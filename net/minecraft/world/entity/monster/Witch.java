@@ -125,7 +125,7 @@ implements RangedAttackMob {
                     this.setUsingItem(false);
                     ItemStack itemStack = this.getMainHandItem();
                     this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-                    if (itemStack.getItem() == Items.POTION && (list = PotionUtils.getMobEffects(itemStack)) != null) {
+                    if (itemStack.is(Items.POTION) && (list = PotionUtils.getMobEffects(itemStack)) != null) {
                         for (MobEffectInstance mobEffectInstance : list) {
                             this.addEffect(new MobEffectInstance(mobEffectInstance));
                         }

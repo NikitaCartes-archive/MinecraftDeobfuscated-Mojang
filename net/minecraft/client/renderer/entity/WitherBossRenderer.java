@@ -7,7 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitherBossModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WitherArmorLayer;
 import net.minecraft.core.BlockPos;
@@ -20,9 +21,9 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     private static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
     private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 
-    public WitherBossRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new WitherBossModel(0.0f), 1.0f);
-        this.addLayer(new WitherArmorLayer(this));
+    public WitherBossRenderer(EntityRendererProvider.Context context) {
+        super(context, new WitherBossModel(context.getLayer(ModelLayers.WITHER)), 1.0f);
+        this.addLayer(new WitherArmorLayer(this, context.getModelSet()));
     }
 
     @Override

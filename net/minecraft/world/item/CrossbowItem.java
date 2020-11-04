@@ -85,6 +85,13 @@ implements Vanishable {
         return InteractionResultHolder.fail(itemStack);
     }
 
+    private static float getShootingPower(ItemStack itemStack) {
+        if (CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)) {
+            return 1.6f;
+        }
+        return 3.15f;
+    }
+
     @Override
     public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
         int j = this.getUseDuration(itemStack) - i;
@@ -92,14 +99,14 @@ implements Vanishable {
         if (f >= 1.0f && !CrossbowItem.isCharged(itemStack) && CrossbowItem.tryLoadProjectiles(livingEntity, itemStack)) {
             CrossbowItem.setCharged(itemStack, true);
             SoundSource soundSource = livingEntity instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
-            level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_LOADING_END, soundSource, 1.0f, 1.0f / (random.nextFloat() * 0.5f + 1.0f) + 0.2f);
+            level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_LOADING_END, soundSource, 1.0f, 1.0f / (level.getRandom().nextFloat() * 0.5f + 1.0f) + 0.2f);
         }
     }
 
     private static boolean tryLoadProjectiles(LivingEntity livingEntity, ItemStack itemStack) {
         int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, itemStack);
         int j = i == 0 ? 1 : 3;
-        boolean bl = livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild;
+        boolean bl = livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild;
         ItemStack itemStack2 = livingEntity.getProjectile(itemStack);
         ItemStack itemStack3 = itemStack2.copy();
         for (int k = 0; k < j; ++k) {
@@ -126,7 +133,7 @@ implements Vanishable {
         if (!(bl3 || bl2 || bl)) {
             itemStack3 = itemStack2.split(1);
             if (itemStack2.isEmpty() && livingEntity instanceof Player) {
-                ((Player)livingEntity).inventory.removeItem(itemStack2);
+                ((Player)livingEntity).getInventory().removeItem(itemStack2);
             }
         } else {
             itemStack3 = itemStack2.copy();
@@ -177,16 +184,15 @@ implements Vanishable {
     }
 
     public static boolean containsChargedProjectile(ItemStack itemStack2, Item item) {
-        return CrossbowItem.getChargedProjectiles(itemStack2).stream().anyMatch(itemStack -> itemStack.getItem() == item);
+        return CrossbowItem.getChargedProjectiles(itemStack2).stream().anyMatch(itemStack -> itemStack.is(item));
     }
 
     private static void shootProjectile(Level level, LivingEntity livingEntity2, InteractionHand interactionHand, ItemStack itemStack, ItemStack itemStack2, float f, boolean bl, float g, float h, float i) {
         Projectile projectile;
-        boolean bl2;
         if (level.isClientSide) {
             return;
         }
-        boolean bl3 = bl2 = itemStack2.getItem() == Items.FIREWORK_ROCKET;
+        boolean bl2 = itemStack2.is(Items.FIREWORK_ROCKET);
         if (bl2) {
             projectile = new FireworkRocketEntity(level, itemStack2, livingEntity2, livingEntity2.getX(), livingEntity2.getEyeY() - (double)0.15f, livingEntity2.getZ(), true);
         } else {
@@ -232,7 +238,7 @@ implements Vanishable {
         for (int i = 0; i < list.size(); ++i) {
             boolean bl;
             ItemStack itemStack2 = list.get(i);
-            boolean bl2 = bl = livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild;
+            boolean bl2 = bl = livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild;
             if (itemStack2.isEmpty()) continue;
             if (i == 0) {
                 CrossbowItem.shootProjectile(level, livingEntity, interactionHand, itemStack, itemStack2, fs[i], bl, f, g, 0.0f);
@@ -250,10 +256,10 @@ implements Vanishable {
 
     private static float[] getShotPitches(Random random) {
         boolean bl = random.nextBoolean();
-        return new float[]{1.0f, CrossbowItem.getRandomShotPitch(bl), CrossbowItem.getRandomShotPitch(!bl)};
+        return new float[]{1.0f, CrossbowItem.getRandomShotPitch(bl, random), CrossbowItem.getRandomShotPitch(!bl, random)};
     }
 
-    private static float getRandomShotPitch(boolean bl) {
+    private static float getRandomShotPitch(boolean bl, Random random) {
         float f = bl ? 0.63f : 0.43f;
         return 1.0f / (random.nextFloat() * 0.5f + 1.8f) + f;
     }
@@ -338,7 +344,7 @@ implements Vanishable {
         }
         ItemStack itemStack2 = list2.get(0);
         list.add(new TranslatableComponent("item.minecraft.crossbow.projectile").append(" ").append(itemStack2.getDisplayName()));
-        if (tooltipFlag.isAdvanced() && itemStack2.getItem() == Items.FIREWORK_ROCKET) {
+        if (tooltipFlag.isAdvanced() && itemStack2.is(Items.FIREWORK_ROCKET)) {
             ArrayList<Component> list3 = Lists.newArrayList();
             Items.FIREWORK_ROCKET.appendHoverText(itemStack2, level, list3, tooltipFlag);
             if (!list3.isEmpty()) {
@@ -350,11 +356,9 @@ implements Vanishable {
         }
     }
 
-    private static float getShootingPower(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.CROSSBOW && CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)) {
-            return 1.6f;
-        }
-        return 3.15f;
+    @Override
+    public boolean useOnRelease(ItemStack itemStack) {
+        return itemStack.is(this);
     }
 
     @Override

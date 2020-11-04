@@ -17,7 +17,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MobSpawnType;
@@ -33,12 +33,12 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Animal
-extends AgableMob {
+extends AgeableMob {
     private int inLove;
     private UUID loveCause;
 
     protected Animal(EntityType<? extends Animal> entityType, Level level) {
-        super((EntityType<? extends AgableMob>)entityType, level);
+        super((EntityType<? extends AgeableMob>)entityType, level);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
@@ -126,7 +126,7 @@ extends AgableMob {
     }
 
     public boolean isFood(ItemStack itemStack) {
-        return itemStack.getItem() == Items.WHEAT;
+        return itemStack.is(Items.WHEAT);
     }
 
     @Override
@@ -152,7 +152,7 @@ extends AgableMob {
     }
 
     protected void usePlayerItem(Player player, ItemStack itemStack) {
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
     }
@@ -208,8 +208,8 @@ extends AgableMob {
     }
 
     public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
-        AgableMob agableMob = this.getBreedOffspring(serverLevel, animal);
-        if (agableMob == null) {
+        AgeableMob ageableMob = this.getBreedOffspring(serverLevel, animal);
+        if (ageableMob == null) {
             return;
         }
         ServerPlayer serverPlayer = this.getLoveCause();
@@ -218,15 +218,15 @@ extends AgableMob {
         }
         if (serverPlayer != null) {
             serverPlayer.awardStat(Stats.ANIMALS_BRED);
-            CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, agableMob);
+            CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, ageableMob);
         }
         this.setAge(6000);
         animal.setAge(6000);
         this.resetLove();
         animal.resetLove();
-        agableMob.setBaby(true);
-        agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f);
-        serverLevel.addFreshEntityWithPassengers(agableMob);
+        ageableMob.setBaby(true);
+        ageableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f);
+        serverLevel.addFreshEntityWithPassengers(ageableMob);
         serverLevel.broadcastEntityEvent(this, (byte)18);
         if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
             serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));

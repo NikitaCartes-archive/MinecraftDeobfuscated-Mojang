@@ -10,9 +10,7 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 
 public class LongTag
 extends NumericTag {
@@ -52,7 +50,7 @@ extends NumericTag {
 
     public static LongTag valueOf(long l) {
         if (l >= -128L && l <= 1024L) {
-            return Cache.cache[(int)l + 128];
+            return Cache.cache[(int)l - -128];
         }
         return new LongTag(l);
     }
@@ -72,11 +70,6 @@ extends NumericTag {
     }
 
     @Override
-    public String toString() {
-        return this.data + "L";
-    }
-
-    @Override
     public LongTag copy() {
         return this;
     }
@@ -93,9 +86,8 @@ extends NumericTag {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        MutableComponent component = new TextComponent("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        return new TextComponent(String.valueOf(this.data)).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitLong(this);
     }
 
     @Override

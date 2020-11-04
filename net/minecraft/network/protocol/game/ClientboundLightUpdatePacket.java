@@ -21,10 +21,10 @@ public class ClientboundLightUpdatePacket
 implements Packet<ClientGamePacketListener> {
     private int x;
     private int z;
-    private int skyYMask;
-    private int blockYMask;
-    private int emptySkyYMask;
-    private int emptyBlockYMask;
+    private long skyYMask;
+    private long blockYMask;
+    private long emptySkyYMask;
+    private long emptyBlockYMask;
     private List<byte[]> skyUpdates;
     private List<byte[]> blockUpdates;
     private boolean trustEdges;
@@ -38,23 +38,23 @@ implements Packet<ClientGamePacketListener> {
         this.trustEdges = bl;
         this.skyUpdates = Lists.newArrayList();
         this.blockUpdates = Lists.newArrayList();
-        for (int i = 0; i < 18; ++i) {
-            DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, -1 + i));
-            DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, -1 + i));
+        for (int i = 0; i < levelLightEngine.getLightSectionCount(); ++i) {
+            DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + i));
+            DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + i));
             if (dataLayer != null) {
                 if (dataLayer.isEmpty()) {
-                    this.emptySkyYMask |= 1 << i;
+                    this.emptySkyYMask |= 1L << i;
                 } else {
-                    this.skyYMask |= 1 << i;
+                    this.skyYMask |= 1L << i;
                     this.skyUpdates.add((byte[])dataLayer.getData().clone());
                 }
             }
             if (dataLayer2 == null) continue;
             if (dataLayer2.isEmpty()) {
-                this.emptyBlockYMask |= 1 << i;
+                this.emptyBlockYMask |= 1L << i;
                 continue;
             }
-            this.blockYMask |= 1 << i;
+            this.blockYMask |= 1L << i;
             this.blockUpdates.add((byte[])dataLayer2.getData().clone());
         }
     }
@@ -67,25 +67,25 @@ implements Packet<ClientGamePacketListener> {
         this.blockYMask = j;
         this.skyUpdates = Lists.newArrayList();
         this.blockUpdates = Lists.newArrayList();
-        for (int k = 0; k < 18; ++k) {
+        for (int k = 0; k < levelLightEngine.getLightSectionCount(); ++k) {
             DataLayer dataLayer;
-            if ((this.skyYMask & 1 << k) != 0) {
-                dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, -1 + k));
+            if ((this.skyYMask & 1L << k) != 0L) {
+                dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + k));
                 if (dataLayer == null || dataLayer.isEmpty()) {
-                    this.skyYMask &= ~(1 << k);
+                    this.skyYMask &= 1L << k ^ 0xFFFFFFFFFFFFFFFFL;
                     if (dataLayer != null) {
-                        this.emptySkyYMask |= 1 << k;
+                        this.emptySkyYMask |= 1L << k;
                     }
                 } else {
                     this.skyUpdates.add((byte[])dataLayer.getData().clone());
                 }
             }
-            if ((this.blockYMask & 1 << k) == 0) continue;
-            dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, -1 + k));
+            if ((this.blockYMask & 1L << k) == 0L) continue;
+            dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + k));
             if (dataLayer == null || dataLayer.isEmpty()) {
-                this.blockYMask &= ~(1 << k);
+                this.blockYMask &= 1L << k ^ 0xFFFFFFFFFFFFFFFFL;
                 if (dataLayer == null) continue;
-                this.emptyBlockYMask |= 1 << k;
+                this.emptyBlockYMask |= 1L << k;
                 continue;
             }
             this.blockUpdates.add((byte[])dataLayer.getData().clone());
@@ -98,18 +98,18 @@ implements Packet<ClientGamePacketListener> {
         this.x = friendlyByteBuf.readVarInt();
         this.z = friendlyByteBuf.readVarInt();
         this.trustEdges = friendlyByteBuf.readBoolean();
-        this.skyYMask = friendlyByteBuf.readVarInt();
-        this.blockYMask = friendlyByteBuf.readVarInt();
-        this.emptySkyYMask = friendlyByteBuf.readVarInt();
-        this.emptyBlockYMask = friendlyByteBuf.readVarInt();
+        this.skyYMask = friendlyByteBuf.readVarLong();
+        this.blockYMask = friendlyByteBuf.readVarLong();
+        this.emptySkyYMask = friendlyByteBuf.readVarLong();
+        this.emptyBlockYMask = friendlyByteBuf.readVarLong();
         this.skyUpdates = Lists.newArrayList();
-        for (i = 0; i < 18; ++i) {
-            if ((this.skyYMask & 1 << i) == 0) continue;
+        for (i = 0; i < 64; ++i) {
+            if ((this.skyYMask & 1L << i) == 0L) continue;
             this.skyUpdates.add(friendlyByteBuf.readByteArray(2048));
         }
         this.blockUpdates = Lists.newArrayList();
-        for (i = 0; i < 18; ++i) {
-            if ((this.blockYMask & 1 << i) == 0) continue;
+        for (i = 0; i < 64; ++i) {
+            if ((this.blockYMask & 1L << i) == 0L) continue;
             this.blockUpdates.add(friendlyByteBuf.readByteArray(2048));
         }
     }
@@ -119,10 +119,10 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeVarInt(this.x);
         friendlyByteBuf.writeVarInt(this.z);
         friendlyByteBuf.writeBoolean(this.trustEdges);
-        friendlyByteBuf.writeVarInt(this.skyYMask);
-        friendlyByteBuf.writeVarInt(this.blockYMask);
-        friendlyByteBuf.writeVarInt(this.emptySkyYMask);
-        friendlyByteBuf.writeVarInt(this.emptyBlockYMask);
+        friendlyByteBuf.writeVarLong(this.skyYMask);
+        friendlyByteBuf.writeVarLong(this.blockYMask);
+        friendlyByteBuf.writeVarLong(this.emptySkyYMask);
+        friendlyByteBuf.writeVarLong(this.emptyBlockYMask);
         for (byte[] bs : this.skyUpdates) {
             friendlyByteBuf.writeByteArray(bs);
         }
@@ -147,12 +147,12 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int getSkyYMask() {
+    public long getSkyYMask() {
         return this.skyYMask;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int getEmptySkyYMask() {
+    public long getEmptySkyYMask() {
         return this.emptySkyYMask;
     }
 
@@ -162,12 +162,12 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int getBlockYMask() {
+    public long getBlockYMask() {
         return this.blockYMask;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int getEmptyBlockYMask() {
+    public long getEmptyBlockYMask() {
         return this.emptyBlockYMask;
     }
 

@@ -40,7 +40,7 @@ extends ValueObject {
             worldTemplate.recommendedPlayers = JsonUtils.getStringOr("recommendedPlayers", jsonObject, "");
             worldTemplate.type = WorldTemplateType.valueOf(JsonUtils.getStringOr("type", jsonObject, WorldTemplateType.WORLD_TEMPLATE.name()));
         } catch (Exception exception) {
-            LOGGER.error("Could not parse WorldTemplate: " + exception.getMessage());
+            LOGGER.error("Could not parse WorldTemplate: {}", (Object)exception.getMessage());
         }
         return worldTemplate;
     }

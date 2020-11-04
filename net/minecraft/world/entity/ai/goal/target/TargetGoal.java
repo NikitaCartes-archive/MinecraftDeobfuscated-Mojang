@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.ai.goal.target;
 
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -64,7 +63,7 @@ extends Goal {
                 return false;
             }
         }
-        if (livingEntity instanceof Player && ((Player)livingEntity).abilities.invulnerable) {
+        if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
             return false;
         }
         this.mob.setTarget(livingEntity);
@@ -123,8 +122,8 @@ extends Goal {
         if (node == null) {
             return false;
         }
-        int i = node.x - Mth.floor(livingEntity.getX());
-        return (double)(i * i + (j = node.z - Mth.floor(livingEntity.getZ())) * j) <= 2.25;
+        int i = node.x - livingEntity.getBlockX();
+        return (double)(i * i + (j = node.z - livingEntity.getBlockZ()) * j) <= 2.25;
     }
 
     public TargetGoal setUnseenMemoryTicks(int i) {

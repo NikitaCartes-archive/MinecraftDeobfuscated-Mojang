@@ -4,7 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
@@ -33,7 +33,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -42,19 +41,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class HopperBlockEntity
 extends RandomizableContainerBlockEntity
-implements Hopper,
-TickableBlockEntity {
+implements Hopper {
     private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
     private int cooldownTime = -1;
     private long tickedGameTime;
 
-    public HopperBlockEntity() {
-        super(BlockEntityType.HOPPER);
+    public HopperBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.HOPPER, blockPos, blockState);
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         if (!this.tryLoadLootTable(compoundTag)) {
             ContainerHelper.loadAllItems(compoundTag, this.items);
@@ -97,34 +95,30 @@ TickableBlockEntity {
         return new TranslatableComponent("container.hopper");
     }
 
-    @Override
-    public void tick() {
-        if (this.level == null || this.level.isClientSide) {
-            return;
-        }
-        --this.cooldownTime;
-        this.tickedGameTime = this.level.getGameTime();
-        if (!this.isOnCooldown()) {
-            this.setCooldown(0);
-            this.tryMoveItems(() -> HopperBlockEntity.suckInItems(this));
+    public static void pushItemsTick(Level level, BlockPos blockPos, BlockState blockState, HopperBlockEntity hopperBlockEntity) {
+        --hopperBlockEntity.cooldownTime;
+        hopperBlockEntity.tickedGameTime = level.getGameTime();
+        if (!hopperBlockEntity.isOnCooldown()) {
+            hopperBlockEntity.setCooldown(0);
+            HopperBlockEntity.tryMoveItems(level, blockPos, blockState, hopperBlockEntity, () -> HopperBlockEntity.suckInItems(level, hopperBlockEntity));
         }
     }
 
-    private boolean tryMoveItems(Supplier<Boolean> supplier) {
-        if (this.level == null || this.level.isClientSide) {
+    private static boolean tryMoveItems(Level level, BlockPos blockPos, BlockState blockState, HopperBlockEntity hopperBlockEntity, BooleanSupplier booleanSupplier) {
+        if (level.isClientSide) {
             return false;
         }
-        if (!this.isOnCooldown() && this.getBlockState().getValue(HopperBlock.ENABLED).booleanValue()) {
+        if (!hopperBlockEntity.isOnCooldown() && blockState.getValue(HopperBlock.ENABLED).booleanValue()) {
             boolean bl = false;
-            if (!this.isEmpty()) {
-                bl = this.ejectItems();
+            if (!hopperBlockEntity.isEmpty()) {
+                bl = HopperBlockEntity.ejectItems(level, blockPos, blockState, hopperBlockEntity);
             }
-            if (!this.inventoryFull()) {
-                bl |= supplier.get().booleanValue();
+            if (!hopperBlockEntity.inventoryFull()) {
+                bl |= booleanSupplier.getAsBoolean();
             }
             if (bl) {
-                this.setCooldown(8);
-                this.setChanged();
+                hopperBlockEntity.setCooldown(8);
+                HopperBlockEntity.setChanged(level, blockPos, blockState);
                 return true;
             }
         }
@@ -139,24 +133,24 @@ TickableBlockEntity {
         return true;
     }
 
-    private boolean ejectItems() {
-        Container container = this.getAttachedContainer();
-        if (container == null) {
+    private static boolean ejectItems(Level level, BlockPos blockPos, BlockState blockState, Container container) {
+        Container container2 = HopperBlockEntity.getAttachedContainer(level, blockPos, blockState);
+        if (container2 == null) {
             return false;
         }
-        Direction direction = this.getBlockState().getValue(HopperBlock.FACING).getOpposite();
-        if (this.isFullContainer(container, direction)) {
+        Direction direction = blockState.getValue(HopperBlock.FACING).getOpposite();
+        if (HopperBlockEntity.isFullContainer(container2, direction)) {
             return false;
         }
-        for (int i = 0; i < this.getContainerSize(); ++i) {
-            if (this.getItem(i).isEmpty()) continue;
-            ItemStack itemStack = this.getItem(i).copy();
-            ItemStack itemStack2 = HopperBlockEntity.addItem(this, container, this.removeItem(i, 1), direction);
+        for (int i = 0; i < container.getContainerSize(); ++i) {
+            if (container.getItem(i).isEmpty()) continue;
+            ItemStack itemStack = container.getItem(i).copy();
+            ItemStack itemStack2 = HopperBlockEntity.addItem(container, container2, container.removeItem(i, 1), direction);
             if (itemStack2.isEmpty()) {
-                container.setChanged();
+                container2.setChanged();
                 return true;
             }
-            this.setItem(i, itemStack);
+            container.setItem(i, itemStack);
         }
         return false;
     }
@@ -168,7 +162,7 @@ TickableBlockEntity {
         return IntStream.range(0, container.getContainerSize());
     }
 
-    private boolean isFullContainer(Container container, Direction direction) {
+    private static boolean isFullContainer(Container container, Direction direction) {
         return HopperBlockEntity.getSlots(container, direction).allMatch(i -> {
             ItemStack itemStack = container.getItem(i);
             return itemStack.getCount() >= itemStack.getMaxStackSize();
@@ -179,8 +173,8 @@ TickableBlockEntity {
         return HopperBlockEntity.getSlots(container, direction).allMatch(i -> container.getItem(i).isEmpty());
     }
 
-    public static boolean suckInItems(Hopper hopper) {
-        Container container = HopperBlockEntity.getSourceContainer(hopper);
+    public static boolean suckInItems(Level level, Hopper hopper) {
+        Container container = HopperBlockEntity.getSourceContainer(level, hopper);
         if (container != null) {
             Direction direction = Direction.DOWN;
             if (HopperBlockEntity.isEmptyContainer(container, direction)) {
@@ -188,7 +182,7 @@ TickableBlockEntity {
             }
             return HopperBlockEntity.getSlots(container, direction).anyMatch(i -> HopperBlockEntity.tryTakeInItemFromSlot(hopper, container, i, direction));
         }
-        for (ItemEntity itemEntity : HopperBlockEntity.getItemsAtAndAbove(hopper)) {
+        for (ItemEntity itemEntity : HopperBlockEntity.getItemsAtAndAbove(level, hopper)) {
             if (!HopperBlockEntity.addItem(hopper, itemEntity)) continue;
             return true;
         }
@@ -215,7 +209,7 @@ TickableBlockEntity {
         ItemStack itemStack2 = HopperBlockEntity.addItem(null, container, itemStack, null);
         if (itemStack2.isEmpty()) {
             bl = true;
-            itemEntity.remove();
+            itemEntity.discard();
         } else {
             itemEntity.setItem(itemStack2);
         }
@@ -285,18 +279,18 @@ TickableBlockEntity {
     }
 
     @Nullable
-    private Container getAttachedContainer() {
-        Direction direction = this.getBlockState().getValue(HopperBlock.FACING);
-        return HopperBlockEntity.getContainerAt(this.getLevel(), this.worldPosition.relative(direction));
+    private static Container getAttachedContainer(Level level, BlockPos blockPos, BlockState blockState) {
+        Direction direction = blockState.getValue(HopperBlock.FACING);
+        return HopperBlockEntity.getContainerAt(level, blockPos.relative(direction));
     }
 
     @Nullable
-    public static Container getSourceContainer(Hopper hopper) {
-        return HopperBlockEntity.getContainerAt(hopper.getLevel(), hopper.getLevelX(), hopper.getLevelY() + 1.0, hopper.getLevelZ());
+    private static Container getSourceContainer(Level level, Hopper hopper) {
+        return HopperBlockEntity.getContainerAt(level, hopper.getLevelX(), hopper.getLevelY() + 1.0, hopper.getLevelZ());
     }
 
-    public static List<ItemEntity> getItemsAtAndAbove(Hopper hopper) {
-        return hopper.getSuckShape().toAabbs().stream().flatMap(aABB -> hopper.getLevel().getEntitiesOfClass(ItemEntity.class, aABB.move(hopper.getLevelX() - 0.5, hopper.getLevelY() - 0.5, hopper.getLevelZ() - 0.5), EntitySelector.ENTITY_STILL_ALIVE).stream()).collect(Collectors.toList());
+    public static List<ItemEntity> getItemsAtAndAbove(Level level, Hopper hopper) {
+        return hopper.getSuckShape().toAabbs().stream().flatMap(aABB -> level.getEntitiesOfClass(ItemEntity.class, aABB.move(hopper.getLevelX() - 0.5, hopper.getLevelY() - 0.5, hopper.getLevelZ() - 0.5), EntitySelector.ENTITY_STILL_ALIVE).stream()).collect(Collectors.toList());
     }
 
     @Nullable
@@ -305,7 +299,7 @@ TickableBlockEntity {
     }
 
     @Nullable
-    public static Container getContainerAt(Level level, double d, double e, double f) {
+    private static Container getContainerAt(Level level, double d, double e, double f) {
         List<Entity> list;
         BlockEntity blockEntity;
         Container container = null;
@@ -314,7 +308,7 @@ TickableBlockEntity {
         Block block = blockState.getBlock();
         if (block instanceof WorldlyContainerHolder) {
             container = ((WorldlyContainerHolder)((Object)block)).getContainer(blockState, level, blockPos);
-        } else if (block.isEntityBlock() && (blockEntity = level.getBlockEntity(blockPos)) instanceof Container && (container = (Container)((Object)blockEntity)) instanceof ChestBlockEntity && block instanceof ChestBlock) {
+        } else if (blockState.hasBlockEntity() && (blockEntity = level.getBlockEntity(blockPos)) instanceof Container && (container = (Container)((Object)blockEntity)) instanceof ChestBlockEntity && block instanceof ChestBlock) {
             container = ChestBlock.getContainer((ChestBlock)block, blockState, level, blockPos, true);
         }
         if (container == null && !(list = level.getEntities((Entity)null, new AABB(d - 0.5, e - 0.5, f - 0.5, d + 0.5, e + 0.5, f + 0.5), EntitySelector.CONTAINER_ENTITY_SELECTOR)).isEmpty()) {
@@ -324,7 +318,7 @@ TickableBlockEntity {
     }
 
     private static boolean canMergeItems(ItemStack itemStack, ItemStack itemStack2) {
-        if (itemStack.getItem() != itemStack2.getItem()) {
+        if (!itemStack.is(itemStack2.getItem())) {
             return false;
         }
         if (itemStack.getDamageValue() != itemStack2.getDamageValue()) {
@@ -373,12 +367,9 @@ TickableBlockEntity {
         this.items = nonNullList;
     }
 
-    public void entityInside(Entity entity) {
-        if (entity instanceof ItemEntity) {
-            BlockPos blockPos = this.getBlockPos();
-            if (Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), this.getSuckShape(), BooleanOp.AND)) {
-                this.tryMoveItems(() -> HopperBlockEntity.addItem(this, (ItemEntity)entity));
-            }
+    public static void entityInside(Level level, BlockPos blockPos, BlockState blockState, Entity entity, HopperBlockEntity hopperBlockEntity) {
+        if (entity instanceof ItemEntity && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), hopperBlockEntity.getSuckShape(), BooleanOp.AND)) {
+            HopperBlockEntity.tryMoveItems(level, blockPos, blockState, hopperBlockEntity, () -> HopperBlockEntity.addItem(hopperBlockEntity, (ItemEntity)entity));
         }
     }
 

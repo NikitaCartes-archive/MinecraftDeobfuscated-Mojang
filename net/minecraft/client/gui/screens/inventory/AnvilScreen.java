@@ -99,7 +99,7 @@ extends ItemCombinerScreen<AnvilMenu> {
         if (k > 0) {
             Component component;
             int l = 8453920;
-            if (k >= 40 && !this.minecraft.player.abilities.instabuild) {
+            if (k >= 40 && !this.minecraft.player.getAbilities().instabuild) {
                 component = TOO_EXPENSIVE_TEXT;
                 l = 0xFF6060;
             } else if (!((AnvilMenu)this.menu).getSlot(2).hasItem()) {

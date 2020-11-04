@@ -17,7 +17,7 @@ implements ParticleOptions {
     private static final ParticleOptions.Deserializer<SimpleParticleType> DESERIALIZER = new ParticleOptions.Deserializer<SimpleParticleType>(){
 
         @Override
-        public SimpleParticleType fromCommand(ParticleType<SimpleParticleType> particleType, StringReader stringReader) throws CommandSyntaxException {
+        public SimpleParticleType fromCommand(ParticleType<SimpleParticleType> particleType, StringReader stringReader) {
             return (SimpleParticleType)particleType;
         }
 

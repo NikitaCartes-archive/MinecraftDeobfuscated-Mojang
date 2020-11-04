@@ -472,7 +472,7 @@ extends LivingEntity {
         if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             List<ItemEntity> list = this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0));
             for (ItemEntity itemEntity : list) {
-                if (itemEntity.removed || itemEntity.getItem().isEmpty() || itemEntity.hasPickUpDelay() || !this.wantsToPickUp(itemEntity.getItem())) continue;
+                if (itemEntity.isRemoved() || itemEntity.getItem().isEmpty() || itemEntity.hasPickUpDelay() || !this.wantsToPickUp(itemEntity.getItem())) continue;
                 this.pickUpItem(itemEntity);
             }
         }
@@ -484,7 +484,7 @@ extends LivingEntity {
         if (this.equipItemIfPossible(itemStack)) {
             this.onItemPickup(itemEntity);
             this.take(itemEntity, itemStack.getCount());
-            itemEntity.remove();
+            itemEntity.discard();
         }
     }
 
@@ -609,7 +609,7 @@ extends LivingEntity {
     @Override
     public void checkDespawn() {
         if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
-            this.remove();
+            this.discard();
             return;
         }
         if (this.isPersistenceRequired() || this.requiresCustomPersistence()) {
@@ -622,12 +622,12 @@ extends LivingEntity {
             int j;
             double d = entity.distanceToSqr(this);
             if (d > (double)(j = (i = this.getType().getCategory().getDespawnDistance()) * i) && this.removeWhenFarAway(d)) {
-                this.remove();
+                this.discard();
             }
             int k = this.getType().getCategory().getNoDespawnDistance();
             int l = k * k;
             if (this.noActionTime > 600 && this.random.nextInt(800) == 0 && d > (double)l && this.removeWhenFarAway(d)) {
-                this.remove();
+                this.discard();
             } else if (d < (double)l) {
                 this.noActionTime = 0;
             }
@@ -844,16 +844,16 @@ extends LivingEntity {
 
     public static EquipmentSlot getEquipmentSlotForItem(ItemStack itemStack) {
         Item item = itemStack.getItem();
-        if (item == Blocks.CARVED_PUMPKIN.asItem() || item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
+        if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem()) || item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
             return EquipmentSlot.HEAD;
         }
         if (item instanceof ArmorItem) {
             return ((ArmorItem)item).getSlot();
         }
-        if (item == Items.ELYTRA) {
+        if (itemStack.is(Items.ELYTRA)) {
             return EquipmentSlot.CHEST;
         }
-        if (item == Items.SHIELD) {
+        if (itemStack.is(Items.SHIELD)) {
             return EquipmentSlot.OFFHAND;
         }
         return EquipmentSlot.MAINHAND;
@@ -1010,7 +1010,7 @@ extends LivingEntity {
             return InteractionResult.PASS;
         }
         if (this.getLeashHolder() == player) {
-            this.dropLeash(true, !player.abilities.instabuild);
+            this.dropLeash(true, !player.getAbilities().instabuild);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
@@ -1027,12 +1027,12 @@ extends LivingEntity {
     private InteractionResult checkAndHandleImportantInteractions(Player player, InteractionHand interactionHand) {
         InteractionResult interactionResult;
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.LEAD && this.canBeLeashed(player)) {
+        if (itemStack.is(Items.LEAD) && this.canBeLeashed(player)) {
             this.setLeashedTo(player, true);
             itemStack.shrink(1);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        if (itemStack.getItem() == Items.NAME_TAG && (interactionResult = itemStack.interactLivingEntity(player, this, interactionHand)).consumesAction()) {
+        if (itemStack.is(Items.NAME_TAG) && (interactionResult = itemStack.interactLivingEntity(player, this, interactionHand)).consumesAction()) {
             return interactionResult;
         }
         if (itemStack.getItem() instanceof SpawnEggItem) {
@@ -1084,7 +1084,7 @@ extends LivingEntity {
 
     @Nullable
     public <T extends Mob> T convertTo(EntityType<T> entityType, boolean bl) {
-        if (this.removed) {
+        if (this.isRemoved()) {
             return null;
         }
         Mob mob = (Mob)entityType.create(this.level);
@@ -1115,7 +1115,7 @@ extends LivingEntity {
             this.stopRiding();
             mob.startRiding(entity, true);
         }
-        this.remove();
+        this.discard();
         return (T)mob;
     }
 
@@ -1292,7 +1292,7 @@ extends LivingEntity {
 
     @Override
     public boolean canAttack(LivingEntity livingEntity) {
-        if (livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).abilities.invulnerable) {
+        if (livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).getAbilities().invulnerable) {
             return false;
         }
         return super.canAttack(livingEntity);
@@ -1327,7 +1327,7 @@ extends LivingEntity {
     }
 
     private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
-        if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
+        if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.is(Items.SHIELD)) {
             float f = 0.25f + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05f;
             if (this.random.nextFloat() < f) {
                 player.getCooldowns().addCooldown(Items.SHIELD, 100);
@@ -1338,10 +1338,9 @@ extends LivingEntity {
 
     protected boolean isSunBurnTick() {
         if (this.level.isDay() && !this.level.isClientSide) {
-            BlockPos blockPos;
             float f = this.getBrightness();
-            BlockPos blockPos2 = blockPos = this.getVehicle() instanceof Boat ? new BlockPos(this.getX(), Math.round(this.getY()), this.getZ()).above() : new BlockPos(this.getX(), Math.round(this.getY()), this.getZ());
-            if (f > 0.5f && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f && this.level.canSeeSky(blockPos)) {
+            BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
+            if (f > 0.5f && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f && !this.isInWaterRainOrBubble() && this.level.canSeeSky(blockPos)) {
                 return true;
             }
         }
@@ -1361,6 +1360,17 @@ extends LivingEntity {
     protected void removeAfterChangingDimensions() {
         super.removeAfterChangingDimensions();
         this.dropLeash(true, false);
+    }
+
+    @Override
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
+        if (spawnEggItem == null) {
+            return null;
+        }
+        return new ItemStack(spawnEggItem);
     }
 }
 

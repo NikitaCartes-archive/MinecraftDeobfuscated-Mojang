@@ -28,7 +28,7 @@ extends ChannelInboundHandlerAdapter {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) throws Exception {
+    public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) {
         ByteBuf byteBuf = (ByteBuf)object;
         byteBuf.markReaderIndex();
         boolean bl = true;

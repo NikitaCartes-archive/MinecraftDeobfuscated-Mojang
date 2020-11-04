@@ -34,19 +34,19 @@ extends CustomRecipe {
         for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
             ItemStack itemStack = craftingContainer.getItem(i);
             if (itemStack.isEmpty()) continue;
-            if (itemStack.getItem() == Blocks.BROWN_MUSHROOM.asItem() && !bl3) {
+            if (itemStack.is(Blocks.BROWN_MUSHROOM.asItem()) && !bl3) {
                 bl3 = true;
                 continue;
             }
-            if (itemStack.getItem() == Blocks.RED_MUSHROOM.asItem() && !bl2) {
+            if (itemStack.is(Blocks.RED_MUSHROOM.asItem()) && !bl2) {
                 bl2 = true;
                 continue;
             }
-            if (itemStack.getItem().is(ItemTags.SMALL_FLOWERS) && !bl) {
+            if (itemStack.is(ItemTags.SMALL_FLOWERS) && !bl) {
                 bl = true;
                 continue;
             }
-            if (itemStack.getItem() == Items.BOWL && !bl4) {
+            if (itemStack.is(Items.BOWL) && !bl4) {
                 bl4 = true;
                 continue;
             }
@@ -60,7 +60,7 @@ extends CustomRecipe {
         ItemStack itemStack = ItemStack.EMPTY;
         for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {
             ItemStack itemStack2 = craftingContainer.getItem(i);
-            if (itemStack2.isEmpty() || !itemStack2.getItem().is(ItemTags.SMALL_FLOWERS)) continue;
+            if (itemStack2.isEmpty() || !itemStack2.is(ItemTags.SMALL_FLOWERS)) continue;
             itemStack = itemStack2;
             break;
         }

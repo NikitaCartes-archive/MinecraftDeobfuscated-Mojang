@@ -48,11 +48,6 @@ extends AbstractArrow {
         this.entityData.set(ID_FOIL, itemStack.hasFoil());
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public ThrownTrident(Level level, double d, double e, double f) {
-        super(EntityType.TRIDENT, d, e, f, level);
-    }
-
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -72,7 +67,7 @@ extends AbstractArrow {
                 if (!this.level.isClientSide && this.pickup == AbstractArrow.Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1f);
                 }
-                this.remove();
+                this.discard();
             } else if (i > 0) {
                 this.setNoPhysics(true);
                 Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getEyeY() - this.getY(), entity.getZ() - this.getZ());
@@ -146,7 +141,7 @@ extends AbstractArrow {
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
         float g = 1.0f;
-        if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem) && this.level.canSeeSky(blockPos = entity.blockPosition())) {
+        if (this.level instanceof ServerLevel && this.level.isThundering() && this.isChanneling() && this.level.canSeeSky(blockPos = entity.blockPosition())) {
             LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level);
             lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
             lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
@@ -155,6 +150,10 @@ extends AbstractArrow {
             g = 5.0f;
         }
         this.playSound(soundEvent, g, 1.0f);
+    }
+
+    public boolean isChanneling() {
+        return EnchantmentHelper.hasChanneling(this.tridentItem);
     }
 
     @Override

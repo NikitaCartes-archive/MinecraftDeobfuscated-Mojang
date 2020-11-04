@@ -74,7 +74,7 @@ extends AbstractMinecart {
 
     @Override
     protected double getMaxSpeed() {
-        return 0.2;
+        return (this.isInWater() ? 3.0 : 4.0) / 20.0;
     }
 
     @Override
@@ -108,7 +108,11 @@ extends AbstractMinecart {
             d = Mth.sqrt(d);
             this.xPush /= d;
             this.zPush /= d;
-            this.setDeltaMovement(this.getDeltaMovement().multiply(0.8, 0.0, 0.8).add(this.xPush, 0.0, this.zPush));
+            Vec3 vec3 = this.getDeltaMovement().multiply(0.8, 0.0, 0.8).add(this.xPush, 0.0, this.zPush);
+            if (this.isInWater()) {
+                vec3 = vec3.scale(0.1);
+            }
+            this.setDeltaMovement(vec3);
         } else {
             this.setDeltaMovement(this.getDeltaMovement().multiply(0.98, 0.0, 0.98));
         }
@@ -119,7 +123,7 @@ extends AbstractMinecart {
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (INGREDIENT.test(itemStack) && this.fuel + 3600 <= 32000) {
-            if (!player.abilities.instabuild) {
+            if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
             this.fuel += 3600;

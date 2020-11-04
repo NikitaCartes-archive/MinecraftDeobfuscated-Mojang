@@ -4,13 +4,21 @@
 package net.minecraft.nbt;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -19,7 +27,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.SnbtPrinterTagVisitor;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.TextComponentTagVisitor;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -28,12 +41,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.StateHolder;
-import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public final class NbtUtils {
+    private static final Comparator<ListTag> YXZ_LISTTAG_INT_COMPARATOR = Comparator.comparingInt(listTag -> listTag.getInt(1)).thenComparingInt(listTag -> listTag.getInt(0)).thenComparingInt(listTag -> listTag.getInt(2));
+    private static final Comparator<ListTag> YXZ_LISTTAG_DOUBLE_COMPARATOR = Comparator.comparingDouble(listTag -> listTag.getDouble(1)).thenComparingDouble(listTag -> listTag.getDouble(0)).thenComparingDouble(listTag -> listTag.getDouble(2));
+    private static final Splitter COMMA_SPLITTER = Splitter.on(",");
+    private static final Splitter COLON_SPLITTER = Splitter.on(':').limit(2);
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Nullable
@@ -56,10 +72,10 @@ public final class NbtUtils {
                         CompoundTag compoundTag3 = listTag.getCompound(i);
                         String string3 = compoundTag3.getString("Value");
                         if (compoundTag3.contains("Signature", 8)) {
-                            gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3, compoundTag3.getString("Signature")));
+                            gameProfile.getProperties().put(string2, new Property(string2, string3, compoundTag3.getString("Signature")));
                             continue;
                         }
-                        gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3));
+                        gameProfile.getProperties().put(string2, new Property(string2, string3));
                     }
                 }
             }
@@ -80,7 +96,7 @@ public final class NbtUtils {
             CompoundTag compoundTag2 = new CompoundTag();
             for (String string : gameProfile.getProperties().keySet()) {
                 ListTag listTag = new ListTag();
-                for (com.mojang.authlib.properties.Property property : gameProfile.getProperties().get(string)) {
+                for (Property property : gameProfile.getProperties().get(string)) {
                     CompoundTag compoundTag3 = new CompoundTag();
                     compoundTag3.putString("Value", property.getValue());
                     if (property.hasSignature()) {
@@ -178,7 +194,7 @@ public final class NbtUtils {
             CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
             StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
             for (String string : compoundTag2.getAllKeys()) {
-                Property<?> property = stateDefinition.getProperty(string);
+                net.minecraft.world.level.block.state.properties.Property<?> property = stateDefinition.getProperty(string);
                 if (property == null) continue;
                 blockState = NbtUtils.setValueHelper(blockState, property, string, compoundTag2, compoundTag);
             }
@@ -186,7 +202,7 @@ public final class NbtUtils {
         return blockState;
     }
 
-    private static <S extends StateHolder<?, S>, T extends Comparable<T>> S setValueHelper(S stateHolder, Property<T> property, String string, CompoundTag compoundTag, CompoundTag compoundTag2) {
+    private static <S extends StateHolder<?, S>, T extends Comparable<T>> S setValueHelper(S stateHolder, net.minecraft.world.level.block.state.properties.Property<T> property, String string, CompoundTag compoundTag, CompoundTag compoundTag2) {
         Optional<T> optional = property.getValue(compoundTag.getString(string));
         if (optional.isPresent()) {
             return (S)((StateHolder)stateHolder.setValue(property, (Comparable)((Comparable)optional.get())));
@@ -198,11 +214,11 @@ public final class NbtUtils {
     public static CompoundTag writeBlockState(BlockState blockState) {
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.putString("Name", Registry.BLOCK.getKey(blockState.getBlock()).toString());
-        ImmutableMap<Property<?>, Comparable<?>> immutableMap = blockState.getValues();
+        ImmutableMap<net.minecraft.world.level.block.state.properties.Property<?>, Comparable<?>> immutableMap = blockState.getValues();
         if (!immutableMap.isEmpty()) {
             CompoundTag compoundTag2 = new CompoundTag();
             for (Map.Entry entry : immutableMap.entrySet()) {
-                Property property = (Property)entry.getKey();
+                net.minecraft.world.level.block.state.properties.Property property = (net.minecraft.world.level.block.state.properties.Property)entry.getKey();
                 compoundTag2.putString(property.getName(), NbtUtils.getName(property, (Comparable)entry.getValue()));
             }
             compoundTag.put("Properties", compoundTag2);
@@ -210,7 +226,7 @@ public final class NbtUtils {
         return compoundTag;
     }
 
-    private static <T extends Comparable<T>> String getName(Property<T> property, Comparable<?> comparable) {
+    private static <T extends Comparable<T>> String getName(net.minecraft.world.level.block.state.properties.Property<T> property, Comparable<?> comparable) {
         return property.getName(comparable);
     }
 
@@ -220,6 +236,119 @@ public final class NbtUtils {
 
     public static CompoundTag update(DataFixer dataFixer, DataFixTypes dataFixTypes, CompoundTag compoundTag, int i, int j) {
         return dataFixer.update(dataFixTypes.getType(), new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag), i, j).getValue();
+    }
+
+    public static Component toPrettyComponent(Tag tag) {
+        return new TextComponentTagVisitor("", 0).visit(tag);
+    }
+
+    public static String structureToSnbt(CompoundTag compoundTag) {
+        return new SnbtPrinterTagVisitor().visit(NbtUtils.packStructureTemplate(compoundTag));
+    }
+
+    public static CompoundTag snbtToStructure(String string) throws CommandSyntaxException {
+        return NbtUtils.unpackStructureTemplate(TagParser.parseTag(string));
+    }
+
+    @VisibleForTesting
+    static CompoundTag packStructureTemplate(CompoundTag compoundTag2) {
+        ListTag listTag4;
+        ListTag listTag32;
+        boolean bl = compoundTag2.contains("palettes", 9);
+        ListTag listTag = bl ? compoundTag2.getList("palettes", 9).getList(0) : compoundTag2.getList("palette", 10);
+        ListTag listTag2 = listTag.stream().map(CompoundTag.class::cast).map(NbtUtils::packBlockState).map(StringTag::valueOf).collect(Collectors.toCollection(ListTag::new));
+        compoundTag2.put("palette", listTag2);
+        if (bl) {
+            listTag32 = new ListTag();
+            listTag4 = compoundTag2.getList("palettes", 9);
+            listTag4.stream().map(ListTag.class::cast).forEach(listTag3 -> {
+                CompoundTag compoundTag = new CompoundTag();
+                for (int i = 0; i < listTag3.size(); ++i) {
+                    compoundTag.putString(listTag2.getString(i), NbtUtils.packBlockState(listTag3.getCompound(i)));
+                }
+                listTag32.add(compoundTag);
+            });
+            compoundTag2.put("palettes", listTag32);
+        }
+        if (compoundTag2.contains("entities", 10)) {
+            listTag32 = compoundTag2.getList("entities", 10);
+            listTag4 = listTag32.stream().map(CompoundTag.class::cast).sorted(Comparator.comparing(compoundTag -> compoundTag.getList("pos", 6), YXZ_LISTTAG_DOUBLE_COMPARATOR)).collect(Collectors.toCollection(ListTag::new));
+            compoundTag2.put("entities", listTag4);
+        }
+        listTag32 = compoundTag2.getList("blocks", 10).stream().map(CompoundTag.class::cast).sorted(Comparator.comparing(compoundTag -> compoundTag.getList("pos", 3), YXZ_LISTTAG_INT_COMPARATOR)).peek(compoundTag -> compoundTag.putString("state", listTag2.getString(compoundTag.getInt("state")))).collect(Collectors.toCollection(ListTag::new));
+        compoundTag2.put("data", listTag32);
+        compoundTag2.remove("blocks");
+        return compoundTag2;
+    }
+
+    @VisibleForTesting
+    static CompoundTag unpackStructureTemplate(CompoundTag compoundTag2) {
+        ListTag listTag = compoundTag2.getList("palette", 8);
+        Map map = listTag.stream().map(StringTag.class::cast).map(StringTag::getAsString).collect(ImmutableMap.toImmutableMap(Function.identity(), NbtUtils::unpackBlockState));
+        if (compoundTag2.contains("palettes", 9)) {
+            compoundTag2.put("palettes", compoundTag2.getList("palettes", 10).stream().map(CompoundTag.class::cast).map(compoundTag -> map.keySet().stream().map(compoundTag::getString).map(NbtUtils::unpackBlockState).collect(Collectors.toCollection(ListTag::new))).collect(Collectors.toCollection(ListTag::new)));
+            compoundTag2.remove("palette");
+        } else {
+            compoundTag2.put("palette", map.values().stream().collect(Collectors.toCollection(ListTag::new)));
+        }
+        if (compoundTag2.contains("data", 9)) {
+            Object2IntOpenHashMap<String> object2IntMap = new Object2IntOpenHashMap<String>();
+            object2IntMap.defaultReturnValue(-1);
+            for (int i = 0; i < listTag.size(); ++i) {
+                object2IntMap.put(listTag.getString(i), i);
+            }
+            ListTag listTag2 = compoundTag2.getList("data", 10);
+            for (int j = 0; j < listTag2.size(); ++j) {
+                CompoundTag compoundTag22 = listTag2.getCompound(j);
+                String string = compoundTag22.getString("state");
+                int k = object2IntMap.getInt(string);
+                if (k == -1) {
+                    throw new IllegalStateException("Entry " + string + " missing from palette");
+                }
+                compoundTag22.putInt("state", k);
+            }
+            compoundTag2.put("blocks", listTag2);
+            compoundTag2.remove("data");
+        }
+        return compoundTag2;
+    }
+
+    @VisibleForTesting
+    static String packBlockState(CompoundTag compoundTag) {
+        StringBuilder stringBuilder = new StringBuilder(compoundTag.getString("Name"));
+        if (compoundTag.contains("Properties", 10)) {
+            CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
+            String string2 = compoundTag2.getAllKeys().stream().sorted().map(string -> string + ':' + compoundTag2.get((String)string).getAsString()).collect(Collectors.joining(","));
+            stringBuilder.append('{').append(string2).append('}');
+        }
+        return stringBuilder.toString();
+    }
+
+    @VisibleForTesting
+    static CompoundTag unpackBlockState(String string) {
+        String string22;
+        CompoundTag compoundTag = new CompoundTag();
+        int i = string.indexOf(123);
+        if (i >= 0) {
+            string22 = string.substring(0, i);
+            CompoundTag compoundTag2 = new CompoundTag();
+            if (i + 2 <= string.length()) {
+                String string3 = string.substring(i + 1, string.indexOf(125, i));
+                COMMA_SPLITTER.split(string3).forEach(string2 -> {
+                    List<String> list = COLON_SPLITTER.splitToList((CharSequence)string2);
+                    if (list.size() == 2) {
+                        compoundTag2.putString(list.get(0), list.get(1));
+                    } else {
+                        LOGGER.error("Something went wrong parsing: '{}' -- incorrect gamedata!", (Object)string);
+                    }
+                });
+                compoundTag.put("Properties", compoundTag2);
+            }
+        } else {
+            string22 = string;
+        }
+        compoundTag.putString("Name", string22);
+        return compoundTag;
     }
 }
 

@@ -29,8 +29,8 @@ extends Feature<HugeFungusConfiguration> {
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeFungusConfiguration hugeFungusConfiguration) {
         Block block = hugeFungusConfiguration.validBaseState.getBlock();
         BlockPos blockPos2 = null;
-        Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
-        if (block2 == block) {
+        BlockState blockState = worldGenLevel.getBlockState(blockPos.below());
+        if (blockState.is(block)) {
             blockPos2 = blockPos;
         }
         if (blockPos2 == null) {

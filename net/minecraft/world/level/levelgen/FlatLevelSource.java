@@ -58,7 +58,7 @@ extends ChunkGenerator {
             BlockState blockState;
             BlockState blockState2 = blockState = blockStates[i] == null ? Blocks.AIR.defaultBlockState() : blockStates[i];
             if (Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
-            return i - 1;
+            return this.settings.getMinBuildHeight() + i - 1;
         }
         return blockStates.length;
     }
@@ -72,11 +72,12 @@ extends ChunkGenerator {
         for (int i = 0; i < blockStates.length; ++i) {
             BlockState blockState = blockStates[i];
             if (blockState == null) continue;
-            for (int j = 0; j < 16; ++j) {
-                for (int k = 0; k < 16; ++k) {
-                    chunkAccess.setBlockState(mutableBlockPos.set(j, i, k), blockState, false);
-                    heightmap.update(j, i, k, blockState);
-                    heightmap2.update(j, i, k, blockState);
+            int j = levelAccessor.getMinBuildHeight() + i;
+            for (int k = 0; k < 16; ++k) {
+                for (int l = 0; l < 16; ++l) {
+                    chunkAccess.setBlockState(mutableBlockPos.set(k, j, l), blockState, false);
+                    heightmap.update(k, j, l, blockState);
+                    heightmap2.update(k, j, l, blockState);
                 }
             }
         }
@@ -88,7 +89,7 @@ extends ChunkGenerator {
         for (int k = blockStates.length - 1; k >= 0; --k) {
             BlockState blockState = blockStates[k];
             if (blockState == null || !types.isOpaque().test(blockState)) continue;
-            return k + 1;
+            return this.settings.getMinBuildHeight() + k + 1;
         }
         return 0;
     }

@@ -185,8 +185,8 @@ public class ServerEntity {
 
     public void sendPairingData(Consumer<Packet<?>> consumer) {
         Mob mob;
-        if (this.entity.removed) {
-            LOGGER.warn("Fetching packet for removed entity " + this.entity);
+        if (this.entity.isRemoved()) {
+            LOGGER.warn("Fetching packet for removed entity {}", (Object)this.entity);
         }
         Packet<?> packet = this.entity.getAddEntityPacket();
         this.yHeadRotp = Mth.floor(this.entity.getYHeadRot() * 256.0f / 360.0f);

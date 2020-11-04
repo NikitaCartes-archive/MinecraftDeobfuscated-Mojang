@@ -4,6 +4,7 @@
 package net.minecraft.util;
 
 import java.util.Random;
+import net.minecraft.util.Mth;
 
 public class IntRange {
     private final int minInclusive;
@@ -22,10 +23,7 @@ public class IntRange {
     }
 
     public int randomValue(Random random) {
-        if (this.minInclusive == this.maxInclusive) {
-            return this.minInclusive;
-        }
-        return random.nextInt(this.maxInclusive - this.minInclusive + 1) + this.minInclusive;
+        return Mth.nextInt(random, this.minInclusive, this.maxInclusive);
     }
 
     public int getMinInclusive() {

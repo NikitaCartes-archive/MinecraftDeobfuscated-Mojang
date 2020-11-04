@@ -15,8 +15,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -169,7 +167,7 @@ extends Projectile {
         if (hitResult.getType() != HitResult.Type.MISS) {
             vec32 = hitResult.getLocation();
         }
-        while (!this.removed) {
+        while (!this.isRemoved()) {
             EntityHitResult entityHitResult = this.findHitEntity(vec33, vec32);
             if (entityHitResult != null) {
                 hitResult = entityHitResult;
@@ -246,7 +244,7 @@ extends Projectile {
     protected void tickDespawn() {
         ++this.life;
         if (this.life >= 1200) {
-            this.remove();
+            this.discard();
         }
     }
 
@@ -277,7 +275,7 @@ extends Projectile {
             if (this.piercingIgnoreEntityIds.size() < this.getPierceLevel() + 1) {
                 this.piercingIgnoreEntityIds.add(entity.getId());
             } else {
-                this.remove();
+                this.discard();
                 return;
             }
         }
@@ -333,7 +331,7 @@ extends Projectile {
             }
             this.playSound(this.soundEvent, 1.0f, 1.2f / (this.random.nextFloat() * 0.2f + 0.9f));
             if (this.getPierceLevel() <= 0) {
-                this.remove();
+                this.discard();
             }
         } else {
             entity.setRemainingFireTicks(j);
@@ -344,7 +342,7 @@ extends Projectile {
                 if (this.pickup == Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1f);
                 }
-                this.remove();
+                this.discard();
             }
         }
     }
@@ -434,7 +432,7 @@ extends Projectile {
     public void setOwner(@Nullable Entity entity) {
         super.setOwner(entity);
         if (entity instanceof Player) {
-            this.pickup = ((Player)entity).abilities.instabuild ? Pickup.CREATIVE_ONLY : Pickup.ALLOWED;
+            this.pickup = ((Player)entity).getAbilities().instabuild ? Pickup.CREATIVE_ONLY : Pickup.ALLOWED;
         }
     }
 
@@ -444,13 +442,13 @@ extends Projectile {
         if (this.level.isClientSide || !this.inGround && !this.isNoPhysics() || this.shakeTime > 0) {
             return;
         }
-        boolean bl2 = bl = this.pickup == Pickup.ALLOWED || this.pickup == Pickup.CREATIVE_ONLY && player.abilities.instabuild || this.isNoPhysics() && this.getOwner().getUUID() == player.getUUID();
-        if (this.pickup == Pickup.ALLOWED && !player.inventory.add(this.getPickupItem())) {
+        boolean bl2 = bl = this.pickup == Pickup.ALLOWED || this.pickup == Pickup.CREATIVE_ONLY && player.getAbilities().instabuild || this.isNoPhysics() && this.getOwner().getUUID() == player.getUUID();
+        if (this.pickup == Pickup.ALLOWED && !player.getInventory().add(this.getPickupItem())) {
             bl = false;
         }
         if (bl) {
             player.take(this, 1);
-            this.remove();
+            this.discard();
         }
     }
 
@@ -547,12 +545,6 @@ extends Projectile {
 
     public void setShotFromCrossbow(boolean bl) {
         this.setFlag(4, bl);
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        Entity entity = this.getOwner();
-        return new ClientboundAddEntityPacket(this, entity == null ? 0 : entity.getId());
     }
 
     public static enum Pickup {

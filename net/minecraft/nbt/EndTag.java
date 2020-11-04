@@ -9,8 +9,7 @@ import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 
 public class EndTag
 implements Tag {
@@ -62,7 +61,7 @@ implements Tag {
 
     @Override
     public String toString() {
-        return "END";
+        return this.getAsString();
     }
 
     @Override
@@ -71,8 +70,8 @@ implements Tag {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        return TextComponent.EMPTY;
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitEnd(this);
     }
 
     @Override

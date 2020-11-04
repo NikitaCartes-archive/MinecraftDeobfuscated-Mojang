@@ -68,7 +68,7 @@ extends AbstractDragonPhaseInstance {
             if (player != null) {
                 d = blockPos.distSqr(player.position(), true) / 512.0;
             }
-            if (!(player == null || player.abilities.invulnerable || this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) != 0 && this.dragon.getRandom().nextInt(i + 2) != 0)) {
+            if (!(player == null || player.getAbilities().invulnerable || this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) != 0 && this.dragon.getRandom().nextInt(i + 2) != 0)) {
                 this.strafePlayer(player);
                 return;
             }
@@ -116,7 +116,7 @@ extends AbstractDragonPhaseInstance {
 
     @Override
     public void onCrystalDestroyed(EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource, @Nullable Player player) {
-        if (player != null && !player.abilities.invulnerable) {
+        if (player != null && !player.getAbilities().invulnerable) {
             this.strafePlayer(player);
         }
     }

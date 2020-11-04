@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,11 +22,6 @@ public class DragonFireball
 extends AbstractHurtingProjectile {
     public DragonFireball(EntityType<? extends DragonFireball> entityType, Level level) {
         super((EntityType<? extends AbstractHurtingProjectile>)entityType, level);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public DragonFireball(Level level, double d, double e, double f, double g, double h, double i) {
-        super(EntityType.DRAGON_FIREBALL, d, e, f, g, h, i, level);
     }
 
     public DragonFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
@@ -63,7 +56,7 @@ extends AbstractHurtingProjectile {
             }
             this.level.levelEvent(2006, this.blockPosition(), this.isSilent() ? -1 : 1);
             this.level.addFreshEntity(areaEffectCloud);
-            this.remove();
+            this.discard();
         }
     }
 

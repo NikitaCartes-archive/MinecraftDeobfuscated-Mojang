@@ -75,7 +75,7 @@ public class Options {
     public List<String> incompatibleResourcePacks = Lists.newArrayList();
     public ChatVisiblity chatVisibility = ChatVisiblity.FULL;
     public double chatOpacity = 1.0;
-    public double chatLineSpacing = 0.0;
+    public double chatLineSpacing;
     public double textBackgroundOpacity = 0.5;
     @Nullable
     public String fullscreenVideoModeString;
@@ -91,7 +91,7 @@ public class Options {
     public double chatWidth = 1.0;
     public double chatHeightUnfocused = 0.44366195797920227;
     public double chatHeightFocused = 1.0;
-    public double chatDelay = 0.0;
+    public double chatDelay;
     public int mipmapLevels = 4;
     private final Map<SoundSource, Float> sourceVolumes = Maps.newEnumMap(SoundSource.class);
     public boolean useNativeTransport = true;

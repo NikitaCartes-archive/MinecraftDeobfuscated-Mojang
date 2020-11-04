@@ -7,7 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.StriderModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -20,9 +21,9 @@ extends MobRenderer<Strider, StriderModel<Strider>> {
     private static final ResourceLocation STRIDER_LOCATION = new ResourceLocation("textures/entity/strider/strider.png");
     private static final ResourceLocation COLD_LOCATION = new ResourceLocation("textures/entity/strider/strider_cold.png");
 
-    public StriderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new StriderModel(), 0.5f);
-        this.addLayer(new SaddleLayer(this, new StriderModel(), new ResourceLocation("textures/entity/strider/strider_saddle.png")));
+    public StriderRenderer(EntityRendererProvider.Context context) {
+        super(context, new StriderModel(context.getLayer(ModelLayers.STRIDER)), 0.5f);
+        this.addLayer(new SaddleLayer(this, new StriderModel(context.getLayer(ModelLayers.STRIDER_SADDLE)), new ResourceLocation("textures/entity/strider/strider_saddle.png")));
     }
 
     @Override

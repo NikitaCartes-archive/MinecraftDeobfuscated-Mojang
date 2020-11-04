@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class GrassBlock
 extends SpreadingSnowyDirtBlock
@@ -52,15 +53,18 @@ implements BonemealableBlock {
             if (random.nextInt(8) == 0) {
                 List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
                 if (list.isEmpty()) continue;
-                ConfiguredFeature<?, ?> configuredFeature = list.get(0);
-                AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;
-                blockState4 = abstractFlowerFeature.getRandomFlower(random, blockPos3, configuredFeature.config());
+                blockState4 = GrassBlock.getBlockState(random, blockPos3, list.get(0));
             } else {
                 blockState4 = blockState2;
             }
             if (!blockState4.canSurvive(serverLevel, blockPos3)) continue;
             serverLevel.setBlock(blockPos3, blockState4, 3);
         }
+    }
+
+    private static <U extends FeatureConfiguration> BlockState getBlockState(Random random, BlockPos blockPos, ConfiguredFeature<U, ?> configuredFeature) {
+        AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;
+        return abstractFlowerFeature.getRandomFlower(random, blockPos, configuredFeature.config());
     }
 }
 

@@ -32,7 +32,7 @@ extends Enchantment {
 
     @Override
     public boolean canEnchant(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.SHEARS) {
+        if (itemStack.is(Items.SHEARS)) {
             return true;
         }
         return super.canEnchant(itemStack);

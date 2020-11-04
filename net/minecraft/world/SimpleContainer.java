@@ -101,7 +101,7 @@ StackedContentsCompatible {
     public boolean canAddItem(ItemStack itemStack) {
         boolean bl = false;
         for (ItemStack itemStack2 : this.items) {
-            if (!itemStack2.isEmpty() && (!this.isSameItem(itemStack2, itemStack) || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
+            if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack) || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
             bl = true;
             break;
         }
@@ -185,15 +185,11 @@ StackedContentsCompatible {
     private void moveItemToOccupiedSlotsWithSameType(ItemStack itemStack) {
         for (int i = 0; i < this.size; ++i) {
             ItemStack itemStack2 = this.getItem(i);
-            if (!this.isSameItem(itemStack2, itemStack)) continue;
+            if (!ItemStack.isSameItemSameTags(itemStack2, itemStack)) continue;
             this.moveItemsBetweenStacks(itemStack, itemStack2);
             if (!itemStack.isEmpty()) continue;
             return;
         }
-    }
-
-    private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
-        return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
     }
 
     private void moveItemsBetweenStacks(ItemStack itemStack, ItemStack itemStack2) {

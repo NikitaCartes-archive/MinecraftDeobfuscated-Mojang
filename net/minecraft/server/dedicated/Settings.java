@@ -35,7 +35,7 @@ public abstract class Settings<T extends Settings<T>> {
         try (InputStream inputStream = Files.newInputStream(path, new OpenOption[0]);){
             properties.load(inputStream);
         } catch (IOException iOException) {
-            LOGGER.error("Failed to load properties from file: " + path);
+            LOGGER.error("Failed to load properties from file: {}", (Object)path);
         }
         return properties;
     }
@@ -44,7 +44,7 @@ public abstract class Settings<T extends Settings<T>> {
         try (OutputStream outputStream = Files.newOutputStream(path, new OpenOption[0]);){
             this.properties.store(outputStream, "Minecraft server properties");
         } catch (IOException iOException) {
-            LOGGER.error("Failed to store properties to file: " + path);
+            LOGGER.error("Failed to store properties to file: {}", (Object)path);
         }
     }
 

@@ -55,7 +55,7 @@ public class EnchantmentHelper {
     }
 
     public static Map<Enchantment, Integer> getEnchantments(ItemStack itemStack) {
-        ListTag listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantments(itemStack) : itemStack.getEnchantmentTags();
+        ListTag listTag = itemStack.is(Items.ENCHANTED_BOOK) ? EnchantedBookItem.getEnchantments(itemStack) : itemStack.getEnchantmentTags();
         return EnchantmentHelper.deserializeEnchantments(listTag);
     }
 
@@ -78,12 +78,12 @@ public class EnchantmentHelper {
             compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
             compoundTag.putShort("lvl", (short)i);
             listTag.add(compoundTag);
-            if (itemStack.getItem() != Items.ENCHANTED_BOOK) continue;
+            if (!itemStack.is(Items.ENCHANTED_BOOK)) continue;
             EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
         }
         if (listTag.isEmpty()) {
             itemStack.removeTagKey("Enchantments");
-        } else if (itemStack.getItem() != Items.ENCHANTED_BOOK) {
+        } else if (!itemStack.is(Items.ENCHANTED_BOOK)) {
             itemStack.addTagElement("Enchantments", listTag);
         }
     }
@@ -264,9 +264,8 @@ public class EnchantmentHelper {
     }
 
     public static ItemStack enchantItem(Random random, ItemStack itemStack, int i, boolean bl) {
-        boolean bl2;
         List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(random, itemStack, i, bl);
-        boolean bl3 = bl2 = itemStack.getItem() == Items.BOOK;
+        boolean bl2 = itemStack.is(Items.BOOK);
         if (bl2) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
         }
@@ -321,7 +320,7 @@ public class EnchantmentHelper {
     public static List<EnchantmentInstance> getAvailableEnchantmentResults(int i, ItemStack itemStack, boolean bl) {
         ArrayList<EnchantmentInstance> list = Lists.newArrayList();
         Item item = itemStack.getItem();
-        boolean bl2 = itemStack.getItem() == Items.BOOK;
+        boolean bl2 = itemStack.is(Items.BOOK);
         block0: for (Enchantment enchantment : Registry.ENCHANTMENT) {
             if (enchantment.isTreasureOnly() && !bl || !enchantment.isDiscoverable() || !enchantment.category.canEnchant(item) && !bl2) continue;
             for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; --j) {

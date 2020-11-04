@@ -24,6 +24,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootingEnchantFunction;
 import net.minecraft.world.level.storage.loot.functions.SetAttributesFunction;
+import net.minecraft.world.level.storage.loot.functions.SetBannerPatternFunction;
 import net.minecraft.world.level.storage.loot.functions.SetContainerContents;
 import net.minecraft.world.level.storage.loot.functions.SetContainerLootTable;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
@@ -57,6 +58,7 @@ public class LootItemFunctions {
     public static final LootItemFunctionType FILL_PLAYER_HEAD = LootItemFunctions.register("fill_player_head", new FillPlayerHead.Serializer());
     public static final LootItemFunctionType COPY_NBT = LootItemFunctions.register("copy_nbt", new CopyNbtFunction.Serializer());
     public static final LootItemFunctionType COPY_STATE = LootItemFunctions.register("copy_state", new CopyBlockState.Serializer());
+    public static final LootItemFunctionType SET_BANNER_PATTERN = LootItemFunctions.register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
 
     private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
         return Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));

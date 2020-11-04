@@ -215,20 +215,20 @@ public class ItemInHandRenderer {
             ItemStack itemStack2;
             InteractionHand interactionHand2;
             itemStack = localPlayer.getUseItem();
-            if (itemStack.getItem() == Items.BOW || itemStack.getItem() == Items.CROSSBOW) {
+            if (itemStack.is(Items.BOW) || itemStack.is(Items.CROSSBOW)) {
                 bl = localPlayer.getUsedItemHand() == InteractionHand.MAIN_HAND;
                 boolean bl3 = bl2 = !bl;
             }
-            if ((interactionHand2 = localPlayer.getUsedItemHand()) == InteractionHand.MAIN_HAND && (itemStack2 = localPlayer.getOffhandItem()).getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack2)) {
+            if ((interactionHand2 = localPlayer.getUsedItemHand()) == InteractionHand.MAIN_HAND && (itemStack2 = localPlayer.getOffhandItem()).is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack2)) {
                 bl2 = false;
             }
         } else {
             itemStack = localPlayer.getMainHandItem();
             ItemStack itemStack3 = localPlayer.getOffhandItem();
-            if (itemStack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack)) {
+            if (itemStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack)) {
                 boolean bl4 = bl2 = !bl;
             }
-            if (itemStack3.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack3)) {
+            if (itemStack3.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack3)) {
                 bl = !itemStack.isEmpty();
                 bl2 = !bl;
             }
@@ -258,13 +258,13 @@ public class ItemInHandRenderer {
             if (bl && !abstractClientPlayer.isInvisible()) {
                 this.renderPlayerArm(poseStack, multiBufferSource, j, i, h, humanoidArm);
             }
-        } else if (itemStack.getItem() == Items.FILLED_MAP) {
+        } else if (itemStack.is(Items.FILLED_MAP)) {
             if (bl && this.offHandItem.isEmpty()) {
                 this.renderTwoHandedMap(poseStack, multiBufferSource, j, g, i, h);
             } else {
                 this.renderOneHandedMap(poseStack, multiBufferSource, j, i, humanoidArm, h, itemStack);
             }
-        } else if (itemStack.getItem() == Items.CROSSBOW) {
+        } else if (itemStack.is(Items.CROSSBOW)) {
             int k;
             boolean bl2 = CrossbowItem.isCharged(itemStack);
             boolean bl3 = humanoidArm == HumanoidArm.RIGHT;

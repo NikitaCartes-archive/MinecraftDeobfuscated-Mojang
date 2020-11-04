@@ -358,6 +358,10 @@ public class Util {
         return is[random.nextInt(is.length)];
     }
 
+    public static <T> T getRandom(List<T> list, Random random) {
+        return list.get(random.nextInt(list.size()));
+    }
+
     private static BooleanSupplier createRenamer(final Path path, final Path path2) {
         return new BooleanSupplier(){
 

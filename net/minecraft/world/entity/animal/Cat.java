@@ -25,7 +25,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
@@ -323,13 +323,13 @@ extends TamableAnimal {
     }
 
     @Override
-    public Cat getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Cat cat = EntityType.CAT.create(serverLevel);
-        if (agableMob instanceof Cat) {
+        if (ageableMob instanceof Cat) {
             if (this.random.nextBoolean()) {
                 cat.setCatType(this.getCatType());
             } else {
-                cat.setCatType(((Cat)agableMob).getCatType());
+                cat.setCatType(((Cat)ageableMob).getCatType());
             }
             if (this.isTame()) {
                 cat.setOwnerUUID(this.getOwnerUUID());
@@ -337,7 +337,7 @@ extends TamableAnimal {
                 if (this.random.nextBoolean()) {
                     cat.setCollarColor(this.getCollarColor());
                 } else {
-                    cat.setCollarColor(((Cat)agableMob).getCollarColor());
+                    cat.setCollarColor(((Cat)ageableMob).getCollarColor());
                 }
             }
         }
@@ -396,7 +396,7 @@ extends TamableAnimal {
                     DyeColor dyeColor = ((DyeItem)item).getDyeColor();
                     if (dyeColor != this.getCollarColor()) {
                         this.setCollarColor(dyeColor);
-                        if (!player.abilities.instabuild) {
+                        if (!player.getAbilities().instabuild) {
                             itemStack.shrink(1);
                         }
                         this.setPersistenceRequired();
@@ -460,8 +460,8 @@ extends TamableAnimal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
     static class CatRelaxOnOwnerGoal
@@ -494,7 +494,7 @@ extends TamableAnimal {
                 }
                 BlockPos blockPos = this.ownerPlayer.blockPosition();
                 BlockState blockState = this.cat.level.getBlockState(blockPos);
-                if (blockState.getBlock().is(BlockTags.BEDS)) {
+                if (blockState.is(BlockTags.BEDS)) {
                     this.goalPos = blockState.getOptionalValue(BedBlock.FACING).map(direction -> blockPos.relative(direction.getOpposite())).orElseGet(() -> new BlockPos(blockPos));
                     return !this.spaceIsOccupied();
                 }

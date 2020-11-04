@@ -5,8 +5,8 @@ package net.minecraft.client.renderer.entity;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -14,8 +14,8 @@ import net.minecraft.world.entity.AreaEffectCloud;
 @Environment(value=EnvType.CLIENT)
 public class AreaEffectCloudRenderer
 extends EntityRenderer<AreaEffectCloud> {
-    public AreaEffectCloudRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public AreaEffectCloudRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

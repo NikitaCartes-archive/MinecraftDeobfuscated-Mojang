@@ -8,12 +8,14 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 
 @Environment(value=EnvType.CLIENT)
 public class ChunkBorderRenderer
@@ -34,14 +36,15 @@ implements DebugRenderer.SimpleDebugRenderer {
         Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        double g = 0.0 - e;
-        double h = 256.0 - e;
+        double g = (double)this.minecraft.level.getMinBuildHeight() - e;
+        double h = (double)this.minecraft.level.getMaxBuildHeight() - e;
         RenderSystem.disableTexture();
         RenderSystem.disableBlend();
-        double i = (double)(entity.xChunk << 4) - d;
-        double j = (double)(entity.zChunk << 4) - f;
+        ChunkPos chunkPos = entity.chunkPosition();
+        double i = (double)chunkPos.getMinBlockX() - d;
+        double j = (double)chunkPos.getMinBlockZ() - f;
         RenderSystem.lineWidth(1.0f);
-        bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (k = -16; k <= 32; k += 16) {
             for (int l = -16; l <= 32; l += 16) {
                 bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(1.0f, 0.0f, 0.0f, 0.0f).endVertex();
@@ -70,7 +73,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             bufferBuilder.vertex(i + 16.0, h, j + (double)k).color(1.0f, 1.0f, 0.0f, 1.0f).endVertex();
             bufferBuilder.vertex(i + 16.0, h, j + (double)k).color(1.0f, 1.0f, 0.0f, 0.0f).endVertex();
         }
-        for (k = 0; k <= 256; k += 2) {
+        for (k = this.minecraft.level.getMinBuildHeight(); k <= this.minecraft.level.getMaxBuildHeight(); k += 2) {
             double m = (double)k - e;
             bufferBuilder.vertex(i, m, j).color(1.0f, 1.0f, 0.0f, 0.0f).endVertex();
             bufferBuilder.vertex(i, m, j).color(1.0f, 1.0f, 0.0f, 1.0f).endVertex();
@@ -82,7 +85,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
         tesselator.end();
         RenderSystem.lineWidth(2.0f);
-        bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (k = 0; k <= 16; k += 16) {
             for (int l = 0; l <= 16; l += 16) {
                 bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(0.25f, 0.25f, 1.0f, 0.0f).endVertex();
@@ -91,7 +94,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 bufferBuilder.vertex(i + (double)k, h, j + (double)l).color(0.25f, 0.25f, 1.0f, 0.0f).endVertex();
             }
         }
-        for (k = 0; k <= 256; k += 16) {
+        for (k = this.minecraft.level.getMinBuildHeight(); k <= this.minecraft.level.getMaxBuildHeight(); k += 16) {
             double m = (double)k - e;
             bufferBuilder.vertex(i, m, j).color(0.25f, 0.25f, 1.0f, 0.0f).endVertex();
             bufferBuilder.vertex(i, m, j).color(0.25f, 0.25f, 1.0f, 1.0f).endVertex();

@@ -24,7 +24,7 @@ extends BaseRailBlock {
 
     protected RailBlock(BlockBehaviour.Properties properties) {
         super(false, properties);
-        this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(SHAPE, RailShape.NORTH_SOUTH));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(SHAPE, RailShape.NORTH_SOUTH)).setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -198,7 +198,7 @@ extends BaseRailBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(SHAPE);
+        builder.add(SHAPE, WATERLOGGED);
     }
 }
 

@@ -15,10 +15,13 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -38,18 +41,19 @@ import org.apache.logging.log4j.Logger;
 
 public class UpgradeData {
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final UpgradeData EMPTY = new UpgradeData();
+    public static final UpgradeData EMPTY = new UpgradeData(EmptyBlockGetter.INSTANCE);
     private static final Direction8[] DIRECTIONS = Direction8.values();
     private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
-    private final int[][] index = new int[16][];
+    private final int[][] index;
     private static final Map<Block, BlockFixer> MAP = new IdentityHashMap<Block, BlockFixer>();
     private static final Set<BlockFixer> CHUNKY_FIXERS = Sets.newHashSet();
 
-    private UpgradeData() {
+    private UpgradeData(LevelHeightAccessor levelHeightAccessor) {
+        this.index = new int[levelHeightAccessor.getSectionsCount()][];
     }
 
-    public UpgradeData(CompoundTag compoundTag) {
-        this();
+    public UpgradeData(CompoundTag compoundTag, LevelHeightAccessor levelHeightAccessor) {
+        this(levelHeightAccessor);
         if (compoundTag.contains("Indices", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("Indices");
             for (int i = 0; i < this.index.length; ++i) {
@@ -94,7 +98,7 @@ public class UpgradeData {
         int n = chunkPos.getMinBlockZ() + (bl5 && (bl || bl2) ? 14 : (bl4 ? 0 : 15));
         Direction[] directions = Direction.values();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (BlockPos blockPos : BlockPos.betweenClosed(k, 0, m, l, level.getMaxBuildHeight() - 1, n)) {
+        for (BlockPos blockPos : BlockPos.betweenClosed(k, level.getMinBuildHeight(), m, l, level.getMaxBuildHeight() - 1, n)) {
             BlockState blockState;
             BlockState blockState2 = blockState = level.getBlockState(blockPos);
             for (Direction direction : directions) {
@@ -115,7 +119,7 @@ public class UpgradeData {
         BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
         ChunkPos chunkPos = levelChunk.getPos();
         Level levelAccessor = levelChunk.getLevel();
-        for (i = 0; i < 16; ++i) {
+        for (i = 0; i < this.index.length; ++i) {
             LevelChunkSection levelChunkSection = levelChunk.getSections()[i];
             int[] is = this.index[i];
             this.index[i] = null;
@@ -127,11 +131,11 @@ public class UpgradeData {
                 int k = j & 0xF;
                 int l = j >> 8 & 0xF;
                 int m = j >> 4 & 0xF;
-                mutableBlockPos.set(chunkPos.getMinBlockX() + k, (i << 4) + l, chunkPos.getMinBlockZ() + m);
+                mutableBlockPos.set(chunkPos.getMinBlockX() + k, levelChunkSection.bottomBlockY() + l, chunkPos.getMinBlockZ() + m);
                 BlockState blockState2 = blockState = palettedContainer.get(j);
                 for (Direction direction : directions) {
                     mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
-                    if (mutableBlockPos.getX() >> 4 != chunkPos.x || mutableBlockPos.getZ() >> 4 != chunkPos.z) continue;
+                    if (SectionPos.blockToSectionCoord(mutableBlockPos.getX()) != chunkPos.x || SectionPos.blockToSectionCoord(mutableBlockPos.getZ()) != chunkPos.z) continue;
                     blockState2 = UpgradeData.updateState(blockState2, direction, levelAccessor, mutableBlockPos, mutableBlockPos2);
                 }
                 Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, 18);
@@ -139,7 +143,7 @@ public class UpgradeData {
         }
         for (i = 0; i < this.index.length; ++i) {
             if (this.index[i] != null) {
-                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", (Object)i, (Object)chunkPos.x, (Object)chunkPos.z);
+                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", (Object)levelAccessor.getSectionYFromSectionIndex(i), (Object)chunkPos.x, (Object)chunkPos.z);
             }
             this.index[i] = null;
         }

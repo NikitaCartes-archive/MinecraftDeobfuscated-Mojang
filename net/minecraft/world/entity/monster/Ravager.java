@@ -136,10 +136,7 @@ extends Raider {
     @Override
     @Nullable
     public Entity getControllingPassenger() {
-        if (this.getPassengers().isEmpty()) {
-            return null;
-        }
-        return this.getPassengers().get(0);
+        return this.getFirstPassenger();
     }
 
     @Override
@@ -224,21 +221,27 @@ extends Raider {
         }
     }
 
+    /*
+     * WARNING - void declaration
+     */
     private void roar() {
         if (this.isAlive()) {
+            void var3_5;
             List<Entity> list = this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE);
-            for (Entity entity : list) {
-                if (!(entity instanceof AbstractIllager)) {
-                    entity.hurt(DamageSource.mobAttack(this), 6.0f);
+            for (LivingEntity livingEntity : list) {
+                if (!(livingEntity instanceof AbstractIllager)) {
+                    livingEntity.hurt(DamageSource.mobAttack(this), 6.0f);
                 }
-                this.strongKnockback(entity);
+                this.strongKnockback(livingEntity);
             }
             Vec3 vec3 = this.getBoundingBox().getCenter();
-            for (int i = 0; i < 40; ++i) {
+            boolean bl = false;
+            while (var3_5 < 40) {
                 double d = this.random.nextGaussian() * 0.2;
                 double e = this.random.nextGaussian() * 0.2;
                 double f = this.random.nextGaussian() * 0.2;
                 this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
+                ++var3_5;
             }
         }
     }

@@ -9,11 +9,12 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.DyeColor;
@@ -23,12 +24,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value=EnvType.CLIENT)
 public class ShulkerBoxRenderer
-extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
+implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
     private final ShulkerModel<?> model;
 
-    public ShulkerBoxRenderer(ShulkerModel<?> shulkerModel, BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
-        this.model = shulkerModel;
+    public ShulkerBoxRenderer(BlockEntityRendererProvider.Context context) {
+        this.model = new ShulkerModel(context.getLayer(ModelLayers.SHULKER));
     }
 
     @Override

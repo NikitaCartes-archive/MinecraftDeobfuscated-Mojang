@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -23,9 +22,9 @@ extends ComplexItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = MapItem.create(level, Mth.floor(player.getX()), Mth.floor(player.getZ()), (byte)0, true, false);
+        ItemStack itemStack = MapItem.create(level, player.getBlockX(), player.getBlockZ(), (byte)0, true, false);
         ItemStack itemStack2 = player.getItemInHand(interactionHand);
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             itemStack2.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -33,7 +32,7 @@ extends ComplexItem {
         if (itemStack2.isEmpty()) {
             return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
-        if (!player.inventory.add(itemStack.copy())) {
+        if (!player.getInventory().add(itemStack.copy())) {
             player.drop(itemStack, false);
         }
         return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());

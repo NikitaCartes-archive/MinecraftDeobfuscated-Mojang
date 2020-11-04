@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
@@ -73,8 +74,8 @@ extends StructureFeature<OceanRuinConfiguration> {
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, OceanRuinConfiguration oceanRuinConfiguration) {
-            int k = i * 16;
-            int l = j * 16;
+            int k = SectionPos.sectionToBlockCoord(i);
+            int l = SectionPos.sectionToBlockCoord(j);
             BlockPos blockPos = new BlockPos(k, 90, l);
             Rotation rotation = Rotation.getRandom(this.random);
             OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);

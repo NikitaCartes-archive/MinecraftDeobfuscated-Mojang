@@ -25,7 +25,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -196,7 +196,7 @@ Saddleable {
             return false;
         }
         Player player = (Player)entity;
-        return player.getMainHandItem().getItem() == Items.WARPED_FUNGUS_ON_A_STICK || player.getOffhandItem().getItem() == Items.WARPED_FUNGUS_ON_A_STICK;
+        return player.getMainHandItem().is(Items.WARPED_FUNGUS_ON_A_STICK) || player.getOffhandItem().is(Items.WARPED_FUNGUS_ON_A_STICK);
     }
 
     @Override
@@ -207,10 +207,7 @@ Saddleable {
     @Override
     @Nullable
     public Entity getControllingPassenger() {
-        if (this.getPassengers().isEmpty()) {
-            return null;
-        }
-        return this.getPassengers().get(0);
+        return this.getFirstPassenger();
     }
 
     @Override
@@ -350,7 +347,7 @@ Saddleable {
 
     @Override
     protected boolean canAddPassenger(Entity entity) {
-        return this.getPassengers().isEmpty() && !this.isEyeInFluid(FluidTags.LAVA);
+        return !this.isVehicle() && !this.isEyeInFluid(FluidTags.LAVA);
     }
 
     @Override
@@ -377,7 +374,7 @@ Saddleable {
     }
 
     @Override
-    public Strider getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Strider getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.STRIDER.create(serverLevel);
     }
 
@@ -406,7 +403,7 @@ Saddleable {
         InteractionResult interactionResult = super.mobInteract(player, interactionHand);
         if (!interactionResult.consumesAction()) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (itemStack.getItem() == Items.SADDLE) {
+            if (itemStack.is(Items.SADDLE)) {
                 return itemStack.interactLivingEntity(player, this, interactionHand);
             }
             return InteractionResult.PASS;
@@ -435,11 +432,11 @@ Saddleable {
             mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
             this.equipSaddle(null);
         } else if (this.random.nextInt(10) == 0) {
-            AgableMob agableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
-            agableMob.setAge(-24000);
-            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, agableMob, null);
+            AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
+            ageableMob.setAge(-24000);
+            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
         } else {
-            spawnGroupData = new AgableMob.AgableMobGroupData(0.5f);
+            spawnGroupData = new AgeableMob.AgeableMobGroupData(0.5f);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -448,12 +445,12 @@ Saddleable {
         mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
         mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
         mob.startRiding(this, true);
-        return new AgableMob.AgableMobGroupData(0.0f);
+        return new AgeableMob.AgeableMobGroupData(0.0f);
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
     static class StriderGoToLavaGoal

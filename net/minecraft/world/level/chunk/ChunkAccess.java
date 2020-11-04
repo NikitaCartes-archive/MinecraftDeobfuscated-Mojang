@@ -36,7 +36,7 @@ FeatureAccess {
     @Nullable
     public BlockState setBlockState(BlockPos var1, BlockState var2, boolean var3);
 
-    public void setBlockEntity(BlockPos var1, BlockEntity var2);
+    public void setBlockEntity(BlockEntity var1);
 
     public void addEntity(Entity var1);
 
@@ -53,7 +53,7 @@ FeatureAccess {
 
     default public int getHighestSectionPosition() {
         LevelChunkSection levelChunkSection = this.getHighestSection();
-        return levelChunkSection == null ? 0 : levelChunkSection.bottomBlockY();
+        return levelChunkSection == null ? this.getMinBuildHeight() : levelChunkSection.bottomBlockY();
     }
 
     public Set<BlockPos> getBlockEntitiesPos();
@@ -70,21 +70,19 @@ FeatureAccess {
 
     public ChunkPos getPos();
 
-    public void setLastSaveTime(long var1);
-
     public Map<StructureFeature<?>, StructureStart<?>> getAllStarts();
 
     public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> var1);
 
     default public boolean isYSpaceEmpty(int i, int j) {
-        if (i < 0) {
-            i = 0;
+        if (i < this.getMinBuildHeight()) {
+            i = this.getMinBuildHeight();
         }
-        if (j >= 256) {
-            j = 255;
+        if (j >= this.getMaxBuildHeight()) {
+            j = this.getMaxBuildHeight() - 1;
         }
         for (int k = i; k <= j; k += 16) {
-            if (LevelChunkSection.isEmpty(this.getSections()[k >> 4])) continue;
+            if (LevelChunkSection.isEmpty(this.getSections()[this.getSectionIndex(k)])) continue;
             return false;
         }
         return true;

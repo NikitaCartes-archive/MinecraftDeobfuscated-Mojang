@@ -503,7 +503,7 @@ extends RealmsScreen {
                             REALMS_DATA_FETCHER.forceUpdate();
                         }
                     } catch (RealmsServiceException realmsServiceException) {
-                        LOGGER.error("Couldn't connect to Realms: " + realmsServiceException);
+                        LOGGER.error("Couldn't connect to Realms: {}", (Object)realmsServiceException.toString());
                     }
                 }
             }.start();
@@ -525,7 +525,7 @@ extends RealmsScreen {
                             REALMS_DATA_FETCHER.forceUpdate();
                         }
                     } catch (RealmsServiceException realmsServiceException) {
-                        LOGGER.error("Couldn't connect to Realms: " + realmsServiceException);
+                        LOGGER.error("Couldn't connect to Realms: {}", (Object)realmsServiceException.toString());
                     }
                 }
             }.start();
@@ -709,7 +709,7 @@ extends RealmsScreen {
             this.hasSwitchedCarouselImage = true;
             this.updateButtonStates(null);
             if (this.children.contains(this.realmSelectionList) && !this.children.remove(guiEventListener = this.realmSelectionList)) {
-                LOGGER.error("Unable to remove widget: " + guiEventListener);
+                LOGGER.error("Unable to remove widget: {}", (Object)guiEventListener);
             }
             NarrationHelper.now(POPUP_TEXT.getString());
         }
@@ -1281,7 +1281,7 @@ extends RealmsScreen {
         @Override
         public boolean keyPressed(int i, int j, int k) {
             if (i == 257 || i == 32 || i == 335) {
-                ObjectSelectionList.Entry entry = (ObjectSelectionList.Entry)this.getSelected();
+                Entry entry = (Entry)this.getSelected();
                 if (entry == null) {
                     return super.keyPressed(i, j, k);
                 }

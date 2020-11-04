@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.StuckInBodyLayer;
 import net.minecraft.util.Mth;
@@ -20,11 +21,10 @@ import net.minecraft.world.entity.projectile.Arrow;
 public class ArrowLayer<T extends LivingEntity, M extends PlayerModel<T>>
 extends StuckInBodyLayer<T, M> {
     private final EntityRenderDispatcher dispatcher;
-    private Arrow arrow;
 
-    public ArrowLayer(LivingEntityRenderer<T, M> livingEntityRenderer) {
+    public ArrowLayer(EntityRendererProvider.Context context, LivingEntityRenderer<T, M> livingEntityRenderer) {
         super(livingEntityRenderer);
-        this.dispatcher = livingEntityRenderer.getDispatcher();
+        this.dispatcher = context.getEntityRenderDispatcher();
     }
 
     @Override
@@ -35,12 +35,12 @@ extends StuckInBodyLayer<T, M> {
     @Override
     protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Entity entity, float f, float g, float h, float j) {
         float k = Mth.sqrt(f * f + h * h);
-        this.arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
-        this.arrow.yRot = (float)(Math.atan2(f, h) * 57.2957763671875);
-        this.arrow.xRot = (float)(Math.atan2(g, k) * 57.2957763671875);
-        this.arrow.yRotO = this.arrow.yRot;
-        this.arrow.xRotO = this.arrow.xRot;
-        this.dispatcher.render(this.arrow, 0.0, 0.0, 0.0, 0.0f, j, poseStack, multiBufferSource, i);
+        Arrow arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
+        arrow.yRot = (float)(Math.atan2(f, h) * 57.2957763671875);
+        arrow.xRot = (float)(Math.atan2(g, k) * 57.2957763671875);
+        arrow.yRotO = arrow.yRot;
+        arrow.xRotO = arrow.xRot;
+        this.dispatcher.render(arrow, 0.0, 0.0, 0.0, 0.0f, j, poseStack, multiBufferSource, i);
     }
 }
 

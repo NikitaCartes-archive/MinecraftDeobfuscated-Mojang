@@ -3,57 +3,46 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class CodModel<T extends Entity>
-extends ListModel<T> {
-    private final ModelPart body;
-    private final ModelPart topFin;
-    private final ModelPart head;
-    private final ModelPart nose;
-    private final ModelPart sideFin0;
-    private final ModelPart sideFin1;
+extends HierarchicalModel<T> {
+    private final ModelPart root;
     private final ModelPart tailFin;
 
-    public CodModel() {
-        this.texWidth = 32;
-        this.texHeight = 32;
+    public CodModel(ModelPart modelPart) {
+        this.root = modelPart;
+        this.tailFin = modelPart.getChild("tail_fin");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
         int i = 22;
-        this.body = new ModelPart(this, 0, 0);
-        this.body.addBox(-1.0f, -2.0f, 0.0f, 2.0f, 4.0f, 7.0f);
-        this.body.setPos(0.0f, 22.0f, 0.0f);
-        this.head = new ModelPart(this, 11, 0);
-        this.head.addBox(-1.0f, -2.0f, -3.0f, 2.0f, 4.0f, 3.0f);
-        this.head.setPos(0.0f, 22.0f, 0.0f);
-        this.nose = new ModelPart(this, 0, 0);
-        this.nose.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 3.0f, 1.0f);
-        this.nose.setPos(0.0f, 22.0f, -3.0f);
-        this.sideFin0 = new ModelPart(this, 22, 1);
-        this.sideFin0.addBox(-2.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f);
-        this.sideFin0.setPos(-1.0f, 23.0f, 0.0f);
-        this.sideFin0.zRot = -0.7853982f;
-        this.sideFin1 = new ModelPart(this, 22, 4);
-        this.sideFin1.addBox(0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f);
-        this.sideFin1.setPos(1.0f, 23.0f, 0.0f);
-        this.sideFin1.zRot = 0.7853982f;
-        this.tailFin = new ModelPart(this, 22, 3);
-        this.tailFin.addBox(0.0f, -2.0f, 0.0f, 0.0f, 4.0f, 4.0f);
-        this.tailFin.setPos(0.0f, 22.0f, 7.0f);
-        this.topFin = new ModelPart(this, 20, -6);
-        this.topFin.addBox(0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 6.0f);
-        this.topFin.setPos(0.0f, 20.0f, 0.0f);
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0f, -2.0f, 0.0f, 2.0f, 4.0f, 7.0f), PartPose.offset(0.0f, 22.0f, 0.0f));
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(11, 0).addBox(-1.0f, -2.0f, -3.0f, 2.0f, 4.0f, 3.0f), PartPose.offset(0.0f, 22.0f, 0.0f));
+        partDefinition.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 3.0f, 1.0f), PartPose.offset(0.0f, 22.0f, -3.0f));
+        partDefinition.addOrReplaceChild("right_fin", CubeListBuilder.create().texOffs(22, 1).addBox(-2.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f), PartPose.offsetAndRotation(-1.0f, 23.0f, 0.0f, 0.0f, 0.0f, -0.7853982f));
+        partDefinition.addOrReplaceChild("left_fin", CubeListBuilder.create().texOffs(22, 4).addBox(0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f), PartPose.offsetAndRotation(1.0f, 23.0f, 0.0f, 0.0f, 0.0f, 0.7853982f));
+        partDefinition.addOrReplaceChild("tail_fin", CubeListBuilder.create().texOffs(22, 3).addBox(0.0f, -2.0f, 0.0f, 0.0f, 4.0f, 4.0f), PartPose.offset(0.0f, 22.0f, 7.0f));
+        partDefinition.addOrReplaceChild("top_fin", CubeListBuilder.create().texOffs(20, -6).addBox(0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 6.0f), PartPose.offset(0.0f, 20.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.body, this.head, this.nose, this.sideFin0, this.sideFin1, this.tailFin, this.topFin);
+    public ModelPart root() {
+        return this.root;
     }
 
     @Override

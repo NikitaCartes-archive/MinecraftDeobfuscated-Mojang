@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -38,6 +40,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public class HopperBlock
 extends BaseEntityBlock {
@@ -114,8 +117,14 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new HopperBlockEntity();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new HopperBlockEntity(blockPos, blockState);
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        return level.isClientSide ? null : HopperBlock.createTickerHelper(blockEntityType, BlockEntityType.HOPPER, HopperBlockEntity::pushItemsTick);
     }
 
     @Override
@@ -207,7 +216,7 @@ extends BaseEntityBlock {
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof HopperBlockEntity) {
-            ((HopperBlockEntity)blockEntity).entityInside(entity);
+            HopperBlockEntity.entityInside(level, blockPos, blockState, entity, (HopperBlockEntity)blockEntity);
         }
     }
 

@@ -39,7 +39,7 @@ implements Vanishable {
             return;
         }
         Player player = (Player)livingEntity;
-        boolean bl = player.abilities.instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
+        boolean bl = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
         ItemStack itemStack2 = player.getProjectile(itemStack);
         if (itemStack2.isEmpty() && !bl) {
             return;
@@ -50,7 +50,7 @@ implements Vanishable {
         if ((double)(f = BowItem.getPowerForTime(j = this.getUseDuration(itemStack) - i)) < 0.1) {
             return;
         }
-        boolean bl3 = bl2 = bl && itemStack2.getItem() == Items.ARROW;
+        boolean bl3 = bl2 = bl && itemStack2.is(Items.ARROW);
         if (!level.isClientSide) {
             int l;
             int k;
@@ -70,16 +70,16 @@ implements Vanishable {
                 abstractArrow.setSecondsOnFire(100);
             }
             itemStack.hurtAndBreak(1, player, player2 -> player2.broadcastBreakEvent(player.getUsedItemHand()));
-            if (bl2 || player.abilities.instabuild && (itemStack2.getItem() == Items.SPECTRAL_ARROW || itemStack2.getItem() == Items.TIPPED_ARROW)) {
+            if (bl2 || player.getAbilities().instabuild && (itemStack2.is(Items.SPECTRAL_ARROW) || itemStack2.is(Items.TIPPED_ARROW))) {
                 abstractArrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
             }
             level.addFreshEntity(abstractArrow);
         }
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0f, 1.0f / (random.nextFloat() * 0.4f + 1.2f) + f * 0.5f);
-        if (!bl2 && !player.abilities.instabuild) {
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0f, 1.0f / (level.getRandom().nextFloat() * 0.4f + 1.2f) + f * 0.5f);
+        if (!bl2 && !player.getAbilities().instabuild) {
             itemStack2.shrink(1);
             if (itemStack2.isEmpty()) {
-                player.inventory.removeItem(itemStack2);
+                player.getInventory().removeItem(itemStack2);
             }
         }
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -108,7 +108,7 @@ implements Vanishable {
         boolean bl;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         boolean bl2 = bl = !player.getProjectile(itemStack).isEmpty();
-        if (player.abilities.instabuild || bl) {
+        if (player.getAbilities().instabuild || bl) {
             player.startUsingItem(interactionHand);
             return InteractionResultHolder.consume(itemStack);
         }

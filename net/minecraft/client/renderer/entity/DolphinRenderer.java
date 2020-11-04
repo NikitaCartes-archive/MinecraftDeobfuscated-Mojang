@@ -6,7 +6,8 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DolphinModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.DolphinCarryingItemLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +18,8 @@ public class DolphinRenderer
 extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
     private static final ResourceLocation DOLPHIN_LOCATION = new ResourceLocation("textures/entity/dolphin.png");
 
-    public DolphinRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new DolphinModel(), 0.7f);
+    public DolphinRenderer(EntityRendererProvider.Context context) {
+        super(context, new DolphinModel(context.getLayer(ModelLayers.DOLPHIN)), 0.7f);
         this.addLayer(new DolphinCarryingItemLayer(this));
     }
 

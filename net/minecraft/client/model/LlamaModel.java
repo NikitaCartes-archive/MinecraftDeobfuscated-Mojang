@@ -10,8 +10,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(value=EnvType.CLIENT)
@@ -19,55 +25,39 @@ public class LlamaModel<T extends AbstractChestedHorse>
 extends EntityModel<T> {
     private final ModelPart head;
     private final ModelPart body;
-    private final ModelPart leg0;
-    private final ModelPart leg1;
-    private final ModelPart leg2;
-    private final ModelPart leg3;
-    private final ModelPart chest1;
-    private final ModelPart chest2;
+    private final ModelPart rightHindLeg;
+    private final ModelPart leftHindLeg;
+    private final ModelPart rightFrontLeg;
+    private final ModelPart leftFrontLeg;
+    private final ModelPart rightChest;
+    private final ModelPart leftChest;
 
-    public LlamaModel(float f) {
-        this.texWidth = 128;
-        this.texHeight = 64;
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-2.0f, -14.0f, -10.0f, 4.0f, 4.0f, 9.0f, f);
-        this.head.setPos(0.0f, 7.0f, -6.0f);
-        this.head.texOffs(0, 14).addBox(-4.0f, -16.0f, -6.0f, 8.0f, 18.0f, 6.0f, f);
-        this.head.texOffs(17, 0).addBox(-4.0f, -19.0f, -4.0f, 3.0f, 3.0f, 2.0f, f);
-        this.head.texOffs(17, 0).addBox(1.0f, -19.0f, -4.0f, 3.0f, 3.0f, 2.0f, f);
-        this.body = new ModelPart(this, 29, 0);
-        this.body.addBox(-6.0f, -10.0f, -7.0f, 12.0f, 18.0f, 10.0f, f);
-        this.body.setPos(0.0f, 5.0f, 2.0f);
-        this.chest1 = new ModelPart(this, 45, 28);
-        this.chest1.addBox(-3.0f, 0.0f, 0.0f, 8.0f, 8.0f, 3.0f, f);
-        this.chest1.setPos(-8.5f, 3.0f, 3.0f);
-        this.chest1.yRot = 1.5707964f;
-        this.chest2 = new ModelPart(this, 45, 41);
-        this.chest2.addBox(-3.0f, 0.0f, 0.0f, 8.0f, 8.0f, 3.0f, f);
-        this.chest2.setPos(5.5f, 3.0f, 3.0f);
-        this.chest2.yRot = 1.5707964f;
+    public LlamaModel(ModelPart modelPart) {
+        this.head = modelPart.getChild("head");
+        this.body = modelPart.getChild("body");
+        this.rightChest = modelPart.getChild("right_chest");
+        this.leftChest = modelPart.getChild("left_chest");
+        this.rightHindLeg = modelPart.getChild("right_hind_leg");
+        this.leftHindLeg = modelPart.getChild("left_hind_leg");
+        this.rightFrontLeg = modelPart.getChild("right_front_leg");
+        this.leftFrontLeg = modelPart.getChild("left_front_leg");
+    }
+
+    public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -14.0f, -10.0f, 4.0f, 4.0f, 9.0f, cubeDeformation).texOffs(0, 14).addBox("neck", -4.0f, -16.0f, -6.0f, 8.0f, 18.0f, 6.0f, cubeDeformation).texOffs(17, 0).addBox("ear", -4.0f, -19.0f, -4.0f, 3.0f, 3.0f, 2.0f, cubeDeformation).texOffs(17, 0).addBox("ear", 1.0f, -19.0f, -4.0f, 3.0f, 3.0f, 2.0f, cubeDeformation), PartPose.offset(0.0f, 7.0f, -6.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(29, 0).addBox(-6.0f, -10.0f, -7.0f, 12.0f, 18.0f, 10.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 5.0f, 2.0f, 1.5707964f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_chest", CubeListBuilder.create().texOffs(45, 28).addBox(-3.0f, 0.0f, 0.0f, 8.0f, 8.0f, 3.0f, cubeDeformation), PartPose.offsetAndRotation(-8.5f, 3.0f, 3.0f, 0.0f, 1.5707964f, 0.0f));
+        partDefinition.addOrReplaceChild("left_chest", CubeListBuilder.create().texOffs(45, 41).addBox(-3.0f, 0.0f, 0.0f, 8.0f, 8.0f, 3.0f, cubeDeformation), PartPose.offsetAndRotation(5.5f, 3.0f, 3.0f, 0.0f, 1.5707964f, 0.0f));
         int i = 4;
         int j = 14;
-        this.leg0 = new ModelPart(this, 29, 29);
-        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 14.0f, 4.0f, f);
-        this.leg0.setPos(-2.5f, 10.0f, 6.0f);
-        this.leg1 = new ModelPart(this, 29, 29);
-        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 14.0f, 4.0f, f);
-        this.leg1.setPos(2.5f, 10.0f, 6.0f);
-        this.leg2 = new ModelPart(this, 29, 29);
-        this.leg2.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 14.0f, 4.0f, f);
-        this.leg2.setPos(-2.5f, 10.0f, -4.0f);
-        this.leg3 = new ModelPart(this, 29, 29);
-        this.leg3.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 14.0f, 4.0f, f);
-        this.leg3.setPos(2.5f, 10.0f, -4.0f);
-        this.leg0.x -= 1.0f;
-        this.leg1.x += 1.0f;
-        this.leg0.z += 0.0f;
-        this.leg1.z += 0.0f;
-        this.leg2.x -= 1.0f;
-        this.leg3.x += 1.0f;
-        this.leg2.z -= 1.0f;
-        this.leg3.z -= 1.0f;
+        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(29, 29).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 14.0f, 4.0f, cubeDeformation);
+        partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-3.5f, 10.0f, 6.0f));
+        partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(3.5f, 10.0f, 6.0f));
+        partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-3.5f, 10.0f, -5.0f));
+        partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(3.5f, 10.0f, -5.0f));
+        return LayerDefinition.create(meshDefinition, 128, 64);
     }
 
     @Override
@@ -75,13 +65,12 @@ extends EntityModel<T> {
         boolean bl;
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
-        this.body.xRot = 1.5707964f;
-        this.leg0.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
-        this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
-        this.leg2.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
-        this.leg3.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
-        this.chest1.visible = bl = !((AgableMob)abstractChestedHorse).isBaby() && ((AbstractChestedHorse)abstractChestedHorse).hasChest();
-        this.chest2.visible = bl;
+        this.rightHindLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.leftHindLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+        this.rightFrontLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+        this.leftFrontLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.rightChest.visible = bl = !((AgeableMob)abstractChestedHorse).isBaby() && ((AbstractChestedHorse)abstractChestedHorse).hasChest();
+        this.leftChest.visible = bl;
     }
 
     @Override
@@ -103,10 +92,10 @@ extends EntityModel<T> {
             poseStack.pushPose();
             poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
             poseStack.translate(0.0, 2.0625, 0.0);
-            ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+            ImmutableList.of(this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.rightChest, this.leftChest).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {
-            ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+            ImmutableList.of(this.head, this.body, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.rightChest, this.leftChest).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
         }
     }
 }

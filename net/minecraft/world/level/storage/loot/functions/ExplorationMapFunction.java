@@ -65,7 +65,7 @@ extends LootItemConditionalFunction {
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         ServerLevel serverLevel;
         BlockPos blockPos;
-        if (itemStack.getItem() != Items.MAP) {
+        if (!itemStack.is(Items.MAP)) {
             return itemStack;
         }
         Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
@@ -113,7 +113,7 @@ extends LootItemConditionalFunction {
             try {
                 type = MapDecoration.Type.valueOf(string.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException illegalArgumentException) {
-                LOGGER.error("Error while parsing loot table decoration entry. Found {}. Defaulting to " + (Object)((Object)DEFAULT_DECORATION), (Object)string);
+                LOGGER.error("Error while parsing loot table decoration entry. Found {}. Defaulting to {}", (Object)string, (Object)DEFAULT_DECORATION);
             }
             byte b = GsonHelper.getAsByte(jsonObject, "zoom", (byte)2);
             int i = GsonHelper.getAsInt(jsonObject, "search_radius", 50);

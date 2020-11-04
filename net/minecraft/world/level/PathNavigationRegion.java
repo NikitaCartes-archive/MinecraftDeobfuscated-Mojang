@@ -6,6 +6,7 @@ package net.minecraft.world.level;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -37,10 +38,10 @@ CollisionGetter {
         int l;
         int k;
         this.level = level;
-        this.centerX = blockPos.getX() >> 4;
-        this.centerZ = blockPos.getZ() >> 4;
-        int i = blockPos2.getX() >> 4;
-        int j = blockPos2.getZ() >> 4;
+        this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
+        this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
+        int i = SectionPos.blockToSectionCoord(blockPos2.getX());
+        int j = SectionPos.blockToSectionCoord(blockPos2.getZ());
         this.chunks = new ChunkAccess[i - this.centerX + 1][j - this.centerZ + 1];
         ChunkSource chunkSource = level.getChunkSource();
         this.allEmpty = true;
@@ -49,8 +50,8 @@ CollisionGetter {
                 this.chunks[k - this.centerX][l - this.centerZ] = chunkSource.getChunkNow(k, l);
             }
         }
-        for (k = blockPos.getX() >> 4; k <= blockPos2.getX() >> 4; ++k) {
-            for (l = blockPos.getZ() >> 4; l <= blockPos2.getZ() >> 4; ++l) {
+        for (k = SectionPos.blockToSectionCoord(blockPos.getX()); k <= SectionPos.blockToSectionCoord(blockPos2.getX()); ++k) {
+            for (l = SectionPos.blockToSectionCoord(blockPos.getZ()); l <= SectionPos.blockToSectionCoord(blockPos2.getZ()); ++l) {
                 ChunkAccess chunkAccess = this.chunks[k - this.centerX][l - this.centerZ];
                 if (chunkAccess == null || chunkAccess.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) continue;
                 this.allEmpty = false;
@@ -60,7 +61,7 @@ CollisionGetter {
     }
 
     private ChunkAccess getChunk(BlockPos blockPos) {
-        return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     private ChunkAccess getChunk(int i, int j) {
@@ -92,7 +93,7 @@ CollisionGetter {
 
     @Override
     public BlockState getBlockState(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return Blocks.AIR.defaultBlockState();
         }
         ChunkAccess chunkAccess = this.getChunk(blockPos);
@@ -111,11 +112,21 @@ CollisionGetter {
 
     @Override
     public FluidState getFluidState(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return Fluids.EMPTY.defaultFluidState();
         }
         ChunkAccess chunkAccess = this.getChunk(blockPos);
         return chunkAccess.getFluidState(blockPos);
+    }
+
+    @Override
+    public int getSectionsCount() {
+        return this.level.getSectionsCount();
+    }
+
+    @Override
+    public int getMinSection() {
+        return this.level.getMinSection();
     }
 }
 

@@ -9,8 +9,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
@@ -26,12 +27,12 @@ public class ArmorStandRenderer
 extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
     public static final ResourceLocation DEFAULT_SKIN_LOCATION = new ResourceLocation("textures/entity/armorstand/wood.png");
 
-    public ArmorStandRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new ArmorStandModel(), 0.0f);
-        this.addLayer(new HumanoidArmorLayer<ArmorStand, ArmorStandArmorModel, ArmorStandArmorModel>(this, new ArmorStandArmorModel(0.5f), new ArmorStandArmorModel(1.0f)));
+    public ArmorStandRenderer(EntityRendererProvider.Context context) {
+        super(context, new ArmorStandModel(context.getLayer(ModelLayers.ARMOR_STAND)), 0.0f);
+        this.addLayer(new HumanoidArmorLayer<ArmorStand, ArmorStandArmorModel, ArmorStandArmorModel>(this, new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_INNER_ARMOR)), new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR))));
         this.addLayer(new ItemInHandLayer<ArmorStand, ArmorStandArmorModel>(this));
-        this.addLayer(new ElytraLayer<ArmorStand, ArmorStandArmorModel>(this));
-        this.addLayer(new CustomHeadLayer<ArmorStand, ArmorStandArmorModel>(this));
+        this.addLayer(new ElytraLayer<ArmorStand, ArmorStandArmorModel>(this, context.getModelSet()));
+        this.addLayer(new CustomHeadLayer<ArmorStand, ArmorStandArmorModel>(this, context.getModelSet()));
     }
 
     @Override

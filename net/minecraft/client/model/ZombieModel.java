@@ -6,18 +6,15 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AbstractZombieModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Zombie;
 
 @Environment(value=EnvType.CLIENT)
 public class ZombieModel<T extends Zombie>
 extends AbstractZombieModel<T> {
-    public ZombieModel(float f, boolean bl) {
-        this(f, 0.0f, 64, bl ? 32 : 64);
-    }
-
-    protected ZombieModel(float f, float g, int i, int j) {
-        super(f, g, i, j);
+    public ZombieModel(ModelPart modelPart) {
+        super(modelPart);
     }
 
     @Override

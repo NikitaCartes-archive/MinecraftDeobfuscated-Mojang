@@ -15,13 +15,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BaseCommandBlock;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
@@ -38,20 +38,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CommandBlock
-extends BaseEntityBlock {
+extends BaseEntityBlock
+implements GameMasterBlock {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
     public static final BooleanProperty CONDITIONAL = BlockStateProperties.CONDITIONAL;
+    private final boolean automatic;
 
-    public CommandBlock(BlockBehaviour.Properties properties) {
+    public CommandBlock(BlockBehaviour.Properties properties, boolean bl) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(CONDITIONAL, false));
+        this.automatic = bl;
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        CommandBlockEntity commandBlockEntity = new CommandBlockEntity();
-        commandBlockEntity.setAutomatic(this == Blocks.CHAIN_COMMAND_BLOCK);
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        CommandBlockEntity commandBlockEntity = new CommandBlockEntity(blockPos, blockState);
+        commandBlockEntity.setAutomatic(this.automatic);
         return commandBlockEntity;
     }
 
@@ -154,7 +157,7 @@ extends BaseEntityBlock {
         if (!level.isClientSide) {
             if (itemStack.getTagElement("BlockEntityTag") == null) {
                 baseCommandBlock.setTrackOutput(level.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
-                commandBlockEntity.setAutomatic(this == Blocks.CHAIN_COMMAND_BLOCK);
+                commandBlockEntity.setAutomatic(this.automatic);
             }
             if (commandBlockEntity.getMode() == CommandBlockEntity.Mode.SEQUENCE) {
                 boolean bl = level.hasNeighborSignal(blockPos);

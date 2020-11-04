@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
@@ -346,7 +347,7 @@ AutoCloseable {
         if (this.panoramicMode) {
             return;
         }
-        this.resetProjectionMatrix(this.getProjectionMatrix(camera, f, false));
+        this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(camera, f, false)));
         PoseStack.Pose pose = poseStack.last();
         pose.pose().setIdentity();
         pose.normal().setIdentity();
@@ -378,14 +379,14 @@ AutoCloseable {
         RenderSystem.matrixMode(5888);
     }
 
-    public Matrix4f getProjectionMatrix(Camera camera, float f, boolean bl) {
+    public Matrix4f getProjectionMatrix(double d) {
         PoseStack poseStack = new PoseStack();
         poseStack.last().pose().setIdentity();
         if (this.zoom != 1.0f) {
             poseStack.translate(this.zoomX, -this.zoomY, 0.0);
             poseStack.scale(this.zoom, this.zoom, 1.0f);
         }
-        poseStack.last().pose().multiply(Matrix4f.perspective(this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * 4.0f));
+        poseStack.last().pose().multiply(Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * 4.0f));
         return poseStack.last().pose();
     }
 
@@ -514,7 +515,7 @@ AutoCloseable {
         }
         Entity entity = this.minecraft.getCameraEntity();
         boolean bl2 = bl = entity instanceof Player && !this.minecraft.options.hideGui;
-        if (bl && !((Player)entity).abilities.mayBuild) {
+        if (bl && !((Player)entity).getAbilities().mayBuild) {
             ItemStack itemStack = ((LivingEntity)entity).getMainHandItem();
             HitResult hitResult = this.minecraft.hitResult;
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
@@ -544,7 +545,8 @@ AutoCloseable {
         Camera camera = this.mainCamera;
         this.renderDistance = this.minecraft.options.renderDistance * 16;
         PoseStack poseStack2 = new PoseStack();
-        poseStack2.last().pose().multiply(this.getProjectionMatrix(camera, f, true));
+        double d = this.getFov(camera, f, true);
+        poseStack2.last().pose().multiply(this.getProjectionMatrix(d));
         this.bobHurt(poseStack2, f);
         if (this.minecraft.options.bobView) {
             this.bobView(poseStack2, f);
@@ -564,6 +566,7 @@ AutoCloseable {
         camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), !this.minecraft.options.getCameraType().isFirstPerson(), this.minecraft.options.getCameraType().isMirrored(), f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0f));
+        this.minecraft.levelRenderer.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d, this.minecraft.options.fov)));
         this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture, matrix4f);
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {
@@ -644,7 +647,7 @@ AutoCloseable {
         this.minecraft.getTextureManager().bind(NAUSEA_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(m, n + l, -90.0).uv(0.0f, 1.0f).endVertex();
         bufferBuilder.vertex(m + e, n + l, -90.0).uv(1.0f, 1.0f).endVertex();
         bufferBuilder.vertex(m + e, n, -90.0).uv(1.0f, 0.0f).endVertex();

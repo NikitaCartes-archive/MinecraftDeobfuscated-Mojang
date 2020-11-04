@@ -12,7 +12,6 @@ import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 public class ConstructBeaconTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
@@ -29,8 +28,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         return new TriggerInstance(composite, ints);
     }
 
-    public void trigger(ServerPlayer serverPlayer, BeaconBlockEntity beaconBlockEntity) {
-        this.trigger(serverPlayer, (T triggerInstance) -> triggerInstance.matches(beaconBlockEntity));
+    public void trigger(ServerPlayer serverPlayer, int i) {
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(i));
     }
 
     @Override
@@ -51,8 +50,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(EntityPredicate.Composite.ANY, ints);
         }
 
-        public boolean matches(BeaconBlockEntity beaconBlockEntity) {
-            return this.level.matches(beaconBlockEntity.getLevels());
+        public boolean matches(int i) {
+            return this.level.matches(i);
         }
 
         @Override

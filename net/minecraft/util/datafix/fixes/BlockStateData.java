@@ -85,11 +85,7 @@ public class BlockStateData {
         return dynamic == null ? MAP[0] : dynamic;
     }
 
-    /*
-     * Opcode count of 30443 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
-     */
-    static {
-        ID_BY_OLD.defaultReturnValue(-1);
+    static void bootstrap0() {
         BlockStateData.register(0, "{Name:'minecraft:air'}", "{Name:'minecraft:air'}");
         BlockStateData.register(16, "{Name:'minecraft:stone'}", "{Name:'minecraft:stone',Properties:{variant:'stone'}}");
         BlockStateData.register(17, "{Name:'minecraft:granite'}", "{Name:'minecraft:stone',Properties:{variant:'granite'}}");
@@ -191,6 +187,9 @@ public class BlockStateData {
         BlockStateData.register(208, "{Name:'minecraft:gravel'}", "{Name:'minecraft:gravel'}");
         BlockStateData.register(224, "{Name:'minecraft:gold_ore'}", "{Name:'minecraft:gold_ore'}");
         BlockStateData.register(240, "{Name:'minecraft:iron_ore'}", "{Name:'minecraft:iron_ore'}");
+    }
+
+    static void bootstrap1() {
         BlockStateData.register(256, "{Name:'minecraft:coal_ore'}", "{Name:'minecraft:coal_ore'}");
         BlockStateData.register(272, "{Name:'minecraft:oak_log',Properties:{axis:'y'}}", "{Name:'minecraft:log',Properties:{axis:'y',variant:'oak'}}");
         BlockStateData.register(273, "{Name:'minecraft:spruce_log',Properties:{axis:'y'}}", "{Name:'minecraft:log',Properties:{axis:'y',variant:'spruce'}}");
@@ -297,6 +296,9 @@ public class BlockStateData {
         BlockStateData.register(496, "{Name:'minecraft:dead_bush'}", "{Name:'minecraft:tallgrass',Properties:{type:'dead_bush'}}");
         BlockStateData.register(497, "{Name:'minecraft:grass'}", "{Name:'minecraft:tallgrass',Properties:{type:'tall_grass'}}");
         BlockStateData.register(498, "{Name:'minecraft:fern'}", "{Name:'minecraft:tallgrass',Properties:{type:'fern'}}");
+    }
+
+    static void bootstrap2() {
         BlockStateData.register(512, "{Name:'minecraft:dead_bush'}", "{Name:'minecraft:deadbush'}");
         BlockStateData.register(528, "{Name:'minecraft:piston',Properties:{extended:'false',facing:'down'}}", "{Name:'minecraft:piston',Properties:{extended:'false',facing:'down'}}");
         BlockStateData.register(529, "{Name:'minecraft:piston',Properties:{extended:'false',facing:'up'}}", "{Name:'minecraft:piston',Properties:{extended:'false',facing:'up'}}");
@@ -400,6 +402,9 @@ public class BlockStateData {
         BlockStateData.register(736, "{Name:'minecraft:tnt',Properties:{unstable:'false'}}", "{Name:'minecraft:tnt',Properties:{explode:'false'}}");
         BlockStateData.register(737, "{Name:'minecraft:tnt',Properties:{unstable:'true'}}", "{Name:'minecraft:tnt',Properties:{explode:'true'}}");
         BlockStateData.register(752, "{Name:'minecraft:bookshelf'}", "{Name:'minecraft:bookshelf'}");
+    }
+
+    static void bootstrap3() {
         BlockStateData.register(768, "{Name:'minecraft:mossy_cobblestone'}", "{Name:'minecraft:mossy_cobblestone'}");
         BlockStateData.register(784, "{Name:'minecraft:obsidian'}", "{Name:'minecraft:obsidian'}");
         BlockStateData.register(801, "{Name:'minecraft:wall_torch',Properties:{facing:'east'}}", "{Name:'minecraft:torch',Properties:{facing:'east'}}");
@@ -495,6 +500,9 @@ public class BlockStateData {
         BlockStateData.register(1021, "{Name:'minecraft:sign',Properties:{rotation:'13'}}", "{Name:'minecraft:standing_sign',Properties:{rotation:'13'}}");
         BlockStateData.register(1022, "{Name:'minecraft:sign',Properties:{rotation:'14'}}", "{Name:'minecraft:standing_sign',Properties:{rotation:'14'}}");
         BlockStateData.register(1023, "{Name:'minecraft:sign',Properties:{rotation:'15'}}", "{Name:'minecraft:standing_sign',Properties:{rotation:'15'}}");
+    }
+
+    static void bootstrap4() {
         BlockStateData.register(1024, "{Name:'minecraft:oak_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'east',half:'lower',hinge:'left',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'east',half:'lower',hinge:'left',open:'false',powered:'true'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'true'}}");
         BlockStateData.register(1025, "{Name:'minecraft:oak_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'south',half:'lower',hinge:'left',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'south',half:'lower',hinge:'left',open:'false',powered:'true'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'true'}}");
         BlockStateData.register(1026, "{Name:'minecraft:oak_door',Properties:{facing:'west',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'west',half:'lower',hinge:'left',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'west',half:'lower',hinge:'left',open:'false',powered:'true'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'west',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:wooden_door',Properties:{facing:'west',half:'lower',hinge:'right',open:'false',powered:'true'}}");
@@ -606,6 +614,9 @@ public class BlockStateData {
         BlockStateData.register(1254, "{Name:'minecraft:snow',Properties:{layers:'7'}}", "{Name:'minecraft:snow_layer',Properties:{layers:'7'}}");
         BlockStateData.register(1255, "{Name:'minecraft:snow',Properties:{layers:'8'}}", "{Name:'minecraft:snow_layer',Properties:{layers:'8'}}");
         BlockStateData.register(1264, "{Name:'minecraft:ice'}", "{Name:'minecraft:ice'}");
+    }
+
+    static void bootstrap5() {
         BlockStateData.register(1280, "{Name:'minecraft:snow_block'}", "{Name:'minecraft:snow'}");
         BlockStateData.register(1296, "{Name:'minecraft:cactus',Properties:{age:'0'}}", "{Name:'minecraft:cactus',Properties:{age:'0'}}");
         BlockStateData.register(1297, "{Name:'minecraft:cactus',Properties:{age:'1'}}", "{Name:'minecraft:cactus',Properties:{age:'1'}}");
@@ -711,6 +722,9 @@ public class BlockStateData {
         BlockStateData.register(1533, "{Name:'minecraft:green_stained_glass'}", "{Name:'minecraft:stained_glass',Properties:{color:'green'}}");
         BlockStateData.register(1534, "{Name:'minecraft:red_stained_glass'}", "{Name:'minecraft:stained_glass',Properties:{color:'red'}}");
         BlockStateData.register(1535, "{Name:'minecraft:black_stained_glass'}", "{Name:'minecraft:stained_glass',Properties:{color:'black'}}");
+    }
+
+    static void bootstrap6() {
         BlockStateData.register(1536, "{Name:'minecraft:oak_trapdoor',Properties:{facing:'north',half:'bottom',open:'false'}}", "{Name:'minecraft:trapdoor',Properties:{facing:'north',half:'bottom',open:'false'}}");
         BlockStateData.register(1537, "{Name:'minecraft:oak_trapdoor',Properties:{facing:'south',half:'bottom',open:'false'}}", "{Name:'minecraft:trapdoor',Properties:{facing:'south',half:'bottom',open:'false'}}");
         BlockStateData.register(1538, "{Name:'minecraft:oak_trapdoor',Properties:{facing:'west',half:'bottom',open:'false'}}", "{Name:'minecraft:trapdoor',Properties:{facing:'west',half:'bottom',open:'false'}}");
@@ -838,6 +852,9 @@ public class BlockStateData {
         BlockStateData.register(1751, "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'straight'}}", "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'inner_left'}}", "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'inner_right'}}", "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'outer_left'}}", "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'outer_right'}}", "{Name:'minecraft:stone_brick_stairs',Properties:{facing:'north',half:'top',shape:'straight'}}");
         BlockStateData.register(1760, "{Name:'minecraft:mycelium',Properties:{snowy:'false'}}", "{Name:'minecraft:mycelium',Properties:{snowy:'false'}}", "{Name:'minecraft:mycelium',Properties:{snowy:'true'}}");
         BlockStateData.register(1776, "{Name:'minecraft:lily_pad'}", "{Name:'minecraft:waterlily'}");
+    }
+
+    static void bootstrap7() {
         BlockStateData.register(1792, "{Name:'minecraft:nether_bricks'}", "{Name:'minecraft:nether_brick'}");
         BlockStateData.register(1808, "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:nether_brick_fence',Properties:{east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(1824, "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'straight'}}", "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'inner_left'}}", "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'inner_right'}}", "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'outer_left'}}", "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'outer_right'}}", "{Name:'minecraft:nether_brick_stairs',Properties:{facing:'east',half:'bottom',shape:'straight'}}");
@@ -908,6 +925,9 @@ public class BlockStateData {
         BlockStateData.register(2041, "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'west'}}", "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'west'}}");
         BlockStateData.register(2042, "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'north'}}", "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'north'}}");
         BlockStateData.register(2043, "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'east'}}", "{Name:'minecraft:cocoa',Properties:{age:'2',facing:'east'}}");
+    }
+
+    static void bootstrap8() {
         BlockStateData.register(2048, "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'straight'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'inner_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'inner_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'outer_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'outer_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'east',half:'bottom',shape:'straight'}}");
         BlockStateData.register(2049, "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'straight'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'inner_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'inner_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'outer_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'outer_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'west',half:'bottom',shape:'straight'}}");
         BlockStateData.register(2050, "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'straight'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'inner_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'inner_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'outer_left'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'outer_right'}}", "{Name:'minecraft:sandstone_stairs',Properties:{facing:'south',half:'bottom',shape:'straight'}}");
@@ -1036,6 +1056,9 @@ public class BlockStateData {
         BlockStateData.register(2299, "{Name:'minecraft:oak_button',Properties:{face:'wall',facing:'south',powered:'true'}}", "{Name:'minecraft:wooden_button',Properties:{facing:'south',powered:'true'}}");
         BlockStateData.register(2300, "{Name:'minecraft:oak_button',Properties:{face:'wall',facing:'north',powered:'true'}}", "{Name:'minecraft:wooden_button',Properties:{facing:'north',powered:'true'}}");
         BlockStateData.register(2301, "{Name:'minecraft:oak_button',Properties:{face:'floor',facing:'north',powered:'true'}}", "{Name:'minecraft:wooden_button',Properties:{facing:'up',powered:'true'}}");
+    }
+
+    static void bootstrap9() {
         BlockStateData.register(2304, "{Name:'%%FILTER_ME%%',Properties:{facing:'down',nodrop:'false'}}", "{Name:'minecraft:skull',Properties:{facing:'down',nodrop:'false'}}");
         BlockStateData.register(2305, "{Name:'%%FILTER_ME%%',Properties:{facing:'up',nodrop:'false'}}", "{Name:'minecraft:skull',Properties:{facing:'up',nodrop:'false'}}");
         BlockStateData.register(2306, "{Name:'%%FILTER_ME%%',Properties:{facing:'north',nodrop:'false'}}", "{Name:'minecraft:skull',Properties:{facing:'north',nodrop:'false'}}");
@@ -1209,6 +1232,9 @@ public class BlockStateData {
         BlockStateData.register(2557, "{Name:'minecraft:green_terracotta'}", "{Name:'minecraft:stained_hardened_clay',Properties:{color:'green'}}");
         BlockStateData.register(2558, "{Name:'minecraft:red_terracotta'}", "{Name:'minecraft:stained_hardened_clay',Properties:{color:'red'}}");
         BlockStateData.register(2559, "{Name:'minecraft:black_terracotta'}", "{Name:'minecraft:stained_hardened_clay',Properties:{color:'black'}}");
+    }
+
+    static void bootstrap10() {
         BlockStateData.register(2560, "{Name:'minecraft:white_stained_glass_pane',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'white',east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(2561, "{Name:'minecraft:orange_stained_glass_pane',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'orange',east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(2562, "{Name:'minecraft:magenta_stained_glass_pane',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:stained_glass_pane',Properties:{color:'magenta',east:'true',north:'true',south:'true',west:'true'}}");
@@ -1311,6 +1337,9 @@ public class BlockStateData {
         BlockStateData.register(2809, "{Name:'minecraft:peony',Properties:{half:'upper'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'double_fern'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'double_grass'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'double_rose'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'paeonia'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'sunflower'}}", "{Name:'minecraft:double_plant',Properties:{facing:'west',half:'upper',variant:'syringa'}}");
         BlockStateData.register(2810, "{Name:'minecraft:peony',Properties:{half:'upper'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'double_fern'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'double_grass'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'double_rose'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'paeonia'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'sunflower'}}", "{Name:'minecraft:double_plant',Properties:{facing:'north',half:'upper',variant:'syringa'}}");
         BlockStateData.register(2811, "{Name:'minecraft:peony',Properties:{half:'upper'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'double_fern'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'double_grass'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'double_rose'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'paeonia'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'sunflower'}}", "{Name:'minecraft:double_plant',Properties:{facing:'east',half:'upper',variant:'syringa'}}");
+    }
+
+    static void bootstrap11() {
         BlockStateData.register(2816, "{Name:'minecraft:white_banner',Properties:{rotation:'0'}}", "{Name:'minecraft:standing_banner',Properties:{rotation:'0'}}");
         BlockStateData.register(2817, "{Name:'minecraft:white_banner',Properties:{rotation:'1'}}", "{Name:'minecraft:standing_banner',Properties:{rotation:'1'}}");
         BlockStateData.register(2818, "{Name:'minecraft:white_banner',Properties:{rotation:'2'}}", "{Name:'minecraft:standing_banner',Properties:{rotation:'2'}}");
@@ -1446,6 +1475,9 @@ public class BlockStateData {
         BlockStateData.register(3024, "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:birch_fence',Properties:{east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(3040, "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:jungle_fence',Properties:{east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(3056, "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:dark_oak_fence',Properties:{east:'true',north:'true',south:'true',west:'true'}}");
+    }
+
+    static void bootstrap12() {
         BlockStateData.register(3072, "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'false',north:'true',south:'true',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'false',south:'false',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'false',south:'false',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'false',south:'true',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'false',south:'true',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'true',south:'false',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'true',south:'false',west:'true'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'true',south:'true',west:'false'}}", "{Name:'minecraft:acacia_fence',Properties:{east:'true',north:'true',south:'true',west:'true'}}");
         BlockStateData.register(3088, "{Name:'minecraft:spruce_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'east',half:'lower',hinge:'left',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'east',half:'lower',hinge:'left',open:'false',powered:'true'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'east',half:'lower',hinge:'right',open:'false',powered:'true'}}");
         BlockStateData.register(3089, "{Name:'minecraft:spruce_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'south',half:'lower',hinge:'left',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'south',half:'lower',hinge:'left',open:'false',powered:'true'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'false'}}", "{Name:'minecraft:spruce_door',Properties:{facing:'south',half:'lower',hinge:'right',open:'false',powered:'true'}}");
@@ -1540,6 +1572,9 @@ public class BlockStateData {
         BlockStateData.register(3313, "{Name:'minecraft:beetroots',Properties:{age:'1'}}", "{Name:'minecraft:beetroots',Properties:{age:'1'}}");
         BlockStateData.register(3314, "{Name:'minecraft:beetroots',Properties:{age:'2'}}", "{Name:'minecraft:beetroots',Properties:{age:'2'}}");
         BlockStateData.register(3315, "{Name:'minecraft:beetroots',Properties:{age:'3'}}", "{Name:'minecraft:beetroots',Properties:{age:'3'}}");
+    }
+
+    static void bootstrap13() {
         BlockStateData.register(3328, "{Name:'minecraft:grass_path'}", "{Name:'minecraft:grass_path'}");
         BlockStateData.register(3344, "{Name:'minecraft:end_gateway'}", "{Name:'minecraft:end_gateway'}");
         BlockStateData.register(3360, "{Name:'minecraft:repeating_command_block',Properties:{conditional:'false',facing:'down'}}", "{Name:'minecraft:repeating_command_block',Properties:{conditional:'false',facing:'down'}}");
@@ -1619,6 +1654,9 @@ public class BlockStateData {
         BlockStateData.register(3571, "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'south'}}", "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'south'}}");
         BlockStateData.register(3572, "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'west'}}", "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'west'}}");
         BlockStateData.register(3573, "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'east'}}", "{Name:'minecraft:yellow_shulker_box',Properties:{facing:'east'}}");
+    }
+
+    static void bootstrap14() {
         BlockStateData.register(3584, "{Name:'minecraft:lime_shulker_box',Properties:{facing:'down'}}", "{Name:'minecraft:lime_shulker_box',Properties:{facing:'down'}}");
         BlockStateData.register(3585, "{Name:'minecraft:lime_shulker_box',Properties:{facing:'up'}}", "{Name:'minecraft:lime_shulker_box',Properties:{facing:'up'}}");
         BlockStateData.register(3586, "{Name:'minecraft:lime_shulker_box',Properties:{facing:'north'}}", "{Name:'minecraft:lime_shulker_box',Properties:{facing:'north'}}");
@@ -1705,6 +1743,9 @@ public class BlockStateData {
         BlockStateData.register(3825, "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'west'}}", "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'west'}}");
         BlockStateData.register(3826, "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'north'}}", "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'north'}}");
         BlockStateData.register(3827, "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'east'}}", "{Name:'minecraft:yellow_glazed_terracotta',Properties:{facing:'east'}}");
+    }
+
+    static void bootstrap15() {
         BlockStateData.register(3840, "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'south'}}", "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'south'}}");
         BlockStateData.register(3841, "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'west'}}", "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'west'}}");
         BlockStateData.register(3842, "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'north'}}", "{Name:'minecraft:lime_glazed_terracotta',Properties:{facing:'north'}}");
@@ -1786,6 +1827,26 @@ public class BlockStateData {
         BlockStateData.register(4082, "{Name:'minecraft:structure_block',Properties:{mode:'corner'}}", "{Name:'minecraft:structure_block',Properties:{mode:'corner'}}");
         BlockStateData.register(4083, "{Name:'minecraft:structure_block',Properties:{mode:'data'}}", "{Name:'minecraft:structure_block',Properties:{mode:'data'}}");
         BlockStateData.finalizeMaps();
+    }
+
+    static {
+        ID_BY_OLD.defaultReturnValue(-1);
+        BlockStateData.bootstrap0();
+        BlockStateData.bootstrap1();
+        BlockStateData.bootstrap2();
+        BlockStateData.bootstrap3();
+        BlockStateData.bootstrap4();
+        BlockStateData.bootstrap5();
+        BlockStateData.bootstrap6();
+        BlockStateData.bootstrap7();
+        BlockStateData.bootstrap8();
+        BlockStateData.bootstrap9();
+        BlockStateData.bootstrap10();
+        BlockStateData.bootstrap11();
+        BlockStateData.bootstrap12();
+        BlockStateData.bootstrap13();
+        BlockStateData.bootstrap14();
+        BlockStateData.bootstrap15();
     }
 }
 

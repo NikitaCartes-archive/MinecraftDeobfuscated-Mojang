@@ -15,6 +15,7 @@ import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,8 +23,8 @@ public class DefaultClientPackResources
 extends VanillaPackResources {
     private final AssetIndex assetIndex;
 
-    public DefaultClientPackResources(AssetIndex assetIndex) {
-        super("minecraft", "realms");
+    public DefaultClientPackResources(PackMetadataSection packMetadataSection, AssetIndex assetIndex) {
+        super(packMetadataSection, "minecraft", "realms");
         this.assetIndex = assetIndex;
     }
 

@@ -69,7 +69,7 @@ extends Feature<ColumnFeatureConfiguration> {
 
     @Nullable
     private static BlockPos findSurface(LevelAccessor levelAccessor, int i, BlockPos.MutableBlockPos mutableBlockPos, int j) {
-        while (mutableBlockPos.getY() > 1 && j > 0) {
+        while (mutableBlockPos.getY() > levelAccessor.getMinBuildHeight() + 1 && j > 0) {
             --j;
             if (BasaltColumnsFeature.canPlaceAt(levelAccessor, i, mutableBlockPos)) {
                 return mutableBlockPos;

@@ -86,7 +86,7 @@ public class StructureTemplate {
             StructureBlockInfo structureBlockInfo;
             BlockPos blockPos7 = blockPos6.subtract(blockPos4);
             BlockState blockState = level.getBlockState(blockPos6);
-            if (block != null && block == blockState.getBlock()) continue;
+            if (block != null && blockState.is(block)) continue;
             BlockEntity blockEntity = level.getBlockEntity(blockPos6);
             if (blockEntity != null) {
                 CompoundTag compoundTag = blockEntity.save(new CompoundTag());
@@ -191,15 +191,16 @@ public class StructureTemplate {
         }
         BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
         ArrayList<BlockPos> list2 = Lists.newArrayListWithCapacity(structurePlaceSettings.shouldKeepLiquids() ? list.size() : 0);
-        ArrayList<Pair<BlockPos, CompoundTag>> list3 = Lists.newArrayListWithCapacity(list.size());
+        ArrayList<BlockPos> list3 = Lists.newArrayListWithCapacity(structurePlaceSettings.shouldKeepLiquids() ? list.size() : 0);
+        ArrayList<Pair<BlockPos, CompoundTag>> list4 = Lists.newArrayListWithCapacity(list.size());
         int j = Integer.MAX_VALUE;
         int k = Integer.MAX_VALUE;
         int l = Integer.MAX_VALUE;
         int m = Integer.MIN_VALUE;
         int n = Integer.MIN_VALUE;
         int o = Integer.MIN_VALUE;
-        List<StructureBlockInfo> list4 = StructureTemplate.processBlockInfos(serverLevelAccessor, blockPos, blockPos2, structurePlaceSettings, list);
-        for (StructureBlockInfo structureBlockInfo : list4) {
+        List<StructureBlockInfo> list5 = StructureTemplate.processBlockInfos(serverLevelAccessor, blockPos, blockPos2, structurePlaceSettings, list);
+        for (StructureBlockInfo structureBlockInfo : list5) {
             BlockEntity blockEntity;
             BlockPos blockPos3 = structureBlockInfo.pos;
             if (boundingBox != null && !boundingBox.isInside(blockPos3)) continue;
@@ -217,7 +218,7 @@ public class StructureTemplate {
             m = Math.max(m, blockPos3.getX());
             n = Math.max(n, blockPos3.getY());
             o = Math.max(o, blockPos3.getZ());
-            list3.add(Pair.of(blockPos3, structureBlockInfo.nbt));
+            list4.add(Pair.of(blockPos3, structureBlockInfo.nbt));
             if (structureBlockInfo.nbt != null && (blockEntity = serverLevelAccessor.getBlockEntity(blockPos3)) != null) {
                 structureBlockInfo.nbt.putInt("x", blockPos3.getX());
                 structureBlockInfo.nbt.putInt("y", blockPos3.getY());
@@ -225,11 +226,14 @@ public class StructureTemplate {
                 if (blockEntity instanceof RandomizableContainerBlockEntity) {
                     structureBlockInfo.nbt.putLong("LootTableSeed", random.nextLong());
                 }
-                blockEntity.load(structureBlockInfo.state, structureBlockInfo.nbt);
-                blockEntity.mirror(structurePlaceSettings.getMirror());
-                blockEntity.rotate(structurePlaceSettings.getRotation());
+                blockEntity.load(structureBlockInfo.nbt);
             }
-            if (fluidState == null || !(blockState.getBlock() instanceof LiquidBlockContainer)) continue;
+            if (fluidState == null) continue;
+            if (blockState.getFluidState().isSource()) {
+                list3.add(blockPos3);
+                continue;
+            }
+            if (!(blockState.getBlock() instanceof LiquidBlockContainer)) continue;
             ((LiquidBlockContainer)((Object)blockState.getBlock())).placeLiquid(serverLevelAccessor, blockPos3, blockState, fluidState);
             if (fluidState.isSource()) continue;
             list2.add(blockPos3);
@@ -241,19 +245,17 @@ public class StructureTemplate {
             Iterator iterator = list2.iterator();
             while (iterator.hasNext()) {
                 BlockState blockState2;
-                Block block;
-                BlockPos blockPos3;
-                BlockPos blockPos5 = blockPos3 = (BlockPos)iterator.next();
-                FluidState fluidState2 = serverLevelAccessor.getFluidState(blockPos5);
+                Object block;
+                BlockPos blockPos3 = (BlockPos)iterator.next();
+                FluidState fluidState2 = serverLevelAccessor.getFluidState(blockPos3);
                 for (int p = 0; p < directions.length && !fluidState2.isSource(); ++p) {
-                    BlockPos blockPos4 = blockPos5.relative(directions[p]);
-                    FluidState fluidState3 = serverLevelAccessor.getFluidState(blockPos4);
-                    if (!(fluidState3.getHeight(serverLevelAccessor, blockPos4) > fluidState2.getHeight(serverLevelAccessor, blockPos5)) && (!fluidState3.isSource() || fluidState2.isSource())) continue;
-                    fluidState2 = fluidState3;
-                    blockPos5 = blockPos4;
+                    BlockPos blockPos5 = blockPos3.relative(directions[p]);
+                    FluidState fluidState = serverLevelAccessor.getFluidState(blockPos5);
+                    if (!fluidState.isSource() || list3.contains(blockPos5)) continue;
+                    fluidState2 = fluidState;
                 }
                 if (!fluidState2.isSource() || !((block = (blockState2 = serverLevelAccessor.getBlockState(blockPos3)).getBlock()) instanceof LiquidBlockContainer)) continue;
-                ((LiquidBlockContainer)((Object)block)).placeLiquid(serverLevelAccessor, blockPos3, blockState2, fluidState2);
+                ((LiquidBlockContainer)block).placeLiquid(serverLevelAccessor, blockPos3, blockState2, fluidState2);
                 bl = true;
                 iterator.remove();
             }
@@ -263,25 +265,25 @@ public class StructureTemplate {
                 BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(m - j + 1, n - k + 1, o - l + 1);
                 int n2 = j;
                 int r = k;
-                int s = l;
-                for (Pair pair : list3) {
-                    BlockPos blockPos7 = (BlockPos)pair.getFirst();
-                    ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos7.getX() - n2, blockPos7.getY() - r, blockPos7.getZ() - s, true, true);
+                int p = l;
+                for (Pair pair : list4) {
+                    BlockPos blockPos6 = (BlockPos)pair.getFirst();
+                    ((DiscreteVoxelShape)discreteVoxelShape).fill(blockPos6.getX() - n2, blockPos6.getY() - r, blockPos6.getZ() - p);
                 }
-                StructureTemplate.updateShapeAtEdge(serverLevelAccessor, i, discreteVoxelShape, n2, r, s);
+                StructureTemplate.updateShapeAtEdge(serverLevelAccessor, i, discreteVoxelShape, n2, r, p);
             }
-            for (Pair pair : list3) {
+            for (Pair pair : list4) {
                 BlockEntity blockEntity;
-                BlockPos blockPos5 = (BlockPos)pair.getFirst();
+                BlockPos blockPos7 = (BlockPos)pair.getFirst();
                 if (!structurePlaceSettings.getKnownShape()) {
-                    BlockState blockState2;
-                    BlockState blockState3 = serverLevelAccessor.getBlockState(blockPos5);
-                    if (blockState3 != (blockState2 = Block.updateFromNeighbourShapes(blockState3, serverLevelAccessor, blockPos5))) {
-                        serverLevelAccessor.setBlock(blockPos5, blockState2, i & 0xFFFFFFFE | 0x10);
+                    BlockState blockState3;
+                    BlockState blockState2 = serverLevelAccessor.getBlockState(blockPos7);
+                    if (blockState2 != (blockState3 = Block.updateFromNeighbourShapes(blockState2, serverLevelAccessor, blockPos7))) {
+                        serverLevelAccessor.setBlock(blockPos7, blockState3, i & 0xFFFFFFFE | 0x10);
                     }
-                    serverLevelAccessor.blockUpdated(blockPos5, blockState2.getBlock());
+                    serverLevelAccessor.blockUpdated(blockPos7, blockState3.getBlock());
                 }
-                if (pair.getSecond() == null || (blockEntity = serverLevelAccessor.getBlockEntity(blockPos5)) == null) continue;
+                if (pair.getSecond() == null || (blockEntity = serverLevelAccessor.getBlockEntity(blockPos7)) == null) continue;
                 blockEntity.setChanged();
             }
         }

@@ -137,6 +137,10 @@ implements AutoCloseable {
         return this.createChunkInputStream(chunkPos, b, RegionFile.createStream(byteBuffer, n));
     }
 
+    private static int getTimestamp() {
+        return (int)(Util.getEpochMillis() / 1000L);
+    }
+
     private static boolean isExternalStreamChunk(byte b) {
         return (b & 0x80) != 0;
     }
@@ -234,6 +238,19 @@ implements AutoCloseable {
         this.file.force(true);
     }
 
+    public void clear(ChunkPos chunkPos) throws IOException {
+        int i = RegionFile.getOffsetIndex(chunkPos);
+        int j = this.offsets.get(i);
+        if (j == 0) {
+            return;
+        }
+        this.offsets.put(i, 0);
+        this.timestamps.put(i, RegionFile.getTimestamp());
+        this.writeHeader();
+        Files.deleteIfExists(this.getExternalChunkPath(chunkPos));
+        this.usedSectors.free(RegionFile.getSectorNumber(j), RegionFile.getNumSectors(j));
+    }
+
     protected synchronized void write(ChunkPos chunkPos, ByteBuffer byteBuffer) throws IOException {
         CommitOp commitOp;
         int o;
@@ -256,9 +273,8 @@ implements AutoCloseable {
             commitOp = () -> Files.deleteIfExists(this.getExternalChunkPath(chunkPos));
             this.file.write(byteBuffer, o * 4096);
         }
-        int p = (int)(Util.getEpochMillis() / 1000L);
         this.offsets.put(i, this.packSectorOffset(o, n));
-        this.timestamps.put(i, p);
+        this.timestamps.put(i, RegionFile.getTimestamp());
         this.writeHeader();
         commitOp.run();
         if (k != 0) {

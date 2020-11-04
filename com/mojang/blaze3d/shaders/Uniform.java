@@ -209,7 +209,7 @@ implements AutoCloseable {
     }
 
     private void uploadAsInteger() {
-        this.floatValues.clear();
+        this.intValues.rewind();
         switch (this.type) {
             case 0: {
                 RenderSystem.glUniform1(this.location, this.intValues);
@@ -234,7 +234,7 @@ implements AutoCloseable {
     }
 
     private void uploadAsFloat() {
-        this.floatValues.clear();
+        this.floatValues.rewind();
         switch (this.type) {
             case 4: {
                 RenderSystem.glUniform1(this.location, this.floatValues);

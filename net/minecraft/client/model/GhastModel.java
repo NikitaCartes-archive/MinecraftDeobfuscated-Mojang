@@ -3,40 +3,48 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class GhastModel<T extends Entity>
-extends ListModel<T> {
+extends HierarchicalModel<T> {
+    private final ModelPart root;
     private final ModelPart[] tentacles = new ModelPart[9];
-    private final ImmutableList<ModelPart> parts;
 
-    public GhastModel() {
-        ImmutableList.Builder builder = ImmutableList.builder();
-        ModelPart modelPart = new ModelPart(this, 0, 0);
-        modelPart.addBox(-8.0f, -8.0f, -8.0f, 16.0f, 16.0f, 16.0f);
-        modelPart.y = 17.6f;
-        builder.add(modelPart);
-        Random random = new Random(1660L);
+    public GhastModel(ModelPart modelPart) {
+        this.root = modelPart;
         for (int i = 0; i < this.tentacles.length; ++i) {
-            this.tentacles[i] = new ModelPart(this, 0, 0);
+            this.tentacles[i] = modelPart.getChild(GhastModel.createTentacleName(i));
+        }
+    }
+
+    private static String createTentacleName(int i) {
+        return "tentacle" + i;
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -8.0f, -8.0f, 16.0f, 16.0f, 16.0f), PartPose.offset(0.0f, 17.6f, 0.0f));
+        Random random = new Random(1660L);
+        for (int i = 0; i < 9; ++i) {
             float f = (((float)(i % 3) - (float)(i / 3 % 2) * 0.5f + 0.25f) / 2.0f * 2.0f - 1.0f) * 5.0f;
             float g = ((float)(i / 3) / 2.0f * 2.0f - 1.0f) * 5.0f;
             int j = random.nextInt(7) + 8;
-            this.tentacles[i].addBox(-1.0f, 0.0f, -1.0f, 2.0f, j, 2.0f);
-            this.tentacles[i].x = f;
-            this.tentacles[i].z = g;
-            this.tentacles[i].y = 24.6f;
-            builder.add(this.tentacles[i]);
+            partDefinition.addOrReplaceChild(GhastModel.createTentacleName(i), CubeListBuilder.create().texOffs(0, 0).addBox(-1.0f, 0.0f, -1.0f, 2.0f, j, 2.0f), PartPose.offset(f, 24.6f, g));
         }
-        this.parts = builder.build();
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -47,8 +55,8 @@ extends ListModel<T> {
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return this.parts;
+    public ModelPart root() {
+        return this.root;
     }
 }
 

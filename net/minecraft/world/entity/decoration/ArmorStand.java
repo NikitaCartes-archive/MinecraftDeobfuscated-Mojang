@@ -305,7 +305,7 @@ extends LivingEntity {
     @Override
     public InteractionResult interactAt(Player player, Vec3 vec3, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (this.isMarker() || itemStack.getItem() == Items.NAME_TAG) {
+        if (this.isMarker() || itemStack.is(Items.NAME_TAG)) {
             return InteractionResult.PASS;
         }
         if (player.isSpectator()) {
@@ -384,7 +384,7 @@ extends LivingEntity {
         if (itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 16) != 0) {
             return false;
         }
-        if (player.abilities.instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
+        if (player.getAbilities().instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
             ItemStack itemStack3 = itemStack.copy();
             itemStack3.setCount(1);
             this.setItemSlot(equipmentSlot, itemStack3);
@@ -407,11 +407,11 @@ extends LivingEntity {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (this.level.isClientSide || this.removed) {
+        if (this.level.isClientSide || this.isRemoved()) {
             return false;
         }
         if (DamageSource.OUT_OF_WORLD.equals(damageSource)) {
-            this.remove();
+            this.kill();
             return false;
         }
         if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
@@ -419,7 +419,7 @@ extends LivingEntity {
         }
         if (damageSource.isExplosion()) {
             this.brokenByAnything(damageSource);
-            this.remove();
+            this.kill();
             return false;
         }
         if (DamageSource.IN_FIRE.equals(damageSource)) {
@@ -440,20 +440,20 @@ extends LivingEntity {
         if (!bl3 && !bl) {
             return false;
         }
-        if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).abilities.mayBuild) {
+        if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).getAbilities().mayBuild) {
             return false;
         }
         if (damageSource.isCreativePlayer()) {
             this.playBrokenSound();
             this.showBreakingParticles();
-            this.remove();
+            this.kill();
             return bl2;
         }
         long l = this.level.getGameTime();
         if (l - this.lastHit <= 5L || bl) {
             this.brokenByPlayer(damageSource);
             this.showBreakingParticles();
-            this.remove();
+            this.kill();
         } else {
             this.level.broadcastEntityEvent(this, (byte)32);
             this.lastHit = l;
@@ -494,7 +494,7 @@ extends LivingEntity {
         float g = this.getHealth();
         if ((g -= f) <= 0.5f) {
             this.brokenByAnything(damageSource);
-            this.remove();
+            this.kill();
         } else {
             this.setHealth(g);
         }
@@ -612,7 +612,7 @@ extends LivingEntity {
 
     @Override
     public void kill() {
-        this.remove();
+        this.remove(Entity.RemovalReason.KILLED);
     }
 
     @Override
@@ -809,6 +809,12 @@ extends LivingEntity {
             return Vec3.atCenterOf(blockPos);
         }
         return super.getLightProbePosition(f);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        return new ItemStack(Items.ARMOR_STAND);
     }
 }
 

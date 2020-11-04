@@ -12,6 +12,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
 public class MeleeAttack
@@ -30,7 +31,10 @@ extends Behavior<Mob> {
     }
 
     private boolean isHoldingUsableProjectileWeapon(Mob mob) {
-        return mob.isHolding(item -> item instanceof ProjectileWeaponItem && mob.canFireProjectileWeapon((ProjectileWeaponItem)item));
+        return mob.isHolding(itemStack -> {
+            Item item = itemStack.getItem();
+            return item instanceof ProjectileWeaponItem && mob.canFireProjectileWeapon((ProjectileWeaponItem)item);
+        });
     }
 
     @Override

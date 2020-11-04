@@ -45,6 +45,7 @@ import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -110,7 +111,6 @@ extends Entity {
     protected AbstractMinecart(EntityType<?> entityType, Level level, double d, double e, double f) {
         this(entityType, level);
         this.setPos(d, e, f);
-        this.setDeltaMovement(Vec3.ZERO);
         this.xo = d;
         this.yo = e;
         this.zo = f;
@@ -216,7 +216,7 @@ extends Entity {
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         boolean bl;
-        if (this.level.isClientSide || this.removed) {
+        if (this.level.isClientSide || this.isRemoved()) {
             return true;
         }
         if (this.isInvulnerableTo(damageSource)) {
@@ -226,13 +226,13 @@ extends Entity {
         this.setHurtTime(10);
         this.markHurt();
         this.setDamage(this.getDamage() + f * 10.0f);
-        boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).abilities.instabuild;
+        boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
         if (bl || this.getDamage() > 40.0f) {
             this.ejectPassengers();
             if (!bl || this.hasCustomName()) {
                 this.destroy(damageSource);
             } else {
-                this.remove();
+                this.discard();
             }
         }
         return true;
@@ -248,7 +248,7 @@ extends Entity {
     }
 
     public void destroy(DamageSource damageSource) {
-        this.remove();
+        this.remove(Entity.RemovalReason.KILLED);
         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ItemStack itemStack = new ItemStack(Items.MINECART);
             if (this.hasCustomName()) {
@@ -268,7 +268,7 @@ extends Entity {
 
     @Override
     public boolean isPickable() {
-        return !this.removed;
+        return !this.isRemoved();
     }
 
     private static Pair<Vec3i, Vec3i> exits(RailShape railShape) {
@@ -294,9 +294,7 @@ extends Entity {
         if (this.getDamage() > 0.0f) {
             this.setDamage(this.getDamage() - 1.0f);
         }
-        if (this.getY() < -64.0) {
-            this.outOfWorld();
-        }
+        this.checkOutOfWorld();
         this.handleNetherPortal();
         if (this.level.isClientSide) {
             if (this.lSteps > 0) {
@@ -316,7 +314,8 @@ extends Entity {
             return;
         }
         if (!this.isNoGravity()) {
-            this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+            double d = this.isInWater() ? -0.005 : -0.04;
+            this.setDeltaMovement(this.getDeltaMovement().add(0.0, d, 0.0));
         }
         if (this.level.getBlockState(new BlockPos(i = Mth.floor(this.getX()), (j = Mth.floor(this.getY())) - 1, k = Mth.floor(this.getZ()))).is(BlockTags.RAILS)) {
             --j;
@@ -371,7 +370,7 @@ extends Entity {
     }
 
     protected double getMaxSpeed() {
-        return 0.4;
+        return (this.isInWater() ? 4.0 : 8.0) / 20.0;
     }
 
     public void activateMinecart(int i, int j, int k, boolean bl) {
@@ -396,7 +395,6 @@ extends Entity {
         double u;
         double t;
         double s;
-        Entity entity;
         this.fallDistance = 0.0f;
         double d = this.getX();
         double e = this.getY();
@@ -405,32 +403,34 @@ extends Entity {
         e = blockPos.getY();
         boolean bl = false;
         boolean bl2 = false;
-        BaseRailBlock baseRailBlock = (BaseRailBlock)blockState.getBlock();
-        if (baseRailBlock == Blocks.POWERED_RAIL) {
+        if (blockState.is(Blocks.POWERED_RAIL)) {
             bl = blockState.getValue(PoweredRailBlock.POWERED);
             bl2 = !bl;
         }
         double g = 0.0078125;
+        if (this.isInWater()) {
+            g *= 0.2;
+        }
         Vec3 vec32 = this.getDeltaMovement();
-        RailShape railShape = blockState.getValue(baseRailBlock.getShapeProperty());
+        RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
         switch (railShape) {
             case ASCENDING_EAST: {
-                this.setDeltaMovement(vec32.add(-0.0078125, 0.0, 0.0));
+                this.setDeltaMovement(vec32.add(-g, 0.0, 0.0));
                 e += 1.0;
                 break;
             }
             case ASCENDING_WEST: {
-                this.setDeltaMovement(vec32.add(0.0078125, 0.0, 0.0));
+                this.setDeltaMovement(vec32.add(g, 0.0, 0.0));
                 e += 1.0;
                 break;
             }
             case ASCENDING_NORTH: {
-                this.setDeltaMovement(vec32.add(0.0, 0.0, 0.0078125));
+                this.setDeltaMovement(vec32.add(0.0, 0.0, g));
                 e += 1.0;
                 break;
             }
             case ASCENDING_SOUTH: {
-                this.setDeltaMovement(vec32.add(0.0, 0.0, -0.0078125));
+                this.setDeltaMovement(vec32.add(0.0, 0.0, -g));
                 e += 1.0;
             }
         }
@@ -449,7 +449,7 @@ extends Entity {
         double l = Math.min(2.0, Math.sqrt(AbstractMinecart.getHorizontalDistanceSqr(vec32)));
         vec32 = new Vec3(l * h / j, vec32.y, l * i / j);
         this.setDeltaMovement(vec32);
-        Entity entity2 = entity = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
+        Entity entity = this.getFirstPassenger();
         if (entity instanceof Player) {
             Vec3 vec33 = entity.getDeltaMovement();
             double m = AbstractMinecart.getHorizontalDistanceSqr(vec33);
@@ -548,7 +548,12 @@ extends Entity {
 
     protected void applyNaturalSlowdown() {
         double d = this.isVehicle() ? 0.997 : 0.96;
-        this.setDeltaMovement(this.getDeltaMovement().multiply(d, 0.0, d));
+        Vec3 vec3 = this.getDeltaMovement();
+        vec3 = vec3.multiply(d, 0.0, d);
+        if (this.isInWater()) {
+            vec3 = vec3.scale(0.95f);
+        }
+        this.setDeltaMovement(vec3);
     }
 
     @Nullable
@@ -810,6 +815,38 @@ extends Entity {
     @Override
     public Packet<?> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        Item item;
+        switch (this.getMinecartType()) {
+            case FURNACE: {
+                item = Items.FURNACE_MINECART;
+                break;
+            }
+            case CHEST: {
+                item = Items.CHEST_MINECART;
+                break;
+            }
+            case TNT: {
+                item = Items.TNT_MINECART;
+                break;
+            }
+            case HOPPER: {
+                item = Items.HOPPER_MINECART;
+                break;
+            }
+            case COMMAND_BLOCK: {
+                item = Items.COMMAND_BLOCK_MINECART;
+                break;
+            }
+            default: {
+                item = Items.MINECART;
+            }
+        }
+        return new ItemStack(item);
     }
 
     public static enum Type {

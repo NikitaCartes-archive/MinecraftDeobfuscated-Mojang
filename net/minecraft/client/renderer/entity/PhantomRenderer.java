@@ -8,7 +8,8 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PhantomModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.PhantomEyesLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +20,8 @@ public class PhantomRenderer
 extends MobRenderer<Phantom, PhantomModel<Phantom>> {
     private static final ResourceLocation PHANTOM_LOCATION = new ResourceLocation("textures/entity/phantom.png");
 
-    public PhantomRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new PhantomModel(), 0.75f);
+    public PhantomRenderer(EntityRendererProvider.Context context) {
+        super(context, new PhantomModel(context.getLayer(ModelLayers.PHANTOM)), 0.75f);
         this.addLayer(new PhantomEyesLayer<Phantom>(this));
     }
 

@@ -252,7 +252,7 @@ RangedAttackMob {
                     this.setAlternativeTarget(i, 0);
                     continue;
                 }
-                if (entity instanceof Player && ((Player)entity).abilities.invulnerable) {
+                if (entity instanceof Player && ((Player)entity).getAbilities().invulnerable) {
                     this.setAlternativeTarget(i, 0);
                     continue;
                 }
@@ -266,7 +266,7 @@ RangedAttackMob {
                 LivingEntity livingEntity = list.get(this.random.nextInt(list.size()));
                 if (livingEntity != this && livingEntity.isAlive() && this.canSee(livingEntity)) {
                     if (livingEntity instanceof Player) {
-                        if (((Player)livingEntity).abilities.invulnerable) continue block0;
+                        if (((Player)livingEntity).getAbilities().invulnerable) continue block0;
                         this.setAlternativeTarget(i, livingEntity.getId());
                         continue block0;
                     }
@@ -313,7 +313,7 @@ RangedAttackMob {
     }
 
     public static boolean canDestroy(BlockState blockState) {
-        return !blockState.isAir() && !BlockTags.WITHER_IMMUNE.contains(blockState.getBlock());
+        return !blockState.isAir() && !blockState.is(BlockTags.WITHER_IMMUNE);
     }
 
     public void makeInvulnerable() {
@@ -443,7 +443,7 @@ RangedAttackMob {
     @Override
     public void checkDespawn() {
         if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
-            this.remove();
+            this.discard();
             return;
         }
         this.noActionTime = 0;

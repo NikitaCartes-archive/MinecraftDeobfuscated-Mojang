@@ -16,6 +16,7 @@ public class References {
     public static final DSL.TypeReference SAVED_DATA = () -> "saved_data";
     public static final DSL.TypeReference ADVANCEMENTS = () -> "advancements";
     public static final DSL.TypeReference POI_CHUNK = () -> "poi_chunk";
+    public static final DSL.TypeReference ENTITY_CHUNK = () -> "entity_chunk";
     public static final DSL.TypeReference BLOCK_ENTITY = () -> "block_entity";
     public static final DSL.TypeReference ITEM_STACK = () -> "item_stack";
     public static final DSL.TypeReference BLOCK_STATE = () -> "block_state";

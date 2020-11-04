@@ -13,8 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -22,11 +22,10 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
 public class BeaconRenderer
-extends BlockEntityRenderer<BeaconBlockEntity> {
+implements BlockEntityRenderer<BeaconBlockEntity> {
     public static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
 
-    public BeaconRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+    public BeaconRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override

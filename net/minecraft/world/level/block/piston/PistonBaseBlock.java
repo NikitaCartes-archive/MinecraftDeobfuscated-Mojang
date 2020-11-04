@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -179,7 +180,7 @@ extends DirectionalBlock {
             }
             BlockState blockState2 = (BlockState)((BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(MovingPistonBlock.FACING, direction)).setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
             level.setBlock(blockPos, blockState2, 20);
-            level.setBlockEntity(blockPos, MovingPistonBlock.newMovingBlockEntity((BlockState)this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true));
+            level.setBlockEntity(MovingPistonBlock.newMovingBlockEntity(blockPos, blockState2, (BlockState)this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true));
             level.blockUpdated(blockPos, blockState2.getBlock());
             blockState2.updateNeighbourShapes(level, blockPos, 2);
             if (this.isSticky) {
@@ -208,7 +209,7 @@ extends DirectionalBlock {
     }
 
     public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
-        if (blockPos.getY() < 0 || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
+        if (blockPos.getY() < level.getMinBuildHeight() || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
             return false;
         }
         if (blockState.isAir()) {
@@ -217,7 +218,7 @@ extends DirectionalBlock {
         if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
             return false;
         }
-        if (direction == Direction.DOWN && blockPos.getY() == 0) {
+        if (direction == Direction.DOWN && blockPos.getY() == level.getMinBuildHeight()) {
             return false;
         }
         if (direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
@@ -243,7 +244,7 @@ extends DirectionalBlock {
                 }
             }
         }
-        return !blockState.getBlock().isEntityBlock();
+        return !blockState.hasBlockEntity();
     }
 
     private boolean moveBlocks(Level level, BlockPos blockPos, Direction direction, boolean bl) {
@@ -275,9 +276,12 @@ extends DirectionalBlock {
         for (k = list3.size() - 1; k >= 0; --k) {
             blockPos4 = list3.get(k);
             BlockState blockState = level.getBlockState(blockPos4);
-            BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos4) : null;
+            BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos4) : null;
             PistonBaseBlock.dropResources(blockState, level, blockPos4, blockEntity);
             level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
+            if (!blockState.is(BlockTags.FIRE)) {
+                level.addDestroyBlockEffect(blockPos4, blockState);
+            }
             blockStates[j++] = blockState;
         }
         for (k = list.size() - 1; k >= 0; --k) {
@@ -285,28 +289,29 @@ extends DirectionalBlock {
             BlockState blockState = level.getBlockState(blockPos4);
             blockPos4 = blockPos4.relative(direction2);
             map.remove(blockPos4);
-            level.setBlock(blockPos4, (BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
-            level.setBlockEntity(blockPos4, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k), direction, bl, false));
+            BlockState blockState3 = (BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction);
+            level.setBlock(blockPos4, blockState3, 68);
+            level.setBlockEntity(MovingPistonBlock.newMovingBlockEntity(blockPos4, blockState3, (BlockState)list2.get(k), direction, bl, false));
             blockStates[j++] = blockState;
         }
         if (bl) {
             PistonType pistonType = this.isSticky ? PistonType.STICKY : PistonType.DEFAULT;
-            BlockState blockState3 = (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction)).setValue(PistonHeadBlock.TYPE, pistonType);
+            BlockState blockState4 = (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction)).setValue(PistonHeadBlock.TYPE, pistonType);
             BlockState blockState = (BlockState)((BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(MovingPistonBlock.FACING, direction)).setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
             map.remove(blockPos2);
             level.setBlock(blockPos2, blockState, 68);
-            level.setBlockEntity(blockPos2, MovingPistonBlock.newMovingBlockEntity(blockState3, direction, true, true));
+            level.setBlockEntity(MovingPistonBlock.newMovingBlockEntity(blockPos2, blockState, blockState4, direction, true, true));
         }
-        BlockState blockState4 = Blocks.AIR.defaultBlockState();
+        BlockState blockState5 = Blocks.AIR.defaultBlockState();
         for (BlockPos blockPos3 : map.keySet()) {
-            level.setBlock(blockPos3, blockState4, 82);
+            level.setBlock(blockPos3, blockState5, 82);
         }
         for (Map.Entry entry : map.entrySet()) {
             blockPos6 = (BlockPos)entry.getKey();
-            BlockState blockState5 = (BlockState)entry.getValue();
+            BlockState blockState6 = (BlockState)entry.getValue();
+            blockState6.updateIndirectNeighbourShapes(level, blockPos6, 2);
+            blockState5.updateNeighbourShapes(level, blockPos6, 2);
             blockState5.updateIndirectNeighbourShapes(level, blockPos6, 2);
-            blockState4.updateNeighbourShapes(level, blockPos6, 2);
-            blockState4.updateIndirectNeighbourShapes(level, blockPos6, 2);
         }
         j = 0;
         for (l = list3.size() - 1; l >= 0; --l) {

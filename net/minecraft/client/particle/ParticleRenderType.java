@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -23,7 +24,7 @@ public interface ParticleRenderType {
             RenderSystem.defaultBlendFunc();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
-            bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
         @Override
@@ -42,7 +43,7 @@ public interface ParticleRenderType {
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
-            bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
         @Override
@@ -61,9 +62,9 @@ public interface ParticleRenderType {
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.alphaFunc(516, 0.003921569f);
-            bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
         @Override
@@ -82,7 +83,7 @@ public interface ParticleRenderType {
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
-            bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
         @Override

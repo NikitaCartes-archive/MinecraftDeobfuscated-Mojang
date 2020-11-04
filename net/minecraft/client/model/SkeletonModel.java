@@ -9,6 +9,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -20,28 +26,18 @@ import net.minecraft.world.item.Items;
 @Environment(value=EnvType.CLIENT)
 public class SkeletonModel<T extends Mob>
 extends HumanoidModel<T> {
-    public SkeletonModel() {
-        this(0.0f, false);
+    public SkeletonModel(ModelPart modelPart) {
+        super(modelPart);
     }
 
-    public SkeletonModel(float f, boolean bl) {
-        super(f);
-        if (!bl) {
-            this.rightArm = new ModelPart(this, 40, 16);
-            this.rightArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-            this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
-            this.leftArm = new ModelPart(this, 40, 16);
-            this.leftArm.mirror = true;
-            this.leftArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-            this.leftArm.setPos(5.0f, 2.0f, 0.0f);
-            this.rightLeg = new ModelPart(this, 0, 16);
-            this.rightLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-            this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
-            this.leftLeg = new ModelPart(this, 0, 16);
-            this.leftLeg.mirror = true;
-            this.leftLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-            this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
-        }
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(-5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(-2.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(2.0f, 12.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -49,7 +45,7 @@ extends HumanoidModel<T> {
         this.rightArmPose = HumanoidModel.ArmPose.EMPTY;
         this.leftArmPose = HumanoidModel.ArmPose.EMPTY;
         ItemStack itemStack = ((LivingEntity)mob).getItemInHand(InteractionHand.MAIN_HAND);
-        if (itemStack.getItem() == Items.BOW && ((Mob)mob).isAggressive()) {
+        if (itemStack.is(Items.BOW) && ((Mob)mob).isAggressive()) {
             if (((Mob)mob).getMainArm() == HumanoidArm.RIGHT) {
                 this.rightArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
             } else {
@@ -63,7 +59,7 @@ extends HumanoidModel<T> {
     public void setupAnim(T mob, float f, float g, float h, float i, float j) {
         super.setupAnim(mob, f, g, h, i, j);
         ItemStack itemStack = ((LivingEntity)mob).getMainHandItem();
-        if (((Mob)mob).isAggressive() && (itemStack.isEmpty() || itemStack.getItem() != Items.BOW)) {
+        if (((Mob)mob).isAggressive() && (itemStack.isEmpty() || !itemStack.is(Items.BOW))) {
             float k = Mth.sin(this.attackTime * (float)Math.PI);
             float l = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
             this.rightArm.zRot = 0.0f;

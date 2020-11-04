@@ -8,7 +8,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -25,7 +24,7 @@ extends Feature<NoneFeatureConfiguration> {
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         int l;
         int k;
-        while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
+        while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
             blockPos = blockPos.below();
         }
         if (!worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
@@ -46,14 +45,10 @@ extends Feature<NoneFeatureConfiguration> {
                     float h = (float)Mth.abs(n) - 0.25f;
                     if ((m != 0 || n != 0) && g * g + h * h > f * f || (m == -l || m == l || n == -l || n == l) && random.nextFloat() > 0.75f) continue;
                     BlockState blockState = worldGenLevel.getBlockState(blockPos.offset(m, k, n));
-                    Block block = blockState.getBlock();
-                    if (blockState.isAir() || IceSpikeFeature.isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+                    if (blockState.isAir() || IceSpikeFeature.isDirt(blockState) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.ICE)) {
                         this.setBlock(worldGenLevel, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
                     }
-                    if (k == 0 || l <= 1) continue;
-                    blockState = worldGenLevel.getBlockState(blockPos.offset(m, -k, n));
-                    block = blockState.getBlock();
-                    if (!blockState.isAir() && !IceSpikeFeature.isDirt(block) && block != Blocks.SNOW_BLOCK && block != Blocks.ICE) continue;
+                    if (k == 0 || l <= 1 || !(blockState = worldGenLevel.getBlockState(blockPos.offset(m, -k, n))).isAir() && !IceSpikeFeature.isDirt(blockState) && !blockState.is(Blocks.SNOW_BLOCK) && !blockState.is(Blocks.ICE)) continue;
                     this.setBlock(worldGenLevel, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
                 }
             }
@@ -65,16 +60,14 @@ extends Feature<NoneFeatureConfiguration> {
             k = 1;
         }
         for (int o = -k; o <= k; ++o) {
-            block5: for (l = -k; l <= k; ++l) {
+            for (l = -k; l <= k; ++l) {
+                BlockState blockState2;
                 BlockPos blockPos2 = blockPos.offset(o, -1, l);
                 int p = 50;
                 if (Math.abs(o) == 1 && Math.abs(l) == 1) {
                     p = random.nextInt(5);
                 }
-                while (blockPos2.getY() > 50) {
-                    BlockState blockState2 = worldGenLevel.getBlockState(blockPos2);
-                    Block block2 = blockState2.getBlock();
-                    if (!blockState2.isAir() && !IceSpikeFeature.isDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) continue block5;
+                while (blockPos2.getY() > 50 && ((blockState2 = worldGenLevel.getBlockState(blockPos2)).isAir() || IceSpikeFeature.isDirt(blockState2) || blockState2.is(Blocks.SNOW_BLOCK) || blockState2.is(Blocks.ICE) || blockState2.is(Blocks.PACKED_ICE))) {
                     this.setBlock(worldGenLevel, blockPos2, Blocks.PACKED_ICE.defaultBlockState());
                     blockPos2 = blockPos2.below();
                     if (--p > 0) continue;

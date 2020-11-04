@@ -98,6 +98,7 @@ public class ModelTemplates {
     public static final ModelTemplate THREE_TURTLE_EGGS = ModelTemplates.create("template_three_turtle_eggs", TextureSlot.ALL);
     public static final ModelTemplate FOUR_TURTLE_EGGS = ModelTemplates.create("template_four_turtle_eggs", TextureSlot.ALL);
     public static final ModelTemplate SINGLE_FACE = ModelTemplates.create("template_single_face", TextureSlot.TEXTURE);
+    public static final ModelTemplate CAULDRON_FULL = ModelTemplates.create("template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
     public static final ModelTemplate FLAT_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ITEM = ModelTemplates.createItem("handheld", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = ModelTemplates.createItem("handheld_rod", TextureSlot.LAYER0);
@@ -105,6 +106,11 @@ public class ModelTemplates {
     public static final ModelTemplate BED_INVENTORY = ModelTemplates.createItem("template_bed", TextureSlot.PARTICLE);
     public static final ModelTemplate BANNER_INVENTORY = ModelTemplates.createItem("template_banner", new TextureSlot[0]);
     public static final ModelTemplate SKULL_INVENTORY = ModelTemplates.createItem("template_skull", new TextureSlot[0]);
+    public static final ModelTemplate CANDLE = ModelTemplates.create("template_candle", TextureSlot.ALL, TextureSlot.PARTICLE);
+    public static final ModelTemplate TWO_CANDLES = ModelTemplates.create("template_two_candles", TextureSlot.ALL, TextureSlot.PARTICLE);
+    public static final ModelTemplate THREE_CANDLES = ModelTemplates.create("template_three_candles", TextureSlot.ALL, TextureSlot.PARTICLE);
+    public static final ModelTemplate FOUR_CANDLES = ModelTemplates.create("template_four_candles", TextureSlot.ALL, TextureSlot.PARTICLE);
+    public static final ModelTemplate CANDLE_CAKE = ModelTemplates.create("template_cake_with_candle", TextureSlot.CANDLE, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE);
 
     private static ModelTemplate create(TextureSlot ... textureSlots) {
         return new ModelTemplate(Optional.empty(), Optional.empty(), textureSlots);

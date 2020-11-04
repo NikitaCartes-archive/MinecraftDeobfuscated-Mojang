@@ -41,7 +41,7 @@ implements TutorialStepInstance {
             return;
         }
         if (this.timeWaiting == 1 && (localPlayer = this.tutorial.getMinecraft().player) != null) {
-            if (localPlayer.inventory.contains(ItemTags.PLANKS)) {
+            if (localPlayer.getInventory().contains(ItemTags.PLANKS)) {
                 this.tutorial.setStep(TutorialSteps.NONE);
                 return;
             }
@@ -66,8 +66,7 @@ implements TutorialStepInstance {
 
     @Override
     public void onGetItem(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-        if (ItemTags.PLANKS.contains(item)) {
+        if (itemStack.is(ItemTags.PLANKS)) {
             this.tutorial.setStep(TutorialSteps.NONE);
         }
     }

@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public class BlockAgeProcessor
 extends StructureProcessor {
     public static final Codec<BlockAgeProcessor> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("mossiness")).xmap(BlockAgeProcessor::new, blockAgeProcessor -> Float.valueOf(blockAgeProcessor.mossiness)).codec();
+    private static final BlockState[] NON_MOSSY_REPLACEMENTS = new BlockState[]{Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()};
     private final float mossiness;
 
     public BlockAgeProcessor(float f) {
@@ -71,9 +72,8 @@ extends StructureProcessor {
         if (random.nextFloat() >= 0.5f) {
             return null;
         }
-        BlockState[] blockStates = new BlockState[]{Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()};
-        BlockState[] blockStates2 = new BlockState[]{(BlockState)((BlockState)Blocks.MOSSY_STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, direction)).setValue(StairBlock.HALF, half), Blocks.MOSSY_STONE_BRICK_SLAB.defaultBlockState()};
-        return this.getRandomBlock(random, blockStates, blockStates2);
+        BlockState[] blockStates = new BlockState[]{(BlockState)((BlockState)Blocks.MOSSY_STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, direction)).setValue(StairBlock.HALF, half), Blocks.MOSSY_STONE_BRICK_SLAB.defaultBlockState()};
+        return this.getRandomBlock(random, NON_MOSSY_REPLACEMENTS, blockStates);
     }
 
     @Nullable

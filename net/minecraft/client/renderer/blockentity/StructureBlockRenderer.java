@@ -11,8 +11,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -22,9 +22,8 @@ import net.minecraft.world.level.block.state.properties.StructureMode;
 
 @Environment(value=EnvType.CLIENT)
 public class StructureBlockRenderer
-extends BlockEntityRenderer<StructureBlockEntity> {
-    public StructureBlockRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+implements BlockEntityRenderer<StructureBlockEntity> {
+    public StructureBlockRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override

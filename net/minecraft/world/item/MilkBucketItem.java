@@ -30,7 +30,7 @@ extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, itemStack);
             serverPlayer.awardStat(Stats.ITEM_USED.get(this));
         }
-        if (livingEntity instanceof Player && !((Player)livingEntity).abilities.instabuild) {
+        if (livingEntity instanceof Player && !((Player)livingEntity).getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         if (!level.isClientSide) {
@@ -54,7 +54,7 @@ extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-        return ItemUtils.useDrink(level, player, interactionHand);
+        return ItemUtils.startUsingInstantly(level, player, interactionHand);
     }
 }
 

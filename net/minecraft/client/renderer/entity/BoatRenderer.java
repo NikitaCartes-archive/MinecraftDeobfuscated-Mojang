@@ -3,17 +3,22 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import java.util.Map;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -22,12 +27,12 @@ import net.minecraft.world.entity.vehicle.Boat;
 @Environment(value=EnvType.CLIENT)
 public class BoatRenderer
 extends EntityRenderer<Boat> {
-    private static final ResourceLocation[] BOAT_TEXTURE_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/boat/oak.png"), new ResourceLocation("textures/entity/boat/spruce.png"), new ResourceLocation("textures/entity/boat/birch.png"), new ResourceLocation("textures/entity/boat/jungle.png"), new ResourceLocation("textures/entity/boat/acacia.png"), new ResourceLocation("textures/entity/boat/dark_oak.png")};
-    protected final BoatModel model = new BoatModel();
+    private final Map<Boat.Type, Pair<ResourceLocation, BoatModel>> boatResources;
 
-    public BoatRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public BoatRenderer(EntityRendererProvider.Context context) {
+        super(context);
         this.shadowRadius = 0.8f;
+        this.boatResources = Stream.of(Boat.Type.values()).collect(ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation("textures/entity/boat/" + type.getName() + ".png"), new BoatModel(context.getLayer(ModelLayers.createBoatModelName(type))))));
     }
 
     @Override
@@ -47,14 +52,17 @@ extends EntityRenderer<Boat> {
         if (!Mth.equal(k = boat.getBubbleAngle(g), 0.0f)) {
             poseStack.mulPose(new Quaternion(new Vector3f(1.0f, 0.0f, 1.0f), boat.getBubbleAngle(g), true));
         }
+        Pair<ResourceLocation, BoatModel> pair = this.boatResources.get((Object)boat.getBoatType());
+        ResourceLocation resourceLocation = pair.getFirst();
+        BoatModel boatModel = pair.getSecond();
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-        this.model.setupAnim(boat, g, 0.0f, -0.1f, 0.0f, 0.0f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(boat)));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        boatModel.setupAnim(boat, g, 0.0f, -0.1f, 0.0f, 0.0f);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(boatModel.renderType(resourceLocation));
+        boatModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         if (!boat.isUnderWater()) {
             VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
-            this.model.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
+            boatModel.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
         }
         poseStack.popPose();
         super.render(boat, f, g, poseStack, multiBufferSource, i);
@@ -62,7 +70,7 @@ extends EntityRenderer<Boat> {
 
     @Override
     public ResourceLocation getTextureLocation(Boat boat) {
-        return BOAT_TEXTURE_LOCATIONS[boat.getBoatType().ordinal()];
+        return this.boatResources.get((Object)boat.getBoatType()).getFirst();
     }
 }
 

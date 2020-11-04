@@ -5,6 +5,7 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -31,6 +34,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractFurnaceBlock
 extends BaseEntityBlock {
@@ -73,8 +77,10 @@ extends BaseEntityBlock {
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof AbstractFurnaceBlockEntity) {
-            Containers.dropContents(level, blockPos, (Container)((AbstractFurnaceBlockEntity)blockEntity));
-            ((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience(level, Vec3.atCenterOf(blockPos));
+            if (level instanceof ServerLevel) {
+                Containers.dropContents(level, blockPos, (Container)((AbstractFurnaceBlockEntity)blockEntity));
+                ((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience((ServerLevel)level, Vec3.atCenterOf(blockPos));
+            }
             level.updateNeighbourForOutputSignal(blockPos, this);
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);
@@ -108,6 +114,11 @@ extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, LIT);
+    }
+
+    @Nullable
+    protected static <T extends BlockEntity> BlockEntityTicker<T> createFurnaceTicker(Level level, BlockEntityType<T> blockEntityType, BlockEntityType<? extends AbstractFurnaceBlockEntity> blockEntityType2) {
+        return level.isClientSide ? null : AbstractFurnaceBlock.createTickerHelper(blockEntityType, blockEntityType2, AbstractFurnaceBlockEntity::serverTick);
     }
 }
 

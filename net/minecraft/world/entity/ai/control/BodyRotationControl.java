@@ -53,7 +53,7 @@ public class BodyRotationControl {
     }
 
     private boolean notCarryingMobPassengers() {
-        return this.mob.getPassengers().isEmpty() || !(this.mob.getPassengers().get(0) instanceof Mob);
+        return !(this.mob.getFirstPassenger() instanceof Mob);
     }
 
     private boolean isMoving() {

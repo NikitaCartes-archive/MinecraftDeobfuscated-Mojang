@@ -11,10 +11,12 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GuardianModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -31,12 +33,12 @@ extends MobRenderer<Guardian, GuardianModel> {
     private static final ResourceLocation GUARDIAN_BEAM_LOCATION = new ResourceLocation("textures/entity/guardian_beam.png");
     private static final RenderType BEAM_RENDER_TYPE = RenderType.entityCutoutNoCull(GUARDIAN_BEAM_LOCATION);
 
-    public GuardianRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        this(entityRenderDispatcher, 0.5f);
+    public GuardianRenderer(EntityRendererProvider.Context context) {
+        this(context, 0.5f, ModelLayers.GUARDIAN);
     }
 
-    protected GuardianRenderer(EntityRenderDispatcher entityRenderDispatcher, float f) {
-        super(entityRenderDispatcher, new GuardianModel(), f);
+    protected GuardianRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
+        super(context, new GuardianModel(context.getLayer(modelLayerLocation)), f);
     }
 
     @Override

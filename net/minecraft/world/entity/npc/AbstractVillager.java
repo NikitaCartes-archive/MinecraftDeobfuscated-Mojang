@@ -21,7 +21,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -42,7 +42,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractVillager
-extends AgableMob
+extends AgeableMob
 implements Npc,
 Merchant {
     private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
@@ -53,7 +53,7 @@ Merchant {
     private final SimpleContainer inventory = new SimpleContainer(8);
 
     public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
-        super((EntityType<? extends AgableMob>)entityType, level);
+        super((EntityType<? extends AgeableMob>)entityType, level);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
@@ -61,7 +61,7 @@ Merchant {
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData(false);
+            spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

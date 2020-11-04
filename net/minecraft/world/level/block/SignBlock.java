@@ -62,15 +62,15 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new SignBlockEntity();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new SignBlockEntity(blockPos, blockState);
     }
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         boolean bl;
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        boolean bl2 = bl = itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild;
+        boolean bl2 = bl = itemStack.getItem() instanceof DyeItem && player.getAbilities().mayBuild;
         if (level.isClientSide) {
             return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
         }

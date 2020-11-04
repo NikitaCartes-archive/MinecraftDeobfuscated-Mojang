@@ -7,12 +7,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ColorableListModel;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ColorableHierarchicalModel;
 import net.minecraft.client.model.TropicalFishModelA;
 import net.minecraft.client.model.TropicalFishModelB;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.TropicalFishPatternLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -21,13 +21,14 @@ import net.minecraft.world.entity.animal.TropicalFish;
 
 @Environment(value=EnvType.CLIENT)
 public class TropicalFishRenderer
-extends MobRenderer<TropicalFish, EntityModel<TropicalFish>> {
-    private final TropicalFishModelA<TropicalFish> modelA = new TropicalFishModelA(0.0f);
-    private final TropicalFishModelB<TropicalFish> modelB = new TropicalFishModelB(0.0f);
+extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
+    private final ColorableHierarchicalModel<TropicalFish> modelA = (ColorableHierarchicalModel)this.getModel();
+    private final ColorableHierarchicalModel<TropicalFish> modelB;
 
-    public TropicalFishRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new TropicalFishModelA(0.0f), 0.15f);
-        this.addLayer(new TropicalFishPatternLayer(this));
+    public TropicalFishRenderer(EntityRendererProvider.Context context) {
+        super(context, new TropicalFishModelA(context.getLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15f);
+        this.modelB = new TropicalFishModelB<TropicalFish>(context.getLayer(ModelLayers.TROPICAL_FISH_LARGE));
+        this.addLayer(new TropicalFishPatternLayer(this, context.getModelSet()));
     }
 
     @Override
@@ -37,12 +38,12 @@ extends MobRenderer<TropicalFish, EntityModel<TropicalFish>> {
 
     @Override
     public void render(TropicalFish tropicalFish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        ColorableListModel colorableListModel;
-        this.model = colorableListModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
+        ColorableHierarchicalModel<TropicalFish> colorableHierarchicalModel;
+        this.model = colorableHierarchicalModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
         float[] fs = tropicalFish.getBaseColor();
-        colorableListModel.setColor(fs[0], fs[1], fs[2]);
+        colorableHierarchicalModel.setColor(fs[0], fs[1], fs[2]);
         super.render(tropicalFish, f, g, poseStack, multiBufferSource, i);
-        colorableListModel.setColor(1.0f, 1.0f, 1.0f);
+        colorableHierarchicalModel.setColor(1.0f, 1.0f, 1.0f);
     }
 
     @Override

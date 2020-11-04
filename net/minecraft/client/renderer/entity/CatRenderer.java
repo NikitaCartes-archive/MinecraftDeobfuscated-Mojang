@@ -9,7 +9,8 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CatCollarLayer;
 import net.minecraft.core.BlockPos;
@@ -22,9 +23,9 @@ import net.minecraft.world.phys.AABB;
 @Environment(value=EnvType.CLIENT)
 public class CatRenderer
 extends MobRenderer<Cat, CatModel<Cat>> {
-    public CatRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new CatModel(0.0f), 0.4f);
-        this.addLayer(new CatCollarLayer(this));
+    public CatRenderer(EntityRendererProvider.Context context) {
+        super(context, new CatModel(context.getLayer(ModelLayers.CAT)), 0.4f);
+        this.addLayer(new CatCollarLayer(this, context.getModelSet()));
     }
 
     @Override

@@ -29,7 +29,7 @@ implements ArgumentType<MobEffect> {
         return new MobEffectArgument();
     }
 
-    public static MobEffect getEffect(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+    public static MobEffect getEffect(CommandContext<CommandSourceStack> commandContext, String string) {
         return commandContext.getArgument(string, MobEffect.class);
     }
 

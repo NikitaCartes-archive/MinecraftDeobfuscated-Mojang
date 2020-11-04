@@ -3,16 +3,12 @@
  */
 package net.minecraft.nbt;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
-import it.unimi.dsi.fastutil.bytes.ByteSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.nbt.CollectionTag;
@@ -26,8 +22,7 @@ import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagTypes;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 
 public class ListTag
 extends CollectionTag<Tag> {
@@ -68,7 +63,6 @@ extends CollectionTag<Tag> {
             return this.load(dataInput, i, nbtAccounter);
         }
     };
-    private static final ByteSet INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
     private final List<Tag> list;
     private byte type;
 
@@ -102,14 +96,7 @@ extends CollectionTag<Tag> {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("[");
-        for (int i = 0; i < this.list.size(); ++i) {
-            if (i != 0) {
-                stringBuilder.append(',');
-            }
-            stringBuilder.append(this.list.get(i));
-        }
-        return stringBuilder.append(']').toString();
+        return this.getAsString();
     }
 
     private void updateTypeAfterRemove() {
@@ -273,40 +260,8 @@ extends CollectionTag<Tag> {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        if (this.isEmpty()) {
-            return new TextComponent("[]");
-        }
-        if (INLINE_ELEMENT_TYPES.contains(this.type) && this.size() <= 8) {
-            String string2 = ", ";
-            TextComponent mutableComponent = new TextComponent("[");
-            for (int j = 0; j < this.list.size(); ++j) {
-                if (j != 0) {
-                    mutableComponent.append(", ");
-                }
-                mutableComponent.append(this.list.get(j).getPrettyDisplay());
-            }
-            mutableComponent.append("]");
-            return mutableComponent;
-        }
-        TextComponent mutableComponent2 = new TextComponent("[");
-        if (!string.isEmpty()) {
-            mutableComponent2.append("\n");
-        }
-        String string3 = String.valueOf(',');
-        for (int j = 0; j < this.list.size(); ++j) {
-            TextComponent mutableComponent3 = new TextComponent(Strings.repeat(string, i + 1));
-            mutableComponent3.append(this.list.get(j).getPrettyDisplay(string, i + 1));
-            if (j != this.list.size() - 1) {
-                mutableComponent3.append(string3).append(string.isEmpty() ? " " : "\n");
-            }
-            mutableComponent2.append(mutableComponent3);
-        }
-        if (!string.isEmpty()) {
-            mutableComponent2.append("\n").append(Strings.repeat(string, i));
-        }
-        mutableComponent2.append("]");
-        return mutableComponent2;
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitList(this);
     }
 
     @Override

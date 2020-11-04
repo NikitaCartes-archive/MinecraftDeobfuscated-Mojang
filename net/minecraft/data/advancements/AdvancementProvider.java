@@ -36,7 +36,7 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) throws IOException {
+    public void run(HashCache hashCache) {
         Path path = this.generator.getOutputFolder();
         HashSet set = Sets.newHashSet();
         Consumer<Advancement> consumer = advancement -> {

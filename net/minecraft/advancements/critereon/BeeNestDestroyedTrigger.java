@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class BeeNestDestroyedTrigger
@@ -46,8 +47,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         return null;
     }
 
-    public void trigger(ServerPlayer serverPlayer, Block block, ItemStack itemStack, int i) {
-        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(block, itemStack, i));
+    public void trigger(ServerPlayer serverPlayer, BlockState blockState, ItemStack itemStack, int i) {
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(blockState, itemStack, i));
     }
 
     @Override
@@ -73,8 +74,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(EntityPredicate.Composite.ANY, block, builder.build(), ints);
         }
 
-        public boolean matches(Block block, ItemStack itemStack, int i) {
-            if (this.block != null && block != this.block) {
+        public boolean matches(BlockState blockState, ItemStack itemStack, int i) {
+            if (this.block != null && !blockState.is(this.block)) {
                 return false;
             }
             if (!this.item.matches(itemStack)) {

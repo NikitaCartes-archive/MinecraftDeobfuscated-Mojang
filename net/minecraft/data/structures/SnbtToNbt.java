@@ -4,12 +4,10 @@
 package net.minecraft.data.structures;
 
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -24,10 +22,10 @@ import net.minecraft.Util;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.TagParser;
-import org.apache.commons.io.FileUtils;
+import net.minecraft.nbt.NbtUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 public class SnbtToNbt
 implements DataProvider {
     @Nullable
-    private static final Path dumpSnbtTo = null;
+    private static final Path DUMP_SNBT_TO = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private final DataGenerator generator;
     private final List<Filter> filters = Lists.newArrayList();
@@ -61,11 +59,22 @@ implements DataProvider {
     @Override
     public void run(HashCache hashCache) throws IOException {
         Path path3 = this.generator.getOutputFolder();
-        ArrayList list = Lists.newArrayList();
+        ArrayList<CompletableFuture> list = Lists.newArrayList();
         for (Path path22 : this.generator.getInputFolders()) {
             Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".snbt")).forEach(path2 -> list.add(CompletableFuture.supplyAsync(() -> this.readStructure((Path)path2, this.getName(path22, (Path)path2)), Util.backgroundExecutor())));
         }
-        Util.sequence(list).join().stream().filter(Objects::nonNull).forEach(taskResult -> this.storeStructureIfChanged(hashCache, (TaskResult)taskResult, path3));
+        boolean bl = false;
+        for (CompletableFuture completableFuture : list) {
+            try {
+                this.storeStructureIfChanged(hashCache, (TaskResult)completableFuture.get(), path3);
+            } catch (Exception exception) {
+                LOGGER.error("Failed to process structure", (Throwable)exception);
+                bl = true;
+            }
+        }
+        if (bl) {
+            throw new IllegalStateException("Failed to convert all structures, aborting");
+        }
     }
 
     @Override
@@ -83,33 +92,28 @@ implements DataProvider {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    @Nullable
     private TaskResult readStructure(Path path, String string) {
         try (BufferedReader bufferedReader = Files.newBufferedReader(path);){
             String string2 = IOUtils.toString(bufferedReader);
-            CompoundTag compoundTag = this.applyFilters(string, TagParser.parseTag(string2));
+            CompoundTag compoundTag = this.applyFilters(string, NbtUtils.snbtToStructure(string2));
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
             byte[] bs = byteArrayOutputStream.toByteArray();
             String string3 = SHA1.hashBytes(bs).toString();
-            String string4 = dumpSnbtTo != null ? compoundTag.getPrettyDisplay("    ", 0).getString() + "\n" : null;
+            String string4 = DUMP_SNBT_TO != null ? NbtUtils.structureToSnbt(compoundTag) : null;
             TaskResult taskResult = new TaskResult(string, bs, string4, string3);
             return taskResult;
-        } catch (CommandSyntaxException commandSyntaxException) {
-            LOGGER.error("Couldn't convert {} from SNBT to NBT at {} as it's invalid SNBT", (Object)string, (Object)path, (Object)commandSyntaxException);
-            return null;
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't convert {} from SNBT to NBT at {}", (Object)string, (Object)path, (Object)iOException);
+        } catch (Throwable throwable) {
+            throw new StructureConversionException(path, throwable);
         }
-        return null;
     }
 
     private void storeStructureIfChanged(HashCache hashCache, TaskResult taskResult, Path path) {
         Path path2;
         if (taskResult.snbtPayload != null) {
-            path2 = dumpSnbtTo.resolve(taskResult.name + ".snbt");
+            path2 = DUMP_SNBT_TO.resolve(taskResult.name + ".snbt");
             try {
-                FileUtils.write(path2.toFile(), (CharSequence)taskResult.snbtPayload, StandardCharsets.UTF_8);
+                NbtToSnbt.writeSnbt(path2, taskResult.snbtPayload);
             } catch (IOException iOException) {
                 LOGGER.error("Couldn't write structure SNBT {} at {}", (Object)taskResult.name, (Object)path2, (Object)iOException);
             }
@@ -125,6 +129,13 @@ implements DataProvider {
             hashCache.putNew(path2, taskResult.hash);
         } catch (IOException iOException) {
             LOGGER.error("Couldn't write structure {} at {}", (Object)taskResult.name, (Object)path2, (Object)iOException);
+        }
+    }
+
+    static class StructureConversionException
+    extends RuntimeException {
+        public StructureConversionException(Path path, Throwable throwable) {
+            super(path.toAbsolutePath().toString(), throwable);
         }
     }
 

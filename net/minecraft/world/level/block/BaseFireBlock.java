@@ -46,7 +46,7 @@ extends Block {
     public static BlockState getState(BlockGetter blockGetter, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState = blockGetter.getBlockState(blockPos2);
-        if (SoulFireBlock.canSurviveOnBlock(blockState.getBlock())) {
+        if (SoulFireBlock.canSurviveOnBlock(blockState)) {
             return Blocks.SOUL_FIRE.defaultBlockState();
         }
         return ((FireBlock)Blocks.FIRE).getStateForPlacement(blockGetter, blockPos);
@@ -181,11 +181,7 @@ extends Block {
             bl = true;
             break;
         }
-        if (!bl) {
-            return false;
-        }
-        Direction.Axis axis = direction.getAxis().isHorizontal() ? direction.getCounterClockWise().getAxis() : Direction.Plane.HORIZONTAL.getRandomAxis(level.random);
-        return PortalShape.findEmptyPortalShape(level, blockPos, axis).isPresent();
+        return bl && PortalShape.findEmptyPortalShape(level, blockPos, direction.getCounterClockWise().getAxis()).isPresent();
     }
 }
 

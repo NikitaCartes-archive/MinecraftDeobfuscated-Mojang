@@ -29,7 +29,6 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Inventory
@@ -60,11 +59,7 @@ Nameable {
     }
 
     private boolean hasRemainingSpaceForItem(ItemStack itemStack, ItemStack itemStack2) {
-        return !itemStack.isEmpty() && this.isSameItem(itemStack, itemStack2) && itemStack.isStackable() && itemStack.getCount() < itemStack.getMaxStackSize() && itemStack.getCount() < this.getMaxStackSize();
-    }
-
-    private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
-        return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
+        return !itemStack.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2) && itemStack.isStackable() && itemStack.getCount() < itemStack.getMaxStackSize() && itemStack.getCount() < this.getMaxStackSize();
     }
 
     public int getFreeSlot() {
@@ -108,7 +103,7 @@ Nameable {
     @Environment(value=EnvType.CLIENT)
     public int findSlotMatchingItem(ItemStack itemStack) {
         for (int i = 0; i < this.items.size(); ++i) {
-            if (this.items.get(i).isEmpty() || !this.isSameItem(itemStack, this.items.get(i))) continue;
+            if (this.items.get(i).isEmpty() || !ItemStack.isSameItemSameTags(itemStack, this.items.get(i))) continue;
             return i;
         }
         return -1;
@@ -117,7 +112,7 @@ Nameable {
     public int findSlotMatchingUnusedItem(ItemStack itemStack) {
         for (int i = 0; i < this.items.size(); ++i) {
             ItemStack itemStack2 = this.items.get(i);
-            if (this.items.get(i).isEmpty() || !this.isSameItem(itemStack, this.items.get(i)) || this.items.get(i).isDamaged() || itemStack2.isEnchanted() || itemStack2.hasCustomHoverName()) continue;
+            if (this.items.get(i).isEmpty() || !ItemStack.isSameItemSameTags(itemStack, this.items.get(i)) || this.items.get(i).isDamaged() || itemStack2.isEnchanted() || itemStack2.hasCustomHoverName()) continue;
             return i;
         }
         return -1;
@@ -247,7 +242,7 @@ Nameable {
                     }
                     itemStack.setCount(this.addResource(i, itemStack));
                 } while (!itemStack.isEmpty() && itemStack.getCount() < j);
-                if (itemStack.getCount() == j && this.player.abilities.instabuild) {
+                if (itemStack.getCount() == j && this.player.getAbilities().instabuild) {
                     itemStack.setCount(0);
                     return true;
                 }
@@ -262,7 +257,7 @@ Nameable {
                 itemStack.setCount(0);
                 return true;
             }
-            if (this.player.abilities.instabuild) {
+            if (this.player.getAbilities().instabuild) {
                 itemStack.setCount(0);
                 return true;
             }
@@ -277,10 +272,7 @@ Nameable {
         }
     }
 
-    public void placeItemBackInInventory(Level level, ItemStack itemStack) {
-        if (level.isClientSide) {
-            return;
-        }
+    public void placeItemBackInInventory(ItemStack itemStack) {
         while (!itemStack.isEmpty()) {
             int i = this.getSlotWithRemainingSpace(itemStack);
             if (i == -1) {
@@ -291,7 +283,7 @@ Nameable {
                 break;
             }
             int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
-            if (!this.add(i, itemStack.split(j))) continue;
+            if (!this.add(i, itemStack.split(j)) || !(this.player instanceof ServerPlayer)) continue;
             ((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
         }
     }
@@ -499,7 +491,7 @@ Nameable {
 
     @Override
     public boolean stillValid(Player player) {
-        if (this.player.removed) {
+        if (this.player.isRemoved()) {
             return false;
         }
         return !(player.distanceToSqr(this.player) > 64.0);
@@ -519,7 +511,7 @@ Nameable {
     public boolean contains(Tag<Item> tag) {
         for (List list : this.compartments) {
             for (ItemStack itemStack : list) {
-                if (itemStack.isEmpty() || !tag.contains(itemStack.getItem())) continue;
+                if (itemStack.isEmpty() || !itemStack.is(tag)) continue;
                 return true;
             }
         }

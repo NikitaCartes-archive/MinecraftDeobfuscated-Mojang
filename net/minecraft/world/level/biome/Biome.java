@@ -151,7 +151,7 @@ public final class Biome {
         if (this.getTemperature(blockPos) >= 0.15f) {
             return false;
         }
-        if (blockPos.getY() >= 0 && blockPos.getY() < 256 && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
+        if (blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
             BlockState blockState = levelReader.getBlockState(blockPos);
             FluidState fluidState = levelReader.getFluidState(blockPos);
             if (fluidState.getType() == Fluids.WATER && blockState.getBlock() instanceof LiquidBlock) {
@@ -173,7 +173,7 @@ public final class Biome {
         if (this.getTemperature(blockPos) >= 0.15f) {
             return false;
         }
-        return blockPos.getY() >= 0 && blockPos.getY() < 256 && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10 && (blockState = levelReader.getBlockState(blockPos)).isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos);
+        return blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10 && (blockState = levelReader.getBlockState(blockPos)).isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos);
     }
 
     public BiomeGenerationSettings getGenerationSettings() {
@@ -189,12 +189,12 @@ public final class Biome {
                 List list2 = this.structuresByStep.getOrDefault(j, Collections.emptyList());
                 for (StructureFeature structureFeature : list2) {
                     worldgenRandom.setFeatureSeed(l, k, j);
-                    int m = blockPos.getX() >> 4;
-                    int n = blockPos.getZ() >> 4;
-                    int o = m << 4;
-                    int p = n << 4;
+                    int m = SectionPos.blockToSectionCoord(blockPos.getX());
+                    int n = SectionPos.blockToSectionCoord(blockPos.getZ());
+                    int o = SectionPos.sectionToBlockCoord(m);
+                    int p = SectionPos.sectionToBlockCoord(n);
                     try {
-                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, p, o + 15, p + 15), new ChunkPos(m, n)));
+                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, worldGenRegion.getMinBuildHeight() + 1, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15), new ChunkPos(m, n)));
                     } catch (Exception exception) {
                         CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                         crashReport.addCategory("Feature").setDetail("Id", Registry.STRUCTURE_FEATURE.getKey(structureFeature)).setDetail("Description", () -> structureFeature.toString());

@@ -217,7 +217,7 @@ extends HangingEntity {
         }
         if (entity instanceof Player) {
             Player player = (Player)entity;
-            if (player.abilities.instabuild) {
+            if (player.getAbilities().instabuild) {
                 this.removeFramedMap(itemStack);
                 return;
             }
@@ -235,7 +235,7 @@ extends HangingEntity {
     }
 
     private void removeFramedMap(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.FILLED_MAP) {
+        if (itemStack.is(Items.FILLED_MAP)) {
             MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.level);
             mapItemSavedData.removedFromFrame(this.pos, this.getId());
             mapItemSavedData.setDirty(true);
@@ -348,9 +348,9 @@ extends HangingEntity {
             return bl || bl2 ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
         if (!bl) {
-            if (bl2 && !this.removed) {
+            if (bl2 && !this.isRemoved()) {
                 this.setItem(itemStack);
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
             }
@@ -371,6 +371,23 @@ extends HangingEntity {
     @Override
     public Packet<?> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this, this.getType(), this.direction.get3DDataValue(), this.getPos());
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        this.setDirection(Direction.from3DDataValue(clientboundAddEntityPacket.getData()));
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        ItemStack itemStack = this.getItem();
+        if (itemStack.isEmpty()) {
+            return new ItemStack(Items.ITEM_FRAME);
+        }
+        return itemStack.copy();
     }
 }
 

@@ -56,8 +56,8 @@ implements BonemealableBlock {
 
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-        Block block = levelReader.getBlockState(blockPos.relative(blockState.getValue(FACING))).getBlock();
-        return block.is(BlockTags.JUNGLE_LOGS);
+        BlockState blockState2 = levelReader.getBlockState(blockPos.relative(blockState.getValue(FACING)));
+        return blockState2.is(BlockTags.JUNGLE_LOGS);
     }
 
     @Override

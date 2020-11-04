@@ -77,5 +77,9 @@ public class AnimationUtils {
         modelPart.xRot += h * 1.2f - i * 0.4f;
         AnimationUtils.bobArms(modelPart2, modelPart, g);
     }
+
+    public static float getSpyglassArmXRot(ModelPart modelPart) {
+        return modelPart.xRot * 0.95f - 2.277655f;
+    }
 }
 

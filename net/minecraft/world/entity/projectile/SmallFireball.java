@@ -69,7 +69,7 @@ extends Fireball {
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
-            this.remove();
+            this.discard();
         }
     }
 

@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +21,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -37,7 +37,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -52,15 +53,15 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -83,10 +84,9 @@ AutoCloseable {
     public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
     public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
     private static final Direction[] DIRECTIONS = Direction.values();
-    public final List<BlockEntity> blockEntityList = Lists.newArrayList();
-    public final List<BlockEntity> tickableBlockEntities = Lists.newArrayList();
-    protected final List<BlockEntity> pendingBlockEntities = Lists.newArrayList();
-    protected final List<BlockEntity> blockEntitiesToUnload = Lists.newArrayList();
+    protected final List<TickingBlockEntity> blockEntityTickers = Lists.newArrayList();
+    private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.newArrayList();
+    private boolean tickingBlockEntities;
     private final Thread thread;
     private final boolean isDebug;
     private int skyDarken;
@@ -101,7 +101,6 @@ AutoCloseable {
     protected final WritableLevelData levelData;
     private final Supplier<ProfilerFiller> profiler;
     public final boolean isClientSide;
-    protected boolean updatingBlockEntities;
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
     private final ResourceKey<Level> dimension;
@@ -139,8 +138,8 @@ AutoCloseable {
         return null;
     }
 
-    public static boolean isInWorldBounds(BlockPos blockPos) {
-        return !Level.isOutsideBuildHeight(blockPos) && Level.isInWorldBoundsHorizontal(blockPos);
+    public boolean isInWorldBounds(BlockPos blockPos) {
+        return !this.isOutsideBuildHeight(blockPos) && Level.isInWorldBoundsHorizontal(blockPos);
     }
 
     public static boolean isInSpawnableBounds(BlockPos blockPos) {
@@ -155,16 +154,8 @@ AutoCloseable {
         return i < -20000000 || i >= 20000000;
     }
 
-    public static boolean isOutsideBuildHeight(BlockPos blockPos) {
-        return Level.isOutsideBuildHeight(blockPos.getY());
-    }
-
-    public static boolean isOutsideBuildHeight(int i) {
-        return i < 0 || i >= 256;
-    }
-
     public LevelChunk getChunkAt(BlockPos blockPos) {
-        return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     @Override
@@ -188,7 +179,7 @@ AutoCloseable {
 
     @Override
     public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return false;
         }
         if (!this.isClientSide && this.isDebug()) {
@@ -250,10 +241,13 @@ AutoCloseable {
             this.levelEvent(2001, blockPos, Block.getId(blockState));
         }
         if (bl) {
-            BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
+            BlockEntity blockEntity = blockState.hasBlockEntity() ? this.getBlockEntity(blockPos) : null;
             Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
         }
         return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
+    }
+
+    public void addDestroyBlockEffect(BlockPos blockPos, BlockState blockState) {
     }
 
     public boolean setBlockAndUpdate(BlockPos blockPos, BlockState blockState) {
@@ -312,14 +306,14 @@ AutoCloseable {
                     return "ID #" + Registry.BLOCK.getKey(block);
                 }
             });
-            CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
+            CrashReportCategory.populateBlockDetails(crashReportCategory, this, blockPos, blockState);
             throw new ReportedException(crashReport);
         }
     }
 
     @Override
     public int getHeight(Heightmap.Types types, int i, int j) {
-        int k = i < -30000000 || j < -30000000 || i >= 30000000 || j >= 30000000 ? this.getSeaLevel() + 1 : (this.hasChunk(i >> 4, j >> 4) ? this.getChunk(i >> 4, j >> 4).getHeight(types, i & 0xF, j & 0xF) + 1 : 0);
+        int k = i < -30000000 || j < -30000000 || i >= 30000000 || j >= 30000000 ? this.getSeaLevel() + 1 : (this.hasChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j)) ? this.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j)).getHeight(types, i & 0xF, j & 0xF) + 1 : this.getMinBuildHeight());
         return k;
     }
 
@@ -330,16 +324,16 @@ AutoCloseable {
 
     @Override
     public BlockState getBlockState(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return Blocks.VOID_AIR.defaultBlockState();
         }
-        LevelChunk levelChunk = this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        LevelChunk levelChunk = this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
         return levelChunk.getBlockState(blockPos);
     }
 
     @Override
     public FluidState getFluidState(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return Fluids.EMPTY.defaultFluidState();
         }
         LevelChunk levelChunk = this.getChunkAt(blockPos);
@@ -385,93 +379,32 @@ AutoCloseable {
         return g * ((float)Math.PI * 2);
     }
 
-    public boolean addBlockEntity(BlockEntity blockEntity) {
-        boolean bl;
-        if (this.updatingBlockEntities) {
-            org.apache.logging.log4j.util.Supplier[] supplierArray = new org.apache.logging.log4j.util.Supplier[2];
-            supplierArray[0] = () -> Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
-            supplierArray[1] = blockEntity::getBlockPos;
-            LOGGER.error("Adding block entity while ticking: {} @ {}", supplierArray);
-        }
-        if ((bl = this.blockEntityList.add(blockEntity)) && blockEntity instanceof TickableBlockEntity) {
-            this.tickableBlockEntities.add(blockEntity);
-        }
-        if (this.isClientSide) {
-            BlockPos blockPos = blockEntity.getBlockPos();
-            BlockState blockState = this.getBlockState(blockPos);
-            this.sendBlockUpdated(blockPos, blockState, blockState, 2);
-        }
-        return bl;
+    public void addBlockEntityTicker(TickingBlockEntity tickingBlockEntity) {
+        (this.tickingBlockEntities ? this.pendingBlockEntityTickers : this.blockEntityTickers).add(tickingBlockEntity);
     }
 
-    public void addAllPendingBlockEntities(Collection<BlockEntity> collection) {
-        if (this.updatingBlockEntities) {
-            this.pendingBlockEntities.addAll(collection);
-        } else {
-            for (BlockEntity blockEntity : collection) {
-                this.addBlockEntity(blockEntity);
-            }
-        }
-    }
-
-    public void tickBlockEntities() {
+    protected void tickBlockEntities() {
         ProfilerFiller profilerFiller = this.getProfiler();
         profilerFiller.push("blockEntities");
-        if (!this.blockEntitiesToUnload.isEmpty()) {
-            this.tickableBlockEntities.removeAll(this.blockEntitiesToUnload);
-            this.blockEntityList.removeAll(this.blockEntitiesToUnload);
-            this.blockEntitiesToUnload.clear();
+        this.tickingBlockEntities = true;
+        if (!this.pendingBlockEntityTickers.isEmpty()) {
+            this.blockEntityTickers.addAll(this.pendingBlockEntityTickers);
+            this.pendingBlockEntityTickers.clear();
         }
-        this.updatingBlockEntities = true;
-        Iterator<BlockEntity> iterator = this.tickableBlockEntities.iterator();
+        Iterator<TickingBlockEntity> iterator = this.blockEntityTickers.iterator();
         while (iterator.hasNext()) {
-            BlockEntity blockEntity = iterator.next();
-            if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
-                BlockPos blockPos = blockEntity.getBlockPos();
-                if (this.getChunkSource().isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
-                    try {
-                        profilerFiller.push(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType())));
-                        if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
-                            ((TickableBlockEntity)((Object)blockEntity)).tick();
-                        } else {
-                            blockEntity.logInvalidState();
-                        }
-                        profilerFiller.pop();
-                    } catch (Throwable throwable) {
-                        CrashReport crashReport = CrashReport.forThrowable(throwable, "Ticking block entity");
-                        CrashReportCategory crashReportCategory = crashReport.addCategory("Block entity being ticked");
-                        blockEntity.fillCrashReportCategory(crashReportCategory);
-                        throw new ReportedException(crashReport);
-                    }
-                }
+            TickingBlockEntity tickingBlockEntity = iterator.next();
+            if (tickingBlockEntity.isRemoved()) {
+                iterator.remove();
+                continue;
             }
-            if (!blockEntity.isRemoved()) continue;
-            iterator.remove();
-            this.blockEntityList.remove(blockEntity);
-            if (!this.hasChunkAt(blockEntity.getBlockPos())) continue;
-            this.getChunkAt(blockEntity.getBlockPos()).removeBlockEntity(blockEntity.getBlockPos());
+            tickingBlockEntity.tick();
         }
-        this.updatingBlockEntities = false;
-        profilerFiller.popPush("pendingBlockEntities");
-        if (!this.pendingBlockEntities.isEmpty()) {
-            for (int i = 0; i < this.pendingBlockEntities.size(); ++i) {
-                BlockEntity blockEntity2 = this.pendingBlockEntities.get(i);
-                if (blockEntity2.isRemoved()) continue;
-                if (!this.blockEntityList.contains(blockEntity2)) {
-                    this.addBlockEntity(blockEntity2);
-                }
-                if (!this.hasChunkAt(blockEntity2.getBlockPos())) continue;
-                LevelChunk levelChunk = this.getChunkAt(blockEntity2.getBlockPos());
-                BlockState blockState = levelChunk.getBlockState(blockEntity2.getBlockPos());
-                levelChunk.setBlockEntity(blockEntity2.getBlockPos(), blockEntity2);
-                this.sendBlockUpdated(blockEntity2.getBlockPos(), blockState, blockState, 3);
-            }
-            this.pendingBlockEntities.clear();
-        }
+        this.tickingBlockEntities = false;
         profilerFiller.pop();
     }
 
-    public void guardEntityTick(Consumer<Entity> consumer, Entity entity) {
+    public <T extends Entity> void guardEntityTick(Consumer<T> consumer, T entity) {
         try {
             consumer.accept(entity);
         } catch (Throwable throwable) {
@@ -497,91 +430,45 @@ AutoCloseable {
         return explosion;
     }
 
-    public String gatherChunkSourceStats() {
-        return this.getChunkSource().gatherStats();
-    }
-
     @Override
     @Nullable
     public BlockEntity getBlockEntity(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return null;
         }
         if (!this.isClientSide && Thread.currentThread() != this.thread) {
             return null;
         }
-        BlockEntity blockEntity = null;
-        if (this.updatingBlockEntities) {
-            blockEntity = this.getPendingBlockEntityAt(blockPos);
-        }
-        if (blockEntity == null) {
-            blockEntity = this.getChunkAt(blockPos).getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
-        }
-        if (blockEntity == null) {
-            blockEntity = this.getPendingBlockEntityAt(blockPos);
-        }
-        return blockEntity;
+        return this.getChunkAt(blockPos).getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
     }
 
-    @Nullable
-    private BlockEntity getPendingBlockEntityAt(BlockPos blockPos) {
-        for (int i = 0; i < this.pendingBlockEntities.size(); ++i) {
-            BlockEntity blockEntity = this.pendingBlockEntities.get(i);
-            if (blockEntity.isRemoved() || !blockEntity.getBlockPos().equals(blockPos)) continue;
-            return blockEntity;
-        }
-        return null;
-    }
-
-    public void setBlockEntity(BlockPos blockPos, @Nullable BlockEntity blockEntity) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+    public void setBlockEntity(BlockEntity blockEntity) {
+        BlockPos blockPos = blockEntity.getBlockPos();
+        if (this.isOutsideBuildHeight(blockPos)) {
             return;
         }
-        if (blockEntity != null && !blockEntity.isRemoved()) {
-            if (this.updatingBlockEntities) {
-                blockEntity.setLevelAndPosition(this, blockPos);
-                Iterator<BlockEntity> iterator = this.pendingBlockEntities.iterator();
-                while (iterator.hasNext()) {
-                    BlockEntity blockEntity2 = iterator.next();
-                    if (!blockEntity2.getBlockPos().equals(blockPos)) continue;
-                    blockEntity2.setRemoved();
-                    iterator.remove();
-                }
-                this.pendingBlockEntities.add(blockEntity);
-            } else {
-                this.getChunkAt(blockPos).setBlockEntity(blockPos, blockEntity);
-                this.addBlockEntity(blockEntity);
-            }
-        }
+        this.getChunkAt(blockPos).addAndRegisterBlockEntity(blockEntity);
     }
 
     public void removeBlockEntity(BlockPos blockPos) {
-        BlockEntity blockEntity = this.getBlockEntity(blockPos);
-        if (blockEntity != null && this.updatingBlockEntities) {
-            blockEntity.setRemoved();
-            this.pendingBlockEntities.remove(blockEntity);
-        } else {
-            if (blockEntity != null) {
-                this.pendingBlockEntities.remove(blockEntity);
-                this.blockEntityList.remove(blockEntity);
-                this.tickableBlockEntities.remove(blockEntity);
-            }
-            this.getChunkAt(blockPos).removeBlockEntity(blockPos);
+        if (this.isOutsideBuildHeight(blockPos)) {
+            return;
         }
+        this.getChunkAt(blockPos).removeBlockEntity(blockPos);
     }
 
     public boolean isLoaded(BlockPos blockPos) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return false;
         }
-        return this.getChunkSource().hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.getChunkSource().hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
-        if (Level.isOutsideBuildHeight(blockPos)) {
+        if (this.isOutsideBuildHeight(blockPos)) {
             return false;
         }
-        ChunkAccess chunkAccess = this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
+        ChunkAccess chunkAccess = this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()), ChunkStatus.FULL, false);
         if (chunkAccess == null) {
             return false;
         }
@@ -624,83 +511,46 @@ AutoCloseable {
     }
 
     @Override
-    public List<Entity> getEntities(@Nullable Entity entity, AABB aABB, @Nullable Predicate<? super Entity> predicate) {
+    public List<Entity> getEntities(@Nullable Entity entity, AABB aABB, Predicate<? super Entity> predicate) {
         this.getProfiler().incrementCounter("getEntities");
         ArrayList<Entity> list = Lists.newArrayList();
-        int i = Mth.floor((aABB.minX - 2.0) / 16.0);
-        int j = Mth.floor((aABB.maxX + 2.0) / 16.0);
-        int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
-        int l = Mth.floor((aABB.maxZ + 2.0) / 16.0);
-        ChunkSource chunkSource = this.getChunkSource();
-        for (int m = i; m <= j; ++m) {
-            for (int n = k; n <= l; ++n) {
-                LevelChunk levelChunk = chunkSource.getChunk(m, n, false);
-                if (levelChunk == null) continue;
-                levelChunk.getEntities(entity, aABB, list, predicate);
+        this.getEntities().get(aABB, entity2 -> {
+            if (entity2 != entity && predicate.test((Entity)entity2)) {
+                list.add((Entity)entity2);
             }
-        }
-        return list;
-    }
-
-    public <T extends Entity> List<T> getEntities(@Nullable EntityType<T> entityType, AABB aABB, Predicate<? super T> predicate) {
-        this.getProfiler().incrementCounter("getEntities");
-        int i = Mth.floor((aABB.minX - 2.0) / 16.0);
-        int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
-        int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
-        int l = Mth.ceil((aABB.maxZ + 2.0) / 16.0);
-        ArrayList list = Lists.newArrayList();
-        for (int m = i; m < j; ++m) {
-            for (int n = k; n < l; ++n) {
-                LevelChunk levelChunk = this.getChunkSource().getChunk(m, n, false);
-                if (levelChunk == null) continue;
-                levelChunk.getEntities(entityType, aABB, list, predicate);
+            if (entity2 instanceof EnderDragon) {
+                for (EnderDragonPart enderDragonPart : ((EnderDragon)entity2).getSubEntities()) {
+                    if (entity2 == entity || !predicate.test(enderDragonPart)) continue;
+                    list.add(enderDragonPart);
+                }
             }
-        }
+        });
         return list;
     }
 
     @Override
-    public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+    public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
         this.getProfiler().incrementCounter("getEntities");
-        int i = Mth.floor((aABB.minX - 2.0) / 16.0);
-        int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
-        int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
-        int l = Mth.ceil((aABB.maxZ + 2.0) / 16.0);
         ArrayList list = Lists.newArrayList();
-        ChunkSource chunkSource = this.getChunkSource();
-        for (int m = i; m < j; ++m) {
-            for (int n = k; n < l; ++n) {
-                LevelChunk levelChunk = chunkSource.getChunk(m, n, false);
-                if (levelChunk == null) continue;
-                levelChunk.getEntitiesOfClass(class_, aABB, list, predicate);
+        this.getEntities().get(entityTypeTest, aABB, entity -> {
+            if (predicate.test(entity)) {
+                list.add(entity);
             }
-        }
-        return list;
-    }
-
-    @Override
-    public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
-        this.getProfiler().incrementCounter("getLoadedEntities");
-        int i = Mth.floor((aABB.minX - 2.0) / 16.0);
-        int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
-        int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
-        int l = Mth.ceil((aABB.maxZ + 2.0) / 16.0);
-        ArrayList list = Lists.newArrayList();
-        ChunkSource chunkSource = this.getChunkSource();
-        for (int m = i; m < j; ++m) {
-            for (int n = k; n < l; ++n) {
-                LevelChunk levelChunk = chunkSource.getChunkNow(m, n);
-                if (levelChunk == null) continue;
-                levelChunk.getEntitiesOfClass(class_, aABB, list, predicate);
+            if (entity instanceof EnderDragon) {
+                for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
+                    Entity entity2 = (Entity)entityTypeTest.tryCast(enderDragonPart);
+                    if (entity2 == null || !predicate.test(entity2)) continue;
+                    list.add(entity2);
+                }
             }
-        }
+        });
         return list;
     }
 
     @Nullable
     public abstract Entity getEntity(int var1);
 
-    public void blockEntityChanged(BlockPos blockPos, BlockEntity blockEntity) {
+    public void blockEntityChanged(BlockPos blockPos) {
         if (this.hasChunkAt(blockPos)) {
             this.getChunkAt(blockPos).markUnsaved();
         }
@@ -877,7 +727,7 @@ AutoCloseable {
         crashReportCategory.setDetail("Chunk stats", this.getChunkSource()::gatherStats);
         crashReportCategory.setDetail("Level dimension", () -> this.dimension().location().toString());
         try {
-            this.levelData.fillCrashReportCategory(crashReportCategory);
+            this.levelData.fillCrashReportCategory(crashReportCategory, this);
         } catch (Throwable throwable) {
             crashReportCategory.setDetailError("Level Data Unobtainable", throwable);
         }
@@ -983,6 +833,18 @@ AutoCloseable {
     public final boolean isDebug() {
         return this.isDebug;
     }
+
+    @Override
+    public int getSectionsCount() {
+        return 16;
+    }
+
+    @Override
+    public int getMinSection() {
+        return 0;
+    }
+
+    protected abstract LevelEntityGetter<Entity> getEntities();
 
     @Override
     public /* synthetic */ ChunkAccess getChunk(int i, int j) {

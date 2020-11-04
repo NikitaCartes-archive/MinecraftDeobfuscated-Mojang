@@ -9,8 +9,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -49,10 +49,10 @@ extends PathNavigation {
         BlockPos blockPos2;
         if (this.level.getBlockState(blockPos).isAir()) {
             blockPos2 = blockPos.below();
-            while (blockPos2.getY() > 0 && this.level.getBlockState(blockPos2).isAir()) {
+            while (blockPos2.getY() > this.level.getMinBuildHeight() && this.level.getBlockState(blockPos2).isAir()) {
                 blockPos2 = blockPos2.below();
             }
-            if (blockPos2.getY() > 0) {
+            if (blockPos2.getY() > this.level.getMinBuildHeight()) {
                 return super.createPath(blockPos2.above(), i);
             }
             while (blockPos2.getY() < this.level.getMaxBuildHeight() && this.level.getBlockState(blockPos2).isAir()) {
@@ -79,13 +79,13 @@ extends PathNavigation {
         if (!this.mob.isInWater() || !this.canFloat()) {
             return Mth.floor(this.mob.getY() + 0.5);
         }
-        int i = Mth.floor(this.mob.getY());
-        Block block = this.level.getBlockState(new BlockPos(this.mob.getX(), (double)i, this.mob.getZ())).getBlock();
+        int i = this.mob.getBlockY();
+        BlockState blockState = this.level.getBlockState(new BlockPos(this.mob.getX(), (double)i, this.mob.getZ()));
         int j = 0;
-        while (block == Blocks.WATER) {
-            block = this.level.getBlockState(new BlockPos(this.mob.getX(), (double)(++i), this.mob.getZ())).getBlock();
+        while (blockState.is(Blocks.WATER)) {
+            blockState = this.level.getBlockState(new BlockPos(this.mob.getX(), (double)(++i), this.mob.getZ()));
             if (++j <= 16) continue;
-            return Mth.floor(this.mob.getY());
+            return this.mob.getBlockY();
         }
         return i;
     }

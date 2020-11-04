@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
 public class StemBlock
 extends BushBlock
@@ -37,10 +36,12 @@ implements BonemealableBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
     protected static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(7.0, 0.0, 7.0, 9.0, 2.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 4.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 6.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 8.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 10.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 12.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)};
     private final StemGrownBlock fruit;
+    private final Supplier<Item> seedSupplier;
 
-    protected StemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
+    protected StemBlock(StemGrownBlock stemGrownBlock, Supplier<Item> supplier, BlockBehaviour.Properties properties) {
         super(properties);
         this.fruit = stemGrownBlock;
+        this.seedSupplier = supplier;
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
     }
 
@@ -77,23 +78,10 @@ implements BonemealableBlock {
         }
     }
 
-    @Nullable
-    @Environment(value=EnvType.CLIENT)
-    protected Item getSeedItem() {
-        if (this.fruit == Blocks.PUMPKIN) {
-            return Items.PUMPKIN_SEEDS;
-        }
-        if (this.fruit == Blocks.MELON) {
-            return Items.MELON_SEEDS;
-        }
-        return null;
-    }
-
     @Override
     @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        Item item = this.getSeedItem();
-        return item == null ? ItemStack.EMPTY : new ItemStack(item);
+        return new ItemStack(this.seedSupplier.get());
     }
 
     @Override

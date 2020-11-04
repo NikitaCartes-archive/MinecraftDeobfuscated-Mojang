@@ -39,7 +39,7 @@ implements ItemSupplier {
     }
 
     public void setItem(ItemStack itemStack2) {
-        if (itemStack2.getItem() != Items.FIRE_CHARGE || itemStack2.hasTag()) {
+        if (!itemStack2.is(Items.FIRE_CHARGE) || itemStack2.hasTag()) {
             this.getEntityData().set(DATA_ITEM_STACK, Util.make(itemStack2.copy(), itemStack -> itemStack.setCount(1)));
         }
     }

@@ -85,7 +85,7 @@ extends ValueObject {
             try {
                 string2 = RealmsUtil.uuidToName(string);
             } catch (Exception exception) {
-                LOGGER.error("Could not get name for " + string, (Throwable)exception);
+                LOGGER.error("Could not get name for {}", (Object)string, (Object)exception);
                 continue;
             }
             list.add(string2);
@@ -121,7 +121,7 @@ extends ValueObject {
             realmsServer.minigameId = JsonUtils.getIntOr("minigameId", jsonObject, -1);
             realmsServer.minigameImage = JsonUtils.getStringOr("minigameImage", jsonObject, null);
         } catch (Exception exception) {
-            LOGGER.error("Could not parse McoServer: " + exception.getMessage());
+            LOGGER.error("Could not parse McoServer: {}", (Object)exception.getMessage());
         }
         return realmsServer;
     }
@@ -178,7 +178,7 @@ extends ValueObject {
         try {
             return RealmsServer.parse(new JsonParser().parse(string).getAsJsonObject());
         } catch (Exception exception) {
-            LOGGER.error("Could not parse McoServer: " + exception.getMessage());
+            LOGGER.error("Could not parse McoServer: {}", (Object)exception.getMessage());
             return new RealmsServer();
         }
     }

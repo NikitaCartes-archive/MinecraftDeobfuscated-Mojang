@@ -44,7 +44,7 @@ implements TutorialStepInstance {
             return;
         }
         if (this.timeWaiting == 1 && (localPlayer = this.tutorial.getMinecraft().player) != null) {
-            if (localPlayer.inventory.contains(ItemTags.LOGS)) {
+            if (localPlayer.getInventory().contains(ItemTags.LOGS)) {
                 this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                 return;
             }
@@ -86,7 +86,7 @@ implements TutorialStepInstance {
 
     @Override
     public void onGetItem(ItemStack itemStack) {
-        if (ItemTags.LOGS.contains(itemStack.getItem())) {
+        if (itemStack.is(ItemTags.LOGS)) {
             this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
             return;
         }

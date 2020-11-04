@@ -33,8 +33,8 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new BannerBlockEntity(this.color);
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new BannerBlockEntity(blockPos, blockState, this.color);
     }
 
     @Override
@@ -50,7 +50,7 @@ extends BaseEntityBlock {
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
         if (blockEntity instanceof BannerBlockEntity) {
-            return ((BannerBlockEntity)blockEntity).getItem(blockState);
+            return ((BannerBlockEntity)blockEntity).getItem();
         }
         return super.getCloneItemStack(blockGetter, blockPos, blockState);
     }

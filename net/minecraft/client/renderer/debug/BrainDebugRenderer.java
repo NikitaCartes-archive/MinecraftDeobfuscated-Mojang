@@ -66,7 +66,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     public void setFreeTicketCount(BlockPos blockPos, int i) {
         PoiInfo poiInfo = this.pois.get(blockPos);
         if (poiInfo == null) {
-            LOGGER.warn("Strange, setFreeTicketCount was called for an unknown POI: " + blockPos);
+            LOGGER.warn("Strange, setFreeTicketCount was called for an unknown POI: {}", (Object)blockPos);
             return;
         }
         poiInfo.freeTicketCount = i;
@@ -95,7 +95,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     private void clearRemovedEntities() {
         this.brainDumpsPerEntity.entrySet().removeIf(entry -> {
             Entity entity = this.minecraft.level.getEntity(((BrainDump)entry.getValue()).id);
-            return entity == null || entity.removed;
+            return entity == null || entity.isRemoved();
         });
     }
 

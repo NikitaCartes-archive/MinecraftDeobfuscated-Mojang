@@ -37,7 +37,7 @@ extends ValueObject {
                 }
             }
         } catch (Exception exception) {
-            LOGGER.error("Could not parse RealmsServerPlayerLists: " + exception.getMessage());
+            LOGGER.error("Could not parse RealmsServerPlayerLists: {}", (Object)exception.getMessage());
         }
         return realmsServerPlayerLists;
     }

@@ -10,8 +10,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
@@ -20,9 +20,8 @@ import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
 public class CampfireRenderer
-extends BlockEntityRenderer<CampfireBlockEntity> {
-    public CampfireRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+implements BlockEntityRenderer<CampfireBlockEntity> {
+    public CampfireRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override

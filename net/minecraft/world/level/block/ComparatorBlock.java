@@ -57,10 +57,18 @@ implements EntityBlock {
     }
 
     private int calculateOutputSignal(Level level, BlockPos blockPos, BlockState blockState) {
-        if (blockState.getValue(MODE) == ComparatorMode.SUBTRACT) {
-            return Math.max(this.getInputSignal(level, blockPos, blockState) - this.getAlternateSignal(level, blockPos, blockState), 0);
+        int i = this.getInputSignal(level, blockPos, blockState);
+        if (i == 0) {
+            return 0;
         }
-        return this.getInputSignal(level, blockPos, blockState);
+        int j = this.getAlternateSignal(level, blockPos, blockState);
+        if (j > i) {
+            return 0;
+        }
+        if (blockState.getValue(MODE) == ComparatorMode.SUBTRACT) {
+            return i - j;
+        }
+        return i;
     }
 
     @Override
@@ -107,7 +115,7 @@ implements EntityBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (!player.abilities.mayBuild) {
+        if (!player.getAbilities().mayBuild) {
             return InteractionResult.PASS;
         }
         float f = (blockState = (BlockState)blockState.cycle(MODE)).getValue(MODE) == ComparatorMode.SUBTRACT ? 0.55f : 0.5f;
@@ -166,8 +174,8 @@ implements EntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new ComparatorBlockEntity();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new ComparatorBlockEntity(blockPos, blockState);
     }
 
     @Override

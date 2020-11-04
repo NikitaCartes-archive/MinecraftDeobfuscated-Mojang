@@ -33,13 +33,13 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeaconBeamBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -47,14 +47,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class BeaconBlockEntity
 extends BlockEntity
-implements MenuProvider,
-TickableBlockEntity {
+implements MenuProvider {
     public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}};
     private static final Set<MobEffect> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
     private List<BeaconBeamSection> beamSections = Lists.newArrayList();
     private List<BeaconBeamSection> checkingBeamSections = Lists.newArrayList();
     private int levels;
-    private int lastCheckY = -1;
+    private int lastCheckY;
     @Nullable
     private MobEffect primaryPower;
     @Nullable
@@ -89,7 +88,7 @@ TickableBlockEntity {
                 }
                 case 1: {
                     if (!BeaconBlockEntity.this.level.isClientSide && !BeaconBlockEntity.this.beamSections.isEmpty()) {
-                        BeaconBlockEntity.this.playSound(SoundEvents.BEACON_POWER_SELECT);
+                        BeaconBlockEntity.playSound(BeaconBlockEntity.this.level, BeaconBlockEntity.this.worldPosition, SoundEvents.BEACON_POWER_SELECT);
                     }
                     BeaconBlockEntity.this.primaryPower = BeaconBlockEntity.getValidEffectById(j);
                     break;
@@ -106,40 +105,38 @@ TickableBlockEntity {
         }
     };
 
-    public BeaconBlockEntity() {
-        super(BlockEntityType.BEACON);
+    public BeaconBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.BEACON, blockPos, blockState);
     }
 
-    @Override
-    public void tick() {
+    public static void tick(Level level, BlockPos blockPos, BlockState blockState, BeaconBlockEntity beaconBlockEntity) {
         int m;
-        BlockPos blockPos;
-        int i = this.worldPosition.getX();
-        int j = this.worldPosition.getY();
-        int k = this.worldPosition.getZ();
-        if (this.lastCheckY < j) {
-            blockPos = this.worldPosition;
-            this.checkingBeamSections = Lists.newArrayList();
-            this.lastCheckY = blockPos.getY() - 1;
+        BlockPos blockPos2;
+        int i = blockPos.getX();
+        int j = blockPos.getY();
+        int k = blockPos.getZ();
+        if (beaconBlockEntity.lastCheckY < j) {
+            blockPos2 = blockPos;
+            beaconBlockEntity.checkingBeamSections = Lists.newArrayList();
+            beaconBlockEntity.lastCheckY = blockPos2.getY() - 1;
         } else {
-            blockPos = new BlockPos(i, this.lastCheckY + 1, k);
+            blockPos2 = new BlockPos(i, beaconBlockEntity.lastCheckY + 1, k);
         }
-        BeaconBeamSection beaconBeamSection = this.checkingBeamSections.isEmpty() ? null : this.checkingBeamSections.get(this.checkingBeamSections.size() - 1);
-        int l = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k);
-        for (m = 0; m < 10 && blockPos.getY() <= l; ++m) {
+        BeaconBeamSection beaconBeamSection = beaconBlockEntity.checkingBeamSections.isEmpty() ? null : beaconBlockEntity.checkingBeamSections.get(beaconBlockEntity.checkingBeamSections.size() - 1);
+        int l = level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k);
+        for (m = 0; m < 10 && blockPos2.getY() <= l; ++m) {
             block18: {
-                Block block;
-                BlockState blockState;
+                BlockState blockState2;
                 block16: {
                     float[] fs;
                     block17: {
-                        blockState = this.level.getBlockState(blockPos);
-                        block = blockState.getBlock();
+                        blockState2 = level.getBlockState(blockPos2);
+                        Block block = blockState2.getBlock();
                         if (!(block instanceof BeaconBeamBlock)) break block16;
                         fs = ((BeaconBeamBlock)((Object)block)).getColor().getTextureDiffuseColors();
-                        if (this.checkingBeamSections.size() > 1) break block17;
+                        if (beaconBlockEntity.checkingBeamSections.size() > 1) break block17;
                         beaconBeamSection = new BeaconBeamSection(fs);
-                        this.checkingBeamSections.add(beaconBeamSection);
+                        beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
                         break block18;
                     }
                     if (beaconBeamSection == null) break block18;
@@ -147,107 +144,104 @@ TickableBlockEntity {
                         beaconBeamSection.increaseHeight();
                     } else {
                         beaconBeamSection = new BeaconBeamSection(new float[]{(beaconBeamSection.color[0] + fs[0]) / 2.0f, (beaconBeamSection.color[1] + fs[1]) / 2.0f, (beaconBeamSection.color[2] + fs[2]) / 2.0f});
-                        this.checkingBeamSections.add(beaconBeamSection);
+                        beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
                     }
                     break block18;
                 }
-                if (beaconBeamSection != null && (blockState.getLightBlock(this.level, blockPos) < 15 || block == Blocks.BEDROCK)) {
+                if (beaconBeamSection != null && (blockState2.getLightBlock(level, blockPos2) < 15 || blockState2.is(Blocks.BEDROCK))) {
                     beaconBeamSection.increaseHeight();
                 } else {
-                    this.checkingBeamSections.clear();
-                    this.lastCheckY = l;
+                    beaconBlockEntity.checkingBeamSections.clear();
+                    beaconBlockEntity.lastCheckY = l;
                     break;
                 }
             }
-            blockPos = blockPos.above();
-            ++this.lastCheckY;
+            blockPos2 = blockPos2.above();
+            ++beaconBlockEntity.lastCheckY;
         }
-        m = this.levels;
-        if (this.level.getGameTime() % 80L == 0L) {
-            if (!this.beamSections.isEmpty()) {
-                this.updateBase(i, j, k);
+        m = beaconBlockEntity.levels;
+        if (level.getGameTime() % 80L == 0L) {
+            if (!beaconBlockEntity.beamSections.isEmpty()) {
+                beaconBlockEntity.levels = BeaconBlockEntity.updateBase(level, i, j, k);
             }
-            if (this.levels > 0 && !this.beamSections.isEmpty()) {
-                this.applyEffects();
-                this.playSound(SoundEvents.BEACON_AMBIENT);
+            if (beaconBlockEntity.levels > 0 && !beaconBlockEntity.beamSections.isEmpty()) {
+                BeaconBlockEntity.applyEffects(level, blockPos, beaconBlockEntity.levels, beaconBlockEntity.primaryPower, beaconBlockEntity.secondaryPower);
+                BeaconBlockEntity.playSound(level, blockPos, SoundEvents.BEACON_AMBIENT);
             }
         }
-        if (this.lastCheckY >= l) {
-            this.lastCheckY = -1;
+        if (beaconBlockEntity.lastCheckY >= l) {
+            beaconBlockEntity.lastCheckY = level.getMinBuildHeight() - 1;
             boolean bl = m > 0;
-            this.beamSections = this.checkingBeamSections;
-            if (!this.level.isClientSide) {
+            beaconBlockEntity.beamSections = beaconBlockEntity.checkingBeamSections;
+            if (!level.isClientSide) {
                 boolean bl2;
-                boolean bl3 = bl2 = this.levels > 0;
+                boolean bl3 = bl2 = beaconBlockEntity.levels > 0;
                 if (!bl && bl2) {
-                    this.playSound(SoundEvents.BEACON_ACTIVATE);
-                    for (ServerPlayer serverPlayer : this.level.getEntitiesOfClass(ServerPlayer.class, new AABB(i, j, k, i, j - 4, k).inflate(10.0, 5.0, 10.0))) {
-                        CriteriaTriggers.CONSTRUCT_BEACON.trigger(serverPlayer, this);
+                    BeaconBlockEntity.playSound(level, blockPos, SoundEvents.BEACON_ACTIVATE);
+                    for (ServerPlayer serverPlayer : level.getEntitiesOfClass(ServerPlayer.class, new AABB(i, j, k, i, j - 4, k).inflate(10.0, 5.0, 10.0))) {
+                        CriteriaTriggers.CONSTRUCT_BEACON.trigger(serverPlayer, beaconBlockEntity.levels);
                     }
                 } else if (bl && !bl2) {
-                    this.playSound(SoundEvents.BEACON_DEACTIVATE);
+                    BeaconBlockEntity.playSound(level, blockPos, SoundEvents.BEACON_DEACTIVATE);
                 }
             }
         }
     }
 
-    private void updateBase(int i, int j, int k) {
-        int m;
-        this.levels = 0;
-        int l = 1;
-        while (l <= 4 && (m = j - l) >= 0) {
+    private static int updateBase(Level level, int i, int j, int k) {
+        int n;
+        int l = 0;
+        int m = 1;
+        while (m <= 4 && (n = j - m) >= level.getMinBuildHeight()) {
             boolean bl = true;
-            block1: for (int n = i - l; n <= i + l && bl; ++n) {
-                for (int o = k - l; o <= k + l; ++o) {
-                    if (this.level.getBlockState(new BlockPos(n, m, o)).is(BlockTags.BEACON_BASE_BLOCKS)) continue;
+            block1: for (int o = i - m; o <= i + m && bl; ++o) {
+                for (int p = k - m; p <= k + m; ++p) {
+                    if (level.getBlockState(new BlockPos(o, n, p)).is(BlockTags.BEACON_BASE_BLOCKS)) continue;
                     bl = false;
                     continue block1;
                 }
             }
             if (!bl) break;
-            this.levels = l++;
+            l = m++;
         }
+        return l;
     }
 
     @Override
     public void setRemoved() {
-        this.playSound(SoundEvents.BEACON_DEACTIVATE);
+        BeaconBlockEntity.playSound(this.level, this.worldPosition, SoundEvents.BEACON_DEACTIVATE);
         super.setRemoved();
     }
 
-    private void applyEffects() {
-        if (this.level.isClientSide || this.primaryPower == null) {
+    private static void applyEffects(Level level, BlockPos blockPos, int i, @Nullable MobEffect mobEffect, @Nullable MobEffect mobEffect2) {
+        if (level.isClientSide || mobEffect == null) {
             return;
         }
-        double d = this.levels * 10 + 10;
-        int i = 0;
-        if (this.levels >= 4 && this.primaryPower == this.secondaryPower) {
-            i = 1;
+        double d = i * 10 + 10;
+        int j = 0;
+        if (i >= 4 && mobEffect == mobEffect2) {
+            j = 1;
         }
-        int j = (9 + this.levels * 2) * 20;
-        AABB aABB = new AABB(this.worldPosition).inflate(d).expandTowards(0.0, this.level.getMaxBuildHeight(), 0.0);
-        List<Player> list = this.level.getEntitiesOfClass(Player.class, aABB);
+        int k = (9 + i * 2) * 20;
+        AABB aABB = new AABB(blockPos).inflate(d).expandTowards(0.0, level.getMaxBuildHeight(), 0.0);
+        List<Player> list = level.getEntitiesOfClass(Player.class, aABB);
         for (Player player : list) {
-            player.addEffect(new MobEffectInstance(this.primaryPower, j, i, true, true));
+            player.addEffect(new MobEffectInstance(mobEffect, k, j, true, true));
         }
-        if (this.levels >= 4 && this.primaryPower != this.secondaryPower && this.secondaryPower != null) {
+        if (i >= 4 && mobEffect != mobEffect2 && mobEffect2 != null) {
             for (Player player : list) {
-                player.addEffect(new MobEffectInstance(this.secondaryPower, j, 0, true, true));
+                player.addEffect(new MobEffectInstance(mobEffect2, k, 0, true, true));
             }
         }
     }
 
-    public void playSound(SoundEvent soundEvent) {
-        this.level.playSound(null, this.worldPosition, soundEvent, SoundSource.BLOCKS, 1.0f, 1.0f);
+    public static void playSound(Level level, BlockPos blockPos, SoundEvent soundEvent) {
+        level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0f, 1.0f);
     }
 
     @Environment(value=EnvType.CLIENT)
     public List<BeaconBeamSection> getBeamSections() {
         return this.levels == 0 ? ImmutableList.of() : this.beamSections;
-    }
-
-    public int getLevels() {
-        return this.levels;
     }
 
     @Override
@@ -274,8 +268,8 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.primaryPower = BeaconBlockEntity.getValidEffectById(compoundTag.getInt("Primary"));
         this.secondaryPower = BeaconBlockEntity.getValidEffectById(compoundTag.getInt("Secondary"));
         if (compoundTag.contains("CustomName", 8)) {
@@ -313,6 +307,12 @@ TickableBlockEntity {
     @Override
     public Component getDisplayName() {
         return this.name != null ? this.name : new TranslatableComponent("container.beacon");
+    }
+
+    @Override
+    public void setLevel(Level level) {
+        super.setLevel(level);
+        this.lastCheckY = level.getMinBuildHeight() - 1;
     }
 
     public static class BeaconBeamSection {

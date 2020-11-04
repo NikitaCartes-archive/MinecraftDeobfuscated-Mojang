@@ -36,6 +36,7 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -93,7 +94,6 @@ extends Entity {
     public Boat(Level level, double d, double e, double f) {
         this((EntityType<? extends Boat>)EntityType.BOAT, level);
         this.setPos(d, e, f);
-        this.setDeltaMovement(Vec3.ZERO);
         this.xo = d;
         this.yo = e;
         this.zo = f;
@@ -155,19 +155,19 @@ extends Entity {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (this.level.isClientSide || this.removed) {
+        if (this.level.isClientSide || this.isRemoved()) {
             return true;
         }
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
         this.setDamage(this.getDamage() + f * 10.0f);
         this.markHurt();
-        boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).abilities.instabuild;
+        boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
         if (bl || this.getDamage() > 40.0f) {
             if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                 this.spawnAtLocation(this.getDropItem());
             }
-            this.remove();
+            this.discard();
         }
         return true;
     }
@@ -230,7 +230,7 @@ extends Entity {
 
     @Override
     public boolean isPickable() {
-        return !this.removed;
+        return !this.isRemoved();
     }
 
     @Override
@@ -266,7 +266,7 @@ extends Entity {
         super.tick();
         this.tickLerp();
         if (this.isControlledByLocalInstance()) {
-            if (this.getPassengers().isEmpty() || !(this.getPassengers().get(0) instanceof Player)) {
+            if (!(this.getFirstPassenger() instanceof Player)) {
                 this.setPaddleState(false, false);
             }
             this.floatBoat();
@@ -332,7 +332,7 @@ extends Entity {
                         this.setDeltaMovement(vec3.add(0.0, -0.7, 0.0));
                         this.ejectPassengers();
                     } else {
-                        this.setDeltaMovement(vec3.x, this.hasPassenger(Player.class) ? 2.7 : 0.6, vec3.z);
+                        this.setDeltaMovement(vec3.x, this.hasPassenger((Entity entity) -> entity instanceof Player) ? 2.7 : 0.6, vec3.z);
                     }
                 }
                 this.isAboveBubbleColumn = false;
@@ -586,7 +586,7 @@ extends Entity {
             return;
         }
         float f = 0.0f;
-        float g = (float)((this.removed ? (double)0.01f : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
+        float g = (float)((this.isRemoved() ? (double)0.01f : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
         if (this.getPassengers().size() > 1) {
             int i = this.getPassengers().indexOf(entity);
             f = i == 0 ? 0.2f : -0.6f;
@@ -685,8 +685,8 @@ extends Entity {
                     return;
                 }
                 this.causeFallDamage(this.fallDistance, 1.0f);
-                if (!this.level.isClientSide && !this.removed) {
-                    this.remove();
+                if (!this.level.isClientSide && !this.isRemoved()) {
+                    this.kill();
                     if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                         int i;
                         for (i = 0; i < 3; ++i) {
@@ -761,8 +761,7 @@ extends Entity {
     @Override
     @Nullable
     public Entity getControllingPassenger() {
-        List<Entity> list = this.getPassengers();
-        return list.isEmpty() ? null : list.get(0);
+        return this.getFirstPassenger();
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -781,6 +780,12 @@ extends Entity {
     @Override
     public boolean isUnderWater() {
         return this.status == Status.UNDER_WATER || this.status == Status.UNDER_FLOWING_WATER;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        return new ItemStack(this.getDropItem());
     }
 
     public static enum Type {

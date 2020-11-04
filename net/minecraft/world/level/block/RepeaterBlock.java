@@ -38,7 +38,7 @@ extends DiodeBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (!player.abilities.mayBuild) {
+        if (!player.getAbilities().mayBuild) {
             return InteractionResult.PASS;
         }
         level.setBlock(blockPos, (BlockState)blockState.cycle(DELAY), 3);

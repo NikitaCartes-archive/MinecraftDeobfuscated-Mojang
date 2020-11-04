@@ -167,8 +167,8 @@ public abstract class PlayerList {
         serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionType(), serverLevel2.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
-        serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.abilities));
-        serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.inventory.selected));
+        serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
+        serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
         serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
         serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(this.server.getTags()));
         this.sendPlayerPermissionLevel(serverPlayer);
@@ -189,7 +189,7 @@ public abstract class PlayerList {
         this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
         this.sendLevelInfo(serverPlayer, serverLevel2);
         if (!this.server.getResourcePack().isEmpty()) {
-            serverPlayer.sendTexturePack(this.server.getResourcePack(), this.server.getResourcePackHash());
+            serverPlayer.sendTexturePack(this.server.getResourcePack(), this.server.getResourcePackHash(), this.server.isResourcePackRequired());
         }
         for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
             serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
@@ -212,9 +212,9 @@ public abstract class PlayerList {
             }
             if (!serverPlayer.isPassenger()) {
                 LOGGER.warn("Couldn't reattach entity to player");
-                serverLevel2.despawn(entity2);
+                entity2.discard();
                 for (Entity entity22 : entity2.getIndirectPassengers()) {
-                    serverLevel2.despawn(entity22);
+                    entity22.discard();
                 }
             }
         }
@@ -302,23 +302,17 @@ public abstract class PlayerList {
     }
 
     public void remove(ServerPlayer serverPlayer) {
-        Entity entity;
+        Entity entity2;
         ServerLevel serverLevel = serverPlayer.getLevel();
         serverPlayer.awardStat(Stats.LEAVE_GAME);
         this.save(serverPlayer);
-        if (serverPlayer.isPassenger() && (entity = serverPlayer.getRootVehicle()).hasOnePlayerPassenger()) {
+        if (serverPlayer.isPassenger() && (entity2 = serverPlayer.getRootVehicle()).hasExactlyOnePlayerPassenger()) {
             LOGGER.debug("Removing player mount");
             serverPlayer.stopRiding();
-            serverLevel.despawn(entity);
-            entity.removed = true;
-            for (Entity entity2 : entity.getIndirectPassengers()) {
-                serverLevel.despawn(entity2);
-                entity2.removed = true;
-            }
-            serverLevel.getChunk(serverPlayer.xChunk, serverPlayer.zChunk).markUnsaved();
+            entity2.getPassengersAndSelf().forEach(entity -> entity.setRemoved(Entity.RemovalReason.UNLOADED_WITH_PLAYER));
         }
         serverPlayer.unRide();
-        serverLevel.removePlayerImmediately(serverPlayer);
+        serverLevel.removePlayerImmediately(serverPlayer, Entity.RemovalReason.UNLOADED_WITH_PLAYER);
         serverPlayer.getAdvancements().stopListening();
         this.players.remove(serverPlayer);
         this.server.getCustomBossEvents().onPlayerDisconnect(serverPlayer);
@@ -381,7 +375,7 @@ public abstract class PlayerList {
 
     public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
         this.players.remove(serverPlayer);
-        serverPlayer.getLevel().removePlayerImmediately(serverPlayer);
+        serverPlayer.getLevel().removePlayerImmediately(serverPlayer, Entity.RemovalReason.DISCARDED);
         BlockPos blockPos = serverPlayer.getRespawnPosition();
         float f = serverPlayer.getRespawnAngle();
         boolean bl2 = serverPlayer.isRespawnForced();
@@ -416,7 +410,7 @@ public abstract class PlayerList {
         } else if (blockPos != null) {
             serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0f));
         }
-        while (!serverLevel2.noCollision(serverPlayer2) && serverPlayer2.getY() < 256.0) {
+        while (!serverLevel2.noCollision(serverPlayer2) && serverPlayer2.getY() < (double)serverLevel2.getMaxBuildHeight()) {
             serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
@@ -599,7 +593,7 @@ public abstract class PlayerList {
     public void sendAllPlayerInfo(ServerPlayer serverPlayer) {
         serverPlayer.refreshContainer(serverPlayer.inventoryMenu);
         serverPlayer.resetSentInfo();
-        serverPlayer.connection.send(new ClientboundSetCarriedItemPacket(serverPlayer.inventory.selected));
+        serverPlayer.connection.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
     }
 
     public int getPlayerCount() {

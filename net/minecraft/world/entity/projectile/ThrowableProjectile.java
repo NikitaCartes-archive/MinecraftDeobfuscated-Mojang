@@ -7,8 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -63,7 +61,7 @@ extends Projectile {
             } else if (blockState.is(Blocks.END_GATEWAY)) {
                 BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
                 if (blockEntity instanceof TheEndGatewayBlockEntity && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
-                    ((TheEndGatewayBlockEntity)blockEntity).teleportEntity(this);
+                    TheEndGatewayBlockEntity.teleportEntity(this.level, blockPos, blockState, this, (TheEndGatewayBlockEntity)blockEntity);
                 }
                 bl = true;
             }
@@ -96,11 +94,6 @@ extends Projectile {
 
     protected float getGravity() {
         return 0.03f;
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 }
 

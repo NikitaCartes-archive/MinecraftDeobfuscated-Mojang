@@ -13,11 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
@@ -42,7 +39,7 @@ extends ChunkSource {
 
     public ClientChunkCache(ClientLevel clientLevel, int i) {
         this.level = clientLevel;
-        this.emptyChunk = new EmptyLevelChunk((Level)clientLevel, new ChunkPos(0, 0));
+        this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0));
         this.lightEngine = new LevelLightEngine(this, true, clientLevel.dimensionType().hasSkyLight());
         this.storage = new Storage(ClientChunkCache.calculateStorageRange(i));
     }
@@ -90,19 +87,20 @@ extends ChunkSource {
     }
 
     @Nullable
-    public LevelChunk replaceWithPacketData(int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k, boolean bl) {
+    public LevelChunk replaceWithPacketData(int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k) {
         if (!this.storage.inRange(i, j)) {
             LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", (Object)i, (Object)j);
             return null;
         }
         int l = this.storage.getIndex(i, j);
         LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
-        if (bl || !ClientChunkCache.isValidChunk(levelChunk, i, j)) {
+        ChunkPos chunkPos = new ChunkPos(i, j);
+        if (!ClientChunkCache.isValidChunk(levelChunk, i, j)) {
             if (chunkBiomeContainer == null) {
                 LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", (Object)i, (Object)j);
                 return null;
             }
-            levelChunk = new LevelChunk(this.level, new ChunkPos(i, j), chunkBiomeContainer);
+            levelChunk = new LevelChunk(this.level, chunkPos, chunkBiomeContainer);
             levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
             this.storage.replace(l, levelChunk);
         } else {
@@ -110,12 +108,13 @@ extends ChunkSource {
         }
         LevelChunkSection[] levelChunkSections = levelChunk.getSections();
         LevelLightEngine levelLightEngine = this.getLightEngine();
-        levelLightEngine.enableLightSources(new ChunkPos(i, j), true);
+        levelLightEngine.enableLightSources(chunkPos, true);
         for (int m = 0; m < levelChunkSections.length; ++m) {
             LevelChunkSection levelChunkSection = levelChunkSections[m];
-            levelLightEngine.updateSectionStatus(SectionPos.of(i, m, j), LevelChunkSection.isEmpty(levelChunkSection));
+            int n = this.level.getSectionYFromSectionIndex(m);
+            levelLightEngine.updateSectionStatus(SectionPos.of(i, n, j), LevelChunkSection.isEmpty(levelChunkSection));
         }
-        this.level.onChunkLoaded(i, j);
+        this.level.onChunkLoaded(chunkPos);
         return levelChunk;
     }
 
@@ -151,7 +150,7 @@ extends ChunkSource {
 
     @Override
     public String gatherStats() {
-        return "Client Chunk Cache: " + this.storage.chunks.length() + ", " + this.getLoadedChunksCount();
+        return this.storage.chunks.length() + ", " + this.getLoadedChunksCount();
     }
 
     public int getLoadedChunksCount() {
@@ -165,17 +164,12 @@ extends ChunkSource {
 
     @Override
     public boolean isTickingChunk(BlockPos blockPos) {
-        return this.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     @Override
     public boolean isEntityTickingChunk(ChunkPos chunkPos) {
         return this.hasChunk(chunkPos.x, chunkPos.z);
-    }
-
-    @Override
-    public boolean isEntityTickingChunk(Entity entity) {
-        return this.hasChunk(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
     }
 
     @Override

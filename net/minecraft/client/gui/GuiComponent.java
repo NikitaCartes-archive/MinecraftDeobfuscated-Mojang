@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
@@ -69,7 +70,7 @@ public abstract class GuiComponent {
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(matrix4f, i, l, 0.0f).color(g, h, o, f).endVertex();
         bufferBuilder.vertex(matrix4f, k, l, 0.0f).color(g, h, o, f).endVertex();
         bufferBuilder.vertex(matrix4f, k, j, 0.0f).color(g, h, o, f).endVertex();
@@ -88,7 +89,7 @@ public abstract class GuiComponent {
         RenderSystem.shadeModel(7425);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         GuiComponent.fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, this.blitOffset, m, n);
         tesselator.end();
         RenderSystem.shadeModel(7424);
@@ -165,7 +166,7 @@ public abstract class GuiComponent {
 
     private static void innerBlit(Matrix4f matrix4f, int i, int j, int k, int l, int m, float f, float g, float h, float n) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, i, l, m).uv(f, n).endVertex();
         bufferBuilder.vertex(matrix4f, j, l, m).uv(g, n).endVertex();
         bufferBuilder.vertex(matrix4f, j, k, m).uv(g, h).endVertex();

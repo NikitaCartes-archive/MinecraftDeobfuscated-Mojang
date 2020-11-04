@@ -15,7 +15,7 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class JigsawRotationFix
 extends DataFix {
-    private static final Map<String, String> renames = ImmutableMap.builder().put("down", "down_south").put("up", "up_north").put("north", "north_up").put("south", "south_up").put("west", "west_up").put("east", "east_up").build();
+    private static final Map<String, String> RENAMES = ImmutableMap.builder().put("down", "down_south").put("up", "up_north").put("north", "north_up").put("south", "south_up").put("west", "west_up").put("east", "east_up").build();
 
     public JigsawRotationFix(Schema schema, boolean bl) {
         super(schema, bl);
@@ -26,7 +26,7 @@ extends DataFix {
         if (optional.equals(Optional.of("minecraft:jigsaw"))) {
             return dynamic2.update("Properties", dynamic -> {
                 String string = dynamic.get("facing").asString("north");
-                return dynamic.remove("facing").set("orientation", dynamic.createString(renames.getOrDefault(string, string)));
+                return dynamic.remove("facing").set("orientation", dynamic.createString(RENAMES.getOrDefault(string, string)));
             });
         }
         return dynamic2;

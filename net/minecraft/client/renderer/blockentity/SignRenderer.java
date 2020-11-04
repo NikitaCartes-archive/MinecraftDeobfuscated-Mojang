@@ -3,21 +3,30 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -31,11 +40,12 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(value=EnvType.CLIENT)
 public class SignRenderer
-extends BlockEntityRenderer<SignBlockEntity> {
-    private final SignModel signModel = new SignModel();
+implements BlockEntityRenderer<SignBlockEntity> {
+    private final Map<WoodType, SignModel> signModels = WoodType.values().collect(ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignModel(context.getLayer(ModelLayers.createSignModelName(woodType)))));
+    private final Font font;
 
-    public SignRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+    public SignRenderer(BlockEntityRendererProvider.Context context) {
+        this.font = context.getFont();
     }
 
     @Override
@@ -44,26 +54,26 @@ extends BlockEntityRenderer<SignBlockEntity> {
         BlockState blockState = signBlockEntity.getBlockState();
         poseStack.pushPose();
         float g = 0.6666667f;
+        WoodType woodType = SignRenderer.getWoodType(blockState.getBlock());
+        SignModel signModel = this.signModels.get(woodType);
         if (blockState.getBlock() instanceof StandingSignBlock) {
             poseStack.translate(0.5, 0.5, 0.5);
             h = -((float)(blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0f);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
-            this.signModel.stick.visible = true;
+            signModel.stick.visible = true;
         } else {
             poseStack.translate(0.5, 0.5, 0.5);
             h = -blockState.getValue(WallSignBlock.FACING).toYRot();
             poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
             poseStack.translate(0.0, -0.3125, -0.4375);
-            this.signModel.stick.visible = false;
+            signModel.stick.visible = false;
         }
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        Material material = SignRenderer.getMaterial(blockState.getBlock());
-        VertexConsumer vertexConsumer = material.buffer(multiBufferSource, this.signModel::renderType);
-        this.signModel.sign.render(poseStack, vertexConsumer, i, j);
-        this.signModel.stick.render(poseStack, vertexConsumer, i, j);
+        Material material = Sheets.signTexture(woodType);
+        VertexConsumer vertexConsumer = material.buffer(multiBufferSource, signModel::renderType);
+        signModel.root.render(poseStack, vertexConsumer, i, j);
         poseStack.popPose();
-        Font font = this.renderer.getFont();
         float k = 0.010416667f;
         poseStack.translate(0.0, 0.3333333432674408, 0.046666666865348816);
         poseStack.scale(0.010416667f, -0.010416667f, 0.010416667f);
@@ -76,38 +86,48 @@ extends BlockEntityRenderer<SignBlockEntity> {
         int q = 20;
         for (int r = 0; r < 4; ++r) {
             FormattedCharSequence formattedCharSequence = signBlockEntity.getRenderMessage(r, component -> {
-                List<FormattedCharSequence> list = font.split((FormattedText)component, 90);
+                List<FormattedCharSequence> list = this.font.split((FormattedText)component, 90);
                 return list.isEmpty() ? FormattedCharSequence.EMPTY : list.get(0);
             });
             if (formattedCharSequence == null) continue;
-            float s = -font.width(formattedCharSequence) / 2;
-            font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+            float s = -this.font.width(formattedCharSequence) / 2;
+            this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
     }
 
-    public static Material getMaterial(Block block) {
+    public static WoodType getWoodType(Block block) {
         WoodType woodType = block instanceof SignBlock ? ((SignBlock)block).type() : WoodType.OAK;
-        return Sheets.signTexture(woodType);
+        return woodType;
+    }
+
+    public static SignModel createSignModel(EntityModelSet entityModelSet, WoodType woodType) {
+        return new SignModel(entityModelSet.getLayer(ModelLayers.createSignModelName(woodType)));
+    }
+
+    public static LayerDefinition createSignLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("sign", CubeListBuilder.create().texOffs(0, 0).addBox(-12.0f, -14.0f, -1.0f, 24.0f, 12.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("stick", CubeListBuilder.create().texOffs(0, 14).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Environment(value=EnvType.CLIENT)
     public static final class SignModel
     extends Model {
-        public final ModelPart sign = new ModelPart(64, 32, 0, 0);
+        public final ModelPart root;
         public final ModelPart stick;
 
-        public SignModel() {
+        public SignModel(ModelPart modelPart) {
             super(RenderType::entityCutoutNoCull);
-            this.sign.addBox(-12.0f, -14.0f, -1.0f, 24.0f, 12.0f, 2.0f, 0.0f);
-            this.stick = new ModelPart(64, 32, 0, 14);
-            this.stick.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f, 0.0f);
+            this.root = modelPart;
+            this.stick = modelPart.getChild("stick");
         }
 
         @Override
         public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-            this.sign.render(poseStack, vertexConsumer, i, j, f, g, h, k);
-            this.stick.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+            this.root.render(poseStack, vertexConsumer, i, j, f, g, h, k);
         }
     }
 }

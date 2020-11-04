@@ -37,7 +37,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -173,16 +173,16 @@ implements RangedAttackMob {
 
     @Override
     protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
-        if (itemStack2.getItem() == Items.NAUTILUS_SHELL) {
+        if (itemStack2.is(Items.NAUTILUS_SHELL)) {
             return false;
         }
-        if (itemStack2.getItem() == Items.TRIDENT) {
-            if (itemStack.getItem() == Items.TRIDENT) {
+        if (itemStack2.is(Items.TRIDENT)) {
+            if (itemStack.is(Items.TRIDENT)) {
                 return itemStack.getDamageValue() < itemStack2.getDamageValue();
             }
             return false;
         }
-        if (itemStack.getItem() == Items.TRIDENT) {
+        if (itemStack.is(Items.TRIDENT)) {
             return true;
         }
         return super.canReplaceCurrentItem(itemStack, itemStack2);
@@ -449,7 +449,7 @@ implements RangedAttackMob {
         @Override
         public void tick() {
             if (this.drowned.getY() < (double)(this.seaLevel - 1) && (this.drowned.getNavigation().isDone() || this.drowned.closeToNextPos())) {
-                Vec3 vec3 = RandomPos.getPosTowards(this.drowned, 4, 8, new Vec3(this.drowned.getX(), this.seaLevel - 1, this.drowned.getZ()));
+                Vec3 vec3 = DefaultRandomPos.getPosTowards(this.drowned, 4, 8, new Vec3(this.drowned.getX(), this.seaLevel - 1, this.drowned.getZ()), 1.5707963705062866);
                 if (vec3 == null) {
                     this.stuck = true;
                     return;
@@ -481,7 +481,7 @@ implements RangedAttackMob {
 
         @Override
         public boolean canUse() {
-            return super.canUse() && this.drowned.getMainHandItem().getItem() == Items.TRIDENT;
+            return super.canUse() && this.drowned.getMainHandItem().is(Items.TRIDENT);
         }
 
         @Override

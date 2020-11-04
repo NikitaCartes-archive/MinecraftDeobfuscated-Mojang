@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
@@ -32,15 +34,17 @@ import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(value=EnvType.CLIENT)
 public class SignEditScreen
 extends Screen {
-    private final SignRenderer.SignModel signModel = new SignRenderer.SignModel();
     private final SignBlockEntity sign;
     private int frame;
     private int line;
     private TextFieldHelper signField;
+    private WoodType woodType;
+    private SignRenderer.SignModel signModel;
     private final String[] messages = (String[])IntStream.range(0, 4).mapToObj(signBlockEntity::getMessage).map(Component::getString).toArray(String[]::new);
 
     public SignEditScreen(SignBlockEntity signBlockEntity) {
@@ -57,6 +61,9 @@ extends Screen {
             this.messages[this.line] = string;
             this.sign.setMessage(this.line, new TextComponent((String)string));
         }, TextFieldHelper.createClipboardGetter(this.minecraft), TextFieldHelper.createClipboardSetter(this.minecraft), string -> this.minecraft.font.width((String)string) <= 90);
+        BlockState blockState = this.sign.getBlockState();
+        this.woodType = SignRenderer.getWoodType(blockState.getBlock());
+        this.signModel = SignRenderer.createSignModel(this.minecraft.getEntityModels(), this.woodType);
     }
 
     @Override
@@ -72,7 +79,7 @@ extends Screen {
     @Override
     public void tick() {
         ++this.frame;
-        if (!this.sign.getType().isValid(this.sign.getBlockState().getBlock())) {
+        if (!this.sign.getType().isValid(this.sign.getBlockState())) {
             this.onDone();
         }
     }
@@ -135,12 +142,10 @@ extends Screen {
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
         MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
-        Material material = SignRenderer.getMaterial(blockState.getBlock());
+        Material material = Sheets.signTexture(this.woodType);
         VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);
-        this.signModel.sign.render(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY);
-        if (bl) {
-            this.signModel.stick.render(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY);
-        }
+        this.signModel.stick.visible = bl;
+        this.signModel.root.render(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         float k = 0.010416667f;
         poseStack.translate(0.0, 0.3333333432674408, 0.046666666865348816);
@@ -185,7 +190,7 @@ extends Screen {
             RenderSystem.disableTexture();
             RenderSystem.enableColorLogicOp();
             RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             bufferBuilder.vertex(matrix4f, x, o + this.minecraft.font.lineHeight, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.vertex(matrix4f, y, o + this.minecraft.font.lineHeight, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.vertex(matrix4f, y, o, 0.0f).color(0, 0, 255, 255).endVertex();

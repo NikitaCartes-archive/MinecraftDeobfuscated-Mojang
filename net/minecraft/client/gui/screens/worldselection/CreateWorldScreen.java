@@ -44,6 +44,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.ServerResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -522,7 +523,7 @@ extends Screen {
         if (path != null) {
             File file = path.toFile();
             if (this.tempDataPackRepository == null) {
-                this.tempDataPackRepository = new PackRepository(new ServerPacksSource(), new FolderRepositorySource(file, PackSource.DEFAULT));
+                this.tempDataPackRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(file, PackSource.DEFAULT));
                 this.tempDataPackRepository.reload();
             }
             this.tempDataPackRepository.setSelected(this.dataPacks.getEnabled());

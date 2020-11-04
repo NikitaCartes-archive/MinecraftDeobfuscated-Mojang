@@ -10,6 +10,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
@@ -87,8 +88,8 @@ public abstract class StructurePiece {
     }
 
     public boolean isCloseToChunk(ChunkPos chunkPos, int i) {
-        int j = chunkPos.x << 4;
-        int k = chunkPos.z << 4;
+        int j = SectionPos.sectionToBlockCoord(chunkPos.x);
+        int k = SectionPos.sectionToBlockCoord(chunkPos.z);
         return this.boundingBox.intersects(j - i, k - i, j + 15 + i, k + 15 + i);
     }
 
@@ -315,7 +316,7 @@ public abstract class StructurePiece {
         if (!boundingBox.isInside(new BlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k)))) {
             return;
         }
-        while ((worldGenLevel.isEmptyBlock(new BlockPos(l, m, n)) || worldGenLevel.getBlockState(new BlockPos(l, m, n)).getMaterial().isLiquid()) && m > 1) {
+        while ((worldGenLevel.isEmptyBlock(new BlockPos(l, m, n)) || worldGenLevel.getBlockState(new BlockPos(l, m, n)).getMaterial().isLiquid()) && m > worldGenLevel.getMinBuildHeight() + 1) {
             worldGenLevel.setBlock(new BlockPos(l, m, n), blockState, 2);
             --m;
         }

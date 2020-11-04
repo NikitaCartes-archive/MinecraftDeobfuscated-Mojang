@@ -38,6 +38,7 @@ import net.minecraft.server.packs.FolderPackResources;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -48,9 +49,11 @@ implements PackResources {
     private static final Logger LOGGER;
     public static Class<?> clientObject;
     private static final Map<PackType, FileSystem> JAR_FILESYSTEM_BY_TYPE;
+    public final PackMetadataSection packMetadata;
     public final Set<String> namespaces;
 
-    public VanillaPackResources(String ... strings) {
+    public VanillaPackResources(PackMetadataSection packMetadataSection, String ... strings) {
+        this.packMetadata = packMetadataSection;
         this.namespaces = ImmutableSet.copyOf(strings);
     }
 
@@ -196,11 +199,16 @@ implements PackResources {
     @Nullable
     public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
         try (InputStream inputStream = this.getRootResource("pack.mcmeta");){
-            T t = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
-            return t;
+            T object;
+            if (inputStream != null && (object = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream)) != null) {
+                T t = object;
+                return t;
+            }
         } catch (FileNotFoundException | RuntimeException exception) {
-            return null;
+            // empty catch block
         }
+        if (metadataSectionSerializer != PackMetadataSection.SERIALIZER) return null;
+        return (T)this.packMetadata;
     }
 
     @Override

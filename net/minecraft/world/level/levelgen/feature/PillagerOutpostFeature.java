@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -33,8 +34,8 @@ extends JigsawFeature {
 
     @Override
     protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, JigsawConfiguration jigsawConfiguration) {
-        int k = i >> 4;
-        int m = j >> 4;
+        int k = SectionPos.blockToSectionCoord(i);
+        int m = SectionPos.blockToSectionCoord(j);
         worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);
         worldgenRandom.nextInt();
         if (worldgenRandom.nextInt(5) != 0) {

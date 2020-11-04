@@ -57,7 +57,7 @@ extends LootItemConditionalFunction {
         Enchantment enchantment2;
         Random random = lootContext.getRandom();
         if (this.enchantments.isEmpty()) {
-            boolean bl = itemStack.getItem() == Items.BOOK;
+            boolean bl = itemStack.is(Items.BOOK);
             List list = Registry.ENCHANTMENT.stream().filter(Enchantment::isDiscoverable).filter(enchantment -> bl || enchantment.canEnchant(itemStack)).collect(Collectors.toList());
             if (list.isEmpty()) {
                 LOGGER.warn("Couldn't find a compatible enchantment for {}", (Object)itemStack);
@@ -72,7 +72,7 @@ extends LootItemConditionalFunction {
 
     private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, Random random) {
         int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
-        if (itemStack.getItem() == Items.BOOK) {
+        if (itemStack.is(Items.BOOK)) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
             EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
         } else {

@@ -17,7 +17,7 @@ extends ByteToMessageDecoder {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
         byteBuf.markReaderIndex();
         byte[] bs = new byte[3];
         for (int i = 0; i < bs.length; ++i) {

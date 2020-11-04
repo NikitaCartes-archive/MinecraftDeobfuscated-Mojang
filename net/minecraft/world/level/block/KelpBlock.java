@@ -42,8 +42,8 @@ implements LiquidBlockContainer {
     }
 
     @Override
-    protected boolean canAttachToBlock(Block block) {
-        return block != Blocks.MAGMA_BLOCK;
+    protected boolean canAttachTo(BlockState blockState) {
+        return !blockState.is(Blocks.MAGMA_BLOCK);
     }
 
     @Override

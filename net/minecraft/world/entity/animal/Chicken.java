@@ -10,7 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -124,7 +124,7 @@ extends Animal {
     }
 
     @Override
-    public Chicken getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Chicken getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.CHICKEN.create(serverLevel);
     }
 
@@ -184,8 +184,8 @@ extends Animal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 }
 

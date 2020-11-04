@@ -8,7 +8,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GiantZombieModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
@@ -21,11 +22,11 @@ extends MobRenderer<Giant, HumanoidModel<Giant>> {
     private static final ResourceLocation ZOMBIE_LOCATION = new ResourceLocation("textures/entity/zombie/zombie.png");
     private final float scale;
 
-    public GiantMobRenderer(EntityRenderDispatcher entityRenderDispatcher, float f) {
-        super(entityRenderDispatcher, new GiantZombieModel(), 0.5f * f);
+    public GiantMobRenderer(EntityRendererProvider.Context context, float f) {
+        super(context, new GiantZombieModel(context.getLayer(ModelLayers.GIANT)), 0.5f * f);
         this.scale = f;
         this.addLayer(new ItemInHandLayer<Giant, HumanoidModel<Giant>>(this));
-        this.addLayer(new HumanoidArmorLayer<Giant, HumanoidModel<Giant>, GiantZombieModel>(this, new GiantZombieModel(0.5f, true), new GiantZombieModel(1.0f, true)));
+        this.addLayer(new HumanoidArmorLayer<Giant, HumanoidModel<Giant>, GiantZombieModel>(this, new GiantZombieModel(context.getLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.getLayer(ModelLayers.GIANT_OUTER_ARMOR))));
     }
 
     @Override

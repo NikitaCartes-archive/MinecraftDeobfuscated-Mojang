@@ -137,7 +137,7 @@ extends Monster {
                 ++this.life;
             }
             if (this.life >= 2400) {
-                this.remove();
+                this.discard();
             }
         }
     }

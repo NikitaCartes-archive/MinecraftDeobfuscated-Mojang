@@ -9,8 +9,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -26,15 +26,15 @@ extends EntityRenderer<T> {
     private final float scale;
     private final boolean fullBright;
 
-    public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer, float f, boolean bl) {
-        super(entityRenderDispatcher);
-        this.itemRenderer = itemRenderer;
+    public ThrownItemRenderer(EntityRendererProvider.Context context, float f, boolean bl) {
+        super(context);
+        this.itemRenderer = context.getItemRenderer();
         this.scale = f;
         this.fullBright = bl;
     }
 
-    public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
-        this(entityRenderDispatcher, itemRenderer, 1.0f, false);
+    public ThrownItemRenderer(EntityRendererProvider.Context context) {
+        this(context, 1.0f, false);
     }
 
     @Override

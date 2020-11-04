@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -35,8 +36,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
-            int k = i * 16;
-            int l = j * 16;
+            int k = SectionPos.sectionToBlockCoord(i);
+            int l = SectionPos.sectionToBlockCoord(j);
             BlockPos blockPos = new BlockPos(k, 90, l);
             Rotation rotation = Rotation.getRandom(this.random);
             IglooPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random);

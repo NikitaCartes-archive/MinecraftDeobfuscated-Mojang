@@ -126,7 +126,7 @@ extends RecipeBookMenu<CraftingContainer> {
         if (player.level.isClientSide) {
             return;
         }
-        this.clearContainer(player, player.level, this.craftSlots);
+        this.clearContainer(player, this.craftSlots);
     }
 
     @Override

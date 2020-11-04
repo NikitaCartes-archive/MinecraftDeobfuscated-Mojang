@@ -57,20 +57,20 @@ extends CrossCollisionBlock {
 
     public boolean connectsTo(BlockState blockState, boolean bl, Direction direction) {
         Block block = blockState.getBlock();
-        boolean bl2 = this.isSameFence(block);
+        boolean bl2 = this.isSameFence(blockState);
         boolean bl3 = block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(blockState, direction);
-        return !FenceBlock.isExceptionForConnection(block) && bl || bl2 || bl3;
+        return !FenceBlock.isExceptionForConnection(blockState) && bl || bl2 || bl3;
     }
 
-    private boolean isSameFence(Block block) {
-        return block.is(BlockTags.FENCES) && block.is(BlockTags.WOODEN_FENCES) == this.defaultBlockState().is(BlockTags.WOODEN_FENCES);
+    private boolean isSameFence(BlockState blockState) {
+        return blockState.is(BlockTags.FENCES) && blockState.is(BlockTags.WOODEN_FENCES) == this.defaultBlockState().is(BlockTags.WOODEN_FENCES);
     }
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (itemStack.getItem() == Items.LEAD) {
+            if (itemStack.is(Items.LEAD)) {
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.PASS;

@@ -32,7 +32,7 @@ extends Feature<NoneFeatureConfiguration> {
         int j;
         int i2;
         blockPos = blockPos.above();
-        while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
+        while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
             blockPos = blockPos.below();
         }
         if (!IS_SAND.test(worldGenLevel.getBlockState(blockPos))) {

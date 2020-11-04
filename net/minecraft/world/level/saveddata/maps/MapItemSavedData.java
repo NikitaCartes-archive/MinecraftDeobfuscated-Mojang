@@ -141,13 +141,13 @@ extends SavedData {
             this.carriedByPlayers.put(player, holdingPlayer);
             this.carriedBy.add(holdingPlayer);
         }
-        if (!player.inventory.contains(itemStack)) {
+        if (!player.getInventory().contains(itemStack)) {
             this.decorations.remove(player.getName().getString());
         }
         for (int i = 0; i < this.carriedBy.size(); ++i) {
             HoldingPlayer holdingPlayer2 = this.carriedBy.get(i);
             String string = holdingPlayer2.player.getName().getString();
-            if (holdingPlayer2.player.removed || !holdingPlayer2.player.inventory.contains(itemStack) && !itemStack.isFramed()) {
+            if (holdingPlayer2.player.isRemoved() || !holdingPlayer2.player.getInventory().contains(itemStack) && !itemStack.isFramed()) {
                 this.carriedByPlayers.remove(holdingPlayer2.player);
                 this.carriedBy.remove(holdingPlayer2);
                 this.decorations.remove(string);

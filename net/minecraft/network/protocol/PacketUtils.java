@@ -24,7 +24,7 @@ public class PacketUtils {
                 if (packetListener.getConnection().isConnected()) {
                     packet.handle(packetListener);
                 } else {
-                    LOGGER.debug("Ignoring packet due to disconnection: " + packet);
+                    LOGGER.debug("Ignoring packet due to disconnection: {}", (Object)packet);
                 }
             });
             throw RunningOnDifferentThreadException.RUNNING_ON_DIFFERENT_THREAD;

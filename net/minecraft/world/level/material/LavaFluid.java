@@ -108,7 +108,7 @@ extends FlowingFluid {
     }
 
     private boolean isFlammable(LevelReader levelReader, BlockPos blockPos) {
-        if (blockPos.getY() >= 0 && blockPos.getY() < 256 && !levelReader.hasChunkAt(blockPos)) {
+        if (blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && !levelReader.hasChunkAt(blockPos)) {
             return false;
         }
         return levelReader.getBlockState(blockPos).getMaterial().isFlammable();

@@ -6,7 +6,8 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HoglinModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,8 +18,8 @@ public class HoglinRenderer
 extends MobRenderer<Hoglin, HoglinModel<Hoglin>> {
     private static final ResourceLocation HOGLIN_LOCATION = new ResourceLocation("textures/entity/hoglin/hoglin.png");
 
-    public HoglinRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new HoglinModel(), 0.7f);
+    public HoglinRenderer(EntityRendererProvider.Context context) {
+        super(context, new HoglinModel(context.getLayer(ModelLayers.HOGLIN)), 0.7f);
     }
 
     @Override

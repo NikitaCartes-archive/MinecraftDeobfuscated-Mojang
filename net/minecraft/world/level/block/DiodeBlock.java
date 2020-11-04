@@ -85,7 +85,7 @@ extends HorizontalDirectionalBlock {
             this.checkTickOnNeighbor(level, blockPos, blockState);
             return;
         }
-        BlockEntity blockEntity = this.isEntityBlock() ? level.getBlockEntity(blockPos) : null;
+        BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos) : null;
         DiodeBlock.dropResources(blockState, level, blockPos, blockEntity);
         level.removeBlock(blockPos, false);
         for (Direction direction : Direction.values()) {

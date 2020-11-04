@@ -56,7 +56,7 @@ extends Entity {
 
     @Override
     public boolean isPickable() {
-        return !this.removed;
+        return !this.isRemoved();
     }
 
     @Override
@@ -71,7 +71,7 @@ extends Entity {
         }
         --this.life;
         if (this.life <= 0) {
-            this.remove();
+            this.discard();
             if (!this.level.isClientSide) {
                 this.explode();
             }

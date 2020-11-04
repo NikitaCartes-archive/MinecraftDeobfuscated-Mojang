@@ -28,7 +28,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
@@ -320,11 +319,10 @@ extends Screen {
         }
 
         public static BookAccess fromItem(ItemStack itemStack) {
-            Item item = itemStack.getItem();
-            if (item == Items.WRITTEN_BOOK) {
+            if (itemStack.is(Items.WRITTEN_BOOK)) {
                 return new WrittenBookAccess(itemStack);
             }
-            if (item == Items.WRITABLE_BOOK) {
+            if (itemStack.is(Items.WRITABLE_BOOK)) {
                 return new WritableBookAccess(itemStack);
             }
             return EMPTY_ACCESS;

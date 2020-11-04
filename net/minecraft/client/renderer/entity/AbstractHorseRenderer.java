@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
@@ -16,8 +16,8 @@ public abstract class AbstractHorseRenderer<T extends AbstractHorse, M extends H
 extends MobRenderer<T, M> {
     private final float scale;
 
-    public AbstractHorseRenderer(EntityRenderDispatcher entityRenderDispatcher, M horseModel, float f) {
-        super(entityRenderDispatcher, horseModel, 0.75f);
+    public AbstractHorseRenderer(EntityRendererProvider.Context context, M horseModel, float f) {
+        super(context, horseModel, 0.75f);
         this.scale = f;
     }
 

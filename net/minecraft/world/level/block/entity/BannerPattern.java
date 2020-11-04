@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -12,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 public enum BannerPattern {
@@ -82,7 +82,6 @@ public enum BannerPattern {
         return new ResourceLocation("entity/" + string + "/" + this.getFilename());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getFilename() {
         return this.filename;
     }
@@ -101,6 +100,15 @@ public enum BannerPattern {
         return null;
     }
 
+    @Nullable
+    public static BannerPattern byFilename(String string) {
+        for (BannerPattern bannerPattern : BannerPattern.values()) {
+            if (!bannerPattern.filename.equals(string)) continue;
+            return bannerPattern;
+        }
+        return null;
+    }
+
     static {
         VALUES = BannerPattern.values();
         COUNT = VALUES.length;
@@ -112,7 +120,11 @@ public enum BannerPattern {
         private final List<Pair<BannerPattern, DyeColor>> patterns = Lists.newArrayList();
 
         public Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
-            this.patterns.add(Pair.of(bannerPattern, dyeColor));
+            return this.addPattern(Pair.of(bannerPattern, dyeColor));
+        }
+
+        public Builder addPattern(Pair<BannerPattern, DyeColor> pair) {
+            this.patterns.add(pair);
             return this;
         }
 
@@ -120,8 +132,8 @@ public enum BannerPattern {
             ListTag listTag = new ListTag();
             for (Pair<BannerPattern, DyeColor> pair : this.patterns) {
                 CompoundTag compoundTag = new CompoundTag();
-                compoundTag.putString("Pattern", pair.getLeft().hashname);
-                compoundTag.putInt("Color", pair.getRight().getId());
+                compoundTag.putString("Pattern", pair.getFirst().hashname);
+                compoundTag.putInt("Color", pair.getSecond().getId());
                 listTag.add(compoundTag);
             }
             return listTag;

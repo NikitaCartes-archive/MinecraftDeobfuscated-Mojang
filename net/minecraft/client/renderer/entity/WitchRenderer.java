@@ -7,8 +7,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WitchItemLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +20,8 @@ public class WitchRenderer
 extends MobRenderer<Witch, WitchModel<Witch>> {
     private static final ResourceLocation WITCH_LOCATION = new ResourceLocation("textures/entity/witch.png");
 
-    public WitchRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new WitchModel(0.0f), 0.5f);
+    public WitchRenderer(EntityRendererProvider.Context context) {
+        super(context, new WitchModel(context.getLayer(ModelLayers.WITCH)), 0.5f);
         this.addLayer(new WitchItemLayer<Witch>(this));
     }
 

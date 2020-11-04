@@ -7,11 +7,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
@@ -21,18 +27,21 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
 public class BellRenderer
-extends BlockEntityRenderer<BellBlockEntity> {
+implements BlockEntityRenderer<BellBlockEntity> {
     public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
-    private final ModelPart bellBody = new ModelPart(32, 32, 0, 0);
+    private final ModelPart bellBody;
 
-    public BellRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
-        this.bellBody.addBox(-3.0f, -6.0f, -3.0f, 6.0f, 7.0f, 6.0f);
-        this.bellBody.setPos(8.0f, 12.0f, 8.0f);
-        ModelPart modelPart = new ModelPart(32, 32, 0, 13);
-        modelPart.addBox(4.0f, 4.0f, 4.0f, 8.0f, 2.0f, 8.0f);
-        modelPart.setPos(-8.0f, -12.0f, -8.0f);
-        this.bellBody.addChild(modelPart);
+    public BellRenderer(BlockEntityRendererProvider.Context context) {
+        ModelPart modelPart = context.getLayer(ModelLayers.BELL);
+        this.bellBody = modelPart.getChild("bell_body");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bell_body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -6.0f, -3.0f, 6.0f, 7.0f, 6.0f), PartPose.offset(8.0f, 12.0f, 8.0f));
+        partDefinition2.addOrReplaceChild("bell_base", CubeListBuilder.create().texOffs(0, 13).addBox(4.0f, 4.0f, 4.0f, 8.0f, 2.0f, 8.0f), PartPose.offset(-8.0f, -12.0f, -8.0f));
+        return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
     @Override

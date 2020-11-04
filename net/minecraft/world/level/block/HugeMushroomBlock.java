@@ -37,7 +37,7 @@ extends Block {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         Level blockGetter = blockPlaceContext.getLevel();
         BlockPos blockPos = blockPlaceContext.getClickedPos();
-        return (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(DOWN, this != blockGetter.getBlockState(blockPos.below()).getBlock())).setValue(UP, this != blockGetter.getBlockState(blockPos.above()).getBlock())).setValue(NORTH, this != blockGetter.getBlockState(blockPos.north()).getBlock())).setValue(EAST, this != blockGetter.getBlockState(blockPos.east()).getBlock())).setValue(SOUTH, this != blockGetter.getBlockState(blockPos.south()).getBlock())).setValue(WEST, this != blockGetter.getBlockState(blockPos.west()).getBlock());
+        return (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(DOWN, !blockGetter.getBlockState(blockPos.below()).is(this))).setValue(UP, !blockGetter.getBlockState(blockPos.above()).is(this))).setValue(NORTH, !blockGetter.getBlockState(blockPos.north()).is(this))).setValue(EAST, !blockGetter.getBlockState(blockPos.east()).is(this))).setValue(SOUTH, !blockGetter.getBlockState(blockPos.south()).is(this))).setValue(WEST, !blockGetter.getBlockState(blockPos.west()).is(this));
     }
 
     @Override

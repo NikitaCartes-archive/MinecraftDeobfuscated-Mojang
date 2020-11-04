@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +128,7 @@ public class SynchedEntityData {
         return this.isDirty;
     }
 
-    public static void pack(List<DataItem<?>> list, FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public static void pack(List<DataItem<?>> list, FriendlyByteBuf friendlyByteBuf) {
         if (list != null) {
             int j = list.size();
             for (int i = 0; i < j; ++i) {
@@ -172,7 +171,7 @@ public class SynchedEntityData {
         return list;
     }
 
-    private static <T> void writeDataItem(FriendlyByteBuf friendlyByteBuf, DataItem<T> dataItem) throws IOException {
+    private static <T> void writeDataItem(FriendlyByteBuf friendlyByteBuf, DataItem<T> dataItem) {
         EntityDataAccessor<T> entityDataAccessor = dataItem.getAccessor();
         int i = EntityDataSerializers.getSerializedId(entityDataAccessor.getSerializer());
         if (i < 0) {
@@ -184,7 +183,7 @@ public class SynchedEntityData {
     }
 
     @Nullable
-    public static List<DataItem<?>> unpack(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public static List<DataItem<?>> unpack(FriendlyByteBuf friendlyByteBuf) {
         short i;
         ArrayList<DataItem<?>> list = null;
         while ((i = friendlyByteBuf.readUnsignedByte()) != 255) {

@@ -191,7 +191,7 @@ extends Block {
             }
             return;
         }
-        if (direction == Direction.UP && blockPos.getY() < 255) {
+        if (direction == Direction.UP && blockPos.getY() < serverLevel.getMaxBuildHeight() - 1) {
             if (this.canSupportAtFace(serverLevel, blockPos, direction)) {
                 serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(UP, true), 2);
                 return;
@@ -211,7 +211,7 @@ extends Block {
                 return;
             }
         }
-        if (blockPos.getY() > 0 && ((blockState2 = serverLevel.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState2.is(this)) && (blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2) != (blockState5 = this.copyRandomFaces(blockState, blockState4, random)) && this.hasHorizontalConnection(blockState5)) {
+        if (blockPos.getY() > serverLevel.getMinBuildHeight() && ((blockState2 = serverLevel.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState2.is(this)) && (blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2) != (blockState5 = this.copyRandomFaces(blockState, blockState4, random)) && this.hasHorizontalConnection(blockState5)) {
             serverLevel.setBlock(blockPos3, blockState5, 2);
         }
     }

@@ -24,7 +24,7 @@ public interface TagType<T extends Tag> {
         return new TagType<EndTag>(){
 
             @Override
-            public EndTag load(DataInput dataInput, int i2, NbtAccounter nbtAccounter) throws IOException {
+            public EndTag load(DataInput dataInput, int i2, NbtAccounter nbtAccounter) {
                 throw new IllegalArgumentException("Invalid tag id: " + i);
             }
 

@@ -207,7 +207,7 @@ extends Entity {
                 break block23;
             }
             if (this.tickCount >= this.waitTime + this.duration) {
-                this.remove();
+                this.discard();
                 return;
             }
             boolean bl3 = bl2 = this.tickCount < this.waitTime;
@@ -219,7 +219,7 @@ extends Entity {
             }
             if (this.radiusPerTick != 0.0f) {
                 if ((f += this.radiusPerTick) < 0.5f) {
-                    this.remove();
+                    this.discard();
                     return;
                 }
                 this.setRadius(f);
@@ -256,7 +256,7 @@ extends Entity {
                             }
                             if (this.radiusOnUse != 0.0f) {
                                 if ((f += this.radiusOnUse) < 0.5f) {
-                                    this.remove();
+                                    this.discard();
                                     return;
                                 }
                                 this.setRadius(f);
@@ -264,7 +264,7 @@ extends Entity {
                             if (this.durationOnUse == 0) continue;
                             this.duration += this.durationOnUse;
                             if (this.duration > 0) continue;
-                            this.remove();
+                            this.discard();
                             return;
                         }
                     }

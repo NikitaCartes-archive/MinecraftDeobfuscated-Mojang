@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.GeodeBlockSettings;
+import net.minecraft.world.level.levelgen.GeodeCrackSettings;
+import net.minecraft.world.level.levelgen.GeodeLayerSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureCon
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
@@ -219,6 +223,7 @@ public class Features {
     public static final ConfiguredFeature<?, ?> ORE_EMERALD = Features.register("ore_emerald", Feature.EMERALD_ORE.configured(new ReplaceBlockConfiguration(States.STONE, States.EMERALD_ORE)).decorated((ConfiguredDecorator)FeatureDecorator.EMERALD_ORE.configured(DecoratorConfiguration.NONE)));
     public static final ConfiguredFeature<?, ?> ORE_DEBRIS_LARGE = Features.register("ore_debris_large", (ConfiguredFeature)Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, States.ANCIENT_DEBRIS, 3)).decorated((ConfiguredDecorator)FeatureDecorator.DEPTH_AVERAGE.configured(new DepthAverageConfigation(16, 8))).squared());
     public static final ConfiguredFeature<?, ?> ORE_DEBRIS_SMALL = Features.register("ore_debris_small", (ConfiguredFeature)Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, States.ANCIENT_DEBRIS, 2)).decorated((ConfiguredDecorator)FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(8, 16, 128))).squared());
+    public static final ConfiguredFeature<?, ?> ORE_COPPER = Features.register("ore_copper", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, States.COPPER_ORE, 10)).range(64)).squared()).count(10));
     public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = Features.register("crimson_fungi", Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_NOT_PLANTED_CONFIG).decorated((ConfiguredDecorator)FeatureDecorator.COUNT_MULTILAYER.configured(new CountConfiguration(8))));
     public static final ConfiguredFeature<HugeFungusConfiguration, ?> CRIMSON_FUNGI_PLANTED = Features.register("crimson_fungi_planted", Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG));
     public static final ConfiguredFeature<?, ?> WARPED_FUNGI = Features.register("warped_fungi", Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_WARPED_FUNGI_NOT_PLANTED_CONFIG).decorated((ConfiguredDecorator)FeatureDecorator.COUNT_MULTILAYER.configured(new CountConfiguration(8))));
@@ -280,6 +285,7 @@ public class Features {
     public static final ConfiguredFeature<?, ?> TREES_JUNGLE = Features.register("trees_jungle", ((ConfiguredFeature)Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.1f), JUNGLE_BUSH.weighted(0.5f), MEGA_JUNGLE_TREE.weighted(0.33333334f)), JUNGLE_TREE)).decorated((ConfiguredDecorator)Decorators.HEIGHTMAP_SQUARE)).decorated((ConfiguredDecorator)FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(50, 0.1f, 1))));
     public static final ConfiguredFeature<?, ?> BAMBOO_VEGETATION = Features.register("bamboo_vegetation", ((ConfiguredFeature)Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.05f), JUNGLE_BUSH.weighted(0.15f), MEGA_JUNGLE_TREE.weighted(0.7f)), Feature.RANDOM_PATCH.configured(Configs.JUNGLE_GRASS_CONFIG))).decorated((ConfiguredDecorator)Decorators.HEIGHTMAP_SQUARE)).decorated((ConfiguredDecorator)FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(30, 0.1f, 1))));
     public static final ConfiguredFeature<?, ?> MUSHROOM_FIELD_VEGETATION = Features.register("mushroom_field_vegetation", Feature.RANDOM_BOOLEAN_SELECTOR.configured(new RandomBooleanFeatureConfiguration(() -> HUGE_RED_MUSHROOM, () -> HUGE_BROWN_MUSHROOM)).decorated((ConfiguredDecorator)Decorators.HEIGHTMAP_SQUARE));
+    public static final ConfiguredFeature<?, ?> AMETHYST_GEODE = Features.register("amethyst_geode", (ConfiguredFeature)((ConfiguredFeature)Feature.GEODE.configured(new GeodeConfiguration(new GeodeBlockSettings(new SimpleStateProvider(States.AIR), new SimpleStateProvider(States.AMETHYST_BLOCK), new SimpleStateProvider(States.BUDDING_AMETHYST), new SimpleStateProvider(States.CALCITE), new SimpleStateProvider(States.TUFF), ImmutableList.of(Blocks.SMALL_AMETHYST_BUD.defaultBlockState(), Blocks.MEDIUM_AMETHYST_BUD.defaultBlockState(), Blocks.LARGE_AMETHYST_BUD.defaultBlockState(), Blocks.AMETHYST_CLUSTER.defaultBlockState())), new GeodeLayerSettings(1.7, 2.2, 3.2, 4.2), new GeodeCrackSettings(0.95, 2.0, 2), 0.35, 0.083, true, 4, 7, 3, 5, 1, 3, -16, 16, 0.05)).decorated((ConfiguredDecorator)FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(6, 0, 47))).squared()).chance(48));
 
     private static <FC extends FeatureConfiguration> ConfiguredFeature<FC, ?> register(String string, ConfiguredFeature<FC, ?> configuredFeature) {
         return Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, string, configuredFeature);
@@ -363,6 +369,7 @@ public class Features {
         protected static final BlockState DIORITE = Blocks.DIORITE.defaultBlockState();
         protected static final BlockState ANDESITE = Blocks.ANDESITE.defaultBlockState();
         protected static final BlockState COAL_ORE = Blocks.COAL_ORE.defaultBlockState();
+        protected static final BlockState COPPER_ORE = Blocks.COPPER_ORE.defaultBlockState();
         protected static final BlockState IRON_ORE = Blocks.IRON_ORE.defaultBlockState();
         protected static final BlockState GOLD_ORE = Blocks.GOLD_ORE.defaultBlockState();
         protected static final BlockState REDSTONE_ORE = Blocks.REDSTONE_ORE.defaultBlockState();
@@ -386,6 +393,11 @@ public class Features {
         protected static final BlockState WARPED_FUNGUS = Blocks.WARPED_FUNGUS.defaultBlockState();
         protected static final BlockState WARPED_ROOTS = Blocks.WARPED_ROOTS.defaultBlockState();
         protected static final BlockState NETHER_SPROUTS = Blocks.NETHER_SPROUTS.defaultBlockState();
+        protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
+        protected static final BlockState AMETHYST_BLOCK = Blocks.AMETHYST_BLOCK.defaultBlockState();
+        protected static final BlockState BUDDING_AMETHYST = Blocks.BUDDING_AMETHYST.defaultBlockState();
+        protected static final BlockState CALCITE = Blocks.CALCITE.defaultBlockState();
+        protected static final BlockState TUFF = Blocks.TUFF.defaultBlockState();
     }
 
     public static final class Decorators {

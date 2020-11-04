@@ -48,7 +48,7 @@ extends ValueObject {
                 return new UploadInfo(bl, string3, uRI);
             }
         } catch (Exception exception) {
-            LOGGER.error("Could not parse UploadInfo: " + exception.getMessage());
+            LOGGER.error("Could not parse UploadInfo: {}", (Object)exception.getMessage());
         }
         return null;
     }

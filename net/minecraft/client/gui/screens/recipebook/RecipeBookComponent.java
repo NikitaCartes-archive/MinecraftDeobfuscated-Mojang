@@ -80,7 +80,7 @@ PlaceRecipe<Ingredient> {
         this.menu = recipeBookMenu;
         minecraft.player.containerMenu = recipeBookMenu;
         this.book = minecraft.player.getRecipeBook();
-        this.timesInventoryChanged = minecraft.player.inventory.getTimesChanged();
+        this.timesInventoryChanged = minecraft.player.getInventory().getTimesChanged();
         if (this.isVisible()) {
             this.initVisuals(bl);
         }
@@ -92,7 +92,7 @@ PlaceRecipe<Ingredient> {
         int i = (this.width - 147) / 2 - this.xOffset;
         int j = (this.height - 166) / 2;
         this.stackedContents.clear();
-        this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
+        this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
         this.menu.fillCraftSlotsStackedContents(this.stackedContents);
         String string = this.searchBox != null ? this.searchBox.getValue() : "";
         this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, this.minecraft.font.lineHeight + 5, new TranslatableComponent("itemGroup.search"));
@@ -204,16 +204,16 @@ PlaceRecipe<Ingredient> {
         if (!this.isVisible()) {
             return;
         }
-        if (this.timesInventoryChanged != this.minecraft.player.inventory.getTimesChanged()) {
+        if (this.timesInventoryChanged != this.minecraft.player.getInventory().getTimesChanged()) {
             this.updateStackedContents();
-            this.timesInventoryChanged = this.minecraft.player.inventory.getTimesChanged();
+            this.timesInventoryChanged = this.minecraft.player.getInventory().getTimesChanged();
         }
         this.searchBox.tick();
     }
 
     private void updateStackedContents() {
         this.stackedContents.clear();
-        this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
+        this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
         this.menu.fillCraftSlotsStackedContents(this.stackedContents);
         this.updateCollections(false);
     }

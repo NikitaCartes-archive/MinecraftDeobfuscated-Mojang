@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -107,7 +108,7 @@ extends HangingEntity {
         this.playSound(SoundEvents.PAINTING_BREAK, 1.0f, 1.0f);
         if (entity instanceof Player) {
             Player player = (Player)entity;
-            if (player.abilities.instabuild) {
+            if (player.getAbilities().instabuild) {
                 return;
             }
         }
@@ -134,6 +135,12 @@ extends HangingEntity {
     @Override
     public Packet<?> getAddEntityPacket() {
         return new ClientboundAddPaintingPacket(this);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        return new ItemStack(Items.PAINTING);
     }
 }
 

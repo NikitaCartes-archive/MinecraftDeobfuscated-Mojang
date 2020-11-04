@@ -94,7 +94,7 @@ extends AbstractMinecart {
                 e = 5.0;
             }
             this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)(4.0 + this.random.nextDouble() * 1.5 * e), Explosion.BlockInteraction.BREAK);
-            this.remove();
+            this.discard();
         }
     }
 

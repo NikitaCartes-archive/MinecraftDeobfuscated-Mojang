@@ -8,7 +8,8 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -19,8 +20,8 @@ public class SquidRenderer
 extends MobRenderer<Squid, SquidModel<Squid>> {
     private static final ResourceLocation SQUID_LOCATION = new ResourceLocation("textures/entity/squid.png");
 
-    public SquidRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new SquidModel(), 0.7f);
+    public SquidRenderer(EntityRendererProvider.Context context) {
+        super(context, new SquidModel(context.getLayer(ModelLayers.SQUID)), 0.7f);
     }
 
     @Override

@@ -124,7 +124,7 @@ implements MenuAccess<T> {
             RenderSystem.enableDepthTest();
         }
         this.renderLabels(poseStack, i, j);
-        Inventory inventory = this.minecraft.player.inventory;
+        Inventory inventory = this.minecraft.player.getInventory();
         ItemStack itemStack2 = itemStack = this.draggingItem.isEmpty() ? inventory.getCarried() : this.draggingItem;
         if (!itemStack.isEmpty()) {
             p = 8;
@@ -159,7 +159,7 @@ implements MenuAccess<T> {
     }
 
     protected void renderTooltip(PoseStack poseStack, int i, int j) {
-        if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+        if (this.minecraft.player.getInventory().getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
             this.renderTooltip(poseStack, this.hoveredSlot.getItem(), i, j);
         }
     }
@@ -188,7 +188,7 @@ implements MenuAccess<T> {
         ItemStack itemStack = slot.getItem();
         boolean bl = false;
         boolean bl2 = slot == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
-        ItemStack itemStack2 = this.minecraft.player.inventory.getCarried();
+        ItemStack itemStack2 = this.minecraft.player.getInventory().getCarried();
         String string = null;
         if (slot == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !itemStack.isEmpty()) {
             itemStack = itemStack.copy();
@@ -232,7 +232,7 @@ implements MenuAccess<T> {
     }
 
     private void recalculateQuickCraftRemaining() {
-        ItemStack itemStack = this.minecraft.player.inventory.getCarried();
+        ItemStack itemStack = this.minecraft.player.getInventory().getCarried();
         if (itemStack.isEmpty() || !this.isQuickCrafting) {
             return;
         }
@@ -285,7 +285,7 @@ implements MenuAccess<T> {
             if (bl2) {
                 m = -999;
             }
-            if (this.minecraft.options.touchscreen && bl2 && this.minecraft.player.inventory.getCarried().isEmpty()) {
+            if (this.minecraft.options.touchscreen && bl2 && this.minecraft.player.getInventory().getCarried().isEmpty()) {
                 this.minecraft.setScreen(null);
                 return true;
             }
@@ -299,7 +299,7 @@ implements MenuAccess<T> {
                         this.clickedSlot = null;
                     }
                 } else if (!this.isQuickCrafting) {
-                    if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+                    if (this.minecraft.player.getInventory().getCarried().isEmpty()) {
                         if (this.minecraft.options.keyPickItem.matchesMouse(i)) {
                             this.slotClicked(slot, m, i, ClickType.CLONE);
                         } else {
@@ -338,7 +338,7 @@ implements MenuAccess<T> {
     }
 
     private void checkHotbarMouseClicked(int i) {
-        if (this.hoveredSlot != null && this.minecraft.player.inventory.getCarried().isEmpty()) {
+        if (this.hoveredSlot != null && this.minecraft.player.getInventory().getCarried().isEmpty()) {
             if (this.minecraft.options.keySwapOffhand.matchesMouse(i)) {
                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
                 return;
@@ -357,7 +357,7 @@ implements MenuAccess<T> {
     @Override
     public boolean mouseDragged(double d, double e, int i, double f, double g) {
         Slot slot = this.findSlot(d, e);
-        ItemStack itemStack = this.minecraft.player.inventory.getCarried();
+        ItemStack itemStack = this.minecraft.player.getInventory().getCarried();
         if (this.clickedSlot != null && this.minecraft.options.touchscreen) {
             if (i == 0 || i == 1) {
                 if (this.draggingItem.isEmpty()) {
@@ -433,7 +433,7 @@ implements MenuAccess<T> {
                     if (l != -1 && !this.draggingItem.isEmpty() && bl2) {
                         this.slotClicked(this.clickedSlot, this.clickedSlot.index, i, ClickType.PICKUP);
                         this.slotClicked(slot, l, 0, ClickType.PICKUP);
-                        if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+                        if (this.minecraft.player.getInventory().getCarried().isEmpty()) {
                             this.snapbackItem = ItemStack.EMPTY;
                         } else {
                             this.slotClicked(this.clickedSlot, this.clickedSlot.index, i, ClickType.PICKUP);
@@ -459,7 +459,7 @@ implements MenuAccess<T> {
                     this.slotClicked(slot2, slot2.index, AbstractContainerMenu.getQuickcraftMask(1, this.quickCraftingType), ClickType.QUICK_CRAFT);
                 }
                 this.slotClicked(null, -999, AbstractContainerMenu.getQuickcraftMask(2, this.quickCraftingType), ClickType.QUICK_CRAFT);
-            } else if (!this.minecraft.player.inventory.getCarried().isEmpty()) {
+            } else if (!this.minecraft.player.getInventory().getCarried().isEmpty()) {
                 if (this.minecraft.options.keyPickItem.matchesMouse(i)) {
                     this.slotClicked(slot, l, i, ClickType.CLONE);
                 } else {
@@ -472,7 +472,7 @@ implements MenuAccess<T> {
                 }
             }
         }
-        if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+        if (this.minecraft.player.getInventory().getCarried().isEmpty()) {
             this.lastClickTime = 0L;
         }
         this.isQuickCrafting = false;
@@ -517,7 +517,7 @@ implements MenuAccess<T> {
     }
 
     protected boolean checkHotbarKeyPressed(int i, int j) {
-        if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null) {
+        if (this.minecraft.player.getInventory().getCarried().isEmpty() && this.hoveredSlot != null) {
             if (this.minecraft.options.keySwapOffhand.matches(i, j)) {
                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
                 return true;
@@ -547,7 +547,7 @@ implements MenuAccess<T> {
     @Override
     public void tick() {
         super.tick();
-        if (!this.minecraft.player.isAlive() || this.minecraft.player.removed) {
+        if (!this.minecraft.player.isAlive() || this.minecraft.player.isRemoved()) {
             this.minecraft.player.closeContainer();
         }
     }

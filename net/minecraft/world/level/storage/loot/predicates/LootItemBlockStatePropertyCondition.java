@@ -45,7 +45,7 @@ implements LootItemCondition {
     @Override
     public boolean test(LootContext lootContext) {
         BlockState blockState = lootContext.getParamOrNull(LootContextParams.BLOCK_STATE);
-        return blockState != null && this.block == blockState.getBlock() && this.properties.matches(blockState);
+        return blockState != null && blockState.is(this.block) && this.properties.matches(blockState);
     }
 
     public static Builder hasBlockStateProperties(Block block) {

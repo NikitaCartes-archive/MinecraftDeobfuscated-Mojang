@@ -6,7 +6,6 @@ package net.minecraft.world.level.block.entity;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.types.Type;
 import java.util.Set;
-import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -49,6 +48,7 @@ import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -88,7 +88,7 @@ public class BlockEntityType<T extends BlockEntity> {
     public static final BlockEntityType<JigsawBlockEntity> JIGSAW = BlockEntityType.register("jigsaw", Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW));
     public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = BlockEntityType.register("campfire", Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE));
     public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = BlockEntityType.register("beehive", Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE));
-    private final Supplier<? extends T> factory;
+    private final BlockEntitySupplier<? extends T> factory;
     private final Set<Block> validBlocks;
     private final Type<?> dataType;
 
@@ -105,19 +105,19 @@ public class BlockEntityType<T extends BlockEntity> {
         return Registry.register(Registry.BLOCK_ENTITY_TYPE, string, builder.build(type));
     }
 
-    public BlockEntityType(Supplier<? extends T> supplier, Set<Block> set, Type<?> type) {
-        this.factory = supplier;
+    public BlockEntityType(BlockEntitySupplier<? extends T> blockEntitySupplier, Set<Block> set, Type<?> type) {
+        this.factory = blockEntitySupplier;
         this.validBlocks = set;
         this.dataType = type;
     }
 
     @Nullable
-    public T create() {
-        return (T)((BlockEntity)this.factory.get());
+    public T create(BlockPos blockPos, BlockState blockState) {
+        return this.factory.create(blockPos, blockState);
     }
 
-    public boolean isValid(Block block) {
-        return this.validBlocks.contains(block);
+    public boolean isValid(BlockState blockState) {
+        return this.validBlocks.contains(blockState.getBlock());
     }
 
     @Nullable
@@ -130,21 +130,26 @@ public class BlockEntityType<T extends BlockEntity> {
     }
 
     public static final class Builder<T extends BlockEntity> {
-        private final Supplier<? extends T> factory;
+        private final BlockEntitySupplier<? extends T> factory;
         private final Set<Block> validBlocks;
 
-        private Builder(Supplier<? extends T> supplier, Set<Block> set) {
-            this.factory = supplier;
+        private Builder(BlockEntitySupplier<? extends T> blockEntitySupplier, Set<Block> set) {
+            this.factory = blockEntitySupplier;
             this.validBlocks = set;
         }
 
-        public static <T extends BlockEntity> Builder<T> of(Supplier<? extends T> supplier, Block ... blocks) {
-            return new Builder<T>(supplier, ImmutableSet.copyOf(blocks));
+        public static <T extends BlockEntity> Builder<T> of(BlockEntitySupplier<? extends T> blockEntitySupplier, Block ... blocks) {
+            return new Builder<T>(blockEntitySupplier, ImmutableSet.copyOf(blocks));
         }
 
         public BlockEntityType<T> build(Type<?> type) {
             return new BlockEntityType<T>(this.factory, this.validBlocks, type);
         }
+    }
+
+    @FunctionalInterface
+    static interface BlockEntitySupplier<T extends BlockEntity> {
+        public T create(BlockPos var1, BlockState var2);
     }
 }
 

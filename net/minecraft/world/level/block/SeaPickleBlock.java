@@ -87,7 +87,7 @@ SimpleWaterloggedBlock {
 
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-        if (blockPlaceContext.getItemInHand().getItem() == this.asItem() && blockState.getValue(PICKLES) < 4) {
+        if (blockPlaceContext.getItemInHand().is(this.asItem()) && blockState.getValue(PICKLES) < 4) {
             return true;
         }
         return super.canBeReplaced(blockState, blockPlaceContext);

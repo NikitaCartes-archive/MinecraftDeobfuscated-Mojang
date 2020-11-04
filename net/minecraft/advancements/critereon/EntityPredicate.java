@@ -221,7 +221,7 @@ public class EntityPredicate {
 
         private static Composite fromElement(String string, DeserializationContext deserializationContext, @Nullable JsonElement jsonElement) {
             if (jsonElement != null && jsonElement.isJsonArray()) {
-                LootItemCondition[] lootItemConditions = deserializationContext.deserializeConditions(jsonElement.getAsJsonArray(), deserializationContext.getAdvancementId().toString() + "/" + string, LootContextParamSets.ADVANCEMENT_ENTITY);
+                LootItemCondition[] lootItemConditions = deserializationContext.deserializeConditions(jsonElement.getAsJsonArray(), deserializationContext.getAdvancementId() + "/" + string, LootContextParamSets.ADVANCEMENT_ENTITY);
                 return new Composite(lootItemConditions);
             }
             EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonElement);

@@ -7,6 +7,8 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -158,6 +160,22 @@ extends Entity {
             f += 360.0f;
         }
         return Mth.lerp(0.2f, f, g);
+    }
+
+    @Override
+    public Packet<?> getAddEntityPacket() {
+        Entity entity = this.getOwner();
+        return new ClientboundAddEntityPacket(this, entity == null ? 0 : entity.getId());
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        Entity entity = this.level.getEntity(clientboundAddEntityPacket.getData());
+        if (entity != null) {
+            this.setOwner(entity);
+        }
     }
 }
 

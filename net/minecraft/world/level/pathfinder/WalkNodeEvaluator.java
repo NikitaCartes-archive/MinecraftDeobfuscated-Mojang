@@ -61,7 +61,7 @@ extends NodeEvaluator {
     public Node getStart() {
         BlockPos blockPos;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        int i = Mth.floor(this.mob.getY());
+        int i = this.mob.getBlockY();
         BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
         if (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
             while (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
@@ -69,7 +69,7 @@ extends NodeEvaluator {
             }
             --i;
         } else if (this.canFloat() && this.mob.isInWater()) {
-            while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
+            while (blockState.is(Blocks.WATER) || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
                 blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
             }
             --i;
@@ -77,7 +77,7 @@ extends NodeEvaluator {
             i = Mth.floor(this.mob.getY() + 0.5);
         } else {
             blockPos = this.mob.blockPosition();
-            while ((this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND)) && blockPos.getY() > 0) {
+            while ((this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND)) && blockPos.getY() > this.mob.level.getMinBuildHeight()) {
                 blockPos = blockPos.below();
             }
             i = blockPos.above().getY();
@@ -225,7 +225,7 @@ extends NodeEvaluator {
             if (this.getCachedBlockType(this.mob, i, j - 1, k) != BlockPathTypes.WATER) {
                 return node;
             }
-            while (j > 0) {
+            while (j > this.mob.level.getMinBuildHeight()) {
                 if ((blockPathTypes2 = this.getCachedBlockType(this.mob, i, --j, k)) == BlockPathTypes.WATER) {
                     node = this.getNode(i, j, k);
                     node.type = blockPathTypes2;
@@ -239,7 +239,7 @@ extends NodeEvaluator {
             int n = 0;
             int o = j;
             while (blockPathTypes2 == BlockPathTypes.OPEN) {
-                if (--j < 0) {
+                if (--j < this.mob.level.getMinBuildHeight()) {
                     Node node2 = this.getNode(i, o, k);
                     node2.type = BlockPathTypes.BLOCKED;
                     node2.costMalus = -1.0f;
@@ -358,7 +358,7 @@ extends NodeEvaluator {
         int j = mutableBlockPos.getY();
         int k = mutableBlockPos.getZ();
         BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos);
-        if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
+        if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
             BlockPathTypes blockPathTypes2 = WalkNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
             BlockPathTypes blockPathTypes3 = blockPathTypes = blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER || blockPathTypes2 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE) {
@@ -454,7 +454,7 @@ extends NodeEvaluator {
         if (block instanceof LeavesBlock) {
             return BlockPathTypes.LEAVES;
         }
-        if (block.is(BlockTags.FENCES) || block.is(BlockTags.WALLS) || block instanceof FenceGateBlock && !blockState.getValue(FenceGateBlock.OPEN).booleanValue()) {
+        if (blockState.is(BlockTags.FENCES) || blockState.is(BlockTags.WALLS) || block instanceof FenceGateBlock && !blockState.getValue(FenceGateBlock.OPEN).booleanValue()) {
             return BlockPathTypes.FENCE;
         }
         if (!blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND)) {

@@ -8,6 +8,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -16,39 +21,38 @@ public class ChickenModel<T extends Entity>
 extends AgeableListModel<T> {
     private final ModelPart head;
     private final ModelPart body;
-    private final ModelPart leg0;
-    private final ModelPart leg1;
-    private final ModelPart wing0;
-    private final ModelPart wing1;
+    private final ModelPart rightLeg;
+    private final ModelPart leftLeg;
+    private final ModelPart rightWing;
+    private final ModelPart leftWing;
     private final ModelPart beak;
     private final ModelPart redThing;
 
-    public ChickenModel() {
+    public ChickenModel(ModelPart modelPart) {
+        this.head = modelPart.getChild("head");
+        this.beak = modelPart.getChild("beak");
+        this.redThing = modelPart.getChild("red_thing");
+        this.body = modelPart.getChild("body");
+        this.rightLeg = modelPart.getChild("right_leg");
+        this.leftLeg = modelPart.getChild("left_leg");
+        this.rightWing = modelPart.getChild("right_wing");
+        this.leftWing = modelPart.getChild("left_wing");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
         int i = 16;
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-2.0f, -6.0f, -2.0f, 4.0f, 6.0f, 3.0f, 0.0f);
-        this.head.setPos(0.0f, 15.0f, -4.0f);
-        this.beak = new ModelPart(this, 14, 0);
-        this.beak.addBox(-2.0f, -4.0f, -4.0f, 4.0f, 2.0f, 2.0f, 0.0f);
-        this.beak.setPos(0.0f, 15.0f, -4.0f);
-        this.redThing = new ModelPart(this, 14, 4);
-        this.redThing.addBox(-1.0f, -2.0f, -3.0f, 2.0f, 2.0f, 2.0f, 0.0f);
-        this.redThing.setPos(0.0f, 15.0f, -4.0f);
-        this.body = new ModelPart(this, 0, 9);
-        this.body.addBox(-3.0f, -4.0f, -3.0f, 6.0f, 8.0f, 6.0f, 0.0f);
-        this.body.setPos(0.0f, 16.0f, 0.0f);
-        this.leg0 = new ModelPart(this, 26, 0);
-        this.leg0.addBox(-1.0f, 0.0f, -3.0f, 3.0f, 5.0f, 3.0f);
-        this.leg0.setPos(-2.0f, 19.0f, 1.0f);
-        this.leg1 = new ModelPart(this, 26, 0);
-        this.leg1.addBox(-1.0f, 0.0f, -3.0f, 3.0f, 5.0f, 3.0f);
-        this.leg1.setPos(1.0f, 19.0f, 1.0f);
-        this.wing0 = new ModelPart(this, 24, 13);
-        this.wing0.addBox(0.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f);
-        this.wing0.setPos(-4.0f, 13.0f, 0.0f);
-        this.wing1 = new ModelPart(this, 24, 13);
-        this.wing1.addBox(-1.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f);
-        this.wing1.setPos(4.0f, 13.0f, 0.0f);
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -6.0f, -2.0f, 4.0f, 6.0f, 3.0f), PartPose.offset(0.0f, 15.0f, -4.0f));
+        partDefinition.addOrReplaceChild("beak", CubeListBuilder.create().texOffs(14, 0).addBox(-2.0f, -4.0f, -4.0f, 4.0f, 2.0f, 2.0f), PartPose.offset(0.0f, 15.0f, -4.0f));
+        partDefinition.addOrReplaceChild("red_thing", CubeListBuilder.create().texOffs(14, 4).addBox(-1.0f, -2.0f, -3.0f, 2.0f, 2.0f, 2.0f), PartPose.offset(0.0f, 15.0f, -4.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 9).addBox(-3.0f, -4.0f, -3.0f, 6.0f, 8.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 16.0f, 0.0f, 1.5707964f, 0.0f, 0.0f));
+        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(26, 0).addBox(-1.0f, 0.0f, -3.0f, 3.0f, 5.0f, 3.0f);
+        partDefinition.addOrReplaceChild("right_leg", cubeListBuilder, PartPose.offset(-2.0f, 19.0f, 1.0f));
+        partDefinition.addOrReplaceChild("left_leg", cubeListBuilder, PartPose.offset(1.0f, 19.0f, 1.0f));
+        partDefinition.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(24, 13).addBox(0.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f), PartPose.offset(-4.0f, 13.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(24, 13).addBox(-1.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f), PartPose.offset(4.0f, 13.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -58,7 +62,7 @@ extends AgeableListModel<T> {
 
     @Override
     protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.leg0, this.leg1, this.wing0, this.wing1);
+        return ImmutableList.of(this.body, this.rightLeg, this.leftLeg, this.rightWing, this.leftWing);
     }
 
     @Override
@@ -69,11 +73,10 @@ extends AgeableListModel<T> {
         this.beak.yRot = this.head.yRot;
         this.redThing.xRot = this.head.xRot;
         this.redThing.yRot = this.head.yRot;
-        this.body.xRot = 1.5707964f;
-        this.leg0.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
-        this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
-        this.wing0.zRot = h;
-        this.wing1.zRot = -h;
+        this.rightLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+        this.rightWing.zRot = h;
+        this.leftWing.zRot = -h;
     }
 }
 

@@ -42,7 +42,7 @@ import net.minecraft.gametest.framework.TestClassNameArgument;
 import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -79,7 +79,7 @@ public class TestCommand {
             for (int m = 0; m < k; ++m) {
                 BlockPos blockPos3 = new BlockPos(blockPos2.getX() + l, blockPos2.getY() + 1, blockPos2.getZ() + m);
                 Block block = Blocks.POLISHED_ANDESITE;
-                BlockInput blockInput = new BlockInput(block.defaultBlockState(), Collections.EMPTY_SET, null);
+                BlockInput blockInput = new BlockInput(block.defaultBlockState(), Collections.emptySet(), null);
                 blockInput.place(serverLevel, blockPos3, 2);
             }
         }
@@ -149,7 +149,7 @@ public class TestCommand {
         TestCommand.runTestPreparation(testFunction, serverLevel);
         AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
         BlockPos blockPos2 = new BlockPos(aABB.minX, aABB.minY, aABB.minZ);
-        GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.singleton);
+        GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
     }
 
     private static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
@@ -170,7 +170,7 @@ public class TestCommand {
         ServerLevel serverLevel = commandSourceStack.getLevel();
         GameTestRunner.clearMarkers(serverLevel);
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition().x, (double)commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, new BlockPos(commandSourceStack.getPosition())).getY(), commandSourceStack.getPosition().z);
-        GameTestRunner.clearAllTests(serverLevel, blockPos, GameTestTicker.singleton, Mth.clamp(i, 0, 1024));
+        GameTestRunner.clearAllTests(serverLevel, blockPos, GameTestTicker.SINGLETON, Mth.clamp(i, 0, 1024));
         return 1;
     }
 
@@ -183,7 +183,7 @@ public class TestCommand {
         TestCommand.runTestPreparation(testFunction, serverLevel);
         Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
         GameTestInfo gameTestInfo = new GameTestInfo(testFunction, rotation, serverLevel);
-        GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.singleton);
+        GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
         return 1;
     }
 
@@ -229,7 +229,7 @@ public class TestCommand {
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3);
         ServerLevel serverLevel = commandSourceStack.getLevel();
         Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
-        Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos2, rotation, serverLevel, GameTestTicker.singleton, j);
+        Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos2, rotation, serverLevel, GameTestTicker.SINGLETON, j);
         MultipleTestTracker multipleTestTracker = new MultipleTestTracker(collection2);
         multipleTestTracker.addListener(new TestSummaryDisplayer(serverLevel, multipleTestTracker));
         multipleTestTracker.addFailureListener(gameTestInfo -> GameTestRegistry.rememberFailedTest(gameTestInfo.getTestFunction()));
@@ -281,7 +281,7 @@ public class TestCommand {
             String string2 = IOUtils.toString(bufferedReader);
             Files.createDirectories(path2.getParent(), new FileAttribute[0]);
             try (OutputStream outputStream = Files.newOutputStream(path2, new OpenOption[0]);){
-                NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+                NbtIo.writeCompressed(NbtUtils.snbtToStructure(string2), outputStream);
             }
             TestCommand.say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
             return 0;

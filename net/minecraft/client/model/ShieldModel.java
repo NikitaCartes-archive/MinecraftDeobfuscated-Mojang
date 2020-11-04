@@ -9,22 +9,33 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 
 @Environment(value=EnvType.CLIENT)
 public class ShieldModel
 extends Model {
+    private final ModelPart root;
     private final ModelPart plate;
     private final ModelPart handle;
 
-    public ShieldModel() {
+    public ShieldModel(ModelPart modelPart) {
         super(RenderType::entitySolid);
-        this.texWidth = 64;
-        this.texHeight = 64;
-        this.plate = new ModelPart(this, 0, 0);
-        this.plate.addBox(-6.0f, -11.0f, -2.0f, 12.0f, 22.0f, 1.0f, 0.0f);
-        this.handle = new ModelPart(this, 26, 0);
-        this.handle.addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f, 0.0f);
+        this.root = modelPart;
+        this.plate = modelPart.getChild("plate");
+        this.handle = modelPart.getChild("handle");
+    }
+
+    public static LayerDefinition createLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0f, -11.0f, -2.0f, 12.0f, 22.0f, 1.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("handle", CubeListBuilder.create().texOffs(26, 0).addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     public ModelPart plate() {
@@ -37,8 +48,7 @@ extends Model {
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-        this.plate.render(poseStack, vertexConsumer, i, j, f, g, h, k);
-        this.handle.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+        this.root.render(poseStack, vertexConsumer, i, j, f, g, h, k);
     }
 }
 

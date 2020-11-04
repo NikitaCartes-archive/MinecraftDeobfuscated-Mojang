@@ -32,7 +32,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class GiveGiftToHero
 extends Behavior<Villager> {
-    private static final Map<VillagerProfession, ResourceLocation> gifts = Util.make(Maps.newHashMap(), hashMap -> {
+    private static final Map<VillagerProfession, ResourceLocation> GIFTS = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
         hashMap.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
         hashMap.put(VillagerProfession.CARTOGRAPHER, BuiltInLootTables.CARTOGRAPHER_GIFT);
@@ -115,8 +115,8 @@ extends Behavior<Villager> {
             return ImmutableList.of(new ItemStack(Items.POPPY));
         }
         VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
-        if (gifts.containsKey(villagerProfession)) {
-            LootTable lootTable = villager.level.getServer().getLootTables().get(gifts.get(villagerProfession));
+        if (GIFTS.containsKey(villagerProfession)) {
+            LootTable lootTable = villager.level.getServer().getLootTables().get(GIFTS.get(villagerProfession));
             LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level).withParameter(LootContextParams.ORIGIN, villager.position()).withParameter(LootContextParams.THIS_ENTITY, villager).withRandom(villager.getRandom());
             return lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
         }

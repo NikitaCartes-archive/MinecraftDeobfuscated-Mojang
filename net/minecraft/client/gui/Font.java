@@ -244,7 +244,7 @@ public class Font {
         private final boolean seeThrough;
         private final int packedLightCoords;
         private float x;
-        private float y;
+        private final float y;
         @Nullable
         private List<BakedGlyph.Effect> effects;
 

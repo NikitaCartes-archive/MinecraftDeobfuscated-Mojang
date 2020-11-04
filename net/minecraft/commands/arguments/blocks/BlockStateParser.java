@@ -149,11 +149,11 @@ public class BlockStateParser {
     private boolean hasBlockEntity(TagCollection<Block> tagCollection) {
         Tag<Block> tag;
         if (this.state != null) {
-            return this.state.getBlock().isEntityBlock();
+            return this.state.hasBlockEntity();
         }
         if (this.tag != null && (tag = tagCollection.getTag(this.tag)) != null) {
             for (Block block : tag.getValues()) {
-                if (!block.isEntityBlock()) continue;
+                if (!block.defaultBlockState().hasBlockEntity()) continue;
                 return true;
             }
         }
@@ -219,7 +219,7 @@ public class BlockStateParser {
             boolean bl = false;
             boolean bl2 = false;
             Iterator<Block> iterator = tag.getValues().iterator();
-            while (!(!iterator.hasNext() || (bl |= !(block = iterator.next()).getStateDefinition().getProperties().isEmpty()) && (bl2 |= block.isEntityBlock()))) {
+            while (!(!iterator.hasNext() || (bl |= !(block = iterator.next()).getStateDefinition().getProperties().isEmpty()) && (bl2 |= block.defaultBlockState().hasBlockEntity()))) {
             }
             if (bl) {
                 suggestionsBuilder.suggest(String.valueOf('['));
@@ -236,7 +236,7 @@ public class BlockStateParser {
             if (!this.state.getBlock().getStateDefinition().getProperties().isEmpty()) {
                 suggestionsBuilder.suggest(String.valueOf('['));
             }
-            if (this.state.getBlock().isEntityBlock()) {
+            if (this.state.hasBlockEntity()) {
                 suggestionsBuilder.suggest(String.valueOf('{'));
             }
         }

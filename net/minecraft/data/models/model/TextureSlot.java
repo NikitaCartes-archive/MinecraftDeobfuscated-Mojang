@@ -41,6 +41,9 @@ public final class TextureSlot {
     public static final TextureSlot TORCH = TextureSlot.create("torch");
     public static final TextureSlot LAYER0 = TextureSlot.create("layer0");
     public static final TextureSlot LIT_LOG = TextureSlot.create("lit_log");
+    public static final TextureSlot CANDLE = TextureSlot.create("candle");
+    public static final TextureSlot INSIDE = TextureSlot.create("inside");
+    public static final TextureSlot CONTENT = TextureSlot.create("content");
     private final String id;
     @Nullable
     private final TextureSlot parent;

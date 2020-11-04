@@ -10,6 +10,8 @@ interface IndexMerger {
 
     public boolean forMergedIndexes(IndexConsumer var1);
 
+    public int size();
+
     public static interface IndexConsumer {
         public boolean merge(int var1, int var2, int var3);
     }

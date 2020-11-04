@@ -7,13 +7,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.monster.Monster;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractZombieModel<T extends Monster>
 extends HumanoidModel<T> {
-    protected AbstractZombieModel(float f, float g, int i, int j) {
-        super(f, g, i, j);
+    protected AbstractZombieModel(ModelPart modelPart) {
+        super(modelPart);
     }
 
     @Override

@@ -8,6 +8,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,58 +24,53 @@ import net.minecraft.world.entity.monster.piglin.PiglinArmPose;
 @Environment(value=EnvType.CLIENT)
 public class PiglinModel<T extends Mob>
 extends PlayerModel<T> {
-    public final ModelPart earRight;
-    public final ModelPart earLeft;
-    private final ModelPart bodyDefault;
-    private final ModelPart headDefault;
-    private final ModelPart leftArmDefault;
-    private final ModelPart rightArmDefault;
+    public final ModelPart rightEar;
+    private final ModelPart leftEar;
+    private final PartPose bodyDefault;
+    private final PartPose headDefault;
+    private final PartPose leftArmDefault;
+    private final PartPose rightArmDefault;
 
-    public PiglinModel(float f, int i, int j) {
-        super(f, false);
-        this.texWidth = i;
-        this.texHeight = j;
-        this.body = new ModelPart(this, 16, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
-        this.head = new ModelPart(this);
-        this.head.texOffs(0, 0).addBox(-5.0f, -8.0f, -4.0f, 10.0f, 8.0f, 8.0f, f);
-        this.head.texOffs(31, 1).addBox(-2.0f, -4.0f, -5.0f, 4.0f, 4.0f, 1.0f, f);
-        this.head.texOffs(2, 4).addBox(2.0f, -2.0f, -5.0f, 1.0f, 2.0f, 1.0f, f);
-        this.head.texOffs(2, 0).addBox(-3.0f, -2.0f, -5.0f, 1.0f, 2.0f, 1.0f, f);
-        this.earRight = new ModelPart(this);
-        this.earRight.setPos(4.5f, -6.0f, 0.0f);
-        this.earRight.texOffs(51, 6).addBox(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
-        this.head.addChild(this.earRight);
-        this.earLeft = new ModelPart(this);
-        this.earLeft.setPos(-4.5f, -6.0f, 0.0f);
-        this.earLeft.texOffs(39, 6).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
-        this.head.addChild(this.earLeft);
-        this.hat = new ModelPart(this);
-        this.bodyDefault = this.body.createShallowCopy();
-        this.headDefault = this.head.createShallowCopy();
-        this.leftArmDefault = this.leftArm.createShallowCopy();
-        this.rightArmDefault = this.leftArm.createShallowCopy();
+    public PiglinModel(ModelPart modelPart) {
+        super(modelPart, false);
+        this.rightEar = this.head.getChild("right_ear");
+        this.leftEar = this.head.getChild("left_ear");
+        this.bodyDefault = this.body.storePose();
+        this.headDefault = this.head.storePose();
+        this.leftArmDefault = this.leftArm.storePose();
+        this.rightArmDefault = this.rightArm.storePose();
+    }
+
+    public static MeshDefinition createMesh(CubeDeformation cubeDeformation) {
+        MeshDefinition meshDefinition = PlayerModel.createMesh(cubeDeformation, false);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, cubeDeformation), PartPose.ZERO);
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0f, -8.0f, -4.0f, 10.0f, 8.0f, 8.0f, cubeDeformation).texOffs(31, 1).addBox(-2.0f, -4.0f, -5.0f, 4.0f, 4.0f, 1.0f, cubeDeformation).texOffs(2, 4).addBox(2.0f, -2.0f, -5.0f, 1.0f, 2.0f, 1.0f, cubeDeformation).texOffs(2, 0).addBox(-3.0f, -2.0f, -5.0f, 1.0f, 2.0f, 1.0f, cubeDeformation), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(51, 6).addBox(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, cubeDeformation), PartPose.offsetAndRotation(4.5f, -6.0f, 0.0f, 0.0f, 0.0f, -0.5235988f));
+        partDefinition2.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(39, 6).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, cubeDeformation), PartPose.offsetAndRotation(-4.5f, -6.0f, 0.0f, 0.0f, 0.0f, 0.5235988f));
+        partDefinition.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+        return meshDefinition;
     }
 
     @Override
     public void setupAnim(T mob, float f, float g, float h, float i, float j) {
-        this.body.copyFrom(this.bodyDefault);
-        this.head.copyFrom(this.headDefault);
-        this.leftArm.copyFrom(this.leftArmDefault);
-        this.rightArm.copyFrom(this.rightArmDefault);
+        this.body.loadPose(this.bodyDefault);
+        this.head.loadPose(this.headDefault);
+        this.leftArm.loadPose(this.leftArmDefault);
+        this.rightArm.loadPose(this.rightArmDefault);
         super.setupAnim(mob, f, g, h, i, j);
         float k = 0.5235988f;
         float l = h * 0.1f + f * 0.5f;
         float m = 0.08f + g * 0.4f;
-        this.earRight.zRot = -0.5235988f - Mth.cos(l * 1.2f) * m;
-        this.earLeft.zRot = 0.5235988f + Mth.cos(l) * m;
+        this.leftEar.zRot = -0.5235988f - Mth.cos(l * 1.2f) * m;
+        this.rightEar.zRot = 0.5235988f + Mth.cos(l) * m;
         if (mob instanceof AbstractPiglin) {
             AbstractPiglin abstractPiglin = (AbstractPiglin)mob;
             PiglinArmPose piglinArmPose = abstractPiglin.getArmPose();
             if (piglinArmPose == PiglinArmPose.DANCING) {
                 float n = h / 60.0f;
-                this.earLeft.zRot = 0.5235988f + (float)Math.PI / 180 * Mth.sin(n * 30.0f) * 10.0f;
-                this.earRight.zRot = -0.5235988f - (float)Math.PI / 180 * Mth.cos(n * 30.0f) * 10.0f;
+                this.rightEar.zRot = 0.5235988f + (float)Math.PI / 180 * Mth.sin(n * 30.0f) * 10.0f;
+                this.leftEar.zRot = -0.5235988f - (float)Math.PI / 180 * Mth.cos(n * 30.0f) * 10.0f;
                 this.head.x = Mth.sin(n * 10.0f);
                 this.head.y = Mth.sin(n * 40.0f) + 0.4f;
                 this.rightArm.zRot = (float)Math.PI / 180 * (70.0f + Mth.cos(n * 40.0f) * 10.0f);

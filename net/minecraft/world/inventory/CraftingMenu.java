@@ -99,7 +99,7 @@ extends RecipeBookMenu<CraftingContainer> {
     @Override
     public void removed(Player player) {
         super.removed(player);
-        this.access.execute((level, blockPos) -> this.clearContainer(player, (Level)level, this.craftSlots));
+        this.access.execute((level, blockPos) -> this.clearContainer(player, this.craftSlots));
     }
 
     @Override

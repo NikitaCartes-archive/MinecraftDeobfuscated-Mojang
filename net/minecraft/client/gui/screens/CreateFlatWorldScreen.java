@@ -129,10 +129,10 @@ extends Screen {
         @Override
         public void setSelected(@Nullable Entry entry) {
             FlatLayerInfo flatLayerInfo;
-            Item item;
+            ItemStack itemStack;
             super.setSelected(entry);
-            if (entry != null && (item = (flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - this.children().indexOf(entry) - 1)).getBlockState().getBlock().asItem()) != Items.AIR) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", item.getName(new ItemStack(item))).getString());
+            if (entry != null && !(itemStack = new ItemStack((flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - this.children().indexOf(entry) - 1)).getBlockState().getBlock())).isEmpty()) {
+                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", itemStack.getItem().getName(itemStack)).getString());
             }
             CreateFlatWorldScreen.this.updateButtonValidity();
         }

@@ -9,9 +9,11 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class PlayerEnderChestContainer
 extends SimpleContainer {
+    @Nullable
     private EnderChestBlockEntity activeChest;
 
     public PlayerEnderChestContainer() {
@@ -20,6 +22,10 @@ extends SimpleContainer {
 
     public void setActiveChest(EnderChestBlockEntity enderChestBlockEntity) {
         this.activeChest = enderChestBlockEntity;
+    }
+
+    public boolean isActiveChest(EnderChestBlockEntity enderChestBlockEntity) {
+        return this.activeChest == enderChestBlockEntity;
     }
 
     @Override
@@ -61,7 +67,7 @@ extends SimpleContainer {
     @Override
     public void startOpen(Player player) {
         if (this.activeChest != null) {
-            this.activeChest.startOpen();
+            this.activeChest.startOpen(player);
         }
         super.startOpen(player);
     }
@@ -69,7 +75,7 @@ extends SimpleContainer {
     @Override
     public void stopOpen(Player player) {
         if (this.activeChest != null) {
-            this.activeChest.stopOpen();
+            this.activeChest.stopOpen(player);
         }
         super.stopOpen(player);
         this.activeChest = null;

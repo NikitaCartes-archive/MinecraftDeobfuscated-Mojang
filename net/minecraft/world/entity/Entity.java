@@ -3,15 +3,15 @@
  */
 package net.minecraft.world.entity;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -19,6 +19,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -43,6 +44,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -84,6 +86,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -97,6 +100,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntityAccess;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -119,6 +124,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Entity
 implements Nameable,
+EntityAccess,
 CommandSource {
     protected static final Logger LOGGER = LogManager.getLogger();
     private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
@@ -128,7 +134,7 @@ CommandSource {
     private final EntityType<?> type;
     private int id = ENTITY_COUNTER.incrementAndGet();
     public boolean blocksBuilding;
-    private final List<Entity> passengers = Lists.newArrayList();
+    private ImmutableList<Entity> passengers = ImmutableList.of();
     protected int boardingCooldown;
     @Nullable
     private Entity vehicle;
@@ -150,7 +156,8 @@ CommandSource {
     public boolean verticalCollision;
     public boolean hurtMarked;
     protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
-    public boolean removed;
+    @Nullable
+    private RemovalReason removalReason;
     public float walkDistO;
     public float walkDist;
     public float moveDist;
@@ -181,11 +188,7 @@ CommandSource {
     private static final EntityDataAccessor<Boolean> DATA_SILENT = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_NO_GRAVITY = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Pose> DATA_POSE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.POSE);
-    public boolean inChunk;
-    public int xChunk;
-    public int yChunk;
-    public int zChunk;
-    private boolean movedSinceLastChunkCheck;
+    private EntityInLevelCallback levelCallback = EntityInLevelCallback.NULL;
     private Vec3 packetCoordinates;
     public boolean noCulling;
     public boolean hasImpulse;
@@ -198,11 +201,12 @@ CommandSource {
     protected String stringUUID = this.uuid.toString();
     protected boolean glowing;
     private final Set<String> tags = Sets.newHashSet();
-    private boolean forceChunkAddition;
     private final double[] pistonDeltas = new double[]{0.0, 0.0, 0.0};
     private long pistonDeltasGameTime;
     private EntityDimensions dimensions;
     private float eyeHeight;
+    private float crystalSoundIntensity;
+    private int lastCrystalSoundPlayTick;
 
     public Entity(EntityType<?> entityType, Level level) {
         this.type = entityType;
@@ -270,6 +274,7 @@ CommandSource {
         return this.type;
     }
 
+    @Override
     public int getId() {
         return this.id;
     }
@@ -294,7 +299,11 @@ CommandSource {
     }
 
     public void kill() {
-        this.remove();
+        this.remove(RemovalReason.KILLED);
+    }
+
+    public final void discard() {
+        this.remove(RemovalReason.DISCARDED);
     }
 
     protected abstract void defineSynchedData();
@@ -319,7 +328,7 @@ CommandSource {
         if (this.level == null) {
             return;
         }
-        for (double d = this.getY(); d > 0.0 && d < 256.0; d += 1.0) {
+        for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMinBuildHeight(); d += 1.0) {
             this.setPos(this.getX(), d, this.getZ());
             if (this.level.noCollision(this)) break;
         }
@@ -327,8 +336,8 @@ CommandSource {
         this.xRot = 0.0f;
     }
 
-    public void remove() {
-        this.removed = true;
+    public void remove(RemovalReason removalReason) {
+        this.setRemoved(removalReason);
     }
 
     public void setPose(Pose pose) {
@@ -384,7 +393,7 @@ CommandSource {
 
     public void baseTick() {
         this.level.getProfiler().push("entityBaseTick");
-        if (this.isPassenger() && this.getVehicle().removed) {
+        if (this.isPassenger() && this.getVehicle().isRemoved()) {
             this.stopRiding();
         }
         if (this.boardingCooldown > 0) {
@@ -419,14 +428,18 @@ CommandSource {
             this.lavaHurt();
             this.fallDistance *= 0.5f;
         }
-        if (this.getY() < -64.0) {
-            this.outOfWorld();
-        }
+        this.checkOutOfWorld();
         if (!this.level.isClientSide) {
             this.setSharedFlag(0, this.remainingFireTicks > 0);
         }
         this.firstTick = false;
         this.level.getProfiler().pop();
+    }
+
+    public void checkOutOfWorld() {
+        if (this.getY() < (double)(this.level.getMinBuildHeight() - 64)) {
+            this.outOfWorld();
+        }
     }
 
     public void setPortalCooldown() {
@@ -447,7 +460,7 @@ CommandSource {
         return 0;
     }
 
-    protected void lavaHurt() {
+    public void lavaHurt() {
         if (this.fireImmune()) {
             return;
         }
@@ -478,7 +491,7 @@ CommandSource {
     }
 
     protected void outOfWorld() {
-        this.remove();
+        this.discard();
     }
 
     public boolean isFree(double d, double e, double f) {
@@ -543,7 +556,7 @@ CommandSource {
             double d = vec32.x;
             double e = vec32.y;
             double f = vec32.z;
-            if (!block.is(BlockTags.CLIMBABLE)) {
+            if (!blockState2.is(BlockTags.CLIMBABLE)) {
                 e = 0.0;
             }
             this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6);
@@ -589,12 +602,11 @@ CommandSource {
     protected BlockPos getOnPos() {
         BlockPos blockPos2;
         BlockState blockState;
-        Block block;
         int k;
         int j;
         int i = Mth.floor(this.position.x);
         BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.position.y - (double)0.2f), k = Mth.floor(this.position.z));
-        if (this.level.getBlockState(blockPos).isAir() && ((block = (blockState = this.level.getBlockState(blockPos2 = blockPos.below())).getBlock()).is(BlockTags.FENCES) || block.is(BlockTags.WALLS) || block instanceof FenceGateBlock)) {
+        if (this.level.getBlockState(blockPos).isAir() && ((blockState = this.level.getBlockState(blockPos2 = blockPos.below())).is(BlockTags.FENCES) || blockState.is(BlockTags.WALLS) || blockState.getBlock() instanceof FenceGateBlock)) {
             return blockPos2;
         }
         return blockPos;
@@ -607,9 +619,9 @@ CommandSource {
     }
 
     protected float getBlockSpeedFactor() {
-        Block block = this.level.getBlockState(this.blockPosition()).getBlock();
-        float f = block.getSpeedFactor();
-        if (block == Blocks.WATER || block == Blocks.BUBBLE_COLUMN) {
+        BlockState blockState = this.level.getBlockState(this.blockPosition());
+        float f = blockState.getBlock().getSpeedFactor();
+        if (blockState.is(Blocks.WATER) || blockState.is(Blocks.BUBBLE_COLUMN)) {
             return f;
         }
         return (double)f == 1.0 ? this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor() : f;
@@ -785,7 +797,7 @@ CommandSource {
                         } catch (Throwable throwable) {
                             CrashReport crashReport = CrashReport.forThrowable(throwable, "Colliding entity with block");
                             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
-                            CrashReportCategory.populateBlockDetails(crashReportCategory, mutableBlockPos, blockState);
+                            CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, mutableBlockPos, blockState);
                             throw new ReportedException(crashReport);
                         }
                     }
@@ -798,11 +810,19 @@ CommandSource {
     }
 
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
+        BlockState blockState2;
         if (blockState.getMaterial().isLiquid()) {
             return;
         }
-        BlockState blockState2 = this.level.getBlockState(blockPos.above());
-        SoundType soundType = blockState2.is(Blocks.SNOW) ? blockState2.getSoundType() : blockState.getSoundType();
+        if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
+            this.crystalSoundIntensity = (float)((double)this.crystalSoundIntensity * Math.pow(0.997f, this.tickCount - this.lastCrystalSoundPlayTick));
+            this.crystalSoundIntensity = Math.min(1.0f, this.crystalSoundIntensity + 0.07f);
+            float f = 0.5f + this.crystalSoundIntensity * this.random.nextFloat() * 1.2f;
+            float g = 0.1f + this.crystalSoundIntensity * 1.2f;
+            this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
+            this.lastCrystalSoundPlayTick = this.tickCount;
+        }
+        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(Blocks.SNOW) ? blockState2.getSoundType() : blockState.getSoundType();
         this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15f, soundType.getPitch());
     }
 
@@ -1261,8 +1281,11 @@ CommandSource {
     }
 
     public boolean saveAsPassenger(CompoundTag compoundTag) {
+        if (this.removalReason != null && !this.removalReason.shouldSave()) {
+            return false;
+        }
         String string = this.getEncodeId();
-        if (this.removed || string == null) {
+        if (string == null) {
             return false;
         }
         compoundTag.putString("id", string);
@@ -1466,7 +1489,7 @@ CommandSource {
     }
 
     public boolean isAlive() {
-        return !this.removed;
+        return !this.isRemoved();
     }
 
     public boolean isInWall() {
@@ -1563,7 +1586,7 @@ CommandSource {
 
     public void ejectPassengers() {
         for (int i = this.passengers.size() - 1; i >= 0; --i) {
-            this.passengers.get(i).stopRiding();
+            ((Entity)this.passengers.get(i)).stopRiding();
         }
     }
 
@@ -1583,10 +1606,16 @@ CommandSource {
         if (entity.getVehicle() != this) {
             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
         }
-        if (!this.level.isClientSide && entity instanceof Player && !(this.getControllingPassenger() instanceof Player)) {
-            this.passengers.add(0, entity);
+        if (this.passengers.isEmpty()) {
+            this.passengers = ImmutableList.of(entity);
         } else {
-            this.passengers.add(entity);
+            ArrayList<Entity> list = Lists.newArrayList(this.passengers);
+            if (!this.level.isClientSide && entity instanceof Player && !(this.getControllingPassenger() instanceof Player)) {
+                list.add(0, entity);
+            } else {
+                list.add(entity);
+            }
+            this.passengers = ImmutableList.copyOf(list);
         }
     }
 
@@ -1594,12 +1623,12 @@ CommandSource {
         if (entity.getVehicle() == this) {
             throw new IllegalStateException("Use x.stopRiding(y), not y.removePassenger(x)");
         }
-        this.passengers.remove(entity);
+        this.passengers = this.passengers.size() == 1 && this.passengers.get(0) == entity ? ImmutableList.of() : this.passengers.stream().filter(entity2 -> entity2 != entity).collect(ImmutableList.toImmutableList());
         entity.boardingCooldown = 60;
     }
 
     protected boolean canAddPassenger(Entity entity) {
-        return this.getPassengers().size() < 1;
+        return this.passengers.isEmpty();
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -1717,7 +1746,7 @@ CommandSource {
     }
 
     public boolean isVehicle() {
-        return !this.getPassengers().isEmpty();
+        return !this.passengers.isEmpty();
     }
 
     public boolean rideableUnderWater() {
@@ -1979,7 +2008,7 @@ CommandSource {
 
     @Nullable
     public Entity changeDimension(ServerLevel serverLevel) {
-        if (!(this.level instanceof ServerLevel) || this.removed) {
+        if (!(this.level instanceof ServerLevel) || this.isRemoved()) {
             return null;
         }
         this.level.getProfiler().push("changeDimension");
@@ -1995,7 +2024,7 @@ CommandSource {
             ((Entity)entity).restoreFrom(this);
             ((Entity)entity).moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, ((Entity)entity).xRot);
             ((Entity)entity).setDeltaMovement(portalInfo.speed);
-            serverLevel.addFromAnotherDimension((Entity)entity);
+            serverLevel.addAndForceLoad((Entity)entity);
             if (serverLevel.dimension() == Level.END) {
                 ServerLevel.makeObsidianPlatform(serverLevel);
             }
@@ -2009,7 +2038,7 @@ CommandSource {
     }
 
     protected void removeAfterChangingDimensions() {
-        this.removed = true;
+        this.setRemoved(RemovalReason.CHANGED_DIMENSION);
     }
 
     @Nullable
@@ -2082,7 +2111,7 @@ CommandSource {
         crashReportCategory.setDetail("Entity ID", this.id);
         crashReportCategory.setDetail("Entity Name", () -> this.getName().getString());
         crashReportCategory.setDetail("Entity's Exact location", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", this.getX(), this.getY(), this.getZ()));
-        crashReportCategory.setDetail("Entity's Block location", CrashReportCategory.formatLocation(Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ())));
+        crashReportCategory.setDetail("Entity's Block location", CrashReportCategory.formatLocation((LevelHeightAccessor)this.level, Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ())));
         Vec3 vec3 = this.getDeltaMovement();
         crashReportCategory.setDetail("Entity's Momentum", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", vec3.x, vec3.y, vec3.z));
         crashReportCategory.setDetail("Entity's Passengers", () -> this.getPassengers().toString());
@@ -2099,6 +2128,7 @@ CommandSource {
         this.stringUUID = this.uuid.toString();
     }
 
+    @Override
     public UUID getUUID() {
         return this.uuid;
     }
@@ -2170,8 +2200,6 @@ CommandSource {
         ServerLevel serverLevel = (ServerLevel)this.level;
         this.moveTo(d, e, f, this.yRot, this.xRot);
         this.getSelfAndPassengers().forEach(entity -> {
-            serverLevel.updateChunkPos((Entity)entity);
-            entity.forceChunkAddition = true;
             for (Entity entity2 : entity.passengers) {
                 entity.positionRider(entity2, Entity::moveTo);
             }
@@ -2224,6 +2252,7 @@ CommandSource {
         return true;
     }
 
+    @Override
     public AABB getBoundingBox() {
         return this.bb;
     }
@@ -2334,72 +2363,50 @@ CommandSource {
         return false;
     }
 
-    public boolean checkAndResetForcedChunkAdditionFlag() {
-        boolean bl = this.forceChunkAddition;
-        this.forceChunkAddition = false;
-        return bl;
-    }
-
-    public boolean checkAndResetUpdateChunkPos() {
-        boolean bl = this.movedSinceLastChunkCheck;
-        this.movedSinceLastChunkCheck = false;
-        return bl;
-    }
-
     @Nullable
     public Entity getControllingPassenger() {
         return null;
     }
 
-    public List<Entity> getPassengers() {
-        if (this.passengers.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return Lists.newArrayList(this.passengers);
+    public final List<Entity> getPassengers() {
+        return this.passengers;
+    }
+
+    @Nullable
+    public Entity getFirstPassenger() {
+        return this.passengers.isEmpty() ? null : (Entity)this.passengers.get(0);
     }
 
     public boolean hasPassenger(Entity entity) {
-        for (Entity entity2 : this.getPassengers()) {
-            if (!entity2.equals(entity)) continue;
+        return this.passengers.contains(entity);
+    }
+
+    public boolean hasPassenger(Predicate<Entity> predicate) {
+        for (Entity entity : this.passengers) {
+            if (!predicate.test(entity)) continue;
             return true;
         }
         return false;
     }
 
-    public boolean hasPassenger(Class<? extends Entity> class_) {
-        for (Entity entity : this.getPassengers()) {
-            if (!class_.isAssignableFrom(entity.getClass())) continue;
-            return true;
-        }
-        return false;
-    }
-
-    public Collection<Entity> getIndirectPassengers() {
-        HashSet<Entity> set = Sets.newHashSet();
-        for (Entity entity : this.getPassengers()) {
-            set.add(entity);
-            entity.fillIndirectPassengers(false, set);
-        }
-        return set;
+    private Stream<Entity> getIndirectPassengersStream() {
+        return this.passengers.stream().flatMap(Entity::getSelfAndPassengers);
     }
 
     public Stream<Entity> getSelfAndPassengers() {
-        return Stream.concat(Stream.of(this), this.passengers.stream().flatMap(Entity::getSelfAndPassengers));
+        return Stream.concat(Stream.of(this), this.getIndirectPassengersStream());
     }
 
-    public boolean hasOnePlayerPassenger() {
-        HashSet<Entity> set = Sets.newHashSet();
-        this.fillIndirectPassengers(true, set);
-        return set.size() == 1;
+    public Stream<Entity> getPassengersAndSelf() {
+        return Stream.concat(this.passengers.stream().flatMap(Entity::getPassengersAndSelf), Stream.of(this));
     }
 
-    private void fillIndirectPassengers(boolean bl, Set<Entity> set) {
-        for (Entity entity : this.getPassengers()) {
-            if (!bl || ServerPlayer.class.isAssignableFrom(entity.getClass())) {
-                set.add(entity);
-            }
-            entity.fillIndirectPassengers(bl, set);
-        }
+    public Iterable<Entity> getIndirectPassengers() {
+        return () -> this.getIndirectPassengersStream().iterator();
+    }
+
+    public boolean hasExactlyOnePlayerPassenger() {
+        return this.getIndirectPassengersStream().filter(entity -> entity instanceof Player).count() == 1L;
     }
 
     public Entity getRootVehicle() {
@@ -2416,14 +2423,7 @@ CommandSource {
 
     @Environment(value=EnvType.CLIENT)
     public boolean hasIndirectPassenger(Entity entity) {
-        for (Entity entity2 : this.getPassengers()) {
-            if (entity2.equals(entity)) {
-                return true;
-            }
-            if (!entity2.hasIndirectPassenger(entity)) continue;
-            return true;
-        }
-        return false;
+        return this.getIndirectPassengersStream().anyMatch(entity2 -> entity2 == entity);
     }
 
     public boolean isControlledByLocalInstance() {
@@ -2584,8 +2584,13 @@ CommandSource {
         return this.position;
     }
 
+    @Override
     public BlockPos blockPosition() {
         return this.blockPosition;
+    }
+
+    public ChunkPos chunkPosition() {
+        return new ChunkPos(this.blockPosition);
     }
 
     public Vec3 getDeltaMovement() {
@@ -2600,6 +2605,10 @@ CommandSource {
         this.setDeltaMovement(new Vec3(d, e, f));
     }
 
+    public final int getBlockX() {
+        return this.blockPosition.getX();
+    }
+
     public final double getX() {
         return this.position.x;
     }
@@ -2610,6 +2619,10 @@ CommandSource {
 
     public double getRandomX(double d) {
         return this.getX((2.0 * this.random.nextDouble() - 1.0) * d);
+    }
+
+    public final int getBlockY() {
+        return this.blockPosition.getY();
     }
 
     public final double getY() {
@@ -2626,6 +2639,10 @@ CommandSource {
 
     public double getEyeY() {
         return this.position.y + (double)this.eyeHeight;
+    }
+
+    public final int getBlockZ() {
+        return this.blockPosition.getZ();
     }
 
     public final double getZ() {
@@ -2649,7 +2666,7 @@ CommandSource {
             if (i != this.blockPosition.getX() || j != this.blockPosition.getY() || k != this.blockPosition.getZ()) {
                 this.blockPosition = new BlockPos(i, j, k);
             }
-            this.movedSinceLastChunkCheck = true;
+            this.levelCallback.onMove();
         }
     }
 
@@ -2659,6 +2676,88 @@ CommandSource {
     @Environment(value=EnvType.CLIENT)
     public Vec3 getRopeHoldPosition(float f) {
         return this.getPosition(f).add(0.0, (double)this.eyeHeight * 0.7, 0.0);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        int i = clientboundAddEntityPacket.getId();
+        double d = clientboundAddEntityPacket.getX();
+        double e = clientboundAddEntityPacket.getY();
+        double f = clientboundAddEntityPacket.getZ();
+        this.setPacketCoordinates(d, e, f);
+        this.moveTo(d, e, f);
+        this.xRot = (float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0f;
+        this.yRot = (float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0f;
+        this.setId(i);
+        this.setUUID(clientboundAddEntityPacket.getUUID());
+    }
+
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getPickResult() {
+        return null;
+    }
+
+    public final boolean isRemoved() {
+        return this.removalReason != null;
+    }
+
+    @Override
+    public void setRemoved(RemovalReason removalReason) {
+        if (this.removalReason == null) {
+            this.removalReason = removalReason;
+        }
+        this.getPassengers().forEach(Entity::stopRiding);
+        this.levelCallback.onRemove(removalReason);
+    }
+
+    protected void unsetRemoved() {
+        this.removalReason = null;
+    }
+
+    @Override
+    public void setLevelCallback(EntityInLevelCallback entityInLevelCallback) {
+        this.levelCallback = entityInLevelCallback;
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        if (this.removalReason != null && !this.removalReason.shouldSave()) {
+            return false;
+        }
+        if (this.isPassenger()) {
+            return false;
+        }
+        return !this.isVehicle() || !this.hasExactlyOnePlayerPassenger();
+    }
+
+    @Override
+    public boolean isAlwaysTicking() {
+        return false;
+    }
+
+    public static enum RemovalReason {
+        KILLED(true, false),
+        DISCARDED(true, false),
+        UNLOADED_TO_CHUNK(false, true),
+        UNLOADED_WITH_PLAYER(false, false),
+        CHANGED_DIMENSION(false, false);
+
+        private final boolean destroy;
+        private final boolean save;
+
+        private RemovalReason(boolean bl, boolean bl2) {
+            this.destroy = bl;
+            this.save = bl2;
+        }
+
+        public boolean shouldDestroy() {
+            return this.destroy;
+        }
+
+        public boolean shouldSave() {
+            return this.save;
+        }
     }
 
     @FunctionalInterface

@@ -3,16 +3,16 @@
  */
 package net.minecraft.world.level.pathfinder;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.EnumSet;
-import java.util.HashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -23,15 +23,19 @@ import org.jetbrains.annotations.Nullable;
 
 public class FlyNodeEvaluator
 extends WalkNodeEvaluator {
+    private final Long2ObjectMap<BlockPathTypes> pathTypeByPosCache = new Long2ObjectOpenHashMap<BlockPathTypes>();
+
     @Override
     public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
         super.prepare(pathNavigationRegion, mob);
+        this.pathTypeByPosCache.clear();
         this.oldWaterCost = mob.getPathfindingMalus(BlockPathTypes.WATER);
     }
 
     @Override
     public void done() {
         this.mob.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
+        this.pathTypeByPosCache.clear();
         super.done();
     }
 
@@ -41,24 +45,20 @@ extends WalkNodeEvaluator {
         BlockPathTypes blockPathTypes;
         int i;
         if (this.canFloat() && this.mob.isInWater()) {
-            i = Mth.floor(this.mob.getY());
+            i = this.mob.getBlockY();
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
-            Block block = this.level.getBlockState(mutableBlockPos).getBlock();
-            while (block == Blocks.WATER) {
+            BlockState blockState = this.level.getBlockState(mutableBlockPos);
+            while (blockState.is(Blocks.WATER)) {
                 mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
-                block = this.level.getBlockState(mutableBlockPos).getBlock();
+                blockState = this.level.getBlockState(mutableBlockPos);
             }
         } else {
             i = Mth.floor(this.mob.getY() + 0.5);
         }
-        if (this.mob.getPathfindingMalus(blockPathTypes = this.getBlockPathType(this.mob, (blockPos = this.mob.blockPosition()).getX(), i, blockPos.getZ())) < 0.0f) {
-            HashSet<BlockPos> set = Sets.newHashSet();
-            set.add(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().minZ));
-            set.add(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().maxZ));
-            set.add(new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().minZ));
-            set.add(new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().maxZ));
+        if (this.mob.getPathfindingMalus(blockPathTypes = this.getCachedBlockPathType((blockPos = this.mob.blockPosition()).getX(), i, blockPos.getZ())) < 0.0f) {
+            ImmutableSet<BlockPos> set = ImmutableSet.of(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().minZ), new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().maxZ), new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().minZ), new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().maxZ));
             for (BlockPos blockPos2 : set) {
-                BlockPathTypes blockPathTypes2 = this.getBlockPathType(this.mob, blockPos2);
+                BlockPathTypes blockPathTypes2 = this.getCachedBlockPathType(blockPos.getX(), i, blockPos.getZ());
                 if (!(this.mob.getPathfindingMalus(blockPathTypes2) >= 0.0f)) continue;
                 return super.getNode(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
             }
@@ -193,7 +193,7 @@ extends WalkNodeEvaluator {
     @Nullable
     protected Node getNode(int i, int j, int k) {
         Node node = null;
-        BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, i, j, k);
+        BlockPathTypes blockPathTypes = this.getCachedBlockPathType(i, j, k);
         float f = this.mob.getPathfindingMalus(blockPathTypes);
         if (f >= 0.0f) {
             node = super.getNode(i, j, k);
@@ -203,10 +203,11 @@ extends WalkNodeEvaluator {
                 node.costMalus += 1.0f;
             }
         }
-        if (blockPathTypes == BlockPathTypes.OPEN || blockPathTypes == BlockPathTypes.WALKABLE) {
-            return node;
-        }
         return node;
+    }
+
+    private BlockPathTypes getCachedBlockPathType(int i, int j, int k) {
+        return this.pathTypeByPosCache.computeIfAbsent(BlockPos.asLong(i, j, k), l -> this.getBlockPathType(this.level, i, j, k, this.mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()));
     }
 
     @Override
@@ -214,7 +215,7 @@ extends WalkNodeEvaluator {
         EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
         BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
         BlockPos blockPos = mob.blockPosition();
-        blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
+        blockPathTypes = super.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
         if (enumSet.contains((Object)BlockPathTypes.FENCE)) {
             return BlockPathTypes.FENCE;
         }
@@ -236,7 +237,7 @@ extends WalkNodeEvaluator {
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPathTypes blockPathTypes = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
-        if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
+        if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
             BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(i, j - 1, k));
             BlockPathTypes blockPathTypes2 = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
             if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockPathTypes2 == BlockPathTypes.LAVA || blockState.is(BlockTags.CAMPFIRES)) {
@@ -257,14 +258,6 @@ extends WalkNodeEvaluator {
             blockPathTypes = FlyNodeEvaluator.checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
         }
         return blockPathTypes;
-    }
-
-    private BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {
-        return this.getBlockPathType(mob, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
-
-    private BlockPathTypes getBlockPathType(Mob mob, int i, int j, int k) {
-        return this.getBlockPathType(this.level, i, j, k, mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors());
     }
 }
 

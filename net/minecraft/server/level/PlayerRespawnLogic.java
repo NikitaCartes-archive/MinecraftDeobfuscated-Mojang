@@ -4,6 +4,7 @@
 package net.minecraft.server.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
@@ -21,19 +22,19 @@ public class PlayerRespawnLogic {
         Biome biome = serverLevel.getBiome(mutableBlockPos);
         boolean bl2 = serverLevel.dimensionType().hasCeiling();
         BlockState blockState = biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();
-        if (bl && !blockState.getBlock().is(BlockTags.VALID_SPAWN)) {
+        if (bl && !blockState.is(BlockTags.VALID_SPAWN)) {
             return null;
         }
-        LevelChunk levelChunk = serverLevel.getChunk(i >> 4, j >> 4);
+        LevelChunk levelChunk = serverLevel.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j));
         int n = k = bl2 ? serverLevel.getChunkSource().getGenerator().getSpawnHeight() : levelChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i & 0xF, j & 0xF);
-        if (k < 0) {
+        if (k < serverLevel.getMinBuildHeight()) {
             return null;
         }
         int l = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i & 0xF, j & 0xF);
         if (l <= k && l > levelChunk.getHeight(Heightmap.Types.OCEAN_FLOOR, i & 0xF, j & 0xF)) {
             return null;
         }
-        for (int m = k + 1; m >= 0; --m) {
+        for (int m = k + 1; m >= serverLevel.getMinBuildHeight(); --m) {
             mutableBlockPos.set(i, m, j);
             BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
             if (!blockState2.getFluidState().isEmpty()) break;

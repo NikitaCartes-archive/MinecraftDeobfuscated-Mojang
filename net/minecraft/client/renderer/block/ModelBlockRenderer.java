@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelBlockRenderer {
+    private static final Direction[] DIRECTIONS = Direction.values();
     private final BlockColors blockColors;
     private static final ThreadLocal<Cache> CACHE = ThreadLocal.withInitial(() -> new Cache());
 
@@ -51,7 +52,7 @@ public class ModelBlockRenderer {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block model");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block model being tesselated");
-            CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
+            CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, blockState);
             crashReportCategory.setDetail("Using AO", bl2);
             throw new ReportedException(crashReport);
         }
@@ -59,13 +60,16 @@ public class ModelBlockRenderer {
 
     public boolean tesselateWithAO(BlockAndTintGetter blockAndTintGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random, long l, int i) {
         boolean bl2 = false;
-        float[] fs = new float[Direction.values().length * 2];
+        float[] fs = new float[DIRECTIONS.length * 2];
         BitSet bitSet = new BitSet(3);
         AmbientOcclusionFace ambientOcclusionFace = new AmbientOcclusionFace();
-        for (Direction direction : Direction.values()) {
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        for (Direction direction : DIRECTIONS) {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
-            if (list.isEmpty() || bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction)) continue;
+            if (list.isEmpty()) continue;
+            mutableBlockPos.setWithOffset(blockPos, direction);
+            if (bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) continue;
             this.renderModelFaceAO(blockAndTintGetter, blockState, blockPos, poseStack, vertexConsumer, list, fs, bitSet, ambientOcclusionFace, i);
             bl2 = true;
         }
@@ -81,11 +85,14 @@ public class ModelBlockRenderer {
     public boolean tesselateWithoutAO(BlockAndTintGetter blockAndTintGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random, long l, int i) {
         boolean bl2 = false;
         BitSet bitSet = new BitSet(3);
-        for (Direction direction : Direction.values()) {
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        for (Direction direction : DIRECTIONS) {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
-            if (list.isEmpty() || bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction)) continue;
-            int j = LevelRenderer.getLightColor(blockAndTintGetter, blockState, blockPos.relative(direction));
+            if (list.isEmpty()) continue;
+            mutableBlockPos.setWithOffset(blockPos, direction);
+            if (bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) continue;
+            int j = LevelRenderer.getLightColor(blockAndTintGetter, blockState, mutableBlockPos);
             this.renderModelFaceFlat(blockAndTintGetter, blockState, blockPos, j, i, false, poseStack, vertexConsumer, list, bitSet);
             bl2 = true;
         }
@@ -150,7 +157,7 @@ public class ModelBlockRenderer {
             fs[Direction.UP.get3DDataValue()] = j;
             fs[Direction.NORTH.get3DDataValue()] = h;
             fs[Direction.SOUTH.get3DDataValue()] = k;
-            l = Direction.values().length;
+            l = DIRECTIONS.length;
             fs[Direction.WEST.get3DDataValue() + l] = 1.0f - f;
             fs[Direction.EAST.get3DDataValue() + l] = 1.0f - i;
             fs[Direction.DOWN.get3DDataValue() + l] = 1.0f - g;
@@ -208,7 +215,7 @@ public class ModelBlockRenderer {
     public void renderModel(PoseStack.Pose pose, VertexConsumer vertexConsumer, @Nullable BlockState blockState, BakedModel bakedModel, float f, float g, float h, int i, int j) {
         Random random = new Random();
         long l = 42L;
-        for (Direction direction : Direction.values()) {
+        for (Direction direction : DIRECTIONS) {
             random.setSeed(42L);
             ModelBlockRenderer.renderQuadList(pose, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, direction, random), i, j);
         }
@@ -302,7 +309,7 @@ public class ModelBlockRenderer {
         private final int shape;
 
         private SizeInfo(Direction direction, boolean bl) {
-            this.shape = direction.get3DDataValue() + (bl ? Direction.values().length : 0);
+            this.shape = direction.get3DDataValue() + (bl ? DIRECTIONS.length : 0);
         }
     }
 

@@ -8,6 +8,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -20,18 +26,16 @@ import net.minecraft.world.item.Items;
 @Environment(value=EnvType.CLIENT)
 public class DrownedModel<T extends Zombie>
 extends ZombieModel<T> {
-    public DrownedModel(float f, float g, int i, int j) {
-        super(f, g, i, j);
-        this.rightArm = new ModelPart(this, 32, 48);
-        this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightArm.setPos(-5.0f, 2.0f + g, 0.0f);
-        this.rightLeg = new ModelPart(this, 16, 48);
-        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightLeg.setPos(-1.9f, 12.0f + g, 0.0f);
+    public DrownedModel(ModelPart modelPart) {
+        super(modelPart);
     }
 
-    public DrownedModel(float f, boolean bl) {
-        super(f, 0.0f, 64, bl ? 32 : 64);
+    public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(1.9f, 12.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     @Override
@@ -39,7 +43,7 @@ extends ZombieModel<T> {
         this.rightArmPose = HumanoidModel.ArmPose.EMPTY;
         this.leftArmPose = HumanoidModel.ArmPose.EMPTY;
         ItemStack itemStack = ((LivingEntity)zombie).getItemInHand(InteractionHand.MAIN_HAND);
-        if (itemStack.getItem() == Items.TRIDENT && ((Mob)zombie).isAggressive()) {
+        if (itemStack.is(Items.TRIDENT) && ((Mob)zombie).isAggressive()) {
             if (((Mob)zombie).getMainArm() == HumanoidArm.RIGHT) {
                 this.rightArmPose = HumanoidModel.ArmPose.THROW_SPEAR;
             } else {

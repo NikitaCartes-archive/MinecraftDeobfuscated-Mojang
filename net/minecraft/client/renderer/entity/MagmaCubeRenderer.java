@@ -7,7 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LavaSlimeModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +20,8 @@ public class MagmaCubeRenderer
 extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     private static final ResourceLocation MAGMACUBE_LOCATION = new ResourceLocation("textures/entity/slime/magmacube.png");
 
-    public MagmaCubeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new LavaSlimeModel(), 0.25f);
+    public MagmaCubeRenderer(EntityRendererProvider.Context context) {
+        super(context, new LavaSlimeModel(context.getLayer(ModelLayers.MAGMA_CUBE)), 0.25f);
     }
 
     @Override

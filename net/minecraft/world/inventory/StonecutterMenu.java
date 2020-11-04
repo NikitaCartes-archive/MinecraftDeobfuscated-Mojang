@@ -136,7 +136,7 @@ extends AbstractContainerMenu {
     @Override
     public void slotsChanged(Container container) {
         ItemStack itemStack = this.inputSlot.getItem();
-        if (itemStack.getItem() != this.input.getItem()) {
+        if (!itemStack.is(this.input.getItem())) {
             this.input = itemStack.copy();
             this.setupRecipeList(container, itemStack);
         }
@@ -211,7 +211,7 @@ extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         this.resultContainer.removeItemNoUpdate(1);
-        this.access.execute((level, blockPos) -> this.clearContainer(player, player.level, this.container));
+        this.access.execute((level, blockPos) -> this.clearContainer(player, this.container));
     }
 }
 

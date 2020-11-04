@@ -801,7 +801,7 @@ AutoCloseable {
         this.profiler.popPush("players");
         this.playerList.tick();
         if (SharedConstants.IS_RUNNING_IN_IDE) {
-            GameTestTicker.singleton.tick();
+            GameTestTicker.SINGLETON.tick();
         }
         this.profiler.popPush("server gui refresh");
         for (int i = 0; i < this.tickables.size(); ++i) {
@@ -1411,7 +1411,7 @@ AutoCloseable {
 
                 @Override
                 public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-                    list.add(String.format("%s=%s\n", key.getId(), ((GameRules.Value)gameRules.getRule(key)).toString()));
+                    list.add(String.format("%s=%s\n", key.getId(), gameRules.getRule(key)));
                 }
             });
             for (String string : list) {
@@ -1495,6 +1495,10 @@ AutoCloseable {
     @Nullable
     public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {
         return null;
+    }
+
+    public boolean isResourcePackRequired() {
+        return false;
     }
 
     @Override

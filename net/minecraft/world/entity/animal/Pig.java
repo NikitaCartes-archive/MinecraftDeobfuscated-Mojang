@@ -19,7 +19,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -88,10 +88,7 @@ Saddleable {
     @Override
     @Nullable
     public Entity getControllingPassenger() {
-        if (this.getPassengers().isEmpty()) {
-            return null;
-        }
-        return this.getPassengers().get(0);
+        return this.getFirstPassenger();
     }
 
     @Override
@@ -101,7 +98,7 @@ Saddleable {
             return false;
         }
         Player player = (Player)entity;
-        return player.getMainHandItem().getItem() == Items.CARROT_ON_A_STICK || player.getOffhandItem().getItem() == Items.CARROT_ON_A_STICK;
+        return player.getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK);
     }
 
     @Override
@@ -163,7 +160,7 @@ Saddleable {
         InteractionResult interactionResult = super.mobInteract(player, interactionHand);
         if (!interactionResult.consumesAction()) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (itemStack.getItem() == Items.SADDLE) {
+            if (itemStack.is(Items.SADDLE)) {
                 return itemStack.interactLivingEntity(player, this, interactionHand);
             }
             return InteractionResult.PASS;
@@ -234,7 +231,7 @@ Saddleable {
             }
             zombifiedPiglin.setPersistenceRequired();
             serverLevel.addFreshEntity(zombifiedPiglin);
-            this.remove();
+            this.discard();
         } else {
             super.thunderHit(serverLevel, lightningBolt);
         }
@@ -261,7 +258,7 @@ Saddleable {
     }
 
     @Override
-    public Pig getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Pig getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.PIG.create(serverLevel);
     }
 
@@ -277,8 +274,8 @@ Saddleable {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 }
 

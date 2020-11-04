@@ -42,6 +42,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -139,7 +140,7 @@ implements WorldGenLevel {
 
     @Override
     public BlockState getBlockState(BlockPos blockPos) {
-        return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4).getBlockState(blockPos);
+        return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ())).getBlockState(blockPos);
     }
 
     @Override
@@ -186,7 +187,7 @@ implements WorldGenLevel {
             return false;
         }
         if (bl) {
-            BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
+            BlockEntity blockEntity = blockState.hasBlockEntity() ? this.getBlockEntity(blockPos) : null;
             Block.dropResources(blockState, this.level, blockPos, blockEntity, entity, ItemStack.EMPTY);
         }
         return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3, i);
@@ -204,20 +205,19 @@ implements WorldGenLevel {
         BlockState blockState = chunkAccess.getBlockState(blockPos);
         if (compoundTag != null) {
             if ("DUMMY".equals(compoundTag.getString("id"))) {
-                Block block = blockState.getBlock();
-                if (!(block instanceof EntityBlock)) {
+                if (!blockState.hasBlockEntity()) {
                     return null;
                 }
-                blockEntity = ((EntityBlock)((Object)block)).newBlockEntity(this.level);
+                blockEntity = ((EntityBlock)((Object)blockState.getBlock())).newBlockEntity(blockPos, blockState);
             } else {
-                blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
+                blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag);
             }
             if (blockEntity != null) {
-                chunkAccess.setBlockEntity(blockPos, blockEntity);
+                chunkAccess.setBlockEntity(blockEntity);
                 return blockEntity;
             }
         }
-        if (blockState.getBlock() instanceof EntityBlock) {
+        if (blockState.hasBlockEntity()) {
             LOGGER.warn("Tried to access a block entity before it was created. {}", (Object)blockPos);
         }
         return null;
@@ -225,15 +225,19 @@ implements WorldGenLevel {
 
     @Override
     public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-        Block block;
         ChunkAccess chunkAccess = this.getChunk(blockPos);
         BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
         if (blockState2 != null) {
             this.level.onBlockStateChange(blockPos, blockState2, blockState);
         }
-        if ((block = blockState.getBlock()).isEntityBlock()) {
+        if (blockState.hasBlockEntity()) {
             if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
-                chunkAccess.setBlockEntity(blockPos, ((EntityBlock)((Object)block)).newBlockEntity(this));
+                BlockEntity blockEntity = ((EntityBlock)((Object)blockState.getBlock())).newBlockEntity(blockPos, blockState);
+                if (blockEntity != null) {
+                    chunkAccess.setBlockEntity(blockEntity);
+                } else {
+                    chunkAccess.removeBlockEntity(blockPos);
+                }
             } else {
                 CompoundTag compoundTag = new CompoundTag();
                 compoundTag.putInt("x", blockPos.getX());
@@ -242,7 +246,7 @@ implements WorldGenLevel {
                 compoundTag.putString("id", "DUMMY");
                 chunkAccess.setBlockEntityNbt(compoundTag);
             }
-        } else if (blockState2 != null && blockState2.getBlock().isEntityBlock()) {
+        } else if (blockState2 != null && blockState2.hasBlockEntity()) {
             chunkAccess.removeBlockEntity(blockPos);
         }
         if (blockState.hasPostProcess(this, blockPos)) {
@@ -257,8 +261,8 @@ implements WorldGenLevel {
 
     @Override
     public boolean addFreshEntity(Entity entity) {
-        int i = Mth.floor(entity.getX() / 16.0);
-        int j = Mth.floor(entity.getZ() / 16.0);
+        int i = SectionPos.blockToSectionCoord(entity.getBlockX());
+        int j = SectionPos.blockToSectionCoord(entity.getBlockZ());
         this.getChunk(i, j).addEntity(entity);
         return true;
     }
@@ -296,7 +300,7 @@ implements WorldGenLevel {
 
     @Override
     public DifficultyInstance getCurrentDifficultyAt(BlockPos blockPos) {
-        if (!this.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
+        if (!this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()))) {
             throw new RuntimeException("We are asking a region for a chunk out of bound");
         }
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(), 0L, this.level.getMoonBrightness());
@@ -334,7 +338,7 @@ implements WorldGenLevel {
 
     @Override
     public int getHeight(Heightmap.Types types, int i, int j) {
-        return this.getChunk(i >> 4, j >> 4).getHeight(types, i & 0xF, j & 0xF) + 1;
+        return this.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j)).getHeight(types, i & 0xF, j & 0xF) + 1;
     }
 
     @Override
@@ -360,7 +364,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+    public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
         return Collections.emptyList();
     }
 
@@ -376,6 +380,16 @@ implements WorldGenLevel {
     @Override
     public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
         return this.structureFeatureManager.startsForFeature(sectionPos, structureFeature);
+    }
+
+    @Override
+    public int getSectionsCount() {
+        return this.level.getSectionsCount();
+    }
+
+    @Override
+    public int getMinSection() {
+        return this.level.getMinSection();
     }
 }
 

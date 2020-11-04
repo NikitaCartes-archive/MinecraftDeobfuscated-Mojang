@@ -105,7 +105,7 @@ extends Entity {
                 this.sentSpikeEvent = true;
             }
             if (--this.lifeTicks < 0) {
-                this.remove();
+                this.discard();
             }
         }
     }

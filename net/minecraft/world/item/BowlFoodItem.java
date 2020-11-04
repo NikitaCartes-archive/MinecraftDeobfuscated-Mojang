@@ -19,7 +19,7 @@ extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
         ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
-        if (livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild) {
+        if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild) {
             return itemStack2;
         }
         return new ItemStack(Items.BOWL);

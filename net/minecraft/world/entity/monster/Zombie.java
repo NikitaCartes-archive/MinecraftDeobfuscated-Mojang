@@ -404,7 +404,7 @@ extends Monster {
 
     @Override
     public boolean canHoldItem(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.EGG && this.isBaby() && this.isPassenger()) {
+        if (itemStack.is(Items.EGG) && this.isBaby() && this.isPassenger()) {
             return false;
         }
         return super.canHoldItem(itemStack);

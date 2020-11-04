@@ -210,7 +210,7 @@ implements PowerableMob {
     @Override
     protected InteractionResult mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.FLINT_AND_STEEL) {
+        if (itemStack.is(Items.FLINT_AND_STEEL)) {
             this.level.playSound(player2, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
             if (!this.level.isClientSide) {
                 this.ignite();
@@ -227,7 +227,7 @@ implements PowerableMob {
             float f = this.isPowered() ? 2.0f : 1.0f;
             this.dead = true;
             this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, blockInteraction);
-            this.remove();
+            this.discard();
             this.spawnLingeringCloud();
         }
     }

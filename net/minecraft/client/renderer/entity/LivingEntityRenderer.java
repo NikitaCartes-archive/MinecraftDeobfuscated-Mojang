@@ -17,8 +17,8 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -43,8 +43,8 @@ implements RenderLayerParent<T, M> {
     protected M model;
     protected final List<RenderLayer<T, M>> layers = Lists.newArrayList();
 
-    public LivingEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, M entityModel, float f) {
-        super(entityRenderDispatcher);
+    public LivingEntityRenderer(EntityRendererProvider.Context context, M entityModel, float f) {
+        super(context);
         this.model = entityModel;
         this.shadowRadius = f;
     }

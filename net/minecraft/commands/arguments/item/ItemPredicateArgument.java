@@ -92,7 +92,7 @@ implements ArgumentType<Result> {
 
         @Override
         public boolean test(ItemStack itemStack) {
-            return this.tag.contains(itemStack.getItem()) && NbtUtils.compareNbt(this.nbt, itemStack.getTag(), true);
+            return itemStack.is(this.tag) && NbtUtils.compareNbt(this.nbt, itemStack.getTag(), true);
         }
 
         @Override
@@ -114,7 +114,7 @@ implements ArgumentType<Result> {
 
         @Override
         public boolean test(ItemStack itemStack) {
-            return itemStack.getItem() == this.item && NbtUtils.compareNbt(this.nbt, itemStack.getTag(), true);
+            return itemStack.is(this.item) && NbtUtils.compareNbt(this.nbt, itemStack.getTag(), true);
         }
 
         @Override

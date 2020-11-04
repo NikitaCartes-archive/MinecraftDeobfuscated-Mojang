@@ -82,7 +82,7 @@ public class HoverEvent {
         if (string == null) {
             return null;
         }
-        Action action = Action.getByName(string);
+        Action<?> action = Action.getByName(string);
         if (action == null) {
             return null;
         }
@@ -108,7 +108,7 @@ public class HoverEvent {
         public static final Action<Component> SHOW_TEXT = new Action<Component>("show_text", true, Component.Serializer::fromJson, Component.Serializer::toJsonTree, Function.identity());
         public static final Action<ItemStackInfo> SHOW_ITEM = new Action<ItemStackInfo>("show_item", true, jsonElement -> ItemStackInfo.method_27684(jsonElement), object -> ItemStackInfo.method_27686((ItemStackInfo)object), component -> ItemStackInfo.method_27685(component));
         public static final Action<EntityTooltipInfo> SHOW_ENTITY = new Action<EntityTooltipInfo>("show_entity", true, EntityTooltipInfo::create, EntityTooltipInfo::serialize, EntityTooltipInfo::create);
-        private static final Map<String, Action> LOOKUP = Stream.of(SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY).collect(ImmutableMap.toImmutableMap(Action::getName, action -> action));
+        private static final Map<String, Action<?>> LOOKUP = Stream.of(SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY).collect(ImmutableMap.toImmutableMap(Action::getName, action -> action));
         private final String name;
         private final boolean allowFromServer;
         private final Function<JsonElement, T> argDeserializer;
@@ -132,7 +132,7 @@ public class HoverEvent {
         }
 
         @Nullable
-        public static Action getByName(String string) {
+        public static Action<?> getByName(String string) {
             return LOOKUP.get(string);
         }
 

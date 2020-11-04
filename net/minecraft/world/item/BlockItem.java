@@ -26,6 +26,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,18 +74,17 @@ extends Item {
         Player player = blockPlaceContext2.getPlayer();
         ItemStack itemStack = blockPlaceContext2.getItemInHand();
         BlockState blockState2 = level.getBlockState(blockPos);
-        Block block = blockState2.getBlock();
-        if (block == blockState.getBlock()) {
+        if (blockState2.is(blockState.getBlock())) {
             blockState2 = this.updateBlockStateFromTag(blockPos, level, itemStack, blockState2);
             this.updateCustomBlockEntityTag(blockPos, level, player, itemStack, blockState2);
-            block.setPlacedBy(level, blockPos, blockState2, player, itemStack);
+            blockState2.getBlock().setPlacedBy(level, blockPos, blockState2, player, itemStack);
             if (player instanceof ServerPlayer) {
                 CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
             }
         }
         SoundType soundType = blockState2.getSoundType();
         level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0f) / 2.0f, soundType.getPitch() * 0.8f);
-        if (player == null || !player.abilities.instabuild) {
+        if (player == null || !player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
@@ -164,7 +164,7 @@ extends Item {
             compoundTag2.putInt("y", blockPos.getY());
             compoundTag2.putInt("z", blockPos.getZ());
             if (!compoundTag2.equals(compoundTag3)) {
-                blockEntity.load(level.getBlockState(blockPos), compoundTag2);
+                blockEntity.load(compoundTag2);
                 blockEntity.setChanged();
                 return true;
             }
@@ -197,6 +197,11 @@ extends Item {
 
     public void registerBlocks(Map<Block, Item> map, Item item) {
         map.put(this.getBlock(), item);
+    }
+
+    @Override
+    public boolean canFitInsideContainerItems() {
+        return !(this.block instanceof ShulkerBoxBlock);
     }
 }
 

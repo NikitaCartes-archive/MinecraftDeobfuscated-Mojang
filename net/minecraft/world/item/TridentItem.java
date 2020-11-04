@@ -78,13 +78,13 @@ implements Vanishable {
             if (k == 0) {
                 ThrownTrident thrownTrident = new ThrownTrident(level, (LivingEntity)player2, itemStack);
                 thrownTrident.shootFromRotation(player2, player2.xRot, player2.yRot, 0.0f, 2.5f + (float)k * 0.5f, 1.0f);
-                if (player2.abilities.instabuild) {
+                if (player2.getAbilities().instabuild) {
                     thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
                 }
                 level.addFreshEntity(thrownTrident);
                 level.playSound(null, thrownTrident, SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0f, 1.0f);
-                if (!player2.abilities.instabuild) {
-                    player2.inventory.removeItem(itemStack);
+                if (!player2.getAbilities().instabuild) {
+                    player2.getInventory().removeItem(itemStack);
                 }
             }
         }

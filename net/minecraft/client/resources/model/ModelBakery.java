@@ -238,7 +238,7 @@ public class ModelBakery {
         }
         Block block = stateDefinition.getOwner();
         return blockState -> {
-            if (blockState == null || block != blockState.getBlock()) {
+            if (blockState == null || !blockState.is(block)) {
                 return false;
             }
             for (Map.Entry entry : map.entrySet()) {

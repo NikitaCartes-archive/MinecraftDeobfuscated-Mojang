@@ -35,12 +35,14 @@ public class BlockRenderDispatcher
 implements ResourceManagerReloadListener {
     private final BlockModelShaper blockModelShaper;
     private final ModelBlockRenderer modelRenderer;
+    private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
     private final LiquidBlockRenderer liquidBlockRenderer;
     private final Random random = new Random();
     private final BlockColors blockColors;
 
-    public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockColors blockColors) {
+    public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer, BlockColors blockColors) {
         this.blockModelShaper = blockModelShaper;
+        this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
         this.blockColors = blockColors;
         this.modelRenderer = new ModelBlockRenderer(this.blockColors);
         this.liquidBlockRenderer = new LiquidBlockRenderer();
@@ -69,7 +71,7 @@ implements ResourceManagerReloadListener {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
-            CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
+            CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, blockState);
             throw new ReportedException(crashReport);
         }
     }
@@ -80,7 +82,7 @@ implements ResourceManagerReloadListener {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating liquid in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
-            CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, null);
+            CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, null);
             throw new ReportedException(crashReport);
         }
     }
@@ -109,7 +111,7 @@ implements ResourceManagerReloadListener {
                 break;
             }
             case ENTITYBLOCK_ANIMATED: {
-                BlockEntityWithoutLevelRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), ItemTransforms.TransformType.NONE, poseStack, multiBufferSource, i, j);
+                this.blockEntityRenderer.renderByItem(new ItemStack(blockState.getBlock()), ItemTransforms.TransformType.NONE, poseStack, multiBufferSource, i, j);
             }
         }
     }

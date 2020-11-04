@@ -139,11 +139,11 @@ extends ComplexItem {
                         for (int z = 0; z < i; ++z) {
                             BlockState blockState;
                             int aa = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, y + u, z + v) + 1;
-                            if (aa > 1) {
+                            if (aa > level.getMinBuildHeight() + 1) {
                                 do {
                                     mutableBlockPos.set(chunkPos.getMinBlockX() + y + u, --aa, chunkPos.getMinBlockZ() + z + v);
-                                } while ((blockState = levelChunk.getBlockState(mutableBlockPos)).getMapColor(level, mutableBlockPos) == MaterialColor.NONE && aa > 0);
-                                if (aa > 0 && !blockState.getFluidState().isEmpty()) {
+                                } while ((blockState = levelChunk.getBlockState(mutableBlockPos)).getMapColor(level, mutableBlockPos) == MaterialColor.NONE && aa > level.getMinBuildHeight());
+                                if (aa > level.getMinBuildHeight() && !blockState.getFluidState().isEmpty()) {
                                     BlockState blockState2;
                                     int ab = aa - 1;
                                     mutableBlockPos2.set(mutableBlockPos);
@@ -151,7 +151,7 @@ extends ComplexItem {
                                         mutableBlockPos2.setY(ab--);
                                         blockState2 = levelChunk.getBlockState(mutableBlockPos2);
                                         ++w;
-                                    } while (ab > 0 && !blockState2.getFluidState().isEmpty());
+                                    } while (ab > level.getMinBuildHeight() && !blockState2.getFluidState().isEmpty());
                                     blockState = this.getCorrectStateForFluidBlock(level, blockState, mutableBlockPos);
                                 }
                             } else {

@@ -12,8 +12,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -21,8 +21,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 @Environment(value=EnvType.CLIENT)
 public abstract class ArrowRenderer<T extends AbstractArrow>
 extends EntityRenderer<T> {
-    public ArrowRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public ArrowRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

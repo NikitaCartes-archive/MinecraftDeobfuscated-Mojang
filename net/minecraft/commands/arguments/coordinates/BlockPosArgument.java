@@ -22,7 +22,6 @@ import net.minecraft.commands.arguments.coordinates.LocalCoordinates;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerLevel;
 
 public class BlockPosArgument
 implements ArgumentType<Coordinates> {
@@ -39,14 +38,13 @@ implements ArgumentType<Coordinates> {
         if (!commandContext.getSource().getLevel().hasChunkAt(blockPos)) {
             throw ERROR_NOT_LOADED.create();
         }
-        commandContext.getSource().getLevel();
-        if (!ServerLevel.isInWorldBounds(blockPos)) {
+        if (!commandContext.getSource().getLevel().isInWorldBounds(blockPos)) {
             throw ERROR_OUT_OF_WORLD.create();
         }
         return blockPos;
     }
 
-    public static BlockPos getOrLoadBlockPos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+    public static BlockPos getOrLoadBlockPos(CommandContext<CommandSourceStack> commandContext, String string) {
         return commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
     }
 

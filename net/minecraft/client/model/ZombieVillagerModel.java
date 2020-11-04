@@ -9,6 +9,12 @@ import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.VillagerHeadModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Zombie;
 
@@ -16,50 +22,36 @@ import net.minecraft.world.entity.monster.Zombie;
 public class ZombieVillagerModel<T extends Zombie>
 extends HumanoidModel<T>
 implements VillagerHeadModel {
-    private ModelPart hatRim;
+    private final ModelPart hatRim;
 
-    public ZombieVillagerModel(float f, boolean bl) {
-        super(f, 0.0f, 64, bl ? 32 : 64);
-        if (bl) {
-            this.head = new ModelPart(this, 0, 0);
-            this.head.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);
-            this.body = new ModelPart(this, 16, 16);
-            this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f + 0.1f);
-            this.rightLeg = new ModelPart(this, 0, 16);
-            this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
-            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.1f);
-            this.leftLeg = new ModelPart(this, 0, 16);
-            this.leftLeg.mirror = true;
-            this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
-            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.1f);
-        } else {
-            this.head = new ModelPart(this, 0, 0);
-            this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f);
-            this.head.texOffs(24, 0).addBox(-1.0f, -3.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
-            this.hat = new ModelPart(this, 32, 0);
-            this.hat.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f + 0.5f);
-            this.hatRim = new ModelPart(this);
-            this.hatRim.texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16.0f, 16.0f, 1.0f, f);
-            this.hatRim.xRot = -1.5707964f;
-            this.hat.addChild(this.hatRim);
-            this.body = new ModelPart(this, 16, 20);
-            this.body.addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f, f);
-            this.body.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, f + 0.05f);
-            this.rightArm = new ModelPart(this, 44, 22);
-            this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-            this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
-            this.leftArm = new ModelPart(this, 44, 22);
-            this.leftArm.mirror = true;
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-            this.leftArm.setPos(5.0f, 2.0f, 0.0f);
-            this.rightLeg = new ModelPart(this, 0, 22);
-            this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
-            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-            this.leftLeg = new ModelPart(this, 0, 22);
-            this.leftLeg.mirror = true;
-            this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
-            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        }
+    public ZombieVillagerModel(ModelPart modelPart) {
+        super(modelPart);
+        this.hatRim = this.hat.getChild("hat_rim");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", new CubeListBuilder().texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f).texOffs(24, 0).addBox(-1.0f, -3.0f, -6.0f, 2.0f, 4.0f, 2.0f), PartPose.ZERO);
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, new CubeDeformation(0.5f)), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("hat_rim", CubeListBuilder.create().texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16.0f, 16.0f, 1.0f), PartPose.rotation(-1.5707964f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f).texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, new CubeDeformation(0.05f)), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(44, 22).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(-5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(44, 22).mirror().addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 22).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(-2.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 22).mirror().addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(2.0f, 12.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
+    }
+
+    public static LayerDefinition createArmorLayer(CubeDeformation cubeDeformation) {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, cubeDeformation.extend(0.1f)), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.1f)), PartPose.offset(-2.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.1f)), PartPose.offset(2.0f, 12.0f, 0.0f));
+        partDefinition.getChild("hat").addOrReplaceChild("hat_rim", CubeListBuilder.create(), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override

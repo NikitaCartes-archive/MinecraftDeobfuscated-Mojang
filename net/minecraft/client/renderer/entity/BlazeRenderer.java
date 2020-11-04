@@ -6,7 +6,8 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BlazeModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +18,8 @@ public class BlazeRenderer
 extends MobRenderer<Blaze, BlazeModel<Blaze>> {
     private static final ResourceLocation BLAZE_LOCATION = new ResourceLocation("textures/entity/blaze.png");
 
-    public BlazeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new BlazeModel(), 0.5f);
+    public BlazeRenderer(EntityRendererProvider.Context context) {
+        super(context, new BlazeModel(context.getLayer(ModelLayers.BLAZE)), 0.5f);
     }
 
     @Override

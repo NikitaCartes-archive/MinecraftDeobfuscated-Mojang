@@ -90,7 +90,7 @@ extends Item {
     }
 
     protected ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             return new ItemStack(Items.BUCKET);
         }
         return itemStack;

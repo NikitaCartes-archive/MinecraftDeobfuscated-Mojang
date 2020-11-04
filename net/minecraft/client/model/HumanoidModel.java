@@ -13,6 +13,11 @@ import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -26,53 +31,44 @@ public class HumanoidModel<T extends LivingEntity>
 extends AgeableListModel<T>
 implements ArmedModel,
 HeadedModel {
-    public ModelPart head;
-    public ModelPart hat;
-    public ModelPart body;
-    public ModelPart rightArm;
-    public ModelPart leftArm;
-    public ModelPart rightLeg;
-    public ModelPart leftLeg;
+    public final ModelPart head;
+    public final ModelPart hat;
+    public final ModelPart body;
+    public final ModelPart rightArm;
+    public final ModelPart leftArm;
+    public final ModelPart rightLeg;
+    public final ModelPart leftLeg;
     public ArmPose leftArmPose = ArmPose.EMPTY;
     public ArmPose rightArmPose = ArmPose.EMPTY;
     public boolean crouching;
     public float swimAmount;
 
-    public HumanoidModel(float f) {
-        this(RenderType::entityCutoutNoCull, f, 0.0f, 64, 32);
+    public HumanoidModel(ModelPart modelPart) {
+        this(modelPart, RenderType::entityCutoutNoCull);
     }
 
-    protected HumanoidModel(float f, float g, int i, int j) {
-        this(RenderType::entityCutoutNoCull, f, g, i, j);
-    }
-
-    public HumanoidModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {
+    public HumanoidModel(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
         super(function, true, 16.0f, 0.0f, 2.0f, 2.0f, 24.0f);
-        this.texWidth = i;
-        this.texHeight = j;
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);
-        this.head.setPos(0.0f, 0.0f + g, 0.0f);
-        this.hat = new ModelPart(this, 32, 0);
-        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f + 0.5f);
-        this.hat.setPos(0.0f, 0.0f + g, 0.0f);
-        this.body = new ModelPart(this, 16, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
-        this.body.setPos(0.0f, 0.0f + g, 0.0f);
-        this.rightArm = new ModelPart(this, 40, 16);
-        this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightArm.setPos(-5.0f, 2.0f + g, 0.0f);
-        this.leftArm = new ModelPart(this, 40, 16);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftArm.setPos(5.0f, 2.0f + g, 0.0f);
-        this.rightLeg = new ModelPart(this, 0, 16);
-        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightLeg.setPos(-1.9f, 12.0f + g, 0.0f);
-        this.leftLeg = new ModelPart(this, 0, 16);
-        this.leftLeg.mirror = true;
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftLeg.setPos(1.9f, 12.0f + g, 0.0f);
+        this.head = modelPart.getChild("head");
+        this.hat = modelPart.getChild("hat");
+        this.body = modelPart.getChild("body");
+        this.rightArm = modelPart.getChild("right_arm");
+        this.leftArm = modelPart.getChild("left_arm");
+        this.rightLeg = modelPart.getChild("right_leg");
+        this.leftLeg = modelPart.getChild("left_leg");
+    }
+
+    public static MeshDefinition createMesh(CubeDeformation cubeDeformation, float f) {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation), PartPose.offset(0.0f, 0.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation.extend(0.5f)), PartPose.offset(0.0f, 0.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(0.0f, 0.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(-5.0f, 2.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(-1.9f, 12.0f + f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(1.9f, 12.0f + f, 0.0f));
+        return meshDefinition;
     }
 
     @Override
@@ -241,6 +237,11 @@ HeadedModel {
             }
             case CROSSBOW_HOLD: {
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
+                break;
+            }
+            case SPYGLASS: {
+                this.rightArm.xRot = Mth.clamp(this.head.xRot + AnimationUtils.getSpyglassArmXRot(this.rightArm), -2.4f, 3.3f);
+                this.rightArm.yRot = Mth.clamp(this.head.yRot + -0.7853982f, -1.1f, 0.0f);
             }
         }
     }
@@ -279,6 +280,11 @@ HeadedModel {
             }
             case CROSSBOW_HOLD: {
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
+                break;
+            }
+            case SPYGLASS: {
+                this.leftArm.xRot = AnimationUtils.getSpyglassArmXRot(this.leftArm);
+                this.leftArm.yRot = 0.7853982f;
             }
         }
     }
@@ -369,7 +375,7 @@ HeadedModel {
         return this.head;
     }
 
-    protected HumanoidArm getAttackArm(T livingEntity) {
+    private HumanoidArm getAttackArm(T livingEntity) {
         HumanoidArm humanoidArm = ((LivingEntity)livingEntity).getMainArm();
         return ((LivingEntity)livingEntity).swingingArm == InteractionHand.MAIN_HAND ? humanoidArm : humanoidArm.getOpposite();
     }
@@ -382,7 +388,8 @@ HeadedModel {
         BOW_AND_ARROW(true),
         THROW_SPEAR(false),
         CROSSBOW_CHARGE(true),
-        CROSSBOW_HOLD(true);
+        CROSSBOW_HOLD(true),
+        SPYGLASS(false);
 
         private final boolean twoHanded;
 

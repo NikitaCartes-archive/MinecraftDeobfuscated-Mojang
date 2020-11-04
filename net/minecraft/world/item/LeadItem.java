@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 public class LeadItem
@@ -26,8 +26,8 @@ extends Item {
     public InteractionResult useOn(UseOnContext useOnContext) {
         BlockPos blockPos;
         Level level = useOnContext.getLevel();
-        Block block = level.getBlockState(blockPos = useOnContext.getClickedPos()).getBlock();
-        if (block.is(BlockTags.FENCES)) {
+        BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
+        if (blockState.is(BlockTags.FENCES)) {
             Player player = useOnContext.getPlayer();
             if (!level.isClientSide && player != null) {
                 LeadItem.bindPlayerMobs(player, level, blockPos);

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.Vec3;
 
@@ -52,7 +52,7 @@ extends Behavior<Villager> {
                 Vec3 vec3 = null;
                 int j = 1000;
                 for (i = 0; i < 1000 && (vec3 == null || this.tooFar(villager, GlobalPos.of(serverLevel.dimension(), new BlockPos(vec3)))); ++i) {
-                    vec3 = RandomPos.getPosTowards(villager, 15, 7, Vec3.atBottomCenterOf(globalPos.pos()));
+                    vec3 = DefaultRandomPos.getPosTowards(villager, 15, 7, Vec3.atBottomCenterOf(globalPos.pos()), 1.5707963705062866);
                 }
                 if (i == 1000) {
                     this.dropPOI(villager, l);

@@ -16,9 +16,9 @@ implements TestReporter {
     @Override
     public void onTestFailed(GameTestInfo gameTestInfo) {
         if (gameTestInfo.isRequired()) {
-            LOGGER.error(gameTestInfo.getTestName() + " failed! " + Util.describeError(gameTestInfo.getError()));
+            LOGGER.error("{} failed! {}", (Object)gameTestInfo.getTestName(), (Object)Util.describeError(gameTestInfo.getError()));
         } else {
-            LOGGER.warn("(optional) " + gameTestInfo.getTestName() + " failed. " + Util.describeError(gameTestInfo.getError()));
+            LOGGER.warn("(optional) {} failed. {}", (Object)gameTestInfo.getTestName(), (Object)Util.describeError(gameTestInfo.getError()));
         }
     }
 }

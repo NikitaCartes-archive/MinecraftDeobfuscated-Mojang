@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -54,7 +55,7 @@ public class CubeMap {
             RenderSystem.rotatef(g, 0.0f, 1.0f, 0.0f);
             for (int n = 0; n < 6; ++n) {
                 minecraft.getTextureManager().bind(this.images[n]);
-                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
                 int o = Math.round(255.0f * h) / (j + 1);
                 if (n == 0) {
                     bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(0.0f, 0.0f).color(255, 255, 255, o).endVertex();

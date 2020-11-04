@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PlayerInfo;
@@ -198,7 +199,7 @@ extends RealmsScreen {
         this.minecraft.getTextureManager().bind(OPTIONS_BACKGROUND);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float g = 32.0f;
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferBuilder.vertex(0.0, this.height, 0.0).uv(0.0f, (float)(this.height - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
         bufferBuilder.vertex(this.width, this.height, 0.0).uv((float)this.width / 32.0f, (float)(this.height - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
         bufferBuilder.vertex(this.width, k, 0.0).uv((float)this.width / 32.0f, 0.0f).color(64, 64, 64, 255).endVertex();

@@ -9,9 +9,10 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LlamaSpitModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -21,10 +22,11 @@ import net.minecraft.world.entity.projectile.LlamaSpit;
 public class LlamaSpitRenderer
 extends EntityRenderer<LlamaSpit> {
     private static final ResourceLocation LLAMA_SPIT_LOCATION = new ResourceLocation("textures/entity/llama/spit.png");
-    private final LlamaSpitModel<LlamaSpit> model = new LlamaSpitModel();
+    private final LlamaSpitModel<LlamaSpit> model;
 
-    public LlamaSpitRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public LlamaSpitRenderer(EntityRendererProvider.Context context) {
+        super(context);
+        this.model = new LlamaSpitModel(context.getLayer(ModelLayers.LLAMA_SPIT));
     }
 
     @Override

@@ -60,10 +60,10 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) throws IOException {
+    public void run(HashCache hashCache) {
         Path path = this.generator.getOutputFolder();
         HashSet set = Sets.newHashSet();
-        RecipeProvider.buildShapelessRecipes(finishedRecipe -> {
+        RecipeProvider.buildCraftingRecipes(finishedRecipe -> {
             if (!set.add(finishedRecipe.getId())) {
                 throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
             }
@@ -108,7 +108,7 @@ implements DataProvider {
         }
     }
 
-    private static void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
+    private static void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
         RecipeProvider.planksFromLog(consumer, Blocks.ACACIA_PLANKS, ItemTags.ACACIA_LOGS);
         RecipeProvider.planksFromLogs(consumer, Blocks.BIRCH_PLANKS, ItemTags.BIRCH_LOGS);
         RecipeProvider.planksFromLogs(consumer, Blocks.CRIMSON_PLANKS, ItemTags.CRIMSON_STEMS);
@@ -384,6 +384,22 @@ implements DataProvider {
         RecipeProvider.concretePowder(consumer, Blocks.RED_CONCRETE_POWDER, Items.RED_DYE);
         RecipeProvider.concretePowder(consumer, Blocks.WHITE_CONCRETE_POWDER, Items.WHITE_DYE);
         RecipeProvider.concretePowder(consumer, Blocks.YELLOW_CONCRETE_POWDER, Items.YELLOW_DYE);
+        RecipeProvider.candle(consumer, Blocks.BLACK_CANDLE, Items.BLACK_DYE);
+        RecipeProvider.candle(consumer, Blocks.BLUE_CANDLE, Items.BLUE_DYE);
+        RecipeProvider.candle(consumer, Blocks.BROWN_CANDLE, Items.BROWN_DYE);
+        RecipeProvider.candle(consumer, Blocks.CYAN_CANDLE, Items.CYAN_DYE);
+        RecipeProvider.candle(consumer, Blocks.GRAY_CANDLE, Items.GRAY_DYE);
+        RecipeProvider.candle(consumer, Blocks.GREEN_CANDLE, Items.GREEN_DYE);
+        RecipeProvider.candle(consumer, Blocks.LIGHT_BLUE_CANDLE, Items.LIGHT_BLUE_DYE);
+        RecipeProvider.candle(consumer, Blocks.LIGHT_GRAY_CANDLE, Items.LIGHT_GRAY_DYE);
+        RecipeProvider.candle(consumer, Blocks.LIME_CANDLE, Items.LIME_DYE);
+        RecipeProvider.candle(consumer, Blocks.MAGENTA_CANDLE, Items.MAGENTA_DYE);
+        RecipeProvider.candle(consumer, Blocks.ORANGE_CANDLE, Items.ORANGE_DYE);
+        RecipeProvider.candle(consumer, Blocks.PINK_CANDLE, Items.PINK_DYE);
+        RecipeProvider.candle(consumer, Blocks.PURPLE_CANDLE, Items.PURPLE_DYE);
+        RecipeProvider.candle(consumer, Blocks.RED_CANDLE, Items.RED_DYE);
+        RecipeProvider.candle(consumer, Blocks.WHITE_CANDLE, Items.WHITE_DYE);
+        RecipeProvider.candle(consumer, Blocks.YELLOW_CANDLE, Items.YELLOW_DYE);
         ShapedRecipeBuilder.shaped(Blocks.ACTIVATOR_RAIL, 6).define(Character.valueOf('#'), Blocks.REDSTONE_TORCH).define(Character.valueOf('S'), Items.STICK).define(Character.valueOf('X'), Items.IRON_INGOT).pattern("XSX").pattern("X#X").pattern("XSX").unlockedBy("has_rail", RecipeProvider.has(Blocks.RAIL)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.ANDESITE, 2).requires(Blocks.DIORITE).requires(Blocks.COBBLESTONE).unlockedBy("has_stone", RecipeProvider.has(Blocks.DIORITE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.ANVIL).define(Character.valueOf('I'), Blocks.IRON_BLOCK).define(Character.valueOf('i'), Items.IRON_INGOT).pattern("III").pattern(" i ").pattern("iii").unlockedBy("has_iron_block", RecipeProvider.has(Blocks.IRON_BLOCK)).save(consumer);
@@ -439,6 +455,41 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.LOOM).define(Character.valueOf('#'), ItemTags.PLANKS).define(Character.valueOf('@'), Items.STRING).pattern("@@").pattern("##").unlockedBy("has_string", RecipeProvider.has(Items.STRING)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHISELED_RED_SANDSTONE).define(Character.valueOf('#'), Blocks.RED_SANDSTONE_SLAB).pattern("#").pattern("#").unlockedBy("has_red_sandstone", RecipeProvider.has(Blocks.RED_SANDSTONE)).unlockedBy("has_chiseled_red_sandstone", RecipeProvider.has(Blocks.CHISELED_RED_SANDSTONE)).unlockedBy("has_cut_red_sandstone", RecipeProvider.has(Blocks.CUT_RED_SANDSTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHISELED_SANDSTONE).define(Character.valueOf('#'), Blocks.SANDSTONE_SLAB).pattern("#").pattern("#").unlockedBy("has_stone_slab", RecipeProvider.has(Blocks.SANDSTONE_SLAB)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.COPPER_BLOCK).define(Character.valueOf('#'), Items.COPPER_INGOT).pattern("###").pattern("###").pattern("###").unlockedBy("has_copper_ingot", RecipeProvider.has(Items.COPPER_INGOT)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 9).requires(Blocks.COPPER_BLOCK).group("copper_ingot").unlockedBy("has_copper_block", RecipeProvider.has(Blocks.COPPER_BLOCK)).save(consumer, "copper_ingot_from_copper_block");
+        ShapedRecipeBuilder.shaped(Blocks.CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.COPPER_BLOCK).pattern("##").pattern("##").unlockedBy("has_copper_block", RecipeProvider.has(Blocks.COPPER_BLOCK)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.LIGHTLY_WEATHERED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK).pattern("##").pattern("##").unlockedBy("has_lightly_weathered_copper_block", RecipeProvider.has(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.SEMI_WEATHERED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.SEMI_WEATHERED_COPPER_BLOCK).pattern("##").pattern("##").unlockedBy("has_semi_weathered_copper_block", RecipeProvider.has(Blocks.SEMI_WEATHERED_COPPER_BLOCK)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.WEATHERED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.WEATHERED_COPPER_BLOCK).pattern("##").pattern("##").unlockedBy("has_weathered_copper_block", RecipeProvider.has(Blocks.WEATHERED_COPPER_BLOCK)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_cut_copper", RecipeProvider.has(Blocks.CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.LIGHTLY_WEATHERED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_lightly_weathered_cut_copper", RecipeProvider.has(Blocks.LIGHTLY_WEATHERED_CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.SEMI_WEATHERED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.SEMI_WEATHERED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_semi_weathered_cut_copper", RecipeProvider.has(Blocks.SEMI_WEATHERED_CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.WEATHERED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.WEATHERED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_weathered_cut_copper", RecipeProvider.has(Blocks.WEATHERED_CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.CUT_COPPER).pattern("###").unlockedBy("has_cut_copper", RecipeProvider.has(Blocks.CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.LIGHTLY_WEATHERED_CUT_COPPER).pattern("###").unlockedBy("has_lightly_weathered_cut_copper", RecipeProvider.has(Blocks.LIGHTLY_WEATHERED_CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.SEMI_WEATHERED_CUT_COPPER).pattern("###").unlockedBy("has_semi_weathered_cut_copper", RecipeProvider.has(Blocks.SEMI_WEATHERED_CUT_COPPER)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.WEATHERED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.WEATHERED_CUT_COPPER).pattern("###").unlockedBy("has_weathered_cut_copper", RecipeProvider.has(Blocks.WEATHERED_CUT_COPPER)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_COPPER).requires(Items.COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_copper_block", RecipeProvider.has(Items.COPPER_BLOCK)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_COPPER).requires(Items.SEMI_WEATHERED_COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_semi_weathered_copper_block", RecipeProvider.has(Items.SEMI_WEATHERED_COPPER_BLOCK)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_COPPER).requires(Items.LIGHTLY_WEATHERED_COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_lightly_weathered_copper_block", RecipeProvider.has(Items.LIGHTLY_WEATHERED_COPPER_BLOCK)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER).requires(Items.CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_cut_copper", RecipeProvider.has(Items.CUT_COPPER)).save(consumer, "waxed_cut_copper_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER).requires(Items.SEMI_WEATHERED_CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_semi_weathered_cut_copper", RecipeProvider.has(Items.SEMI_WEATHERED_CUT_COPPER)).save(consumer, "waxed_semi_weathered_cut_copper_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER).requires(Items.LIGHTLY_WEATHERED_CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_lightly_weathered_cut_copper", RecipeProvider.has(Items.LIGHTLY_WEATHERED_CUT_COPPER)).save(consumer, "waxed_lightly_weathered_cut_copper_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_STAIRS).requires(Items.CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_copper_cut_stairs", RecipeProvider.has(Items.CUT_COPPER_STAIRS)).save(consumer, "waxed_copper_cut_stairs_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS).requires(Items.SEMI_WEATHERED_CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_semi_weathered_cut_copper_stairs", RecipeProvider.has(Items.SEMI_WEATHERED_CUT_COPPER_STAIRS)).save(consumer, "waxed_semi_weathered_cut_copper_stairs_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS).requires(Items.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_lightly_weathered_cut_copper_stairs", RecipeProvider.has(Items.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS)).save(consumer, "waxed_lightly_weathered_cut_copper_stairs_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_SLAB).requires(Items.CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_copper_cut_slab", RecipeProvider.has(Items.CUT_COPPER_SLAB)).save(consumer, "waxed_copper_cut_slab_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB).requires(Items.SEMI_WEATHERED_CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_semi_weathered_cut_copper_slab", RecipeProvider.has(Items.SEMI_WEATHERED_CUT_COPPER_SLAB)).save(consumer, "waxed_semi_weathered_cut_copper_slab_from_honeycomb");
+        ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB).requires(Items.LIGHTLY_WEATHERED_CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_lightly_weathered_cut_copper_slab", RecipeProvider.has(Items.LIGHTLY_WEATHERED_CUT_COPPER_SLAB)).save(consumer, "waxed_lightly_weathered_cut_copper_slab_from_honeycomb");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.WAXED_COPPER).pattern("##").pattern("##").unlockedBy("has_waxed_copper", RecipeProvider.has(Blocks.WAXED_COPPER)).save(consumer, "waxed_cut_copper_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.WAXED_LIGHTLY_WEATHERED_COPPER).pattern("##").pattern("##").unlockedBy("has_waxed_lightly_weathered_copper", RecipeProvider.has(Blocks.WAXED_LIGHTLY_WEATHERED_COPPER)).save(consumer, "waxed_lightly_weathered_cut_copper_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER, 4).define(Character.valueOf('#'), Blocks.WAXED_SEMI_WEATHERED_COPPER).pattern("##").pattern("##").unlockedBy("has_waxed_semi_weathered_copper", RecipeProvider.has(Blocks.WAXED_SEMI_WEATHERED_COPPER)).save(consumer, "waxed_semi_weathered_cut_copper_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.WAXED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_waxed_cut_copper", RecipeProvider.has(Blocks.WAXED_CUT_COPPER)).save(consumer, "waxed_cut_copper_stairs_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_waxed_lightly_weathered_cut_copper", RecipeProvider.has(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER)).save(consumer, "waxed_lightly_weathered_cut_copper_stairs_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS, 4).define(Character.valueOf('#'), Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_waxed_semi_weathered_cut_copper", RecipeProvider.has(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER)).save(consumer, "waxed_semi_weathered_cut_copper_stairs_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.WAXED_CUT_COPPER).pattern("###").unlockedBy("has_waxed_cut_copper", RecipeProvider.has(Blocks.WAXED_CUT_COPPER)).save(consumer, "waxed_cut_copper_slab_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER).pattern("###").unlockedBy("has_waxed_lightly_weathered_cut_copper", RecipeProvider.has(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER)).save(consumer, "waxed_lightly_weathered_cut_copper_slab_from_waxed_block");
+        ShapedRecipeBuilder.shaped(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB, 4).define(Character.valueOf('#'), Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER).pattern("###").unlockedBy("has_waxed_semi_weathered_cut_copper", RecipeProvider.has(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER)).save(consumer, "waxed_semi_weathered_cut_copper_slab_from_waxed_block");
         ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2).requires(Items.BLUE_DYE).requires(Items.GREEN_DYE).unlockedBy("has_green_dye", RecipeProvider.has(Items.GREEN_DYE)).unlockedBy("has_blue_dye", RecipeProvider.has(Items.BLUE_DYE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.DARK_PRISMARINE).define(Character.valueOf('S'), Items.PRISMARINE_SHARD).define(Character.valueOf('I'), Items.BLACK_DYE).pattern("SSS").pattern("SIS").pattern("SSS").unlockedBy("has_prismarine_shard", RecipeProvider.has(Items.PRISMARINE_SHARD)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.PRISMARINE_STAIRS, 4).define(Character.valueOf('#'), Blocks.PRISMARINE).pattern("#  ").pattern("## ").pattern("###").unlockedBy("has_prismarine", RecipeProvider.has(Blocks.PRISMARINE)).save(consumer);
@@ -470,6 +521,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.END_ROD, 4).define(Character.valueOf('#'), Items.POPPED_CHORUS_FRUIT).define(Character.valueOf('/'), Items.BLAZE_ROD).pattern("/").pattern("#").unlockedBy("has_chorus_fruit_popped", RecipeProvider.has(Items.POPPED_CHORUS_FRUIT)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.FERMENTED_SPIDER_EYE).requires(Items.SPIDER_EYE).requires(Blocks.BROWN_MUSHROOM).requires(Items.SUGAR).unlockedBy("has_spider_eye", RecipeProvider.has(Items.SPIDER_EYE)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.FIRE_CHARGE, 3).requires(Items.GUNPOWDER).requires(Items.BLAZE_POWDER).requires(Ingredient.of(Items.COAL, Items.CHARCOAL)).unlockedBy("has_blaze_powder", RecipeProvider.has(Items.BLAZE_POWDER)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.FIREWORK_ROCKET, 3).requires(Items.GUNPOWDER).requires(Items.PAPER).unlockedBy("has_gunpowder", RecipeProvider.has(Items.GUNPOWDER)).save(consumer, "firework_rocket_simple");
         ShapedRecipeBuilder.shaped(Items.FISHING_ROD).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.STRING).pattern("  #").pattern(" #X").pattern("# X").unlockedBy("has_string", RecipeProvider.has(Items.STRING)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.FLINT_AND_STEEL).requires(Items.IRON_INGOT).requires(Items.FLINT).unlockedBy("has_flint", RecipeProvider.has(Items.FLINT)).unlockedBy("has_obsidian", RecipeProvider.has(Blocks.OBSIDIAN)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.FLOWER_POT).define(Character.valueOf('#'), Items.BRICK).pattern("# #").pattern(" # ").unlockedBy("has_brick", RecipeProvider.has(Items.BRICK)).save(consumer);
@@ -541,6 +593,7 @@ implements DataProvider {
         ShapelessRecipeBuilder.shapeless(Items.LIGHT_GRAY_DYE).requires(Blocks.OXEYE_DAISY).group("light_gray_dye").unlockedBy("has_red_flower", RecipeProvider.has(Blocks.OXEYE_DAISY)).save(consumer, "light_gray_dye_from_oxeye_daisy");
         ShapelessRecipeBuilder.shapeless(Items.LIGHT_GRAY_DYE).requires(Blocks.WHITE_TULIP).group("light_gray_dye").unlockedBy("has_red_flower", RecipeProvider.has(Blocks.WHITE_TULIP)).save(consumer, "light_gray_dye_from_white_tulip");
         ShapedRecipeBuilder.shaped(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE).define(Character.valueOf('#'), Items.GOLD_INGOT).pattern("##").unlockedBy("has_gold_ingot", RecipeProvider.has(Items.GOLD_INGOT)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.LIGHTNING_ROD).define(Character.valueOf('#'), Items.COPPER_INGOT).pattern("#").pattern("#").pattern("#").unlockedBy("has_copper_ingot", RecipeProvider.has(Items.COPPER_INGOT)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.LIME_DYE, 2).requires(Items.GREEN_DYE).requires(Items.WHITE_DYE).unlockedBy("has_green_dye", RecipeProvider.has(Items.GREEN_DYE)).unlockedBy("has_white_dye", RecipeProvider.has(Items.WHITE_DYE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.JACK_O_LANTERN).define(Character.valueOf('A'), Blocks.CARVED_PUMPKIN).define(Character.valueOf('B'), Blocks.TORCH).pattern("A").pattern("B").unlockedBy("has_carved_pumpkin", RecipeProvider.has(Blocks.CARVED_PUMPKIN)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.MAGENTA_DYE).requires(Blocks.ALLIUM).group("magenta_dye").unlockedBy("has_red_flower", RecipeProvider.has(Blocks.ALLIUM)).save(consumer, "magenta_dye_from_allium");
@@ -629,6 +682,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.SOUL_CAMPFIRE).define(Character.valueOf('L'), ItemTags.LOGS).define(Character.valueOf('S'), Items.STICK).define(Character.valueOf('#'), ItemTags.SOUL_FIRE_BASE_BLOCKS).pattern(" S ").pattern("S#S").pattern("LLL").unlockedBy("has_stick", RecipeProvider.has(Items.STICK)).unlockedBy("has_soul_sand", RecipeProvider.has(ItemTags.SOUL_FIRE_BASE_BLOCKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.GLISTERING_MELON_SLICE).define(Character.valueOf('#'), Items.GOLD_NUGGET).define(Character.valueOf('X'), Items.MELON_SLICE).pattern("###").pattern("#X#").pattern("###").unlockedBy("has_melon", RecipeProvider.has(Items.MELON_SLICE)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.SPECTRAL_ARROW, 2).define(Character.valueOf('#'), Items.GLOWSTONE_DUST).define(Character.valueOf('X'), Items.ARROW).pattern(" # ").pattern("#X#").pattern(" # ").unlockedBy("has_glowstone_dust", RecipeProvider.has(Items.GLOWSTONE_DUST)).save(consumer);
+        ShapedRecipeBuilder.shaped(Items.SPYGLASS).define(Character.valueOf('#'), Items.AMETHYST_SHARD).define(Character.valueOf('X'), Items.COPPER_INGOT).pattern(" # ").pattern(" X ").pattern(" X ").unlockedBy("has_amethyst_shard", RecipeProvider.has(Items.AMETHYST_SHARD)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.STICK, 4).define(Character.valueOf('#'), ItemTags.PLANKS).pattern("#").pattern("#").group("sticks").unlockedBy("has_planks", RecipeProvider.has(ItemTags.PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.STICK, 1).define(Character.valueOf('#'), Blocks.BAMBOO).pattern("#").pattern("#").group("sticks").unlockedBy("has_bamboo", RecipeProvider.has(Blocks.BAMBOO)).save(consumer, "stick_from_bamboo_item");
         ShapedRecipeBuilder.shaped(Blocks.STICKY_PISTON).define(Character.valueOf('P'), Blocks.PISTON).define(Character.valueOf('S'), Items.SLIME_BALL).pattern("S").pattern("P").unlockedBy("has_slime_ball", RecipeProvider.has(Items.SLIME_BALL)).save(consumer);
@@ -743,9 +797,13 @@ implements DataProvider {
         ShapelessRecipeBuilder.shapeless(Blocks.POLISHED_BLACKSTONE_BUTTON).requires(Blocks.POLISHED_BLACKSTONE).unlockedBy("has_polished_blackstone", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE).define(Character.valueOf('#'), Blocks.POLISHED_BLACKSTONE).pattern("##").unlockedBy("has_polished_blackstone", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHAIN).define(Character.valueOf('I'), Items.IRON_INGOT).define(Character.valueOf('N'), Items.IRON_NUGGET).pattern("N").pattern("I").pattern("N").unlockedBy("has_iron_nugget", RecipeProvider.has(Items.IRON_NUGGET)).unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
+        ShapedRecipeBuilder.shaped(Items.CANDLE).define(Character.valueOf('S'), Items.STRING).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("S").pattern("H").unlockedBy("has_string", RecipeProvider.has(Items.STRING)).unlockedBy("has_honeycomb", RecipeProvider.has(Items.HONEYCOMB)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.TINTED_GLASS, 2).define(Character.valueOf('G'), Blocks.GLASS).define(Character.valueOf('S'), Items.AMETHYST_SHARD).pattern(" S ").pattern("SGS").pattern(" S ").unlockedBy("has_amethyst_shard", RecipeProvider.has(Items.AMETHYST_SHARD)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.AMETHYST_BLOCK).define(Character.valueOf('S'), Items.AMETHYST_SHARD).pattern("SS").pattern("SS").unlockedBy("has_amethyst_shard", RecipeProvider.has(Items.AMETHYST_SHARD)).save(consumer);
         SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
         SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
         SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");
+        ShapedRecipeBuilder.shaped(Items.BUNDLE).define(Character.valueOf('#'), Items.RABBIT_HIDE).define(Character.valueOf('-'), Items.STRING).pattern("-#-").pattern("# #").pattern("###").unlockedBy("has_string", RecipeProvider.has(Items.STRING)).save(consumer);
         SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_ROCKET).save(consumer, "firework_rocket");
         SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR).save(consumer, "firework_star");
         SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR_FADE).save(consumer, "firework_star_fade");
@@ -779,6 +837,7 @@ implements DataProvider {
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_AXE, Items.GOLDEN_HOE, Items.GOLDEN_SWORD, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS, Items.GOLDEN_HORSE_ARMOR), Items.GOLD_NUGGET, 0.1f, 200).unlockedBy("has_golden_pickaxe", RecipeProvider.has(Items.GOLDEN_PICKAXE)).unlockedBy("has_golden_shovel", RecipeProvider.has(Items.GOLDEN_SHOVEL)).unlockedBy("has_golden_axe", RecipeProvider.has(Items.GOLDEN_AXE)).unlockedBy("has_golden_hoe", RecipeProvider.has(Items.GOLDEN_HOE)).unlockedBy("has_golden_sword", RecipeProvider.has(Items.GOLDEN_SWORD)).unlockedBy("has_golden_helmet", RecipeProvider.has(Items.GOLDEN_HELMET)).unlockedBy("has_golden_chestplate", RecipeProvider.has(Items.GOLDEN_CHESTPLATE)).unlockedBy("has_golden_leggings", RecipeProvider.has(Items.GOLDEN_LEGGINGS)).unlockedBy("has_golden_boots", RecipeProvider.has(Items.GOLDEN_BOOTS)).unlockedBy("has_golden_horse_armor", RecipeProvider.has(Items.GOLDEN_HORSE_ARMOR)).save(consumer, "gold_nugget_from_smelting");
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.IRON_PICKAXE, Items.IRON_SHOVEL, Items.IRON_AXE, Items.IRON_HOE, Items.IRON_SWORD, Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.IRON_HORSE_ARMOR, Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS), Items.IRON_NUGGET, 0.1f, 200).unlockedBy("has_iron_pickaxe", RecipeProvider.has(Items.IRON_PICKAXE)).unlockedBy("has_iron_shovel", RecipeProvider.has(Items.IRON_SHOVEL)).unlockedBy("has_iron_axe", RecipeProvider.has(Items.IRON_AXE)).unlockedBy("has_iron_hoe", RecipeProvider.has(Items.IRON_HOE)).unlockedBy("has_iron_sword", RecipeProvider.has(Items.IRON_SWORD)).unlockedBy("has_iron_helmet", RecipeProvider.has(Items.IRON_HELMET)).unlockedBy("has_iron_chestplate", RecipeProvider.has(Items.IRON_CHESTPLATE)).unlockedBy("has_iron_leggings", RecipeProvider.has(Items.IRON_LEGGINGS)).unlockedBy("has_iron_boots", RecipeProvider.has(Items.IRON_BOOTS)).unlockedBy("has_iron_horse_armor", RecipeProvider.has(Items.IRON_HORSE_ARMOR)).unlockedBy("has_chainmail_helmet", RecipeProvider.has(Items.CHAINMAIL_HELMET)).unlockedBy("has_chainmail_chestplate", RecipeProvider.has(Items.CHAINMAIL_CHESTPLATE)).unlockedBy("has_chainmail_leggings", RecipeProvider.has(Items.CHAINMAIL_LEGGINGS)).unlockedBy("has_chainmail_boots", RecipeProvider.has(Items.CHAINMAIL_BOOTS)).save(consumer, "iron_nugget_from_smelting");
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7f, 200).unlockedBy("has_iron_ore", RecipeProvider.has(Blocks.IRON_ORE.asItem())).save(consumer);
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.COPPER_ORE), Items.COPPER_INGOT, 0.7f, 200).unlockedBy("has_copper_ore", RecipeProvider.has(Blocks.COPPER_ORE.asItem())).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.CLAY), Blocks.TERRACOTTA.asItem(), 0.35f, 200).unlockedBy("has_clay_block", RecipeProvider.has(Blocks.CLAY)).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.NETHERRACK), Items.NETHER_BRICK, 0.1f, 200).unlockedBy("has_netherrack", RecipeProvider.has(Blocks.NETHERRACK)).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.NETHER_QUARTZ_ORE), Items.QUARTZ, 0.2f, 200).unlockedBy("has_nether_quartz_ore", RecipeProvider.has(Blocks.NETHER_QUARTZ_ORE)).save(consumer);
@@ -810,6 +869,7 @@ implements DataProvider {
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.asItem(), 0.1f, 200).unlockedBy("has_blackstone_bricks", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE_BRICKS)).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.NETHER_BRICKS), Blocks.CRACKED_NETHER_BRICKS.asItem(), 0.1f, 200).unlockedBy("has_nether_bricks", RecipeProvider.has(Blocks.NETHER_BRICKS)).save(consumer);
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7f, 100).unlockedBy("has_iron_ore", RecipeProvider.has(Blocks.IRON_ORE.asItem())).save(consumer, "iron_ingot_from_blasting");
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.COPPER_ORE), Items.COPPER_INGOT, 0.7f, 100).unlockedBy("has_copper_ore", RecipeProvider.has(Blocks.COPPER_ORE.asItem())).save(consumer, "copper_ingot_from_blasting");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.GOLD_ORES), Items.GOLD_INGOT, 1.0f, 100).unlockedBy("has_gold_ore", RecipeProvider.has(ItemTags.GOLD_ORES)).save(consumer, "gold_ingot_from_blasting");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.DIAMOND_ORE.asItem()), Items.DIAMOND, 1.0f, 100).unlockedBy("has_diamond_ore", RecipeProvider.has(Blocks.DIAMOND_ORE)).save(consumer, "diamond_from_blasting");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.LAPIS_ORE.asItem()), Items.LAPIS_LAZULI, 0.2f, 100).unlockedBy("has_lapis_ore", RecipeProvider.has(Blocks.LAPIS_ORE)).save(consumer, "lapis_from_blasting");
@@ -1061,6 +1121,11 @@ implements DataProvider {
 
     private static void concretePowder(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
         ShapelessRecipeBuilder.shapeless(itemLike, 8).requires(itemLike2).requires(Blocks.SAND, 4).requires(Blocks.GRAVEL, 4).group("concrete_powder").unlockedBy("has_sand", RecipeProvider.has(Blocks.SAND)).unlockedBy("has_gravel", RecipeProvider.has(Blocks.GRAVEL)).save(consumer);
+    }
+
+    public static void candle(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+        String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+        ShapelessRecipeBuilder.shapeless(itemLike).requires(Blocks.CANDLE).requires(itemLike2).unlockedBy("has_" + string, RecipeProvider.has(itemLike2)).save(consumer);
     }
 
     private static void cookRecipes(Consumer<FinishedRecipe> consumer, String string, SimpleCookingSerializer<?> simpleCookingSerializer, int i) {

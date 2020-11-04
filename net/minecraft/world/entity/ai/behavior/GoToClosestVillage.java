@@ -11,7 +11,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.Vec3;
@@ -38,7 +38,7 @@ extends Behavior<Villager> {
         int i = poiManager.sectionsToVillage(SectionPos.of(villager.blockPosition()));
         Vec3 vec3 = null;
         for (int j = 0; j < 5; ++j) {
-            Vec3 vec32 = RandomPos.getLandPos(villager, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));
+            Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));
             if (vec32 == null) continue;
             int k = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(vec32)));
             if (k < i) {

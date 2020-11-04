@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -19,15 +20,18 @@ public class ProtoTickList<T>
 implements TickList<T> {
     protected final Predicate<T> ignore;
     private final ChunkPos chunkPos;
-    private final ShortList[] toBeTicked = new ShortList[16];
+    private final ShortList[] toBeTicked;
+    private LevelHeightAccessor levelHeightAccessor;
 
-    public ProtoTickList(Predicate<T> predicate, ChunkPos chunkPos) {
-        this(predicate, chunkPos, new ListTag());
+    public ProtoTickList(Predicate<T> predicate, ChunkPos chunkPos, LevelHeightAccessor levelHeightAccessor) {
+        this(predicate, chunkPos, new ListTag(), levelHeightAccessor);
     }
 
-    public ProtoTickList(Predicate<T> predicate, ChunkPos chunkPos, ListTag listTag) {
+    public ProtoTickList(Predicate<T> predicate, ChunkPos chunkPos, ListTag listTag, LevelHeightAccessor levelHeightAccessor) {
         this.ignore = predicate;
         this.chunkPos = chunkPos;
+        this.levelHeightAccessor = levelHeightAccessor;
+        this.toBeTicked = new ShortList[levelHeightAccessor.getSectionsCount()];
         for (int i = 0; i < listTag.size(); ++i) {
             ListTag listTag2 = listTag.getList(i);
             for (int j = 0; j < listTag2.size(); ++j) {
@@ -44,7 +48,7 @@ implements TickList<T> {
         for (int i = 0; i < this.toBeTicked.length; ++i) {
             if (this.toBeTicked[i] == null) continue;
             for (Short short_ : this.toBeTicked[i]) {
-                BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, i, this.chunkPos);
+                BlockPos blockPos = ProtoChunk.unpackOffsetCoordinates(short_, this.levelHeightAccessor.getSectionYFromSectionIndex(i), this.chunkPos);
                 tickList.scheduleTick(blockPos, function.apply(blockPos), 0);
             }
             this.toBeTicked[i].clear();
@@ -58,7 +62,7 @@ implements TickList<T> {
 
     @Override
     public void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
-        ChunkAccess.getOrCreateOffsetList(this.toBeTicked, blockPos.getY() >> 4).add(ProtoChunk.packOffsetCoordinates(blockPos));
+        ChunkAccess.getOrCreateOffsetList(this.toBeTicked, this.levelHeightAccessor.getSectionIndex(blockPos.getY())).add(ProtoChunk.packOffsetCoordinates(blockPos));
     }
 
     @Override

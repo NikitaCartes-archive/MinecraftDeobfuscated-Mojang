@@ -52,6 +52,24 @@ extends RisingParticle {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class SmallFlameProvider
+    implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprite;
+
+        public SmallFlameProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            FlameParticle flameParticle = new FlameParticle(clientLevel, d, e, f, g, h, i);
+            flameParticle.pickSprite(this.sprite);
+            flameParticle.scale(0.5f);
+            return flameParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Provider
     implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;

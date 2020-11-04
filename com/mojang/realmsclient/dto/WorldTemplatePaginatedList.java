@@ -53,7 +53,7 @@ extends ValueObject {
             worldTemplatePaginatedList.size = JsonUtils.getIntOr("size", jsonObject, 0);
             worldTemplatePaginatedList.total = JsonUtils.getIntOr("total", jsonObject, 0);
         } catch (Exception exception) {
-            LOGGER.error("Could not parse WorldTemplatePaginatedList: " + exception.getMessage());
+            LOGGER.error("Could not parse WorldTemplatePaginatedList: {}", (Object)exception.getMessage());
         }
         return worldTemplatePaginatedList;
     }

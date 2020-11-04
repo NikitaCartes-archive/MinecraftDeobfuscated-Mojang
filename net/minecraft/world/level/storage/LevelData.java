@@ -6,6 +6,7 @@ package net.minecraft.world.level.storage;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LevelHeightAccessor;
 
 public interface LevelData {
     public int getXSpawn();
@@ -34,8 +35,8 @@ public interface LevelData {
 
     public boolean isDifficultyLocked();
 
-    default public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-        crashReportCategory.setDetail("Level spawn location", () -> CrashReportCategory.formatLocation(this.getXSpawn(), this.getYSpawn(), this.getZSpawn()));
+    default public void fillCrashReportCategory(CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor) {
+        crashReportCategory.setDetail("Level spawn location", () -> CrashReportCategory.formatLocation(levelHeightAccessor, this.getXSpawn(), this.getYSpawn(), this.getZSpawn()));
         crashReportCategory.setDetail("Level time", () -> String.format("%d game time, %d day time", this.getGameTime(), this.getDayTime()));
     }
 }

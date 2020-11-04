@@ -68,8 +68,8 @@ extends Projectile {
     public void tick() {
         HitResult hitResult;
         Entity entity = this.getOwner();
-        if (!this.level.isClientSide && (entity != null && entity.removed || !this.level.hasChunkAt(this.blockPosition()))) {
-            this.remove();
+        if (!this.level.isClientSide && (entity != null && entity.isRemoved() || !this.level.hasChunkAt(this.blockPosition()))) {
+            this.discard();
             return;
         }
         super.tick();
@@ -171,6 +171,21 @@ extends Projectile {
         Entity entity = this.getOwner();
         int i = entity == null ? 0 : entity.getId();
         return new ClientboundAddEntityPacket(this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.xRot, this.yRot, this.getType(), i, new Vec3(this.xPower, this.yPower, this.zPower));
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        double d = clientboundAddEntityPacket.getXa();
+        double e = clientboundAddEntityPacket.getYa();
+        double f = clientboundAddEntityPacket.getZa();
+        double g = Mth.sqrt(d * d + e * e + f * f);
+        if (g != 0.0) {
+            this.xPower = d / g * 0.1;
+            this.yPower = e / g * 0.1;
+            this.zPower = f / g * 0.1;
+        }
     }
 }
 

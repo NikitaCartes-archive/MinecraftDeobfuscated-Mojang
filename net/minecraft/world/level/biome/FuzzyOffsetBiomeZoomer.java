@@ -15,10 +15,7 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer
 
     @Override
     public Biome getBiome(long l, int i, int j, int k, BiomeManager.NoiseBiomeSource noiseBiomeSource) {
-        int y;
-        int u;
         int t;
-        int s;
         int m = i - 2;
         int n = j - 2;
         int o = k - 2;
@@ -28,30 +25,27 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer
         double d = (double)(m & 3) / 4.0;
         double e = (double)(n & 3) / 4.0;
         double f = (double)(o & 3) / 4.0;
-        double[] ds = new double[8];
-        for (s = 0; s < 8; ++s) {
-            boolean bl = (s & 4) == 0;
-            boolean bl2 = (s & 2) == 0;
-            boolean bl3 = (s & 1) == 0;
-            t = bl ? p : p + 1;
-            u = bl2 ? q : q + 1;
-            int v = bl3 ? r : r + 1;
-            double g = bl ? d : d - 1.0;
-            double h = bl2 ? e : e - 1.0;
-            double w = bl3 ? f : f - 1.0;
-            ds[s] = FuzzyOffsetBiomeZoomer.getFiddledDistance(l, t, u, v, g, h, w);
+        int s = 0;
+        double g = Double.POSITIVE_INFINITY;
+        for (t = 0; t < 8; ++t) {
+            double y;
+            double x;
+            double h;
+            boolean bl3;
+            int w;
+            boolean bl2;
+            int v;
+            boolean bl = (t & 4) == 0;
+            int u = bl ? p : p + 1;
+            double z = FuzzyOffsetBiomeZoomer.getFiddledDistance(l, u, v = (bl2 = (t & 2) == 0) ? q : q + 1, w = (bl3 = (t & 1) == 0) ? r : r + 1, h = bl ? d : d - 1.0, x = bl2 ? e : e - 1.0, y = bl3 ? f : f - 1.0);
+            if (!(g > z)) continue;
+            s = t;
+            g = z;
         }
-        s = 0;
-        double x = ds[0];
-        for (y = 1; y < 8; ++y) {
-            if (!(x > ds[y])) continue;
-            s = y;
-            x = ds[y];
-        }
-        y = (s & 4) == 0 ? p : p + 1;
-        t = (s & 2) == 0 ? q : q + 1;
-        u = (s & 1) == 0 ? r : r + 1;
-        return noiseBiomeSource.getNoiseBiome(y, t, u);
+        t = (s & 4) == 0 ? p : p + 1;
+        int aa = (s & 2) == 0 ? q : q + 1;
+        int ab = (s & 1) == 0 ? r : r + 1;
+        return noiseBiomeSource.getNoiseBiome(t, aa, ab);
     }
 
     private static double getFiddledDistance(long l, int i, int j, int k, double d, double e, double f) {

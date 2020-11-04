@@ -33,12 +33,11 @@ implements BonemealableBlock {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        Block block;
         if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
         GrowingPlantHeadBlock growingPlantHeadBlock = this.getHeadBlock();
-        if (direction == this.growthDirection && (block = blockState2.getBlock()) != this && block != growingPlantHeadBlock) {
+        if (direction == this.growthDirection && !blockState2.is(this) && !blockState2.is(growingPlantHeadBlock)) {
             return growingPlantHeadBlock.getStateForPlacement(levelAccessor);
         }
         if (this.scheduleFluidTicks) {
@@ -74,11 +73,11 @@ implements BonemealableBlock {
     }
 
     private Optional<BlockPos> getHeadPos(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        Block block;
+        BlockState blockState2;
         BlockPos blockPos2 = blockPos;
-        while ((block = blockGetter.getBlockState(blockPos2 = blockPos2.relative(this.growthDirection)).getBlock()) == blockState.getBlock()) {
+        while ((blockState2 = blockGetter.getBlockState(blockPos2 = blockPos2.relative(this.growthDirection))).is(blockState.getBlock())) {
         }
-        if (block == this.getHeadBlock()) {
+        if (blockState2.is(this.getHeadBlock())) {
             return Optional.of(blockPos2);
         }
         return Optional.empty();
@@ -87,7 +86,7 @@ implements BonemealableBlock {
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
         boolean bl = super.canBeReplaced(blockState, blockPlaceContext);
-        if (bl && blockPlaceContext.getItemInHand().getItem() == this.getHeadBlock().asItem()) {
+        if (bl && blockPlaceContext.getItemInHand().is(this.getHeadBlock().asItem())) {
             return false;
         }
         return bl;

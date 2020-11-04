@@ -30,6 +30,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiSection;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -41,8 +42,8 @@ extends SectionStorage<PoiSection> {
     private final DistanceTracker distanceTracker;
     private final LongSet loadedChunks = new LongOpenHashSet();
 
-    public PoiManager(File file, DataFixer dataFixer, boolean bl) {
-        super(file, PoiSection::codec, PoiSection::new, dataFixer, DataFixTypes.POI_CHUNK, bl);
+    public PoiManager(File file, DataFixer dataFixer, boolean bl, LevelHeightAccessor levelHeightAccessor) {
+        super(file, PoiSection::codec, PoiSection::new, dataFixer, DataFixTypes.POI_CHUNK, bl, levelHeightAccessor);
         this.distanceTracker = new DistanceTracker();
     }
 
@@ -77,7 +78,7 @@ extends SectionStorage<PoiSection> {
     }
 
     public Stream<PoiRecord> getInChunk(Predicate<PoiType> predicate, ChunkPos chunkPos, Occupancy occupancy) {
-        return IntStream.range(0, 16).boxed().map(integer -> this.getOrLoad(SectionPos.of(chunkPos, integer).asLong())).filter(Optional::isPresent).flatMap(optional -> ((PoiSection)optional.get()).getRecords(predicate, occupancy));
+        return IntStream.range(this.levelHeightAccessor.getMinSection(), this.levelHeightAccessor.getMaxSection()).boxed().map(integer -> this.getOrLoad(SectionPos.of(chunkPos, integer).asLong())).filter(Optional::isPresent).flatMap(optional -> ((PoiSection)optional.get()).getRecords(predicate, occupancy));
     }
 
     public Stream<BlockPos> findAll(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, Occupancy occupancy) {
@@ -153,7 +154,7 @@ extends SectionStorage<PoiSection> {
     }
 
     public void checkConsistencyWithBlocks(ChunkPos chunkPos, LevelChunkSection levelChunkSection) {
-        SectionPos sectionPos = SectionPos.of(chunkPos, levelChunkSection.bottomBlockY() >> 4);
+        SectionPos sectionPos = SectionPos.of(chunkPos, SectionPos.blockToSectionCoord(levelChunkSection.bottomBlockY()));
         Util.ifElse(this.getOrLoad(sectionPos.asLong()), poiSection -> poiSection.refresh(biConsumer -> {
             if (PoiManager.mayHavePoi(levelChunkSection)) {
                 this.updateFromSection(levelChunkSection, sectionPos, (BiConsumer<BlockPos, PoiType>)biConsumer);
@@ -178,7 +179,7 @@ extends SectionStorage<PoiSection> {
     }
 
     public void ensureLoadedAndValid(LevelReader levelReader, BlockPos blockPos, int i) {
-        SectionPos.aroundChunk(new ChunkPos(blockPos), Math.floorDiv(i, 16)).map(sectionPos -> Pair.of(sectionPos, this.getOrLoad(sectionPos.asLong()))).filter(pair -> ((Optional)pair.getSecond()).map(PoiSection::isValid).orElse(false) == false).map(pair -> ((SectionPos)pair.getFirst()).chunk()).filter(chunkPos -> this.loadedChunks.add(chunkPos.toLong())).forEach(chunkPos -> levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY));
+        SectionPos.aroundChunk(new ChunkPos(blockPos), Math.floorDiv(i, 16), this.levelHeightAccessor.getMinSection(), this.levelHeightAccessor.getMaxSection()).map(sectionPos -> Pair.of(sectionPos, this.getOrLoad(sectionPos.asLong()))).filter(pair -> ((Optional)pair.getSecond()).map(PoiSection::isValid).orElse(false) == false).map(pair -> ((SectionPos)pair.getFirst()).chunk()).filter(chunkPos -> this.loadedChunks.add(chunkPos.toLong())).forEach(chunkPos -> levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY));
     }
 
     final class DistanceTracker

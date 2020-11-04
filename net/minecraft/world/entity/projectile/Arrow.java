@@ -46,7 +46,7 @@ extends AbstractArrow {
     }
 
     public void setEffectsFromItem(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.TIPPED_ARROW) {
+        if (itemStack.is(Items.TIPPED_ARROW)) {
             int i;
             this.potion = PotionUtils.getPotion(itemStack);
             List<MobEffectInstance> collection = PotionUtils.getCustomEffects(itemStack);
@@ -60,7 +60,7 @@ extends AbstractArrow {
             } else {
                 this.setFixedColor(i);
             }
-        } else if (itemStack.getItem() == Items.ARROW) {
+        } else if (itemStack.is(Items.ARROW)) {
             this.potion = Potions.EMPTY;
             this.effects.clear();
             this.entityData.set(ID_EFFECT_COLOR, -1);

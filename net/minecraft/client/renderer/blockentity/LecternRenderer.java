@@ -9,10 +9,11 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
@@ -20,11 +21,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value=EnvType.CLIENT)
 public class LecternRenderer
-extends BlockEntityRenderer<LecternBlockEntity> {
-    private final BookModel bookModel = new BookModel();
+implements BlockEntityRenderer<LecternBlockEntity> {
+    private final BookModel bookModel;
 
-    public LecternRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+    public LecternRenderer(BlockEntityRendererProvider.Context context) {
+        this.bookModel = new BookModel(context.getLayer(ModelLayers.BOOK));
     }
 
     @Override

@@ -176,7 +176,7 @@ public class EndDragonFight {
                 this.spawnExitPortal(false);
             }
         }
-        List<EnderDragon> list = this.level.getDragons();
+        List<? extends EnderDragon> list = this.level.getDragons();
         if (list.isEmpty()) {
             this.dragonKilled = true;
         } else {
@@ -186,7 +186,7 @@ public class EndDragonFight {
             this.dragonKilled = false;
             if (!bl) {
                 LOGGER.info("But we didn't have a portal, let's remove it.");
-                enderDragon.remove();
+                enderDragon.discard();
                 this.dragonUUID = null;
             }
         }
@@ -196,7 +196,7 @@ public class EndDragonFight {
     }
 
     private void findOrCreateDragon() {
-        List<EnderDragon> list = this.level.getDragons();
+        List<? extends EnderDragon> list = this.level.getDragons();
         if (list.isEmpty()) {
             LOGGER.debug("Haven't seen the dragon, respawning it");
             this.createNewDragon();
@@ -254,7 +254,7 @@ public class EndDragonFight {
                 }
             }
         }
-        for (j = i = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION).getY(); j >= 0; --j) {
+        for (j = i = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION).getY(); j >= this.level.getMinBuildHeight(); --j) {
             BlockPattern.BlockPatternMatch blockPatternMatch2 = this.exitPortalPattern.find(this.level, new BlockPos(EndPodiumFeature.END_PODIUM_LOCATION.getX(), j, EndPodiumFeature.END_PODIUM_LOCATION.getZ()));
             if (blockPatternMatch2 == null) continue;
             if (this.portalLocation == null) {

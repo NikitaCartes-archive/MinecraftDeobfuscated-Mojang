@@ -166,22 +166,23 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
     @Nullable
     public BlockPos getNearestGeneratedFeature(LevelReader levelReader, StructureFeatureManager structureFeatureManager, BlockPos blockPos, int i, boolean bl, long l, StructureFeatureConfiguration structureFeatureConfiguration) {
         int j = structureFeatureConfiguration.spacing();
-        int k = blockPos.getX() >> 4;
-        int m = blockPos.getZ() >> 4;
+        int k = SectionPos.blockToSectionCoord(blockPos.getX());
+        int m = SectionPos.blockToSectionCoord(blockPos.getZ());
         WorldgenRandom worldgenRandom = new WorldgenRandom();
         block0: for (int n = 0; n <= i; ++n) {
             for (int o = -n; o <= n; ++o) {
                 boolean bl2 = o == -n || o == n;
                 for (int p = -n; p <= n; ++p) {
+                    ChunkAccess chunkAccess;
+                    StructureStart<?> structureStart;
                     boolean bl3;
                     boolean bl4 = bl3 = p == -n || p == n;
                     if (!bl2 && !bl3) continue;
                     int q = k + j * o;
                     int r = m + j * p;
                     ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-                    ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-                    StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), this, chunkAccess);
-                    if (structureStart != null && structureStart.isValid()) {
+                    boolean bl42 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos.x, chunkPos.z).getGenerationSettings().isValidStart(this);
+                    if (bl42 && (structureStart = structureFeatureManager.getStartForFeature(SectionPos.of((chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS)).getPos(), 0), this, chunkAccess)) != null && structureStart.isValid()) {
                         if (bl && structureStart.canBeReferenced()) {
                             structureStart.addReference();
                             return structureStart.getLocatePos();

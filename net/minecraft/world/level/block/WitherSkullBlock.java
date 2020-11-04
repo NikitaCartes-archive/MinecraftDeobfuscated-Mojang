@@ -57,7 +57,7 @@ extends SkullBlock {
         }
         BlockState blockState = skullBlockEntity.getBlockState();
         boolean bl2 = bl = blockState.is(Blocks.WITHER_SKELETON_SKULL) || blockState.is(Blocks.WITHER_SKELETON_WALL_SKULL);
-        if (!bl || blockPos.getY() < 0 || level.getDifficulty() == Difficulty.PEACEFUL) {
+        if (!bl || blockPos.getY() < level.getMinBuildHeight() || level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
         BlockPattern blockPattern = WitherSkullBlock.getOrCreateWitherFull();
@@ -89,7 +89,7 @@ extends SkullBlock {
     }
 
     public static boolean canSpawnMob(Level level, BlockPos blockPos, ItemStack itemStack) {
-        if (itemStack.getItem() == Items.WITHER_SKELETON_SKULL && blockPos.getY() >= 2 && level.getDifficulty() != Difficulty.PEACEFUL && !level.isClientSide) {
+        if (itemStack.is(Items.WITHER_SKELETON_SKULL) && blockPos.getY() >= level.getMinBuildHeight() + 2 && level.getDifficulty() != Difficulty.PEACEFUL && !level.isClientSide) {
             return WitherSkullBlock.getOrCreateWitherBase().find(level, blockPos) != null;
         }
         return false;

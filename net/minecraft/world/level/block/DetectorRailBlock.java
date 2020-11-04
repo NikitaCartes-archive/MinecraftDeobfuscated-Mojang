@@ -31,7 +31,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.Nullable;
 
 public class DetectorRailBlock
 extends BaseRailBlock {
@@ -40,7 +39,7 @@ extends BaseRailBlock {
 
     public DetectorRailBlock(BlockBehaviour.Properties properties) {
         super(true, properties);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(POWERED, false)).setValue(SHAPE, RailShape.NORTH_SOUTH));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(POWERED, false)).setValue(SHAPE, RailShape.NORTH_SOUTH)).setValue(WATERLOGGED, false));
     }
 
     @Override
@@ -87,7 +86,7 @@ extends BaseRailBlock {
         }
         boolean bl = blockState.getValue(POWERED);
         boolean bl2 = false;
-        List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);
+        List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, entity -> true);
         if (!list.isEmpty()) {
             bl2 = true;
         }
@@ -127,7 +126,8 @@ extends BaseRailBlock {
         if (blockState2.is(blockState.getBlock())) {
             return;
         }
-        this.checkPressed(level, blockPos, this.updateState(blockState, level, blockPos, bl));
+        BlockState blockState3 = this.updateState(blockState, level, blockPos, bl);
+        this.checkPressed(level, blockPos, blockState3);
     }
 
     @Override
@@ -143,7 +143,7 @@ extends BaseRailBlock {
     @Override
     public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
         if (blockState.getValue(POWERED).booleanValue()) {
-            List<MinecartCommandBlock> list = this.getInteractingMinecartOfType(level, blockPos, MinecartCommandBlock.class, null);
+            List<MinecartCommandBlock> list = this.getInteractingMinecartOfType(level, blockPos, MinecartCommandBlock.class, entity -> true);
             if (!list.isEmpty()) {
                 return list.get(0).getCommandBlock().getSuccessCount();
             }
@@ -155,7 +155,7 @@ extends BaseRailBlock {
         return 0;
     }
 
-    protected <T extends AbstractMinecart> List<T> getInteractingMinecartOfType(Level level, BlockPos blockPos, Class<T> class_, @Nullable Predicate<Entity> predicate) {
+    private <T extends AbstractMinecart> List<T> getInteractingMinecartOfType(Level level, BlockPos blockPos, Class<T> class_, Predicate<Entity> predicate) {
         return level.getEntitiesOfClass(class_, this.getSearchBB(blockPos), predicate);
     }
 
@@ -323,7 +323,7 @@ extends BaseRailBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(SHAPE, POWERED);
+        builder.add(SHAPE, POWERED, WATERLOGGED);
     }
 }
 

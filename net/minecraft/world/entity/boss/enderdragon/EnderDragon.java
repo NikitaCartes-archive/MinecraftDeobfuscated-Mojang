@@ -42,7 +42,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -317,7 +316,7 @@ implements Enemy {
 
     private void checkCrystals() {
         if (this.nearestCrystal != null) {
-            if (this.nearestCrystal.removed) {
+            if (this.nearestCrystal.isRemoved()) {
                 this.nearestCrystal = null;
             } else if (this.tickCount % 10 == 0 && this.getHealth() < this.getMaxHealth()) {
                 this.setHealth(this.getHealth() + 1.0f);
@@ -378,9 +377,8 @@ implements Enemy {
                 for (int q = k; q <= n; ++q) {
                     BlockPos blockPos = new BlockPos(o, p, q);
                     BlockState blockState = this.level.getBlockState(blockPos);
-                    Block block = blockState.getBlock();
                     if (blockState.isAir() || blockState.getMaterial() == Material.FIRE) continue;
-                    if (!this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || BlockTags.DRAGON_IMMUNE.contains(block)) {
+                    if (!this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || blockState.is(BlockTags.DRAGON_IMMUNE)) {
                         bl = true;
                         continue;
                     }
@@ -438,7 +436,7 @@ implements Enemy {
 
     @Override
     public void kill() {
-        this.remove();
+        this.remove(Entity.RemovalReason.KILLED);
         if (this.dragonFight != null) {
             this.dragonFight.updateDragon(this);
             this.dragonFight.setDragonKilled(this);
@@ -462,9 +460,9 @@ implements Enemy {
         if (this.dragonFight != null && !this.dragonFight.hasPreviouslyKilledDragon()) {
             i = 12000;
         }
-        if (!this.level.isClientSide) {
+        if (this.level instanceof ServerLevel) {
             if (this.dragonDeathTime > 150 && this.dragonDeathTime % 5 == 0 && bl) {
-                this.dropExperience(Mth.floor((float)i * 0.08f));
+                ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.08f));
             }
             if (this.dragonDeathTime == 1 && !this.isSilent()) {
                 this.level.globalLevelEvent(1028, this.blockPosition(), 0);
@@ -473,22 +471,14 @@ implements Enemy {
         this.move(MoverType.SELF, new Vec3(0.0, 0.1f, 0.0));
         this.yRot += 20.0f;
         this.yBodyRot = this.yRot;
-        if (this.dragonDeathTime == 200 && !this.level.isClientSide) {
+        if (this.dragonDeathTime == 200 && this.level instanceof ServerLevel) {
             if (bl) {
-                this.dropExperience(Mth.floor((float)i * 0.2f));
+                ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.2f));
             }
             if (this.dragonFight != null) {
                 this.dragonFight.setDragonKilled(this);
             }
-            this.remove();
-        }
-    }
-
-    private void dropExperience(int i) {
-        while (i > 0) {
-            int j = ExperienceOrb.getExperienceValue(i);
-            i -= j;
-            this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
+            this.remove(Entity.RemovalReason.KILLED);
         }
     }
 

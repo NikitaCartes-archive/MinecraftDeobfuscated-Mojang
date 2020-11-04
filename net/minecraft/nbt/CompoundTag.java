@@ -3,8 +3,6 @@
  */
 package net.minecraft.nbt;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -12,11 +10,8 @@ import com.mojang.serialization.Dynamic;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,11 +39,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagTypes;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.nbt.TagVisitor;
 import org.jetbrains.annotations.Nullable;
 
 public class CompoundTag
@@ -60,7 +51,6 @@ implements Tag {
         }
         return DataResult.error("Not a compound tag: " + tag);
     }, compoundTag -> new Dynamic<CompoundTag>(NbtOps.INSTANCE, (CompoundTag)compoundTag));
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>(){
 
@@ -377,20 +367,7 @@ implements Tag {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("{");
-        Collection<String> collection = this.tags.keySet();
-        if (LOGGER.isDebugEnabled()) {
-            ArrayList<String> list = Lists.newArrayList(this.tags.keySet());
-            Collections.sort(list);
-            collection = list;
-        }
-        for (String string : collection) {
-            if (stringBuilder.length() != 1) {
-                stringBuilder.append(',');
-            }
-            stringBuilder.append(CompoundTag.handleEscape(string)).append(':').append(this.tags.get(string));
-        }
-        return stringBuilder.append('}').toString();
+        return this.getAsString();
     }
 
     public boolean isEmpty() {
@@ -469,52 +446,9 @@ implements Tag {
         return this;
     }
 
-    protected static String handleEscape(String string) {
-        if (SIMPLE_VALUE.matcher(string).matches()) {
-            return string;
-        }
-        return StringTag.quoteAndEscape(string);
-    }
-
-    protected static Component handleEscapePretty(String string) {
-        if (SIMPLE_VALUE.matcher(string).matches()) {
-            return new TextComponent(string).withStyle(SYNTAX_HIGHLIGHTING_KEY);
-        }
-        String string2 = StringTag.quoteAndEscape(string);
-        String string3 = string2.substring(0, 1);
-        MutableComponent component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
-        return new TextComponent(string3).append(component).append(string3);
-    }
-
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        if (this.tags.isEmpty()) {
-            return new TextComponent("{}");
-        }
-        TextComponent mutableComponent = new TextComponent("{");
-        Collection<String> collection = this.tags.keySet();
-        if (LOGGER.isDebugEnabled()) {
-            ArrayList<String> list = Lists.newArrayList(this.tags.keySet());
-            Collections.sort(list);
-            collection = list;
-        }
-        if (!string.isEmpty()) {
-            mutableComponent.append("\n");
-        }
-        Iterator iterator = collection.iterator();
-        while (iterator.hasNext()) {
-            String string2 = (String)iterator.next();
-            MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(string, i + 1)).append(CompoundTag.handleEscapePretty(string2)).append(String.valueOf(':')).append(" ").append(this.tags.get(string2).getPrettyDisplay(string, i + 1));
-            if (iterator.hasNext()) {
-                mutableComponent2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
-            }
-            mutableComponent.append(mutableComponent2);
-        }
-        if (!string.isEmpty()) {
-            mutableComponent.append("\n").append(Strings.repeat(string, i));
-        }
-        mutableComponent.append("}");
-        return mutableComponent;
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitCompound(this);
     }
 
     protected Map<String, Tag> entries() {

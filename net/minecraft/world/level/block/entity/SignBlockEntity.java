@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -37,8 +38,8 @@ extends BlockEntity {
     private final FormattedCharSequence[] renderMessages = new FormattedCharSequence[4];
     private DyeColor color = DyeColor.BLACK;
 
-    public SignBlockEntity() {
-        super(BlockEntityType.SIGN);
+    public SignBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.SIGN, blockPos, blockState);
     }
 
     @Override
@@ -53,9 +54,9 @@ extends BlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
+    public void load(CompoundTag compoundTag) {
         this.isEditable = false;
-        super.load(blockState, compoundTag);
+        super.load(compoundTag);
         this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
         for (int i = 0; i < 4; ++i) {
             String string = compoundTag.getString("Text" + (i + 1));

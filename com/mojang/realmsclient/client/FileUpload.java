@@ -130,7 +130,7 @@ public class FileUpload {
         String string;
         int i = httpResponse.getStatusLine().getStatusCode();
         if (i == 401) {
-            LOGGER.debug("Realms server returned 401: " + httpResponse.getFirstHeader("WWW-Authenticate"));
+            LOGGER.debug("Realms server returned 401: {}", (Object)httpResponse.getFirstHeader("WWW-Authenticate"));
         }
         builder.withStatusCode(i);
         if (httpResponse.getEntity() != null && (string = EntityUtils.toString(httpResponse.getEntity(), "UTF-8")) != null) {

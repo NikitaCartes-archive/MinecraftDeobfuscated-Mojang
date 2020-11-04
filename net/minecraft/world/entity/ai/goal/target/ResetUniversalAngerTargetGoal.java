@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.goal.target;
 
 import java.util.List;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -44,10 +45,10 @@ extends Goal {
         super.start();
     }
 
-    private List<Mob> getNearbyMobsOfSameType() {
+    private List<? extends Mob> getNearbyMobsOfSameType() {
         double d = ((LivingEntity)this.mob).getAttributeValue(Attributes.FOLLOW_RANGE);
         AABB aABB = AABB.unitCubeFromLowerCorner(((Entity)this.mob).position()).inflate(d, 10.0, d);
-        return ((Mob)this.mob).level.getLoadedEntitiesOfClass(this.mob.getClass(), aABB);
+        return ((Mob)this.mob).level.getEntitiesOfClass(this.mob.getClass(), aABB, EntitySelector.NO_SPECTATORS);
     }
 }
 

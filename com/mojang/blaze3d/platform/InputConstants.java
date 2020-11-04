@@ -32,7 +32,7 @@ import org.lwjgl.glfw.GLFWScrollCallbackI;
 @Environment(value=EnvType.CLIENT)
 public class InputConstants {
     @Nullable
-    private static final MethodHandle glfwRawMouseMotionSupported;
+    private static final MethodHandle GLFW_RAW_MOUSE_MOTION_SUPPORTED;
     private static final int GLFW_RAW_MOUSE_MOTION;
     public static final Key UNKNOWN;
 
@@ -78,7 +78,7 @@ public class InputConstants {
 
     public static boolean isRawMouseInputSupported() {
         try {
-            return glfwRawMouseMotionSupported != null && glfwRawMouseMotionSupported.invokeExact();
+            return GLFW_RAW_MOUSE_MOTION_SUPPORTED != null && GLFW_RAW_MOUSE_MOTION_SUPPORTED.invokeExact();
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
         }
@@ -103,7 +103,7 @@ public class InputConstants {
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
         }
-        glfwRawMouseMotionSupported = methodHandle;
+        GLFW_RAW_MOUSE_MOTION_SUPPORTED = methodHandle;
         GLFW_RAW_MOUSE_MOTION = i;
         UNKNOWN = Type.KEYSYM.getOrCreate(-1);
     }

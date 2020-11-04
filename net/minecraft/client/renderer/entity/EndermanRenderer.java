@@ -8,8 +8,9 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EndermanModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CarriedBlockLayer;
 import net.minecraft.client.renderer.entity.layers.EnderEyesLayer;
@@ -24,8 +25,8 @@ extends MobRenderer<EnderMan, EndermanModel<EnderMan>> {
     private static final ResourceLocation ENDERMAN_LOCATION = new ResourceLocation("textures/entity/enderman/enderman.png");
     private final Random random = new Random();
 
-    public EndermanRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new EndermanModel(0.0f), 0.5f);
+    public EndermanRenderer(EntityRendererProvider.Context context) {
+        super(context, new EndermanModel(context.getLayer(ModelLayers.ENDERMAN)), 0.5f);
         this.addLayer(new EnderEyesLayer<EnderMan>(this));
         this.addLayer(new CarriedBlockLayer(this));
     }

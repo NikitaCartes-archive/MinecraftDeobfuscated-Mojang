@@ -86,7 +86,7 @@ implements SimpleWaterloggedBlock {
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
         ItemStack itemStack = blockPlaceContext.getItemInHand();
         SlabType slabType = blockState.getValue(TYPE);
-        if (slabType == SlabType.DOUBLE || itemStack.getItem() != this.asItem()) {
+        if (slabType == SlabType.DOUBLE || !itemStack.is(this.asItem())) {
             return false;
         }
         if (blockPlaceContext.replacingClickedOnBlock()) {

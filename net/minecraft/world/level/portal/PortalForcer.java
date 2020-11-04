@@ -51,19 +51,19 @@ public class PortalForcer {
         double e = -1.0;
         BlockPos blockPos3 = null;
         WorldBorder worldBorder = this.level.getWorldBorder();
-        int i = this.level.getHeight() - 1;
+        int i = this.level.getMinBuildHeight() + this.level.getLogicalHeight() - 1;
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (BlockPos.MutableBlockPos mutableBlockPos2 : BlockPos.spiralAround(blockPos, 16, Direction.EAST, Direction.SOUTH)) {
             j = Math.min(i, this.level.getHeight(Heightmap.Types.MOTION_BLOCKING, mutableBlockPos2.getX(), mutableBlockPos2.getZ()));
             k = 1;
             if (!worldBorder.isWithinBounds(mutableBlockPos2) || !worldBorder.isWithinBounds(mutableBlockPos2.move(direction, 1))) continue;
             mutableBlockPos2.move(direction.getOpposite(), 1);
-            for (int l = j; l >= 0; --l) {
+            for (int l = j; l >= this.level.getMinBuildHeight(); --l) {
                 int n;
                 mutableBlockPos2.setY(l);
                 if (!this.level.isEmptyBlock(mutableBlockPos2)) continue;
                 int m = l;
-                while (l > 0 && this.level.isEmptyBlock(mutableBlockPos2.move(Direction.DOWN))) {
+                while (l > this.level.getMinBuildHeight() && this.level.isEmptyBlock(mutableBlockPos2.move(Direction.DOWN))) {
                     --l;
                 }
                 if (l + 4 > i || (n = m - l) > 0 && n < 3) continue;
@@ -84,7 +84,7 @@ public class PortalForcer {
             d = e;
         }
         if (d == -1.0) {
-            blockPos2 = new BlockPos(blockPos.getX(), Mth.clamp(blockPos.getY(), 70, this.level.getHeight() - 10), blockPos.getZ()).immutable();
+            blockPos2 = new BlockPos(blockPos.getX(), Mth.clamp(blockPos.getY(), 70, this.level.getMinBuildHeight() + this.level.getLogicalHeight() - 10), blockPos.getZ()).immutable();
             Direction direction2 = direction.getClockWise();
             if (!worldBorder.isWithinBounds(blockPos2)) {
                 return Optional.empty();

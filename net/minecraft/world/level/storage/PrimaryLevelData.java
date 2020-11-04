@@ -8,7 +8,6 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,6 +32,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -84,7 +84,7 @@ WorldData {
     private boolean wasModded;
     private final TimerQueue<MinecraftServer> scheduledEvents;
 
-    private PrimaryLevelData(@Nullable DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, boolean bl, int j, int k, int l, float f, long m, long n, int o, int p, int q, boolean bl2, int r, boolean bl3, boolean bl4, boolean bl5, WorldBorder.Settings settings, int s, int t, @Nullable UUID uUID, LinkedHashSet<String> linkedHashSet, TimerQueue<MinecraftServer> timerQueue, @Nullable CompoundTag compoundTag2, CompoundTag compoundTag3, LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
+    private PrimaryLevelData(@Nullable DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, boolean bl, int j, int k, int l, float f, long m, long n, int o, int p, int q, boolean bl2, int r, boolean bl3, boolean bl4, boolean bl5, WorldBorder.Settings settings, int s, int t, @Nullable UUID uUID, Set<String> set, TimerQueue<MinecraftServer> timerQueue, @Nullable CompoundTag compoundTag2, CompoundTag compoundTag3, LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
         this.fixerUpper = dataFixer;
         this.wasModded = bl;
         this.xSpawn = j;
@@ -105,7 +105,7 @@ WorldData {
         this.wanderingTraderSpawnDelay = s;
         this.wanderingTraderSpawnChance = t;
         this.wanderingTraderId = uUID;
-        this.knownServerBrands = linkedHashSet;
+        this.knownServerBrands = set;
         this.loadedPlayerTag = compoundTag;
         this.playerDataVersion = i;
         this.scheduledEvents = timerQueue;
@@ -406,8 +406,8 @@ WorldData {
     }
 
     @Override
-    public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-        ServerLevelData.super.fillCrashReportCategory(crashReportCategory);
+    public void fillCrashReportCategory(CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor) {
+        ServerLevelData.super.fillCrashReportCategory(crashReportCategory, levelHeightAccessor);
         WorldData.super.fillCrashReportCategory(crashReportCategory);
     }
 

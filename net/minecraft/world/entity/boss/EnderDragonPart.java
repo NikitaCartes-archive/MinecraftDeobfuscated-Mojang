@@ -64,5 +64,10 @@ extends Entity {
     public EntityDimensions getDimensions(Pose pose) {
         return this.size;
     }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return false;
+    }
 }
 

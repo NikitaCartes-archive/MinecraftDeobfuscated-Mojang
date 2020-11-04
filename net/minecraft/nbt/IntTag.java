@@ -10,8 +10,7 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 
 public class IntTag
 extends NumericTag {
@@ -51,7 +50,7 @@ extends NumericTag {
 
     public static IntTag valueOf(int i) {
         if (i >= -128 && i <= 1024) {
-            return Cache.cache[i + 128];
+            return Cache.cache[i - -128];
         }
         return new IntTag(i);
     }
@@ -71,11 +70,6 @@ extends NumericTag {
     }
 
     @Override
-    public String toString() {
-        return String.valueOf(this.data);
-    }
-
-    @Override
     public IntTag copy() {
         return this;
     }
@@ -92,8 +86,8 @@ extends NumericTag {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        return new TextComponent(String.valueOf(this.data)).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitInt(this);
     }
 
     @Override

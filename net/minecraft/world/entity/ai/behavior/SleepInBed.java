@@ -43,7 +43,7 @@ extends Behavior<LivingEntity> {
             return false;
         }
         BlockState blockState = serverLevel.getBlockState(globalPos.pos());
-        return globalPos.pos().closerThan(livingEntity.position(), 2.0) && blockState.getBlock().is(BlockTags.BEDS) && blockState.getValue(BedBlock.OCCUPIED) == false;
+        return globalPos.pos().closerThan(livingEntity.position(), 2.0) && blockState.is(BlockTags.BEDS) && blockState.getValue(BedBlock.OCCUPIED) == false;
     }
 
     @Override

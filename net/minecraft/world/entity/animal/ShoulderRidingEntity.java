@@ -22,7 +22,7 @@ extends TamableAnimal {
         compoundTag.putString("id", this.getEncodeId());
         this.saveWithoutId(compoundTag);
         if (serverPlayer.setEntityOnShoulder(compoundTag)) {
-            this.remove();
+            this.discard();
             return true;
         }
         return false;

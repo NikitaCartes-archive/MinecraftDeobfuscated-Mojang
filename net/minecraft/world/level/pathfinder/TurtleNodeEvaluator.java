@@ -157,7 +157,7 @@ extends WalkNodeEvaluator {
                 return node;
             }
             int m = 0;
-            while (j > 0 && blockPathTypes == BlockPathTypes.OPEN) {
+            while (j > this.level.getMinBuildHeight() && blockPathTypes == BlockPathTypes.OPEN) {
                 --j;
                 if (m++ >= this.mob.getMaxFallDistance()) {
                     return null;

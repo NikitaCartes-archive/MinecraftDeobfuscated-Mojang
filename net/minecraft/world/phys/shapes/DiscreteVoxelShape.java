@@ -16,6 +16,9 @@ public abstract class DiscreteVoxelShape {
     protected final int zSize;
 
     protected DiscreteVoxelShape(int i, int j, int k) {
+        if (i < 0 || j < 0 || k < 0) {
+            throw new IllegalArgumentException("Need all positive sizes: x: " + i + ", y: " + j + ", z: " + k);
+        }
         this.xSize = i;
         this.ySize = j;
         this.zSize = k;
@@ -41,7 +44,7 @@ public abstract class DiscreteVoxelShape {
 
     public abstract boolean isFull(int var1, int var2, int var3);
 
-    public abstract void setFull(int var1, int var2, int var3, boolean var4, boolean var5);
+    public abstract void fill(int var1, int var2, int var3);
 
     public boolean isEmpty() {
         for (Direction.Axis axis : AXIS_VALUES) {
@@ -133,75 +136,8 @@ public abstract class DiscreteVoxelShape {
         }
     }
 
-    protected boolean isZStripFull(int i, int j, int k, int l) {
-        for (int m = i; m < j; ++m) {
-            if (this.isFullWide(k, l, m)) continue;
-            return false;
-        }
-        return true;
-    }
-
-    protected void setZStrip(int i, int j, int k, int l, boolean bl) {
-        for (int m = i; m < j; ++m) {
-            this.setFull(k, l, m, false, bl);
-        }
-    }
-
-    protected boolean isXZRectangleFull(int i, int j, int k, int l, int m) {
-        for (int n = i; n < j; ++n) {
-            if (this.isZStripFull(k, l, n, m)) continue;
-            return false;
-        }
-        return true;
-    }
-
     public void forAllBoxes(IntLineConsumer intLineConsumer, boolean bl) {
-        BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(this);
-        for (int i = 0; i <= this.xSize; ++i) {
-            for (int j = 0; j <= this.ySize; ++j) {
-                int k = -1;
-                for (int l = 0; l <= this.zSize; ++l) {
-                    int q;
-                    if (discreteVoxelShape.isFullWide(i, j, l)) {
-                        if (bl) {
-                            if (k != -1) continue;
-                            k = l;
-                            continue;
-                        }
-                        intLineConsumer.consume(i, j, l, i + 1, j + 1, l + 1);
-                        continue;
-                    }
-                    if (k == -1) continue;
-                    int m = i;
-                    int n = i;
-                    int o = j;
-                    int p = j;
-                    ((DiscreteVoxelShape)discreteVoxelShape).setZStrip(k, l, i, j, false);
-                    while (((DiscreteVoxelShape)discreteVoxelShape).isZStripFull(k, l, m - 1, o)) {
-                        ((DiscreteVoxelShape)discreteVoxelShape).setZStrip(k, l, m - 1, o, false);
-                        --m;
-                    }
-                    while (((DiscreteVoxelShape)discreteVoxelShape).isZStripFull(k, l, n + 1, o)) {
-                        ((DiscreteVoxelShape)discreteVoxelShape).setZStrip(k, l, n + 1, o, false);
-                        ++n;
-                    }
-                    while (discreteVoxelShape.isXZRectangleFull(m, n + 1, k, l, o - 1)) {
-                        for (q = m; q <= n; ++q) {
-                            ((DiscreteVoxelShape)discreteVoxelShape).setZStrip(k, l, q, o - 1, false);
-                        }
-                        --o;
-                    }
-                    while (discreteVoxelShape.isXZRectangleFull(m, n + 1, k, l, p + 1)) {
-                        for (q = m; q <= n; ++q) {
-                            ((DiscreteVoxelShape)discreteVoxelShape).setZStrip(k, l, q, p + 1, false);
-                        }
-                        ++p;
-                    }
-                    intLineConsumer.consume(m, o, k, n + 1, p + 1, l);
-                    k = -1;
-                }
-            }
-        }
+        BitSetDiscreteVoxelShape.forAllBoxes(this, intLineConsumer, bl);
     }
 
     public void forAllFaces(IntFaceConsumer intFaceConsumer) {

@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -75,8 +76,8 @@ extends ChunkGenerator {
         int j = worldGenRegion.getCenterZ();
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
-                int m = (i << 4) + k;
-                int n = (j << 4) + l;
+                int m = SectionPos.sectionToBlockCoord(i, k);
+                int n = SectionPos.sectionToBlockCoord(j, l);
                 worldGenRegion.setBlock(mutableBlockPos.set(m, 60, n), BARRIER, 2);
                 BlockState blockState = DebugLevelSource.getBlockStateFor(m, n);
                 if (blockState == null) continue;

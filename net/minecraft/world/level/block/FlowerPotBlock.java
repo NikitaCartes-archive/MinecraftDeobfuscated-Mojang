@@ -56,14 +56,13 @@ extends Block {
         boolean bl2;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
-        Block block = item instanceof BlockItem ? POTTED_BY_CONTENT.getOrDefault(((BlockItem)item).getBlock(), Blocks.AIR) : Blocks.AIR;
-        boolean bl = block == Blocks.AIR;
-        boolean bl3 = bl2 = this.content == Blocks.AIR;
-        if (bl != bl2) {
+        BlockState blockState2 = (item instanceof BlockItem ? POTTED_BY_CONTENT.getOrDefault(((BlockItem)item).getBlock(), Blocks.AIR) : Blocks.AIR).defaultBlockState();
+        boolean bl = blockState2.is(Blocks.AIR);
+        if (bl != (bl2 = this.isEmpty())) {
             if (bl2) {
-                level.setBlock(blockPos, block.defaultBlockState(), 3);
+                level.setBlock(blockPos, blockState2, 3);
                 player.awardStat(Stats.POT_FLOWER);
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
             } else {
@@ -83,10 +82,14 @@ extends Block {
     @Override
     @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        if (this.content == Blocks.AIR) {
+        if (this.isEmpty()) {
             return super.getCloneItemStack(blockGetter, blockPos, blockState);
         }
         return new ItemStack(this.content);
+    }
+
+    private boolean isEmpty() {
+        return this.content == Blocks.AIR;
     }
 
     @Override

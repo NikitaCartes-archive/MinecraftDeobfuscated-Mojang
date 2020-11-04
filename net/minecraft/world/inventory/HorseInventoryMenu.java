@@ -33,7 +33,7 @@ extends AbstractContainerMenu {
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
-                return itemStack.getItem() == Items.SADDLE && !this.hasItem() && abstractHorse.isSaddleable();
+                return itemStack.is(Items.SADDLE) && !this.hasItem() && abstractHorse.isSaddleable();
             }
 
             @Override

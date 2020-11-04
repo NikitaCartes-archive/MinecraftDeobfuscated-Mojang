@@ -6,7 +6,6 @@ package net.minecraft.world.entity.projectile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,17 +34,6 @@ extends Projectile {
         this.setPos(llama.getX() - (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.sin(llama.yBodyRot * ((float)Math.PI / 180)), llama.getEyeY() - (double)0.1f, llama.getZ() + (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.cos(llama.yBodyRot * ((float)Math.PI / 180)));
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public LlamaSpit(Level level, double d, double e, double f, double g, double h, double i) {
-        this((EntityType<? extends LlamaSpit>)EntityType.LLAMA_SPIT, level);
-        this.setPos(d, e, f);
-        for (int j = 0; j < 7; ++j) {
-            double k = 0.4 + 0.1 * (double)j;
-            level.addParticle(ParticleTypes.SPIT, d, e, f, g * k, h, i * k);
-        }
-        this.setDeltaMovement(g, h, i);
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -61,11 +49,11 @@ extends Projectile {
         float g = 0.99f;
         float h = 0.06f;
         if (this.level.getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
-            this.remove();
+            this.discard();
             return;
         }
         if (this.isInWaterOrBubble()) {
-            this.remove();
+            this.discard();
             return;
         }
         this.setDeltaMovement(vec3.scale(0.99f));
@@ -88,7 +76,7 @@ extends Projectile {
     protected void onHitBlock(BlockHitResult blockHitResult) {
         super.onHitBlock(blockHitResult);
         if (!this.level.isClientSide) {
-            this.remove();
+            this.discard();
         }
     }
 
@@ -97,8 +85,17 @@ extends Projectile {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        double d = clientboundAddEntityPacket.getXa();
+        double e = clientboundAddEntityPacket.getYa();
+        double f = clientboundAddEntityPacket.getZa();
+        for (int i = 0; i < 7; ++i) {
+            double g = 0.4 + 0.1 * (double)i;
+            this.level.addParticle(ParticleTypes.SPIT, this.getX(), this.getY(), this.getZ(), d * g, e, f * g);
+        }
+        this.setDeltaMovement(d, e, f);
     }
 }
 

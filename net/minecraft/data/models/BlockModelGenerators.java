@@ -627,9 +627,11 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).with(BlockModelGenerators.createHorizontalFacingDispatch()));
     }
 
-    private void createCauldron() {
+    private void createCauldrons() {
         this.createSimpleFlatItemModel(Items.CAULDRON);
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.CAULDRON).with(PropertyDispatch.property(BlockStateProperties.LEVEL_CAULDRON).select((Integer)0, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.CAULDRON))).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.CAULDRON, "_level1"))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.CAULDRON, "_level2"))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.CAULDRON, "_level3")))));
+        this.createNonTemplateModelBlock(Blocks.CAULDRON);
+        this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(Blocks.LAVA_CAULDRON, ModelTemplates.CAULDRON_FULL.create(Blocks.LAVA_CAULDRON, TextureMapping.cauldron(Blocks.LAVA), this.modelOutput)));
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.WATER_CAULDRON).with(PropertyDispatch.property(BlockStateProperties.LEVEL_CAULDRON).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.WATER_CAULDRON, "_level1"))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.WATER_CAULDRON, "_level2"))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_FULL.create(Blocks.WATER_CAULDRON, TextureMapping.cauldron(Blocks.WATER), this.modelOutput)))));
     }
 
     private void createChiseledSandsone(Block block, Block block2) {
@@ -669,6 +671,18 @@ public class BlockModelGenerators {
 
     private void createComposter() {
         this.blockStateOutput.accept(MultiPartGenerator.multiPart(Blocks.COMPOSTER).with(Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 1), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents1"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 2), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents2"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 3), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents3"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 4), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents4"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 5), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents5"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 6), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents6"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 7), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents7"))).with((Condition)Condition.condition().term(BlockStateProperties.LEVEL_COMPOSTER, 8), Variant.variant().with(VariantProperties.MODEL, TextureMapping.getBlockTexture(Blocks.COMPOSTER, "_contents_ready"))));
+    }
+
+    private void createAmethystCluster(Block block) {
+        this.createSimpleFlatItemModel(block);
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CROSS.create(block, TextureMapping.cross(block), this.modelOutput))).with(this.createColumnWithFacing()));
+    }
+
+    private void createAmethystClusters() {
+        this.createAmethystCluster(Blocks.SMALL_AMETHYST_BUD);
+        this.createAmethystCluster(Blocks.MEDIUM_AMETHYST_BUD);
+        this.createAmethystCluster(Blocks.LARGE_AMETHYST_BUD);
+        this.createAmethystCluster(Blocks.AMETHYST_CLUSTER);
     }
 
     private void createNyliumBlock(Block block) {
@@ -767,8 +781,8 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.COCOA).with(PropertyDispatch.property(BlockStateProperties.AGE_2).select((Integer)0, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.COCOA, "_stage0"))).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.COCOA, "_stage1"))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.COCOA, "_stage2")))).with(BlockModelGenerators.createHorizontalFacingDispatchAlt()));
     }
 
-    private void createGrassPath() {
-        this.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(Blocks.GRASS_PATH, ModelLocationUtils.getModelLocation(Blocks.GRASS_PATH)));
+    private void createDirtPath() {
+        this.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(Blocks.DIRT_PATH, ModelLocationUtils.getModelLocation(Blocks.DIRT_PATH)));
     }
 
     private void createWeightedPressurePlate(Block block, Block block2) {
@@ -1104,6 +1118,23 @@ public class BlockModelGenerators {
         this.createNonTemplateModelBlock(Blocks.LAVA);
         this.createNonTemplateModelBlock(Blocks.SLIME_BLOCK);
         this.createSimpleFlatItemModel(Items.CHAIN);
+        this.createCandleAndCandleCake(Blocks.WHITE_CANDLE, Blocks.WHITE_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.ORANGE_CANDLE, Blocks.ORANGE_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.MAGENTA_CANDLE, Blocks.MAGENTA_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.LIGHT_BLUE_CANDLE, Blocks.LIGHT_BLUE_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.YELLOW_CANDLE, Blocks.YELLOW_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.LIME_CANDLE, Blocks.LIME_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.PINK_CANDLE, Blocks.PINK_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.GRAY_CANDLE, Blocks.GRAY_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.LIGHT_GRAY_CANDLE, Blocks.LIGHT_GRAY_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.CYAN_CANDLE, Blocks.CYAN_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.PURPLE_CANDLE, Blocks.PURPLE_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.BLUE_CANDLE, Blocks.BLUE_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.BROWN_CANDLE, Blocks.BROWN_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.GREEN_CANDLE, Blocks.GREEN_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.RED_CANDLE, Blocks.RED_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.BLACK_CANDLE, Blocks.BLACK_CANDLE_CAKE);
+        this.createCandleAndCandleCake(Blocks.CANDLE, Blocks.CANDLE_CAKE);
         this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
         this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
         this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
@@ -1168,27 +1199,45 @@ public class BlockModelGenerators {
         this.createChiseledSandsone(Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE);
         this.createChiseledSandsone(Blocks.CHISELED_RED_SANDSTONE, Blocks.RED_SANDSTONE);
         this.createTrivialBlock(Blocks.CHISELED_POLISHED_BLACKSTONE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.AMETHYST_BLOCK, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.BUDDING_AMETHYST, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
+        this.createTrivialCube(Blocks.COPPER_ORE);
+        this.createTrivialCube(Blocks.COPPER_BLOCK);
+        this.createTrivialCube(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK);
+        this.createTrivialCube(Blocks.SEMI_WEATHERED_COPPER_BLOCK);
+        this.createTrivialCube(Blocks.WEATHERED_COPPER_BLOCK);
+        this.copyModel(Blocks.COPPER_BLOCK, Blocks.WAXED_COPPER);
+        this.copyModel(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK, Blocks.WAXED_LIGHTLY_WEATHERED_COPPER);
+        this.copyModel(Blocks.SEMI_WEATHERED_COPPER_BLOCK, Blocks.WAXED_SEMI_WEATHERED_COPPER);
+        this.family(Blocks.CUT_COPPER).fullBlockCopies(Blocks.WAXED_CUT_COPPER).slab(Blocks.CUT_COPPER_SLAB, Blocks.WAXED_CUT_COPPER_SLAB).stairs(Blocks.CUT_COPPER_STAIRS, Blocks.WAXED_CUT_COPPER_STAIRS);
+        this.family(Blocks.LIGHTLY_WEATHERED_CUT_COPPER).fullBlockCopies(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER).slab(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB).stairs(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS);
+        this.family(Blocks.SEMI_WEATHERED_CUT_COPPER).fullBlockCopies(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER).slab(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB).stairs(Blocks.SEMI_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS);
+        this.family(Blocks.WEATHERED_CUT_COPPER).slab(Blocks.WEATHERED_CUT_COPPER_SLAB, new Block[0]).stairs(Blocks.WEATHERED_CUT_COPPER_STAIRS, new Block[0]);
         this.createWeightedPressurePlate(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.GOLD_BLOCK);
         this.createWeightedPressurePlate(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.IRON_BLOCK);
+        this.createAmethystClusters();
         this.createBookshelf();
         this.createBrewingStand();
         this.createCakeBlock();
         this.createCampfires(Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
         this.createCartographyTable();
-        this.createCauldron();
+        this.createCauldrons();
         this.createChorusFlower();
         this.createChorusPlant();
         this.createComposter();
         this.createDaylightDetector();
         this.createEndPortalFrame();
         this.createRotatableColumn(Blocks.END_ROD);
+        this.createRotatableColumn(Blocks.LIGHTNING_ROD);
         this.createFarmland();
         this.createFire();
         this.createSoulFire();
         this.createFrostedIce();
         this.createGrassBlocks();
         this.createCocoa();
-        this.createGrassPath();
+        this.createDirtPath();
         this.createGrindstone();
         this.createHopper();
         this.createIronBars();
@@ -1323,6 +1372,7 @@ public class BlockModelGenerators {
         this.createTrivialCube(Blocks.GREEN_TERRACOTTA);
         this.createTrivialCube(Blocks.RED_TERRACOTTA);
         this.createTrivialCube(Blocks.BLACK_TERRACOTTA);
+        this.createTrivialCube(Blocks.TINTED_GLASS);
         this.createGlassBlocks(Blocks.GLASS, Blocks.GLASS_PANE);
         this.createGlassBlocks(Blocks.WHITE_STAINED_GLASS, Blocks.WHITE_STAINED_GLASS_PANE);
         this.createGlassBlocks(Blocks.ORANGE_STAINED_GLASS, Blocks.ORANGE_STAINED_GLASS_PANE);
@@ -1406,56 +1456,56 @@ public class BlockModelGenerators {
         this.createCoral(Blocks.HORN_CORAL, Blocks.DEAD_HORN_CORAL, Blocks.HORN_CORAL_BLOCK, Blocks.DEAD_HORN_CORAL_BLOCK, Blocks.HORN_CORAL_FAN, Blocks.DEAD_HORN_CORAL_FAN, Blocks.HORN_CORAL_WALL_FAN, Blocks.DEAD_HORN_CORAL_WALL_FAN);
         this.createStems(Blocks.MELON_STEM, Blocks.ATTACHED_MELON_STEM);
         this.createStems(Blocks.PUMPKIN_STEM, Blocks.ATTACHED_PUMPKIN_STEM);
-        this.family(Blocks.ACACIA_PLANKS).button(Blocks.ACACIA_BUTTON).fence(Blocks.ACACIA_FENCE).fenceGate(Blocks.ACACIA_FENCE_GATE).pressurePlate(Blocks.ACACIA_PRESSURE_PLATE).sign(Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN).slab(Blocks.ACACIA_SLAB).stairs(Blocks.ACACIA_STAIRS);
+        this.family(Blocks.ACACIA_PLANKS).button(Blocks.ACACIA_BUTTON).fence(Blocks.ACACIA_FENCE).fenceGate(Blocks.ACACIA_FENCE_GATE).pressurePlate(Blocks.ACACIA_PRESSURE_PLATE).sign(Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN).slab(Blocks.ACACIA_SLAB, new Block[0]).stairs(Blocks.ACACIA_STAIRS, new Block[0]);
         this.createDoor(Blocks.ACACIA_DOOR);
         this.createOrientableTrapdoor(Blocks.ACACIA_TRAPDOOR);
         this.woodProvider(Blocks.ACACIA_LOG).logWithHorizontal(Blocks.ACACIA_LOG).wood(Blocks.ACACIA_WOOD);
         this.woodProvider(Blocks.STRIPPED_ACACIA_LOG).logWithHorizontal(Blocks.STRIPPED_ACACIA_LOG).wood(Blocks.STRIPPED_ACACIA_WOOD);
         this.createPlant(Blocks.ACACIA_SAPLING, Blocks.POTTED_ACACIA_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.ACACIA_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.BIRCH_PLANKS).button(Blocks.BIRCH_BUTTON).fence(Blocks.BIRCH_FENCE).fenceGate(Blocks.BIRCH_FENCE_GATE).pressurePlate(Blocks.BIRCH_PRESSURE_PLATE).sign(Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN).slab(Blocks.BIRCH_SLAB).stairs(Blocks.BIRCH_STAIRS);
+        this.family(Blocks.BIRCH_PLANKS).button(Blocks.BIRCH_BUTTON).fence(Blocks.BIRCH_FENCE).fenceGate(Blocks.BIRCH_FENCE_GATE).pressurePlate(Blocks.BIRCH_PRESSURE_PLATE).sign(Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN).slab(Blocks.BIRCH_SLAB, new Block[0]).stairs(Blocks.BIRCH_STAIRS, new Block[0]);
         this.createDoor(Blocks.BIRCH_DOOR);
         this.createOrientableTrapdoor(Blocks.BIRCH_TRAPDOOR);
         this.woodProvider(Blocks.BIRCH_LOG).logWithHorizontal(Blocks.BIRCH_LOG).wood(Blocks.BIRCH_WOOD);
         this.woodProvider(Blocks.STRIPPED_BIRCH_LOG).logWithHorizontal(Blocks.STRIPPED_BIRCH_LOG).wood(Blocks.STRIPPED_BIRCH_WOOD);
         this.createPlant(Blocks.BIRCH_SAPLING, Blocks.POTTED_BIRCH_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.BIRCH_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.OAK_PLANKS).button(Blocks.OAK_BUTTON).fence(Blocks.OAK_FENCE).fenceGate(Blocks.OAK_FENCE_GATE).pressurePlate(Blocks.OAK_PRESSURE_PLATE).sign(Blocks.OAK_SIGN, Blocks.OAK_WALL_SIGN).slab(Blocks.OAK_SLAB).slab(Blocks.PETRIFIED_OAK_SLAB).stairs(Blocks.OAK_STAIRS);
+        this.family(Blocks.OAK_PLANKS).button(Blocks.OAK_BUTTON).fence(Blocks.OAK_FENCE).fenceGate(Blocks.OAK_FENCE_GATE).pressurePlate(Blocks.OAK_PRESSURE_PLATE).sign(Blocks.OAK_SIGN, Blocks.OAK_WALL_SIGN).slab(Blocks.OAK_SLAB, new Block[0]).slab(Blocks.PETRIFIED_OAK_SLAB, new Block[0]).stairs(Blocks.OAK_STAIRS, new Block[0]);
         this.createDoor(Blocks.OAK_DOOR);
         this.createTrapdoor(Blocks.OAK_TRAPDOOR);
         this.woodProvider(Blocks.OAK_LOG).logWithHorizontal(Blocks.OAK_LOG).wood(Blocks.OAK_WOOD);
         this.woodProvider(Blocks.STRIPPED_OAK_LOG).logWithHorizontal(Blocks.STRIPPED_OAK_LOG).wood(Blocks.STRIPPED_OAK_WOOD);
         this.createPlant(Blocks.OAK_SAPLING, Blocks.POTTED_OAK_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.OAK_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.SPRUCE_PLANKS).button(Blocks.SPRUCE_BUTTON).fence(Blocks.SPRUCE_FENCE).fenceGate(Blocks.SPRUCE_FENCE_GATE).pressurePlate(Blocks.SPRUCE_PRESSURE_PLATE).sign(Blocks.SPRUCE_SIGN, Blocks.SPRUCE_WALL_SIGN).slab(Blocks.SPRUCE_SLAB).stairs(Blocks.SPRUCE_STAIRS);
+        this.family(Blocks.SPRUCE_PLANKS).button(Blocks.SPRUCE_BUTTON).fence(Blocks.SPRUCE_FENCE).fenceGate(Blocks.SPRUCE_FENCE_GATE).pressurePlate(Blocks.SPRUCE_PRESSURE_PLATE).sign(Blocks.SPRUCE_SIGN, Blocks.SPRUCE_WALL_SIGN).slab(Blocks.SPRUCE_SLAB, new Block[0]).stairs(Blocks.SPRUCE_STAIRS, new Block[0]);
         this.createDoor(Blocks.SPRUCE_DOOR);
         this.createOrientableTrapdoor(Blocks.SPRUCE_TRAPDOOR);
         this.woodProvider(Blocks.SPRUCE_LOG).logWithHorizontal(Blocks.SPRUCE_LOG).wood(Blocks.SPRUCE_WOOD);
         this.woodProvider(Blocks.STRIPPED_SPRUCE_LOG).logWithHorizontal(Blocks.STRIPPED_SPRUCE_LOG).wood(Blocks.STRIPPED_SPRUCE_WOOD);
         this.createPlant(Blocks.SPRUCE_SAPLING, Blocks.POTTED_SPRUCE_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.SPRUCE_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.DARK_OAK_PLANKS).button(Blocks.DARK_OAK_BUTTON).fence(Blocks.DARK_OAK_FENCE).fenceGate(Blocks.DARK_OAK_FENCE_GATE).pressurePlate(Blocks.DARK_OAK_PRESSURE_PLATE).sign(Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN).slab(Blocks.DARK_OAK_SLAB).stairs(Blocks.DARK_OAK_STAIRS);
+        this.family(Blocks.DARK_OAK_PLANKS).button(Blocks.DARK_OAK_BUTTON).fence(Blocks.DARK_OAK_FENCE).fenceGate(Blocks.DARK_OAK_FENCE_GATE).pressurePlate(Blocks.DARK_OAK_PRESSURE_PLATE).sign(Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN).slab(Blocks.DARK_OAK_SLAB, new Block[0]).stairs(Blocks.DARK_OAK_STAIRS, new Block[0]);
         this.createDoor(Blocks.DARK_OAK_DOOR);
         this.createTrapdoor(Blocks.DARK_OAK_TRAPDOOR);
         this.woodProvider(Blocks.DARK_OAK_LOG).logWithHorizontal(Blocks.DARK_OAK_LOG).wood(Blocks.DARK_OAK_WOOD);
         this.woodProvider(Blocks.STRIPPED_DARK_OAK_LOG).logWithHorizontal(Blocks.STRIPPED_DARK_OAK_LOG).wood(Blocks.STRIPPED_DARK_OAK_WOOD);
         this.createPlant(Blocks.DARK_OAK_SAPLING, Blocks.POTTED_DARK_OAK_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.DARK_OAK_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.JUNGLE_PLANKS).button(Blocks.JUNGLE_BUTTON).fence(Blocks.JUNGLE_FENCE).fenceGate(Blocks.JUNGLE_FENCE_GATE).pressurePlate(Blocks.JUNGLE_PRESSURE_PLATE).sign(Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN).slab(Blocks.JUNGLE_SLAB).stairs(Blocks.JUNGLE_STAIRS);
+        this.family(Blocks.JUNGLE_PLANKS).button(Blocks.JUNGLE_BUTTON).fence(Blocks.JUNGLE_FENCE).fenceGate(Blocks.JUNGLE_FENCE_GATE).pressurePlate(Blocks.JUNGLE_PRESSURE_PLATE).sign(Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN).slab(Blocks.JUNGLE_SLAB, new Block[0]).stairs(Blocks.JUNGLE_STAIRS, new Block[0]);
         this.createDoor(Blocks.JUNGLE_DOOR);
         this.createOrientableTrapdoor(Blocks.JUNGLE_TRAPDOOR);
         this.woodProvider(Blocks.JUNGLE_LOG).logWithHorizontal(Blocks.JUNGLE_LOG).wood(Blocks.JUNGLE_WOOD);
         this.woodProvider(Blocks.STRIPPED_JUNGLE_LOG).logWithHorizontal(Blocks.STRIPPED_JUNGLE_LOG).wood(Blocks.STRIPPED_JUNGLE_WOOD);
         this.createPlant(Blocks.JUNGLE_SAPLING, Blocks.POTTED_JUNGLE_SAPLING, TintState.NOT_TINTED);
         this.createTrivialBlock(Blocks.JUNGLE_LEAVES, TexturedModel.LEAVES);
-        this.family(Blocks.CRIMSON_PLANKS).button(Blocks.CRIMSON_BUTTON).fence(Blocks.CRIMSON_FENCE).fenceGate(Blocks.CRIMSON_FENCE_GATE).pressurePlate(Blocks.CRIMSON_PRESSURE_PLATE).sign(Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN).slab(Blocks.CRIMSON_SLAB).stairs(Blocks.CRIMSON_STAIRS);
+        this.family(Blocks.CRIMSON_PLANKS).button(Blocks.CRIMSON_BUTTON).fence(Blocks.CRIMSON_FENCE).fenceGate(Blocks.CRIMSON_FENCE_GATE).pressurePlate(Blocks.CRIMSON_PRESSURE_PLATE).sign(Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN).slab(Blocks.CRIMSON_SLAB, new Block[0]).stairs(Blocks.CRIMSON_STAIRS, new Block[0]);
         this.createDoor(Blocks.CRIMSON_DOOR);
         this.createOrientableTrapdoor(Blocks.CRIMSON_TRAPDOOR);
         this.woodProvider(Blocks.CRIMSON_STEM).log(Blocks.CRIMSON_STEM).wood(Blocks.CRIMSON_HYPHAE);
         this.woodProvider(Blocks.STRIPPED_CRIMSON_STEM).log(Blocks.STRIPPED_CRIMSON_STEM).wood(Blocks.STRIPPED_CRIMSON_HYPHAE);
         this.createPlant(Blocks.CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_FUNGUS, TintState.NOT_TINTED);
         this.createNetherRoots(Blocks.CRIMSON_ROOTS, Blocks.POTTED_CRIMSON_ROOTS);
-        this.family(Blocks.WARPED_PLANKS).button(Blocks.WARPED_BUTTON).fence(Blocks.WARPED_FENCE).fenceGate(Blocks.WARPED_FENCE_GATE).pressurePlate(Blocks.WARPED_PRESSURE_PLATE).sign(Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN).slab(Blocks.WARPED_SLAB).stairs(Blocks.WARPED_STAIRS);
+        this.family(Blocks.WARPED_PLANKS).button(Blocks.WARPED_BUTTON).fence(Blocks.WARPED_FENCE).fenceGate(Blocks.WARPED_FENCE_GATE).pressurePlate(Blocks.WARPED_PRESSURE_PLATE).sign(Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN).slab(Blocks.WARPED_SLAB, new Block[0]).stairs(Blocks.WARPED_STAIRS, new Block[0]);
         this.createDoor(Blocks.WARPED_DOOR);
         this.createOrientableTrapdoor(Blocks.WARPED_TRAPDOOR);
         this.woodProvider(Blocks.WARPED_STEM).log(Blocks.WARPED_STEM).wood(Blocks.WARPED_HYPHAE);
@@ -1469,38 +1519,38 @@ public class BlockModelGenerators {
             ResourceLocation resourceLocation2 = ModelTemplates.CUBE_MIRRORED_ALL.create(Blocks.STONE, (TextureMapping)textureMapping, this.modelOutput);
             this.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(Blocks.STONE, resourceLocation, resourceLocation2));
             return resourceLocation;
-        }).slab(Blocks.STONE_SLAB).pressurePlate(Blocks.STONE_PRESSURE_PLATE).button(Blocks.STONE_BUTTON).stairs(Blocks.STONE_STAIRS);
+        }).slab(Blocks.STONE_SLAB, new Block[0]).pressurePlate(Blocks.STONE_PRESSURE_PLATE).button(Blocks.STONE_BUTTON).stairs(Blocks.STONE_STAIRS, new Block[0]);
         this.createDoor(Blocks.IRON_DOOR);
         this.createTrapdoor(Blocks.IRON_TRAPDOOR);
-        this.family(Blocks.STONE_BRICKS).wall(Blocks.STONE_BRICK_WALL).stairs(Blocks.STONE_BRICK_STAIRS).slab(Blocks.STONE_BRICK_SLAB);
-        this.family(Blocks.MOSSY_STONE_BRICKS).wall(Blocks.MOSSY_STONE_BRICK_WALL).stairs(Blocks.MOSSY_STONE_BRICK_STAIRS).slab(Blocks.MOSSY_STONE_BRICK_SLAB);
-        this.family(Blocks.COBBLESTONE).wall(Blocks.COBBLESTONE_WALL).stairs(Blocks.COBBLESTONE_STAIRS).slab(Blocks.COBBLESTONE_SLAB);
-        this.family(Blocks.MOSSY_COBBLESTONE).wall(Blocks.MOSSY_COBBLESTONE_WALL).stairs(Blocks.MOSSY_COBBLESTONE_STAIRS).slab(Blocks.MOSSY_COBBLESTONE_SLAB);
-        this.family(Blocks.PRISMARINE).wall(Blocks.PRISMARINE_WALL).stairs(Blocks.PRISMARINE_STAIRS).slab(Blocks.PRISMARINE_SLAB);
-        this.family(Blocks.PRISMARINE_BRICKS).stairs(Blocks.PRISMARINE_BRICK_STAIRS).slab(Blocks.PRISMARINE_BRICK_SLAB);
-        this.family(Blocks.DARK_PRISMARINE).stairs(Blocks.DARK_PRISMARINE_STAIRS).slab(Blocks.DARK_PRISMARINE_SLAB);
-        this.family(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL).wall(Blocks.SANDSTONE_WALL).stairs(Blocks.SANDSTONE_STAIRS).slab(Blocks.SANDSTONE_SLAB);
-        this.family(Blocks.SMOOTH_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"))).slab(Blocks.SMOOTH_SANDSTONE_SLAB).stairs(Blocks.SMOOTH_SANDSTONE_STAIRS);
-        this.family(Blocks.CUT_SANDSTONE, TexturedModel.COLUMN.get(Blocks.SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_SANDSTONE)))).slab(Blocks.CUT_SANDSTONE_SLAB);
-        this.family(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL).wall(Blocks.RED_SANDSTONE_WALL).stairs(Blocks.RED_SANDSTONE_STAIRS).slab(Blocks.RED_SANDSTONE_SLAB);
-        this.family(Blocks.SMOOTH_RED_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"))).slab(Blocks.SMOOTH_RED_SANDSTONE_SLAB).stairs(Blocks.SMOOTH_RED_SANDSTONE_STAIRS);
-        this.family(Blocks.CUT_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.RED_SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE)))).slab(Blocks.CUT_RED_SANDSTONE_SLAB);
-        this.family(Blocks.BRICKS).wall(Blocks.BRICK_WALL).stairs(Blocks.BRICK_STAIRS).slab(Blocks.BRICK_SLAB);
-        this.family(Blocks.NETHER_BRICKS).fence(Blocks.NETHER_BRICK_FENCE).wall(Blocks.NETHER_BRICK_WALL).stairs(Blocks.NETHER_BRICK_STAIRS).slab(Blocks.NETHER_BRICK_SLAB);
-        this.family(Blocks.PURPUR_BLOCK).stairs(Blocks.PURPUR_STAIRS).slab(Blocks.PURPUR_SLAB);
-        this.family(Blocks.DIORITE).wall(Blocks.DIORITE_WALL).stairs(Blocks.DIORITE_STAIRS).slab(Blocks.DIORITE_SLAB);
-        this.family(Blocks.POLISHED_DIORITE).stairs(Blocks.POLISHED_DIORITE_STAIRS).slab(Blocks.POLISHED_DIORITE_SLAB);
-        this.family(Blocks.GRANITE).wall(Blocks.GRANITE_WALL).stairs(Blocks.GRANITE_STAIRS).slab(Blocks.GRANITE_SLAB);
-        this.family(Blocks.POLISHED_GRANITE).stairs(Blocks.POLISHED_GRANITE_STAIRS).slab(Blocks.POLISHED_GRANITE_SLAB);
-        this.family(Blocks.ANDESITE).wall(Blocks.ANDESITE_WALL).stairs(Blocks.ANDESITE_STAIRS).slab(Blocks.ANDESITE_SLAB);
-        this.family(Blocks.POLISHED_ANDESITE).stairs(Blocks.POLISHED_ANDESITE_STAIRS).slab(Blocks.POLISHED_ANDESITE_SLAB);
-        this.family(Blocks.END_STONE_BRICKS).wall(Blocks.END_STONE_BRICK_WALL).stairs(Blocks.END_STONE_BRICK_STAIRS).slab(Blocks.END_STONE_BRICK_SLAB);
-        this.family(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN).stairs(Blocks.QUARTZ_STAIRS).slab(Blocks.QUARTZ_SLAB);
-        this.family(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).stairs(Blocks.SMOOTH_QUARTZ_STAIRS).slab(Blocks.SMOOTH_QUARTZ_SLAB);
-        this.family(Blocks.RED_NETHER_BRICKS).slab(Blocks.RED_NETHER_BRICK_SLAB).stairs(Blocks.RED_NETHER_BRICK_STAIRS).wall(Blocks.RED_NETHER_BRICK_WALL);
-        this.family(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL).wall(Blocks.BLACKSTONE_WALL).stairs(Blocks.BLACKSTONE_STAIRS).slab(Blocks.BLACKSTONE_SLAB);
-        this.family(Blocks.POLISHED_BLACKSTONE_BRICKS).wall(Blocks.POLISHED_BLACKSTONE_BRICK_WALL).stairs(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).slab(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB);
-        this.family(Blocks.POLISHED_BLACKSTONE).wall(Blocks.POLISHED_BLACKSTONE_WALL).pressurePlate(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE).button(Blocks.POLISHED_BLACKSTONE_BUTTON).stairs(Blocks.POLISHED_BLACKSTONE_STAIRS).slab(Blocks.POLISHED_BLACKSTONE_SLAB);
+        this.family(Blocks.STONE_BRICKS).wall(Blocks.STONE_BRICK_WALL).stairs(Blocks.STONE_BRICK_STAIRS, new Block[0]).slab(Blocks.STONE_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.MOSSY_STONE_BRICKS).wall(Blocks.MOSSY_STONE_BRICK_WALL).stairs(Blocks.MOSSY_STONE_BRICK_STAIRS, new Block[0]).slab(Blocks.MOSSY_STONE_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.COBBLESTONE).wall(Blocks.COBBLESTONE_WALL).stairs(Blocks.COBBLESTONE_STAIRS, new Block[0]).slab(Blocks.COBBLESTONE_SLAB, new Block[0]);
+        this.family(Blocks.MOSSY_COBBLESTONE).wall(Blocks.MOSSY_COBBLESTONE_WALL).stairs(Blocks.MOSSY_COBBLESTONE_STAIRS, new Block[0]).slab(Blocks.MOSSY_COBBLESTONE_SLAB, new Block[0]);
+        this.family(Blocks.PRISMARINE).wall(Blocks.PRISMARINE_WALL).stairs(Blocks.PRISMARINE_STAIRS, new Block[0]).slab(Blocks.PRISMARINE_SLAB, new Block[0]);
+        this.family(Blocks.PRISMARINE_BRICKS).stairs(Blocks.PRISMARINE_BRICK_STAIRS, new Block[0]).slab(Blocks.PRISMARINE_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.DARK_PRISMARINE).stairs(Blocks.DARK_PRISMARINE_STAIRS, new Block[0]).slab(Blocks.DARK_PRISMARINE_SLAB, new Block[0]);
+        this.family(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL).wall(Blocks.SANDSTONE_WALL).stairs(Blocks.SANDSTONE_STAIRS, new Block[0]).slab(Blocks.SANDSTONE_SLAB, new Block[0]);
+        this.family(Blocks.SMOOTH_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"))).slab(Blocks.SMOOTH_SANDSTONE_SLAB, new Block[0]).stairs(Blocks.SMOOTH_SANDSTONE_STAIRS, new Block[0]);
+        this.family(Blocks.CUT_SANDSTONE, TexturedModel.COLUMN.get(Blocks.SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_SANDSTONE)))).slab(Blocks.CUT_SANDSTONE_SLAB, new Block[0]);
+        this.family(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL).wall(Blocks.RED_SANDSTONE_WALL).stairs(Blocks.RED_SANDSTONE_STAIRS, new Block[0]).slab(Blocks.RED_SANDSTONE_SLAB, new Block[0]);
+        this.family(Blocks.SMOOTH_RED_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"))).slab(Blocks.SMOOTH_RED_SANDSTONE_SLAB, new Block[0]).stairs(Blocks.SMOOTH_RED_SANDSTONE_STAIRS, new Block[0]);
+        this.family(Blocks.CUT_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.RED_SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE)))).slab(Blocks.CUT_RED_SANDSTONE_SLAB, new Block[0]);
+        this.family(Blocks.BRICKS).wall(Blocks.BRICK_WALL).stairs(Blocks.BRICK_STAIRS, new Block[0]).slab(Blocks.BRICK_SLAB, new Block[0]);
+        this.family(Blocks.NETHER_BRICKS).fence(Blocks.NETHER_BRICK_FENCE).wall(Blocks.NETHER_BRICK_WALL).stairs(Blocks.NETHER_BRICK_STAIRS, new Block[0]).slab(Blocks.NETHER_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.PURPUR_BLOCK).stairs(Blocks.PURPUR_STAIRS, new Block[0]).slab(Blocks.PURPUR_SLAB, new Block[0]);
+        this.family(Blocks.DIORITE).wall(Blocks.DIORITE_WALL).stairs(Blocks.DIORITE_STAIRS, new Block[0]).slab(Blocks.DIORITE_SLAB, new Block[0]);
+        this.family(Blocks.POLISHED_DIORITE).stairs(Blocks.POLISHED_DIORITE_STAIRS, new Block[0]).slab(Blocks.POLISHED_DIORITE_SLAB, new Block[0]);
+        this.family(Blocks.GRANITE).wall(Blocks.GRANITE_WALL).stairs(Blocks.GRANITE_STAIRS, new Block[0]).slab(Blocks.GRANITE_SLAB, new Block[0]);
+        this.family(Blocks.POLISHED_GRANITE).stairs(Blocks.POLISHED_GRANITE_STAIRS, new Block[0]).slab(Blocks.POLISHED_GRANITE_SLAB, new Block[0]);
+        this.family(Blocks.ANDESITE).wall(Blocks.ANDESITE_WALL).stairs(Blocks.ANDESITE_STAIRS, new Block[0]).slab(Blocks.ANDESITE_SLAB, new Block[0]);
+        this.family(Blocks.POLISHED_ANDESITE).stairs(Blocks.POLISHED_ANDESITE_STAIRS, new Block[0]).slab(Blocks.POLISHED_ANDESITE_SLAB, new Block[0]);
+        this.family(Blocks.END_STONE_BRICKS).wall(Blocks.END_STONE_BRICK_WALL).stairs(Blocks.END_STONE_BRICK_STAIRS, new Block[0]).slab(Blocks.END_STONE_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN).stairs(Blocks.QUARTZ_STAIRS, new Block[0]).slab(Blocks.QUARTZ_SLAB, new Block[0]);
+        this.family(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).stairs(Blocks.SMOOTH_QUARTZ_STAIRS, new Block[0]).slab(Blocks.SMOOTH_QUARTZ_SLAB, new Block[0]);
+        this.family(Blocks.RED_NETHER_BRICKS).slab(Blocks.RED_NETHER_BRICK_SLAB, new Block[0]).stairs(Blocks.RED_NETHER_BRICK_STAIRS, new Block[0]).wall(Blocks.RED_NETHER_BRICK_WALL);
+        this.family(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL).wall(Blocks.BLACKSTONE_WALL).stairs(Blocks.BLACKSTONE_STAIRS, new Block[0]).slab(Blocks.BLACKSTONE_SLAB, new Block[0]);
+        this.family(Blocks.POLISHED_BLACKSTONE_BRICKS).wall(Blocks.POLISHED_BLACKSTONE_BRICK_WALL).stairs(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS, new Block[0]).slab(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, new Block[0]);
+        this.family(Blocks.POLISHED_BLACKSTONE).wall(Blocks.POLISHED_BLACKSTONE_WALL).pressurePlate(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE).button(Blocks.POLISHED_BLACKSTONE_BUTTON).stairs(Blocks.POLISHED_BLACKSTONE_STAIRS, new Block[0]).slab(Blocks.POLISHED_BLACKSTONE_SLAB, new Block[0]);
         this.createSmoothStoneSlab();
         this.createPassiveRail(Blocks.RAIL);
         this.createActiveRail(Blocks.POWERED_RAIL);
@@ -1527,6 +1577,13 @@ public class BlockModelGenerators {
         this.createInfestedStone();
         this.copyModel(Blocks.STONE_BRICKS, Blocks.INFESTED_STONE_BRICKS);
         SpawnEggItem.eggs().forEach(spawnEggItem -> this.delegateItemModel((Item)spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
+    }
+
+    private void createCandleAndCandleCake(Block block, Block block2) {
+        this.createSimpleFlatItemModel(block.asItem());
+        TextureMapping textureMapping = TextureMapping.cube(TextureMapping.getBlockTexture(block));
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.property(BlockStateProperties.CANDLES).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CANDLE.createWithSuffix(block, "_one_candle", textureMapping, this.modelOutput))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.TWO_CANDLES.createWithSuffix(block, "_two_candles", textureMapping, this.modelOutput))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.THREE_CANDLES.createWithSuffix(block, "_three_candles", textureMapping, this.modelOutput))).select((Integer)4, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.FOUR_CANDLES.createWithSuffix(block, "_four_candles", textureMapping, this.modelOutput)))));
+        this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block2, ModelTemplates.CANDLE_CAKE.create(block2, TextureMapping.candleCake(block), this.modelOutput)));
     }
 
     class BlockEntityModelGenerator {
@@ -1620,6 +1677,17 @@ public class BlockModelGenerators {
             return this;
         }
 
+        public BlockFamilyProvider fullBlockCopies(Block ... blocks) {
+            if (this.fullBlock == null) {
+                throw new IllegalStateException("Full block not generated yet");
+            }
+            for (Block block : blocks) {
+                BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, this.fullBlock));
+                BlockModelGenerators.this.delegateItemModel(block, this.fullBlock);
+            }
+            return this;
+        }
+
         public BlockFamilyProvider button(Block block) {
             ResourceLocation resourceLocation = ModelTemplates.BUTTON.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             ResourceLocation resourceLocation2 = ModelTemplates.BUTTON_PRESSED.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
@@ -1673,21 +1741,29 @@ public class BlockModelGenerators {
             return this;
         }
 
-        public BlockFamilyProvider slab(Block block) {
+        public BlockFamilyProvider slab(Block block, Block ... blocks) {
             if (this.fullBlock == null) {
                 throw new IllegalStateException("Full block not generated yet");
             }
             ResourceLocation resourceLocation = ModelTemplates.SLAB_BOTTOM.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             ResourceLocation resourceLocation2 = ModelTemplates.SLAB_TOP.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSlab(block, resourceLocation, resourceLocation2, this.fullBlock));
+            for (Block block2 : blocks) {
+                BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSlab(block2, resourceLocation, resourceLocation2, this.fullBlock));
+                BlockModelGenerators.this.delegateItemModel(block2, resourceLocation);
+            }
             return this;
         }
 
-        public BlockFamilyProvider stairs(Block block) {
+        public BlockFamilyProvider stairs(Block block, Block ... blocks) {
             ResourceLocation resourceLocation = ModelTemplates.STAIRS_INNER.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             ResourceLocation resourceLocation2 = ModelTemplates.STAIRS_STRAIGHT.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             ResourceLocation resourceLocation3 = ModelTemplates.STAIRS_OUTER.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createStairs(block, resourceLocation, resourceLocation2, resourceLocation3));
+            for (Block block2 : blocks) {
+                BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createStairs(block2, resourceLocation, resourceLocation2, resourceLocation3));
+                BlockModelGenerators.this.delegateItemModel(block2, resourceLocation2);
+            }
             return this;
         }
     }

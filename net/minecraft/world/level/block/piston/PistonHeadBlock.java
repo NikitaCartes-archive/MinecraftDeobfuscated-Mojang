@@ -106,7 +106,7 @@ extends DirectionalBlock {
     @Override
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
         BlockPos blockPos2;
-        if (!level.isClientSide && player.abilities.instabuild && this.isFittingBase(blockState, level.getBlockState(blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite())))) {
+        if (!level.isClientSide && player.getAbilities().instabuild && this.isFittingBase(blockState, level.getBlockState(blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite())))) {
             level.destroyBlock(blockPos2, false);
         }
         super.playerWillDestroy(level, blockPos, blockState, player);

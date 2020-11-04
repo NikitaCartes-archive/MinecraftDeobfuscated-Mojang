@@ -28,7 +28,7 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         ++this.time;
-        if (this.player.removed || this.time > 20 && !this.player.isFallFlying()) {
+        if (this.player.isRemoved() || this.time > 20 && !this.player.isFallFlying()) {
             this.stop();
             return;
         }

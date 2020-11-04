@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.projectile;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,14 +42,11 @@ extends ThrowableItemProjectile {
     @Override
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
-        if (!this.level.isClientSide) {
-            int j;
+        if (this.level instanceof ServerLevel) {
             this.level.levelEvent(2002, this.blockPosition(), PotionUtils.getColor(Potions.WATER));
-            for (int i = 3 + this.level.random.nextInt(5) + this.level.random.nextInt(5); i > 0; i -= j) {
-                j = ExperienceOrb.getExperienceValue(i);
-                this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
-            }
-            this.remove();
+            int i = 3 + this.level.random.nextInt(5) + this.level.random.nextInt(5);
+            ExperienceOrb.award((ServerLevel)this.level, this.position(), i);
+            this.discard();
         }
     }
 }

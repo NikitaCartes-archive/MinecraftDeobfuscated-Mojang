@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ extends Goal {
         if (!serverLevel.isCloseToVillage(blockPos2, 6)) {
             return false;
         }
-        Vec3 vec3 = RandomPos.getLandPos(this.mob, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));
+        Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));
         this.wantedPos = vec3 == null ? null : new BlockPos(vec3);
         return this.wantedPos != null;
     }

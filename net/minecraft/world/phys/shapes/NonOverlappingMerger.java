@@ -14,7 +14,7 @@ implements IndexMerger {
     private final DoubleList upper;
     private final boolean swap;
 
-    public NonOverlappingMerger(DoubleList doubleList, DoubleList doubleList2, boolean bl) {
+    protected NonOverlappingMerger(DoubleList doubleList, DoubleList doubleList2, boolean bl) {
         this.lower = doubleList;
         this.upper = doubleList2;
         this.swap = bl;
@@ -35,16 +35,14 @@ implements IndexMerger {
 
     private boolean forNonSwappedIndexes(IndexMerger.IndexConsumer indexConsumer) {
         int j;
-        int i = this.lower.size() - 1;
+        int i = this.lower.size();
         for (j = 0; j < i; ++j) {
             if (indexConsumer.merge(j, -1, j)) continue;
             return false;
         }
-        if (!indexConsumer.merge(i, -1, i)) {
-            return false;
-        }
-        for (j = 0; j < this.upper.size(); ++j) {
-            if (indexConsumer.merge(i, j, i + 1 + j)) continue;
+        j = this.upper.size() - 1;
+        for (int k = 0; k < j; ++k) {
+            if (indexConsumer.merge(i - 1, k, i + k)) continue;
             return false;
         }
         return true;

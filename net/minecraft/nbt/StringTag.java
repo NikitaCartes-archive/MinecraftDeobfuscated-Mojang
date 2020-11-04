@@ -10,9 +10,7 @@ import java.util.Objects;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 
 public class StringTag
 implements Tag {
@@ -77,7 +75,7 @@ implements Tag {
 
     @Override
     public String toString() {
-        return StringTag.quoteAndEscape(this.data);
+        return Tag.super.getAsString();
     }
 
     @Override
@@ -102,11 +100,8 @@ implements Tag {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        String string2 = StringTag.quoteAndEscape(this.data);
-        String string3 = string2.substring(0, 1);
-        MutableComponent component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_STRING);
-        return new TextComponent(string3).append(component).append(string3);
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitString(this);
     }
 
     public static String quoteAndEscape(String string) {

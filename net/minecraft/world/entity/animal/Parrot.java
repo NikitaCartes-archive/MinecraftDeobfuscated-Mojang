@@ -33,7 +33,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -144,7 +144,7 @@ implements FlyingAnimal {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setVariant(this.random.nextInt(5));
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData(false);
+            spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -243,7 +243,7 @@ implements FlyingAnimal {
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!this.isTame() && TAME_FOOD.contains(itemStack.getItem())) {
-            if (!player.abilities.instabuild) {
+            if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
             if (!this.isSilent()) {
@@ -259,8 +259,8 @@ implements FlyingAnimal {
             }
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        if (itemStack.getItem() == POISONOUS_FOOD) {
-            if (!player.abilities.instabuild) {
+        if (itemStack.is(POISONOUS_FOOD)) {
+            if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
             this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
@@ -304,7 +304,7 @@ implements FlyingAnimal {
 
     @Override
     @Nullable
-    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return null;
     }
 

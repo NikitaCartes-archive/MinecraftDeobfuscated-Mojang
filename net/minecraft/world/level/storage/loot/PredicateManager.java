@@ -59,7 +59,7 @@ extends SimpleJsonResourceReloadListener {
         ImmutableMap<ResourceLocation, LootItemCondition> map2 = builder.build();
         ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, map2::get, resourceLocation -> null);
         map2.forEach((resourceLocation, lootItemCondition) -> lootItemCondition.validate(validationContext.enterCondition("{" + resourceLocation + "}", (ResourceLocation)resourceLocation)));
-        validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+        validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
         this.conditions = map2;
     }
 

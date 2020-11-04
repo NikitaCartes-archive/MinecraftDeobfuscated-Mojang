@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
@@ -51,12 +53,18 @@ extends BaseEntityBlock {
 
     @Override
     @Nullable
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return null;
     }
 
-    public static BlockEntity newMovingBlockEntity(BlockState blockState, Direction direction, boolean bl, boolean bl2) {
-        return new PistonMovingBlockEntity(blockState, direction, bl, bl2);
+    public static BlockEntity newMovingBlockEntity(BlockPos blockPos, BlockState blockState, BlockState blockState2, Direction direction, boolean bl, boolean bl2) {
+        return new PistonMovingBlockEntity(blockPos, blockState, blockState2, direction, bl, bl2);
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        return MovingPistonBlock.createTickerHelper(blockEntityType, BlockEntityType.PISTON, PistonMovingBlockEntity::tick);
     }
 
     @Override

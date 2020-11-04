@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ConcretePowderBlock;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -98,14 +97,14 @@ extends Entity {
 
     @Override
     public boolean isPickable() {
-        return !this.removed;
+        return !this.isRemoved();
     }
 
     @Override
     public void tick() {
         BlockPos blockPos;
         if (this.blockState.isAir()) {
-            this.remove();
+            this.discard();
             return;
         }
         Block block = this.blockState.getBlock();
@@ -114,7 +113,7 @@ extends Entity {
             if (this.level.getBlockState(blockPos).is(block)) {
                 this.level.removeBlock(blockPos, false);
             } else if (!this.level.isClientSide) {
-                this.remove();
+                this.discard();
                 return;
             }
         }
@@ -136,7 +135,7 @@ extends Entity {
                 BlockState blockState = this.level.getBlockState(blockPos);
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
                 if (!blockState.is(Blocks.MOVING_PISTON)) {
-                    this.remove();
+                    this.discard();
                     if (!this.cancelDrop) {
                         boolean bl5;
                         boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
@@ -151,14 +150,14 @@ extends Entity {
                                 if (block instanceof FallingBlock) {
                                     ((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState, this);
                                 }
-                                if (this.blockData != null && block instanceof EntityBlock && (blockEntity = this.level.getBlockEntity(blockPos)) != null) {
+                                if (this.blockData != null && this.blockState.hasBlockEntity() && (blockEntity = this.level.getBlockEntity(blockPos)) != null) {
                                     CompoundTag compoundTag = blockEntity.save(new CompoundTag());
                                     for (String string : this.blockData.getAllKeys()) {
                                         Tag tag = this.blockData.get(string);
                                         if ("x".equals(string) || "y".equals(string) || "z".equals(string)) continue;
                                         compoundTag.put(string, tag.copy());
                                     }
-                                    blockEntity.load(this.blockState, compoundTag);
+                                    blockEntity.load(compoundTag);
                                     blockEntity.setChanged();
                                 }
                             } else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
@@ -171,11 +170,11 @@ extends Entity {
                         ((FallingBlock)block).onBroken(this.level, blockPos, this);
                     }
                 }
-            } else if (!(this.level.isClientSide || (this.time <= 100 || blockPos.getY() >= 1 && blockPos.getY() <= 256) && this.time <= 600)) {
+            } else if (!(this.level.isClientSide || (this.time <= 100 || blockPos.getY() > this.level.getMinBuildHeight() && blockPos.getY() <= this.level.getMaxBuildHeight()) && this.time <= 600)) {
                 if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                     this.spawnAtLocation(block);
                 }
-                this.remove();
+                this.discard();
             }
         }
         this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
@@ -271,6 +270,19 @@ extends Entity {
     @Override
     public Packet<?> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this, Block.getId(this.getBlockState()));
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        this.blockState = Block.stateById(clientboundAddEntityPacket.getData());
+        this.blocksBuilding = true;
+        double d = clientboundAddEntityPacket.getX();
+        double e = clientboundAddEntityPacket.getY();
+        double f = clientboundAddEntityPacket.getZ();
+        this.setPos(d, e + (double)((1.0f - this.getBbHeight()) / 2.0f), f);
+        this.setStartPos(this.blockPosition());
     }
 }
 

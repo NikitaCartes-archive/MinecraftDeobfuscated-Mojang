@@ -125,14 +125,14 @@ public class LootCommand {
     }
 
     private static boolean canMergeItems(ItemStack itemStack, ItemStack itemStack2) {
-        return itemStack.getItem() == itemStack2.getItem() && itemStack.getDamageValue() == itemStack2.getDamageValue() && itemStack.getCount() <= itemStack.getMaxStackSize() && Objects.equals(itemStack.getTag(), itemStack2.getTag());
+        return itemStack.is(itemStack2.getItem()) && itemStack.getDamageValue() == itemStack2.getDamageValue() && itemStack.getCount() <= itemStack.getMaxStackSize() && Objects.equals(itemStack.getTag(), itemStack2.getTag());
     }
 
     private static int playerGive(Collection<ServerPlayer> collection, List<ItemStack> list, Callback callback) throws CommandSyntaxException {
         ArrayList<ItemStack> list2 = Lists.newArrayListWithCapacity(list.size());
         for (ItemStack itemStack : list) {
             for (ServerPlayer serverPlayer : collection) {
-                if (!serverPlayer.inventory.add(itemStack.copy())) continue;
+                if (!serverPlayer.getInventory().add(itemStack.copy())) continue;
                 list2.add(itemStack);
             }
         }

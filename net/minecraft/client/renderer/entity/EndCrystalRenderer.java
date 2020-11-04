@@ -9,13 +9,19 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -32,15 +38,22 @@ extends EntityRenderer<EndCrystal> {
     private final ModelPart glass;
     private final ModelPart base;
 
-    public EndCrystalRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public EndCrystalRenderer(EntityRendererProvider.Context context) {
+        super(context);
         this.shadowRadius = 0.5f;
-        this.glass = new ModelPart(64, 32, 0, 0);
-        this.glass.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
-        this.cube = new ModelPart(64, 32, 32, 0);
-        this.cube.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
-        this.base = new ModelPart(64, 32, 0, 16);
-        this.base.addBox(-6.0f, 0.0f, -6.0f, 12.0f, 4.0f, 12.0f);
+        ModelPart modelPart = context.getLayer(ModelLayers.END_CRYSTAL);
+        this.glass = modelPart.getChild("glass");
+        this.cube = modelPart.getChild("cube");
+        this.base = modelPart.getChild("base");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("glass", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("cube", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 16).addBox(-6.0f, 0.0f, -6.0f, 12.0f, 4.0f, 12.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override

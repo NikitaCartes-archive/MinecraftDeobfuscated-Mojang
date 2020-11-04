@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import java.util.Random;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -22,12 +23,12 @@ extends RandomizableContainerBlockEntity {
     private static final Random RANDOM = new Random();
     private NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
 
-    protected DispenserBlockEntity(BlockEntityType<?> blockEntityType) {
-        super(blockEntityType);
+    protected DispenserBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
+        super(blockEntityType, blockPos, blockState);
     }
 
-    public DispenserBlockEntity() {
-        this(BlockEntityType.DISPENSER);
+    public DispenserBlockEntity(BlockPos blockPos, BlockState blockState) {
+        this(BlockEntityType.DISPENSER, blockPos, blockState);
     }
 
     @Override
@@ -61,8 +62,8 @@ extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         if (!this.tryLoadLootTable(compoundTag)) {
             ContainerHelper.loadAllItems(compoundTag, this.items);

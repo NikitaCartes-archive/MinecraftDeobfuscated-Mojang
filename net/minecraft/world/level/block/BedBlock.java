@@ -169,7 +169,7 @@ implements EntityBlock {
         BlockPos blockPos2;
         BlockState blockState2;
         BedPart bedPart;
-        if (!level.isClientSide && player.isCreative() && (bedPart = blockState.getValue(PART)) == BedPart.FOOT && (blockState2 = level.getBlockState(blockPos2 = blockPos.relative(BedBlock.getNeighbourDirection(bedPart, blockState.getValue(FACING))))).getBlock() == this && blockState2.getValue(PART) == BedPart.HEAD) {
+        if (!level.isClientSide && player.isCreative() && (bedPart = blockState.getValue(PART)) == BedPart.FOOT && (blockState2 = level.getBlockState(blockPos2 = blockPos.relative(BedBlock.getNeighbourDirection(bedPart, blockState.getValue(FACING))))).is(this) && blockState2.getValue(PART) == BedPart.HEAD) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
         }
@@ -293,8 +293,8 @@ implements EntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new BedBlockEntity(this.color);
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new BedBlockEntity(blockPos, blockState, this.color);
     }
 
     @Override
@@ -308,7 +308,6 @@ implements EntityBlock {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public DyeColor getColor() {
         return this.color;
     }

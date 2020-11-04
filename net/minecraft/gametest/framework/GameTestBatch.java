@@ -14,14 +14,17 @@ public class GameTestBatch {
     private final Collection<TestFunction> testFunctions;
     @Nullable
     private final Consumer<ServerLevel> beforeBatchFunction;
+    @Nullable
+    private final Consumer<ServerLevel> afterBatchFunction;
 
-    public GameTestBatch(String string, Collection<TestFunction> collection, @Nullable Consumer<ServerLevel> consumer) {
+    public GameTestBatch(String string, Collection<TestFunction> collection, @Nullable Consumer<ServerLevel> consumer, @Nullable Consumer<ServerLevel> consumer2) {
         if (collection.isEmpty()) {
             throw new IllegalArgumentException("A GameTestBatch must include at least one TestFunction!");
         }
         this.name = string;
         this.testFunctions = collection;
         this.beforeBatchFunction = consumer;
+        this.afterBatchFunction = consumer2;
     }
 
     public String getName() {
@@ -35,6 +38,12 @@ public class GameTestBatch {
     public void runBeforeBatchFunction(ServerLevel serverLevel) {
         if (this.beforeBatchFunction != null) {
             this.beforeBatchFunction.accept(serverLevel);
+        }
+    }
+
+    public void runAfterBatchFunction(ServerLevel serverLevel) {
+        if (this.afterBatchFunction != null) {
+            this.afterBatchFunction.accept(serverLevel);
         }
     }
 }

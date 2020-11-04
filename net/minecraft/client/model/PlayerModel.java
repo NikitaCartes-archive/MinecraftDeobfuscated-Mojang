@@ -5,7 +5,6 @@ package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
@@ -14,6 +13,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -23,7 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 @Environment(value=EnvType.CLIENT)
 public class PlayerModel<T extends LivingEntity>
 extends HumanoidModel<T> {
-    private List<ModelPart> cubes = Lists.newArrayList();
+    private final List<ModelPart> parts;
     public final ModelPart leftSleeve;
     public final ModelPart rightSleeve;
     public final ModelPart leftPants;
@@ -33,50 +37,40 @@ extends HumanoidModel<T> {
     private final ModelPart ear;
     private final boolean slim;
 
-    public PlayerModel(float f, boolean bl) {
-        super(RenderType::entityTranslucent, f, 0.0f, 64, 64);
+    public PlayerModel(ModelPart modelPart2, boolean bl) {
+        super(modelPart2, RenderType::entityTranslucent);
         this.slim = bl;
-        this.ear = new ModelPart(this, 24, 0);
-        this.ear.addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, f);
-        this.cloak = new ModelPart(this, 0, 0);
-        this.cloak.setTexSize(64, 32);
-        this.cloak.addBox(-5.0f, 0.0f, -1.0f, 10.0f, 16.0f, 1.0f, f);
+        this.ear = modelPart2.getChild("ear");
+        this.cloak = modelPart2.getChild("cloak");
+        this.leftSleeve = modelPart2.getChild("left_sleeve");
+        this.rightSleeve = modelPart2.getChild("right_sleeve");
+        this.leftPants = modelPart2.getChild("left_pants");
+        this.rightPants = modelPart2.getChild("right_pants");
+        this.jacket = modelPart2.getChild("jacket");
+        this.parts = modelPart2.getAllParts().filter(modelPart -> !modelPart.isEmpty()).collect(ImmutableList.toImmutableList());
+    }
+
+    public static MeshDefinition createMesh(CubeDeformation cubeDeformation, boolean bl) {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("ear", CubeListBuilder.create().texOffs(24, 0).addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, cubeDeformation), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("cloak", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0f, 0.0f, -1.0f, 10.0f, 16.0f, 1.0f, cubeDeformation, 1.0f, 0.5f), PartPose.offset(0.0f, 0.0f, 0.0f));
+        float f = 0.25f;
         if (bl) {
-            this.leftArm = new ModelPart(this, 32, 48);
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f);
-            this.leftArm.setPos(5.0f, 2.5f, 0.0f);
-            this.rightArm = new ModelPart(this, 40, 16);
-            this.rightArm.addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f);
-            this.rightArm.setPos(-5.0f, 2.5f, 0.0f);
-            this.leftSleeve = new ModelPart(this, 48, 48);
-            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f + 0.25f);
-            this.leftSleeve.setPos(5.0f, 2.5f, 0.0f);
-            this.rightSleeve = new ModelPart(this, 40, 32);
-            this.rightSleeve.addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f + 0.25f);
-            this.rightSleeve.setPos(-5.0f, 2.5f, 10.0f);
+            partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.5f, 0.0f));
+            partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(-5.0f, 2.5f, 0.0f));
+            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.5f, 0.0f));
+            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.5f, 0.0f));
         } else {
-            this.leftArm = new ModelPart(this, 32, 48);
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-            this.leftArm.setPos(5.0f, 2.0f, 0.0f);
-            this.leftSleeve = new ModelPart(this, 48, 48);
-            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
-            this.leftSleeve.setPos(5.0f, 2.0f, 0.0f);
-            this.rightSleeve = new ModelPart(this, 40, 32);
-            this.rightSleeve.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
-            this.rightSleeve.setPos(-5.0f, 2.0f, 10.0f);
+            partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.0f, 0.0f));
+            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.0f, 0.0f));
+            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.0f, 0.0f));
         }
-        this.leftLeg = new ModelPart(this, 16, 48);
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftLeg.setPos(1.9f, 12.0f, 0.0f);
-        this.leftPants = new ModelPart(this, 0, 48);
-        this.leftPants.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
-        this.leftPants.setPos(1.9f, 12.0f, 0.0f);
-        this.rightPants = new ModelPart(this, 0, 32);
-        this.rightPants.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
-        this.rightPants.setPos(-1.9f, 12.0f, 0.0f);
-        this.jacket = new ModelPart(this, 16, 32);
-        this.jacket.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f + 0.25f);
-        this.jacket.setPos(0.0f, 0.0f, 0.0f);
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_pants", CubeListBuilder.create().texOffs(0, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_pants", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("jacket", CubeListBuilder.create().texOffs(16, 32).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.ZERO);
+        return meshDefinition;
     }
 
     @Override
@@ -146,20 +140,7 @@ extends HumanoidModel<T> {
     }
 
     public ModelPart getRandomModelPart(Random random) {
-        return this.cubes.get(random.nextInt(this.cubes.size()));
-    }
-
-    @Override
-    public void accept(ModelPart modelPart) {
-        if (this.cubes == null) {
-            this.cubes = Lists.newArrayList();
-        }
-        this.cubes.add(modelPart);
-    }
-
-    @Override
-    public /* synthetic */ void accept(Object object) {
-        this.accept((ModelPart)object);
+        return this.parts.get(random.nextInt(this.parts.size()));
     }
 }
 

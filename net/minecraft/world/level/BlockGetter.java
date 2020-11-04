@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -20,7 +21,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public interface BlockGetter {
+public interface BlockGetter
+extends LevelHeightAccessor {
     @Nullable
     public BlockEntity getBlockEntity(BlockPos var1);
 
@@ -34,10 +36,6 @@ public interface BlockGetter {
 
     default public int getMaxLightLevel() {
         return 15;
-    }
-
-    default public int getMaxBuildHeight() {
-        return 256;
     }
 
     default public Stream<BlockState> getBlockStates(AABB aABB) {

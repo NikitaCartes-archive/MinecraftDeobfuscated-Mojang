@@ -108,7 +108,7 @@ implements ItemSupplier {
         }
         int i = potion.hasInstantEffects() ? 2007 : 2002;
         this.level.levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
-        this.remove();
+        this.discard();
     }
 
     private void applyWater() {
@@ -170,7 +170,7 @@ implements ItemSupplier {
     }
 
     private boolean isLingering() {
-        return this.getItem().getItem() == Items.LINGERING_POTION;
+        return this.getItem().is(Items.LINGERING_POTION);
     }
 
     private void dowseFire(BlockPos blockPos, Direction direction) {

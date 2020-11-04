@@ -63,7 +63,7 @@ implements AutoCloseable {
     @Override
     public void checkBlock(BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.immutable();
-        this.addTask(blockPos.getX() >> 4, blockPos.getZ() >> 4, TaskType.POST_UPDATE, Util.name(() -> super.checkBlock(blockPos2), () -> "checkBlock " + blockPos2));
+        this.addTask(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()), TaskType.POST_UPDATE, Util.name(() -> super.checkBlock(blockPos2), () -> "checkBlock " + blockPos2));
     }
 
     protected void updateChunkStatus(ChunkPos chunkPos) {
@@ -71,11 +71,11 @@ implements AutoCloseable {
             int i;
             super.retainData(chunkPos, false);
             super.enableLightSources(chunkPos, false);
-            for (i = -1; i < 17; ++i) {
+            for (i = this.getMinLightSection(); i < this.getMaxLightSection(); ++i) {
                 super.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, i), null, true);
                 super.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null, true);
             }
-            for (i = 0; i < 16; ++i) {
+            for (i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); ++i) {
                 super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
             }
         }, () -> "updateChunkStatus " + chunkPos + " " + true));
@@ -119,10 +119,11 @@ implements AutoCloseable {
         chunkAccess.setLightCorrect(false);
         this.addTask(chunkPos.x, chunkPos.z, TaskType.PRE_UPDATE, Util.name(() -> {
             LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
-            for (int i = 0; i < 16; ++i) {
+            for (int i = 0; i < chunkAccess.getSectionsCount(); ++i) {
                 LevelChunkSection levelChunkSection = levelChunkSections[i];
                 if (LevelChunkSection.isEmpty(levelChunkSection)) continue;
-                super.updateSectionStatus(SectionPos.of(chunkPos, i), false);
+                int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+                super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
             super.enableLightSources(chunkPos, true);
             if (!bl) {

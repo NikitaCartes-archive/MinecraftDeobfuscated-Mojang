@@ -66,7 +66,7 @@ implements Predicate<ItemStack> {
             return itemStack.isEmpty();
         }
         for (ItemStack itemStack2 : this.itemStacks) {
-            if (itemStack2.getItem() != itemStack.getItem()) continue;
+            if (!itemStack2.is(itemStack.getItem())) continue;
             return true;
         }
         return false;

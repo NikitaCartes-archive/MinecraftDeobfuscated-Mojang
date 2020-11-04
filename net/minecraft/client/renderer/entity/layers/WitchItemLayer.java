@@ -26,7 +26,7 @@ extends CrossedArmsItemLayer<T, WitchModel<T>> {
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         ItemStack itemStack = ((LivingEntity)livingEntity).getMainHandItem();
         poseStack.pushPose();
-        if (itemStack.getItem() == Items.POTION) {
+        if (itemStack.is(Items.POTION)) {
             ((WitchModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
             ((WitchModel)this.getParentModel()).getNose().translateAndRotate(poseStack);
             poseStack.translate(0.0625, 0.25, 0.0);

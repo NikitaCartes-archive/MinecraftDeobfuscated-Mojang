@@ -3,63 +3,68 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class SnowGolemModel<T extends Entity>
-extends ListModel<T> {
-    private final ModelPart piece1;
-    private final ModelPart piece2;
+extends HierarchicalModel<T> {
+    private final ModelPart root;
+    private final ModelPart upperBody;
     private final ModelPart head;
-    private final ModelPart arm1;
-    private final ModelPart arm2;
+    private final ModelPart leftArm;
+    private final ModelPart rightArm;
 
-    public SnowGolemModel() {
+    public SnowGolemModel(ModelPart modelPart) {
+        this.root = modelPart;
+        this.head = modelPart.getChild("head");
+        this.leftArm = modelPart.getChild("left_arm");
+        this.rightArm = modelPart.getChild("right_arm");
+        this.upperBody = modelPart.getChild("upper_body");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
         float f = 4.0f;
-        float g = 0.0f;
-        this.head = new ModelPart(this, 0, 0).setTexSize(64, 64);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, -0.5f);
-        this.head.setPos(0.0f, 4.0f, 0.0f);
-        this.arm1 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-        this.arm1.addBox(-1.0f, 0.0f, -1.0f, 12.0f, 2.0f, 2.0f, -0.5f);
-        this.arm1.setPos(0.0f, 6.0f, 0.0f);
-        this.arm2 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-        this.arm2.addBox(-1.0f, 0.0f, -1.0f, 12.0f, 2.0f, 2.0f, -0.5f);
-        this.arm2.setPos(0.0f, 6.0f, 0.0f);
-        this.piece1 = new ModelPart(this, 0, 16).setTexSize(64, 64);
-        this.piece1.addBox(-5.0f, -10.0f, -5.0f, 10.0f, 10.0f, 10.0f, -0.5f);
-        this.piece1.setPos(0.0f, 13.0f, 0.0f);
-        this.piece2 = new ModelPart(this, 0, 36).setTexSize(64, 64);
-        this.piece2.addBox(-6.0f, -12.0f, -6.0f, 12.0f, 12.0f, 12.0f, -0.5f);
-        this.piece2.setPos(0.0f, 24.0f, 0.0f);
+        CubeDeformation cubeDeformation = new CubeDeformation(-0.5f);
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation), PartPose.offset(0.0f, 4.0f, 0.0f));
+        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(32, 0).addBox(-1.0f, 0.0f, -1.0f, 12.0f, 2.0f, 2.0f, cubeDeformation);
+        partDefinition.addOrReplaceChild("left_arm", cubeListBuilder, PartPose.offsetAndRotation(5.0f, 6.0f, 1.0f, 0.0f, 0.0f, 1.0f));
+        partDefinition.addOrReplaceChild("right_arm", cubeListBuilder, PartPose.offsetAndRotation(-5.0f, 6.0f, -1.0f, 0.0f, (float)Math.PI, -1.0f));
+        partDefinition.addOrReplaceChild("upper_body", CubeListBuilder.create().texOffs(0, 16).addBox(-5.0f, -10.0f, -5.0f, 10.0f, 10.0f, 10.0f, cubeDeformation), PartPose.offset(0.0f, 13.0f, 0.0f));
+        partDefinition.addOrReplaceChild("lower_body", CubeListBuilder.create().texOffs(0, 36).addBox(-6.0f, -12.0f, -6.0f, 12.0f, 12.0f, 12.0f, cubeDeformation), PartPose.offset(0.0f, 24.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     @Override
     public void setupAnim(T entity, float f, float g, float h, float i, float j) {
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
-        this.piece1.yRot = i * ((float)Math.PI / 180) * 0.25f;
-        float k = Mth.sin(this.piece1.yRot);
-        float l = Mth.cos(this.piece1.yRot);
-        this.arm1.zRot = 1.0f;
-        this.arm2.zRot = -1.0f;
-        this.arm1.yRot = 0.0f + this.piece1.yRot;
-        this.arm2.yRot = (float)Math.PI + this.piece1.yRot;
-        this.arm1.x = l * 5.0f;
-        this.arm1.z = -k * 5.0f;
-        this.arm2.x = -l * 5.0f;
-        this.arm2.z = k * 5.0f;
+        this.upperBody.yRot = i * ((float)Math.PI / 180) * 0.25f;
+        float k = Mth.sin(this.upperBody.yRot);
+        float l = Mth.cos(this.upperBody.yRot);
+        this.leftArm.yRot = this.upperBody.yRot;
+        this.rightArm.yRot = this.upperBody.yRot + (float)Math.PI;
+        this.leftArm.x = l * 5.0f;
+        this.leftArm.z = -k * 5.0f;
+        this.rightArm.x = -l * 5.0f;
+        this.rightArm.z = k * 5.0f;
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.piece1, this.piece2, this.head, this.arm1, this.arm2);
+    public ModelPart root() {
+        return this.root;
     }
 
     public ModelPart getHead() {

@@ -76,7 +76,7 @@ extends Block {
                     continue;
                 }
                 if (material != Material.WATER_PLANT && material != Material.REPLACEABLE_WATER_PLANT) continue;
-                BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos3) : null;
+                BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos3) : null;
                 SpongeBlock.dropResources(blockState, level, blockPos3, blockEntity);
                 level.setBlock(blockPos3, Blocks.AIR.defaultBlockState(), 3);
                 ++i;

@@ -29,7 +29,7 @@ extends PotionItem {
             level.addFreshEntity(thrownPotion);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());

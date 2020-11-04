@@ -24,7 +24,7 @@ extends Behavior<E> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E piglin) {
         ItemEntity itemEntity = ((Piglin)piglin).getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM).get();
-        return PiglinAi.isLovedItem(itemEntity.getItem().getItem());
+        return PiglinAi.isLovedItem(itemEntity.getItem());
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientboundEntityEventPacket
 implements Packet<ClientGamePacketListener> {
@@ -42,6 +43,7 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleEntityEvent(this);
     }
 
+    @Nullable
     @Environment(value=EnvType.CLIENT)
     public Entity getEntity(Level level) {
         return level.getEntity(this.entityId);

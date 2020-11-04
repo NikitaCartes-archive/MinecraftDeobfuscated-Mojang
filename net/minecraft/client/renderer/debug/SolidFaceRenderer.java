@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -60,7 +61,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.WEST)) {
                     tesselator = Tesselator.getInstance();
                     bufferBuilder = tesselator.getBuilder();
-                    bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                    bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     bufferBuilder.vertex(g, h, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(g, h, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(g, k, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
@@ -70,7 +71,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.SOUTH)) {
                     tesselator = Tesselator.getInstance();
                     bufferBuilder = tesselator.getBuilder();
-                    bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                    bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     bufferBuilder.vertex(g, k, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(g, h, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(j, k, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
@@ -80,7 +81,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.EAST)) {
                     tesselator = Tesselator.getInstance();
                     bufferBuilder = tesselator.getBuilder();
-                    bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                    bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     bufferBuilder.vertex(j, h, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(j, h, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(j, k, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
@@ -90,7 +91,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.NORTH)) {
                     tesselator = Tesselator.getInstance();
                     bufferBuilder = tesselator.getBuilder();
-                    bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                    bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     bufferBuilder.vertex(j, k, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(j, h, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(g, k, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
@@ -100,7 +101,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.DOWN)) {
                     tesselator = Tesselator.getInstance();
                     bufferBuilder = tesselator.getBuilder();
-                    bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                    bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                     bufferBuilder.vertex(g, h, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(j, h, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                     bufferBuilder.vertex(g, h, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
@@ -110,7 +111,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 if (!blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) continue;
                 tesselator = Tesselator.getInstance();
                 bufferBuilder = tesselator.getBuilder();
-                bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+                bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
                 bufferBuilder.vertex(g, k, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                 bufferBuilder.vertex(g, k, l).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();
                 bufferBuilder.vertex(j, k, i).color(1.0f, 0.0f, 0.0f, 0.5f).endVertex();

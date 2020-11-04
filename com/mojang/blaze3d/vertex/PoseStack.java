@@ -25,7 +25,7 @@ public class PoseStack {
 
     public void translate(double d, double e, double f) {
         Pose pose = this.poseStack.getLast();
-        pose.pose.multiply(Matrix4f.createTranslateMatrix((float)d, (float)e, (float)f));
+        pose.pose.multiplyWithTranslation((float)d, (float)e, (float)f);
     }
 
     public void scale(float f, float g, float h) {

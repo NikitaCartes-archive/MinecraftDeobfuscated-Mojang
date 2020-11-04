@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,11 +25,13 @@ import net.minecraft.world.phys.Vec3;
 @Environment(value=EnvType.CLIENT)
 public abstract class EntityRenderer<T extends Entity> {
     protected final EntityRenderDispatcher entityRenderDispatcher;
+    private final Font font;
     protected float shadowRadius;
     protected float shadowStrength = 1.0f;
 
-    protected EntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        this.entityRenderDispatcher = entityRenderDispatcher;
+    protected EntityRenderer(EntityRendererProvider.Context context) {
+        this.entityRenderDispatcher = context.getEntityRenderDispatcher();
+        this.font = context.getFont();
     }
 
     public final int getPackedLightCoords(T entity, float f) {
@@ -79,7 +82,7 @@ public abstract class EntityRenderer<T extends Entity> {
     public abstract ResourceLocation getTextureLocation(T var1);
 
     public Font getFont() {
-        return this.entityRenderDispatcher.getFont();
+        return this.font;
     }
 
     protected void renderNameTag(T entity, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -104,10 +107,6 @@ public abstract class EntityRenderer<T extends Entity> {
             font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
-    }
-
-    public EntityRenderDispatcher getDispatcher() {
-        return this.entityRenderDispatcher;
     }
 }
 

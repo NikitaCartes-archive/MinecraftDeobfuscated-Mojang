@@ -285,29 +285,10 @@ public class Mth {
         return Mth.ceillog2(i) - (Mth.isPowerOfTwo(i) ? 0 : 1);
     }
 
-    public static int roundUp(int i, int j) {
-        int k;
-        if (j == 0) {
-            return 0;
-        }
-        if (i == 0) {
-            return j;
-        }
-        if (i < 0) {
-            j *= -1;
-        }
-        if ((k = i % j) == 0) {
-            return i;
-        }
-        return i + j - k;
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static int color(float f, float g, float h) {
         return Mth.color(Mth.floor(f * 255.0f), Mth.floor(g * 255.0f), Mth.floor(h * 255.0f));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int color(int i, int j, int k) {
         int l = i;
         l = (l << 8) + j;
@@ -563,6 +544,10 @@ public class Mth {
 
     public static float square(float f) {
         return f * f;
+    }
+
+    public static int roundToward(int i, int j) {
+        return (i + j - 1) / j * j;
     }
 
     static {

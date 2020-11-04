@@ -38,10 +38,11 @@ public abstract class Language {
     private static Language loadDefault() {
         ImmutableMap.Builder builder = ImmutableMap.builder();
         BiConsumer<String, String> biConsumer = builder::put;
+        String string = "/assets/minecraft/lang/en_us.json";
         try (InputStream inputStream = Language.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");){
             Language.loadFromJson(inputStream, biConsumer);
         } catch (JsonParseException | IOException exception) {
-            LOGGER.error("Couldn't read strings from /assets/minecraft/lang/en_us.json", (Throwable)exception);
+            LOGGER.error("Couldn't read strings from {}", (Object)"/assets/minecraft/lang/en_us.json", (Object)exception);
         }
         final ImmutableMap map = builder.build();
         return new Language(){

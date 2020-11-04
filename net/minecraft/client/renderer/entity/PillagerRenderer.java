@@ -6,7 +6,8 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.IllagerRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +18,8 @@ public class PillagerRenderer
 extends IllagerRenderer<Pillager> {
     private static final ResourceLocation PILLAGER = new ResourceLocation("textures/entity/illager/pillager.png");
 
-    public PillagerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new IllagerModel(0.0f, 0.0f, 64, 64), 0.5f);
+    public PillagerRenderer(EntityRendererProvider.Context context) {
+        super(context, new IllagerModel(context.getLayer(ModelLayers.PILLAGER)), 0.5f);
         this.addLayer(new ItemInHandLayer<Pillager, IllagerModel<Pillager>>(this));
     }
 

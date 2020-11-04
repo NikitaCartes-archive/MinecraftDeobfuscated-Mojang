@@ -56,7 +56,7 @@ extends SimpleJsonResourceReloadListener {
         ImmutableMap<ResourceLocation, LootTable> immutableMap = builder.build();
         ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, this.predicateManager::get, immutableMap::get);
         immutableMap.forEach((resourceLocation, lootTable) -> LootTables.validate(validationContext, resourceLocation, lootTable));
-        validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+        validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
         this.tables = immutableMap;
     }
 

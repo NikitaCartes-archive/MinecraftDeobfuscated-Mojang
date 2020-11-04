@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -41,12 +42,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     @Override
     protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        Set<Biome> set = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 16);
+        Set<Biome> set = biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 16);
         for (Biome biome2 : set) {
             if (biome2.getGenerationSettings().isValidStart(this)) continue;
             return false;
         }
-        Set<Biome> set2 = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 29);
+        Set<Biome> set2 = biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 29);
         for (Biome biome3 : set2) {
             if (biome3.getBiomeCategory() == Biome.BiomeCategory.OCEAN || biome3.getBiomeCategory() == Biome.BiomeCategory.RIVER) continue;
             return false;
@@ -78,8 +79,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         private void generatePieces(int i, int j) {
-            int k = i * 16 - 29;
-            int l = j * 16 - 29;
+            int k = SectionPos.sectionToBlockCoord(i) - 29;
+            int l = SectionPos.sectionToBlockCoord(j) - 29;
             Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(this.random);
             this.pieces.add(new OceanMonumentPieces.MonumentBuilding(this.random, k, l, direction));
             this.calculateBoundingBox();

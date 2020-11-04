@@ -83,7 +83,7 @@ extends AbstractPiglin {
 
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.GOLDEN_AXE) {
+        if (itemStack.is(Items.GOLDEN_AXE)) {
             return super.wantsToPickUp(itemStack);
         }
         return false;

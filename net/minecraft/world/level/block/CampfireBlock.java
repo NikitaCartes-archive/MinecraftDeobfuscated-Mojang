@@ -39,6 +39,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,7 +84,7 @@ implements SimpleWaterloggedBlock {
         Optional<CampfireCookingRecipe> optional;
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof CampfireBlockEntity && (optional = (campfireBlockEntity = (CampfireBlockEntity)blockEntity).getCookableRecipe(itemStack = player.getItemInHand(interactionHand))).isPresent()) {
-            if (!level.isClientSide && campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, optional.get().getCookingTime())) {
+            if (!level.isClientSide && campfireBlockEntity.placeFood(player.getAbilities().instabuild ? itemStack.copy() : itemStack, optional.get().getCookingTime())) {
                 player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
                 return InteractionResult.SUCCESS;
             }
@@ -255,8 +257,24 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new CampfireBlockEntity();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new CampfireBlockEntity(blockPos, blockState);
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        if (level.isClientSide) {
+            if (blockState.getValue(LIT).booleanValue()) {
+                return CampfireBlock.createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::particleTick);
+            }
+        } else {
+            if (blockState.getValue(LIT).booleanValue()) {
+                return CampfireBlock.createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::cookTick);
+            }
+            return CampfireBlock.createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::cooldownTick);
+        }
+        return null;
     }
 
     @Override
@@ -265,7 +283,7 @@ implements SimpleWaterloggedBlock {
     }
 
     public static boolean canLight(BlockState blockState) {
-        return blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(BlockStateProperties.WATERLOGGED) && blockStateBase.hasProperty(BlockStateProperties.LIT)) && blockState.getValue(BlockStateProperties.WATERLOGGED) == false && blockState.getValue(BlockStateProperties.LIT) == false;
+        return blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(WATERLOGGED) && blockStateBase.hasProperty(LIT)) && blockState.getValue(WATERLOGGED) == false && blockState.getValue(LIT) == false;
     }
 }
 

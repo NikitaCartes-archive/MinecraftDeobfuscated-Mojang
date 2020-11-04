@@ -10,12 +10,18 @@ import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.Calendar;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
@@ -32,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 @Environment(value=EnvType.CLIENT)
 public class ChestRenderer<T extends BlockEntity>
-extends BlockEntityRenderer<T> {
+implements BlockEntityRenderer<T> {
     private final ModelPart lid;
     private final ModelPart bottom;
     private final ModelPart lock;
@@ -44,39 +50,50 @@ extends BlockEntityRenderer<T> {
     private final ModelPart doubleRightLock;
     private boolean xmasTextures;
 
-    public ChestRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+    public ChestRenderer(BlockEntityRendererProvider.Context context) {
         Calendar calendar = Calendar.getInstance();
         if (calendar.get(2) + 1 == 12 && calendar.get(5) >= 24 && calendar.get(5) <= 26) {
             this.xmasTextures = true;
         }
-        this.bottom = new ModelPart(64, 64, 0, 19);
-        this.bottom.addBox(1.0f, 0.0f, 1.0f, 14.0f, 10.0f, 14.0f, 0.0f);
-        this.lid = new ModelPart(64, 64, 0, 0);
-        this.lid.addBox(1.0f, 0.0f, 0.0f, 14.0f, 5.0f, 14.0f, 0.0f);
-        this.lid.y = 9.0f;
-        this.lid.z = 1.0f;
-        this.lock = new ModelPart(64, 64, 0, 0);
-        this.lock.addBox(7.0f, -1.0f, 15.0f, 2.0f, 4.0f, 1.0f, 0.0f);
-        this.lock.y = 8.0f;
-        this.doubleLeftBottom = new ModelPart(64, 64, 0, 19);
-        this.doubleLeftBottom.addBox(1.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f, 0.0f);
-        this.doubleLeftLid = new ModelPart(64, 64, 0, 0);
-        this.doubleLeftLid.addBox(1.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f, 0.0f);
-        this.doubleLeftLid.y = 9.0f;
-        this.doubleLeftLid.z = 1.0f;
-        this.doubleLeftLock = new ModelPart(64, 64, 0, 0);
-        this.doubleLeftLock.addBox(15.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f, 0.0f);
-        this.doubleLeftLock.y = 8.0f;
-        this.doubleRightBottom = new ModelPart(64, 64, 0, 19);
-        this.doubleRightBottom.addBox(0.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f, 0.0f);
-        this.doubleRightLid = new ModelPart(64, 64, 0, 0);
-        this.doubleRightLid.addBox(0.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f, 0.0f);
-        this.doubleRightLid.y = 9.0f;
-        this.doubleRightLid.z = 1.0f;
-        this.doubleRightLock = new ModelPart(64, 64, 0, 0);
-        this.doubleRightLock.addBox(0.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f, 0.0f);
-        this.doubleRightLock.y = 8.0f;
+        ModelPart modelPart = context.getLayer(ModelLayers.CHEST);
+        this.bottom = modelPart.getChild("bottom");
+        this.lid = modelPart.getChild("lid");
+        this.lock = modelPart.getChild("lock");
+        ModelPart modelPart2 = context.getLayer(ModelLayers.DOUBLE_CHEST_LEFT);
+        this.doubleLeftBottom = modelPart2.getChild("bottom");
+        this.doubleLeftLid = modelPart2.getChild("lid");
+        this.doubleLeftLock = modelPart2.getChild("lock");
+        ModelPart modelPart3 = context.getLayer(ModelLayers.DOUBLE_CHEST_RIGHT);
+        this.doubleRightBottom = modelPart3.getChild("bottom");
+        this.doubleRightLid = modelPart3.getChild("lid");
+        this.doubleRightLock = modelPart3.getChild("lock");
+    }
+
+    public static LayerDefinition createSingleBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 14.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 14.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0f, -1.0f, 15.0f, 2.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
+    }
+
+    public static LayerDefinition createDoubleBodyRightLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(15.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
+    }
+
+    public static LayerDefinition createDoubleBodyLeftLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(0.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     @Override
@@ -105,9 +122,9 @@ extends BlockEntityRenderer<T> {
         VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityCutout);
         if (bl2) {
             if (chestType == ChestType.LEFT) {
-                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, k, j);
-            } else {
                 this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, k, j);
+            } else {
+                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, k, j);
             }
         } else {
             this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, k, j);

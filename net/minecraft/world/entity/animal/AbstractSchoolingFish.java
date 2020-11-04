@@ -95,7 +95,7 @@ extends AbstractFish {
         }
     }
 
-    public void addFollowers(Stream<AbstractSchoolingFish> stream) {
+    public void addFollowers(Stream<? extends AbstractSchoolingFish> stream) {
         stream.limit(this.getMaxSchoolSize() - this.schoolSize).filter(abstractSchoolingFish -> abstractSchoolingFish != this).forEach(abstractSchoolingFish -> abstractSchoolingFish.startFollowing(this));
     }
 

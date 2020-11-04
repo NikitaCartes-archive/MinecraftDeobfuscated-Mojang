@@ -14,8 +14,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.ai.util.GoalUtils;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.block.DoorBlock;
@@ -60,7 +61,7 @@ extends Goal {
         if (!serverLevel.isCloseToVillage(blockPos, 6)) {
             return false;
         }
-        Vec3 vec3 = RandomPos.getLandPos(this.mob, 15, 7, blockPos2 -> {
+        Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7, blockPos2 -> {
             if (!serverLevel.isVillage((BlockPos)blockPos2)) {
                 return Double.NEGATIVE_INFINITY;
             }
@@ -84,7 +85,7 @@ extends Goal {
         this.path = groundPathNavigation.createPath(this.poiPos, 0);
         groundPathNavigation.setCanOpenDoors(bl);
         if (this.path == null) {
-            Vec3 vec32 = RandomPos.getPosTowards(this.mob, 10, 7, Vec3.atBottomCenterOf(this.poiPos));
+            Vec3 vec32 = DefaultRandomPos.getPosTowards(this.mob, 10, 7, Vec3.atBottomCenterOf(this.poiPos), 1.5707963705062866);
             if (vec32 == null) {
                 return false;
             }

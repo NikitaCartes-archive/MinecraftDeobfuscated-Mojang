@@ -139,7 +139,7 @@ RangedAttackMob {
     @Override
     protected InteractionResult mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
+        if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
             this.shear(SoundSource.PLAYERS);
             if (!this.level.isClientSide) {
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));

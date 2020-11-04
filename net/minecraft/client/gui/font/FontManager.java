@@ -82,17 +82,17 @@ implements AutoCloseable {
                                     profilerFiller.pop();
                                     continue;
                                 } catch (RuntimeException runtimeException) {
-                                    LOGGER.warn("Unable to read definition '{}' in fonts.json in resourcepack: '{}': {}", (Object)resourceLocation22, (Object)resource.getSourceName(), (Object)runtimeException.getMessage());
+                                    LOGGER.warn("Unable to read definition '{}' in {} in resourcepack: '{}': {}", (Object)resourceLocation22, (Object)"fonts.json", (Object)resource.getSourceName(), (Object)runtimeException.getMessage());
                                 }
                             }
                             profilerFiller.pop();
                         } catch (RuntimeException runtimeException2) {
-                            LOGGER.warn("Unable to load font '{}' in fonts.json in resourcepack: '{}': {}", (Object)resourceLocation22, (Object)resource.getSourceName(), (Object)runtimeException2.getMessage());
+                            LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}': {}", (Object)resourceLocation22, (Object)"fonts.json", (Object)resource.getSourceName(), (Object)runtimeException2.getMessage());
                         }
                         profilerFiller.pop();
                     }
                 } catch (IOException iOException) {
-                    LOGGER.warn("Unable to load font '{}' in fonts.json: {}", (Object)resourceLocation22, (Object)iOException.getMessage());
+                    LOGGER.warn("Unable to load font '{}' in {}: {}", (Object)resourceLocation22, (Object)"fonts.json", (Object)iOException.getMessage());
                 }
                 profilerFiller.push("caching");
                 IntOpenHashSet intSet = new IntOpenHashSet();

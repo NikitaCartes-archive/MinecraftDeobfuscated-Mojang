@@ -71,7 +71,7 @@ public class NbtPredicate {
     public static CompoundTag getEntityTagToCompare(Entity entity) {
         ItemStack itemStack;
         CompoundTag compoundTag = entity.saveWithoutId(new CompoundTag());
-        if (entity instanceof Player && !(itemStack = ((Player)entity).inventory.getSelected()).isEmpty()) {
+        if (entity instanceof Player && !(itemStack = ((Player)entity).getInventory().getSelected()).isEmpty()) {
             compoundTag.put("SelectedItem", itemStack.save(new CompoundTag()));
         }
         return compoundTag;

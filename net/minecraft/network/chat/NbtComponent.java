@@ -89,7 +89,7 @@ implements ContextAwareComponent {
                     MutableComponent mutableComponent = Component.Serializer.fromJson(string);
                     return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, mutableComponent, entity, i));
                 } catch (Exception exception) {
-                    LOGGER.warn("Failed to parse component: " + string, (Throwable)exception);
+                    LOGGER.warn("Failed to parse component: {}", string, (Object)exception);
                     return Stream.of(new MutableComponent[0]);
                 }
             }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(", ").append((Component)mutableComponent2)).orElse(new TextComponent(""));

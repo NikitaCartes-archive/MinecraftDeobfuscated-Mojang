@@ -38,7 +38,7 @@ extends ProtoChunk {
     private final LevelChunk wrapped;
 
     public ImposterProtoChunk(LevelChunk levelChunk) {
-        super(levelChunk.getPos(), UpgradeData.EMPTY);
+        super(levelChunk.getPos(), UpgradeData.EMPTY, levelChunk);
         this.wrapped = levelChunk;
     }
 
@@ -71,7 +71,7 @@ extends ProtoChunk {
     }
 
     @Override
-    public void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
+    public void setBlockEntity(BlockEntity blockEntity) {
     }
 
     @Override
@@ -115,10 +115,6 @@ extends ProtoChunk {
     @Override
     public ChunkPos getPos() {
         return this.wrapped.getPos();
-    }
-
-    @Override
-    public void setLastSaveTime(long l) {
     }
 
     @Override
@@ -212,12 +208,12 @@ extends ProtoChunk {
 
     @Override
     public ProtoTickList<Block> getBlockTicks() {
-        return new ProtoTickList<Block>(block -> block.defaultBlockState().isAir(), this.getPos());
+        return new ProtoTickList<Block>(block -> block.defaultBlockState().isAir(), this.getPos(), this);
     }
 
     @Override
     public ProtoTickList<Fluid> getLiquidTicks() {
-        return new ProtoTickList<Fluid>(fluid -> fluid == Fluids.EMPTY, this.getPos());
+        return new ProtoTickList<Fluid>(fluid -> fluid == Fluids.EMPTY, this.getPos(), this);
     }
 
     @Override

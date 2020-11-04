@@ -47,7 +47,7 @@ extends Item {
                 livingEntity.addEffect(new MobEffectInstance(mobEffect, j));
             }
         }
-        if (livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild) {
+        if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild) {
             return itemStack2;
         }
         return new ItemStack(Items.BOWL);

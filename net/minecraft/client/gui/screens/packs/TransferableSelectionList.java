@@ -61,7 +61,7 @@ extends ObjectSelectionList<PackEntry> {
     @Environment(value=EnvType.CLIENT)
     public static class PackEntry
     extends ObjectSelectionList.Entry<PackEntry> {
-        private TransferableSelectionList parent;
+        private final TransferableSelectionList parent;
         protected final Minecraft minecraft;
         protected final Screen screen;
         private final PackSelectionModel.Entry pack;

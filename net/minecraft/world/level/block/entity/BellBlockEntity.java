@@ -19,13 +19,12 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class BellBlockEntity
-extends BlockEntity
-implements TickableBlockEntity {
+extends BlockEntity {
     private long lastRingTimestamp;
     public int ticks;
     public boolean shaking;
@@ -34,8 +33,8 @@ implements TickableBlockEntity {
     private boolean resonating;
     private int resonationTicks;
 
-    public BellBlockEntity() {
-        super(BlockEntityType.BELL);
+    public BellBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.BELL, blockPos, blockState);
     }
 
     @Override
@@ -51,32 +50,34 @@ implements TickableBlockEntity {
         return super.triggerEvent(i, j);
     }
 
-    @Override
-    public void tick() {
-        if (this.shaking) {
-            ++this.ticks;
+    private static void tick(Level level, BlockPos blockPos, BlockState blockState, BellBlockEntity bellBlockEntity, ResonationEndAction resonationEndAction) {
+        if (bellBlockEntity.shaking) {
+            ++bellBlockEntity.ticks;
         }
-        if (this.ticks >= 50) {
-            this.shaking = false;
-            this.ticks = 0;
+        if (bellBlockEntity.ticks >= 50) {
+            bellBlockEntity.shaking = false;
+            bellBlockEntity.ticks = 0;
         }
-        if (this.ticks >= 5 && this.resonationTicks == 0 && this.areRaidersNearby()) {
-            this.resonating = true;
-            this.playResonateSound();
+        if (bellBlockEntity.ticks >= 5 && bellBlockEntity.resonationTicks == 0 && BellBlockEntity.areRaidersNearby(blockPos, bellBlockEntity.nearbyEntities)) {
+            bellBlockEntity.resonating = true;
+            level.playSound(null, blockPos, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0f, 1.0f);
         }
-        if (this.resonating) {
-            if (this.resonationTicks < 40) {
-                ++this.resonationTicks;
+        if (bellBlockEntity.resonating) {
+            if (bellBlockEntity.resonationTicks < 40) {
+                ++bellBlockEntity.resonationTicks;
             } else {
-                this.makeRaidersGlow(this.level);
-                this.showBellParticles(this.level);
-                this.resonating = false;
+                resonationEndAction.run(level, blockPos, bellBlockEntity.nearbyEntities);
+                bellBlockEntity.resonating = false;
             }
         }
     }
 
-    private void playResonateSound() {
-        this.level.playSound(null, this.getBlockPos(), SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.0f, 1.0f);
+    public static void clientTick(Level level, BlockPos blockPos, BlockState blockState, BellBlockEntity bellBlockEntity) {
+        BellBlockEntity.tick(level, blockPos, blockState, bellBlockEntity, BellBlockEntity::showBellParticles);
+    }
+
+    public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, BellBlockEntity bellBlockEntity) {
+        BellBlockEntity.tick(level, blockPos, blockState, bellBlockEntity, BellBlockEntity::makeRaidersGlow);
     }
 
     public void onHit(Direction direction) {
@@ -99,36 +100,28 @@ implements TickableBlockEntity {
         }
         if (!this.level.isClientSide) {
             for (LivingEntity livingEntity : this.nearbyEntities) {
-                if (!livingEntity.isAlive() || livingEntity.removed || !blockPos.closerThan(livingEntity.position(), 32.0)) continue;
+                if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerThan(livingEntity.position(), 32.0)) continue;
                 livingEntity.getBrain().setMemory(MemoryModuleType.HEARD_BELL_TIME, this.level.getGameTime());
             }
         }
     }
 
-    private boolean areRaidersNearby() {
-        BlockPos blockPos = this.getBlockPos();
-        for (LivingEntity livingEntity : this.nearbyEntities) {
-            if (!livingEntity.isAlive() || livingEntity.removed || !blockPos.closerThan(livingEntity.position(), 32.0) || !livingEntity.getType().is(EntityTypeTags.RAIDERS)) continue;
+    private static boolean areRaidersNearby(BlockPos blockPos, List<LivingEntity> list) {
+        for (LivingEntity livingEntity : list) {
+            if (!livingEntity.isAlive() || livingEntity.isRemoved() || !blockPos.closerThan(livingEntity.position(), 32.0) || !livingEntity.getType().is(EntityTypeTags.RAIDERS)) continue;
             return true;
         }
         return false;
     }
 
-    private void makeRaidersGlow(Level level) {
-        if (level.isClientSide) {
-            return;
-        }
-        this.nearbyEntities.stream().filter(this::isRaiderWithinRange).forEach(this::glow);
+    private static void makeRaidersGlow(Level level, BlockPos blockPos, List<LivingEntity> list) {
+        list.stream().filter(livingEntity -> BellBlockEntity.isRaiderWithinRange(blockPos, livingEntity)).forEach(BellBlockEntity::glow);
     }
 
-    private void showBellParticles(Level level) {
-        if (!level.isClientSide) {
-            return;
-        }
-        BlockPos blockPos = this.getBlockPos();
+    private static void showBellParticles(Level level, BlockPos blockPos, List<LivingEntity> list) {
         MutableInt mutableInt = new MutableInt(16700985);
-        int i = (int)this.nearbyEntities.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
-        this.nearbyEntities.stream().filter(this::isRaiderWithinRange).forEach(livingEntity -> {
+        int i = (int)list.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
+        list.stream().filter(livingEntity -> BellBlockEntity.isRaiderWithinRange(blockPos, livingEntity)).forEach(livingEntity -> {
             float f = 1.0f;
             float g = Mth.sqrt((livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX()) + (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ()));
             double d = (double)((float)blockPos.getX() + 0.5f) + (double)(1.0f / g) * (livingEntity.getX() - (double)blockPos.getX());
@@ -144,12 +137,17 @@ implements TickableBlockEntity {
         });
     }
 
-    private boolean isRaiderWithinRange(LivingEntity livingEntity) {
-        return livingEntity.isAlive() && !livingEntity.removed && this.getBlockPos().closerThan(livingEntity.position(), 48.0) && livingEntity.getType().is(EntityTypeTags.RAIDERS);
+    private static boolean isRaiderWithinRange(BlockPos blockPos, LivingEntity livingEntity) {
+        return livingEntity.isAlive() && !livingEntity.isRemoved() && blockPos.closerThan(livingEntity.position(), 48.0) && livingEntity.getType().is(EntityTypeTags.RAIDERS);
     }
 
-    private void glow(LivingEntity livingEntity) {
+    private static void glow(LivingEntity livingEntity) {
         livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 60));
+    }
+
+    @FunctionalInterface
+    static interface ResonationEndAction {
+        public void run(Level var1, BlockPos var2, List<LivingEntity> var3);
     }
 }
 

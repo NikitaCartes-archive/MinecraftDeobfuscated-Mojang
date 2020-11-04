@@ -13,8 +13,8 @@ import net.minecraft.world.item.Items;
 
 public abstract class ProjectileWeaponItem
 extends Item {
-    public static final Predicate<ItemStack> ARROW_ONLY = itemStack -> itemStack.getItem().is(ItemTags.ARROWS);
-    public static final Predicate<ItemStack> ARROW_OR_FIREWORK = ARROW_ONLY.or(itemStack -> itemStack.getItem() == Items.FIREWORK_ROCKET);
+    public static final Predicate<ItemStack> ARROW_ONLY = itemStack -> itemStack.is(ItemTags.ARROWS);
+    public static final Predicate<ItemStack> ARROW_OR_FIREWORK = ARROW_ONLY.or(itemStack -> itemStack.is(Items.FIREWORK_ROCKET));
 
     public ProjectileWeaponItem(Item.Properties properties) {
         super(properties);

@@ -13,8 +13,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -31,8 +31,8 @@ extends EntityRenderer<FishingHook> {
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
     private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
 
-    public FishingHookRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public FishingHookRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -62,7 +62,7 @@ extends EntityRenderer<FishingHook> {
         poseStack.popPose();
         int j = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
         ItemStack itemStack = player.getMainHandItem();
-        if (itemStack.getItem() != Items.FISHING_ROD) {
+        if (!itemStack.is(Items.FISHING_ROD)) {
             j = -j;
         }
         float h = player.getAttackAnim(g);

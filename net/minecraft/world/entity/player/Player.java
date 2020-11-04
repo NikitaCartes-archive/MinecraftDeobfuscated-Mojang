@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -127,7 +129,7 @@ extends LivingEntity {
     protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
     protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
     private long timeEntitySatOnShoulder;
-    public final Inventory inventory = new Inventory(this);
+    private final Inventory inventory = new Inventory(this);
     protected PlayerEnderChestContainer enderChestInventory = new PlayerEnderChestContainer();
     public final InventoryMenu inventoryMenu;
     public AbstractContainerMenu containerMenu;
@@ -144,7 +146,7 @@ extends LivingEntity {
     public double zCloak;
     private int sleepCounter;
     protected boolean wasUnderwater;
-    public final Abilities abilities = new Abilities();
+    private final Abilities abilities = new Abilities();
     public int experienceLevel;
     public int totalExperience;
     public float experienceProgress;
@@ -279,7 +281,7 @@ extends LivingEntity {
 
     private void turtleHelmetTick() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
-        if (itemStack.getItem() == Items.TURTLE_HELMET && !this.isEyeInFluid(FluidTags.WATER)) {
+        if (itemStack.is(Items.TURTLE_HELMET) && !this.isEyeInFluid(FluidTags.WATER)) {
             this.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
         }
     }
@@ -457,12 +459,20 @@ extends LivingEntity {
         float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, Mth.sqrt(Player.getHorizontalDistanceSqr(this.getDeltaMovement())));
         this.bob += (f - this.bob) * 0.4f;
         if (this.getHealth() > 0.0f && !this.isSpectator()) {
-            AABB aABB = this.isPassenger() && !this.getVehicle().removed ? this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0) : this.getBoundingBox().inflate(1.0, 0.5, 1.0);
+            AABB aABB = this.isPassenger() && !this.getVehicle().isRemoved() ? this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0) : this.getBoundingBox().inflate(1.0, 0.5, 1.0);
             List<Entity> list = this.level.getEntities(this, aABB);
+            ArrayList<Entity> list2 = Lists.newArrayList();
             for (int i = 0; i < list.size(); ++i) {
                 Entity entity = list.get(i);
-                if (entity.removed) continue;
+                if (entity.getType() == EntityType.EXPERIENCE_ORB) {
+                    list2.add(entity);
+                    continue;
+                }
+                if (entity.isRemoved()) continue;
                 this.touch(entity);
+            }
+            if (!list2.isEmpty()) {
+                this.touch((Entity)Util.getRandom(list2, this.random));
             }
         }
         this.playShoulderEntityAmbientSound(this.getShoulderEntityLeft());
@@ -768,7 +778,7 @@ extends LivingEntity {
 
     @Override
     protected void hurtCurrentlyUsedShield(float f) {
-        if (this.useItem.getItem() != Items.SHIELD) {
+        if (!this.useItem.is(Items.SHIELD)) {
             return;
         }
         if (!this.level.isClientSide) {
@@ -1108,8 +1118,8 @@ extends LivingEntity {
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void remove(Entity.RemovalReason removalReason) {
+        super.remove(removalReason);
         this.inventoryMenu.removed(this);
         if (this.containerMenu != null) {
             this.containerMenu.removed(this);
@@ -1122,6 +1132,14 @@ extends LivingEntity {
 
     public GameProfile getGameProfile() {
         return this.gameProfile;
+    }
+
+    public Inventory getInventory() {
+        return this.inventory;
+    }
+
+    public Abilities getAbilities() {
+        return this.abilities;
     }
 
     public Either<BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
@@ -1349,7 +1367,7 @@ extends LivingEntity {
 
     public boolean tryToStartFallFlying() {
         ItemStack itemStack;
-        if (!(this.onGround || this.isFallFlying() || this.isInWater() || this.hasEffect(MobEffects.LEVITATION) || (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() != Items.ELYTRA || !ElytraItem.isFlyEnabled(itemStack))) {
+        if (!this.onGround && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION) && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
             this.startFallFlying();
             return true;
         }
@@ -1866,6 +1884,16 @@ extends LivingEntity {
         double m = this.getBoundingBox().getYsize() - 1.0;
         double e = this.isCrouching() ? -0.2 : 0.07;
         return this.getPosition(f).add(new Vec3(d, m, e).yRot(-h));
+    }
+
+    @Override
+    public boolean isAlwaysTicking() {
+        return true;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean isScoping() {
+        return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
     }
 
     public static enum BedSleepingProblem {

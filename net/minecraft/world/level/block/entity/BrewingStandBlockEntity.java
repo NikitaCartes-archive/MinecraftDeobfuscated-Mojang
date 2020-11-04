@@ -22,17 +22,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BrewingStandBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class BrewingStandBlockEntity
 extends BaseContainerBlockEntity
-implements WorldlyContainer,
-TickableBlockEntity {
+implements WorldlyContainer {
     private static final int[] SLOTS_FOR_UP = new int[]{3};
     private static final int[] SLOTS_FOR_DOWN = new int[]{0, 1, 2, 3};
     private static final int[] SLOTS_FOR_SIDES = new int[]{0, 1, 2, 4};
@@ -75,8 +74,8 @@ TickableBlockEntity {
         }
     };
 
-    public BrewingStandBlockEntity() {
-        super(BlockEntityType.BREWING_STAND);
+    public BrewingStandBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.BREWING_STAND, blockPos, blockState);
     }
 
     @Override
@@ -98,52 +97,48 @@ TickableBlockEntity {
         return true;
     }
 
-    @Override
-    public void tick() {
-        boolean[] bls;
-        ItemStack itemStack = this.items.get(4);
-        if (this.fuel <= 0 && itemStack.getItem() == Items.BLAZE_POWDER) {
-            this.fuel = 20;
+    public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, BrewingStandBlockEntity brewingStandBlockEntity) {
+        ItemStack itemStack = brewingStandBlockEntity.items.get(4);
+        if (brewingStandBlockEntity.fuel <= 0 && itemStack.is(Items.BLAZE_POWDER)) {
+            brewingStandBlockEntity.fuel = 20;
             itemStack.shrink(1);
-            this.setChanged();
+            BrewingStandBlockEntity.setChanged(level, blockPos, blockState);
         }
-        boolean bl = this.isBrewable();
-        boolean bl2 = this.brewTime > 0;
-        ItemStack itemStack2 = this.items.get(3);
+        boolean bl = BrewingStandBlockEntity.isBrewable(brewingStandBlockEntity.items);
+        boolean bl2 = brewingStandBlockEntity.brewTime > 0;
+        ItemStack itemStack2 = brewingStandBlockEntity.items.get(3);
         if (bl2) {
             boolean bl3;
-            --this.brewTime;
-            boolean bl4 = bl3 = this.brewTime == 0;
+            --brewingStandBlockEntity.brewTime;
+            boolean bl4 = bl3 = brewingStandBlockEntity.brewTime == 0;
             if (bl3 && bl) {
-                this.doBrew();
-                this.setChanged();
-            } else if (!bl) {
-                this.brewTime = 0;
-                this.setChanged();
-            } else if (this.ingredient != itemStack2.getItem()) {
-                this.brewTime = 0;
-                this.setChanged();
+                BrewingStandBlockEntity.doBrew(level, blockPos, brewingStandBlockEntity.items);
+                BrewingStandBlockEntity.setChanged(level, blockPos, blockState);
+            } else if (!bl || !itemStack2.is(brewingStandBlockEntity.ingredient)) {
+                brewingStandBlockEntity.brewTime = 0;
+                BrewingStandBlockEntity.setChanged(level, blockPos, blockState);
             }
-        } else if (bl && this.fuel > 0) {
-            --this.fuel;
-            this.brewTime = 400;
-            this.ingredient = itemStack2.getItem();
-            this.setChanged();
+        } else if (bl && brewingStandBlockEntity.fuel > 0) {
+            --brewingStandBlockEntity.fuel;
+            brewingStandBlockEntity.brewTime = 400;
+            brewingStandBlockEntity.ingredient = itemStack2.getItem();
+            BrewingStandBlockEntity.setChanged(level, blockPos, blockState);
         }
-        if (!this.level.isClientSide && !Arrays.equals(bls = this.getPotionBits(), this.lastPotionCount)) {
-            this.lastPotionCount = bls;
-            BlockState blockState = this.level.getBlockState(this.getBlockPos());
-            if (!(blockState.getBlock() instanceof BrewingStandBlock)) {
+        boolean[] bls = brewingStandBlockEntity.getPotionBits();
+        if (!Arrays.equals(bls, brewingStandBlockEntity.lastPotionCount)) {
+            brewingStandBlockEntity.lastPotionCount = bls;
+            BlockState blockState2 = blockState;
+            if (!(blockState2.getBlock() instanceof BrewingStandBlock)) {
                 return;
             }
             for (int i = 0; i < BrewingStandBlock.HAS_BOTTLE.length; ++i) {
-                blockState = (BlockState)blockState.setValue(BrewingStandBlock.HAS_BOTTLE[i], bls[i]);
+                blockState2 = (BlockState)blockState2.setValue(BrewingStandBlock.HAS_BOTTLE[i], bls[i]);
             }
-            this.level.setBlock(this.worldPosition, blockState, 2);
+            level.setBlock(blockPos, blockState2, 2);
         }
     }
 
-    public boolean[] getPotionBits() {
+    private boolean[] getPotionBits() {
         boolean[] bls = new boolean[3];
         for (int i = 0; i < 3; ++i) {
             if (this.items.get(i).isEmpty()) continue;
@@ -152,8 +147,8 @@ TickableBlockEntity {
         return bls;
     }
 
-    private boolean isBrewable() {
-        ItemStack itemStack = this.items.get(3);
+    private static boolean isBrewable(NonNullList<ItemStack> nonNullList) {
+        ItemStack itemStack = nonNullList.get(3);
         if (itemStack.isEmpty()) {
             return false;
         }
@@ -161,35 +156,34 @@ TickableBlockEntity {
             return false;
         }
         for (int i = 0; i < 3; ++i) {
-            ItemStack itemStack2 = this.items.get(i);
+            ItemStack itemStack2 = nonNullList.get(i);
             if (itemStack2.isEmpty() || !PotionBrewing.hasMix(itemStack2, itemStack)) continue;
             return true;
         }
         return false;
     }
 
-    private void doBrew() {
-        ItemStack itemStack = this.items.get(3);
+    private static void doBrew(Level level, BlockPos blockPos, NonNullList<ItemStack> nonNullList) {
+        ItemStack itemStack = nonNullList.get(3);
         for (int i = 0; i < 3; ++i) {
-            this.items.set(i, PotionBrewing.mix(itemStack, this.items.get(i)));
+            nonNullList.set(i, PotionBrewing.mix(itemStack, nonNullList.get(i)));
         }
         itemStack.shrink(1);
-        BlockPos blockPos = this.getBlockPos();
         if (itemStack.getItem().hasCraftingRemainingItem()) {
             ItemStack itemStack2 = new ItemStack(itemStack.getItem().getCraftingRemainingItem());
             if (itemStack.isEmpty()) {
                 itemStack = itemStack2;
-            } else if (!this.level.isClientSide) {
-                Containers.dropItemStack(this.level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
+            } else {
+                Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
             }
         }
-        this.items.set(3, itemStack);
-        this.level.levelEvent(1035, blockPos, 0);
+        nonNullList.set(3, itemStack);
+        level.levelEvent(1035, blockPos, 0);
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(compoundTag, this.items);
         this.brewTime = compoundTag.getShort("BrewTime");
@@ -243,11 +237,10 @@ TickableBlockEntity {
         if (i == 3) {
             return PotionBrewing.isIngredient(itemStack);
         }
-        Item item = itemStack.getItem();
         if (i == 4) {
-            return item == Items.BLAZE_POWDER;
+            return itemStack.is(Items.BLAZE_POWDER);
         }
-        return (item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION || item == Items.GLASS_BOTTLE) && this.getItem(i).isEmpty();
+        return (itemStack.is(Items.POTION) || itemStack.is(Items.SPLASH_POTION) || itemStack.is(Items.LINGERING_POTION) || itemStack.is(Items.GLASS_BOTTLE)) && this.getItem(i).isEmpty();
     }
 
     @Override
@@ -269,7 +262,7 @@ TickableBlockEntity {
     @Override
     public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
         if (i == 3) {
-            return itemStack.getItem() == Items.GLASS_BOTTLE;
+            return itemStack.is(Items.GLASS_BOTTLE);
         }
         return true;
     }

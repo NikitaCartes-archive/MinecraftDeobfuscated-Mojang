@@ -18,11 +18,10 @@ public interface ItemSteerable {
     public float getSteeringSpeed();
 
     default public boolean travel(Mob mob, ItemBasedSteering itemBasedSteering, Vec3 vec3) {
-        Entity entity;
         if (!mob.isAlive()) {
             return false;
         }
-        Entity entity2 = entity = mob.getPassengers().isEmpty() ? null : mob.getPassengers().get(0);
+        Entity entity = mob.getFirstPassenger();
         if (!(mob.isVehicle() && mob.canBeControlledByRider() && entity instanceof Player)) {
             mob.maxUpStep = 0.5f;
             mob.flyingSpeed = 0.02f;

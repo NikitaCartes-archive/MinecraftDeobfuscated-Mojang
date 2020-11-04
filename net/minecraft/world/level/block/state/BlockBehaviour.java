@@ -46,6 +46,9 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.SupportType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -139,7 +142,7 @@ public abstract class BlockBehaviour {
 
     @Deprecated
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (this.isEntityBlock() && !blockState.is(blockState2.getBlock())) {
+        if (blockState.hasBlockEntity() && !blockState.is(blockState2.getBlock())) {
             level.removeBlockEntity(blockPos);
         }
     }
@@ -200,7 +203,7 @@ public abstract class BlockBehaviour {
 
     @Deprecated
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-        return this.material.isReplaceable() && (blockPlaceContext.getItemInHand().isEmpty() || blockPlaceContext.getItemInHand().getItem() != this.asItem());
+        return this.material.isReplaceable() && (blockPlaceContext.getItemInHand().isEmpty() || !blockPlaceContext.getItemInHand().is(this.asItem()));
     }
 
     @Deprecated
@@ -325,10 +328,6 @@ public abstract class BlockBehaviour {
     @Deprecated
     public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
         return 0;
-    }
-
-    public final boolean isEntityBlock() {
-        return this instanceof EntityBlock;
     }
 
     public final ResourceLocation getLootTable() {
@@ -690,15 +689,27 @@ public abstract class BlockBehaviour {
         }
 
         public boolean is(Tag<Block> tag) {
-            return this.getBlock().is(tag);
+            return tag.contains(this.getBlock());
         }
 
         public boolean is(Tag<Block> tag, Predicate<BlockStateBase> predicate) {
-            return this.getBlock().is(tag) && predicate.test(this);
+            return this.is(tag) && predicate.test(this);
+        }
+
+        public boolean hasBlockEntity() {
+            return this.getBlock() instanceof EntityBlock;
+        }
+
+        @Nullable
+        public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockEntityType<T> blockEntityType) {
+            if (this.getBlock() instanceof EntityBlock) {
+                return ((EntityBlock)((Object)this.getBlock())).getTicker(level, this.asState(), blockEntityType);
+            }
+            return null;
         }
 
         public boolean is(Block block) {
-            return this.getBlock().is(block);
+            return this.getBlock() == block;
         }
 
         public FluidState getFluidState() {
@@ -973,6 +984,11 @@ public abstract class BlockBehaviour {
 
         public Properties requiresCorrectToolForDrops() {
             this.requiresCorrectToolForDrops = true;
+            return this;
+        }
+
+        public Properties color(MaterialColor materialColor) {
+            this.materialColor = blockState -> materialColor;
             return this;
         }
     }

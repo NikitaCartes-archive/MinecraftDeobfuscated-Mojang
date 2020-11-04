@@ -30,16 +30,11 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
     @Override
     protected int computeLevelFromNeighbor(long l, long m, int i) {
         boolean bl2;
-        VoxelShape voxelShape;
-        if (m == Long.MAX_VALUE) {
+        VoxelShape voxelShape2;
+        int t;
+        int s;
+        if (m == Long.MAX_VALUE || l == Long.MAX_VALUE) {
             return 15;
-        }
-        if (l == Long.MAX_VALUE) {
-            if (((SkyLightSectionStorage)this.storage).hasLightSource(m)) {
-                i = 0;
-            } else {
-                return 15;
-            }
         }
         if (i >= 15) {
             return i;
@@ -55,34 +50,18 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
         int o = BlockPos.getX(m);
         int p = BlockPos.getY(m);
         int q = BlockPos.getZ(m);
-        boolean bl = j == o && n == q;
         int r = Integer.signum(o - j);
-        int s = Integer.signum(p - k);
-        int t = Integer.signum(q - n);
-        Direction direction = l == Long.MAX_VALUE ? Direction.DOWN : Direction.fromNormal(r, s, t);
-        BlockState blockState2 = this.getStateAndOpacity(l, null);
-        if (direction != null) {
-            VoxelShape voxelShape2;
-            voxelShape = this.getShape(blockState2, l, direction);
-            if (Shapes.faceShapeOccludes(voxelShape, voxelShape2 = this.getShape(blockState, m, direction.getOpposite()))) {
-                return 15;
-            }
-        } else {
-            voxelShape = this.getShape(blockState2, l, Direction.DOWN);
-            if (Shapes.faceShapeOccludes(voxelShape, Shapes.empty())) {
-                return 15;
-            }
-            int u = bl ? -1 : 0;
-            Direction direction2 = Direction.fromNormal(r, u, t);
-            if (direction2 == null) {
-                return 15;
-            }
-            VoxelShape voxelShape3 = this.getShape(blockState, m, direction2.getOpposite());
-            if (Shapes.faceShapeOccludes(Shapes.empty(), voxelShape3)) {
-                return 15;
-            }
+        Direction direction = Direction.fromNormal(r, s = Integer.signum(p - k), t = Integer.signum(q - n));
+        if (direction == null) {
+            throw new IllegalStateException(String.format("Light was spread in illegal direction %d, %d, %d", r, s, t));
         }
-        boolean bl3 = bl2 = l == Long.MAX_VALUE || bl && k > p;
+        BlockState blockState2 = this.getStateAndOpacity(l, null);
+        VoxelShape voxelShape = this.getShape(blockState2, l, direction);
+        if (Shapes.faceShapeOccludes(voxelShape, voxelShape2 = this.getShape(blockState, m, direction.getOpposite()))) {
+            return 15;
+        }
+        boolean bl = j == o && n == q;
+        boolean bl3 = bl2 = bl && k > p;
         if (bl2 && i == 0 && mutableInt.getValue() == 0) {
             return 0;
         }
@@ -125,7 +104,8 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
                     continue block1;
                 }
                 if (!((SkyLightSectionStorage)this.storage).storingLightForSection(w)) continue;
-                this.checkNeighbor(l, v, i, bl);
+                long x = BlockPos.offset(l, 0, -u, 0);
+                this.checkNeighbor(x, v, i, bl);
             } while (++u <= o * 16);
         }
     }
@@ -133,46 +113,23 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
     @Override
     protected int getComputedLevel(long l, long m, int i) {
         int j = i;
-        if (Long.MAX_VALUE != m) {
-            int k = this.computeLevelFromNeighbor(Long.MAX_VALUE, l, 0);
-            if (j > k) {
-                j = k;
-            }
-            if (j == 0) {
-                return j;
-            }
-        }
         long n = SectionPos.blockToSection(l);
         DataLayer dataLayer = ((SkyLightSectionStorage)this.storage).getDataLayer(n, true);
         for (Direction direction : DIRECTIONS) {
-            int r;
+            int k;
             long o = BlockPos.offset(l, direction);
+            if (o == m) continue;
             long p = SectionPos.blockToSection(o);
             DataLayer dataLayer2 = n == p ? dataLayer : ((SkyLightSectionStorage)this.storage).getDataLayer(p, true);
             if (dataLayer2 != null) {
-                if (o == m) continue;
-                int q = this.computeLevelFromNeighbor(o, l, this.getLevel(dataLayer2, o));
-                if (j > q) {
-                    j = q;
-                }
-                if (j != 0) continue;
-                return j;
-            }
-            if (direction == Direction.DOWN) continue;
-            o = BlockPos.getFlatIndex(o);
-            while (!((SkyLightSectionStorage)this.storage).storingLightForSection(p) && !((SkyLightSectionStorage)this.storage).isAboveData(p)) {
-                p = SectionPos.offset(p, Direction.UP);
-                o = BlockPos.offset(o, 0, 16, 0);
-            }
-            DataLayer dataLayer3 = ((SkyLightSectionStorage)this.storage).getDataLayer(p, true);
-            if (o == m) continue;
-            if (dataLayer3 != null) {
-                r = this.computeLevelFromNeighbor(o, l, this.getLevel(dataLayer3, o));
+                k = this.getLevel(dataLayer2, o);
             } else {
-                int n2 = r = ((SkyLightSectionStorage)this.storage).lightOnInSection(p) ? 0 : 15;
+                if (direction == Direction.DOWN) continue;
+                k = 15 - ((SkyLightSectionStorage)this.storage).getLightValue(o, true);
             }
-            if (j > r) {
-                j = r;
+            int q = this.computeLevelFromNeighbor(o, l, k);
+            if (j > q) {
+                j = q;
             }
             if (j != 0) continue;
             return j;

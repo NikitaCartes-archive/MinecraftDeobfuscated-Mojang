@@ -210,7 +210,7 @@ public class OceanRuinPieces {
                 BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(m, o, n);
                 BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
                 FluidState fluidState = blockGetter.getFluidState(mutableBlockPos);
-                while ((blockState.isAir() || fluidState.is(FluidTags.WATER) || blockState.getBlock().is(BlockTags.ICE)) && o > 1) {
+                while ((blockState.isAir() || fluidState.is(FluidTags.WATER) || blockState.is(BlockTags.ICE)) && o > blockGetter.getMinBuildHeight() + 1) {
                     mutableBlockPos.set(m, --o, n);
                     blockState = blockGetter.getBlockState(mutableBlockPos);
                     fluidState = blockGetter.getFluidState(mutableBlockPos);

@@ -42,7 +42,7 @@ implements BiomeManager.NoiseBiomeSource {
             int j = is[i];
             Biome biome = idMap.byId(j);
             if (biome == null) {
-                LOGGER.warn("Received invalid biome id: " + j);
+                LOGGER.warn("Received invalid biome id: {}", (Object)j);
                 this.biomes[i] = idMap.byId(0);
                 continue;
             }

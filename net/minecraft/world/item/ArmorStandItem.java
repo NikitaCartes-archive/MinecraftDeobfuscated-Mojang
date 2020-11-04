@@ -50,11 +50,10 @@ extends Item {
             if (armorStand == null) {
                 return InteractionResult.FAIL;
             }
-            serverLevel.addFreshEntityWithPassengers(armorStand);
             float f = (float)Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0f) + 22.5f) / 45.0f) * 45.0f;
             armorStand.moveTo(armorStand.getX(), armorStand.getY(), armorStand.getZ(), f, 0.0f);
             this.randomizePose(armorStand, level.random);
-            level.addFreshEntity(armorStand);
+            serverLevel.addFreshEntityWithPassengers(armorStand);
             level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
         }
         itemStack.shrink(1);

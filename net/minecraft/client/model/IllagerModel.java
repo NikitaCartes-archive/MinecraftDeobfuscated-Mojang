@@ -3,15 +3,20 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HeadedModel;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,61 +24,49 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(value=EnvType.CLIENT)
 public class IllagerModel<T extends AbstractIllager>
-extends ListModel<T>
+extends HierarchicalModel<T>
 implements ArmedModel,
 HeadedModel {
+    private final ModelPart root;
     private final ModelPart head;
     private final ModelPart hat;
-    private final ModelPart body;
     private final ModelPart arms;
     private final ModelPart leftLeg;
     private final ModelPart rightLeg;
     private final ModelPart rightArm;
     private final ModelPart leftArm;
 
-    public IllagerModel(float f, float g, int i, int j) {
-        this.head = new ModelPart(this).setTexSize(i, j);
-        this.head.setPos(0.0f, 0.0f + g, 0.0f);
-        this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f);
-        this.hat = new ModelPart(this, 32, 0).setTexSize(i, j);
-        this.hat.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 12.0f, 8.0f, f + 0.45f);
-        this.head.addChild(this.hat);
+    public IllagerModel(ModelPart modelPart) {
+        this.root = modelPart;
+        this.head = modelPart.getChild("head");
+        this.hat = this.head.getChild("hat");
         this.hat.visible = false;
-        ModelPart modelPart = new ModelPart(this).setTexSize(i, j);
-        modelPart.setPos(0.0f, g - 2.0f, 0.0f);
-        modelPart.texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
-        this.head.addChild(modelPart);
-        this.body = new ModelPart(this).setTexSize(i, j);
-        this.body.setPos(0.0f, 0.0f + g, 0.0f);
-        this.body.texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f, f);
-        this.body.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, f + 0.5f);
-        this.arms = new ModelPart(this).setTexSize(i, j);
-        this.arms.setPos(0.0f, 0.0f + g + 2.0f, 0.0f);
-        this.arms.texOffs(44, 22).addBox(-8.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
-        ModelPart modelPart2 = new ModelPart(this, 44, 22).setTexSize(i, j);
-        modelPart2.mirror = true;
-        modelPart2.addBox(4.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
-        this.arms.addChild(modelPart2);
-        this.arms.texOffs(40, 38).addBox(-4.0f, 2.0f, -2.0f, 8.0f, 4.0f, 4.0f, f);
-        this.leftLeg = new ModelPart(this, 0, 22).setTexSize(i, j);
-        this.leftLeg.setPos(-2.0f, 12.0f + g, 0.0f);
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightLeg = new ModelPart(this, 0, 22).setTexSize(i, j);
-        this.rightLeg.mirror = true;
-        this.rightLeg.setPos(2.0f, 12.0f + g, 0.0f);
-        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightArm = new ModelPart(this, 40, 46).setTexSize(i, j);
-        this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightArm.setPos(-5.0f, 2.0f + g, 0.0f);
-        this.leftArm = new ModelPart(this, 40, 46).setTexSize(i, j);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftArm.setPos(5.0f, 2.0f + g, 0.0f);
+        this.arms = modelPart.getChild("arms");
+        this.leftLeg = modelPart.getChild("left_leg");
+        this.rightLeg = modelPart.getChild("right_leg");
+        this.leftArm = modelPart.getChild("left_arm");
+        this.rightArm = modelPart.getChild("right_arm");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f), PartPose.offset(0.0f, 0.0f, 0.0f));
+        partDefinition2.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 12.0f, 8.0f, new CubeDeformation(0.45f)), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2.0f, 4.0f, 2.0f), PartPose.offset(0.0f, -2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f).texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, new CubeDeformation(0.5f)), PartPose.offset(0.0f, 0.0f, 0.0f));
+        PartDefinition partDefinition3 = partDefinition.addOrReplaceChild("arms", CubeListBuilder.create().texOffs(44, 22).addBox(-8.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f).texOffs(40, 38).addBox(-4.0f, 2.0f, -2.0f, 8.0f, 4.0f, 4.0f), PartPose.offsetAndRotation(0.0f, 3.0f, -1.0f, -0.75f, 0.0f, 0.0f));
+        partDefinition3.addOrReplaceChild("left_shoulder", CubeListBuilder.create().texOffs(44, 22).mirror().addBox(4.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 22).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(-2.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 22).mirror().addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(2.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 46).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(-5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(40, 46).mirror().addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f), PartPose.offset(5.0f, 2.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.head, this.body, this.leftLeg, this.rightLeg, this.arms, this.rightArm, this.leftArm);
+    public ModelPart root() {
+        return this.root;
     }
 
     @Override
@@ -81,9 +74,6 @@ HeadedModel {
         boolean bl;
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
-        this.arms.y = 3.0f;
-        this.arms.z = -1.0f;
-        this.arms.xRot = -0.75f;
         if (this.riding) {
             this.rightArm.xRot = -0.62831855f;
             this.rightArm.yRot = 0.0f;
@@ -91,12 +81,12 @@ HeadedModel {
             this.leftArm.xRot = -0.62831855f;
             this.leftArm.yRot = 0.0f;
             this.leftArm.zRot = 0.0f;
-            this.leftLeg.xRot = -1.4137167f;
-            this.leftLeg.yRot = 0.31415927f;
-            this.leftLeg.zRot = 0.07853982f;
             this.rightLeg.xRot = -1.4137167f;
-            this.rightLeg.yRot = -0.31415927f;
-            this.rightLeg.zRot = -0.07853982f;
+            this.rightLeg.yRot = 0.31415927f;
+            this.rightLeg.zRot = 0.07853982f;
+            this.leftLeg.xRot = -1.4137167f;
+            this.leftLeg.yRot = -0.31415927f;
+            this.leftLeg.zRot = -0.07853982f;
         } else {
             this.rightArm.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 2.0f * g * 0.5f;
             this.rightArm.yRot = 0.0f;
@@ -104,12 +94,12 @@ HeadedModel {
             this.leftArm.xRot = Mth.cos(f * 0.6662f) * 2.0f * g * 0.5f;
             this.leftArm.yRot = 0.0f;
             this.leftArm.zRot = 0.0f;
-            this.leftLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g * 0.5f;
-            this.leftLeg.yRot = 0.0f;
-            this.leftLeg.zRot = 0.0f;
-            this.rightLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g * 0.5f;
+            this.rightLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g * 0.5f;
             this.rightLeg.yRot = 0.0f;
             this.rightLeg.zRot = 0.0f;
+            this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g * 0.5f;
+            this.leftLeg.yRot = 0.0f;
+            this.leftLeg.zRot = 0.0f;
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {

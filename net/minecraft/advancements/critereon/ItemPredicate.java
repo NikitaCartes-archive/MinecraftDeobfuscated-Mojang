@@ -72,10 +72,10 @@ public class ItemPredicate {
         if (this == ANY) {
             return true;
         }
-        if (this.tag != null && !this.tag.contains(itemStack.getItem())) {
+        if (this.tag != null && !itemStack.is(this.tag)) {
             return false;
         }
-        if (this.item != null && itemStack.getItem() != this.item) {
+        if (this.item != null && !itemStack.is(this.item)) {
             return false;
         }
         if (!this.count.matches(itemStack.getCount())) {

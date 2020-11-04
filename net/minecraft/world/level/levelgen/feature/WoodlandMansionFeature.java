@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -41,7 +42,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     @Override
     protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        Set<Biome> set = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32);
+        Set<Biome> set = biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 32);
         for (Biome biome2 : set) {
             if (biome2.getGenerationSettings().isValidStart(this)) continue;
             return false;
@@ -73,8 +74,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
             } else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
                 l = -5;
             }
-            int m = (i << 4) + 7;
-            int n = (j << 4) + 7;
+            int m = SectionPos.sectionToBlockCoord(i, 7);
+            int n = SectionPos.sectionToBlockCoord(j, 7);
             int o = chunkGenerator.getFirstOccupiedHeight(m, n, Heightmap.Types.WORLD_SURFACE_WG);
             int p = chunkGenerator.getFirstOccupiedHeight(m, n + l, Heightmap.Types.WORLD_SURFACE_WG);
             int q = chunkGenerator.getFirstOccupiedHeight(m + k, n, Heightmap.Types.WORLD_SURFACE_WG);
@@ -83,7 +84,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
             if (s < 60) {
                 return;
             }
-            BlockPos blockPos = new BlockPos(i * 16 + 8, s + 1, j * 16 + 8);
+            BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 8), s + 1, SectionPos.sectionToBlockCoord(j, 8));
             LinkedList<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.newLinkedList();
             WoodlandMansionPieces.generateMansion(structureManager, blockPos, rotation, list, this.random);
             this.pieces.addAll(list);

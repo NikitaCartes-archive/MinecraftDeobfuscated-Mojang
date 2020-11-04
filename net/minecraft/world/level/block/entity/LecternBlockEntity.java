@@ -5,6 +5,7 @@ package net.minecraft.world.level.block.entity;
 
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -19,7 +20,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.LecternMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
@@ -132,8 +132,8 @@ MenuProvider {
     private int page;
     private int pageCount;
 
-    public LecternBlockEntity() {
-        super(BlockEntityType.LECTERN);
+    public LecternBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.LECTERN, blockPos, blockState);
     }
 
     public ItemStack getBook() {
@@ -141,8 +141,7 @@ MenuProvider {
     }
 
     public boolean hasBook() {
-        Item item = this.book.getItem();
-        return item == Items.WRITABLE_BOOK || item == Items.WRITTEN_BOOK;
+        return this.book.is(Items.WRITABLE_BOOK) || this.book.is(Items.WRITTEN_BOOK);
     }
 
     public void setBook(ItemStack itemStack) {
@@ -181,7 +180,7 @@ MenuProvider {
     }
 
     private ItemStack resolveBook(ItemStack itemStack, @Nullable Player player) {
-        if (this.level instanceof ServerLevel && itemStack.getItem() == Items.WRITTEN_BOOK) {
+        if (this.level instanceof ServerLevel && itemStack.is(Items.WRITTEN_BOOK)) {
             WrittenBookItem.resolveBookComponents(itemStack, this.createCommandSourceStack(player), player);
         }
         return itemStack;
@@ -207,8 +206,8 @@ MenuProvider {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.book = compoundTag.contains("Book", 10) ? this.resolveBook(ItemStack.of(compoundTag.getCompound("Book")), null) : ItemStack.EMPTY;
         this.pageCount = WrittenBookItem.getPageCount(this.book);
         this.page = Mth.clamp(compoundTag.getInt("Page"), 0, this.pageCount - 1);

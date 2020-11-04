@@ -8,6 +8,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,13 +23,20 @@ import net.minecraft.world.phys.Vec3;
 public class ElytraModel<T extends LivingEntity>
 extends AgeableListModel<T> {
     private final ModelPart rightWing;
-    private final ModelPart leftWing = new ModelPart(this, 22, 0);
+    private final ModelPart leftWing;
 
-    public ElytraModel() {
-        this.leftWing.addBox(-10.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, 1.0f);
-        this.rightWing = new ModelPart(this, 22, 0);
-        this.rightWing.mirror = true;
-        this.rightWing.addBox(0.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, 1.0f);
+    public ElytraModel(ModelPart modelPart) {
+        this.leftWing = modelPart.getChild("left_wing");
+        this.rightWing = modelPart.getChild("right_wing");
+    }
+
+    public static LayerDefinition createLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        CubeDeformation cubeDeformation = new CubeDeformation(1.0f);
+        partDefinition.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(22, 0).addBox(-10.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, cubeDeformation), PartPose.offsetAndRotation(5.0f, 0.0f, 0.0f, 0.2617994f, 0.0f, -0.2617994f));
+        partDefinition.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(22, 0).mirror().addBox(0.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, cubeDeformation), PartPose.offsetAndRotation(-5.0f, 0.0f, 0.0f, 0.2617994f, 0.0f, 0.2617994f));
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -57,7 +70,6 @@ extends AgeableListModel<T> {
             m = 3.0f;
             n = 0.08726646f;
         }
-        this.leftWing.x = 5.0f;
         this.leftWing.y = m;
         if (livingEntity instanceof AbstractClientPlayer) {
             AbstractClientPlayer abstractClientPlayer = (AbstractClientPlayer)livingEntity;
@@ -72,7 +84,6 @@ extends AgeableListModel<T> {
             this.leftWing.zRot = l;
             this.leftWing.yRot = n;
         }
-        this.rightWing.x = -this.leftWing.x;
         this.rightWing.yRot = -this.leftWing.yRot;
         this.rightWing.y = this.leftWing.y;
         this.rightWing.xRot = this.leftWing.xRot;

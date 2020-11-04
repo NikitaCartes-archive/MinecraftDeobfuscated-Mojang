@@ -9,7 +9,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -17,51 +24,34 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 @Environment(value=EnvType.CLIENT)
 public class ArmorStandModel
 extends ArmorStandArmorModel {
-    private final ModelPart bodyStick1;
-    private final ModelPart bodyStick2;
+    private final ModelPart rightBodyStick;
+    private final ModelPart leftBodyStick;
     private final ModelPart shoulderStick;
     private final ModelPart basePlate;
 
-    public ArmorStandModel() {
-        this(0.0f);
+    public ArmorStandModel(ModelPart modelPart) {
+        super(modelPart);
+        this.rightBodyStick = modelPart.getChild("right_body_stick");
+        this.leftBodyStick = modelPart.getChild("left_body_stick");
+        this.shoulderStick = modelPart.getChild("shoulder_stick");
+        this.basePlate = modelPart.getChild("base_plate");
+        this.hat.visible = false;
     }
 
-    public ArmorStandModel(float f) {
-        super(f, 64, 64);
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-1.0f, -7.0f, -1.0f, 2.0f, 7.0f, 2.0f, f);
-        this.head.setPos(0.0f, 0.0f, 0.0f);
-        this.body = new ModelPart(this, 0, 26);
-        this.body.addBox(-6.0f, 0.0f, -1.5f, 12.0f, 3.0f, 3.0f, f);
-        this.body.setPos(0.0f, 0.0f, 0.0f);
-        this.rightArm = new ModelPart(this, 24, 0);
-        this.rightArm.addBox(-2.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-        this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
-        this.leftArm = new ModelPart(this, 32, 16);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(0.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
-        this.leftArm.setPos(5.0f, 2.0f, 0.0f);
-        this.rightLeg = new ModelPart(this, 8, 0);
-        this.rightLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f, f);
-        this.rightLeg.setPos(-1.9f, 12.0f, 0.0f);
-        this.leftLeg = new ModelPart(this, 40, 16);
-        this.leftLeg.mirror = true;
-        this.leftLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f, f);
-        this.leftLeg.setPos(1.9f, 12.0f, 0.0f);
-        this.bodyStick1 = new ModelPart(this, 16, 0);
-        this.bodyStick1.addBox(-3.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f, f);
-        this.bodyStick1.setPos(0.0f, 0.0f, 0.0f);
-        this.bodyStick1.visible = true;
-        this.bodyStick2 = new ModelPart(this, 48, 16);
-        this.bodyStick2.addBox(1.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f, f);
-        this.bodyStick2.setPos(0.0f, 0.0f, 0.0f);
-        this.shoulderStick = new ModelPart(this, 0, 48);
-        this.shoulderStick.addBox(-4.0f, 10.0f, -1.0f, 8.0f, 2.0f, 2.0f, f);
-        this.shoulderStick.setPos(0.0f, 0.0f, 0.0f);
-        this.basePlate = new ModelPart(this, 0, 32);
-        this.basePlate.addBox(-6.0f, 11.0f, -6.0f, 12.0f, 1.0f, 12.0f, f);
-        this.basePlate.setPos(0.0f, 12.0f, 0.0f);
-        this.hat.visible = false;
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0f, -7.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 26).addBox(-6.0f, 0.0f, -1.5f, 12.0f, 3.0f, 3.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(24, 0).addBox(-2.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(-5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 16).mirror().addBox(0.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(5.0f, 2.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(8, 0).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f), PartPose.offset(-1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f), PartPose.offset(1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_body_stick", CubeListBuilder.create().texOffs(16, 0).addBox(-3.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("left_body_stick", CubeListBuilder.create().texOffs(48, 16).addBox(1.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("shoulder_stick", CubeListBuilder.create().texOffs(0, 48).addBox(-4.0f, 10.0f, -1.0f, 8.0f, 2.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("base_plate", CubeListBuilder.create().texOffs(0, 32).addBox(-6.0f, 11.0f, -6.0f, 12.0f, 1.0f, 12.0f), PartPose.offset(0.0f, 12.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     @Override
@@ -77,14 +67,12 @@ extends ArmorStandArmorModel {
         this.leftArm.visible = armorStand.isShowArms();
         this.rightArm.visible = armorStand.isShowArms();
         this.basePlate.visible = !armorStand.isNoBasePlate();
-        this.leftLeg.setPos(1.9f, 12.0f, 0.0f);
-        this.rightLeg.setPos(-1.9f, 12.0f, 0.0f);
-        this.bodyStick1.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
-        this.bodyStick1.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
-        this.bodyStick1.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
-        this.bodyStick2.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
-        this.bodyStick2.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
-        this.bodyStick2.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
+        this.rightBodyStick.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
+        this.rightBodyStick.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
+        this.rightBodyStick.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
+        this.leftBodyStick.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
+        this.leftBodyStick.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
+        this.leftBodyStick.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
         this.shoulderStick.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
         this.shoulderStick.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
         this.shoulderStick.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
@@ -92,7 +80,7 @@ extends ArmorStandArmorModel {
 
     @Override
     protected Iterable<ModelPart> bodyParts() {
-        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.bodyStick1, this.bodyStick2, this.shoulderStick, this.basePlate));
+        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.rightBodyStick, this.leftBodyStick, this.shoulderStick, this.basePlate));
     }
 
     @Override

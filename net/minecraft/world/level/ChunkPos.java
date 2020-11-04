@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkPos {
@@ -21,8 +22,8 @@ public class ChunkPos {
     }
 
     public ChunkPos(BlockPos blockPos) {
-        this.x = blockPos.getX() >> 4;
-        this.z = blockPos.getZ() >> 4;
+        this.x = SectionPos.blockToSectionCoord(blockPos.getX());
+        this.z = SectionPos.blockToSectionCoord(blockPos.getZ());
     }
 
     public ChunkPos(long l) {
@@ -64,19 +65,19 @@ public class ChunkPos {
     }
 
     public int getMinBlockX() {
-        return this.x << 4;
+        return SectionPos.sectionToBlockCoord(this.x);
     }
 
     public int getMinBlockZ() {
-        return this.z << 4;
+        return SectionPos.sectionToBlockCoord(this.z);
     }
 
     public int getMaxBlockX() {
-        return (this.x << 4) + 15;
+        return SectionPos.sectionToBlockCoord(this.x, 15);
     }
 
     public int getMaxBlockZ() {
-        return (this.z << 4) + 15;
+        return SectionPos.sectionToBlockCoord(this.z, 15);
     }
 
     public int getRegionX() {

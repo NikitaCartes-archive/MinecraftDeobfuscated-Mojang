@@ -3,139 +3,53 @@
  */
 package net.minecraft.world.entity.ai.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class RandomPos {
-    @Nullable
-    public static Vec3 getPos(PathfinderMob pathfinderMob, int i, int j) {
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, null, true, 1.5707963705062866, pathfinderMob::getWalkTargetValue, false, 0, 0, true);
+    public static BlockPos generateRandomDirection(Random random, int i, int j) {
+        int k = random.nextInt(2 * i + 1) - i;
+        int l = random.nextInt(2 * j + 1) - j;
+        int m = random.nextInt(2 * i + 1) - i;
+        return new BlockPos(k, l, m);
     }
 
     @Nullable
-    public static Vec3 getAirPos(PathfinderMob pathfinderMob, int i, int j, int k, @Nullable Vec3 vec3, double d) {
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, k, vec3, true, d, pathfinderMob::getWalkTargetValue, true, 0, 0, false);
-    }
-
-    @Nullable
-    public static Vec3 getLandPos(PathfinderMob pathfinderMob, int i, int j) {
-        return RandomPos.getLandPos(pathfinderMob, i, j, pathfinderMob::getWalkTargetValue);
-    }
-
-    @Nullable
-    public static Vec3 getLandPos(PathfinderMob pathfinderMob, int i, int j, ToDoubleFunction<BlockPos> toDoubleFunction) {
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, null, false, 0.0, toDoubleFunction, true, 0, 0, true);
-    }
-
-    @Nullable
-    public static Vec3 getAboveLandPos(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3, float f, int k, int l) {
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec3, false, f, pathfinderMob::getWalkTargetValue, true, k, l, true);
-    }
-
-    @Nullable
-    public static Vec3 getLandPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-        Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, false, 1.5707963705062866, pathfinderMob::getWalkTargetValue, true, 0, 0, true);
-    }
-
-    @Nullable
-    public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-        Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, true, 1.5707963705062866, pathfinderMob::getWalkTargetValue, false, 0, 0, true);
-    }
-
-    @Nullable
-    public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3, double d) {
-        Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, true, d, pathfinderMob::getWalkTargetValue, false, 0, 0, true);
-    }
-
-    @Nullable
-    public static Vec3 getAirPosTowards(PathfinderMob pathfinderMob, int i, int j, int k, Vec3 vec3, double d) {
-        Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, k, vec32, false, d, pathfinderMob::getWalkTargetValue, true, 0, 0, false);
-    }
-
-    @Nullable
-    public static Vec3 getPosAvoid(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-        Vec3 vec32 = pathfinderMob.position().subtract(vec3);
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, true, 1.5707963705062866, pathfinderMob::getWalkTargetValue, false, 0, 0, true);
-    }
-
-    @Nullable
-    public static Vec3 getLandPosAvoid(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-        Vec3 vec32 = pathfinderMob.position().subtract(vec3);
-        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, false, 1.5707963705062866, pathfinderMob::getWalkTargetValue, true, 0, 0, true);
-    }
-
-    @Nullable
-    private static Vec3 generateRandomPos(PathfinderMob pathfinderMob, int i, int j, int k, @Nullable Vec3 vec3, boolean bl, double d, ToDoubleFunction<BlockPos> toDoubleFunction, boolean bl2, int l, int m, boolean bl3) {
-        PathNavigation pathNavigation = pathfinderMob.getNavigation();
-        Random random = pathfinderMob.getRandom();
-        boolean bl4 = pathfinderMob.hasRestriction() ? pathfinderMob.getRestrictCenter().closerThan(pathfinderMob.position(), (double)(pathfinderMob.getRestrictRadius() + (float)i) + 1.0) : false;
-        boolean bl5 = false;
-        double e = Double.NEGATIVE_INFINITY;
-        BlockPos blockPos2 = pathfinderMob.blockPosition();
-        for (int n = 0; n < 10; ++n) {
-            double f;
-            BlockPathTypes blockPathTypes;
-            BlockPos blockPos3;
-            BlockPos blockPos22 = RandomPos.getRandomDelta(random, i, j, k, vec3, d);
-            if (blockPos22 == null) continue;
-            int o = blockPos22.getX();
-            int p = blockPos22.getY();
-            int q = blockPos22.getZ();
-            if (pathfinderMob.hasRestriction() && i > 1) {
-                blockPos3 = pathfinderMob.getRestrictCenter();
-                o = pathfinderMob.getX() > (double)blockPos3.getX() ? (o -= random.nextInt(i / 2)) : (o += random.nextInt(i / 2));
-                q = pathfinderMob.getZ() > (double)blockPos3.getZ() ? (q -= random.nextInt(i / 2)) : (q += random.nextInt(i / 2));
-            }
-            if ((blockPos3 = new BlockPos((double)o + pathfinderMob.getX(), (double)p + pathfinderMob.getY(), (double)q + pathfinderMob.getZ())).getY() < 0 || blockPos3.getY() > pathfinderMob.level.getMaxBuildHeight() || bl4 && !pathfinderMob.isWithinRestriction(blockPos3) || bl3 && !pathNavigation.isStableDestination(blockPos3)) continue;
-            if (bl2) {
-                blockPos3 = RandomPos.moveUpToAboveSolid(blockPos3, random.nextInt(l + 1) + m, pathfinderMob.level.getMaxBuildHeight(), blockPos -> pathfinderMob.level.getBlockState((BlockPos)blockPos).getMaterial().isSolid());
-            }
-            if (!bl && pathfinderMob.level.getFluidState(blockPos3).is(FluidTags.WATER) || pathfinderMob.getPathfindingMalus(blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3.mutable())) != 0.0f || !((f = toDoubleFunction.applyAsDouble(blockPos3)) > e)) continue;
-            e = f;
-            blockPos2 = blockPos3;
-            bl5 = true;
-        }
-        if (bl5) {
-            return Vec3.atBottomCenterOf(blockPos2);
-        }
-        return null;
-    }
-
-    @Nullable
-    private static BlockPos getRandomDelta(Random random, int i, int j, int k, @Nullable Vec3 vec3, double d) {
-        if (vec3 == null || d >= Math.PI) {
-            int l = random.nextInt(2 * i + 1) - i;
-            int m = random.nextInt(2 * j + 1) - j + k;
-            int n = random.nextInt(2 * i + 1) - i;
-            return new BlockPos(l, m, n);
-        }
-        double e = Mth.atan2(vec3.z, vec3.x) - 1.5707963705062866;
-        double f = e + (double)(2.0f * random.nextFloat() - 1.0f) * d;
-        double g = Math.sqrt(random.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)i;
-        double h = -g * Math.sin(f);
-        double o = g * Math.cos(f);
-        if (Math.abs(h) > (double)i || Math.abs(o) > (double)i) {
+    public static BlockPos generateRandomDirectionWithinRadians(Random random, int i, int j, int k, double d, double e, double f) {
+        double g = Mth.atan2(e, d) - 1.5707963705062866;
+        double h = g + (double)(2.0f * random.nextFloat() - 1.0f) * f;
+        double l = Math.sqrt(random.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)i;
+        double m = -l * Math.sin(h);
+        double n = l * Math.cos(h);
+        if (Math.abs(m) > (double)i || Math.abs(n) > (double)i) {
             return null;
         }
-        int p = random.nextInt(2 * j + 1) - j + k;
-        return new BlockPos(h, (double)p, o);
+        int o = random.nextInt(2 * j + 1) - j + k;
+        return new BlockPos(m, (double)o, n);
     }
 
-    static BlockPos moveUpToAboveSolid(BlockPos blockPos, int i, int j, Predicate<BlockPos> predicate) {
+    @VisibleForTesting
+    public static BlockPos moveUpOutOfSolid(BlockPos blockPos, int i, Predicate<BlockPos> predicate) {
+        if (predicate.test(blockPos)) {
+            BlockPos blockPos2 = blockPos.above();
+            while (blockPos2.getY() < i && predicate.test(blockPos2)) {
+                blockPos2 = blockPos2.above();
+            }
+            return blockPos2;
+        }
+        return blockPos;
+    }
+
+    @VisibleForTesting
+    public static BlockPos moveUpToAboveSolid(BlockPos blockPos, int i, int j, Predicate<BlockPos> predicate) {
         if (i < 0) {
             throw new IllegalArgumentException("aboveSolidAmount was " + i + ", expected >= 0");
         }
@@ -152,6 +66,36 @@ public class RandomPos {
             return blockPos3;
         }
         return blockPos;
+    }
+
+    @Nullable
+    public static Vec3 generateRandomPos(PathfinderMob pathfinderMob, Supplier<BlockPos> supplier) {
+        return RandomPos.generateRandomPos(supplier, pathfinderMob::getWalkTargetValue);
+    }
+
+    @Nullable
+    public static Vec3 generateRandomPos(Supplier<BlockPos> supplier, ToDoubleFunction<BlockPos> toDoubleFunction) {
+        double d = Double.NEGATIVE_INFINITY;
+        BlockPos blockPos = null;
+        for (int i = 0; i < 10; ++i) {
+            double e;
+            BlockPos blockPos2 = supplier.get();
+            if (blockPos2 == null || !((e = toDoubleFunction.applyAsDouble(blockPos2)) > d)) continue;
+            d = e;
+            blockPos = blockPos2;
+        }
+        return blockPos != null ? Vec3.atBottomCenterOf(blockPos) : null;
+    }
+
+    public static BlockPos generateRandomPosTowardDirection(PathfinderMob pathfinderMob, int i, Random random, BlockPos blockPos) {
+        int j = blockPos.getX();
+        int k = blockPos.getZ();
+        if (pathfinderMob.hasRestriction() && i > 1) {
+            BlockPos blockPos2 = pathfinderMob.getRestrictCenter();
+            j = pathfinderMob.getX() > (double)blockPos2.getX() ? (j -= random.nextInt(i / 2)) : (j += random.nextInt(i / 2));
+            k = pathfinderMob.getZ() > (double)blockPos2.getZ() ? (k -= random.nextInt(i / 2)) : (k += random.nextInt(i / 2));
+        }
+        return new BlockPos((double)j + pathfinderMob.getX(), (double)blockPos.getY() + pathfinderMob.getY(), (double)k + pathfinderMob.getZ());
     }
 }
 

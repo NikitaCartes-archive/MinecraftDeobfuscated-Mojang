@@ -45,7 +45,7 @@ extends LootItemConditionalFunction {
     @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         Entity entity;
-        if (itemStack.getItem() == Items.PLAYER_HEAD && (entity = lootContext.getParamOrNull(this.entityTarget.getParam())) instanceof Player) {
+        if (itemStack.is(Items.PLAYER_HEAD) && (entity = lootContext.getParamOrNull(this.entityTarget.getParam())) instanceof Player) {
             GameProfile gameProfile = ((Player)entity).getGameProfile();
             itemStack.getOrCreateTag().put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
         }

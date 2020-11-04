@@ -7,6 +7,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.animal.Sheep;
 
 @Environment(value=EnvType.CLIENT)
@@ -14,14 +20,16 @@ public class SheepModel<T extends Sheep>
 extends QuadrupedModel<T> {
     private float headXRot;
 
-    public SheepModel() {
-        super(12, 0.0f, false, 8.0f, 4.0f, 2.0f, 2.0f, 24);
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-3.0f, -4.0f, -6.0f, 6.0f, 6.0f, 8.0f, 0.0f);
-        this.head.setPos(0.0f, 6.0f, -8.0f);
-        this.body = new ModelPart(this, 28, 8);
-        this.body.addBox(-4.0f, -10.0f, -7.0f, 8.0f, 16.0f, 6.0f, 0.0f);
-        this.body.setPos(0.0f, 5.0f, 2.0f);
+    public SheepModel(ModelPart modelPart) {
+        super(modelPart, false, 8.0f, 4.0f, 2.0f, 2.0f, 24);
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = QuadrupedModel.createBodyMesh(12, CubeDeformation.NONE);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -4.0f, -6.0f, 6.0f, 6.0f, 8.0f), PartPose.offset(0.0f, 6.0f, -8.0f));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(28, 8).addBox(-4.0f, -10.0f, -7.0f, 8.0f, 16.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 5.0f, 2.0f, 1.5707964f, 0.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override

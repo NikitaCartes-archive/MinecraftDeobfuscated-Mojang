@@ -56,18 +56,18 @@ extends Feature<NoneFeatureConfiguration> {
         StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
         StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
         ChunkPos chunkPos = new ChunkPos(blockPos);
-        BoundingBox boundingBox = new BoundingBox(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), 256, chunkPos.getMaxBlockZ());
+        BoundingBox boundingBox = new BoundingBox(chunkPos.getMinBlockX(), worldGenLevel.getMinBuildHeight(), chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), worldGenLevel.getMaxBuildHeight(), chunkPos.getMaxBlockZ());
         StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(random).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
         BlockPos blockPos2 = structureTemplate.getSize(rotation);
         int j = random.nextInt(16 - blockPos2.getX());
         int k = random.nextInt(16 - blockPos2.getZ());
-        int l = 256;
+        int l = worldGenLevel.getMaxBuildHeight();
         for (m = 0; m < blockPos2.getX(); ++m) {
             for (int n = 0; n < blockPos2.getZ(); ++n) {
                 l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
             }
         }
-        m = Math.max(l - 15 - random.nextInt(10), 10);
+        m = Math.max(l - worldGenLevel.getMinBuildHeight() - 15 - random.nextInt(10), 10);
         BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
         BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9f);
         structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);

@@ -36,7 +36,7 @@ extends AbstractTickableSoundInstance {
 
     @Override
     public void tick() {
-        if (this.entity.removed) {
+        if (this.entity.isRemoved()) {
             this.stop();
             return;
         }

@@ -34,7 +34,7 @@ extends ValueObject {
                 }
             }
         } catch (Exception exception) {
-            LOGGER.error("Could not parse BackupList: " + exception.getMessage());
+            LOGGER.error("Could not parse BackupList: {}", (Object)exception.getMessage());
         }
         return backupList;
     }

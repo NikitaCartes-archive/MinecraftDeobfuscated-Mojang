@@ -82,9 +82,9 @@ extends Item {
             if (player instanceof ServerPlayer) {
                 CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayer)player, blockPos);
             }
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
             level.levelEvent(null, 1003, player.blockPosition(), 0);
-            if (!player.abilities.instabuild) {
+            if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
             player.awardStat(Stats.ITEM_USED.get(this));

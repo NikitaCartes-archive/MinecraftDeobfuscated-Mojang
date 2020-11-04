@@ -26,14 +26,14 @@ extends CustomRecipe {
         for (int j = 0; j < craftingContainer.getContainerSize(); ++j) {
             ItemStack itemStack2 = craftingContainer.getItem(j);
             if (itemStack2.isEmpty()) continue;
-            if (itemStack2.getItem() == Items.FILLED_MAP) {
+            if (itemStack2.is(Items.FILLED_MAP)) {
                 if (!itemStack.isEmpty()) {
                     return false;
                 }
                 itemStack = itemStack2;
                 continue;
             }
-            if (itemStack2.getItem() == Items.MAP) {
+            if (itemStack2.is(Items.MAP)) {
                 ++i;
                 continue;
             }
@@ -49,14 +49,14 @@ extends CustomRecipe {
         for (int j = 0; j < craftingContainer.getContainerSize(); ++j) {
             ItemStack itemStack2 = craftingContainer.getItem(j);
             if (itemStack2.isEmpty()) continue;
-            if (itemStack2.getItem() == Items.FILLED_MAP) {
+            if (itemStack2.is(Items.FILLED_MAP)) {
                 if (!itemStack.isEmpty()) {
                     return ItemStack.EMPTY;
                 }
                 itemStack = itemStack2;
                 continue;
             }
-            if (itemStack2.getItem() == Items.MAP) {
+            if (itemStack2.is(Items.MAP)) {
                 ++i;
                 continue;
             }

@@ -21,11 +21,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EntitySelector {
+    private static final EntityTypeTest<Entity, ?> ANY_TYPE = new EntityTypeTest<Entity, Entity>(){
+
+        @Override
+        public Entity tryCast(Entity entity) {
+            return entity;
+        }
+
+        @Override
+        public Class<? extends Entity> getBaseClass() {
+            return Entity.class;
+        }
+    };
     private final int maxResults;
     private final boolean includesEntities;
     private final boolean worldLimited;
@@ -40,8 +53,7 @@ public class EntitySelector {
     private final String playerName;
     @Nullable
     private final UUID entityUUID;
-    @Nullable
-    private final EntityType<?> type;
+    private EntityTypeTest<Entity, ?> type;
     private final boolean usesSelector;
 
     public EntitySelector(int i, boolean bl, boolean bl2, Predicate<Entity> predicate, MinMaxBounds.Floats floats, Function<Vec3, Vec3> function, @Nullable AABB aABB, BiConsumer<Vec3, List<? extends Entity>> biConsumer, boolean bl3, @Nullable String string, @Nullable UUID uUID, @Nullable EntityType<?> entityType, boolean bl4) {
@@ -56,7 +68,7 @@ public class EntitySelector {
         this.currentEntity = bl3;
         this.playerName = string;
         this.entityUUID = uUID;
-        this.type = entityType;
+        this.type = entityType == null ? ANY_TYPE : entityType;
         this.usesSelector = bl4;
     }
 
@@ -177,7 +189,7 @@ public class EntitySelector {
             return Collections.emptyList();
         }
         if (this.isWorldLimited()) {
-            list = commandSourceStack.getLevel().getPlayers(predicate::test);
+            list = commandSourceStack.getLevel().getPlayers(predicate);
         } else {
             list = Lists.newArrayList();
             for (ServerPlayer serverPlayer3 : commandSourceStack.getServer().getPlayerList().getPlayers()) {

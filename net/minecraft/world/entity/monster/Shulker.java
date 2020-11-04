@@ -78,7 +78,7 @@ implements Enemy {
         this.goalSelector.addGoal(4, new ShulkerAttackGoal());
         this.goalSelector.addGoal(7, new ShulkerPeekGoal());
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, new Class[0]).setAlertOthers(new Class[0]));
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, this.getClass()).setAlertOthers(new Class[0]));
         this.targetSelector.addGoal(2, new ShulkerNearestAttackGoal(this));
         this.targetSelector.addGoal(3, new ShulkerDefenseAttackGoal(this));
     }
@@ -284,13 +284,14 @@ implements Enemy {
 
     protected boolean teleportSomewhere() {
         if (this.isNoAi() || !this.isAlive()) {
-            return true;
+            return false;
         }
         BlockPos blockPos = this.blockPosition();
         for (int i = 0; i < 5; ++i) {
             Direction direction;
             BlockPos blockPos2 = blockPos.offset(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));
-            if (blockPos2.getY() <= 0 || !this.level.isEmptyBlock(blockPos2) || !this.level.getWorldBorder().isWithinBounds(blockPos2) || !this.level.noCollision(this, new AABB(blockPos2)) || (direction = this.findAttachableFace(blockPos2)) == null) continue;
+            if (blockPos2.getY() <= this.level.getMinBuildHeight() || !this.level.isEmptyBlock(blockPos2) || !this.level.getWorldBorder().isWithinBounds(blockPos2) || !this.level.noCollision(this, new AABB(blockPos2)) || (direction = this.findAttachableFace(blockPos2)) == null) continue;
+            this.unRide();
             this.entityData.set(DATA_ATTACH_FACE_ID, direction);
             this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0f, 1.0f);
             this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos2));
@@ -340,6 +341,8 @@ implements Enemy {
         if (super.hurt(damageSource, f)) {
             if ((double)this.getHealth() < (double)this.getMaxHealth() * 0.5 && this.random.nextInt(4) == 0) {
                 this.teleportSomewhere();
+            } else if (damageSource.isProjectile() && (entity = damageSource.getDirectEntity()) != null && entity.getType() == EntityType.SHULKER_BULLET) {
+                this.hitByShulkerBullet();
             }
             return true;
         }
@@ -348,6 +351,26 @@ implements Enemy {
 
     private boolean isClosed() {
         return this.getRawPeekAmount() == 0;
+    }
+
+    private void hitByShulkerBullet() {
+        Vec3 vec3 = this.position();
+        AABB aABB = this.getBoundingBox();
+        if (this.isClosed() || !this.teleportSomewhere()) {
+            return;
+        }
+        int i = this.level.getEntities(EntityType.SHULKER, aABB.inflate(8.0), Entity::isAlive).size();
+        float f = (float)(i - 1) / 5.0f;
+        if (this.level.random.nextFloat() < f) {
+            return;
+        }
+        Shulker shulker = EntityType.SHULKER.create(this.level);
+        DyeColor dyeColor = this.getColor();
+        if (dyeColor != null) {
+            shulker.setColor(dyeColor);
+        }
+        shulker.moveTo(vec3);
+        this.level.addFreshEntity(shulker);
     }
 
     @Override
@@ -429,14 +452,17 @@ implements Enemy {
         return this.oldAttachPosition != null && this.getAttachPosition() != null;
     }
 
+    public void setColor(DyeColor dyeColor) {
+        this.entityData.set(DATA_COLOR_ID, (byte)dyeColor.getId());
+    }
+
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public DyeColor getColor() {
-        Byte byte_ = this.entityData.get(DATA_COLOR_ID);
-        if (byte_ == 16 || byte_ > 15) {
+        byte b = this.entityData.get(DATA_COLOR_ID);
+        if (b == 16 || b > 15) {
             return null;
         }
-        return DyeColor.byId(byte_.byteValue());
+        return DyeColor.byId(b);
     }
 
     static class ShulkerDefenseAttackGoal

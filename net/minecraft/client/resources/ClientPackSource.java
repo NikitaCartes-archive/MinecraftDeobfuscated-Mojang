@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.FolderPackResources;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
@@ -49,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ClientPackSource
 implements RepositorySource {
+    private static final PackMetadataSection BUILT_IN = new PackMetadataSection(new TranslatableComponent("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
     private final VanillaPackResources vanillaPack;
@@ -63,7 +65,7 @@ implements RepositorySource {
     public ClientPackSource(File file, AssetIndex assetIndex) {
         this.serverPackDir = file;
         this.assetIndex = assetIndex;
-        this.vanillaPack = new DefaultClientPackResources(assetIndex);
+        this.vanillaPack = new DefaultClientPackResources(BUILT_IN, assetIndex);
     }
 
     @Override
@@ -91,7 +93,7 @@ implements RepositorySource {
         map.put("X-Minecraft-UUID", Minecraft.getInstance().getUser().getUuid());
         map.put("X-Minecraft-Version", SharedConstants.getCurrentVersion().getName());
         map.put("X-Minecraft-Version-ID", SharedConstants.getCurrentVersion().getId());
-        map.put("X-Minecraft-Pack-Format", String.valueOf(SharedConstants.getCurrentVersion().getPackVersion()));
+        map.put("X-Minecraft-Pack-Format", String.valueOf(PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())));
         map.put("User-Agent", "Minecraft Java/" + SharedConstants.getCurrentVersion().getName());
         return map;
     }
@@ -202,7 +204,7 @@ implements RepositorySource {
             return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), iOException));
         }
         LOGGER.info("Applying server pack {}", (Object)file);
-        this.serverPack = new Pack("server", true, () -> new FilePackResources(file), new TranslatableComponent("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forFormat(packMetadataSection.getPackFormat()), Pack.Position.TOP, true, packSource);
+        this.serverPack = new Pack("server", true, () -> new FilePackResources(file), new TranslatableComponent("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES), Pack.Position.TOP, true, packSource);
         return Minecraft.getInstance().delayTextureReload();
     }
 

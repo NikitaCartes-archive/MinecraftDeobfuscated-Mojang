@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -33,7 +34,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
-            DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, i * 16, j * 16);
+            DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, SectionPos.sectionToBlockCoord(i), SectionPos.sectionToBlockCoord(j));
             this.pieces.add(desertPyramidPiece);
             this.calculateBoundingBox();
         }

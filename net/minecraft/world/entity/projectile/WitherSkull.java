@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -37,11 +35,6 @@ extends AbstractHurtingProjectile {
 
     public WitherSkull(Level level, LivingEntity livingEntity, double d, double e, double f) {
         super(EntityType.WITHER_SKULL, livingEntity, d, e, f, level);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public WitherSkull(Level level, double d, double e, double f, double g, double h, double i) {
-        super(EntityType.WITHER_SKULL, d, e, f, g, h, i, level);
     }
 
     @Override
@@ -103,7 +96,7 @@ extends AbstractHurtingProjectile {
         if (!this.level.isClientSide) {
             Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
             this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0f, false, blockInteraction);
-            this.remove();
+            this.discard();
         }
     }
 

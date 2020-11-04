@@ -3,7 +3,6 @@
  */
 package net.minecraft.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,10 +65,6 @@ extends AbstractCollection<T> {
             return Collections.emptyIterator();
         }
         return Iterators.unmodifiableIterator(this.allInstances.iterator());
-    }
-
-    public List<T> getAllInstances() {
-        return ImmutableList.copyOf(this.allInstances);
     }
 
     @Override

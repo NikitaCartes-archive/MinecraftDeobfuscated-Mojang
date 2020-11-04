@@ -9,9 +9,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,8 +84,8 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Nullable
-    public Entity getTarget(Level level) {
-        return level.getEntity(this.entityId);
+    public Entity getTarget(ServerLevel serverLevel) {
+        return serverLevel.getEntityOrPart(this.entityId);
     }
 
     public Action getAction() {

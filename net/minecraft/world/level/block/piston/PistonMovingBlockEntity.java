@@ -16,11 +16,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.piston.PistonMath;
@@ -34,8 +34,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PistonMovingBlockEntity
-extends BlockEntity
-implements TickableBlockEntity {
+extends BlockEntity {
     private BlockState movedState;
     private Direction direction;
     private boolean extending;
@@ -46,13 +45,13 @@ implements TickableBlockEntity {
     private long lastTicked;
     private int deathTicks;
 
-    public PistonMovingBlockEntity() {
-        super(BlockEntityType.PISTON);
+    public PistonMovingBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.PISTON, blockPos, blockState);
     }
 
-    public PistonMovingBlockEntity(BlockState blockState, Direction direction, boolean bl, boolean bl2) {
-        this();
-        this.movedState = blockState;
+    public PistonMovingBlockEntity(BlockPos blockPos, BlockState blockState, BlockState blockState2, Direction direction, boolean bl, boolean bl2) {
+        this(blockPos, blockState);
+        this.movedState = blockState2;
         this.direction = direction;
         this.extending = bl;
         this.isSourcePiston = bl2;
@@ -108,20 +107,20 @@ implements TickableBlockEntity {
         return this.movedState;
     }
 
-    private void moveCollidedEntities(float f) {
-        Direction direction = this.getMovementDirection();
-        double d = f - this.progress;
-        VoxelShape voxelShape = this.getCollisionRelatedBlockState().getCollisionShape(this.level, this.getBlockPos());
+    private static void moveCollidedEntities(Level level, BlockPos blockPos, float f, PistonMovingBlockEntity pistonMovingBlockEntity) {
+        Direction direction = pistonMovingBlockEntity.getMovementDirection();
+        double d = f - pistonMovingBlockEntity.progress;
+        VoxelShape voxelShape = pistonMovingBlockEntity.getCollisionRelatedBlockState().getCollisionShape(level, blockPos);
         if (voxelShape.isEmpty()) {
             return;
         }
-        AABB aABB = this.moveByPositionAndProgress(voxelShape.bounds());
-        List<Entity> list = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
+        AABB aABB = PistonMovingBlockEntity.moveByPositionAndProgress(blockPos, voxelShape.bounds(), pistonMovingBlockEntity);
+        List<Entity> list = level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
         if (list.isEmpty()) {
             return;
         }
         List<AABB> list2 = voxelShape.toAabbs();
-        boolean bl = this.movedState.is(Blocks.SLIME_BLOCK);
+        boolean bl = pistonMovingBlockEntity.movedState.is(Blocks.SLIME_BLOCK);
         for (Entity entity : list) {
             AABB aABB4;
             AABB aABB2;
@@ -150,13 +149,13 @@ implements TickableBlockEntity {
             }
             double i = 0.0;
             Iterator<AABB> iterator = list2.iterator();
-            while (!(!iterator.hasNext() || (aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2 = iterator.next()), direction, d)).intersects(aABB4 = entity.getBoundingBox()) && (i = Math.max(i, PistonMovingBlockEntity.getMovement(aABB3, direction, aABB4))) >= d)) {
+            while (!(!iterator.hasNext() || (aABB3 = PistonMath.getMovementArea(PistonMovingBlockEntity.moveByPositionAndProgress(blockPos, aABB2 = iterator.next(), pistonMovingBlockEntity), direction, d)).intersects(aABB4 = entity.getBoundingBox()) && (i = Math.max(i, PistonMovingBlockEntity.getMovement(aABB3, direction, aABB4))) >= d)) {
             }
             if (i <= 0.0) continue;
             i = Math.min(i, d) + 0.01;
             PistonMovingBlockEntity.moveEntityByPiston(direction, entity, i, direction);
-            if (this.extending || !this.isSourcePiston) continue;
-            this.fixEntityWithinPistonBase(entity, direction, d);
+            if (pistonMovingBlockEntity.extending || !pistonMovingBlockEntity.isSourcePiston) continue;
+            PistonMovingBlockEntity.fixEntityWithinPistonBase(blockPos, entity, direction, d);
         }
     }
 
@@ -166,18 +165,18 @@ implements TickableBlockEntity {
         NOCLIP.set(null);
     }
 
-    private void moveStuckEntities(float f) {
-        if (!this.isStickyForEntities()) {
+    private static void moveStuckEntities(Level level, BlockPos blockPos, float f, PistonMovingBlockEntity pistonMovingBlockEntity) {
+        if (!pistonMovingBlockEntity.isStickyForEntities()) {
             return;
         }
-        Direction direction = this.getMovementDirection();
+        Direction direction = pistonMovingBlockEntity.getMovementDirection();
         if (!direction.getAxis().isHorizontal()) {
             return;
         }
-        double d = this.movedState.getCollisionShape(this.level, this.worldPosition).max(Direction.Axis.Y);
-        AABB aABB = this.moveByPositionAndProgress(new AABB(0.0, d, 0.0, 1.0, 1.5000000999999998, 1.0));
-        double e = f - this.progress;
-        List<Entity> list = this.level.getEntities((Entity)null, aABB, entity -> PistonMovingBlockEntity.matchesStickyCritera(aABB, entity));
+        double d = pistonMovingBlockEntity.movedState.getCollisionShape(level, blockPos).max(Direction.Axis.Y);
+        AABB aABB = PistonMovingBlockEntity.moveByPositionAndProgress(blockPos, new AABB(0.0, d, 0.0, 1.0, 1.5000000999999998, 1.0), pistonMovingBlockEntity);
+        double e = f - pistonMovingBlockEntity.progress;
+        List<Entity> list = level.getEntities((Entity)null, aABB, entity -> PistonMovingBlockEntity.matchesStickyCritera(aABB, entity));
         for (Entity entity2 : list) {
             PistonMovingBlockEntity.moveEntityByPiston(direction, entity2, e, direction);
         }
@@ -217,18 +216,18 @@ implements TickableBlockEntity {
         return aABB2.maxZ - aABB.minZ;
     }
 
-    private AABB moveByPositionAndProgress(AABB aABB) {
-        double d = this.getExtendedProgress(this.progress);
-        return aABB.move((double)this.worldPosition.getX() + d * (double)this.direction.getStepX(), (double)this.worldPosition.getY() + d * (double)this.direction.getStepY(), (double)this.worldPosition.getZ() + d * (double)this.direction.getStepZ());
+    private static AABB moveByPositionAndProgress(BlockPos blockPos, AABB aABB, PistonMovingBlockEntity pistonMovingBlockEntity) {
+        double d = pistonMovingBlockEntity.getExtendedProgress(pistonMovingBlockEntity.progress);
+        return aABB.move((double)blockPos.getX() + d * (double)pistonMovingBlockEntity.direction.getStepX(), (double)blockPos.getY() + d * (double)pistonMovingBlockEntity.direction.getStepY(), (double)blockPos.getZ() + d * (double)pistonMovingBlockEntity.direction.getStepZ());
     }
 
-    private void fixEntityWithinPistonBase(Entity entity, Direction direction, double d) {
+    private static void fixEntityWithinPistonBase(BlockPos blockPos, Entity entity, Direction direction, double d) {
         double f;
         Direction direction2;
         double e;
         AABB aABB2;
         AABB aABB = entity.getBoundingBox();
-        if (aABB.intersects(aABB2 = Shapes.block().bounds().move(this.worldPosition)) && Math.abs((e = PistonMovingBlockEntity.getMovement(aABB2, direction2 = direction.getOpposite(), aABB) + 0.01) - (f = PistonMovingBlockEntity.getMovement(aABB2, direction2, aABB.intersect(aABB2)) + 0.01)) < 0.01) {
+        if (aABB.intersects(aABB2 = Shapes.block().bounds().move(blockPos)) && Math.abs((e = PistonMovingBlockEntity.getMovement(aABB2, direction2 = direction.getOpposite(), aABB) + 0.01) - (f = PistonMovingBlockEntity.getMovement(aABB2, direction2, aABB.intersect(aABB2)) + 0.01)) < 0.01) {
             e = Math.min(e, d) + 0.01;
             PistonMovingBlockEntity.moveEntityByPiston(direction, entity, e, direction2);
         }
@@ -251,44 +250,43 @@ implements TickableBlockEntity {
         }
     }
 
-    @Override
-    public void tick() {
-        this.lastTicked = this.level.getGameTime();
-        this.progressO = this.progress;
-        if (this.progressO >= 1.0f) {
-            if (this.level.isClientSide && this.deathTicks < 5) {
-                ++this.deathTicks;
+    public static void tick(Level level, BlockPos blockPos, BlockState blockState, PistonMovingBlockEntity pistonMovingBlockEntity) {
+        pistonMovingBlockEntity.lastTicked = level.getGameTime();
+        pistonMovingBlockEntity.progressO = pistonMovingBlockEntity.progress;
+        if (pistonMovingBlockEntity.progressO >= 1.0f) {
+            if (level.isClientSide && pistonMovingBlockEntity.deathTicks < 5) {
+                ++pistonMovingBlockEntity.deathTicks;
                 return;
             }
-            this.level.removeBlockEntity(this.worldPosition);
-            this.setRemoved();
-            if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
-                BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
-                if (blockState.isAir()) {
-                    this.level.setBlock(this.worldPosition, this.movedState, 84);
-                    Block.updateOrDestroy(this.movedState, blockState, this.level, this.worldPosition, 3);
+            level.removeBlockEntity(blockPos);
+            pistonMovingBlockEntity.setRemoved();
+            if (pistonMovingBlockEntity.movedState != null && level.getBlockState(blockPos).is(Blocks.MOVING_PISTON)) {
+                BlockState blockState2 = Block.updateFromNeighbourShapes(pistonMovingBlockEntity.movedState, level, blockPos);
+                if (blockState2.isAir()) {
+                    level.setBlock(blockPos, pistonMovingBlockEntity.movedState, 84);
+                    Block.updateOrDestroy(pistonMovingBlockEntity.movedState, blockState2, level, blockPos, 3);
                 } else {
-                    if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
-                        blockState = (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, false);
+                    if (blockState2.hasProperty(BlockStateProperties.WATERLOGGED) && blockState2.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
+                        blockState2 = (BlockState)blockState2.setValue(BlockStateProperties.WATERLOGGED, false);
                     }
-                    this.level.setBlock(this.worldPosition, blockState, 67);
-                    this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+                    level.setBlock(blockPos, blockState2, 67);
+                    level.neighborChanged(blockPos, blockState2.getBlock(), blockPos);
                 }
             }
             return;
         }
-        float f = this.progress + 0.5f;
-        this.moveCollidedEntities(f);
-        this.moveStuckEntities(f);
-        this.progress = f;
-        if (this.progress >= 1.0f) {
-            this.progress = 1.0f;
+        float f = pistonMovingBlockEntity.progress + 0.5f;
+        PistonMovingBlockEntity.moveCollidedEntities(level, blockPos, f, pistonMovingBlockEntity);
+        PistonMovingBlockEntity.moveStuckEntities(level, blockPos, f, pistonMovingBlockEntity);
+        pistonMovingBlockEntity.progress = f;
+        if (pistonMovingBlockEntity.progress >= 1.0f) {
+            pistonMovingBlockEntity.progress = 1.0f;
         }
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.movedState = NbtUtils.readBlockState(compoundTag.getCompound("blockState"));
         this.direction = Direction.from3DDataValue(compoundTag.getInt("facing"));
         this.progressO = this.progress = compoundTag.getFloat("progress");

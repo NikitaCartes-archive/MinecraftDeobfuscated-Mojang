@@ -21,10 +21,8 @@ import net.minecraft.client.resources.metadata.animation.VillagerMetaDataSection
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,8 +33,7 @@ import net.minecraft.world.entity.npc.VillagerType;
 
 @Environment(value=EnvType.CLIENT)
 public class VillagerProfessionLayer<T extends LivingEntity, M extends EntityModel<T>>
-extends RenderLayer<T, M>
-implements ResourceManagerReloadListener {
+extends RenderLayer<T, M> {
     private static final Int2ObjectMap<ResourceLocation> LEVEL_LOCATIONS = Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
         int2ObjectOpenHashMap.put(1, new ResourceLocation("stone"));
         int2ObjectOpenHashMap.put(2, new ResourceLocation("iron"));
@@ -46,14 +43,13 @@ implements ResourceManagerReloadListener {
     });
     private final Object2ObjectMap<VillagerType, VillagerMetaDataSection.Hat> typeHatCache = new Object2ObjectOpenHashMap<VillagerType, VillagerMetaDataSection.Hat>();
     private final Object2ObjectMap<VillagerProfession, VillagerMetaDataSection.Hat> professionHatCache = new Object2ObjectOpenHashMap<VillagerProfession, VillagerMetaDataSection.Hat>();
-    private final ReloadableResourceManager resourceManager;
+    private final ResourceManager resourceManager;
     private final String path;
 
-    public VillagerProfessionLayer(RenderLayerParent<T, M> renderLayerParent, ReloadableResourceManager reloadableResourceManager, String string) {
+    public VillagerProfessionLayer(RenderLayerParent<T, M> renderLayerParent, ResourceManager resourceManager, String string) {
         super(renderLayerParent);
-        this.resourceManager = reloadableResourceManager;
+        this.resourceManager = resourceManager;
         this.path = string;
-        reloadableResourceManager.registerReloadListener(this);
     }
 
     @Override
@@ -97,12 +93,6 @@ implements ResourceManagerReloadListener {
             }
             return VillagerMetaDataSection.Hat.NONE;
         });
-    }
-
-    @Override
-    public void onResourceManagerReload(ResourceManager resourceManager) {
-        this.professionHatCache.clear();
-        this.typeHatCache.clear();
     }
 }
 

@@ -9,21 +9,20 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class SkullBlockEntity
-extends BlockEntity
-implements TickableBlockEntity {
+extends BlockEntity {
     @Nullable
     private static GameProfileCache profileCache;
     @Nullable
@@ -33,8 +32,8 @@ implements TickableBlockEntity {
     private int mouthTickCount;
     private boolean isMovingMouth;
 
-    public SkullBlockEntity() {
-        super(BlockEntityType.SKULL);
+    public SkullBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.SKULL, blockPos, blockState);
     }
 
     public static void setProfileCache(GameProfileCache gameProfileCache) {
@@ -57,9 +56,9 @@ implements TickableBlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
+    public void load(CompoundTag compoundTag) {
         String string;
-        super.load(blockState, compoundTag);
+        super.load(compoundTag);
         if (compoundTag.contains("SkullOwner", 10)) {
             this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
         } else if (compoundTag.contains("ExtraType", 8) && !StringUtil.isNullOrEmpty(string = compoundTag.getString("ExtraType"))) {
@@ -67,16 +66,12 @@ implements TickableBlockEntity {
         }
     }
 
-    @Override
-    public void tick() {
-        BlockState blockState = this.getBlockState();
-        if (blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD)) {
-            if (this.level.hasNeighborSignal(this.worldPosition)) {
-                this.isMovingMouth = true;
-                ++this.mouthTickCount;
-            } else {
-                this.isMovingMouth = false;
-            }
+    public static void dragonHeadAnimation(Level level, BlockPos blockPos, BlockState blockState, SkullBlockEntity skullBlockEntity) {
+        if (level.hasNeighborSignal(blockPos)) {
+            skullBlockEntity.isMovingMouth = true;
+            ++skullBlockEntity.mouthTickCount;
+        } else {
+            skullBlockEntity.isMovingMouth = false;
         }
     }
 

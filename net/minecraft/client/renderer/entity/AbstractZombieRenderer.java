@@ -6,7 +6,7 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -18,8 +18,8 @@ public abstract class AbstractZombieRenderer<T extends Zombie, M extends ZombieM
 extends HumanoidMobRenderer<T, M> {
     private static final ResourceLocation ZOMBIE_LOCATION = new ResourceLocation("textures/entity/zombie/zombie.png");
 
-    protected AbstractZombieRenderer(EntityRenderDispatcher entityRenderDispatcher, M zombieModel, M zombieModel2, M zombieModel3) {
-        super(entityRenderDispatcher, zombieModel, 0.5f);
+    protected AbstractZombieRenderer(EntityRendererProvider.Context context, M zombieModel, M zombieModel2, M zombieModel3) {
+        super(context, zombieModel, 0.5f);
         this.addLayer(new HumanoidArmorLayer(this, zombieModel2, zombieModel3));
     }
 

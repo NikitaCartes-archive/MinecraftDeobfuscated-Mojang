@@ -61,7 +61,7 @@ extends Block {
         }
         if (RespawnAnchorBlock.isRespawnFuel(itemStack) && RespawnAnchorBlock.canBeCharged(blockState)) {
             RespawnAnchorBlock.charge(level, blockPos, blockState);
-            if (!player.abilities.instabuild) {
+            if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
@@ -85,7 +85,7 @@ extends Block {
     }
 
     private static boolean isRespawnFuel(ItemStack itemStack) {
-        return itemStack.getItem() == Items.GLOWSTONE;
+        return itemStack.is(Items.GLOWSTONE);
     }
 
     private static boolean canBeCharged(BlockState blockState) {

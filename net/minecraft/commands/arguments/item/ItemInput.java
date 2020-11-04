@@ -32,7 +32,7 @@ implements Predicate<ItemStack> {
 
     @Override
     public boolean test(ItemStack itemStack) {
-        return itemStack.getItem() == this.item && NbtUtils.compareNbt(this.tag, itemStack.getTag(), true);
+        return itemStack.is(this.item) && NbtUtils.compareNbt(this.tag, itemStack.getTag(), true);
     }
 
     public ItemStack createItemStack(int i, boolean bl) throws CommandSyntaxException {

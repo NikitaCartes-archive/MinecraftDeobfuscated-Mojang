@@ -18,7 +18,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -41,12 +41,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class SpawnEggItem
 extends Item {
-    private static final Map<EntityType<?>, SpawnEggItem> BY_ID = Maps.newIdentityHashMap();
+    private static final Map<EntityType<? extends Mob>, SpawnEggItem> BY_ID = Maps.newIdentityHashMap();
     private final int color1;
     private final int color2;
     private final EntityType<?> defaultType;
 
-    public SpawnEggItem(EntityType<?> entityType, int i, int j, Item.Properties properties) {
+    public SpawnEggItem(EntityType<? extends Mob> entityType, int i, int j, Item.Properties properties) {
         super(properties);
         this.defaultType = entityType;
         this.color1 = i;
@@ -104,7 +104,7 @@ extends Item {
         if (entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -142,7 +142,7 @@ extends Item {
         if (!this.spawnsEntity(itemStack.getTag(), entityType)) {
             return Optional.empty();
         }
-        Mob mob2 = mob instanceof AgableMob ? ((AgableMob)mob).getBreedOffspring(serverLevel, (AgableMob)mob) : entityType.create(serverLevel);
+        Mob mob2 = mob instanceof AgeableMob ? ((AgeableMob)mob).getBreedOffspring(serverLevel, (AgeableMob)mob) : entityType.create(serverLevel);
         if (mob2 == null) {
             return Optional.empty();
         }
@@ -155,7 +155,7 @@ extends Item {
         if (itemStack.hasCustomHoverName()) {
             mob2.setCustomName(itemStack.getHoverName());
         }
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         return Optional.of(mob2);

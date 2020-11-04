@@ -55,8 +55,8 @@ extends BlockEntity {
     private float integrity = 1.0f;
     private long seed;
 
-    public StructureBlockEntity() {
-        super(BlockEntityType.STRUCTURE_BLOCK);
+    public StructureBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.STRUCTURE_BLOCK, blockPos, blockState);
     }
 
     @Override
@@ -90,8 +90,8 @@ extends BlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.setStructureName(compoundTag.getString("name"));
         this.author = compoundTag.getString("author");
         this.metaData = compoundTag.getString("metadata");
@@ -294,7 +294,7 @@ extends BlockEntity {
         BlockPos blockPos = this.getBlockPos();
         int i = 80;
         BlockPos blockPos2 = new BlockPos(blockPos.getX() - 80, 0, blockPos.getZ() - 80);
-        List<StructureBlockEntity> list = this.getNearbyCornerBlocks(blockPos2, blockPos3 = new BlockPos(blockPos.getX() + 80, 255, blockPos.getZ() + 80));
+        List<StructureBlockEntity> list = this.getNearbyCornerBlocks(blockPos2, blockPos3 = new BlockPos(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80));
         List<StructureBlockEntity> list2 = this.filterRelatedCornerBlocks(list);
         if (list2.size() < 1) {
             return false;

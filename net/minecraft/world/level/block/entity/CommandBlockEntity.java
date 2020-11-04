@@ -58,8 +58,8 @@ extends BlockEntity {
         }
     };
 
-    public CommandBlockEntity() {
-        super(BlockEntityType.COMMAND_BLOCK);
+    public CommandBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.COMMAND_BLOCK, blockPos, blockState);
     }
 
     @Override
@@ -73,8 +73,8 @@ extends BlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         this.commandBlock.load(compoundTag);
         this.powered = compoundTag.getBoolean("powered");
         this.conditionMet = compoundTag.getBoolean("conditionMet");
@@ -178,12 +178,6 @@ extends BlockEntity {
             return blockState.getValue(CommandBlock.CONDITIONAL);
         }
         return false;
-    }
-
-    @Override
-    public void clearRemoved() {
-        this.clearCache();
-        super.clearRemoved();
     }
 
     public static enum Mode {

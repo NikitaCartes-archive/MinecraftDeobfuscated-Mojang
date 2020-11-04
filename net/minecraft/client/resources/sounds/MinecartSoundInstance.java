@@ -41,7 +41,7 @@ extends AbstractTickableSoundInstance {
 
     @Override
     public void tick() {
-        if (this.minecart.removed) {
+        if (this.minecart.isRemoved()) {
             this.stop();
             return;
         }

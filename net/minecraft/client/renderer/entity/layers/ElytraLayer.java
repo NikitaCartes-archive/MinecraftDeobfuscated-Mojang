@@ -9,6 +9,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -27,17 +29,18 @@ import net.minecraft.world.item.Items;
 public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>>
 extends RenderLayer<T, M> {
     private static final ResourceLocation WINGS_LOCATION = new ResourceLocation("textures/entity/elytra.png");
-    private final ElytraModel<T> elytraModel = new ElytraModel();
+    private final ElytraModel<T> elytraModel;
 
-    public ElytraLayer(RenderLayerParent<T, M> renderLayerParent) {
+    public ElytraLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
+        this.elytraModel = new ElytraModel(entityModelSet.getLayer(ModelLayers.ELYTRA));
     }
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         AbstractClientPlayer abstractClientPlayer;
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.CHEST);
-        if (itemStack.getItem() != Items.ELYTRA) {
+        if (!itemStack.is(Items.ELYTRA)) {
             return;
         }
         ResourceLocation resourceLocation = livingEntity instanceof AbstractClientPlayer ? ((abstractClientPlayer = (AbstractClientPlayer)livingEntity).isElytraLoaded() && abstractClientPlayer.getElytraTextureLocation() != null ? abstractClientPlayer.getElytraTextureLocation() : (abstractClientPlayer.isCapeLoaded() && abstractClientPlayer.getCloakTextureLocation() != null && abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE) ? abstractClientPlayer.getCloakTextureLocation() : WINGS_LOCATION)) : WINGS_LOCATION;

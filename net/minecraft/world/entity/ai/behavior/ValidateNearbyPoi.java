@@ -53,7 +53,7 @@ extends Behavior<LivingEntity> {
 
     private boolean bedIsOccupied(ServerLevel serverLevel, BlockPos blockPos, LivingEntity livingEntity) {
         BlockState blockState = serverLevel.getBlockState(blockPos);
-        return blockState.getBlock().is(BlockTags.BEDS) && blockState.getValue(BedBlock.OCCUPIED) != false && !livingEntity.isSleeping();
+        return blockState.is(BlockTags.BEDS) && blockState.getValue(BedBlock.OCCUPIED) != false && !livingEntity.isSleeping();
     }
 
     private boolean poiDoesntExist(ServerLevel serverLevel, BlockPos blockPos) {

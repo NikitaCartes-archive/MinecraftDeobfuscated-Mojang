@@ -106,7 +106,7 @@ extends Behavior<Villager> {
         int i = simpleContainer.getContainerSize();
         for (int j = 0; j < i; ++j) {
             ItemStack itemStack2 = simpleContainer.getItem(j);
-            if (itemStack2.getItem() != Items.BONE_MEAL) continue;
+            if (!itemStack2.is(Items.BONE_MEAL)) continue;
             itemStack = itemStack2;
             break;
         }

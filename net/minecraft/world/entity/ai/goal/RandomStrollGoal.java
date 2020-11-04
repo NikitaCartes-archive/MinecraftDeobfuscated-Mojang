@@ -6,7 +6,7 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ extends Goal {
     protected final double speedModifier;
     protected int interval;
     protected boolean forceTrigger;
-    private boolean checkNoActionTime;
+    private final boolean checkNoActionTime;
 
     public RandomStrollGoal(PathfinderMob pathfinderMob, double d) {
         this(pathfinderMob, d, 120);
@@ -63,7 +63,7 @@ extends Goal {
 
     @Nullable
     protected Vec3 getPosition() {
-        return RandomPos.getPos(this.mob, 10, 7);
+        return DefaultRandomPos.getPos(this.mob, 10, 7);
     }
 
     @Override

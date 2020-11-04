@@ -78,7 +78,7 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
                         profilerFiller.pop();
                     } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Invalid sounds.json in resourcepack: '{}'", (Object)resource.getSourceName(), (Object)runtimeException);
+                        LOGGER.warn("Invalid {} in resourcepack: '{}'", (Object)"sounds.json", (Object)resource.getSourceName(), (Object)runtimeException);
                     }
                     profilerFiller.pop();
                 }

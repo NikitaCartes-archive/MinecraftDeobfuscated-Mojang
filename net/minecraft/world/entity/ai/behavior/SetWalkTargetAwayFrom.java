@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class SetWalkTargetAwayFrom<T>
@@ -71,7 +71,7 @@ extends Behavior<PathfinderMob> {
 
     private static void moveAwayFrom(PathfinderMob pathfinderMob, Vec3 vec3, float f) {
         for (int i = 0; i < 10; ++i) {
-            Vec3 vec32 = RandomPos.getLandPosAvoid(pathfinderMob, 16, 7, vec3);
+            Vec3 vec32 = LandRandomPos.getPosAway(pathfinderMob, 16, 7, vec3);
             if (vec32 == null) continue;
             pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec32, f, 0));
             return;

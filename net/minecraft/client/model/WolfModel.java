@@ -8,6 +8,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ColorableAgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Wolf;
@@ -18,48 +23,43 @@ extends ColorableAgeableListModel<T> {
     private final ModelPart head;
     private final ModelPart realHead;
     private final ModelPart body;
-    private final ModelPart leg0;
-    private final ModelPart leg1;
-    private final ModelPart leg2;
-    private final ModelPart leg3;
+    private final ModelPart rightHindLeg;
+    private final ModelPart leftHindLeg;
+    private final ModelPart rightFrontLeg;
+    private final ModelPart leftFrontLeg;
     private final ModelPart tail;
     private final ModelPart realTail;
     private final ModelPart upperBody;
 
-    public WolfModel() {
-        float f = 0.0f;
-        float g = 13.5f;
-        this.head = new ModelPart(this, 0, 0);
-        this.head.setPos(-1.0f, 13.5f, -7.0f);
-        this.realHead = new ModelPart(this, 0, 0);
-        this.realHead.addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f, 0.0f);
-        this.head.addChild(this.realHead);
-        this.body = new ModelPart(this, 18, 14);
-        this.body.addBox(-3.0f, -2.0f, -3.0f, 6.0f, 9.0f, 6.0f, 0.0f);
-        this.body.setPos(0.0f, 14.0f, 2.0f);
-        this.upperBody = new ModelPart(this, 21, 0);
-        this.upperBody.addBox(-3.0f, -3.0f, -3.0f, 8.0f, 6.0f, 7.0f, 0.0f);
-        this.upperBody.setPos(-1.0f, 14.0f, 2.0f);
-        this.leg0 = new ModelPart(this, 0, 18);
-        this.leg0.addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f, 0.0f);
-        this.leg0.setPos(-2.5f, 16.0f, 7.0f);
-        this.leg1 = new ModelPart(this, 0, 18);
-        this.leg1.addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f, 0.0f);
-        this.leg1.setPos(0.5f, 16.0f, 7.0f);
-        this.leg2 = new ModelPart(this, 0, 18);
-        this.leg2.addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f, 0.0f);
-        this.leg2.setPos(-2.5f, 16.0f, -4.0f);
-        this.leg3 = new ModelPart(this, 0, 18);
-        this.leg3.addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f, 0.0f);
-        this.leg3.setPos(0.5f, 16.0f, -4.0f);
-        this.tail = new ModelPart(this, 9, 18);
-        this.tail.setPos(-1.0f, 12.0f, 8.0f);
-        this.realTail = new ModelPart(this, 9, 18);
-        this.realTail.addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f, 0.0f);
-        this.tail.addChild(this.realTail);
-        this.realHead.texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f, 0.0f);
-        this.realHead.texOffs(16, 14).addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f, 0.0f);
-        this.realHead.texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f, 0.0f);
+    public WolfModel(ModelPart modelPart) {
+        this.head = modelPart.getChild("head");
+        this.realHead = this.head.getChild("real_head");
+        this.body = modelPart.getChild("body");
+        this.upperBody = modelPart.getChild("upper_body");
+        this.rightHindLeg = modelPart.getChild("right_hind_leg");
+        this.leftHindLeg = modelPart.getChild("left_hind_leg");
+        this.rightFrontLeg = modelPart.getChild("right_front_leg");
+        this.leftFrontLeg = modelPart.getChild("left_front_leg");
+        this.tail = modelPart.getChild("tail");
+        this.realTail = this.tail.getChild("real_tail");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        float f = 13.5f;
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(-1.0f, 13.5f, -7.0f));
+        partDefinition2.addOrReplaceChild("real_head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f).texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(16, 14).addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(18, 14).addBox(-3.0f, -2.0f, -3.0f, 6.0f, 9.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 14.0f, 2.0f, 1.5707964f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild("upper_body", CubeListBuilder.create().texOffs(21, 0).addBox(-3.0f, -3.0f, -3.0f, 8.0f, 6.0f, 7.0f), PartPose.offsetAndRotation(-1.0f, 14.0f, -3.0f, 1.5707964f, 0.0f, 0.0f));
+        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f);
+        partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, 7.0f));
+        partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, 7.0f));
+        partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, -4.0f));
+        partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, -4.0f));
+        PartDefinition partDefinition3 = partDefinition.addOrReplaceChild("tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0f, 12.0f, 8.0f, 0.62831855f, 0.0f, 0.0f));
+        partDefinition3.addOrReplaceChild("real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -69,7 +69,7 @@ extends ColorableAgeableListModel<T> {
 
     @Override
     protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.tail, this.upperBody);
+        return ImmutableList.of(this.body, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.upperBody);
     }
 
     @Override
@@ -82,28 +82,28 @@ extends ColorableAgeableListModel<T> {
             this.body.setPos(0.0f, 18.0f, 0.0f);
             this.body.xRot = 0.7853982f;
             this.tail.setPos(-1.0f, 21.0f, 6.0f);
-            this.leg0.setPos(-2.5f, 22.7f, 2.0f);
-            this.leg0.xRot = 4.712389f;
-            this.leg1.setPos(0.5f, 22.7f, 2.0f);
-            this.leg1.xRot = 4.712389f;
-            this.leg2.xRot = 5.811947f;
-            this.leg2.setPos(-2.49f, 17.0f, -4.0f);
-            this.leg3.xRot = 5.811947f;
-            this.leg3.setPos(0.51f, 17.0f, -4.0f);
+            this.rightHindLeg.setPos(-2.5f, 22.7f, 2.0f);
+            this.rightHindLeg.xRot = 4.712389f;
+            this.leftHindLeg.setPos(0.5f, 22.7f, 2.0f);
+            this.leftHindLeg.xRot = 4.712389f;
+            this.rightFrontLeg.xRot = 5.811947f;
+            this.rightFrontLeg.setPos(-2.49f, 17.0f, -4.0f);
+            this.leftFrontLeg.xRot = 5.811947f;
+            this.leftFrontLeg.setPos(0.51f, 17.0f, -4.0f);
         } else {
             this.body.setPos(0.0f, 14.0f, 2.0f);
             this.body.xRot = 1.5707964f;
             this.upperBody.setPos(-1.0f, 14.0f, -3.0f);
             this.upperBody.xRot = this.body.xRot;
             this.tail.setPos(-1.0f, 12.0f, 8.0f);
-            this.leg0.setPos(-2.5f, 16.0f, 7.0f);
-            this.leg1.setPos(0.5f, 16.0f, 7.0f);
-            this.leg2.setPos(-2.5f, 16.0f, -4.0f);
-            this.leg3.setPos(0.5f, 16.0f, -4.0f);
-            this.leg0.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
-            this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
-            this.leg2.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
-            this.leg3.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+            this.rightHindLeg.setPos(-2.5f, 16.0f, 7.0f);
+            this.leftHindLeg.setPos(0.5f, 16.0f, 7.0f);
+            this.rightFrontLeg.setPos(-2.5f, 16.0f, -4.0f);
+            this.leftFrontLeg.setPos(0.5f, 16.0f, -4.0f);
+            this.rightHindLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+            this.leftHindLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+            this.rightFrontLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+            this.leftFrontLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
         }
         this.realHead.zRot = ((Wolf)wolf).getHeadRollAngle(h) + ((Wolf)wolf).getBodyRollAngle(h, 0.0f);
         this.upperBody.zRot = ((Wolf)wolf).getBodyRollAngle(h, -0.08f);

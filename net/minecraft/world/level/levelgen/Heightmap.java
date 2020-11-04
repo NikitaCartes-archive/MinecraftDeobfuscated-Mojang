@@ -25,13 +25,15 @@ import org.jetbrains.annotations.Nullable;
 public class Heightmap {
     private static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
     private static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
-    private final BitStorage data = new BitStorage(9, 256);
+    private final BitStorage data;
     private final Predicate<BlockState> isOpaque;
     private final ChunkAccess chunk;
 
     public Heightmap(ChunkAccess chunkAccess, Types types) {
         this.isOpaque = types.isOpaque();
         this.chunk = chunkAccess;
+        int i = (int)Math.ceil(Math.log(chunkAccess.getHeight() + 1) / Math.log(2.0));
+        this.data = new BitStorage(i, 256);
     }
 
     public static void primeHeightmaps(ChunkAccess chunkAccess, Set<Types> set) {
@@ -45,7 +47,7 @@ public class Heightmap {
                 for (Types types : set) {
                     objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
                 }
-                for (int m = j - 1; m >= 0; --m) {
+                for (int m = j - 1; m >= chunkAccess.getMinBuildHeight(); --m) {
                     mutableBlockPos.set(k, m, l);
                     BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
                     if (blockState.is(Blocks.AIR)) continue;
@@ -74,13 +76,13 @@ public class Heightmap {
             }
         } else if (l - 1 == j) {
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            for (int m = j - 1; m >= 0; --m) {
+            for (int m = j - 1; m >= this.chunk.getMinBuildHeight(); --m) {
                 mutableBlockPos.set(i, m, k);
                 if (!this.isOpaque.test(this.chunk.getBlockState(mutableBlockPos))) continue;
                 this.setHeight(i, k, m + 1);
                 return true;
             }
-            this.setHeight(i, k, 0);
+            this.setHeight(i, k, this.chunk.getMinBuildHeight());
             return true;
         }
         return false;
@@ -91,11 +93,11 @@ public class Heightmap {
     }
 
     private int getFirstAvailable(int i) {
-        return this.data.get(i);
+        return this.data.get(i) + this.chunk.getMinBuildHeight();
     }
 
     private void setHeight(int i, int j, int k) {
-        this.data.set(Heightmap.getIndex(i, j), k);
+        this.data.set(Heightmap.getIndex(i, j), k - this.chunk.getMinBuildHeight());
     }
 
     public void setRawData(long[] ls) {

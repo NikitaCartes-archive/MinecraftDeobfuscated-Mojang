@@ -24,6 +24,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DataResult;
@@ -102,12 +103,12 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -115,6 +116,7 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.GpuWarnlistManager;
@@ -127,6 +129,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -212,21 +215,12 @@ import net.minecraft.world.Snooper;
 import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
-import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PlayerHeadItem;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.Level;
@@ -320,6 +314,8 @@ WindowEventHandler {
     private final Game game = new Game(this);
     private final Tutorial tutorial;
     private final PlayerSocialManager playerSocialManager;
+    private final EntityModelSet entityModels;
+    private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
     public static byte[] reserve;
     @Nullable
     public MultiPlayerGameMode gameMode;
@@ -462,15 +458,22 @@ WindowEventHandler {
         this.itemColors = ItemColors.createDefault(this.blockColors);
         this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
         this.resourceManager.registerReloadListener(this.modelManager);
-        this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
-        this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
+        this.entityModels = new EntityModelSet();
+        this.resourceManager.registerReloadListener(this.entityModels);
+        this.blockEntityRenderDispatcher = new BlockEntityRenderDispatcher(this.font, this.entityModels, this::getBlockRenderer);
+        this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
+        BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
+        this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
+        this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
+        this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.font, this.options, this.entityModels);
+        this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
         this.itemInHandRenderer = new ItemInHandRenderer(this);
         this.resourceManager.registerReloadListener(this.itemRenderer);
         this.renderBuffers = new RenderBuffers();
         this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.gameRenderer);
         this.playerSocialManager = new PlayerSocialManager(this, this.socialInteractionsService);
-        this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
+        this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), blockEntityWithoutLevelRenderer, this.blockColors);
         this.resourceManager.registerReloadListener(this.blockRenderer);
         this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.levelRenderer);
@@ -733,7 +736,8 @@ WindowEventHandler {
                 LOGGER.debug("Missing translation for: {} {} {}", (Object)itemStack, (Object)string, (Object)itemStack.getItem());
             }
         }
-        if (bl |= MenuScreens.selfTest()) {
+        bl |= MenuScreens.selfTest();
+        if (bl |= EntityRenderers.validateRegistrations()) {
             throw new IllegalStateException("Your game data is foobar, fix the errors above!");
         }
     }
@@ -764,10 +768,6 @@ WindowEventHandler {
             } else {
                 this.player.respawn();
             }
-        }
-        if (screen instanceof TitleScreen || screen instanceof JoinMultiplayerScreen) {
-            this.options.renderDebug = false;
-            this.gui.getChat().clearMessages(true);
         }
         this.screen = screen;
         if (screen != null) {
@@ -1046,7 +1046,7 @@ WindowEventHandler {
         int j = this.window.getWidth() - 160 - 10;
         int k = this.window.getHeight() - 320;
         RenderSystem.enableBlend();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex((float)j - 176.0f, (float)k - 96.0f - 16.0f, 0.0).color(200, 0, 0, 0).endVertex();
         bufferBuilder.vertex((float)j - 176.0f, k + 320, 0.0).color(200, 0, 0, 0).endVertex();
         bufferBuilder.vertex((float)j + 176.0f, k + 320, 0.0).color(200, 0, 0, 0).endVertex();
@@ -1060,7 +1060,7 @@ WindowEventHandler {
             float f;
             int q;
             int l = Mth.floor(resultField2.percentage / 4.0) + 1;
-            bufferBuilder.begin(6, DefaultVertexFormat.POSITION_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
             m = resultField2.getColor();
             int n = m >> 16 & 0xFF;
             int o = m >> 8 & 0xFF;
@@ -1073,7 +1073,7 @@ WindowEventHandler {
                 bufferBuilder.vertex((float)j + g, (float)k - h, 0.0).color(n, o, p, 255).endVertex();
             }
             tesselator.end();
-            bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
             for (q = l; q >= 0; --q) {
                 f = (float)((d + resultField2.percentage * (double)q / (double)l) * 6.2831854820251465 / 100.0);
                 g = Mth.sin(f) * 160.0f;
@@ -1347,7 +1347,7 @@ WindowEventHandler {
             }
             this.profiler.popPush("animateTick");
             if (!this.pause && this.level != null) {
-                this.level.animateTick(Mth.floor(this.player.getX()), Mth.floor(this.player.getY()), Mth.floor(this.player.getZ()));
+                this.level.animateTick(this.player.getBlockX(), this.player.getBlockY(), this.player.getBlockZ());
             }
             this.profiler.popPush("particles");
             if (!this.pause) {
@@ -1391,7 +1391,7 @@ WindowEventHandler {
                 CreativeModeInventoryScreen.handleHotbarLoadOrSave(this, i, bl2, bl);
                 continue;
             }
-            this.player.inventory.selected = i;
+            this.player.getInventory().selected = i;
         }
         while (this.options.keySocialInteractions.consumeClick()) {
             if (!this.isMultiplayerServer()) {
@@ -1618,7 +1618,7 @@ WindowEventHandler {
 
     public ServerStem makeServerStem(RegistryAccess.RegistryHolder registryHolder, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> function, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> function4, boolean bl, LevelStorageSource.LevelStorageAccess levelStorageAccess) throws InterruptedException, ExecutionException {
         DataPackConfig dataPackConfig = function.apply(levelStorageAccess);
-        PackRepository packRepository = new PackRepository(new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
+        PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
         try {
             DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(packRepository, dataPackConfig, bl);
             CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this);
@@ -1704,7 +1704,7 @@ WindowEventHandler {
     private void updateLevelInEngines(@Nullable ClientLevel clientLevel) {
         this.levelRenderer.setLevel(clientLevel);
         this.particleEngine.setLevel(clientLevel);
-        BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
+        this.blockEntityRenderDispatcher.setLevel(clientLevel);
         this.updateTitle();
     }
 
@@ -1753,74 +1753,28 @@ WindowEventHandler {
         if (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
-        boolean bl = this.player.abilities.instabuild;
+        boolean bl = this.player.getAbilities().instabuild;
         BlockEntity blockEntity = null;
         HitResult.Type type = this.hitResult.getType();
         if (type == HitResult.Type.BLOCK) {
             BlockPos blockPos = ((BlockHitResult)this.hitResult).getBlockPos();
             BlockState blockState = this.level.getBlockState(blockPos);
-            Block block = blockState.getBlock();
             if (blockState.isAir()) {
                 return;
             }
+            Block block = blockState.getBlock();
             itemStack = block.getCloneItemStack(this.level, blockPos, blockState);
             if (itemStack.isEmpty()) {
                 return;
             }
-            if (bl && Screen.hasControlDown() && block.isEntityBlock()) {
+            if (bl && Screen.hasControlDown() && blockState.hasBlockEntity()) {
                 blockEntity = this.level.getBlockEntity(blockPos);
             }
         } else if (type == HitResult.Type.ENTITY && bl) {
             Entity entity = ((EntityHitResult)this.hitResult).getEntity();
-            if (entity instanceof Painting) {
-                itemStack = new ItemStack(Items.PAINTING);
-            } else if (entity instanceof LeashFenceKnotEntity) {
-                itemStack = new ItemStack(Items.LEAD);
-            } else if (entity instanceof ItemFrame) {
-                ItemFrame itemFrame = (ItemFrame)entity;
-                ItemStack itemStack2 = itemFrame.getItem();
-                itemStack = itemStack2.isEmpty() ? new ItemStack(Items.ITEM_FRAME) : itemStack2.copy();
-            } else if (entity instanceof AbstractMinecart) {
-                Item item;
-                AbstractMinecart abstractMinecart = (AbstractMinecart)entity;
-                switch (abstractMinecart.getMinecartType()) {
-                    case FURNACE: {
-                        item = Items.FURNACE_MINECART;
-                        break;
-                    }
-                    case CHEST: {
-                        item = Items.CHEST_MINECART;
-                        break;
-                    }
-                    case TNT: {
-                        item = Items.TNT_MINECART;
-                        break;
-                    }
-                    case HOPPER: {
-                        item = Items.HOPPER_MINECART;
-                        break;
-                    }
-                    case COMMAND_BLOCK: {
-                        item = Items.COMMAND_BLOCK_MINECART;
-                        break;
-                    }
-                    default: {
-                        item = Items.MINECART;
-                    }
-                }
-                itemStack = new ItemStack(item);
-            } else if (entity instanceof Boat) {
-                itemStack = new ItemStack(((Boat)entity).getDropItem());
-            } else if (entity instanceof ArmorStand) {
-                itemStack = new ItemStack(Items.ARMOR_STAND);
-            } else if (entity instanceof EndCrystal) {
-                itemStack = new ItemStack(Items.END_CRYSTAL);
-            } else {
-                SpawnEggItem spawnEggItem = SpawnEggItem.byId(entity.getType());
-                if (spawnEggItem == null) {
-                    return;
-                }
-                itemStack = new ItemStack(spawnEggItem);
+            itemStack = entity.getPickResult();
+            if (itemStack == null) {
+                return;
             }
         } else {
             return;
@@ -1835,7 +1789,7 @@ WindowEventHandler {
             LOGGER.warn("Picking on: [{}] {} gave null item", (Object)type, (Object)string);
             return;
         }
-        Inventory inventory = this.player.inventory;
+        Inventory inventory = this.player.getInventory();
         if (blockEntity != null) {
             this.addCustomNbtData(itemStack, blockEntity);
         }
@@ -2068,7 +2022,7 @@ WindowEventHandler {
             if (this.musicManager.isPlayingMusic(Musics.UNDER_WATER) || this.player.isUnderWater() && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
                 return Musics.UNDER_WATER;
             }
-            if (this.player.level.dimension() != Level.NETHER && this.player.abilities.instabuild && this.player.abilities.mayfly) {
+            if (this.player.level.dimension() != Level.NETHER && this.player.getAbilities().instabuild && this.player.getAbilities().mayfly) {
                 return Musics.CREATIVE;
             }
             return this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);
@@ -2119,6 +2073,10 @@ WindowEventHandler {
 
     public EntityRenderDispatcher getEntityRenderDispatcher() {
         return this.entityRenderDispatcher;
+    }
+
+    public BlockEntityRenderDispatcher getBlockEntityRenderDispatcher() {
+        return this.blockEntityRenderDispatcher;
     }
 
     public ItemRenderer getItemRenderer() {
@@ -2231,7 +2189,7 @@ WindowEventHandler {
         return this.renderBuffers;
     }
 
-    private static Pack createClientPackAdapter(String string, boolean bl, Supplier<PackResources> supplier, PackResources packResources, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) {
+    private static Pack createClientPackAdapter(String string, Component component, boolean bl, Supplier<PackResources> supplier, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) {
         int i = packMetadataSection.getPackFormat();
         Supplier<PackResources> supplier2 = supplier;
         if (i <= 3) {
@@ -2240,7 +2198,7 @@ WindowEventHandler {
         if (i <= 4) {
             supplier2 = Minecraft.adaptV4(supplier2);
         }
-        return new Pack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
+        return new Pack(string, component, bl, supplier2, packMetadataSection, PackType.CLIENT_RESOURCES, position, packSource);
     }
 
     private static Supplier<PackResources> adaptV3(Supplier<PackResources> supplier) {
@@ -2253,6 +2211,10 @@ WindowEventHandler {
 
     public void updateMaxMipLevel(int i) {
         this.modelManager.updateMaxMipLevel(i);
+    }
+
+    public EntityModelSet getEntityModels() {
+        return this.entityModels;
     }
 
     static {

@@ -32,7 +32,7 @@ implements ContextAwareComponent {
             EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string));
             entitySelector = entitySelectorParser.parse();
         } catch (CommandSyntaxException commandSyntaxException) {
-            LOGGER.warn("Invalid selector component: {}", (Object)string, (Object)commandSyntaxException.getMessage());
+            LOGGER.warn("Invalid selector component: {}: {}", (Object)string, (Object)commandSyntaxException.getMessage());
         }
         this.selector = entitySelector;
     }

@@ -5,6 +5,7 @@ package net.minecraft.world.item;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -78,6 +79,7 @@ extends Item {
         if (!(level instanceof ServerLevel)) {
             return true;
         }
+        Random random = level.getRandom();
         block0: for (int i = 0; i < 128; ++i) {
             BlockPos blockPos2 = blockPos;
             BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
@@ -92,7 +94,7 @@ extends Item {
                     blockState = ((Block)BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random)).defaultBlockState();
                 }
             }
-            if (blockState.getBlock().is(BlockTags.WALL_CORALS)) {
+            if (blockState.is(BlockTags.WALL_CORALS)) {
                 for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; ++k) {
                     blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
                 }
@@ -134,6 +136,7 @@ extends Item {
             e = blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
         }
         levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
+        Random random = levelAccessor.getRandom();
         for (int j = 0; j < i; ++j) {
             double n;
             double m;

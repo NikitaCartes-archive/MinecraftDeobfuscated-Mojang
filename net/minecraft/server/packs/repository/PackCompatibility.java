@@ -9,6 +9,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 
 public enum PackCompatibility {
     TOO_OLD("old"),
@@ -27,14 +29,19 @@ public enum PackCompatibility {
         return this == COMPATIBLE;
     }
 
-    public static PackCompatibility forFormat(int i) {
-        if (i < SharedConstants.getCurrentVersion().getPackVersion()) {
+    public static PackCompatibility forFormat(int i, PackType packType) {
+        int j = packType.getVersion(SharedConstants.getCurrentVersion());
+        if (i < j) {
             return TOO_OLD;
         }
-        if (i > SharedConstants.getCurrentVersion().getPackVersion()) {
+        if (i > j) {
             return TOO_NEW;
         }
         return COMPATIBLE;
+    }
+
+    public static PackCompatibility forMetadata(PackMetadataSection packMetadataSection, PackType packType) {
+        return PackCompatibility.forFormat(packMetadataSection.getPackFormat(), packType);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -10,7 +10,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -108,9 +107,9 @@ extends Feature<BlockStateConfiguration> {
         for (int o = -m; o < m; ++o) {
             for (int p = -m; p < m; ++p) {
                 BlockPos blockPos3;
-                Block block;
+                BlockState blockState;
                 double e = this.signedDistanceEllipse(o, p, blockPos2, m, n, d);
-                if (!(e < 0.0) || !this.isIcebergBlock(block = levelAccessor.getBlockState(blockPos3 = blockPos.offset(o, j, p)).getBlock()) && block != Blocks.SNOW_BLOCK) continue;
+                if (!(e < 0.0) || !IcebergFeature.isIcebergState(blockState = levelAccessor.getBlockState(blockPos3 = blockPos.offset(o, j, p))) && !blockState.is(Blocks.SNOW_BLOCK)) continue;
                 if (bl) {
                     this.setBlock(levelAccessor, blockPos3, Blocks.WATER.defaultBlockState());
                     continue;
@@ -194,8 +193,8 @@ extends Feature<BlockStateConfiguration> {
         return Mth.ceil(g / 2.0f);
     }
 
-    private boolean isIcebergBlock(Block block) {
-        return block == Blocks.PACKED_ICE || block == Blocks.SNOW_BLOCK || block == Blocks.BLUE_ICE;
+    private static boolean isIcebergState(BlockState blockState) {
+        return blockState.is(Blocks.PACKED_ICE) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.BLUE_ICE);
     }
 
     private boolean belowIsAir(BlockGetter blockGetter, BlockPos blockPos) {
@@ -208,18 +207,18 @@ extends Feature<BlockStateConfiguration> {
             for (int n = -l; n <= l; ++n) {
                 for (int o = 0; o <= j; ++o) {
                     BlockPos blockPos2 = blockPos.offset(m, o, n);
-                    Block block = levelAccessor.getBlockState(blockPos2).getBlock();
-                    if (!this.isIcebergBlock(block) && block != Blocks.SNOW) continue;
+                    BlockState blockState = levelAccessor.getBlockState(blockPos2);
+                    if (!IcebergFeature.isIcebergState(blockState) && !blockState.is(Blocks.SNOW)) continue;
                     if (this.belowIsAir(levelAccessor, blockPos2)) {
                         this.setBlock(levelAccessor, blockPos2, Blocks.AIR.defaultBlockState());
                         this.setBlock(levelAccessor, blockPos2.above(), Blocks.AIR.defaultBlockState());
                         continue;
                     }
-                    if (!this.isIcebergBlock(block)) continue;
-                    Block[] blocks = new Block[]{levelAccessor.getBlockState(blockPos2.west()).getBlock(), levelAccessor.getBlockState(blockPos2.east()).getBlock(), levelAccessor.getBlockState(blockPos2.north()).getBlock(), levelAccessor.getBlockState(blockPos2.south()).getBlock()};
+                    if (!IcebergFeature.isIcebergState(blockState)) continue;
+                    BlockState[] blockStates = new BlockState[]{levelAccessor.getBlockState(blockPos2.west()), levelAccessor.getBlockState(blockPos2.east()), levelAccessor.getBlockState(blockPos2.north()), levelAccessor.getBlockState(blockPos2.south())};
                     int p = 0;
-                    for (Block block2 : blocks) {
-                        if (this.isIcebergBlock(block2)) continue;
+                    for (BlockState blockState2 : blockStates) {
+                        if (IcebergFeature.isIcebergState(blockState2)) continue;
                         ++p;
                     }
                     if (p < 3) continue;

@@ -39,12 +39,12 @@ implements PlaceRecipe<Integer> {
         if (recipe == null || !serverPlayer.getRecipeBook().contains(recipe)) {
             return;
         }
-        this.inventory = serverPlayer.inventory;
+        this.inventory = serverPlayer.getInventory();
         if (!this.testClearGrid() && !serverPlayer.isCreative()) {
             return;
         }
         this.stackedContents.clear();
-        serverPlayer.inventory.fillStackedContents(this.stackedContents);
+        serverPlayer.getInventory().fillStackedContents(this.stackedContents);
         this.menu.fillCraftSlotsStackedContents(this.stackedContents);
         if (this.stackedContents.canCraft(recipe, null)) {
             this.handleRecipeClicked(recipe, bl);
@@ -52,7 +52,7 @@ implements PlaceRecipe<Integer> {
             this.clearGrid();
             serverPlayer.connection.send(new ClientboundPlaceGhostRecipePacket(serverPlayer.containerMenu.containerId, recipe));
         }
-        serverPlayer.inventory.setChanged();
+        serverPlayer.getInventory().setChanged();
     }
 
     protected void clearGrid() {

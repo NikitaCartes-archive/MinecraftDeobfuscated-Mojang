@@ -260,7 +260,7 @@ public class EntitySelectorOptions {
             }
             if (entitySelectorParser.isTag()) {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
-                entitySelectorParser.addPredicate(entity -> entity.getServer().getTags().getEntityTypes().getTagOrEmpty(resourceLocation).contains(entity.getType()) != bl);
+                entitySelectorParser.addPredicate(entity -> entity.getType().is(entity.getServer().getTags().getEntityTypes().getTagOrEmpty(resourceLocation)) != bl);
             } else {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
                 EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {
@@ -292,7 +292,7 @@ public class EntitySelectorOptions {
             entitySelectorParser.addPredicate(entity -> {
                 ItemStack itemStack;
                 CompoundTag compoundTag2 = entity.saveWithoutId(new CompoundTag());
-                if (entity instanceof ServerPlayer && !(itemStack = ((ServerPlayer)entity).inventory.getSelected()).isEmpty()) {
+                if (entity instanceof ServerPlayer && !(itemStack = ((ServerPlayer)entity).getInventory().getSelected()).isEmpty()) {
                     compoundTag2.put("SelectedItem", itemStack.save(new CompoundTag()));
                 }
                 return NbtUtils.compareNbt(compoundTag, compoundTag2, true) != bl;

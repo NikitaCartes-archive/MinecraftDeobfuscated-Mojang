@@ -337,7 +337,7 @@ extends Fluid {
         if (block instanceof LiquidBlockContainer) {
             return ((LiquidBlockContainer)((Object)block)).canPlaceLiquid(blockGetter, blockPos, blockState, fluid);
         }
-        if (block instanceof DoorBlock || block.is(BlockTags.SIGNS) || block == Blocks.LADDER || block == Blocks.SUGAR_CANE || block == Blocks.BUBBLE_COLUMN) {
+        if (block instanceof DoorBlock || blockState.is(BlockTags.SIGNS) || blockState.is(Blocks.LADDER) || blockState.is(Blocks.SUGAR_CANE) || blockState.is(Blocks.BUBBLE_COLUMN)) {
             return false;
         }
         Material material = blockState.getMaterial();

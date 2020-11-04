@@ -35,7 +35,7 @@ extends CustomRecipe {
                 itemStack2 = itemStack3;
                 continue;
             }
-            if (itemStack3.getItem() == Items.SHIELD) {
+            if (itemStack3.is(Items.SHIELD)) {
                 if (!itemStack.isEmpty()) {
                     return false;
                 }
@@ -61,7 +61,7 @@ extends CustomRecipe {
                 itemStack = itemStack3;
                 continue;
             }
-            if (itemStack3.getItem() != Items.SHIELD) continue;
+            if (!itemStack3.is(Items.SHIELD)) continue;
             itemStack2 = itemStack3.copy();
         }
         if (itemStack2.isEmpty()) {

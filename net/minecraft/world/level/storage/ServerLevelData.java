@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.level.timers.TimerQueue;
@@ -26,8 +27,8 @@ extends WritableLevelData {
     public int getThunderTime();
 
     @Override
-    default public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-        WritableLevelData.super.fillCrashReportCategory(crashReportCategory);
+    default public void fillCrashReportCategory(CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor) {
+        WritableLevelData.super.fillCrashReportCategory(crashReportCategory, levelHeightAccessor);
         crashReportCategory.setDetail("Level name", this::getLevelName);
         crashReportCategory.setDetail("Level game mode", () -> String.format("Game mode: %s (ID %d). Hardcore: %b. Cheats: %b", this.getGameType().getName(), this.getGameType().getId(), this.isHardcore(), this.getAllowCommands()));
         crashReportCategory.setDetail("Level weather", () -> String.format("Rain time: %d (now: %b), thunder time: %d (now: %b)", this.getRainTime(), this.isRaining(), this.getThunderTime(), this.isThundering()));

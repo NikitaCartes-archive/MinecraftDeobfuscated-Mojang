@@ -6,6 +6,7 @@ package net.minecraft.world.inventory;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 
 public class GrindstoneMenu
 extends AbstractContainerMenu {
@@ -50,14 +52,14 @@ extends AbstractContainerMenu {
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
-                return itemStack.isDamageableItem() || itemStack.getItem() == Items.ENCHANTED_BOOK || itemStack.isEnchanted();
+                return itemStack.isDamageableItem() || itemStack.is(Items.ENCHANTED_BOOK) || itemStack.isEnchanted();
             }
         });
         this.addSlot(new Slot(this.repairSlots, 1, 49, 40){
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
-                return itemStack.isDamageableItem() || itemStack.getItem() == Items.ENCHANTED_BOOK || itemStack.isEnchanted();
+                return itemStack.isDamageableItem() || itemStack.is(Items.ENCHANTED_BOOK) || itemStack.isEnchanted();
             }
         });
         this.addSlot(new Slot(this.resultSlots, 2, 129, 34){
@@ -70,10 +72,8 @@ extends AbstractContainerMenu {
             @Override
             public ItemStack onTake(Player player, ItemStack itemStack) {
                 containerLevelAccess.execute((level, blockPos) -> {
-                    int j;
-                    for (int i = this.getExperienceAmount((Level)level); i > 0; i -= j) {
-                        j = ExperienceOrb.getExperienceValue(i);
-                        level.addFreshEntity(new ExperienceOrb((Level)level, blockPos.getX(), (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, j));
+                    if (level instanceof ServerLevel) {
+                        ExperienceOrb.award((ServerLevel)level, Vec3.atCenterOf(blockPos), this.getExperienceAmount((Level)level));
                     }
                     level.levelEvent(1042, (BlockPos)blockPos, 0);
                 });
@@ -135,7 +135,7 @@ extends AbstractContainerMenu {
             ItemStack itemStack3;
             int m;
             boolean bl32;
-            boolean bl4 = bl32 = !itemStack.isEmpty() && itemStack.getItem() != Items.ENCHANTED_BOOK && !itemStack.isEnchanted() || !itemStack2.isEmpty() && itemStack2.getItem() != Items.ENCHANTED_BOOK && !itemStack2.isEnchanted();
+            boolean bl4 = bl32 = !itemStack.isEmpty() && !itemStack.is(Items.ENCHANTED_BOOK) && !itemStack.isEnchanted() || !itemStack2.isEmpty() && !itemStack2.is(Items.ENCHANTED_BOOK) && !itemStack2.isEnchanted();
             if (itemStack.getCount() > 1 || itemStack2.getCount() > 1 || !bl2 && bl32) {
                 this.resultSlots.setItem(0, ItemStack.EMPTY);
                 this.broadcastChanges();
@@ -143,7 +143,7 @@ extends AbstractContainerMenu {
             }
             int i = 1;
             if (bl2) {
-                if (itemStack.getItem() != itemStack2.getItem()) {
+                if (!itemStack.is(itemStack2.getItem())) {
                     this.resultSlots.setItem(0, ItemStack.EMPTY);
                     this.broadcastChanges();
                     return;
@@ -198,7 +198,7 @@ extends AbstractContainerMenu {
         Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack).entrySet().stream().filter(entry -> ((Enchantment)entry.getKey()).isCurse()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         EnchantmentHelper.setEnchantments(map, itemStack2);
         itemStack2.setRepairCost(0);
-        if (itemStack2.getItem() == Items.ENCHANTED_BOOK && map.size() == 0) {
+        if (itemStack2.is(Items.ENCHANTED_BOOK) && map.size() == 0) {
             itemStack2 = new ItemStack(Items.BOOK);
             if (itemStack.hasCustomHoverName()) {
                 itemStack2.setHoverName(itemStack.getHoverName());
@@ -213,7 +213,7 @@ extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
-        this.access.execute((level, blockPos) -> this.clearContainer(player, (Level)level, this.repairSlots));
+        this.access.execute((level, blockPos) -> this.clearContainer(player, this.repairSlots));
     }
 
     @Override

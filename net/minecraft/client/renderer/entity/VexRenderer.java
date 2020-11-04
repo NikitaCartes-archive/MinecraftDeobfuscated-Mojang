@@ -7,7 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +20,8 @@ extends HumanoidMobRenderer<Vex, VexModel> {
     private static final ResourceLocation VEX_LOCATION = new ResourceLocation("textures/entity/illager/vex.png");
     private static final ResourceLocation VEX_CHARGING_LOCATION = new ResourceLocation("textures/entity/illager/vex_charging.png");
 
-    public VexRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new VexModel(), 0.3f);
+    public VexRenderer(EntityRendererProvider.Context context) {
+        super(context, new VexModel(context.getLayer(ModelLayers.VEX)), 0.3f);
     }
 
     @Override

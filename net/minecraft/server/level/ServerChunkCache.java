@@ -35,7 +35,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
-import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
@@ -51,6 +50,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -78,7 +78,7 @@ extends ChunkSource {
     @Nullable
     private NaturalSpawner.SpawnState lastSpawnState;
 
-    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier) {
+    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
         this.generator = chunkGenerator;
@@ -87,7 +87,7 @@ extends ChunkSource {
         File file2 = new File(file, "data");
         file2.mkdirs();
         this.dataStorage = new DimensionDataStorage(file2, dataFixer);
-        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl);
+        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, chunkStatusUpdateListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
         this.clearCache();
@@ -271,19 +271,13 @@ extends ChunkSource {
     }
 
     @Override
-    public boolean isEntityTickingChunk(Entity entity) {
-        long l = ChunkPos.asLong(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
-        return this.checkChunkFuture(l, ChunkHolder::getEntityTickingChunkFuture);
-    }
-
-    @Override
     public boolean isEntityTickingChunk(ChunkPos chunkPos) {
         return this.checkChunkFuture(chunkPos.toLong(), ChunkHolder::getEntityTickingChunkFuture);
     }
 
     @Override
     public boolean isTickingChunk(BlockPos blockPos) {
-        long l = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        long l = ChunkPos.asLong(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
         return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
     }
 
@@ -380,7 +374,7 @@ extends ChunkSource {
 
     @Override
     public String gatherStats() {
-        return "ServerChunkCache: " + this.getLoadedChunksCount();
+        return Integer.toString(this.getLoadedChunksCount());
     }
 
     @VisibleForTesting
@@ -398,8 +392,8 @@ extends ChunkSource {
 
     public void blockChanged(BlockPos blockPos) {
         int j;
-        int i = blockPos.getX() >> 4;
-        ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i, j = blockPos.getZ() >> 4));
+        int i = SectionPos.blockToSectionCoord(blockPos.getX());
+        ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i, j = SectionPos.blockToSectionCoord(blockPos.getZ())));
         if (chunkHolder != null) {
             chunkHolder.blockChanged(blockPos);
         }

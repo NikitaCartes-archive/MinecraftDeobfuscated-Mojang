@@ -12,6 +12,8 @@ public class TestFunction {
     private final String testName;
     private final String structureName;
     private final boolean required;
+    private final int maxAttempts;
+    private final int requiredSuccesses;
     private final Consumer<GameTestHelper> function;
     private final int maxTicks;
     private final long setupTicks;
@@ -51,6 +53,18 @@ public class TestFunction {
 
     public Rotation getRotation() {
         return this.rotation;
+    }
+
+    public boolean isFlaky() {
+        return this.maxAttempts > 1;
+    }
+
+    public int getMaxAttempts() {
+        return this.maxAttempts;
+    }
+
+    public int getRequiredSuccesses() {
+        return this.requiredSuccesses;
     }
 }
 

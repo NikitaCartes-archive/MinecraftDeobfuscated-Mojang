@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -40,19 +39,19 @@ extends Feature<HugeMushroomFeatureConfiguration> {
 
     protected boolean isValidPosition(LevelAccessor levelAccessor, BlockPos blockPos, int i, BlockPos.MutableBlockPos mutableBlockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration) {
         int j = blockPos.getY();
-        if (j < 1 || j + i + 1 >= 256) {
+        if (j < levelAccessor.getMinBuildHeight() + 1 || j + i + 1 >= levelAccessor.getMaxBuildHeight()) {
             return false;
         }
-        Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-        if (!AbstractHugeMushroomFeature.isDirt(block) && !block.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+        if (!AbstractHugeMushroomFeature.isDirt(blockState) && !blockState.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
             return false;
         }
         for (int k = 0; k <= i; ++k) {
             int l = this.getTreeRadiusForHeight(-1, -1, hugeMushroomFeatureConfiguration.foliageRadius, k);
             for (int m = -l; m <= l; ++m) {
                 for (int n = -l; n <= l; ++n) {
-                    BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
-                    if (blockState.isAir() || blockState.is(BlockTags.LEAVES)) continue;
+                    BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
+                    if (blockState2.isAir() || blockState2.is(BlockTags.LEAVES)) continue;
                     return false;
                 }
             }

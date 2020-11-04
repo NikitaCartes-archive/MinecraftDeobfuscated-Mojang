@@ -34,7 +34,7 @@ extends Vec3i {
     }
 
     public static SectionPos of(Entity entity) {
-        return new SectionPos(SectionPos.blockToSectionCoord(Mth.floor(entity.getX())), SectionPos.blockToSectionCoord(Mth.floor(entity.getY())), SectionPos.blockToSectionCoord(Mth.floor(entity.getZ())));
+        return new SectionPos(SectionPos.blockToSectionCoord(entity.getBlockX()), SectionPos.blockToSectionCoord(entity.getBlockY()), SectionPos.blockToSectionCoord(entity.getBlockZ()));
     }
 
     public static SectionPos of(long l) {
@@ -47,6 +47,10 @@ extends Vec3i {
 
     public static long offset(long l, int i, int j, int k) {
         return SectionPos.asLong(SectionPos.x(l) + i, SectionPos.y(l) + j, SectionPos.z(l) + k);
+    }
+
+    public static int posToSectionCoord(double d) {
+        return SectionPos.blockToSectionCoord(Mth.floor(d));
     }
 
     public static int blockToSectionCoord(int i) {
@@ -96,6 +100,10 @@ extends Vec3i {
         return i << 4;
     }
 
+    public static int sectionToBlockCoord(int i, int j) {
+        return SectionPos.sectionToBlockCoord(i) + j;
+    }
+
     public static int x(long l) {
         return (int)(l << 0 >> 42);
     }
@@ -121,27 +129,27 @@ extends Vec3i {
     }
 
     public int minBlockX() {
-        return this.x() << 4;
+        return SectionPos.sectionToBlockCoord(this.x());
     }
 
     public int minBlockY() {
-        return this.y() << 4;
+        return SectionPos.sectionToBlockCoord(this.y());
     }
 
     public int minBlockZ() {
-        return this.z() << 4;
+        return SectionPos.sectionToBlockCoord(this.z());
     }
 
     public int maxBlockX() {
-        return (this.x() << 4) + 15;
+        return SectionPos.sectionToBlockCoord(this.x(), 15);
     }
 
     public int maxBlockY() {
-        return (this.y() << 4) + 15;
+        return SectionPos.sectionToBlockCoord(this.y(), 15);
     }
 
     public int maxBlockZ() {
-        return (this.z() << 4) + 15;
+        return SectionPos.sectionToBlockCoord(this.z(), 15);
     }
 
     public static long blockToSection(long l) {
@@ -187,10 +195,10 @@ extends Vec3i {
         return SectionPos.betweenClosedStream(j - i, k - i, l - i, j + i, k + i, l + i);
     }
 
-    public static Stream<SectionPos> aroundChunk(ChunkPos chunkPos, int i) {
-        int j = chunkPos.x;
-        int k = chunkPos.z;
-        return SectionPos.betweenClosedStream(j - i, 0, k - i, j + i, 15, k + i);
+    public static Stream<SectionPos> aroundChunk(ChunkPos chunkPos, int i, int j, int k) {
+        int l = chunkPos.x;
+        int m = chunkPos.z;
+        return SectionPos.betweenClosedStream(l - i, j, m - i, l + i, k - 1, m + i);
     }
 
     public static Stream<SectionPos> betweenClosedStream(final int i, final int j, final int k, final int l, final int m, final int n) {

@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,7 +25,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
@@ -130,14 +130,6 @@ implements ItemLike {
         return Shapes.box(d / 16.0, e / 16.0, f / 16.0, g / 16.0, h / 16.0, i / 16.0);
     }
 
-    public boolean is(Tag<Block> tag) {
-        return tag.contains(this);
-    }
-
-    public boolean is(Block block) {
-        return this == block;
-    }
-
     public static BlockState updateFromNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockState blockState2 = blockState;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -166,14 +158,18 @@ implements ItemLike {
 
     public Block(BlockBehaviour.Properties properties) {
         super(properties);
+        String string;
         StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<Block, BlockState>(this);
         this.createBlockStateDefinition(builder);
         this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
         this.registerDefaultState(this.stateDefinition.any());
+        if (SharedConstants.IS_RUNNING_IN_IDE && !(string = this.getClass().getSimpleName()).endsWith("Block")) {
+            LOGGER.error("Block classes should end with Block and {} doesn't.", (Object)string);
+        }
     }
 
-    public static boolean isExceptionForConnection(Block block) {
-        return block instanceof LeavesBlock || block == Blocks.BARRIER || block == Blocks.CARVED_PUMPKIN || block == Blocks.JACK_O_LANTERN || block == Blocks.MELON || block == Blocks.PUMPKIN || block.is(BlockTags.SHULKER_BOXES);
+    public static boolean isExceptionForConnection(BlockState blockState) {
+        return blockState.getBlock() instanceof LeavesBlock || blockState.is(Blocks.BARRIER) || blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN) || blockState.is(Blocks.MELON) || blockState.is(Blocks.PUMPKIN) || blockState.is(BlockTags.SHULKER_BOXES);
     }
 
     public boolean isRandomlyTicking(BlockState blockState) {
@@ -181,8 +177,7 @@ implements ItemLike {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-        BlockPos blockPos2 = blockPos.relative(direction);
+    public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
         BlockState blockState2 = blockGetter.getBlockState(blockPos2);
         if (blockState.skipRendering(blockState2, direction)) {
             return false;
@@ -284,11 +279,7 @@ implements ItemLike {
 
     protected void popExperience(ServerLevel serverLevel, BlockPos blockPos, int i) {
         if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
-            while (i > 0) {
-                int j = ExperienceOrb.getExperienceValue(i);
-                i -= j;
-                serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, j));
-            }
+            ExperienceOrb.award(serverLevel, Vec3.atCenterOf(blockPos), i);
         }
     }
 
@@ -363,12 +354,12 @@ implements ItemLike {
 
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
         level.levelEvent(player, 2001, blockPos, Block.getId(blockState));
-        if (this.is(BlockTags.GUARDED_BY_PIGLINS)) {
+        if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
             PiglinAi.angerNearbyPiglins(player, false);
         }
     }
 
-    public void handleRain(Level level, BlockPos blockPos) {
+    public void handleRain(BlockState blockState, Level level, BlockPos blockPos) {
     }
 
     public boolean dropFromExplosion(Explosion explosion) {

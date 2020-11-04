@@ -57,10 +57,14 @@ implements AutoCloseable {
         }
     }
 
-    protected void write(ChunkPos chunkPos, CompoundTag compoundTag) throws IOException {
+    protected void write(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) throws IOException {
         RegionFile regionFile = this.getRegionFile(chunkPos);
-        try (DataOutputStream dataOutputStream = regionFile.getChunkDataOutputStream(chunkPos);){
-            NbtIo.write(compoundTag, dataOutputStream);
+        if (compoundTag == null) {
+            regionFile.clear(chunkPos);
+        } else {
+            try (DataOutputStream dataOutputStream = regionFile.getChunkDataOutputStream(chunkPos);){
+                NbtIo.write(compoundTag, dataOutputStream);
+            }
         }
     }
 

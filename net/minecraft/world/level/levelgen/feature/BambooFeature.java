@@ -45,7 +45,7 @@ extends Feature<ProbabilityFeatureConfiguration> {
                             int n = l - blockPos.getX();
                             if (n * n + (o = m - blockPos.getZ()) * o > k * k) continue;
                             mutableBlockPos2.set(l, worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE, l, m) - 1, m);
-                            if (!BambooFeature.isDirt(worldGenLevel.getBlockState(mutableBlockPos2).getBlock())) continue;
+                            if (!BambooFeature.isDirt(worldGenLevel.getBlockState(mutableBlockPos2))) continue;
                             worldGenLevel.setBlock(mutableBlockPos2, Blocks.PODZOL.defaultBlockState(), 2);
                         }
                     }

@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -15,9 +15,9 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 @Environment(value=EnvType.CLIENT)
 public abstract class IllagerRenderer<T extends AbstractIllager>
 extends MobRenderer<T, IllagerModel<T>> {
-    protected IllagerRenderer(EntityRenderDispatcher entityRenderDispatcher, IllagerModel<T> illagerModel, float f) {
-        super(entityRenderDispatcher, illagerModel, f);
-        this.addLayer(new CustomHeadLayer(this));
+    protected IllagerRenderer(EntityRendererProvider.Context context, IllagerModel<T> illagerModel, float f) {
+        super(context, illagerModel, f);
+        this.addLayer(new CustomHeadLayer(this, context.getModelSet()));
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class MultipleTestTracker {
     private final Collection<GameTestInfo> tests = Lists.newArrayList();
     @Nullable
-    private Collection<GameTestListener> listeners = Lists.newArrayList();
+    private final Collection<GameTestListener> listeners = Lists.newArrayList();
 
     public MultipleTestTracker() {
     }

@@ -11,13 +11,13 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
@@ -122,7 +122,7 @@ public abstract class PathNavigation {
         if (set.isEmpty()) {
             return null;
         }
-        if (this.mob.getY() < 0.0) {
+        if (this.mob.getY() < (double)this.level.getMinBuildHeight()) {
             return null;
         }
         if (!this.canUpdatePath()) {
@@ -305,7 +305,7 @@ public abstract class PathNavigation {
             Node node = this.path.getNode(i);
             Node node2 = i + 1 < this.path.getNodeCount() ? this.path.getNode(i + 1) : null;
             BlockState blockState = this.level.getBlockState(new BlockPos(node.x, node.y, node.z));
-            if (!blockState.is(Blocks.CAULDRON)) continue;
+            if (!blockState.is(BlockTags.CAULDRONS)) continue;
             this.path.replaceNode(i, node.cloneAndMove(node.x, node.y + 1, node.z));
             if (node2 == null || node.y < node2.y) continue;
             this.path.replaceNode(i + 1, node.cloneAndMove(node2.x, node.y + 1, node2.z));

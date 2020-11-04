@@ -65,7 +65,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-        return blockPlaceContext.getItemInHand().getItem() == this.asItem();
+        return blockPlaceContext.getItemInHand().is(this.asItem());
     }
 
     @Override

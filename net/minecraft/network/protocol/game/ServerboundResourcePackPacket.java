@@ -34,6 +34,10 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleResourcePackResponse(this);
     }
 
+    public Action getAction() {
+        return this.action;
+    }
+
     public static enum Action {
         SUCCESSFULLY_LOADED,
         DECLINED,

@@ -130,8 +130,8 @@ extends Block {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockPos blockPos = blockPlaceContext.getClickedPos();
-        if (blockPos.getY() < 255 && blockPlaceContext.getLevel().getBlockState(blockPos.above()).canBeReplaced(blockPlaceContext)) {
-            Level level = blockPlaceContext.getLevel();
+        Level level = blockPlaceContext.getLevel();
+        if (blockPos.getY() < level.getMaxBuildHeight() - 1 && level.getBlockState(blockPos.above()).canBeReplaced(blockPlaceContext)) {
             boolean bl = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
             return (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection())).setValue(HINGE, this.getHinge(blockPlaceContext))).setValue(POWERED, bl)).setValue(OPEN, bl)).setValue(HALF, DoubleBlockHalf.LOWER);
         }
@@ -203,7 +203,7 @@ extends Block {
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         boolean bl2;
         boolean bl3 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.relative(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN)) ? true : (bl2 = false);
-        if (block != this && bl2 != blockState.getValue(POWERED)) {
+        if (!this.defaultBlockState().is(block) && bl2 != blockState.getValue(POWERED)) {
             if (bl2 != blockState.getValue(OPEN)) {
                 this.playSound(level, blockPos, bl2);
             }

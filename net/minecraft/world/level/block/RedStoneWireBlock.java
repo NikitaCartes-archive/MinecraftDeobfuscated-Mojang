@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -54,8 +55,16 @@ extends Block {
     private static final VoxelShape SHAPE_DOT = Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 13.0);
     private static final Map<Direction, VoxelShape> SHAPES_FLOOR = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Block.box(3.0, 0.0, 0.0, 13.0, 1.0, 13.0), Direction.SOUTH, Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 16.0), Direction.EAST, Block.box(3.0, 0.0, 3.0, 16.0, 1.0, 13.0), Direction.WEST, Block.box(0.0, 0.0, 3.0, 13.0, 1.0, 13.0)));
     private static final Map<Direction, VoxelShape> SHAPES_UP = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Shapes.or(SHAPES_FLOOR.get(Direction.NORTH), Block.box(3.0, 0.0, 0.0, 13.0, 16.0, 1.0)), Direction.SOUTH, Shapes.or(SHAPES_FLOOR.get(Direction.SOUTH), Block.box(3.0, 0.0, 15.0, 13.0, 16.0, 16.0)), Direction.EAST, Shapes.or(SHAPES_FLOOR.get(Direction.EAST), Block.box(15.0, 0.0, 3.0, 16.0, 16.0, 13.0)), Direction.WEST, Shapes.or(SHAPES_FLOOR.get(Direction.WEST), Block.box(0.0, 0.0, 3.0, 1.0, 16.0, 13.0))));
-    private final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.newHashMap();
-    private static final Vector3f[] COLORS = new Vector3f[16];
+    private static final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.newHashMap();
+    private static final Vector3f[] COLORS = Util.make(new Vector3f[16], vector3fs -> {
+        for (int i = 0; i <= 15; ++i) {
+            float f;
+            float g = f * 0.6f + ((f = (float)i / 15.0f) > 0.0f ? 0.4f : 0.3f);
+            float h = Mth.clamp(f * f * 0.7f - 0.5f, 0.0f, 1.0f);
+            float j = Mth.clamp(f * f * 0.6f - 0.7f, 0.0f, 1.0f);
+            vector3fs[i] = new Vector3f(g, h, j);
+        }
+    });
     private final BlockState crossState;
     private boolean shouldSignal = true;
 
@@ -65,7 +74,7 @@ extends Block {
         this.crossState = (BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(NORTH, RedstoneSide.SIDE)).setValue(EAST, RedstoneSide.SIDE)).setValue(SOUTH, RedstoneSide.SIDE)).setValue(WEST, RedstoneSide.SIDE);
         for (BlockState blockState : this.getStateDefinition().getPossibleStates()) {
             if (blockState.getValue(POWER) != 0) continue;
-            this.SHAPES_CACHE.put(blockState, this.calculateShape(blockState));
+            SHAPES_CACHE.put(blockState, this.calculateShape(blockState));
         }
     }
 
@@ -85,7 +94,7 @@ extends Block {
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        return this.SHAPES_CACHE.get(blockState.setValue(POWER, 0));
+        return SHAPES_CACHE.get(blockState.setValue(POWER, 0));
     }
 
     @Override
@@ -439,7 +448,7 @@ extends Block {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (!player.abilities.mayBuild) {
+        if (!player.getAbilities().mayBuild) {
             return InteractionResult.PASS;
         }
         if (RedStoneWireBlock.isCross(blockState) || RedStoneWireBlock.isDot(blockState)) {
@@ -459,16 +468,6 @@ extends Block {
             BlockPos blockPos2 = blockPos.relative(direction);
             if (((RedstoneSide)blockState.getValue(PROPERTY_BY_DIRECTION.get(direction))).isConnected() == ((RedstoneSide)blockState2.getValue(PROPERTY_BY_DIRECTION.get(direction))).isConnected() || !level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) continue;
             level.updateNeighborsAtExceptFromFacing(blockPos2, blockState2.getBlock(), direction.getOpposite());
-        }
-    }
-
-    static {
-        for (int i = 0; i <= 15; ++i) {
-            float f;
-            float g = f * 0.6f + ((f = (float)i / 15.0f) > 0.0f ? 0.4f : 0.3f);
-            float h = Mth.clamp(f * f * 0.7f - 0.5f, 0.0f, 1.0f);
-            float j = Mth.clamp(f * f * 0.6f - 0.7f, 0.0f, 1.0f);
-            RedStoneWireBlock.COLORS[i] = new Vector3f(g, h, j);
         }
     }
 }

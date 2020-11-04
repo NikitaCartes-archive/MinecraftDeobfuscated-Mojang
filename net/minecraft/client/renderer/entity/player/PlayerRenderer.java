@@ -9,11 +9,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
@@ -46,21 +47,17 @@ import net.minecraft.world.scores.Scoreboard;
 @Environment(value=EnvType.CLIENT)
 public class PlayerRenderer
 extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    public PlayerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        this(entityRenderDispatcher, false);
-    }
-
-    public PlayerRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean bl) {
-        super(entityRenderDispatcher, new PlayerModel(0.0f, bl), 0.5f);
-        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(0.5f), new HumanoidModel(1.0f)));
+    public PlayerRenderer(EntityRendererProvider.Context context, boolean bl) {
+        super(context, new PlayerModel(context.getLayer(bl ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), bl), 0.5f);
+        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(context.getLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(context.getLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
         this.addLayer(new ItemInHandLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
-        this.addLayer(new ArrowLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
+        this.addLayer(new ArrowLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(context, this));
         this.addLayer(new Deadmau5EarsLayer(this));
         this.addLayer(new CapeLayer(this));
-        this.addLayer(new CustomHeadLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
-        this.addLayer(new ElytraLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
-        this.addLayer(new ParrotOnShoulderLayer<AbstractClientPlayer>(this));
-        this.addLayer(new SpinAttackEffectLayer<AbstractClientPlayer>(this));
+        this.addLayer(new CustomHeadLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getModelSet()));
+        this.addLayer(new ElytraLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getModelSet()));
+        this.addLayer(new ParrotOnShoulderLayer<AbstractClientPlayer>(this, context.getModelSet()));
+        this.addLayer(new SpinAttackEffectLayer<AbstractClientPlayer>(this, context.getModelSet()));
         this.addLayer(new BeeStingerLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
     }
 
@@ -127,7 +124,10 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             if (useAnim == UseAnim.CROSSBOW && interactionHand == abstractClientPlayer.getUsedItemHand()) {
                 return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
             }
-        } else if (!abstractClientPlayer.swinging && itemStack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack)) {
+            if (useAnim == UseAnim.SPYGLASS) {
+                return HumanoidModel.ArmPose.SPYGLASS;
+            }
+        } else if (!abstractClientPlayer.swinging && itemStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack)) {
             return HumanoidModel.ArmPose.CROSSBOW_HOLD;
         }
         return HumanoidModel.ArmPose.ITEM;

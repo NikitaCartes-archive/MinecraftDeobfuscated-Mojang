@@ -30,7 +30,7 @@ extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, Bloc
         int i = BlockPos.getX(l);
         int j = BlockPos.getY(l);
         int k = BlockPos.getZ(l);
-        BlockGetter blockGetter = this.chunkSource.getChunkForLighting(i >> 4, k >> 4);
+        BlockGetter blockGetter = this.chunkSource.getChunkForLighting(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(k));
         if (blockGetter != null) {
             return blockGetter.getLightEmission(this.pos.set(i, j, k));
         }

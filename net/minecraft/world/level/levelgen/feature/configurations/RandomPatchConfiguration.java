@@ -63,7 +63,7 @@ implements FeatureConfiguration {
         private int zspread = 7;
         private boolean canReplace;
         private boolean project = true;
-        private boolean needWater = false;
+        private boolean needWater;
 
         public GrassConfigurationBuilder(BlockStateProvider blockStateProvider, BlockPlacer blockPlacer) {
             this.stateProvider = blockStateProvider;

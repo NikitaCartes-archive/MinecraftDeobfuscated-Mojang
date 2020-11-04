@@ -85,7 +85,7 @@ extends Block {
         if (blockState2.is(Blocks.HONEY_BLOCK) || blockState2.is(Blocks.SOUL_SAND)) {
             return true;
         }
-        return Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP) || blockState2.getBlock() == this && blockState2.getValue(LAYERS) == 8;
+        return Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP) || blockState2.is(this) && blockState2.getValue(LAYERS) == 8;
     }
 
     @Override
@@ -107,7 +107,7 @@ extends Block {
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
         int i = blockState.getValue(LAYERS);
-        if (blockPlaceContext.getItemInHand().getItem() == this.asItem() && i < 8) {
+        if (blockPlaceContext.getItemInHand().is(this.asItem()) && i < 8) {
             if (blockPlaceContext.replacingClickedOnBlock()) {
                 return blockPlaceContext.getClickedFace() == Direction.UP;
             }

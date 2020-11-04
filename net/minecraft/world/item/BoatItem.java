@@ -58,7 +58,7 @@ extends Item {
             }
             if (!level.isClientSide) {
                 level.addFreshEntity(boat);
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
             }

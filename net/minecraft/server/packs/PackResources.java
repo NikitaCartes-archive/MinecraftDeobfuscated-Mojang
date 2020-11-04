@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PackResources
 extends AutoCloseable {
+    @Nullable
     @Environment(value=EnvType.CLIENT)
     public InputStream getRootResource(String var1) throws IOException;
 

@@ -39,7 +39,7 @@ implements RecipeUpdateListener {
     private boolean buttonClicked;
 
     public InventoryScreen(Player player) {
-        super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting"));
+        super(player.inventoryMenu, player.getInventory(), new TranslatableComponent("container.crafting"));
         this.passEvents = true;
         this.titleLabelX = 97;
     }

@@ -3,34 +3,41 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class SlimeModel<T extends Entity>
-extends ListModel<T> {
-    private final ModelPart cube;
-    private final ModelPart eye0;
-    private final ModelPart eye1;
-    private final ModelPart mouth;
+extends HierarchicalModel<T> {
+    private final ModelPart root;
 
-    public SlimeModel(int i) {
-        this.cube = new ModelPart(this, 0, i);
-        this.eye0 = new ModelPart(this, 32, 0);
-        this.eye1 = new ModelPart(this, 32, 4);
-        this.mouth = new ModelPart(this, 32, 8);
-        if (i > 0) {
-            this.cube.addBox(-3.0f, 17.0f, -3.0f, 6.0f, 6.0f, 6.0f);
-            this.eye0.addBox(-3.25f, 18.0f, -3.5f, 2.0f, 2.0f, 2.0f);
-            this.eye1.addBox(1.25f, 18.0f, -3.5f, 2.0f, 2.0f, 2.0f);
-            this.mouth.addBox(0.0f, 21.0f, -3.5f, 1.0f, 1.0f, 1.0f);
-        } else {
-            this.cube.addBox(-4.0f, 16.0f, -4.0f, 8.0f, 8.0f, 8.0f);
-        }
+    public SlimeModel(ModelPart modelPart) {
+        this.root = modelPart;
+    }
+
+    public static LayerDefinition createOuterBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("cube", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, 16.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
+    }
+
+    public static LayerDefinition createInnerBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("cube", CubeListBuilder.create().texOffs(0, 16).addBox(-3.0f, 17.0f, -3.0f, 6.0f, 6.0f, 6.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("right_eye", CubeListBuilder.create().texOffs(32, 0).addBox(-3.25f, 18.0f, -3.5f, 2.0f, 2.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("left_eye", CubeListBuilder.create().texOffs(32, 4).addBox(1.25f, 18.0f, -3.5f, 2.0f, 2.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild("mouth", CubeListBuilder.create().texOffs(32, 8).addBox(0.0f, 21.0f, -3.5f, 1.0f, 1.0f, 1.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -38,8 +45,8 @@ extends ListModel<T> {
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.cube, this.eye0, this.eye1, this.mouth);
+    public ModelPart root() {
+        return this.root;
     }
 }
 

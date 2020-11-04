@@ -19,6 +19,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
@@ -108,18 +109,23 @@ extends Player {
 
     public float getFieldOfViewModifier() {
         float f = 1.0f;
-        if (this.abilities.flying) {
+        if (this.getAbilities().flying) {
             f *= 1.1f;
         }
-        f = (float)((double)f * ((this.getAttributeValue(Attributes.MOVEMENT_SPEED) / (double)this.abilities.getWalkingSpeed() + 1.0) / 2.0));
-        if (this.abilities.getWalkingSpeed() == 0.0f || Float.isNaN(f) || Float.isInfinite(f)) {
+        f = (float)((double)f * ((this.getAttributeValue(Attributes.MOVEMENT_SPEED) / (double)this.getAbilities().getWalkingSpeed() + 1.0) / 2.0));
+        if (this.getAbilities().getWalkingSpeed() == 0.0f || Float.isNaN(f) || Float.isInfinite(f)) {
             f = 1.0f;
         }
-        if (this.isUsingItem() && this.getUseItem().getItem() == Items.BOW) {
-            int i = this.getTicksUsingItem();
-            float g = (float)i / 20.0f;
-            g = g > 1.0f ? 1.0f : (g *= g);
-            f *= 1.0f - g * 0.15f;
+        ItemStack itemStack = this.getUseItem();
+        if (this.isUsingItem()) {
+            if (itemStack.is(Items.BOW)) {
+                int i = this.getTicksUsingItem();
+                float g = (float)i / 20.0f;
+                g = g > 1.0f ? 1.0f : (g *= g);
+                f *= 1.0f - g * 0.15f;
+            } else if (Minecraft.getInstance().options.getCameraType().isFirstPerson() && this.isScoping()) {
+                return 0.1f;
+            }
         }
         return Mth.lerp(Minecraft.getInstance().options.fovEffectScale, 1.0f, f);
     }

@@ -26,7 +26,7 @@ extends AbstractContainerMenu {
 
         @Override
         public boolean canPlaceItem(int i, ItemStack itemStack) {
-            return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
+            return itemStack.is(ItemTags.BEACON_PAYMENT_ITEMS);
         }
 
         @Override
@@ -152,7 +152,7 @@ extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(ItemStack itemStack) {
-            return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
+            return itemStack.is(ItemTags.BEACON_PAYMENT_ITEMS);
         }
 
         @Override

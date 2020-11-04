@@ -37,7 +37,7 @@ extends AbstractTickableSoundInstance {
             Minecraft.getInstance().getSoundManager().queueTickingSound(this.getAlternativeSoundInstance());
             this.hasSwitched = true;
         }
-        if (this.bee.removed || this.hasSwitched) {
+        if (this.bee.isRemoved() || this.hasSwitched) {
             this.stop();
             return;
         }

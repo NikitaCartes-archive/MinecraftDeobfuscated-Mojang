@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import java.util.List;
 import java.util.Random;
@@ -67,10 +68,12 @@ implements ResourceManagerReloadListener {
     private final ItemModelShaper itemModelShaper;
     private final TextureManager textureManager;
     private final ItemColors itemColors;
+    private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
 
-    public ItemRenderer(TextureManager textureManager, ModelManager modelManager, ItemColors itemColors) {
+    public ItemRenderer(TextureManager textureManager, ModelManager modelManager, ItemColors itemColors, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer) {
         this.textureManager = textureManager;
         this.itemModelShaper = new ItemModelShaper(modelManager);
+        this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
         for (Item item : Registry.ITEM) {
             if (IGNORED.contains(item)) continue;
             this.itemModelShaper.register(item, new ModelResourceLocation(Registry.ITEM.getKey(item), "inventory"));
@@ -100,19 +103,19 @@ implements ResourceManagerReloadListener {
         }
         poseStack.pushPose();
         boolean bl3 = bl2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
-        if (itemStack.getItem() == Items.TRIDENT && bl2) {
+        if (itemStack.is(Items.TRIDENT) && bl2) {
             bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
         poseStack.translate(-0.5, -0.5, -0.5);
-        if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl2) {
-            BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
+        if (bakedModel.isCustomRenderer() || itemStack.is(Items.TRIDENT) && !bl2) {
+            this.blockEntityRenderer.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
         } else {
             VertexConsumer vertexConsumer;
             Block block;
             boolean bl32 = transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem ? !((block = ((BlockItem)itemStack.getItem()).getBlock()) instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock) : true;
             RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl32);
-            if (itemStack.getItem() == Items.COMPASS && itemStack.hasFoil()) {
+            if (itemStack.is(Items.COMPASS) && itemStack.hasFoil()) {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
                 if (transformType == ItemTransforms.TransformType.GUI) {
@@ -178,8 +181,7 @@ implements ResourceManagerReloadListener {
     }
 
     public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-        Item item = itemStack.getItem();
-        BakedModel bakedModel = item == Items.TRIDENT ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack);
+        BakedModel bakedModel = itemStack.is(Items.TRIDENT) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack);
         ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
         BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity);
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
@@ -270,7 +272,7 @@ implements ResourceManagerReloadListener {
 
     public void renderGuiItemDecorations(Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
         LocalPlayer localPlayer;
-        float m;
+        float f;
         if (itemStack.isEmpty()) {
             return;
         }
@@ -282,18 +284,15 @@ implements ResourceManagerReloadListener {
             font.drawInBatch(string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 0xFFFFFF, true, poseStack.last().pose(), (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
             bufferSource.endBatch();
         }
-        if (itemStack.isDamaged()) {
+        if (itemStack.isBarVisible()) {
             RenderSystem.disableDepthTest();
             RenderSystem.disableTexture();
             RenderSystem.disableAlphaTest();
             RenderSystem.disableBlend();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
-            float f = itemStack.getDamageValue();
-            float g = itemStack.getMaxDamage();
-            float h = Math.max(0.0f, (g - f) / g);
-            int k = Math.round(13.0f - f * 13.0f / g);
-            int l = Mth.hsvToRgb(h / 3.0f, 1.0f, 1.0f);
+            int k = itemStack.getBarWidth();
+            int l = itemStack.getBarColor();
             this.fillRect(bufferBuilder, i + 2, j + 13, 13, 2, 0, 0, 0, 255);
             this.fillRect(bufferBuilder, i + 2, j + 13, k, 1, l >> 16 & 0xFF, l >> 8 & 0xFF, l & 0xFF, 255);
             RenderSystem.enableBlend();
@@ -301,22 +300,22 @@ implements ResourceManagerReloadListener {
             RenderSystem.enableTexture();
             RenderSystem.enableDepthTest();
         }
-        float f = m = (localPlayer = Minecraft.getInstance().player) == null ? 0.0f : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
-        if (m > 0.0f) {
+        float f2 = f = (localPlayer = Minecraft.getInstance().player) == null ? 0.0f : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
+        if (f > 0.0f) {
             RenderSystem.disableDepthTest();
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             Tesselator tesselator2 = Tesselator.getInstance();
             BufferBuilder bufferBuilder2 = tesselator2.getBuilder();
-            this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0f * (1.0f - m)), 16, Mth.ceil(16.0f * m), 255, 255, 255, 127);
+            this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0f * (1.0f - f)), 16, Mth.ceil(16.0f * f), 255, 255, 255, 127);
             RenderSystem.enableTexture();
             RenderSystem.enableDepthTest();
         }
     }
 
     private void fillRect(BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o, int p) {
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(i + 0, j + 0, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + 0, j + l, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + k, j + l, 0.0).color(m, n, o, p).endVertex();

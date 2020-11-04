@@ -126,7 +126,7 @@ implements SimpleWaterloggedBlock {
     private boolean connectsTo(BlockState blockState, boolean bl, Direction direction) {
         Block block = blockState.getBlock();
         boolean bl2 = block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(blockState, direction);
-        return blockState.is(BlockTags.WALLS) || !WallBlock.isExceptionForConnection(block) && bl || block instanceof IronBarsBlock || bl2;
+        return blockState.is(BlockTags.WALLS) || !WallBlock.isExceptionForConnection(blockState) && bl || block instanceof IronBarsBlock || bl2;
     }
 
     @Override
@@ -223,7 +223,7 @@ implements SimpleWaterloggedBlock {
         if (bl7) {
             return false;
         }
-        return blockState2.getBlock().is(BlockTags.WALL_POST_OVERRIDE) || WallBlock.isCovered(voxelShape, POST_TEST);
+        return blockState2.is(BlockTags.WALL_POST_OVERRIDE) || WallBlock.isCovered(voxelShape, POST_TEST);
     }
 
     private BlockState updateSides(BlockState blockState, boolean bl, boolean bl2, boolean bl3, boolean bl4, VoxelShape voxelShape) {

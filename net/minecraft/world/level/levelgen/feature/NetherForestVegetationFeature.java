@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -27,20 +26,20 @@ extends Feature<BlockPileConfiguration> {
     }
 
     public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration, int i, int j) {
-        Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-        if (!block.is(BlockTags.NYLIUM)) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+        if (!blockState.is(BlockTags.NYLIUM)) {
             return false;
         }
         int k = blockPos.getY();
-        if (k < 1 || k + 1 >= 256) {
+        if (k < levelAccessor.getMinBuildHeight() + 1 || k + 1 >= levelAccessor.getMaxBuildHeight()) {
             return false;
         }
         int l = 0;
         for (int m = 0; m < i * i; ++m) {
             BlockPos blockPos2 = blockPos.offset(random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
-            BlockState blockState = blockPileConfiguration.stateProvider.getState(random, blockPos2);
-            if (!levelAccessor.isEmptyBlock(blockPos2) || blockPos2.getY() <= 0 || !blockState.canSurvive(levelAccessor, blockPos2)) continue;
-            levelAccessor.setBlock(blockPos2, blockState, 2);
+            BlockState blockState2 = blockPileConfiguration.stateProvider.getState(random, blockPos2);
+            if (!levelAccessor.isEmptyBlock(blockPos2) || blockPos2.getY() <= levelAccessor.getMinBuildHeight() || !blockState2.canSurvive(levelAccessor, blockPos2)) continue;
+            levelAccessor.setBlock(blockPos2, blockState2, 2);
             ++l;
         }
         return l > 0;

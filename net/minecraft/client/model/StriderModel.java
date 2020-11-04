@@ -3,75 +3,64 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Strider;
 
 @Environment(value=EnvType.CLIENT)
 public class StriderModel<T extends Strider>
-extends ListModel<T> {
+extends HierarchicalModel<T> {
+    private final ModelPart root;
     private final ModelPart rightLeg;
     private final ModelPart leftLeg;
     private final ModelPart body;
-    private final ModelPart bristle0;
-    private final ModelPart bristle1;
-    private final ModelPart bristle2;
-    private final ModelPart bristle3;
-    private final ModelPart bristle4;
-    private final ModelPart bristle5;
+    private final ModelPart rightBottomBristle;
+    private final ModelPart rightMiddleBristle;
+    private final ModelPart rightTopBristle;
+    private final ModelPart leftTopBristle;
+    private final ModelPart leftMiddleBristle;
+    private final ModelPart leftBottomBristle;
 
-    public StriderModel() {
-        this.texWidth = 64;
-        this.texHeight = 128;
-        this.rightLeg = new ModelPart(this, 0, 32);
-        this.rightLeg.setPos(-4.0f, 8.0f, 0.0f);
-        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f, 0.0f);
-        this.leftLeg = new ModelPart(this, 0, 55);
-        this.leftLeg.setPos(4.0f, 8.0f, 0.0f);
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f, 0.0f);
-        this.body = new ModelPart(this, 0, 0);
-        this.body.setPos(0.0f, 1.0f, 0.0f);
-        this.body.addBox(-8.0f, -6.0f, -8.0f, 16.0f, 14.0f, 16.0f, 0.0f);
-        this.bristle0 = new ModelPart(this, 16, 65);
-        this.bristle0.setPos(-8.0f, 4.0f, -8.0f);
-        this.bristle0.addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f, true);
-        this.setRotationAngle(this.bristle0, 0.0f, 0.0f, -1.2217305f);
-        this.bristle1 = new ModelPart(this, 16, 49);
-        this.bristle1.setPos(-8.0f, -1.0f, -8.0f);
-        this.bristle1.addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f, true);
-        this.setRotationAngle(this.bristle1, 0.0f, 0.0f, -1.134464f);
-        this.bristle2 = new ModelPart(this, 16, 33);
-        this.bristle2.setPos(-8.0f, -5.0f, -8.0f);
-        this.bristle2.addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f, true);
-        this.setRotationAngle(this.bristle2, 0.0f, 0.0f, -0.87266463f);
-        this.bristle3 = new ModelPart(this, 16, 33);
-        this.bristle3.setPos(8.0f, -6.0f, -8.0f);
-        this.bristle3.addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f);
-        this.setRotationAngle(this.bristle3, 0.0f, 0.0f, 0.87266463f);
-        this.bristle4 = new ModelPart(this, 16, 49);
-        this.bristle4.setPos(8.0f, -2.0f, -8.0f);
-        this.bristle4.addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f);
-        this.setRotationAngle(this.bristle4, 0.0f, 0.0f, 1.134464f);
-        this.bristle5 = new ModelPart(this, 16, 65);
-        this.bristle5.setPos(8.0f, 3.0f, -8.0f);
-        this.bristle5.addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, 0.0f);
-        this.setRotationAngle(this.bristle5, 0.0f, 0.0f, 1.2217305f);
-        this.body.addChild(this.bristle0);
-        this.body.addChild(this.bristle1);
-        this.body.addChild(this.bristle2);
-        this.body.addChild(this.bristle3);
-        this.body.addChild(this.bristle4);
-        this.body.addChild(this.bristle5);
+    public StriderModel(ModelPart modelPart) {
+        this.root = modelPart;
+        this.rightLeg = modelPart.getChild("right_leg");
+        this.leftLeg = modelPart.getChild("left_leg");
+        this.body = modelPart.getChild("body");
+        this.rightBottomBristle = this.body.getChild("right_bottom_bristle");
+        this.rightMiddleBristle = this.body.getChild("right_middle_bristle");
+        this.rightTopBristle = this.body.getChild("right_top_bristle");
+        this.leftTopBristle = this.body.getChild("left_top_bristle");
+        this.leftMiddleBristle = this.body.getChild("left_middle_bristle");
+        this.leftBottomBristle = this.body.getChild("left_bottom_bristle");
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f), PartPose.offset(-4.0f, 8.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 55).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f), PartPose.offset(4.0f, 8.0f, 0.0f));
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -6.0f, -8.0f, 16.0f, 14.0f, 16.0f), PartPose.offset(0.0f, 1.0f, 0.0f));
+        partDefinition2.addOrReplaceChild("right_bottom_bristle", CubeListBuilder.create().texOffs(16, 65).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, 4.0f, -8.0f, 0.0f, 0.0f, -1.2217305f));
+        partDefinition2.addOrReplaceChild("right_middle_bristle", CubeListBuilder.create().texOffs(16, 49).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -1.0f, -8.0f, 0.0f, 0.0f, -1.134464f));
+        partDefinition2.addOrReplaceChild("right_top_bristle", CubeListBuilder.create().texOffs(16, 33).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -5.0f, -8.0f, 0.0f, 0.0f, -0.87266463f));
+        partDefinition2.addOrReplaceChild("left_top_bristle", CubeListBuilder.create().texOffs(16, 33).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -6.0f, -8.0f, 0.0f, 0.0f, 0.87266463f));
+        partDefinition2.addOrReplaceChild("left_middle_bristle", CubeListBuilder.create().texOffs(16, 49).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -2.0f, -8.0f, 0.0f, 0.0f, 1.134464f));
+        partDefinition2.addOrReplaceChild("left_bottom_bristle", CubeListBuilder.create().texOffs(16, 65).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, 3.0f, -8.0f, 0.0f, 0.0f, 1.2217305f));
+        return LayerDefinition.create(meshDefinition, 64, 128);
     }
 
     @Override
     public void setupAnim(Strider strider, float f, float g, float h, float i, float j) {
         g = Math.min(0.25f, g);
-        if (strider.getPassengers().size() <= 0) {
+        if (!strider.isVehicle()) {
             this.body.xRot = j * ((float)Math.PI / 180);
             this.body.yRot = i * ((float)Math.PI / 180);
         } else {
@@ -88,38 +77,32 @@ extends ListModel<T> {
         this.rightLeg.zRot = 0.17453292f * Mth.cos(f * 1.5f * 0.5f + (float)Math.PI) * g;
         this.leftLeg.y = 8.0f + 2.0f * Mth.sin(f * 1.5f * 0.5f + (float)Math.PI) * 2.0f * g;
         this.rightLeg.y = 8.0f + 2.0f * Mth.sin(f * 1.5f * 0.5f) * 2.0f * g;
-        this.bristle0.zRot = -1.2217305f;
-        this.bristle1.zRot = -1.134464f;
-        this.bristle2.zRot = -0.87266463f;
-        this.bristle3.zRot = 0.87266463f;
-        this.bristle4.zRot = 1.134464f;
-        this.bristle5.zRot = 1.2217305f;
+        this.rightBottomBristle.zRot = -1.2217305f;
+        this.rightMiddleBristle.zRot = -1.134464f;
+        this.rightTopBristle.zRot = -0.87266463f;
+        this.leftTopBristle.zRot = 0.87266463f;
+        this.leftMiddleBristle.zRot = 1.134464f;
+        this.leftBottomBristle.zRot = 1.2217305f;
         float l = Mth.cos(f * 1.5f + (float)Math.PI) * g;
-        this.bristle0.zRot += l * 1.3f;
-        this.bristle1.zRot += l * 1.2f;
-        this.bristle2.zRot += l * 0.6f;
-        this.bristle3.zRot += l * 0.6f;
-        this.bristle4.zRot += l * 1.2f;
-        this.bristle5.zRot += l * 1.3f;
+        this.rightBottomBristle.zRot += l * 1.3f;
+        this.rightMiddleBristle.zRot += l * 1.2f;
+        this.rightTopBristle.zRot += l * 0.6f;
+        this.leftTopBristle.zRot += l * 0.6f;
+        this.leftMiddleBristle.zRot += l * 1.2f;
+        this.leftBottomBristle.zRot += l * 1.3f;
         float m = 1.0f;
         float n = 1.0f;
-        this.bristle0.zRot += 0.05f * Mth.sin(h * 1.0f * -0.4f);
-        this.bristle1.zRot += 0.1f * Mth.sin(h * 1.0f * 0.2f);
-        this.bristle2.zRot += 0.1f * Mth.sin(h * 1.0f * 0.4f);
-        this.bristle3.zRot += 0.1f * Mth.sin(h * 1.0f * 0.4f);
-        this.bristle4.zRot += 0.1f * Mth.sin(h * 1.0f * 0.2f);
-        this.bristle5.zRot += 0.05f * Mth.sin(h * 1.0f * -0.4f);
-    }
-
-    public void setRotationAngle(ModelPart modelPart, float f, float g, float h) {
-        modelPart.xRot = f;
-        modelPart.yRot = g;
-        modelPart.zRot = h;
+        this.rightBottomBristle.zRot += 0.05f * Mth.sin(h * 1.0f * -0.4f);
+        this.rightMiddleBristle.zRot += 0.1f * Mth.sin(h * 1.0f * 0.2f);
+        this.rightTopBristle.zRot += 0.1f * Mth.sin(h * 1.0f * 0.4f);
+        this.leftTopBristle.zRot += 0.1f * Mth.sin(h * 1.0f * 0.4f);
+        this.leftMiddleBristle.zRot += 0.1f * Mth.sin(h * 1.0f * 0.2f);
+        this.leftBottomBristle.zRot += 0.05f * Mth.sin(h * 1.0f * -0.4f);
     }
 
     @Override
-    public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.body, this.leftLeg, this.rightLeg);
+    public ModelPart root() {
+        return this.root;
     }
 }
 

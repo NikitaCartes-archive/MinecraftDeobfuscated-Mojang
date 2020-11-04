@@ -23,7 +23,7 @@ extends FeatureDecorator<NoneDecoratorConfiguration> {
         int j;
         int i;
         int k;
-        if (random.nextInt(700) == 0 && (k = decorationContext.getHeight(Heightmap.Types.MOTION_BLOCKING, i = random.nextInt(16) + blockPos.getX(), j = random.nextInt(16) + blockPos.getZ())) > 0) {
+        if (random.nextInt(700) == 0 && (k = decorationContext.getHeight(Heightmap.Types.MOTION_BLOCKING, i = random.nextInt(16) + blockPos.getX(), j = random.nextInt(16) + blockPos.getZ())) > decorationContext.getMinBuildHeight()) {
             int l = k + 3 + random.nextInt(7);
             return Stream.of(new BlockPos(i, l, j));
         }

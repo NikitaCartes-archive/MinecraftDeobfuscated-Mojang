@@ -89,7 +89,7 @@ extends AbstractDragonSittingPhase {
     @Override
     public void end() {
         if (this.flame != null) {
-            this.flame.remove();
+            this.flame.discard();
             this.flame = null;
         }
     }

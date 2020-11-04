@@ -198,7 +198,7 @@ extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
-        this.access.execute((level, blockPos) -> this.clearContainer(player, player.level, this.inputContainer));
+        this.access.execute((level, blockPos) -> this.clearContainer(player, this.inputContainer));
     }
 
     private void setupResultSlot() {

@@ -3,24 +3,38 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Slime;
 
 @Environment(value=EnvType.CLIENT)
 public class LavaSlimeModel<T extends Slime>
-extends ListModel<T> {
+extends HierarchicalModel<T> {
+    private final ModelPart root;
     private final ModelPart[] bodyCubes = new ModelPart[8];
-    private final ModelPart insideCube;
-    private final ImmutableList<ModelPart> parts;
 
-    public LavaSlimeModel() {
-        for (int i = 0; i < this.bodyCubes.length; ++i) {
+    public LavaSlimeModel(ModelPart modelPart) {
+        this.root = modelPart;
+        Arrays.setAll(this.bodyCubes, i -> modelPart.getChild(LavaSlimeModel.getSegmentName(i)));
+    }
+
+    private static String getSegmentName(int i) {
+        return "cube" + i;
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        for (int i = 0; i < 8; ++i) {
             int j = 0;
             int k = i;
             if (i == 2) {
@@ -30,15 +44,10 @@ extends ListModel<T> {
                 j = 24;
                 k = 19;
             }
-            this.bodyCubes[i] = new ModelPart(this, j, k);
-            this.bodyCubes[i].addBox(-4.0f, 16 + i, -4.0f, 8.0f, 1.0f, 8.0f);
+            partDefinition.addOrReplaceChild(LavaSlimeModel.getSegmentName(i), CubeListBuilder.create().texOffs(j, k).addBox(-4.0f, 16 + i, -4.0f, 8.0f, 1.0f, 8.0f), PartPose.ZERO);
         }
-        this.insideCube = new ModelPart(this, 0, 16);
-        this.insideCube.addBox(-2.0f, 18.0f, -2.0f, 4.0f, 4.0f, 4.0f);
-        ImmutableList.Builder builder = ImmutableList.builder();
-        builder.add(this.insideCube);
-        builder.addAll(Arrays.asList(this.bodyCubes));
-        this.parts = builder.build();
+        partDefinition.addOrReplaceChild("inside_cube", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0f, 18.0f, -2.0f, 4.0f, 4.0f, 4.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
@@ -56,13 +65,9 @@ extends ListModel<T> {
         }
     }
 
-    public ImmutableList<ModelPart> parts() {
-        return this.parts;
-    }
-
     @Override
-    public /* synthetic */ Iterable parts() {
-        return this.parts();
+    public ModelPart root() {
+        return this.root;
     }
 }
 

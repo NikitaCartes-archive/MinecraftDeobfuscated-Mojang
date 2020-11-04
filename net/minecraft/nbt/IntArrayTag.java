@@ -14,9 +14,7 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.nbt.TagVisitor;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag
@@ -88,14 +86,7 @@ extends CollectionTag<IntTag> {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("[I;");
-        for (int i = 0; i < this.data.length; ++i) {
-            if (i != 0) {
-                stringBuilder.append(',');
-            }
-            stringBuilder.append(this.data[i]);
-        }
-        return stringBuilder.append(']').toString();
+        return this.getAsString();
     }
 
     @Override
@@ -123,16 +114,8 @@ extends CollectionTag<IntTag> {
     }
 
     @Override
-    public Component getPrettyDisplay(String string, int i) {
-        MutableComponent component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
-        for (int j = 0; j < this.data.length; ++j) {
-            mutableComponent.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
-            if (j == this.data.length - 1) continue;
-            mutableComponent.append(",");
-        }
-        mutableComponent.append("]");
-        return mutableComponent;
+    public void accept(TagVisitor tagVisitor) {
+        tagVisitor.visitIntArray(this);
     }
 
     @Override

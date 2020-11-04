@@ -4,22 +4,22 @@
 package net.minecraft.world.level.block.entity;
 
 import java.util.Random;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class EnchantmentTableBlockEntity
 extends BlockEntity
-implements Nameable,
-TickableBlockEntity {
+implements Nameable {
     public int time;
     public float flip;
     public float oFlip;
@@ -33,8 +33,8 @@ TickableBlockEntity {
     private static final Random RANDOM = new Random();
     private Component name;
 
-    public EnchantmentTableBlockEntity() {
-        super(BlockEntityType.ENCHANTING_TABLE);
+    public EnchantmentTableBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(BlockEntityType.ENCHANTING_TABLE, blockPos, blockState);
     }
 
     @Override
@@ -47,60 +47,59 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(BlockState blockState, CompoundTag compoundTag) {
-        super.load(blockState, compoundTag);
+    public void load(CompoundTag compoundTag) {
+        super.load(compoundTag);
         if (compoundTag.contains("CustomName", 8)) {
             this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
         }
     }
 
-    @Override
-    public void tick() {
+    public static void bookAnimationTick(Level level, BlockPos blockPos, BlockState blockState, EnchantmentTableBlockEntity enchantmentTableBlockEntity) {
         float g;
-        this.oOpen = this.open;
-        this.oRot = this.rot;
-        Player player = this.level.getNearestPlayer((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5, 3.0, false);
+        enchantmentTableBlockEntity.oOpen = enchantmentTableBlockEntity.open;
+        enchantmentTableBlockEntity.oRot = enchantmentTableBlockEntity.rot;
+        Player player = level.getNearestPlayer((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 3.0, false);
         if (player != null) {
-            double d = player.getX() - ((double)this.worldPosition.getX() + 0.5);
-            double e = player.getZ() - ((double)this.worldPosition.getZ() + 0.5);
-            this.tRot = (float)Mth.atan2(e, d);
-            this.open += 0.1f;
-            if (this.open < 0.5f || RANDOM.nextInt(40) == 0) {
-                float f = this.flipT;
+            double d = player.getX() - ((double)blockPos.getX() + 0.5);
+            double e = player.getZ() - ((double)blockPos.getZ() + 0.5);
+            enchantmentTableBlockEntity.tRot = (float)Mth.atan2(e, d);
+            enchantmentTableBlockEntity.open += 0.1f;
+            if (enchantmentTableBlockEntity.open < 0.5f || RANDOM.nextInt(40) == 0) {
+                float f = enchantmentTableBlockEntity.flipT;
                 do {
-                    this.flipT += (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
-                } while (f == this.flipT);
+                    enchantmentTableBlockEntity.flipT += (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
+                } while (f == enchantmentTableBlockEntity.flipT);
             }
         } else {
-            this.tRot += 0.02f;
-            this.open -= 0.1f;
+            enchantmentTableBlockEntity.tRot += 0.02f;
+            enchantmentTableBlockEntity.open -= 0.1f;
         }
-        while (this.rot >= (float)Math.PI) {
-            this.rot -= (float)Math.PI * 2;
+        while (enchantmentTableBlockEntity.rot >= (float)Math.PI) {
+            enchantmentTableBlockEntity.rot -= (float)Math.PI * 2;
         }
-        while (this.rot < (float)(-Math.PI)) {
-            this.rot += (float)Math.PI * 2;
+        while (enchantmentTableBlockEntity.rot < (float)(-Math.PI)) {
+            enchantmentTableBlockEntity.rot += (float)Math.PI * 2;
         }
-        while (this.tRot >= (float)Math.PI) {
-            this.tRot -= (float)Math.PI * 2;
+        while (enchantmentTableBlockEntity.tRot >= (float)Math.PI) {
+            enchantmentTableBlockEntity.tRot -= (float)Math.PI * 2;
         }
-        while (this.tRot < (float)(-Math.PI)) {
-            this.tRot += (float)Math.PI * 2;
+        while (enchantmentTableBlockEntity.tRot < (float)(-Math.PI)) {
+            enchantmentTableBlockEntity.tRot += (float)Math.PI * 2;
         }
-        for (g = this.tRot - this.rot; g >= (float)Math.PI; g -= (float)Math.PI * 2) {
+        for (g = enchantmentTableBlockEntity.tRot - enchantmentTableBlockEntity.rot; g >= (float)Math.PI; g -= (float)Math.PI * 2) {
         }
         while (g < (float)(-Math.PI)) {
             g += (float)Math.PI * 2;
         }
-        this.rot += g * 0.4f;
-        this.open = Mth.clamp(this.open, 0.0f, 1.0f);
-        ++this.time;
-        this.oFlip = this.flip;
-        float h = (this.flipT - this.flip) * 0.4f;
+        enchantmentTableBlockEntity.rot += g * 0.4f;
+        enchantmentTableBlockEntity.open = Mth.clamp(enchantmentTableBlockEntity.open, 0.0f, 1.0f);
+        ++enchantmentTableBlockEntity.time;
+        enchantmentTableBlockEntity.oFlip = enchantmentTableBlockEntity.flip;
+        float h = (enchantmentTableBlockEntity.flipT - enchantmentTableBlockEntity.flip) * 0.4f;
         float i = 0.2f;
         h = Mth.clamp(h, -0.2f, 0.2f);
-        this.flipA += (h - this.flipA) * 0.9f;
-        this.flip += this.flipA;
+        enchantmentTableBlockEntity.flipA += (h - enchantmentTableBlockEntity.flipA) * 0.9f;
+        enchantmentTableBlockEntity.flip += enchantmentTableBlockEntity.flipA;
     }
 
     @Override

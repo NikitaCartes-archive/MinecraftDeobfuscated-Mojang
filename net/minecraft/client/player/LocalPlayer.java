@@ -66,7 +66,6 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ElytraItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
@@ -152,7 +151,8 @@ extends AbstractClientPlayer {
             return false;
         }
         if (entity instanceof AbstractMinecart) {
-            this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity));
+            this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity, true));
+            this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity, false));
         }
         if (entity instanceof Boat) {
             this.yRotO = entity.yRot;
@@ -265,7 +265,7 @@ extends AbstractClientPlayer {
     public boolean drop(boolean bl) {
         ServerboundPlayerActionPacket.Action action = bl ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS : ServerboundPlayerActionPacket.Action.DROP_ITEM;
         this.connection.send(new ServerboundPlayerActionPacket(action, BlockPos.ZERO, Direction.DOWN));
-        return this.inventory.removeItem(this.inventory.selected, bl && !this.inventory.getSelected().isEmpty() ? this.inventory.getSelected().getCount() : 1) != ItemStack.EMPTY;
+        return this.getInventory().removeItem(this.getInventory().selected, bl && !this.getInventory().getSelected().isEmpty() ? this.getInventory().getSelected().getCount() : 1) != ItemStack.EMPTY;
     }
 
     public void chat(String string) {
@@ -298,7 +298,7 @@ extends AbstractClientPlayer {
     }
 
     public void clientSideCloseContainer() {
-        this.inventory.setCarried(ItemStack.EMPTY);
+        this.getInventory().setCarried(ItemStack.EMPTY);
         super.closeContainer();
         this.minecraft.setScreen(null);
     }
@@ -326,7 +326,7 @@ extends AbstractClientPlayer {
 
     @Override
     public void onUpdateAbilities() {
-        this.connection.send(new ServerboundPlayerAbilitiesPacket(this.abilities));
+        this.connection.send(new ServerboundPlayerAbilitiesPacket(this.getAbilities()));
     }
 
     @Override
@@ -336,17 +336,17 @@ extends AbstractClientPlayer {
 
     @Override
     public boolean isSuppressingSlidingDownLadder() {
-        return !this.abilities.flying && super.isSuppressingSlidingDownLadder();
+        return !this.getAbilities().flying && super.isSuppressingSlidingDownLadder();
     }
 
     @Override
     public boolean canSpawnSprintParticle() {
-        return !this.abilities.flying && super.canSpawnSprintParticle();
+        return !this.getAbilities().flying && super.canSpawnSprintParticle();
     }
 
     @Override
     public boolean canSpawnSoulSpeedParticle() {
-        return !this.abilities.flying && super.canSpawnSoulSpeedParticle();
+        return !this.getAbilities().flying && super.canSpawnSoulSpeedParticle();
     }
 
     protected void sendRidingJump() {
@@ -562,8 +562,7 @@ extends AbstractClientPlayer {
 
     @Override
     public void openItemGui(ItemStack itemStack, InteractionHand interactionHand) {
-        Item item = itemStack.getItem();
-        if (item == Items.WRITABLE_BOOK) {
+        if (itemStack.is(Items.WRITABLE_BOOK)) {
             this.minecraft.setScreen(new BookEditScreen(this, itemStack, interactionHand));
         }
     }
@@ -624,7 +623,7 @@ extends AbstractClientPlayer {
         boolean bl = this.input.jumping;
         boolean bl2 = this.input.shiftKeyDown;
         boolean bl3 = this.hasEnoughImpulseToStartSprinting();
-        this.crouching = !this.abilities.flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) && (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
+        this.crouching = !this.getAbilities().flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) && (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
         this.input.tick(this.isMovingSlowly());
         this.minecraft.getTutorial().onInput(this.input);
         if (this.isUsingItem() && !this.isPassenger()) {
@@ -647,7 +646,7 @@ extends AbstractClientPlayer {
         if (bl2) {
             this.sprintTriggerTime = 0;
         }
-        boolean bl7 = bl5 = (float)this.getFoodData().getFoodLevel() > 6.0f || this.abilities.mayfly;
+        boolean bl7 = bl5 = (float)this.getFoodData().getFoodLevel() > 6.0f || this.getAbilities().mayfly;
         if (!(!this.onGround && !this.isUnderWater() || bl2 || bl3 || !this.hasEnoughImpulseToStartSprinting() || this.isSprinting() || !bl5 || this.isUsingItem() || this.hasEffect(MobEffects.BLINDNESS))) {
             if (this.sprintTriggerTime > 0 || this.minecraft.options.keySprint.isDown()) {
                 this.setSprinting(true);
@@ -671,10 +670,10 @@ extends AbstractClientPlayer {
             }
         }
         bl6 = false;
-        if (this.abilities.mayfly) {
+        if (this.getAbilities().mayfly) {
             if (this.minecraft.gameMode.isAlwaysFlying()) {
-                if (!this.abilities.flying) {
-                    this.abilities.flying = true;
+                if (!this.getAbilities().flying) {
+                    this.getAbilities().flying = true;
                     bl6 = true;
                     this.onUpdateAbilities();
                 }
@@ -682,14 +681,14 @@ extends AbstractClientPlayer {
                 if (this.jumpTriggerTime == 0) {
                     this.jumpTriggerTime = 7;
                 } else if (!this.isSwimming()) {
-                    this.abilities.flying = !this.abilities.flying;
+                    this.getAbilities().flying = !this.getAbilities().flying;
                     bl6 = true;
                     this.onUpdateAbilities();
                     this.jumpTriggerTime = 0;
                 }
             }
         }
-        if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger() && !this.onClimbable() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
+        if (this.input.jumping && !bl6 && !bl && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();
@@ -703,7 +702,7 @@ extends AbstractClientPlayer {
             this.isEyeInFluid(FluidTags.WATER);
             this.waterVisionTime = Mth.clamp(this.waterVisionTime - 10, 0, 600);
         }
-        if (this.abilities.flying && this.isControlledCamera()) {
+        if (this.getAbilities().flying && this.isControlledCamera()) {
             i = 0;
             if (this.input.shiftKeyDown) {
                 --i;
@@ -712,7 +711,7 @@ extends AbstractClientPlayer {
                 ++i;
             }
             if (i != 0) {
-                this.setDeltaMovement(this.getDeltaMovement().add(0.0, (float)i * this.abilities.getFlyingSpeed() * 3.0f, 0.0));
+                this.setDeltaMovement(this.getDeltaMovement().add(0.0, (float)i * this.getAbilities().getFlyingSpeed() * 3.0f, 0.0));
             }
         }
         if (this.isRidingJumpable()) {
@@ -738,8 +737,8 @@ extends AbstractClientPlayer {
             this.jumpRidingScale = 0.0f;
         }
         super.aiStep();
-        if (this.onGround && this.abilities.flying && !this.minecraft.gameMode.isAlwaysFlying()) {
-            this.abilities.flying = false;
+        if (this.onGround && this.getAbilities().flying && !this.minecraft.gameMode.isAlwaysFlying()) {
+            this.getAbilities().flying = false;
             this.onUpdateAbilities();
         }
     }

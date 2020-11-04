@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
@@ -77,7 +78,7 @@ public class ScreenEffectRenderer {
         float n = textureAtlasSprite.getV0();
         float o = textureAtlasSprite.getV1();
         Matrix4f matrix4f = poseStack.last().pose();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         bufferBuilder.vertex(matrix4f, -1.0f, -1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(m, o).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, -1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(l, o).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, 1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(l, n).endVertex();
@@ -102,7 +103,7 @@ public class ScreenEffectRenderer {
         float m = -minecraft.player.yRot / 64.0f;
         float n = minecraft.player.xRot / 64.0f;
         Matrix4f matrix4f = poseStack.last().pose();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         bufferBuilder.vertex(matrix4f, -1.0f, -1.0f, -0.5f).color(f, f, f, 0.1f).uv(4.0f + m, 4.0f + n).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, -1.0f, -0.5f).color(f, f, f, 0.1f).uv(0.0f + m, 4.0f + n).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, 1.0f, -0.5f).color(f, f, f, 0.1f).uv(0.0f + m, 0.0f + n).endVertex();
@@ -143,7 +144,7 @@ public class ScreenEffectRenderer {
             poseStack.translate((float)(-(r * 2 - 1)) * 0.24f, -0.3f, 0.0);
             poseStack.mulPose(Vector3f.YP.rotationDegrees((float)(r * 2 - 1) * 10.0f));
             Matrix4f matrix4f = poseStack.last().pose();
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             bufferBuilder.vertex(matrix4f, -0.5f, -0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(n, p).endVertex();
             bufferBuilder.vertex(matrix4f, 0.5f, -0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(m, p).endVertex();
             bufferBuilder.vertex(matrix4f, 0.5f, 0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(m, o).endVertex();

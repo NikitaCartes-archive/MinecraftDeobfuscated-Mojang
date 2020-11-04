@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractPiglin
 extends Monster {
     protected static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(AbstractPiglin.class, EntityDataSerializers.BOOLEAN);
-    protected int timeInOverworld = 0;
+    protected int timeInOverworld;
 
     public AbstractPiglin(EntityType<? extends AbstractPiglin> entityType, Level level) {
         super((EntityType<? extends Monster>)entityType, level);

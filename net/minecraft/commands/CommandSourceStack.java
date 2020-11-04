@@ -147,11 +147,11 @@ implements SharedSuggestionProvider {
         return new CommandSourceStack(this.source, vec3, this.rotation, serverLevel, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
     }
 
-    public CommandSourceStack facing(Entity entity, EntityAnchorArgument.Anchor anchor) throws CommandSyntaxException {
+    public CommandSourceStack facing(Entity entity, EntityAnchorArgument.Anchor anchor) {
         return this.facing(anchor.apply(entity));
     }
 
-    public CommandSourceStack facing(Vec3 vec3) throws CommandSyntaxException {
+    public CommandSourceStack facing(Vec3 vec3) {
         Vec3 vec32 = this.anchor.apply(this);
         double d = vec3.x - vec32.x;
         double e = vec3.y - vec32.y;

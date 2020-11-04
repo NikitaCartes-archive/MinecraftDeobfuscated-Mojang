@@ -15,7 +15,6 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -55,15 +54,14 @@ extends AbstractContainerMenu {
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
-                return itemStack.getItem() == Items.FILLED_MAP;
+                return itemStack.is(Items.FILLED_MAP);
             }
         });
         this.addSlot(new Slot(this.container, 1, 15, 52){
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
-                Item item = itemStack.getItem();
-                return item == Items.PAPER || item == Items.MAP || item == Items.GLASS_PANE;
+                return itemStack.is(Items.PAPER) || itemStack.is(Items.MAP) || itemStack.is(Items.GLASS_PANE);
             }
         });
         this.addSlot(new Slot(this.resultContainer, 2, 145, 39){
@@ -118,22 +116,21 @@ extends AbstractContainerMenu {
     private void setupResultSlot(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3) {
         this.access.execute((level, blockPos) -> {
             ItemStack itemStack4;
-            Item item = itemStack2.getItem();
             MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
             if (mapItemSavedData == null) {
                 return;
             }
-            if (item == Items.PAPER && !mapItemSavedData.locked && mapItemSavedData.scale < 4) {
+            if (itemStack2.is(Items.PAPER) && !mapItemSavedData.locked && mapItemSavedData.scale < 4) {
                 itemStack4 = itemStack.copy();
                 itemStack4.setCount(1);
                 itemStack4.getOrCreateTag().putInt("map_scale_direction", 1);
                 this.broadcastChanges();
-            } else if (item == Items.GLASS_PANE && !mapItemSavedData.locked) {
+            } else if (itemStack2.is(Items.GLASS_PANE) && !mapItemSavedData.locked) {
                 itemStack4 = itemStack.copy();
                 itemStack4.setCount(1);
                 itemStack4.getOrCreateTag().putBoolean("map_to_lock", true);
                 this.broadcastChanges();
-            } else if (item == Items.MAP) {
+            } else if (itemStack2.is(Items.MAP)) {
                 itemStack4 = itemStack.copy();
                 itemStack4.setCount(2);
                 this.broadcastChanges();
@@ -159,27 +156,25 @@ extends AbstractContainerMenu {
         ItemStack itemStack = ItemStack.EMPTY;
         Slot slot = (Slot)this.slots.get(i);
         if (slot != null && slot.hasItem()) {
-            ItemStack itemStack2;
-            ItemStack itemStack3 = itemStack2 = slot.getItem();
-            Item item = itemStack3.getItem();
-            itemStack = itemStack3.copy();
+            ItemStack itemStack2 = slot.getItem();
+            itemStack = itemStack2.copy();
             if (i == 2) {
-                item.onCraftedBy(itemStack3, player.level, player);
-                if (!this.moveItemStackTo(itemStack3, 3, 39, true)) {
+                itemStack2.getItem().onCraftedBy(itemStack2, player.level, player);
+                if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
                     return ItemStack.EMPTY;
                 }
-                slot.onQuickCraft(itemStack3, itemStack);
-            } else if (i == 1 || i == 0 ? !this.moveItemStackTo(itemStack3, 3, 39, false) : (item == Items.FILLED_MAP ? !this.moveItemStackTo(itemStack3, 0, 1, false) : (item == Items.PAPER || item == Items.MAP || item == Items.GLASS_PANE ? !this.moveItemStackTo(itemStack3, 1, 2, false) : (i >= 3 && i < 30 ? !this.moveItemStackTo(itemStack3, 30, 39, false) : i >= 30 && i < 39 && !this.moveItemStackTo(itemStack3, 3, 30, false))))) {
+                slot.onQuickCraft(itemStack2, itemStack);
+            } else if (i == 1 || i == 0 ? !this.moveItemStackTo(itemStack2, 3, 39, false) : (itemStack2.is(Items.FILLED_MAP) ? !this.moveItemStackTo(itemStack2, 0, 1, false) : (itemStack2.is(Items.PAPER) || itemStack2.is(Items.MAP) || itemStack2.is(Items.GLASS_PANE) ? !this.moveItemStackTo(itemStack2, 1, 2, false) : (i >= 3 && i < 30 ? !this.moveItemStackTo(itemStack2, 30, 39, false) : i >= 30 && i < 39 && !this.moveItemStackTo(itemStack2, 3, 30, false))))) {
                 return ItemStack.EMPTY;
             }
-            if (itemStack3.isEmpty()) {
+            if (itemStack2.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
             }
             slot.setChanged();
-            if (itemStack3.getCount() == itemStack.getCount()) {
+            if (itemStack2.getCount() == itemStack.getCount()) {
                 return ItemStack.EMPTY;
             }
-            slot.onTake(player, itemStack3);
+            slot.onTake(player, itemStack2);
             this.broadcastChanges();
         }
         return itemStack;
@@ -189,7 +184,7 @@ extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         this.resultContainer.removeItemNoUpdate(2);
-        this.access.execute((level, blockPos) -> this.clearContainer(player, player.level, this.container));
+        this.access.execute((level, blockPos) -> this.clearContainer(player, this.container));
     }
 }
 

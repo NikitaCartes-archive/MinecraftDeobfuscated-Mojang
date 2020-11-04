@@ -76,7 +76,7 @@ extends Feature<NoneFeatureConfiguration> {
                     blockPos2 = blockPos.offset(s, t, u);
                     BlockState blockState = worldGenLevel.getBlockState(blockPos2);
                     if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
-                        if (blockPos2.getY() >= 0 && !worldGenLevel.getBlockState(blockPos2.below()).getMaterial().isSolid()) {
+                        if (blockPos2.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2.below()).getMaterial().isSolid()) {
                             worldGenLevel.setBlock(blockPos2, AIR, 2);
                             continue;
                         }

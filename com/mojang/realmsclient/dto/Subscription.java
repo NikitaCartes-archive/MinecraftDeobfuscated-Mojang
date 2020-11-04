@@ -29,7 +29,7 @@ extends ValueObject {
             subscription.daysLeft = JsonUtils.getIntOr("daysLeft", jsonObject, 0);
             subscription.type = Subscription.typeFrom(JsonUtils.getStringOr("subscriptionType", jsonObject, SubscriptionType.NORMAL.name()));
         } catch (Exception exception) {
-            LOGGER.error("Could not parse Subscription: " + exception.getMessage());
+            LOGGER.error("Could not parse Subscription: {}", (Object)exception.getMessage());
         }
         return subscription;
     }

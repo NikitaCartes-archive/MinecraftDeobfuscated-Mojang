@@ -9,8 +9,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.HorseArmorLayer;
 import net.minecraft.client.renderer.entity.layers.HorseMarkingLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -30,10 +31,10 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
         enumMap.put(Variant.DARKBROWN, new ResourceLocation("textures/entity/horse/horse_darkbrown.png"));
     });
 
-    public HorseRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new HorseModel(0.0f), 1.1f);
+    public HorseRenderer(EntityRendererProvider.Context context) {
+        super(context, new HorseModel(context.getLayer(ModelLayers.HORSE)), 1.1f);
         this.addLayer(new HorseMarkingLayer(this));
-        this.addLayer(new HorseArmorLayer(this));
+        this.addLayer(new HorseArmorLayer(this, context.getModelSet()));
     }
 
     @Override

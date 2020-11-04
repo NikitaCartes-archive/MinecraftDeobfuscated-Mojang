@@ -166,9 +166,9 @@ extends AbstractContainerMenu {
             if (!(itemStack = this.tradeContainer.removeItemNoUpdate(1)).isEmpty()) {
                 player.drop(itemStack, false);
             }
-        } else {
-            player.inventory.placeItemBackInInventory(player.level, this.tradeContainer.removeItemNoUpdate(0));
-            player.inventory.placeItemBackInInventory(player.level, this.tradeContainer.removeItemNoUpdate(1));
+        } else if (player instanceof ServerPlayer) {
+            player.getInventory().placeItemBackInInventory(this.tradeContainer.removeItemNoUpdate(0));
+            player.getInventory().placeItemBackInInventory(this.tradeContainer.removeItemNoUpdate(1));
         }
     }
 
@@ -202,7 +202,7 @@ extends AbstractContainerMenu {
         if (!itemStack.isEmpty()) {
             for (int j = 3; j < 39; ++j) {
                 ItemStack itemStack2 = ((Slot)this.slots.get(j)).getItem();
-                if (itemStack2.isEmpty() || !this.isSameItem(itemStack, itemStack2)) continue;
+                if (itemStack2.isEmpty() || !ItemStack.isSameItemSameTags(itemStack, itemStack2)) continue;
                 ItemStack itemStack3 = this.tradeContainer.getItem(i);
                 int k = itemStack3.isEmpty() ? 0 : itemStack3.getCount();
                 int l = Math.min(itemStack.getMaxStackSize() - k, itemStack2.getCount());
@@ -214,10 +214,6 @@ extends AbstractContainerMenu {
                 if (m >= itemStack.getMaxStackSize()) break;
             }
         }
-    }
-
-    private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
-        return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
     }
 
     @Environment(value=EnvType.CLIENT)

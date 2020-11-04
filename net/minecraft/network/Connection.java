@@ -51,6 +51,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.login.ClientLoginPacketListener;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -110,7 +112,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext channelHandlerContext) throws Exception {
+    public void channelInactive(ChannelHandlerContext channelHandlerContext) {
         this.disconnect(new TranslatableComponent("disconnect.endOfStream"));
     }
 
@@ -132,7 +134,9 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             TranslatableComponent component = new TranslatableComponent("disconnect.genericReason", "Internal Exception: " + throwable);
             if (bl) {
                 LOGGER.debug("Failed to sent packet", throwable);
-                this.send(new ClientboundDisconnectPacket(component), future -> this.disconnect(component));
+                ConnectionProtocol connectionProtocol = this.getCurrentProtocol();
+                Packet<ClientLoginPacketListener> packet = connectionProtocol == ConnectionProtocol.LOGIN ? new ClientboundLoginDisconnectPacket(component) : new ClientboundDisconnectPacket(component);
+                this.send(packet, future -> this.disconnect(component));
                 this.setReadOnly();
             } else {
                 LOGGER.debug("Double fault", throwable);
@@ -142,7 +146,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet<?> packet) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet<?> packet) {
         if (this.channel.isOpen()) {
             try {
                 Connection.genericsFtw(packet, this.packetListener);
@@ -177,7 +181,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
 
     private void sendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
         ConnectionProtocol connectionProtocol = ConnectionProtocol.getProtocolForPacket(packet);
-        ConnectionProtocol connectionProtocol2 = this.channel.attr(ATTRIBUTE_PROTOCOL).get();
+        ConnectionProtocol connectionProtocol2 = this.getCurrentProtocol();
         ++this.sentPackets;
         if (connectionProtocol2 != connectionProtocol) {
             LOGGER.debug("Disabled auto read");
@@ -204,6 +208,10 @@ extends SimpleChannelInboundHandler<Packet<?>> {
                 channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             });
         }
+    }
+
+    private ConnectionProtocol getCurrentProtocol() {
+        return this.channel.attr(ATTRIBUTE_PROTOCOL).get();
     }
 
     /*
@@ -275,7 +283,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         ((Bootstrap)((Bootstrap)((Bootstrap)new Bootstrap().group(lazyLoadedValue.get())).handler(new ChannelInitializer<Channel>(){
 
             @Override
-            protected void initChannel(Channel channel) throws Exception {
+            protected void initChannel(Channel channel) {
                 try {
                     channel.config().setOption(ChannelOption.TCP_NODELAY, true);
                 } catch (ChannelException channelException) {
@@ -293,7 +301,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         ((Bootstrap)((Bootstrap)((Bootstrap)new Bootstrap().group(LOCAL_WORKER_GROUP.get())).handler(new ChannelInitializer<Channel>(){
 
             @Override
-            protected void initChannel(Channel channel) throws Exception {
+            protected void initChannel(Channel channel) {
                 channel.pipeline().addLast("packet_handler", (ChannelHandler)connection);
             }
         })).channel(LocalChannel.class)).connect(socketAddress).syncUninterruptibly();

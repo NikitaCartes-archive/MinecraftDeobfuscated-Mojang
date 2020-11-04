@@ -5,6 +5,8 @@ package net.minecraft.world.entity.ai.goal.target;
 
 import java.util.EnumSet;
 import java.util.List;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -68,7 +70,7 @@ extends TargetGoal {
     protected void alertOthers() {
         double d = this.getFollowDistance();
         AABB aABB = AABB.unitCubeFromLowerCorner(this.mob.position()).inflate(d, 10.0, d);
-        List<?> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), aABB);
+        List<Entity> list = this.mob.level.getEntitiesOfClass(this.mob.getClass(), aABB, EntitySelector.NO_SPECTATORS);
         for (Mob mob : list) {
             if (this.mob == mob || mob.getTarget() != null || this.mob instanceof TamableAnimal && ((TamableAnimal)this.mob).getOwner() != ((TamableAnimal)mob).getOwner() || mob.isAlliedTo(this.mob.getLastHurtByMob())) continue;
             if (this.toIgnoreAlert != null) {

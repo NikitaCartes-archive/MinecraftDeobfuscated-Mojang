@@ -108,7 +108,7 @@ public class MenuScreens {
     @Environment(value=EnvType.CLIENT)
     static interface ScreenConstructor<T extends AbstractContainerMenu, U extends Screen> {
         default public void fromPacket(Component component, MenuType<T> menuType, Minecraft minecraft, int i) {
-            U screen = this.create(menuType.create(i, minecraft.player.inventory), minecraft.player.inventory, component);
+            U screen = this.create(menuType.create(i, minecraft.player.getInventory()), minecraft.player.getInventory(), component);
             minecraft.player.containerMenu = ((MenuAccess)screen).getMenu();
             minecraft.setScreen((Screen)screen);
         }

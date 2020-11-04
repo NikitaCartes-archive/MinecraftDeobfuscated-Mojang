@@ -7,6 +7,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
 @Environment(value=EnvType.CLIENT)
@@ -15,37 +21,30 @@ extends HumanoidModel<T> {
     public boolean carrying;
     public boolean creepy;
 
-    public EndermanModel(float f) {
-        super(0.0f, -14.0f, 64, 32);
-        float g = -14.0f;
-        this.hat = new ModelPart(this, 0, 16);
-        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f - 0.5f);
-        this.hat.setPos(0.0f, -14.0f, 0.0f);
-        this.body = new ModelPart(this, 32, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
-        this.body.setPos(0.0f, -14.0f, 0.0f);
-        this.rightArm = new ModelPart(this, 56, 0);
-        this.rightArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 30.0f, 2.0f, f);
-        this.rightArm.setPos(-3.0f, -12.0f, 0.0f);
-        this.leftArm = new ModelPart(this, 56, 0);
-        this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 30.0f, 2.0f, f);
-        this.leftArm.setPos(5.0f, -12.0f, 0.0f);
-        this.rightLeg = new ModelPart(this, 56, 0);
-        this.rightLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 30.0f, 2.0f, f);
-        this.rightLeg.setPos(-2.0f, -2.0f, 0.0f);
-        this.leftLeg = new ModelPart(this, 56, 0);
-        this.leftLeg.mirror = true;
-        this.leftLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 30.0f, 2.0f, f);
-        this.leftLeg.setPos(2.0f, -2.0f, 0.0f);
+    public EndermanModel(ModelPart modelPart) {
+        super(modelPart);
+    }
+
+    public static LayerDefinition createBodyLayer() {
+        float f = -14.0f;
+        MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, -14.0f);
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        PartPose partPose = PartPose.offset(0.0f, -13.0f, 0.0f);
+        partDefinition.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(0, 16).addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, new CubeDeformation(-0.5f)), partPose);
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f), partPose);
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(32, 16).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f), PartPose.offset(0.0f, -14.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(56, 0).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 30.0f, 2.0f), PartPose.offset(-5.0f, -12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(56, 0).mirror().addBox(-1.0f, -2.0f, -1.0f, 2.0f, 30.0f, 2.0f), PartPose.offset(5.0f, -12.0f, 0.0f));
+        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(56, 0).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 30.0f, 2.0f), PartPose.offset(-2.0f, -5.0f, 0.0f));
+        partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(56, 0).mirror().addBox(-1.0f, 0.0f, -1.0f, 2.0f, 30.0f, 2.0f), PartPose.offset(2.0f, -5.0f, 0.0f));
+        return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
     @Override
     public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
-        float m;
         super.setupAnim(livingEntity, f, g, h, i, j);
         this.head.visible = true;
-        float k = -14.0f;
+        int k = -14;
         this.body.xRot = 0.0f;
         this.body.y = -14.0f;
         this.body.z = -0.0f;
@@ -86,8 +85,6 @@ extends HumanoidModel<T> {
             this.rightArm.zRot = 0.05f;
             this.leftArm.zRot = -0.05f;
         }
-        this.rightArm.z = 0.0f;
-        this.leftArm.z = 0.0f;
         this.rightLeg.z = 0.0f;
         this.leftLeg.z = 0.0f;
         this.rightLeg.y = -5.0f;
@@ -101,10 +98,10 @@ extends HumanoidModel<T> {
         this.hat.yRot = this.head.yRot;
         this.hat.zRot = this.head.zRot;
         if (this.creepy) {
-            m = 1.0f;
+            float m = 1.0f;
             this.head.y -= 5.0f;
         }
-        m = -14.0f;
+        int n = -14;
         this.rightArm.setPos(-5.0f, -12.0f, 0.0f);
         this.leftArm.setPos(5.0f, -12.0f, 0.0f);
     }

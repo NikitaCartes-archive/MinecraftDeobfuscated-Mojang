@@ -96,7 +96,7 @@ implements BonemealableBlock {
         boolean bl;
         int i = blockState.getValue(AGE);
         boolean bl2 = bl = i == 3;
-        if (!bl && player.getItemInHand(interactionHand).getItem() == Items.BONE_MEAL) {
+        if (!bl && player.getItemInHand(interactionHand).is(Items.BONE_MEAL)) {
             return InteractionResult.PASS;
         }
         if (i > 1) {

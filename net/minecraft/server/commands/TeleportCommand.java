@@ -102,6 +102,8 @@ public class TeleportCommand {
         if (!Level.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
         }
+        float i = Mth.wrapDegrees(g);
+        float j = Mth.wrapDegrees(h);
         if (entity instanceof ServerPlayer) {
             ChunkPos chunkPos = new ChunkPos(new BlockPos(d, e, f));
             serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, entity.getId());
@@ -110,17 +112,15 @@ public class TeleportCommand {
                 ((ServerPlayer)entity).stopSleepInBed(true, true);
             }
             if (serverLevel == entity.level) {
-                ((ServerPlayer)entity).connection.teleport(d, e, f, g, h, set);
+                ((ServerPlayer)entity).connection.teleport(d, e, f, i, j, set);
             } else {
-                ((ServerPlayer)entity).teleportTo(serverLevel, d, e, f, g, h);
+                ((ServerPlayer)entity).teleportTo(serverLevel, d, e, f, i, j);
             }
-            entity.setYHeadRot(g);
+            entity.setYHeadRot(i);
         } else {
-            float i = Mth.wrapDegrees(g);
-            float j = Mth.wrapDegrees(h);
-            j = Mth.clamp(j, -90.0f, 90.0f);
+            float k = Mth.clamp(j, -90.0f, 90.0f);
             if (serverLevel == entity.level) {
-                entity.moveTo(d, e, f, i, j);
+                entity.moveTo(d, e, f, i, k);
                 entity.setYHeadRot(i);
             } else {
                 entity.unRide();
@@ -128,10 +128,10 @@ public class TeleportCommand {
                 entity = entity2.getType().create(serverLevel);
                 if (entity != null) {
                     entity.restoreFrom(entity2);
-                    entity.moveTo(d, e, f, i, j);
+                    entity.moveTo(d, e, f, i, k);
                     entity.setYHeadRot(i);
-                    serverLevel.addFromAnotherDimension(entity);
-                    entity2.removed = true;
+                    serverLevel.addAndForceLoad(entity);
+                    entity2.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
                 } else {
                     return;
                 }

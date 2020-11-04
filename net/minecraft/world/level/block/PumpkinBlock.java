@@ -32,7 +32,7 @@ extends StemGrownBlock {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.SHEARS) {
+        if (itemStack.is(Items.SHEARS)) {
             if (!level.isClientSide) {
                 Direction direction = blockHitResult.getDirection();
                 Direction direction2 = direction.getAxis() == Direction.Axis.Y ? player2.getDirection().getOpposite() : direction;

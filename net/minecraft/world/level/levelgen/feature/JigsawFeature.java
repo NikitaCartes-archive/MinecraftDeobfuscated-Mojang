@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -46,7 +47,7 @@ extends StructureFeature<JigsawConfiguration> {
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, JigsawConfiguration jigsawConfiguration) {
-            BlockPos blockPos = new BlockPos(i * 16, this.feature.startY, j * 16);
+            BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), this.feature.startY, SectionPos.sectionToBlockCoord(j));
             Pools.bootstrap();
             JigsawPlacement.addPieces(registryAccess, jigsawConfiguration, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockPos, this.pieces, this.random, this.feature.doExpansionHack, this.feature.projectStartToHeightmap);
             this.calculateBoundingBox();

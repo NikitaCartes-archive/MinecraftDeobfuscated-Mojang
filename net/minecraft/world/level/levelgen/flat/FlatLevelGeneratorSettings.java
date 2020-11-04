@@ -22,6 +22,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.Biomes;
@@ -40,7 +41,8 @@ import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FlatLevelGeneratorSettings {
+public class FlatLevelGeneratorSettings
+implements LevelHeightAccessor {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biomes), ((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(FlatLevelGeneratorSettings::structureSettings), ((MapCodec)FlatLayerInfo.CODEC.listOf().fieldOf("layers")).forGetter(FlatLevelGeneratorSettings::getLayersInfo), ((MapCodec)Codec.BOOL.fieldOf("lakes")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes), ((MapCodec)Codec.BOOL.fieldOf("features")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration), Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(flatLevelGeneratorSettings -> Optional.of(flatLevelGeneratorSettings.biome))).apply((Applicative<FlatLevelGeneratorSettings, ?>)instance, FlatLevelGeneratorSettings::new)).stable();
     private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(Maps.newHashMap(), hashMap -> {
@@ -65,10 +67,10 @@ public class FlatLevelGeneratorSettings {
     private final StructureSettings structureSettings;
     private final List<FlatLayerInfo> layersInfo = Lists.newArrayList();
     private Supplier<Biome> biome;
-    private final BlockState[] layers = new BlockState[256];
+    private final BlockState[] layers;
     private boolean voidGen;
-    private boolean decoration = false;
-    private boolean addLakes = false;
+    private boolean decoration;
+    private boolean addLakes;
 
     public FlatLevelGeneratorSettings(Registry<Biome> registry, StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Optional<Supplier<Biome>> optional) {
         this(structureSettings, registry);
@@ -92,6 +94,7 @@ public class FlatLevelGeneratorSettings {
         this.biomes = registry;
         this.structureSettings = structureSettings;
         this.biome = () -> registry.getOrThrow(Biomes.PLAINS);
+        this.layers = new BlockState[this.getHeight()];
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -153,7 +156,8 @@ public class FlatLevelGeneratorSettings {
             BlockState blockState = blockStates[i];
             if (blockState == null || Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
             this.layers[i] = null;
-            builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)));
+            int j = this.getMinBuildHeight() + i;
+            builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(j, blockState)));
         }
         return new Biome.BiomeBuilder().precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).generationSettings(builder.build()).mobSpawnSettings(biome.getMobSettings()).build();
     }
@@ -181,7 +185,7 @@ public class FlatLevelGeneratorSettings {
 
     public void updateLayers() {
         Arrays.fill(this.layers, 0, this.layers.length, null);
-        int i = 0;
+        int i = this.getMinBuildHeight();
         for (FlatLayerInfo flatLayerInfo : this.layersInfo) {
             flatLayerInfo.setStart(i);
             i += flatLayerInfo.getHeight();
@@ -192,7 +196,7 @@ public class FlatLevelGeneratorSettings {
                 BlockState blockState = flatLayerInfo2.getBlockState();
                 if (blockState.is(Blocks.AIR)) continue;
                 this.voidGen = false;
-                this.layers[j] = blockState;
+                this.layers[this.getLayerIndex((int)j)] = blockState;
             }
         }
     }
@@ -206,6 +210,20 @@ public class FlatLevelGeneratorSettings {
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.GRASS_BLOCK));
         flatLevelGeneratorSettings.updateLayers();
         return flatLevelGeneratorSettings;
+    }
+
+    public int getLayerIndex(int i) {
+        return i - this.getMinBuildHeight();
+    }
+
+    @Override
+    public int getSectionsCount() {
+        return 16;
+    }
+
+    @Override
+    public int getMinSection() {
+        return 0;
     }
 }
 

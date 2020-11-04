@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DaylightDetectorBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +28,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public class DaylightDetectorBlock
 extends BaseEntityBlock {
@@ -53,10 +56,7 @@ extends BaseEntityBlock {
         return blockState.getValue(POWER);
     }
 
-    public static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
-        if (!level.dimensionType().hasSkyLight()) {
-            return;
-        }
+    private static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
         int i = level.getBrightness(LightLayer.SKY, blockPos) - level.getSkyDarken();
         float f = level.getSunAngle(1.0f);
         boolean bl = blockState.getValue(INVERTED);
@@ -98,8 +98,23 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-        return new DaylightDetectorBlockEntity();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new DaylightDetectorBlockEntity(blockPos, blockState);
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        if (!level.isClientSide && level.dimensionType().hasSkyLight()) {
+            return DaylightDetectorBlock.createTickerHelper(blockEntityType, BlockEntityType.DAYLIGHT_DETECTOR, DaylightDetectorBlock::tickEntity);
+        }
+        return null;
+    }
+
+    private static void tickEntity(Level level, BlockPos blockPos, BlockState blockState, DaylightDetectorBlockEntity daylightDetectorBlockEntity) {
+        if (level.getGameTime() % 20L == 0L) {
+            DaylightDetectorBlock.updateSignalStrength(blockState, level, blockPos);
+        }
     }
 
     @Override

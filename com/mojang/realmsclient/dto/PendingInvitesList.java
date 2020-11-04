@@ -34,7 +34,7 @@ extends ValueObject {
                 }
             }
         } catch (Exception exception) {
-            LOGGER.error("Could not parse PendingInvitesList: " + exception.getMessage());
+            LOGGER.error("Could not parse PendingInvitesList: {}", (Object)exception.getMessage());
         }
         return pendingInvitesList;
     }

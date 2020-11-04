@@ -20,7 +20,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -72,11 +71,7 @@ public class PoiSection {
             if (poiType2.equals(poiRecord2.getPoiType())) {
                 return false;
             }
-            String string = "POI data mismatch: already registered at " + blockPos;
-            if (SharedConstants.IS_RUNNING_IN_IDE) {
-                throw Util.pauseInIde(new IllegalStateException(string));
-            }
-            LOGGER.error(string);
+            throw Util.pauseInIde(new IllegalStateException("POI data mismatch: already registered at " + blockPos));
         }
         this.records.put(s, poiRecord);
         this.byType.computeIfAbsent(poiType2, poiType -> Sets.newHashSet()).add(poiRecord);
@@ -86,7 +81,7 @@ public class PoiSection {
     public void remove(BlockPos blockPos) {
         PoiRecord poiRecord = (PoiRecord)this.records.remove(SectionPos.sectionRelativePos(blockPos));
         if (poiRecord == null) {
-            LOGGER.error("POI data mismatch: never registered at " + blockPos);
+            LOGGER.error("POI data mismatch: never registered at {}", (Object)blockPos);
             return;
         }
         this.byType.get(poiRecord.getPoiType()).remove(poiRecord);

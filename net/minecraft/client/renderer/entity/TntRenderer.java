@@ -8,8 +8,8 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.TntMinecartRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(value=EnvType.CLIENT)
 public class TntRenderer
 extends EntityRenderer<PrimedTnt> {
-    public TntRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public TntRenderer(EntityRendererProvider.Context context) {
+        super(context);
         this.shadowRadius = 0.5f;
     }
 

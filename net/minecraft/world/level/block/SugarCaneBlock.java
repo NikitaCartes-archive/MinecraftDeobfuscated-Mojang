@@ -74,7 +74,7 @@ extends Block {
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-        if (blockState2.getBlock() == this) {
+        if (blockState2.is(this)) {
             return true;
         }
         if (blockState2.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.DIRT) || blockState2.is(Blocks.COARSE_DIRT) || blockState2.is(Blocks.PODZOL) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {

@@ -21,6 +21,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +57,14 @@ extends Entity {
         this.cause = serverPlayer;
     }
 
+    private void powerLightningRod() {
+        BlockPos blockPos = this.blockPosition().below();
+        BlockState blockState = this.level.getBlockState(blockPos);
+        if (blockState.is(Blocks.LIGHTNING_ROD)) {
+            ((LightningRodBlock)blockState.getBlock()).onLightningStrike(blockState, this.level, blockPos);
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -63,13 +73,14 @@ extends Entity {
             if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
                 this.spawnFire(4);
             }
+            this.powerLightningRod();
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0f, 0.8f + this.random.nextFloat() * 0.2f);
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0f, 0.5f + this.random.nextFloat() * 0.2f);
         }
         --this.life;
         if (this.life < 0) {
             if (this.flashes == 0) {
-                this.remove();
+                this.discard();
             } else if (this.life < -this.random.nextInt(10)) {
                 --this.flashes;
                 this.life = 1;

@@ -48,7 +48,7 @@ implements TutorialStepInstance {
         }
         if (this.timeWaiting == 1 && (localPlayer = this.tutorial.getMinecraft().player) != null) {
             for (Block block : TREE_BLOCKS) {
-                if (!localPlayer.inventory.contains(new ItemStack(block))) continue;
+                if (!localPlayer.getInventory().contains(new ItemStack(block))) continue;
                 this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
                 return;
             }
@@ -82,7 +82,7 @@ implements TutorialStepInstance {
     @Override
     public void onGetItem(ItemStack itemStack) {
         for (Block block : TREE_BLOCKS) {
-            if (itemStack.getItem() != block.asItem()) continue;
+            if (!itemStack.is(block.asItem())) continue;
             this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
             return;
         }

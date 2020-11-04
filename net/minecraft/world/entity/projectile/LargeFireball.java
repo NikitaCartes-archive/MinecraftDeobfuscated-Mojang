@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -25,11 +23,6 @@ extends Fireball {
         super((EntityType<? extends Fireball>)entityType, level);
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public LargeFireball(Level level, double d, double e, double f, double g, double h, double i) {
-        super((EntityType<? extends Fireball>)EntityType.FIREBALL, d, e, f, g, h, i, level);
-    }
-
     public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
         super((EntityType<? extends Fireball>)EntityType.FIREBALL, livingEntity, d, e, f, level);
     }
@@ -40,7 +33,7 @@ extends Fireball {
         if (!this.level.isClientSide) {
             boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
             this.level.explode(null, this.getX(), this.getY(), this.getZ(), this.explosionPower, bl, bl ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
-            this.remove();
+            this.discard();
         }
     }
 

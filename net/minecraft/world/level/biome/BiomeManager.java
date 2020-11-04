@@ -56,8 +56,16 @@ public class BiomeManager {
         return this.noiseBiomeSource.getNoiseBiome(i, j, k);
     }
 
+    public Biome getPrimaryBiomeAtChunk(int i, int j) {
+        return this.noiseBiomeSource.getPrimaryBiome(i, j);
+    }
+
     public static interface NoiseBiomeSource {
         public Biome getNoiseBiome(int var1, int var2, int var3);
+
+        default public Biome getPrimaryBiome(int i, int j) {
+            return this.getNoiseBiome((i << 2) + 2, 0, (j << 2) + 2);
+        }
     }
 }
 

@@ -123,13 +123,13 @@ implements BonemealableBlock {
         BlockPos blockPos4 = blockPos.south();
         BlockPos blockPos5 = blockPos.west();
         BlockPos blockPos6 = blockPos.east();
-        boolean bl = block == blockGetter.getBlockState(blockPos5).getBlock() || block == blockGetter.getBlockState(blockPos6).getBlock();
-        boolean bl3 = bl2 = block == blockGetter.getBlockState(blockPos3).getBlock() || block == blockGetter.getBlockState(blockPos4).getBlock();
+        boolean bl = blockGetter.getBlockState(blockPos5).is(block) || blockGetter.getBlockState(blockPos6).is(block);
+        boolean bl3 = bl2 = blockGetter.getBlockState(blockPos3).is(block) || blockGetter.getBlockState(blockPos4).is(block);
         if (bl && bl2) {
             f /= 2.0f;
         } else {
             boolean bl32;
-            boolean bl4 = bl32 = block == blockGetter.getBlockState(blockPos5.north()).getBlock() || block == blockGetter.getBlockState(blockPos6.north()).getBlock() || block == blockGetter.getBlockState(blockPos6.south()).getBlock() || block == blockGetter.getBlockState(blockPos5.south()).getBlock();
+            boolean bl4 = bl32 = blockGetter.getBlockState(blockPos5.north()).is(block) || blockGetter.getBlockState(blockPos6.north()).is(block) || blockGetter.getBlockState(blockPos6.south()).is(block) || blockGetter.getBlockState(blockPos5.south()).is(block);
             if (bl32) {
                 f /= 2.0f;
             }

@@ -37,7 +37,6 @@ extends AbstractMinecart
 implements Container,
 MenuProvider {
     private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
-    private boolean dropEquipment = true;
     @Nullable
     private ResourceLocation lootTable;
     private long lootTableSeed;
@@ -118,25 +117,18 @@ MenuProvider {
 
     @Override
     public boolean stillValid(Player player) {
-        if (this.removed) {
+        if (this.isRemoved()) {
             return false;
         }
         return !(player.distanceToSqr(this) > 64.0);
     }
 
     @Override
-    @Nullable
-    public Entity changeDimension(ServerLevel serverLevel) {
-        this.dropEquipment = false;
-        return super.changeDimension(serverLevel);
-    }
-
-    @Override
-    public void remove() {
-        if (!this.level.isClientSide && this.dropEquipment) {
+    public void remove(Entity.RemovalReason removalReason) {
+        if (!this.level.isClientSide && removalReason.shouldDestroy()) {
             Containers.dropContents(this.level, this, (Container)this);
         }
-        super.remove();
+        super.remove(removalReason);
     }
 
     @Override
@@ -180,6 +172,9 @@ MenuProvider {
         if (this.lootTable == null) {
             int i = 15 - AbstractContainerMenu.getRedstoneSignalFromContainer(this);
             f += (float)i * 0.001f;
+        }
+        if (this.isInWater()) {
+            f *= 0.95f;
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.0, f));
     }

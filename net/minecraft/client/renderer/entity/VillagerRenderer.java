@@ -7,13 +7,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.npc.Villager;
 
 @Environment(value=EnvType.CLIENT)
@@ -21,10 +21,10 @@ public class VillagerRenderer
 extends MobRenderer<Villager, VillagerModel<Villager>> {
     private static final ResourceLocation VILLAGER_BASE_SKIN = new ResourceLocation("textures/entity/villager/villager.png");
 
-    public VillagerRenderer(EntityRenderDispatcher entityRenderDispatcher, ReloadableResourceManager reloadableResourceManager) {
-        super(entityRenderDispatcher, new VillagerModel(0.0f), 0.5f);
-        this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this));
-        this.addLayer(new VillagerProfessionLayer<Villager, VillagerModel<Villager>>(this, reloadableResourceManager, "villager"));
+    public VillagerRenderer(EntityRendererProvider.Context context) {
+        super(context, new VillagerModel(context.getLayer(ModelLayers.VILLAGER)), 0.5f);
+        this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this, context.getModelSet()));
+        this.addLayer(new VillagerProfessionLayer<Villager, VillagerModel<Villager>>(this, context.getResourceManager(), "villager"));
         this.addLayer(new CrossedArmsItemLayer<Villager, VillagerModel<Villager>>(this));
     }
 

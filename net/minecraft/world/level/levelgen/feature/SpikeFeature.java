@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -61,7 +62,7 @@ extends Feature<SpikeConfiguration> {
 
     private void placeSpike(ServerLevelAccessor serverLevelAccessor, Random random, SpikeConfiguration spikeConfiguration, EndSpike endSpike) {
         int i = endSpike.getRadius();
-        for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(endSpike.getCenterX() - i, 0, endSpike.getCenterZ() - i), new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i))) {
+        for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(endSpike.getCenterX() - i, serverLevelAccessor.getMinBuildHeight(), endSpike.getCenterZ() - i), new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i))) {
             if (blockPos.distSqr(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ(), false) <= (double)(i * i + 1) && blockPos.getY() < endSpike.getHeight()) {
                 this.setBlock(serverLevelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
                 continue;
@@ -145,7 +146,7 @@ extends Feature<SpikeConfiguration> {
         }
 
         public boolean isCenterWithinChunk(BlockPos blockPos) {
-            return blockPos.getX() >> 4 == this.centerX >> 4 && blockPos.getZ() >> 4 == this.centerZ >> 4;
+            return SectionPos.blockToSectionCoord(blockPos.getX()) == SectionPos.blockToSectionCoord(this.centerX) && SectionPos.blockToSectionCoord(blockPos.getZ()) == SectionPos.blockToSectionCoord(this.centerZ);
         }
 
         public int getCenterX() {

@@ -8,14 +8,13 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -27,11 +26,11 @@ import net.minecraft.world.level.block.state.properties.PistonType;
 
 @Environment(value=EnvType.CLIENT)
 public class PistonHeadRenderer
-extends BlockEntityRenderer<PistonMovingBlockEntity> {
-    private final BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+implements BlockEntityRenderer<PistonMovingBlockEntity> {
+    private final BlockRenderDispatcher blockRenderer;
 
-    public PistonHeadRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-        super(blockEntityRenderDispatcher);
+    public PistonHeadRenderer(BlockEntityRendererProvider.Context context) {
+        this.blockRenderer = context.getBlockRenderDispatcher();
     }
 
     @Override

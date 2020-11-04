@@ -21,7 +21,7 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E piglin) {
-        return !((LivingEntity)piglin).getOffhandItem().isEmpty() && ((LivingEntity)piglin).getOffhandItem().getItem() != Items.SHIELD;
+        return !((LivingEntity)piglin).getOffhandItem().isEmpty() && !((LivingEntity)piglin).getOffhandItem().is(Items.SHIELD);
     }
 
     @Override

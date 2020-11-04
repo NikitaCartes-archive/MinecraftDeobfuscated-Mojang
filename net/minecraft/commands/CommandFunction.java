@@ -8,8 +8,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
@@ -106,13 +106,13 @@ public class CommandFunction {
         }
 
         @Override
-        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, ArrayDeque<ServerFunctionManager.QueuedCommand> arrayDeque, int i) {
+        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i) {
             this.function.get(serverFunctionManager).ifPresent(commandFunction -> {
                 Entry[] entrys = commandFunction.getEntries();
-                int j = i - arrayDeque.size();
+                int j = i - deque.size();
                 int k = Math.min(entrys.length, j);
                 for (int l = k - 1; l >= 0; --l) {
-                    arrayDeque.addFirst(new ServerFunctionManager.QueuedCommand(serverFunctionManager, commandSourceStack, entrys[l]));
+                    deque.addFirst(new ServerFunctionManager.QueuedCommand(serverFunctionManager, commandSourceStack, entrys[l]));
                 }
             });
         }
@@ -131,7 +131,7 @@ public class CommandFunction {
         }
 
         @Override
-        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, ArrayDeque<ServerFunctionManager.QueuedCommand> arrayDeque, int i) throws CommandSyntaxException {
+        public void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i) throws CommandSyntaxException {
             serverFunctionManager.getDispatcher().execute(new ParseResults<CommandSourceStack>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
         }
 
@@ -141,7 +141,7 @@ public class CommandFunction {
     }
 
     public static interface Entry {
-        public void execute(ServerFunctionManager var1, CommandSourceStack var2, ArrayDeque<ServerFunctionManager.QueuedCommand> var3, int var4) throws CommandSyntaxException;
+        public void execute(ServerFunctionManager var1, CommandSourceStack var2, Deque<ServerFunctionManager.QueuedCommand> var3, int var4) throws CommandSyntaxException;
     }
 }
 

@@ -4,10 +4,14 @@
 package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -146,6 +150,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -153,7 +158,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class EntityType<T extends Entity> {
+public class EntityType<T extends Entity>
+implements EntityTypeTest<Entity, T> {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = EntityType.register("area_effect_cloud", Builder.of(AreaEffectCloud::new, MobCategory.MISC).fireImmune().sized(6.0f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<ArmorStand> ARMOR_STAND = EntityType.register("armor_stand", Builder.of(ArmorStand::new, MobCategory.MISC).sized(0.5f, 1.975f).clientTrackingRange(10));
@@ -195,7 +201,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<ItemEntity> ITEM = EntityType.register("item", Builder.of(ItemEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(6).updateInterval(20));
     public static final EntityType<ItemFrame> ITEM_FRAME = EntityType.register("item_frame", Builder.of(ItemFrame::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<LargeFireball> FIREBALL = EntityType.register("fireball", Builder.of(LargeFireball::new, MobCategory.MISC).sized(1.0f, 1.0f).clientTrackingRange(4).updateInterval(10));
-    public static final EntityType<LeashFenceKnotEntity> LEASH_KNOT = EntityType.register("leash_knot", Builder.of(LeashFenceKnotEntity::new, MobCategory.MISC).noSave().sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
+    public static final EntityType<LeashFenceKnotEntity> LEASH_KNOT = EntityType.register("leash_knot", Builder.of(LeashFenceKnotEntity::new, MobCategory.MISC).noSave().sized(0.375f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<LightningBolt> LIGHTNING_BOLT = EntityType.register("lightning_bolt", Builder.of(LightningBolt::new, MobCategory.MISC).noSave().sized(0.0f, 0.0f).clientTrackingRange(16).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<Llama> LLAMA = EntityType.register("llama", Builder.of(Llama::new, MobCategory.CREATURE).sized(0.9f, 1.87f).clientTrackingRange(10));
     public static final EntityType<LlamaSpit> LLAMA_SPIT = EntityType.register("llama_spit", Builder.of(LlamaSpit::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
@@ -262,7 +268,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<ZombieVillager> ZOMBIE_VILLAGER = EntityType.register("zombie_villager", Builder.of(ZombieVillager::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = EntityType.register("zombified_piglin", Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<Player> PLAYER = EntityType.register("player", Builder.createNothing(MobCategory.MISC).noSave().noSummon().sized(0.6f, 1.8f).clientTrackingRange(32).updateInterval(2));
-    public static final EntityType<FishingHook> FISHING_BOBBER = EntityType.register("fishing_bobber", Builder.createNothing(MobCategory.MISC).noSave().noSummon().sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(5));
+    public static final EntityType<FishingHook> FISHING_BOBBER = EntityType.register("fishing_bobber", Builder.of(FishingHook::new, MobCategory.MISC).noSave().noSummon().sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(5));
     private final EntityFactory<T> factory;
     private final MobCategory category;
     private final ImmutableSet<Block> immuneTo;
@@ -487,6 +493,35 @@ public class EntityType<T extends Entity> {
         }).orElse(null);
     }
 
+    public static Stream<Entity> loadEntitiesRecursive(final List<? extends net.minecraft.nbt.Tag> list, final Level level) {
+        final Spliterator<? extends net.minecraft.nbt.Tag> spliterator = list.spliterator();
+        return StreamSupport.stream(new Spliterator<Entity>(){
+
+            @Override
+            public boolean tryAdvance(Consumer<? super Entity> consumer) {
+                return spliterator.tryAdvance((? super T tag) -> EntityType.loadEntityRecursive((CompoundTag)tag, level, entity -> {
+                    consumer.accept((Entity)entity);
+                    return entity;
+                }));
+            }
+
+            @Override
+            public Spliterator<Entity> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return list.size();
+            }
+
+            @Override
+            public int characteristics() {
+                return 1297;
+            }
+        }, false);
+    }
+
     private static Optional<Entity> loadStaticEntity(CompoundTag compoundTag, Level level) {
         try {
             return EntityType.create(compoundTag, level);
@@ -510,6 +545,17 @@ public class EntityType<T extends Entity> {
 
     public boolean is(Tag<EntityType<?>> tag) {
         return tag.contains(this);
+    }
+
+    @Override
+    @Nullable
+    public T tryCast(Entity entity) {
+        return (T)(entity.getType() == this ? entity : null);
+    }
+
+    @Override
+    public Class<? extends Entity> getBaseClass() {
+        return Entity.class;
     }
 
     public static interface EntityFactory<T extends Entity> {

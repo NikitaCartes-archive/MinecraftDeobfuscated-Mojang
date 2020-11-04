@@ -88,7 +88,7 @@ extends Block {
 
     @Override
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        if (!level.isClientSide && !player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == Items.SHEARS) {
+        if (!level.isClientSide && !player.getMainHandItem().isEmpty() && player.getMainHandItem().is(Items.SHEARS)) {
             level.setBlock(blockPos, (BlockState)blockState.setValue(DISARMED, true), 4);
         }
         super.playerWillDestroy(level, blockPos, blockState, player);
@@ -151,11 +151,10 @@ extends Block {
     }
 
     public boolean shouldConnectTo(BlockState blockState, Direction direction) {
-        Block block = blockState.getBlock();
-        if (block == this.hook) {
+        if (blockState.is(this.hook)) {
             return blockState.getValue(TripWireHookBlock.FACING) == direction.getOpposite();
         }
-        return block == this;
+        return blockState.is(this);
     }
 
     @Override

@@ -11,13 +11,12 @@ import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 public class Pack
 implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final PackMetadataSection BROKEN_ASSETS_FALLBACK = new PackMetadataSection(new TranslatableComponent("resourcePack.broken_assets").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), SharedConstants.getCurrentVersion().getPackVersion());
     private final String id;
     private final Supplier<PackResources> supplier;
     private final Component title;
@@ -48,12 +46,8 @@ implements AutoCloseable {
     public static Pack create(String string, boolean bl, Supplier<PackResources> supplier, PackConstructor packConstructor, Position position, PackSource packSource) {
         try (PackResources packResources = supplier.get();){
             PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
-            if (bl && packMetadataSection == null) {
-                LOGGER.error("Broken/missing pack.mcmeta detected, fudging it into existance. Please check that your launcher has downloaded all assets for the game correctly!");
-                packMetadataSection = BROKEN_ASSETS_FALLBACK;
-            }
             if (packMetadataSection != null) {
-                Pack pack = packConstructor.create(string, bl, supplier, packResources, packMetadataSection, position, packSource);
+                Pack pack = packConstructor.create(string, new TextComponent(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
                 return pack;
             }
             LOGGER.warn("Couldn't find pack meta for pack {}", (Object)string);
@@ -76,8 +70,8 @@ implements AutoCloseable {
         this.packSource = packSource;
     }
 
-    public Pack(String string, boolean bl, Supplier<PackResources> supplier, PackResources packResources, PackMetadataSection packMetadataSection, Position position, PackSource packSource) {
-        this(string, bl, supplier, new TextComponent(packResources.getName()), packMetadataSection.getDescription(), PackCompatibility.forFormat(packMetadataSection.getPackFormat()), position, false, packSource);
+    public Pack(String string, Component component, boolean bl, Supplier<PackResources> supplier, PackMetadataSection packMetadataSection, PackType packType, Position position, PackSource packSource) {
+        this(string, bl, supplier, component, packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, packType), position, false, packSource);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -174,7 +168,7 @@ implements AutoCloseable {
     @FunctionalInterface
     public static interface PackConstructor {
         @Nullable
-        public Pack create(String var1, boolean var2, Supplier<PackResources> var3, PackResources var4, PackMetadataSection var5, Position var6, PackSource var7);
+        public Pack create(String var1, Component var2, boolean var3, Supplier<PackResources> var4, PackMetadataSection var5, Position var6, PackSource var7);
     }
 }
 

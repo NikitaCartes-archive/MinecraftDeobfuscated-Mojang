@@ -241,7 +241,7 @@ public class Commands {
             commandSourceStack.sendFailure(new TranslatableComponent("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2))));
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 commandSourceStack.sendFailure(new TextComponent(Util.describeError(exception)));
-                LOGGER.error("'" + string + "' threw an exception", (Throwable)exception);
+                LOGGER.error("'{}' threw an exception", (Object)string, (Object)exception);
             }
             int n = 0;
             return n;

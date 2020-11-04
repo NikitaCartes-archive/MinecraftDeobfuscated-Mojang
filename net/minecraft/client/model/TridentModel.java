@@ -9,6 +9,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
@@ -16,29 +21,27 @@ import net.minecraft.resources.ResourceLocation;
 public class TridentModel
 extends Model {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/trident.png");
-    private final ModelPart pole = new ModelPart(32, 32, 0, 6);
+    private final ModelPart root;
 
-    public TridentModel() {
+    public TridentModel(ModelPart modelPart) {
         super(RenderType::entitySolid);
-        this.pole.addBox(-0.5f, 2.0f, -0.5f, 1.0f, 25.0f, 1.0f, 0.0f);
-        ModelPart modelPart = new ModelPart(32, 32, 4, 0);
-        modelPart.addBox(-1.5f, 0.0f, -0.5f, 3.0f, 2.0f, 1.0f);
-        this.pole.addChild(modelPart);
-        ModelPart modelPart2 = new ModelPart(32, 32, 4, 3);
-        modelPart2.addBox(-2.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f);
-        this.pole.addChild(modelPart2);
-        ModelPart modelPart3 = new ModelPart(32, 32, 0, 0);
-        modelPart3.addBox(-0.5f, -4.0f, -0.5f, 1.0f, 4.0f, 1.0f, 0.0f);
-        this.pole.addChild(modelPart3);
-        ModelPart modelPart4 = new ModelPart(32, 32, 4, 3);
-        modelPart4.mirror = true;
-        modelPart4.addBox(1.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f);
-        this.pole.addChild(modelPart4);
+        this.root = modelPart;
+    }
+
+    public static LayerDefinition createLayer() {
+        MeshDefinition meshDefinition = new MeshDefinition();
+        PartDefinition partDefinition = meshDefinition.getRoot();
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("pole", CubeListBuilder.create().texOffs(0, 6).addBox(-0.5f, 2.0f, -0.5f, 1.0f, 25.0f, 1.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("base", CubeListBuilder.create().texOffs(4, 0).addBox(-1.5f, 0.0f, -0.5f, 3.0f, 2.0f, 1.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("left_spike", CubeListBuilder.create().texOffs(4, 3).addBox(-2.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("middle_spike", CubeListBuilder.create().texOffs(0, 0).addBox(-0.5f, -4.0f, -0.5f, 1.0f, 4.0f, 1.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild("right_spike", CubeListBuilder.create().texOffs(4, 3).mirror().addBox(1.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f), PartPose.ZERO);
+        return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-        this.pole.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+        this.root.render(poseStack, vertexConsumer, i, j, f, g, h, k);
     }
 }
 

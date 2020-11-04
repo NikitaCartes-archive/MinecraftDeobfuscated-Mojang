@@ -21,7 +21,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -239,7 +239,7 @@ extends Animal {
     }
 
     @Override
-    public Ocelot getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Ocelot getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.OCELOT.create(serverLevel);
     }
 
@@ -271,7 +271,7 @@ extends Animal {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData(1.0f);
+            spawnGroupData = new AgeableMob.AgeableMobGroupData(1.0f);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -283,8 +283,8 @@ extends Animal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
     static class OcelotTemptGoal

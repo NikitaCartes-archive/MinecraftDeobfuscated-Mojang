@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -21,12 +22,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public interface EntityGetter {
-    public List<Entity> getEntities(@Nullable Entity var1, AABB var2, @Nullable Predicate<? super Entity> var3);
+    public List<Entity> getEntities(@Nullable Entity var1, AABB var2, Predicate<? super Entity> var3);
 
-    public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> var1, AABB var2, @Nullable Predicate<? super T> var3);
+    public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> var1, AABB var2, Predicate<? super T> var3);
 
-    default public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
-        return this.getEntitiesOfClass(class_, aABB, predicate);
+    default public <T extends Entity> List<T> getEntitiesOfClass(Class<T> class_, AABB aABB, Predicate<? super T> predicate) {
+        return this.getEntities(EntityTypeTest.forClass(class_), aABB, predicate);
     }
 
     public List<? extends Player> players();
@@ -40,18 +41,14 @@ public interface EntityGetter {
             return true;
         }
         for (Entity entity2 : this.getEntities(entity, voxelShape.bounds())) {
-            if (entity2.removed || !entity2.blocksBuilding || entity != null && entity2.isPassengerOfSameVehicle(entity) || !Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity2.getBoundingBox()), BooleanOp.AND)) continue;
+            if (entity2.isRemoved() || !entity2.blocksBuilding || entity != null && entity2.isPassengerOfSameVehicle(entity) || !Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity2.getBoundingBox()), BooleanOp.AND)) continue;
             return false;
         }
         return true;
     }
 
-    default public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
+    default public <T extends Entity> List<T> getEntitiesOfClass(Class<T> class_, AABB aABB) {
         return this.getEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
-    }
-
-    default public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
-        return this.getLoadedEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
     }
 
     default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
@@ -113,13 +110,8 @@ public interface EntityGetter {
     }
 
     @Nullable
-    default public <T extends LivingEntity> T getNearestEntity(Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB) {
-        return this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
-    }
-
-    @Nullable
-    default public <T extends LivingEntity> T getNearestLoadedEntity(Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB) {
-        return this.getNearestEntity(this.getLoadedEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
+    default public <T extends LivingEntity> T getNearestEntity(Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity2, double d, double e, double f, AABB aABB) {
+        return (T)this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, livingEntity -> true), targetingConditions, livingEntity2, d, e, f);
     }
 
     @Nullable
@@ -145,12 +137,12 @@ public interface EntityGetter {
         return list;
     }
 
-    default public <T extends LivingEntity> List<T> getNearbyEntities(Class<? extends T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
-        List<T> list = this.getEntitiesOfClass(class_, aABB, null);
+    default public <T extends LivingEntity> List<T> getNearbyEntities(Class<T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity2, AABB aABB) {
+        List<LivingEntity> list = this.getEntitiesOfClass(class_, aABB, livingEntity -> true);
         ArrayList<LivingEntity> list2 = Lists.newArrayList();
-        for (LivingEntity livingEntity2 : list) {
-            if (!targetingConditions.test(livingEntity, livingEntity2)) continue;
-            list2.add(livingEntity2);
+        for (LivingEntity livingEntity22 : list) {
+            if (!targetingConditions.test(livingEntity2, livingEntity22)) continue;
+            list2.add(livingEntity22);
         }
         return list2;
     }

@@ -13,9 +13,8 @@ import java.nio.file.attribute.FileAttribute;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.network.chat.Component;
+import net.minecraft.nbt.NbtUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -50,19 +49,20 @@ implements DataProvider {
     @Nullable
     public static Path convertStructure(Path path, String string, Path path2) {
         try {
-            CompoundTag compoundTag = NbtIo.readCompressed(Files.newInputStream(path, new OpenOption[0]));
-            Component component = compoundTag.getPrettyDisplay("    ", 0);
-            String string2 = component.getString() + "\n";
-            Path path3 = path2.resolve(string + ".snbt");
-            Files.createDirectories(path3.getParent(), new FileAttribute[0]);
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path3, new OpenOption[0]);){
-                bufferedWriter.write(string2);
-            }
+            NbtToSnbt.writeSnbt(path2.resolve(string + ".snbt"), NbtUtils.structureToSnbt(NbtIo.readCompressed(Files.newInputStream(path, new OpenOption[0]))));
             LOGGER.info("Converted {} from NBT to SNBT", (Object)string);
-            return path3;
+            return path2.resolve(string + ".snbt");
         } catch (IOException iOException) {
             LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", (Object)string, (Object)path, (Object)iOException);
             return null;
+        }
+    }
+
+    public static void writeSnbt(Path path, String string) throws IOException {
+        Files.createDirectories(path.getParent(), new FileAttribute[0]);
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, new OpenOption[0]);){
+            bufferedWriter.write(string);
+            bufferedWriter.write(10);
         }
     }
 }

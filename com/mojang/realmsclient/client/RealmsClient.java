@@ -345,15 +345,15 @@ public class RealmsClient {
             if (i < 200 || i >= 300) {
                 if (i == 401) {
                     String string2 = request.getHeader("WWW-Authenticate");
-                    LOGGER.info("Could not authorize you against Realms server: " + string2);
+                    LOGGER.info("Could not authorize you against Realms server: {}", (Object)string2);
                     throw new RealmsServiceException(i, string2, -1, string2);
                 }
                 if (string == null || string.length() == 0) {
-                    LOGGER.error("Realms error code: " + i + " message: " + string);
+                    LOGGER.error("Realms error code: {} message: {}", (Object)i, (Object)string);
                     throw new RealmsServiceException(i, string, i, "");
                 }
                 RealmsError realmsError = RealmsError.create(string);
-                LOGGER.error("Realms http code: " + i + " -  error code: " + realmsError.getErrorCode() + " -  message: " + realmsError.getErrorMessage() + " - raw body: " + string);
+                LOGGER.error("Realms http code: {} -  error code: {} -  message: {} - raw body: {}", (Object)i, (Object)realmsError.getErrorCode(), (Object)realmsError.getErrorMessage(), (Object)string);
                 throw new RealmsServiceException(i, string, realmsError);
             }
             return string;

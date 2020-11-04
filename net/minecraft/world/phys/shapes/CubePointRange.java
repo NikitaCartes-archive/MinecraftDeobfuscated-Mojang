@@ -10,6 +10,9 @@ extends AbstractDoubleList {
     private final int parts;
 
     CubePointRange(int i) {
+        if (i <= 0) {
+            throw new IllegalArgumentException("Need at least 1 part");
+        }
         this.parts = i;
     }
 

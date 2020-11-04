@@ -46,7 +46,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -237,7 +237,7 @@ VillagerDataHolder {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isSleeping()) {
+        if (!itemStack.is(Items.VILLAGER_SPAWN_EGG) && this.isAlive() && !this.isTrading() && !this.isSleeping()) {
             if (this.isBaby()) {
                 this.setUnhappy();
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -639,9 +639,9 @@ VillagerDataHolder {
     }
 
     @Override
-    public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Villager getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         double d = this.random.nextDouble();
-        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
+        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)ageableMob).getVillagerData().getType());
         Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
         villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
         return villager;
@@ -662,7 +662,7 @@ VillagerDataHolder {
             witch.setPersistenceRequired();
             serverLevel.addFreshEntityWithPassengers(witch);
             this.releaseAllPois();
-            this.remove();
+            this.discard();
         } else {
             super.thunderHit(serverLevel, lightningBolt);
         }
@@ -681,7 +681,7 @@ VillagerDataHolder {
             this.take(itemEntity, itemStack.getCount());
             ItemStack itemStack2 = simpleContainer.addItem(itemStack);
             if (itemStack2.isEmpty()) {
-                itemEntity.remove();
+                itemEntity.discard();
             } else {
                 itemStack.setCount(itemStack2.getCount());
             }
@@ -786,7 +786,7 @@ VillagerDataHolder {
                 serverLevel.addFreshEntityWithPassengers(ironGolem);
                 return ironGolem;
             }
-            ironGolem.remove();
+            ironGolem.discard();
         }
         return null;
     }
@@ -872,8 +872,8 @@ VillagerDataHolder {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 }
 

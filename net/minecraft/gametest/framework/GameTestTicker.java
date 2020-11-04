@@ -8,7 +8,7 @@ import java.util.Collection;
 import net.minecraft.gametest.framework.GameTestInfo;
 
 public class GameTestTicker {
-    public static final GameTestTicker singleton = new GameTestTicker();
+    public static final GameTestTicker SINGLETON = new GameTestTicker();
     private final Collection<GameTestInfo> testInfos = Lists.newCopyOnWriteArrayList();
 
     public void add(GameTestInfo gameTestInfo) {

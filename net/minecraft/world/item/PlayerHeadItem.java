@@ -24,7 +24,7 @@ extends StandingAndWallBlockItem {
 
     @Override
     public Component getName(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.PLAYER_HEAD && itemStack.hasTag()) {
+        if (itemStack.is(Items.PLAYER_HEAD) && itemStack.hasTag()) {
             CompoundTag compoundTag2;
             String string = null;
             CompoundTag compoundTag = itemStack.getTag();

@@ -34,7 +34,7 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
             return;
         }
         ItemStack itemStack = abstractClientPlayer.getItemBySlot(EquipmentSlot.CHEST);
-        if (itemStack.getItem() == Items.ELYTRA) {
+        if (itemStack.is(Items.ELYTRA)) {
             return;
         }
         poseStack.pushPose();

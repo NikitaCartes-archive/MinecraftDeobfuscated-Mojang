@@ -13,8 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -160,7 +158,7 @@ implements ItemSupplier {
     private void explode() {
         this.level.broadcastEntityEvent(this, (byte)17);
         this.dealExplosionDamage();
-        this.remove();
+        this.discard();
     }
 
     @Override
@@ -284,11 +282,6 @@ implements ItemSupplier {
     @Override
     public boolean isAttackable() {
         return false;
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 }
 

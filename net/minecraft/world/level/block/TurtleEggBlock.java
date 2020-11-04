@@ -133,7 +133,7 @@ extends Block {
 
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-        if (blockPlaceContext.getItemInHand().getItem() == this.asItem() && blockState.getValue(EGGS) < 4) {
+        if (blockPlaceContext.getItemInHand().is(this.asItem()) && blockState.getValue(EGGS) < 4) {
             return true;
         }
         return super.canBeReplaced(blockState, blockPlaceContext);

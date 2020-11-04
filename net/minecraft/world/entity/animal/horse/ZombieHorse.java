@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -61,7 +61,7 @@ extends AbstractHorse {
 
     @Override
     @Nullable
-    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.ZOMBIE_HORSE.create(serverLevel);
     }
 
@@ -82,7 +82,7 @@ extends AbstractHorse {
             return super.mobInteract(player, interactionHand);
         }
         if (!itemStack.isEmpty()) {
-            if (itemStack.getItem() == Items.SADDLE && !this.isSaddled()) {
+            if (itemStack.is(Items.SADDLE) && !this.isSaddled()) {
                 this.openInventory(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }

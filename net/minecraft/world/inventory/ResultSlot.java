@@ -80,7 +80,7 @@ extends Slot {
                 this.craftSlots.setItem(i, itemStack3);
                 continue;
             }
-            if (this.player.inventory.add(itemStack3)) continue;
+            if (this.player.getInventory().add(itemStack3)) continue;
             this.player.drop(itemStack3, false);
         }
         return itemStack;

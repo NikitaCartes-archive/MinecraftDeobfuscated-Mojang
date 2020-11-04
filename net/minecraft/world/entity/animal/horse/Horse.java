@@ -17,7 +17,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
@@ -203,7 +203,7 @@ extends AbstractHorse {
                 this.makeMad();
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
-            boolean bl2 = bl = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+            boolean bl2 = bl = !this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE);
             if (this.isArmor(itemStack) || bl) {
                 this.openInventory(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -228,12 +228,12 @@ extends AbstractHorse {
     }
 
     @Override
-    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         AbstractHorse abstractHorse;
-        if (agableMob instanceof Donkey) {
+        if (ageableMob instanceof Donkey) {
             abstractHorse = EntityType.MULE.create(serverLevel);
         } else {
-            Horse horse = (Horse)agableMob;
+            Horse horse = (Horse)ageableMob;
             abstractHorse = EntityType.HORSE.create(serverLevel);
             int i = this.random.nextInt(9);
             Variant variant = i < 4 ? this.getVariant() : (i < 8 ? horse.getVariant() : Util.getRandom(Variant.values(), this.random));
@@ -241,7 +241,7 @@ extends AbstractHorse {
             Markings markings = j < 2 ? this.getMarkings() : (j < 4 ? horse.getMarkings() : Util.getRandom(Markings.values(), this.random));
             ((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
         }
-        this.setOffspringAttributes(agableMob, abstractHorse);
+        this.setOffspringAttributes(ageableMob, abstractHorse);
         return abstractHorse;
     }
 
@@ -270,7 +270,7 @@ extends AbstractHorse {
     }
 
     public static class HorseGroupData
-    extends AgableMob.AgableMobGroupData {
+    extends AgeableMob.AgeableMobGroupData {
         public final Variant variant;
 
         public HorseGroupData(Variant variant) {

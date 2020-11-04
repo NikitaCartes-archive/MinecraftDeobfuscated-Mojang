@@ -64,7 +64,7 @@ implements DataProvider {
         map.forEach((resourceLocation, lootTable) -> LootTables.validate(validationContext, resourceLocation, lootTable));
         Multimap<String, String> multimap = validationContext.getProblems();
         if (!multimap.isEmpty()) {
-            multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+            multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
             throw new IllegalStateException("Failed to validate loot tables, see logs");
         }
         map.forEach((resourceLocation, lootTable) -> {

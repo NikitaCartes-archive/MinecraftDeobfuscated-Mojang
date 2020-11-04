@@ -35,22 +35,29 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
 
     @Override
     protected int getLightValue(long l) {
+        return this.getLightValue(l, false);
+    }
+
+    protected int getLightValue(long l, boolean bl) {
         long m = SectionPos.blockToSection(l);
         int i = SectionPos.y(m);
-        SkyDataLayerStorageMap skyDataLayerStorageMap = (SkyDataLayerStorageMap)this.visibleSectionData;
+        SkyDataLayerStorageMap skyDataLayerStorageMap = bl ? (SkyDataLayerStorageMap)this.updatingSectionData : (SkyDataLayerStorageMap)this.visibleSectionData;
         int j = skyDataLayerStorageMap.topSections.get(SectionPos.getZeroNode(m));
         if (j == skyDataLayerStorageMap.currentLowestY || i >= j) {
+            if (bl && !this.lightOnInSection(m)) {
+                return 0;
+            }
             return 15;
         }
         DataLayer dataLayer = this.getDataLayer(skyDataLayerStorageMap, m);
         if (dataLayer == null) {
             l = BlockPos.getFlatIndex(l);
             while (dataLayer == null) {
-                m = SectionPos.offset(m, Direction.UP);
                 if (++i >= j) {
                     return 15;
                 }
                 l = BlockPos.offset(l, 0, 16, 0);
+                m = SectionPos.offset(m, Direction.UP);
                 dataLayer = this.getDataLayer(skyDataLayerStorageMap, m);
             }
         }
@@ -220,8 +227,8 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
                     }
                     for (int s = 0; s < 16; ++s) {
                         for (int t = 0; t < 16; ++t) {
-                            long u = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l)) + s, SectionPos.sectionToBlockCoord(SectionPos.y(l)), SectionPos.sectionToBlockCoord(SectionPos.z(l)) + t);
-                            n = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l)) + s, SectionPos.sectionToBlockCoord(SectionPos.y(l)) - 1, SectionPos.sectionToBlockCoord(SectionPos.z(l)) + t);
+                            long u = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l), s), SectionPos.sectionToBlockCoord(SectionPos.y(l)), SectionPos.sectionToBlockCoord(SectionPos.z(l), t));
+                            n = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l), s), SectionPos.sectionToBlockCoord(SectionPos.y(l)) - 1, SectionPos.sectionToBlockCoord(SectionPos.z(l), t));
                             layerLightEngine.checkEdge(u, n, layerLightEngine.computeLevelFromNeighbor(u, n, 0), true);
                         }
                     }
@@ -229,7 +236,7 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
                 }
                 for (j = 0; j < 16; ++j) {
                     for (k = 0; k < 16; ++k) {
-                        long v = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l)) + j, SectionPos.sectionToBlockCoord(SectionPos.y(l)) + 16 - 1, SectionPos.sectionToBlockCoord(SectionPos.z(l)) + k);
+                        long v = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l), j), SectionPos.sectionToBlockCoord(SectionPos.y(l), 15), SectionPos.sectionToBlockCoord(SectionPos.z(l), k));
                         layerLightEngine.checkEdge(Long.MAX_VALUE, v, 0, true);
                     }
                 }
@@ -243,7 +250,7 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
                 if (!this.sectionsWithSources.remove(l) || !this.storingLightForSection(l)) continue;
                 for (i = 0; i < 16; ++i) {
                     for (j = 0; j < 16; ++j) {
-                        long w = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l)) + i, SectionPos.sectionToBlockCoord(SectionPos.y(l)) + 16 - 1, SectionPos.sectionToBlockCoord(SectionPos.z(l)) + j);
+                        long w = BlockPos.asLong(SectionPos.sectionToBlockCoord(SectionPos.x(l), i), SectionPos.sectionToBlockCoord(SectionPos.y(l), 15), SectionPos.sectionToBlockCoord(SectionPos.z(l), j));
                         layerLightEngine.checkEdge(Long.MAX_VALUE, w, 15, false);
                     }
                 }
@@ -255,20 +262,6 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
 
     protected boolean hasSectionsBelow(int i) {
         return i >= ((SkyDataLayerStorageMap)this.updatingSectionData).currentLowestY;
-    }
-
-    protected boolean hasLightSource(long l) {
-        int i = BlockPos.getY(l);
-        if ((i & 0xF) != 15) {
-            return false;
-        }
-        long m = SectionPos.blockToSection(l);
-        long n = SectionPos.getZeroNode(m);
-        if (!this.columnsWithSkySources.contains(n)) {
-            return false;
-        }
-        int j = ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.get(n);
-        return SectionPos.sectionToBlockCoord(j) == i + 16;
     }
 
     protected boolean isAboveData(long l) {

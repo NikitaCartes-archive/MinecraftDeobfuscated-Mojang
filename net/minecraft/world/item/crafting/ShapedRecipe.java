@@ -174,6 +174,13 @@ implements CraftingRecipe {
         return strings2;
     }
 
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public boolean isIncomplete() {
+        NonNullList<Ingredient> nonNullList = this.getIngredients();
+        return nonNullList.isEmpty() || nonNullList.stream().filter(ingredient -> !ingredient.isEmpty()).anyMatch(ingredient -> ingredient.getItems().length == 0);
+    }
+
     private static int firstNonSpace(String string) {
         int i;
         for (i = 0; i < string.length() && string.charAt(i) == ' '; ++i) {

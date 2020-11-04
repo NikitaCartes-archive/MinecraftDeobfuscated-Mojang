@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -207,7 +208,7 @@ extends Screen {
             this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
             this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
         }
-        int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.inventory.selected : 40;
+        int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
         this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, i));
     }
 
@@ -436,7 +437,7 @@ extends Screen {
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         for (Rect2i rect2i : rect2is) {
             int i = rect2i.getX();
             int j = rect2i.getY();

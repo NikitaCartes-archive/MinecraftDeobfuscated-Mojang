@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.CartographyTableMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -46,14 +45,14 @@ extends AbstractContainerScreen<CartographyTableMenu> {
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-        Item item = ((CartographyTableMenu)this.menu).getSlot(1).getItem().getItem();
-        boolean bl = item == Items.MAP;
-        boolean bl2 = item == Items.PAPER;
-        boolean bl3 = item == Items.GLASS_PANE;
-        ItemStack itemStack = ((CartographyTableMenu)this.menu).getSlot(0).getItem();
+        ItemStack itemStack = ((CartographyTableMenu)this.menu).getSlot(1).getItem();
+        boolean bl = itemStack.is(Items.MAP);
+        boolean bl2 = itemStack.is(Items.PAPER);
+        boolean bl3 = itemStack.is(Items.GLASS_PANE);
+        ItemStack itemStack2 = ((CartographyTableMenu)this.menu).getSlot(0).getItem();
         boolean bl4 = false;
-        if (itemStack.getItem() == Items.FILLED_MAP) {
-            mapItemSavedData = MapItem.getSavedData(itemStack, this.minecraft.level);
+        if (itemStack2.is(Items.FILLED_MAP)) {
+            mapItemSavedData = MapItem.getSavedData(itemStack2, this.minecraft.level);
             if (mapItemSavedData != null) {
                 if (mapItemSavedData.locked) {
                     bl4 = true;

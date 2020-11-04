@@ -12,8 +12,8 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -31,7 +31,7 @@ public final class LevelStem {
     public static final ResourceKey<LevelStem> OVERWORLD = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<LevelStem> NETHER = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("the_nether"));
     public static final ResourceKey<LevelStem> END = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, new ResourceLocation("the_end"));
-    private static final LinkedHashSet<ResourceKey<LevelStem>> BUILTIN_ORDER = Sets.newLinkedHashSet(ImmutableList.of(OVERWORLD, NETHER, END));
+    private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = Sets.newLinkedHashSet(ImmutableList.of(OVERWORLD, NETHER, END));
     private final Supplier<DimensionType> type;
     private final ChunkGenerator generator;
 
@@ -54,7 +54,7 @@ public final class LevelStem {
 
     public static MappedRegistry<LevelStem> sortMap(MappedRegistry<LevelStem> mappedRegistry) {
         MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
-        for (ResourceKey resourceKey : BUILTIN_ORDER) {
+        for (ResourceKey<LevelStem> resourceKey : BUILTIN_ORDER) {
             LevelStem levelStem = mappedRegistry.get(resourceKey);
             if (levelStem == null) continue;
             mappedRegistry2.register(resourceKey, levelStem, mappedRegistry.lifecycle(levelStem));

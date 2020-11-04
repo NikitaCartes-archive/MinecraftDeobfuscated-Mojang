@@ -19,6 +19,7 @@ public class AngleArgument
 implements ArgumentType<SingleAngle> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0", "~", "~-5");
     public static final SimpleCommandExceptionType ERROR_NOT_COMPLETE = new SimpleCommandExceptionType(new TranslatableComponent("argument.angle.incomplete"));
+    public static final SimpleCommandExceptionType ERROR_INVALID_ANGLE = new SimpleCommandExceptionType(new TranslatableComponent("argument.angle.invalid"));
 
     public static AngleArgument angle() {
         return new AngleArgument();
@@ -30,11 +31,15 @@ implements ArgumentType<SingleAngle> {
 
     @Override
     public SingleAngle parse(StringReader stringReader) throws CommandSyntaxException {
+        float f;
         if (!stringReader.canRead()) {
             throw ERROR_NOT_COMPLETE.createWithContext(stringReader);
         }
         boolean bl = WorldCoordinate.isRelative(stringReader);
-        float f = stringReader.canRead() && stringReader.peek() != ' ' ? stringReader.readFloat() : 0.0f;
+        float f2 = f = stringReader.canRead() && stringReader.peek() != ' ' ? stringReader.readFloat() : 0.0f;
+        if (Float.isNaN(f) || Float.isInfinite(f)) {
+            throw ERROR_INVALID_ANGLE.createWithContext(stringReader);
+        }
         return new SingleAngle(f, bl);
     }
 

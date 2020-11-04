@@ -7,7 +7,7 @@ import java.util.EnumSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveTowardsTargetGoal
@@ -36,7 +36,7 @@ extends Goal {
         if (this.target.distanceToSqr(this.mob) > (double)(this.within * this.within)) {
             return false;
         }
-        Vec3 vec3 = RandomPos.getPosTowards(this.mob, 16, 7, this.target.position());
+        Vec3 vec3 = DefaultRandomPos.getPosTowards(this.mob, 16, 7, this.target.position(), 1.5707963705062866);
         if (vec3 == null) {
             return false;
         }

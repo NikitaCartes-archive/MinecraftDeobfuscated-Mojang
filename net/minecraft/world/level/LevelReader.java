@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -118,7 +119,7 @@ BiomeManager.NoiseBiomeSource {
     }
 
     default public ChunkAccess getChunk(BlockPos blockPos) {
-        return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     default public ChunkAccess getChunk(int i, int j) {
@@ -172,7 +173,7 @@ BiomeManager.NoiseBiomeSource {
 
     @Deprecated
     default public boolean hasChunkAt(BlockPos blockPos) {
-        return this.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     @Deprecated
@@ -182,7 +183,7 @@ BiomeManager.NoiseBiomeSource {
 
     @Deprecated
     default public boolean hasChunksAt(int i, int j, int k, int l, int m, int n) {
-        if (m < 0 || j >= 256) {
+        if (m < this.getMinBuildHeight() || j >= this.getMaxBuildHeight()) {
             return false;
         }
         k >>= 4;

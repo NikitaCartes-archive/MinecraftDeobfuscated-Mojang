@@ -36,6 +36,7 @@ public class ItemModelGenerators {
     public void run() {
         int i;
         this.generateFlatItem(Items.ACACIA_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.AMETHYST_SHARD, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.APPLE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.ARMOR_STAND, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.ARROW, ModelTemplates.FLAT_ITEM);
@@ -85,6 +86,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.COOKED_RABBIT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.COOKED_SALMON, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.COOKIE, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.COPPER_INGOT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.CREEPER_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.CYAN_DYE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.DARK_OAK_BOAT, ModelTemplates.FLAT_ITEM);

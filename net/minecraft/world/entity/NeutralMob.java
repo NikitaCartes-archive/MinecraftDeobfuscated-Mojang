@@ -36,15 +36,18 @@ public interface NeutralMob {
         }
     }
 
-    default public void readPersistentAngerSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+    default public void readPersistentAngerSaveData(Level level, CompoundTag compoundTag) {
         this.setRemainingPersistentAngerTime(compoundTag.getInt("AngerTime"));
+        if (!(level instanceof ServerLevel)) {
+            return;
+        }
         if (!compoundTag.hasUUID("AngryAt")) {
             this.setPersistentAngerTarget(null);
             return;
         }
         UUID uUID = compoundTag.getUUID("AngryAt");
         this.setPersistentAngerTarget(uUID);
-        Entity entity = serverLevel.getEntity(uUID);
+        Entity entity = ((ServerLevel)level).getEntity(uUID);
         if (entity == null) {
             return;
         }

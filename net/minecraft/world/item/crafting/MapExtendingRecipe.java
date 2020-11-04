@@ -30,7 +30,7 @@ extends ShapedRecipe {
         ItemStack itemStack = ItemStack.EMPTY;
         for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); ++i) {
             ItemStack itemStack2 = craftingContainer.getItem(i);
-            if (itemStack2.getItem() != Items.FILLED_MAP) continue;
+            if (!itemStack2.is(Items.FILLED_MAP)) continue;
             itemStack = itemStack2;
         }
         if (itemStack.isEmpty()) {
@@ -61,7 +61,7 @@ extends ShapedRecipe {
         ItemStack itemStack = ItemStack.EMPTY;
         for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); ++i) {
             ItemStack itemStack2 = craftingContainer.getItem(i);
-            if (itemStack2.getItem() != Items.FILLED_MAP) continue;
+            if (!itemStack2.is(Items.FILLED_MAP)) continue;
             itemStack = itemStack2;
         }
         itemStack = itemStack.copy();

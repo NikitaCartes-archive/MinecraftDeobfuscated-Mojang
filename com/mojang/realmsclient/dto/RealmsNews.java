@@ -25,7 +25,7 @@ extends ValueObject {
             JsonObject jsonObject = jsonParser.parse(string).getAsJsonObject();
             realmsNews.newsLink = JsonUtils.getStringOr("newsLink", jsonObject, null);
         } catch (Exception exception) {
-            LOGGER.error("Could not parse RealmsNews: " + exception.getMessage());
+            LOGGER.error("Could not parse RealmsNews: {}", (Object)exception.getMessage());
         }
         return realmsNews;
     }

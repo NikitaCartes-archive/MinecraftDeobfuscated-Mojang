@@ -9,8 +9,9 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ChestedHorseModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,8 +22,8 @@ public class ChestedHorseRenderer<T extends AbstractChestedHorse>
 extends AbstractHorseRenderer<T, ChestedHorseModel<T>> {
     private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.newHashMap(ImmutableMap.of(EntityType.DONKEY, new ResourceLocation("textures/entity/horse/donkey.png"), EntityType.MULE, new ResourceLocation("textures/entity/horse/mule.png")));
 
-    public ChestedHorseRenderer(EntityRenderDispatcher entityRenderDispatcher, float f) {
-        super(entityRenderDispatcher, new ChestedHorseModel(0.0f), f);
+    public ChestedHorseRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
+        super(context, new ChestedHorseModel(context.getLayer(modelLayerLocation)), f);
     }
 
     @Override

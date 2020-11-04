@@ -9,7 +9,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,11 +29,11 @@ extends BaseFireBlock {
 
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-        return SoulFireBlock.canSurviveOnBlock(levelReader.getBlockState(blockPos.below()).getBlock());
+        return SoulFireBlock.canSurviveOnBlock(levelReader.getBlockState(blockPos.below()));
     }
 
-    public static boolean canSurviveOnBlock(Block block) {
-        return block.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
+    public static boolean canSurviveOnBlock(BlockState blockState) {
+        return blockState.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
     }
 
     @Override

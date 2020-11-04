@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -185,7 +186,7 @@ implements Widget {
             this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             float g = 32.0f;
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             bufferBuilder.vertex(this.x0, this.y1, 0.0).uv((float)this.x0 / 32.0f, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
             bufferBuilder.vertex(this.x1, this.y1, 0.0).uv((float)this.x1 / 32.0f, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
             bufferBuilder.vertex(this.x1, this.y0, 0.0).uv((float)this.x1 / 32.0f, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
@@ -204,7 +205,7 @@ implements Widget {
             RenderSystem.depthFunc(519);
             float h = 32.0f;
             o = -100;
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             bufferBuilder.vertex(this.x0, this.y0, -100.0).uv(0.0f, (float)this.y0 / 32.0f).color(64, 64, 64, 255).endVertex();
             bufferBuilder.vertex(this.x0 + this.width, this.y0, -100.0).uv((float)this.width / 32.0f, (float)this.y0 / 32.0f).color(64, 64, 64, 255).endVertex();
             bufferBuilder.vertex(this.x0 + this.width, 0.0, -100.0).uv((float)this.width / 32.0f, 0.0f).color(64, 64, 64, 255).endVertex();
@@ -222,7 +223,7 @@ implements Widget {
             RenderSystem.shadeModel(7425);
             RenderSystem.disableTexture();
             p = 4;
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 0).endVertex();
             bufferBuilder.vertex(this.x1, this.y0 + 4, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 0).endVertex();
             bufferBuilder.vertex(this.x1, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
@@ -241,7 +242,7 @@ implements Widget {
             if (p < this.y0) {
                 p = this.y0;
             }
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 255).endVertex();
             bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 255).endVertex();
             bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
@@ -429,14 +430,14 @@ implements Widget {
                 RenderSystem.disableTexture();
                 float g = this.isFocused() ? 1.0f : 0.5f;
                 RenderSystem.color4f(g, g, g, 1.0f);
-                bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
                 bufferBuilder.vertex(t, q + r + 2, 0.0).endVertex();
                 bufferBuilder.vertex(u, q + r + 2, 0.0).endVertex();
                 bufferBuilder.vertex(u, q - 2, 0.0).endVertex();
                 bufferBuilder.vertex(t, q - 2, 0.0).endVertex();
                 tesselator.end();
                 RenderSystem.color4f(0.0f, 0.0f, 0.0f, 1.0f);
-                bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
                 bufferBuilder.vertex(t + 1, q + r + 1, 0.0).endVertex();
                 bufferBuilder.vertex(u - 1, q + r + 1, 0.0).endVertex();
                 bufferBuilder.vertex(u - 1, q - 1, 0.0).endVertex();

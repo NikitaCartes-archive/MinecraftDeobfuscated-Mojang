@@ -109,7 +109,7 @@ implements ServerInterface {
         thread.setDaemon(true);
         thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
         thread.start();
-        LOGGER.info("Starting minecraft server version " + SharedConstants.getCurrentVersion().getName());
+        LOGGER.info("Starting minecraft server version {}", (Object)SharedConstants.getCurrentVersion().getName());
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             LOGGER.warn("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
         }
@@ -545,6 +545,11 @@ implements ServerInterface {
             return this.textFilterClient.createContext(serverPlayer.getGameProfile());
         }
         return null;
+    }
+
+    @Override
+    public boolean isResourcePackRequired() {
+        return this.settings.getProperties().requireResourcePack;
     }
 
     @Override

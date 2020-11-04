@@ -185,7 +185,7 @@ implements Enemy {
     }
 
     @Override
-    public void remove() {
+    public void remove(Entity.RemovalReason removalReason) {
         int i = this.getSize();
         if (!this.level.isClientSide && i > 1 && this.isDeadOrDying()) {
             Component component = this.getCustomName();
@@ -208,7 +208,7 @@ implements Enemy {
                 this.level.addFreshEntity(slime);
             }
         }
-        super.remove();
+        super.remove(removalReason);
     }
 
     @Override
@@ -431,7 +431,7 @@ implements Enemy {
             if (!livingEntity.isAlive()) {
                 return false;
             }
-            if (livingEntity instanceof Player && ((Player)livingEntity).abilities.invulnerable) {
+            if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
                 return false;
             }
             return this.slime.getMoveControl() instanceof SlimeMoveControl;
@@ -452,7 +452,7 @@ implements Enemy {
             if (!livingEntity.isAlive()) {
                 return false;
             }
-            if (livingEntity instanceof Player && ((Player)livingEntity).abilities.invulnerable) {
+            if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
                 return false;
             }
             return --this.growTiredTimer > 0;

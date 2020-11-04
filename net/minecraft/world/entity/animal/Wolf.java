@@ -22,7 +22,7 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -146,7 +146,7 @@ implements NeutralMob {
         if (compoundTag.contains("CollarColor", 99)) {
             this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
         }
-        this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
+        this.readPersistentAngerSaveData(this.level, compoundTag);
     }
 
     @Override
@@ -328,12 +328,12 @@ implements NeutralMob {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
         if (this.level.isClientSide) {
-            boolean bl = this.isOwnedBy(player) || this.isTame() || item == Items.BONE && !this.isTame() && !this.isAngry();
+            boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
             return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
         }
         if (this.isTame()) {
             if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
                 this.heal(item.getFoodProperties().getNutrition());
@@ -343,7 +343,7 @@ implements NeutralMob {
                 DyeColor dyeColor = ((DyeItem)item).getDyeColor();
                 if (dyeColor == this.getCollarColor()) return super.mobInteract(player, interactionHand);
                 this.setCollarColor(dyeColor);
-                if (player.abilities.instabuild) return InteractionResult.SUCCESS;
+                if (player.getAbilities().instabuild) return InteractionResult.SUCCESS;
                 itemStack.shrink(1);
                 return InteractionResult.SUCCESS;
             }
@@ -355,8 +355,8 @@ implements NeutralMob {
             this.setTarget(null);
             return InteractionResult.SUCCESS;
         }
-        if (item != Items.BONE || this.isAngry()) return super.mobInteract(player, interactionHand);
-        if (!player.abilities.instabuild) {
+        if (!itemStack.is(Items.BONE) || this.isAngry()) return super.mobInteract(player, interactionHand);
+        if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
         if (this.random.nextInt(3) == 0) {
@@ -443,7 +443,7 @@ implements NeutralMob {
     }
 
     @Override
-    public Wolf getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+    public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Wolf wolf = EntityType.WOLF.create(serverLevel);
         UUID uUID = this.getOwnerUUID();
         if (uUID != null) {
@@ -512,8 +512,8 @@ implements NeutralMob {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-        return this.getBreedOffspring(serverLevel, agableMob);
+    public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
     class WolfAvoidEntityGoal<T extends LivingEntity>

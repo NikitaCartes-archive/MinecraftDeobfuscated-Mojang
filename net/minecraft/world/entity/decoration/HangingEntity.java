@@ -87,13 +87,11 @@ extends Entity {
     @Override
     public void tick() {
         if (!this.level.isClientSide) {
-            if (this.getY() < -64.0) {
-                this.outOfWorld();
-            }
+            this.checkOutOfWorld();
             if (this.checkInterval++ == 100) {
                 this.checkInterval = 0;
-                if (!this.removed && !this.survives()) {
-                    this.remove();
+                if (!this.isRemoved() && !this.survives()) {
+                    this.discard();
                     this.dropItem(null);
                 }
             }
@@ -149,8 +147,8 @@ extends Entity {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (!this.removed && !this.level.isClientSide) {
-            this.remove();
+        if (!this.isRemoved() && !this.level.isClientSide) {
+            this.kill();
             this.markHurt();
             this.dropItem(damageSource.getEntity());
         }
@@ -159,16 +157,16 @@ extends Entity {
 
     @Override
     public void move(MoverType moverType, Vec3 vec3) {
-        if (!this.level.isClientSide && !this.removed && vec3.lengthSqr() > 0.0) {
-            this.remove();
+        if (!this.level.isClientSide && !this.isRemoved() && vec3.lengthSqr() > 0.0) {
+            this.kill();
             this.dropItem(null);
         }
     }
 
     @Override
     public void push(double d, double e, double f) {
-        if (!this.level.isClientSide && !this.removed && d * d + e * e + f * f > 0.0) {
-            this.remove();
+        if (!this.level.isClientSide && !this.isRemoved() && d * d + e * e + f * f > 0.0) {
+            this.kill();
             this.dropItem(null);
         }
     }

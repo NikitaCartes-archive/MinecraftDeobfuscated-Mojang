@@ -9,10 +9,11 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerBulletModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -24,10 +25,11 @@ public class ShulkerBulletRenderer
 extends EntityRenderer<ShulkerBullet> {
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/shulker/spark.png");
     private static final RenderType RENDER_TYPE = RenderType.entityTranslucent(TEXTURE_LOCATION);
-    private final ShulkerBulletModel<ShulkerBullet> model = new ShulkerBulletModel();
+    private final ShulkerBulletModel<ShulkerBullet> model;
 
-    public ShulkerBulletRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public ShulkerBulletRenderer(EntityRendererProvider.Context context) {
+        super(context);
+        this.model = new ShulkerBulletModel(context.getLayer(ModelLayers.SHULKER_BULLET));
     }
 
     @Override

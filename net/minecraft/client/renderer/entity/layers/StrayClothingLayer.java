@@ -8,6 +8,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SkeletonModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -18,10 +20,11 @@ import net.minecraft.world.entity.Mob;
 public class StrayClothingLayer<T extends Mob, M extends EntityModel<T>>
 extends RenderLayer<T, M> {
     private static final ResourceLocation STRAY_CLOTHES_LOCATION = new ResourceLocation("textures/entity/skeleton/stray_overlay.png");
-    private final SkeletonModel<T> layerModel = new SkeletonModel(0.25f, true);
+    private final SkeletonModel<T> layerModel;
 
-    public StrayClothingLayer(RenderLayerParent<T, M> renderLayerParent) {
+    public StrayClothingLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
+        this.layerModel = new SkeletonModel(entityModelSet.getLayer(ModelLayers.STRAY_OUTER_LAYER));
     }
 
     @Override

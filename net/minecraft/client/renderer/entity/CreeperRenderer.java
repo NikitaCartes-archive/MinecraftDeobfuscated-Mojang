@@ -7,7 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CreeperPowerLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -20,9 +21,9 @@ public class CreeperRenderer
 extends MobRenderer<Creeper, CreeperModel<Creeper>> {
     private static final ResourceLocation CREEPER_LOCATION = new ResourceLocation("textures/entity/creeper/creeper.png");
 
-    public CreeperRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new CreeperModel(), 0.5f);
-        this.addLayer(new CreeperPowerLayer(this));
+    public CreeperRenderer(EntityRendererProvider.Context context) {
+        super(context, new CreeperModel(context.getLayer(ModelLayers.CREEPER)), 0.5f);
+        this.addLayer(new CreeperPowerLayer(this, context.getModelSet()));
     }
 
     @Override
