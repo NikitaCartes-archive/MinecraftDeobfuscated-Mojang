@@ -156,6 +156,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle.ObsidianTearLandProvider::new);
 		this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
 		this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
+		this.register(ParticleTypes.SMALL_FLAME, FlameParticle.SmallFlameProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

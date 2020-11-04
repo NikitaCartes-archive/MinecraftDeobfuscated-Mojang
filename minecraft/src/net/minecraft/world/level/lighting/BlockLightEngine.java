@@ -24,7 +24,7 @@ public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionSt
 		int i = BlockPos.getX(l);
 		int j = BlockPos.getY(l);
 		int k = BlockPos.getZ(l);
-		BlockGetter blockGetter = this.chunkSource.getChunkForLighting(i >> 4, k >> 4);
+		BlockGetter blockGetter = this.chunkSource.getChunkForLighting(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(k));
 		return blockGetter != null ? blockGetter.getLightEmission(this.pos.set(i, j, k)) : 0;
 	}
 

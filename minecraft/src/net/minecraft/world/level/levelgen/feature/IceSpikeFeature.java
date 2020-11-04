@@ -5,7 +5,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -19,7 +18,7 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 	public boolean place(
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
+		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
 			blockPos = blockPos.below();
 		}
 
@@ -44,15 +43,13 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 						float h = (float)Mth.abs(n) - 0.25F;
 						if ((m == 0 && n == 0 || !(g * g + h * h > f * f)) && (m != -l && m != l && n != -l && n != l || !(random.nextFloat() > 0.75F))) {
 							BlockState blockState = worldGenLevel.getBlockState(blockPos.offset(m, k, n));
-							Block block = blockState.getBlock();
-							if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+							if (blockState.isAir() || isDirt(blockState) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.ICE)) {
 								this.setBlock(worldGenLevel, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
 							}
 
 							if (k != 0 && l > 1) {
 								blockState = worldGenLevel.getBlockState(blockPos.offset(m, -k, n));
-								block = blockState.getBlock();
-								if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+								if (blockState.isAir() || isDirt(blockState) || blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.ICE)) {
 									this.setBlock(worldGenLevel, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
 								}
 							}
@@ -78,8 +75,11 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 
 					while (blockPos2.getY() > 50) {
 						BlockState blockState2 = worldGenLevel.getBlockState(blockPos2);
-						Block block2 = blockState2.getBlock();
-						if (!blockState2.isAir() && !isDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) {
+						if (!blockState2.isAir()
+							&& !isDirt(blockState2)
+							&& !blockState2.is(Blocks.SNOW_BLOCK)
+							&& !blockState2.is(Blocks.ICE)
+							&& !blockState2.is(Blocks.PACKED_ICE)) {
 							break;
 						}
 

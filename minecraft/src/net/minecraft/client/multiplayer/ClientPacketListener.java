@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.ClientRecipeBook;
@@ -73,7 +73,6 @@ import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.Registry;
@@ -83,6 +82,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -203,12 +203,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -217,46 +215,13 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.DragonFireball;
-import net.minecraft.world.entity.projectile.EvokerFangs;
-import net.minecraft.world.entity.projectile.EyeOfEnder;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.entity.projectile.LlamaSpit;
-import net.minecraft.world.entity.projectile.ShulkerBullet;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.Snowball;
-import net.minecraft.world.entity.projectile.SpectralArrow;
-import net.minecraft.world.entity.projectile.ThrownEgg;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
-import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.entity.projectile.ThrownTrident;
-import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.entity.vehicle.MinecartChest;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
-import net.minecraft.world.entity.vehicle.MinecartFurnace;
-import net.minecraft.world.entity.vehicle.MinecartHopper;
-import net.minecraft.world.entity.vehicle.MinecartSpawner;
-import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -271,7 +236,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
@@ -286,6 +250,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -311,7 +276,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private final Connection connection;
 	private final GameProfile localGameProfile;
 	private final Screen callbackScreen;
-	private Minecraft minecraft;
+	private final Minecraft minecraft;
 	private ClientLevel level;
 	private ClientLevel.ClientLevelData levelData;
 	private boolean started;
@@ -357,9 +322,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			StaticTags.resetAllToEmpty();
 		}
 
-		ArrayList<ResourceKey<Level>> arrayList = Lists.newArrayList(clientboundLoginPacket.levels());
-		Collections.shuffle(arrayList);
-		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(arrayList);
+		List<ResourceKey<Level>> list = Lists.<ResourceKey<Level>>newArrayList(clientboundLoginPacket.levels());
+		Collections.shuffle(list);
+		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(list);
 		this.registryAccess = clientboundLoginPacket.registryAccess();
 		ResourceKey<Level> resourceKey = clientboundLoginPacket.getDimension();
 		DimensionType dimensionType = clientboundLoginPacket.getDimensionType();
@@ -391,12 +356,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.debugRenderer.clear();
 		this.minecraft.player.resetPos();
 		int i = clientboundLoginPacket.getPlayerId();
+		this.minecraft.player.setId(i);
 		this.level.addPlayer(i, this.minecraft.player);
 		this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
 		this.minecraft.cameraEntity = this.minecraft.player;
 		this.minecraft.setScreen(new ReceivingLevelScreen());
-		this.minecraft.player.setId(i);
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.isReducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.shouldShowDeathScreen());
 		this.minecraft.gameMode.setLocalMode(clientboundLoginPacket.getGameType());
@@ -414,110 +379,11 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleAddEntity(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAddEntityPacket, this, this.minecraft);
-		double d = clientboundAddEntityPacket.getX();
-		double e = clientboundAddEntityPacket.getY();
-		double f = clientboundAddEntityPacket.getZ();
 		EntityType<?> entityType = clientboundAddEntityPacket.getType();
-		Entity entity;
-		if (entityType == EntityType.CHEST_MINECART) {
-			entity = new MinecartChest(this.level, d, e, f);
-		} else if (entityType == EntityType.FURNACE_MINECART) {
-			entity = new MinecartFurnace(this.level, d, e, f);
-		} else if (entityType == EntityType.TNT_MINECART) {
-			entity = new MinecartTNT(this.level, d, e, f);
-		} else if (entityType == EntityType.SPAWNER_MINECART) {
-			entity = new MinecartSpawner(this.level, d, e, f);
-		} else if (entityType == EntityType.HOPPER_MINECART) {
-			entity = new MinecartHopper(this.level, d, e, f);
-		} else if (entityType == EntityType.COMMAND_BLOCK_MINECART) {
-			entity = new MinecartCommandBlock(this.level, d, e, f);
-		} else if (entityType == EntityType.MINECART) {
-			entity = new Minecart(this.level, d, e, f);
-		} else if (entityType == EntityType.FISHING_BOBBER) {
-			Entity entity2 = this.level.getEntity(clientboundAddEntityPacket.getData());
-			if (entity2 instanceof Player) {
-				entity = new FishingHook(this.level, (Player)entity2, d, e, f);
-			} else {
-				entity = null;
-			}
-		} else if (entityType == EntityType.ARROW) {
-			entity = new Arrow(this.level, d, e, f);
-			Entity entity2 = this.level.getEntity(clientboundAddEntityPacket.getData());
-			if (entity2 != null) {
-				((AbstractArrow)entity).setOwner(entity2);
-			}
-		} else if (entityType == EntityType.SPECTRAL_ARROW) {
-			entity = new SpectralArrow(this.level, d, e, f);
-			Entity entity2 = this.level.getEntity(clientboundAddEntityPacket.getData());
-			if (entity2 != null) {
-				((AbstractArrow)entity).setOwner(entity2);
-			}
-		} else if (entityType == EntityType.TRIDENT) {
-			entity = new ThrownTrident(this.level, d, e, f);
-			Entity entity2 = this.level.getEntity(clientboundAddEntityPacket.getData());
-			if (entity2 != null) {
-				((AbstractArrow)entity).setOwner(entity2);
-			}
-		} else if (entityType == EntityType.SNOWBALL) {
-			entity = new Snowball(this.level, d, e, f);
-		} else if (entityType == EntityType.LLAMA_SPIT) {
-			entity = new LlamaSpit(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.ITEM_FRAME) {
-			entity = new ItemFrame(this.level, new BlockPos(d, e, f), Direction.from3DDataValue(clientboundAddEntityPacket.getData()));
-		} else if (entityType == EntityType.LEASH_KNOT) {
-			entity = new LeashFenceKnotEntity(this.level, new BlockPos(d, e, f));
-		} else if (entityType == EntityType.ENDER_PEARL) {
-			entity = new ThrownEnderpearl(this.level, d, e, f);
-		} else if (entityType == EntityType.EYE_OF_ENDER) {
-			entity = new EyeOfEnder(this.level, d, e, f);
-		} else if (entityType == EntityType.FIREWORK_ROCKET) {
-			entity = new FireworkRocketEntity(this.level, d, e, f, ItemStack.EMPTY);
-		} else if (entityType == EntityType.FIREBALL) {
-			entity = new LargeFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.DRAGON_FIREBALL) {
-			entity = new DragonFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.SMALL_FIREBALL) {
-			entity = new SmallFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.WITHER_SKULL) {
-			entity = new WitherSkull(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.SHULKER_BULLET) {
-			entity = new ShulkerBullet(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-		} else if (entityType == EntityType.EGG) {
-			entity = new ThrownEgg(this.level, d, e, f);
-		} else if (entityType == EntityType.EVOKER_FANGS) {
-			entity = new EvokerFangs(this.level, d, e, f, 0.0F, 0, null);
-		} else if (entityType == EntityType.POTION) {
-			entity = new ThrownPotion(this.level, d, e, f);
-		} else if (entityType == EntityType.EXPERIENCE_BOTTLE) {
-			entity = new ThrownExperienceBottle(this.level, d, e, f);
-		} else if (entityType == EntityType.BOAT) {
-			entity = new Boat(this.level, d, e, f);
-		} else if (entityType == EntityType.TNT) {
-			entity = new PrimedTnt(this.level, d, e, f, null);
-		} else if (entityType == EntityType.ARMOR_STAND) {
-			entity = new ArmorStand(this.level, d, e, f);
-		} else if (entityType == EntityType.END_CRYSTAL) {
-			entity = new EndCrystal(this.level, d, e, f);
-		} else if (entityType == EntityType.ITEM) {
-			entity = new ItemEntity(this.level, d, e, f);
-		} else if (entityType == EntityType.FALLING_BLOCK) {
-			entity = new FallingBlockEntity(this.level, d, e, f, Block.stateById(clientboundAddEntityPacket.getData()));
-		} else if (entityType == EntityType.AREA_EFFECT_CLOUD) {
-			entity = new AreaEffectCloud(this.level, d, e, f);
-		} else if (entityType == EntityType.LIGHTNING_BOLT) {
-			entity = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level);
-		} else {
-			entity = null;
-		}
-
+		Entity entity = entityType.create(this.level);
 		if (entity != null) {
+			entity.recreateFromPacket(clientboundAddEntityPacket);
 			int i = clientboundAddEntityPacket.getId();
-			entity.setPacketCoordinates(d, e, f);
-			entity.moveTo(d, e, f);
-			entity.xRot = (float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0F;
-			entity.yRot = (float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0F;
-			entity.setId(i);
-			entity.setUUID(clientboundAddEntityPacket.getUUID());
 			this.level.putNonPlayerEntity(i, entity);
 			if (entity instanceof AbstractMinecart) {
 				this.minecraft.getSoundManager().play(new MinecartSoundInstance((AbstractMinecart)entity));
@@ -611,7 +477,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleSetCarriedItem(ClientboundSetCarriedItemPacket clientboundSetCarriedItemPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetCarriedItemPacket, this, this.minecraft);
 		if (Inventory.isHotbarSlot(clientboundSetCarriedItemPacket.getSlot())) {
-			this.minecraft.player.inventory.selected = clientboundSetCarriedItemPacket.getSlot();
+			this.minecraft.player.getInventory().selected = clientboundSetCarriedItemPacket.getSlot();
 		}
 	}
 
@@ -654,7 +520,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 		for (int i = 0; i < clientboundRemoveEntitiesPacket.getEntityIds().length; i++) {
 			int j = clientboundRemoveEntitiesPacket.getEntityIds()[i];
-			this.level.removeEntity(j);
+			this.level.removeEntity(j, Entity.RemovalReason.DISCARDED);
 		}
 	}
 
@@ -753,22 +619,20 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				chunkBiomeContainer,
 				clientboundLevelChunkPacket.getReadBuffer(),
 				clientboundLevelChunkPacket.getHeightmaps(),
-				clientboundLevelChunkPacket.getAvailableSections(),
-				clientboundLevelChunkPacket.isFullChunk()
+				clientboundLevelChunkPacket.getAvailableSections()
 			);
-		if (levelChunk != null && clientboundLevelChunkPacket.isFullChunk()) {
-			this.level.reAddEntitiesToChunk(levelChunk);
-		}
 
-		for (int k = 0; k < 16; k++) {
+		for (int k = this.level.getMinSection(); k < this.level.getMaxSection(); k++) {
 			this.level.setSectionDirtyWithNeighbors(i, k, j);
 		}
 
-		for (CompoundTag compoundTag : clientboundLevelChunkPacket.getBlockEntitiesTags()) {
-			BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
-			BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
-			if (blockEntity != null) {
-				blockEntity.load(this.level.getBlockState(blockPos), compoundTag);
+		if (levelChunk != null) {
+			for (CompoundTag compoundTag : clientboundLevelChunkPacket.getBlockEntitiesTags()) {
+				BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+				BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
+				if (blockEntity != null) {
+					blockEntity.load(compoundTag);
+				}
 			}
 		}
 	}
@@ -782,7 +646,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		clientChunkCache.drop(i, j);
 		LevelLightEngine levelLightEngine = clientChunkCache.getLightEngine();
 
-		for (int k = 0; k < 16; k++) {
+		for (int k = this.level.getMinSection(); k < this.level.getMaxSection(); k++) {
 			this.level.setSectionDirtyWithNeighbors(i, k, j);
 			levelLightEngine.updateSectionStatus(SectionPos.of(i, k, j), true);
 		}
@@ -863,10 +727,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				ItemStack itemStack = itemEntity.getItem();
 				itemStack.shrink(clientboundTakeItemEntityPacket.getAmount());
 				if (itemStack.isEmpty()) {
-					this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
+					this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId(), Entity.RemovalReason.DISCARDED);
 				}
-			} else {
-				this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
+			} else if (!(entity instanceof ExperienceOrb)) {
+				this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId(), Entity.RemovalReason.DISCARDED);
 			}
 		}
 	}
@@ -994,7 +858,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private static ItemStack findTotem(Player player) {
 		for (InteractionHand interactionHand : InteractionHand.values()) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (itemStack.getItem() == Items.TOTEM_OF_UNDYING) {
+			if (itemStack.is(Items.TOTEM_OF_UNDYING)) {
 				return itemStack;
 			}
 		}
@@ -1072,7 +936,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			this.minecraft.setScreen(new ReceivingLevelScreen());
 		}
 
-		this.level.removeAllPendingEntityRemovals();
 		String string = localPlayer.getServerBrand();
 		this.minecraft.cameraEntity = null;
 		LocalPlayer localPlayer2 = this.minecraft
@@ -1138,10 +1001,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			AbstractHorse abstractHorse = (AbstractHorse)entity;
 			SimpleContainer simpleContainer = new SimpleContainer(clientboundHorseScreenOpenPacket.getSize());
 			HorseInventoryMenu horseInventoryMenu = new HorseInventoryMenu(
-				clientboundHorseScreenOpenPacket.getContainerId(), localPlayer.inventory, simpleContainer, abstractHorse
+				clientboundHorseScreenOpenPacket.getContainerId(), localPlayer.getInventory(), simpleContainer, abstractHorse
 			);
 			localPlayer.containerMenu = horseInventoryMenu;
-			this.minecraft.setScreen(new HorseInventoryScreen(horseInventoryMenu, localPlayer.inventory, abstractHorse));
+			this.minecraft.setScreen(new HorseInventoryScreen(horseInventoryMenu, localPlayer.getInventory(), abstractHorse));
 		}
 	}
 
@@ -1162,10 +1025,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.getTutorial().onGetItem(itemStack);
 		if (clientboundContainerSetSlotPacket.getContainerId() == -1) {
 			if (!(this.minecraft.screen instanceof CreativeModeInventoryScreen)) {
-				player.inventory.setCarried(itemStack);
+				player.getInventory().setCarried(itemStack);
 			}
 		} else if (clientboundContainerSetSlotPacket.getContainerId() == -2) {
-			player.inventory.setItem(i, itemStack);
+			player.getInventory().setItem(i, itemStack);
 		} else {
 			boolean bl = false;
 			if (this.minecraft.screen instanceof CreativeModeInventoryScreen) {
@@ -1219,10 +1082,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleOpenSignEditor(ClientboundOpenSignEditorPacket clientboundOpenSignEditorPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundOpenSignEditorPacket, this, this.minecraft);
-		BlockEntity blockEntity = this.level.getBlockEntity(clientboundOpenSignEditorPacket.getPos());
+		BlockPos blockPos = clientboundOpenSignEditorPacket.getPos();
+		BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
 		if (!(blockEntity instanceof SignBlockEntity)) {
-			blockEntity = new SignBlockEntity();
-			blockEntity.setLevelAndPosition(this.level, clientboundOpenSignEditorPacket.getPos());
+			BlockState blockState = this.level.getBlockState(blockPos);
+			blockEntity = new SignBlockEntity(blockPos, blockState);
+			blockEntity.setLevel(this.level);
 		}
 
 		this.minecraft.player.openTextEdit((SignBlockEntity)blockEntity);
@@ -1248,7 +1113,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			|| i == 12 && blockEntity instanceof JigsawBlockEntity
 			|| i == 13 && blockEntity instanceof CampfireBlockEntity
 			|| i == 14 && blockEntity instanceof BeehiveBlockEntity) {
-			blockEntity.load(this.minecraft.level.getBlockState(blockPos), clientboundBlockEntityDataPacket.getTag());
+			blockEntity.load(clientboundBlockEntityDataPacket.getTag());
 		}
 
 		if (bl && this.minecraft.screen instanceof CommandBlockEditScreen) {
@@ -1685,12 +1550,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handlePlayerAbilities(ClientboundPlayerAbilitiesPacket clientboundPlayerAbilitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerAbilitiesPacket, this, this.minecraft);
 		Player player = this.minecraft.player;
-		player.abilities.flying = clientboundPlayerAbilitiesPacket.isFlying();
-		player.abilities.instabuild = clientboundPlayerAbilitiesPacket.canInstabuild();
-		player.abilities.invulnerable = clientboundPlayerAbilitiesPacket.isInvulnerable();
-		player.abilities.mayfly = clientboundPlayerAbilitiesPacket.canFly();
-		player.abilities.setFlyingSpeed(clientboundPlayerAbilitiesPacket.getFlyingSpeed());
-		player.abilities.setWalkingSpeed(clientboundPlayerAbilitiesPacket.getWalkingSpeed());
+		player.getAbilities().flying = clientboundPlayerAbilitiesPacket.isFlying();
+		player.getAbilities().instabuild = clientboundPlayerAbilitiesPacket.canInstabuild();
+		player.getAbilities().invulnerable = clientboundPlayerAbilitiesPacket.isInvulnerable();
+		player.getAbilities().mayfly = clientboundPlayerAbilitiesPacket.canFly();
+		player.getAbilities().setFlyingSpeed(clientboundPlayerAbilitiesPacket.getFlyingSpeed());
+		player.getAbilities().setWalkingSpeed(clientboundPlayerAbilitiesPacket.getWalkingSpeed());
 	}
 
 	@Override
@@ -1754,6 +1619,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleResourcePack(ClientboundResourcePackPacket clientboundResourcePackPacket) {
 		String string = clientboundResourcePackPacket.getUrl();
 		String string2 = clientboundResourcePackPacket.getHash();
+		boolean bl = clientboundResourcePackPacket.isRequired();
 		if (this.validateResourcePackUrl(string)) {
 			if (string.startsWith("level://")) {
 				try {
@@ -1766,7 +1632,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 						this.downloadCallback(completableFuture);
 						return;
 					}
-				} catch (UnsupportedEncodingException var8) {
+				} catch (UnsupportedEncodingException var9) {
 				}
 
 				this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
@@ -1777,28 +1643,47 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(string, string2));
 				} else if (serverData != null && serverData.getResourcePackStatus() != ServerData.ServerPackStatus.PROMPT) {
 					this.send(ServerboundResourcePackPacket.Action.DECLINED);
+					if (bl) {
+						this.connection.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
+					}
 				} else {
-					this.minecraft.execute(() -> this.minecraft.setScreen(new ConfirmScreen(bl -> {
-							this.minecraft = Minecraft.getInstance();
-							ServerData serverDatax = this.minecraft.getCurrentServer();
-							if (bl) {
-								if (serverDatax != null) {
-									serverDatax.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
-								}
+					this.minecraft
+						.execute(
+							() -> this.minecraft
+									.setScreen(
+										new ConfirmScreen(
+											bl2 -> {
+												this.minecraft.setScreen(null);
+												ServerData serverDatax = this.minecraft.getCurrentServer();
+												if (bl2) {
+													if (serverDatax != null) {
+														serverDatax.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
+													}
 
-								this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-								this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(string, string2));
-							} else {
-								if (serverDatax != null) {
-									serverDatax.setResourcePackStatus(ServerData.ServerPackStatus.DISABLED);
-								}
+													this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
+													this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(string, string2));
+												} else {
+													this.send(ServerboundResourcePackPacket.Action.DECLINED);
+													if (bl) {
+														this.connection.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
+													} else if (serverDatax != null) {
+														serverDatax.setResourcePackStatus(ServerData.ServerPackStatus.DISABLED);
+													}
+												}
 
-								this.send(ServerboundResourcePackPacket.Action.DECLINED);
-							}
-
-							ServerList.saveSingleServer(serverDatax);
-							this.minecraft.setScreen(null);
-						}, new TranslatableComponent("multiplayer.texturePrompt.line1"), new TranslatableComponent("multiplayer.texturePrompt.line2"))));
+												if (serverDatax != null) {
+													ServerList.saveSingleServer(serverDatax);
+												}
+											},
+											bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line1") : new TranslatableComponent("multiplayer.texturePrompt.line1"),
+											(Component)(bl
+												? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD})
+												: new TranslatableComponent("multiplayer.texturePrompt.line2")),
+											(Component)(bl ? new TranslatableComponent("gui.proceed") : CommonComponents.GUI_YES),
+											(Component)(bl ? new TranslatableComponent("menu.disconnect") : CommonComponents.GUI_NO)
+										)
+									)
+						);
 				}
 			}
 		}
@@ -1869,7 +1754,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleOpenBook(ClientboundOpenBookPacket clientboundOpenBookPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundOpenBookPacket, this, this.minecraft);
 		ItemStack itemStack = this.minecraft.player.getItemInHand(clientboundOpenBookPacket.getHand());
-		if (itemStack.getItem() == Items.WRITTEN_BOOK) {
+		if (itemStack.is(Items.WRITTEN_BOOK)) {
 			this.minecraft.setScreen(new BookViewScreen(new BookViewScreen.WrittenBookAccess(itemStack)));
 		}
 	}
@@ -2314,14 +2199,14 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		int i = clientboundLightUpdatePacket.getX();
 		int j = clientboundLightUpdatePacket.getZ();
 		LevelLightEngine levelLightEngine = this.level.getChunkSource().getLightEngine();
-		int k = clientboundLightUpdatePacket.getSkyYMask();
-		int l = clientboundLightUpdatePacket.getEmptySkyYMask();
+		long l = clientboundLightUpdatePacket.getSkyYMask();
+		long m = clientboundLightUpdatePacket.getEmptySkyYMask();
 		Iterator<byte[]> iterator = clientboundLightUpdatePacket.getSkyUpdates().iterator();
-		this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, k, l, iterator, clientboundLightUpdatePacket.getTrustEdges());
-		int m = clientboundLightUpdatePacket.getBlockYMask();
-		int n = clientboundLightUpdatePacket.getEmptyBlockYMask();
+		this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, l, m, iterator, clientboundLightUpdatePacket.getTrustEdges());
+		long n = clientboundLightUpdatePacket.getBlockYMask();
+		long o = clientboundLightUpdatePacket.getEmptyBlockYMask();
 		Iterator<byte[]> iterator2 = clientboundLightUpdatePacket.getBlockUpdates().iterator();
-		this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, m, n, iterator2, clientboundLightUpdatePacket.getTrustEdges());
+		this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, n, o, iterator2, clientboundLightUpdatePacket.getTrustEdges());
 	}
 
 	@Override
@@ -2364,11 +2249,11 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			);
 	}
 
-	private void readSectionList(int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, int k, int l, Iterator<byte[]> iterator, boolean bl) {
-		for (int m = 0; m < 18; m++) {
-			int n = -1 + m;
-			boolean bl2 = (k & 1 << m) != 0;
-			boolean bl3 = (l & 1 << m) != 0;
+	private void readSectionList(int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, long l, long m, Iterator<byte[]> iterator, boolean bl) {
+		for (int k = 0; k < levelLightEngine.getLightSectionCount(); k++) {
+			int n = levelLightEngine.getMinLightSection() + k;
+			boolean bl2 = (l & 1L << k) != 0L;
+			boolean bl3 = (m & 1L << k) != 0L;
 			if (bl2 || bl3) {
 				levelLightEngine.queueSectionData(lightLayer, SectionPos.of(i, n, j), bl2 ? new DataLayer((byte[])((byte[])iterator.next()).clone()) : new DataLayer(), bl);
 				this.level.setSectionDirtyWithNeighbors(i, n, j);

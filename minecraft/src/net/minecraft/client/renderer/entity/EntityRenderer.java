@@ -20,11 +20,13 @@ import net.minecraft.world.phys.Vec3;
 @Environment(EnvType.CLIENT)
 public abstract class EntityRenderer<T extends Entity> {
 	protected final EntityRenderDispatcher entityRenderDispatcher;
+	private final Font font;
 	protected float shadowRadius;
 	protected float shadowStrength = 1.0F;
 
-	protected EntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		this.entityRenderDispatcher = entityRenderDispatcher;
+	protected EntityRenderer(EntityRendererProvider.Context context) {
+		this.entityRenderDispatcher = context.getEntityRenderDispatcher();
+		this.font = context.getFont();
 	}
 
 	public final int getPackedLightCoords(T entity, float f) {
@@ -72,7 +74,7 @@ public abstract class EntityRenderer<T extends Entity> {
 	public abstract ResourceLocation getTextureLocation(T entity);
 
 	public Font getFont() {
-		return this.entityRenderDispatcher.getFont();
+		return this.font;
 	}
 
 	protected void renderNameTag(T entity, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -97,9 +99,5 @@ public abstract class EntityRenderer<T extends Entity> {
 
 			poseStack.popPose();
 		}
-	}
-
-	public EntityRenderDispatcher getDispatcher() {
-		return this.entityRenderDispatcher;
 	}
 }

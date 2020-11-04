@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -10,7 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
-import org.apache.commons.lang3.tuple.Pair;
 
 public enum BannerPattern {
 	BASE("base", "b", false),
@@ -79,7 +79,6 @@ public enum BannerPattern {
 		return new ResourceLocation("entity/" + string + "/" + this.getFilename());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getFilename() {
 		return this.filename;
 	}
@@ -100,11 +99,26 @@ public enum BannerPattern {
 		return null;
 	}
 
+	@Nullable
+	public static BannerPattern byFilename(String string) {
+		for (BannerPattern bannerPattern : values()) {
+			if (bannerPattern.filename.equals(string)) {
+				return bannerPattern;
+			}
+		}
+
+		return null;
+	}
+
 	public static class Builder {
 		private final List<Pair<BannerPattern, DyeColor>> patterns = Lists.<Pair<BannerPattern, DyeColor>>newArrayList();
 
 		public BannerPattern.Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
-			this.patterns.add(Pair.of(bannerPattern, dyeColor));
+			return this.addPattern(Pair.of(bannerPattern, dyeColor));
+		}
+
+		public BannerPattern.Builder addPattern(Pair<BannerPattern, DyeColor> pair) {
+			this.patterns.add(pair);
 			return this;
 		}
 
@@ -113,8 +127,8 @@ public enum BannerPattern {
 
 			for (Pair<BannerPattern, DyeColor> pair : this.patterns) {
 				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putString("Pattern", pair.getLeft().hashname);
-				compoundTag.putInt("Color", pair.getRight().getId());
+				compoundTag.putString("Pattern", pair.getFirst().hashname);
+				compoundTag.putInt("Color", pair.getSecond().getId());
 				listTag.add(compoundTag);
 			}
 

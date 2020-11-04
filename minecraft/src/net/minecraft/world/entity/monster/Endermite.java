@@ -141,7 +141,7 @@ public class Endermite extends Monster {
 			}
 
 			if (this.life >= 2400) {
-				this.remove();
+				this.discard();
 			}
 		}
 	}

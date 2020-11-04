@@ -90,7 +90,9 @@ public class FontManager implements AutoCloseable {
 											profilerFiller.pop();
 										} catch (RuntimeException var49) {
 											FontManager.LOGGER
-												.warn("Unable to read definition '{}' in fonts.json in resourcepack: '{}': {}", resourceLocation2, resource.getSourceName(), var49.getMessage());
+												.warn(
+													"Unable to read definition '{}' in {} in resourcepack: '{}': {}", resourceLocation2, "fonts.json", resource.getSourceName(), var49.getMessage()
+												);
 										}
 									}
 
@@ -129,13 +131,13 @@ public class FontManager implements AutoCloseable {
 							}
 						} catch (RuntimeException var54) {
 							FontManager.LOGGER
-								.warn("Unable to load font '{}' in fonts.json in resourcepack: '{}': {}", resourceLocation2, resource.getSourceName(), var54.getMessage());
+								.warn("Unable to load font '{}' in {} in resourcepack: '{}': {}", resourceLocation2, "fonts.json", resource.getSourceName(), var54.getMessage());
 						}
 
 						profilerFiller.pop();
 					}
 				} catch (IOException var55) {
-					FontManager.LOGGER.warn("Unable to load font '{}' in fonts.json: {}", resourceLocation2, var55.getMessage());
+					FontManager.LOGGER.warn("Unable to load font '{}' in {}: {}", resourceLocation2, "fonts.json", var55.getMessage());
 				}
 
 				profilerFiller.push("caching");

@@ -6,6 +6,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ChestedHorseModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
@@ -18,8 +19,8 @@ public class ChestedHorseRenderer<T extends AbstractChestedHorse> extends Abstra
 		)
 	);
 
-	public ChestedHorseRenderer(EntityRenderDispatcher entityRenderDispatcher, float f) {
-		super(entityRenderDispatcher, new ChestedHorseModel<>(0.0F), f);
+	public ChestedHorseRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
+		super(context, new ChestedHorseModel<>(context.getLayer(modelLayerLocation)), f);
 	}
 
 	public ResourceLocation getTextureLocation(T abstractChestedHorse) {

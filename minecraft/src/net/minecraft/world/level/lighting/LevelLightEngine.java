@@ -6,17 +6,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
 public class LevelLightEngine implements LightEventListener {
+	protected final LevelHeightAccessor levelHeightAccessor;
 	@Nullable
 	private final LayerLightEngine<?, ?> blockEngine;
 	@Nullable
 	private final LayerLightEngine<?, ?> skyEngine;
 
 	public LevelLightEngine(LightChunkGetter lightChunkGetter, boolean bl, boolean bl2) {
+		this.levelHeightAccessor = lightChunkGetter.getLevel();
 		this.blockEngine = bl ? new BlockLightEngine(lightChunkGetter) : null;
 		this.skyEngine = bl2 ? new SkyLightEngine(lightChunkGetter) : null;
 	}
@@ -121,5 +124,17 @@ public class LevelLightEngine implements LightEventListener {
 		int j = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(blockPos) - i;
 		int k = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(blockPos);
 		return Math.max(k, j);
+	}
+
+	public int getLightSectionCount() {
+		return this.levelHeightAccessor.getSectionsCount() + 2;
+	}
+
+	public int getMinLightSection() {
+		return this.levelHeightAccessor.getMinSection() - 1;
+	}
+
+	public int getMaxLightSection() {
+		return this.getMinLightSection() + this.getLightSectionCount();
 	}
 }

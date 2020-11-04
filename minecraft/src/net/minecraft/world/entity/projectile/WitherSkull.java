@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -32,11 +30,6 @@ public class WitherSkull extends AbstractHurtingProjectile {
 
 	public WitherSkull(Level level, LivingEntity livingEntity, double d, double e, double f) {
 		super(EntityType.WITHER_SKULL, livingEntity, d, e, f, level);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public WitherSkull(Level level, double d, double e, double f, double g, double h, double i) {
-		super(EntityType.WITHER_SKULL, d, e, f, g, h, i, level);
 	}
 
 	@Override
@@ -100,7 +93,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 				? Explosion.BlockInteraction.DESTROY
 				: Explosion.BlockInteraction.NONE;
 			this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, blockInteraction);
-			this.remove();
+			this.discard();
 		}
 	}
 

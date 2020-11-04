@@ -4,37 +4,50 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
-	protected ModelPart head = new ModelPart(this, 0, 0);
-	protected ModelPart body;
-	protected ModelPart leg0;
-	protected ModelPart leg1;
-	protected ModelPart leg2;
-	protected ModelPart leg3;
+	protected final ModelPart head;
+	protected final ModelPart body;
+	protected final ModelPart rightHindLeg;
+	protected final ModelPart leftHindLeg;
+	protected final ModelPart rightFrontLeg;
+	protected final ModelPart leftFrontLeg;
 
-	public QuadrupedModel(int i, float f, boolean bl, float g, float h, float j, float k, int l) {
-		super(bl, g, h, j, k, (float)l);
-		this.head.addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F, f);
-		this.head.setPos(0.0F, (float)(18 - i), -6.0F);
-		this.body = new ModelPart(this, 28, 8);
-		this.body.addBox(-5.0F, -10.0F, -7.0F, 10.0F, 16.0F, 8.0F, f);
-		this.body.setPos(0.0F, (float)(17 - i), 2.0F);
-		this.leg0 = new ModelPart(this, 0, 16);
-		this.leg0.addBox(-2.0F, 0.0F, -2.0F, 4.0F, (float)i, 4.0F, f);
-		this.leg0.setPos(-3.0F, (float)(24 - i), 7.0F);
-		this.leg1 = new ModelPart(this, 0, 16);
-		this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4.0F, (float)i, 4.0F, f);
-		this.leg1.setPos(3.0F, (float)(24 - i), 7.0F);
-		this.leg2 = new ModelPart(this, 0, 16);
-		this.leg2.addBox(-2.0F, 0.0F, -2.0F, 4.0F, (float)i, 4.0F, f);
-		this.leg2.setPos(-3.0F, (float)(24 - i), -5.0F);
-		this.leg3 = new ModelPart(this, 0, 16);
-		this.leg3.addBox(-2.0F, 0.0F, -2.0F, 4.0F, (float)i, 4.0F, f);
-		this.leg3.setPos(3.0F, (float)(24 - i), -5.0F);
+	protected QuadrupedModel(ModelPart modelPart, boolean bl, float f, float g, float h, float i, int j) {
+		super(bl, f, g, h, i, (float)j);
+		this.head = modelPart.getChild("head");
+		this.body = modelPart.getChild("body");
+		this.rightHindLeg = modelPart.getChild("right_hind_leg");
+		this.leftHindLeg = modelPart.getChild("left_hind_leg");
+		this.rightFrontLeg = modelPart.getChild("right_front_leg");
+		this.leftFrontLeg = modelPart.getChild("left_front_leg");
+	}
+
+	public static MeshDefinition createBodyMesh(int i, CubeDeformation cubeDeformation) {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, (float)(18 - i), -6.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"body",
+			CubeListBuilder.create().texOffs(28, 8).addBox(-5.0F, -10.0F, -7.0F, 10.0F, 16.0F, 8.0F, cubeDeformation),
+			PartPose.offsetAndRotation(0.0F, (float)(17 - i), 2.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
+		);
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, (float)i, 4.0F, cubeDeformation);
+		partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-3.0F, (float)(24 - i), 7.0F));
+		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(3.0F, (float)(24 - i), 7.0F));
+		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-3.0F, (float)(24 - i), -5.0F));
+		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(3.0F, (float)(24 - i), -5.0F));
+		return meshDefinition;
 	}
 
 	@Override
@@ -44,7 +57,7 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 
 	@Override
 	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.leg0, this.leg1, this.leg2, this.leg3);
+		return ImmutableList.<ModelPart>of(this.body, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg);
 	}
 
 	@Override
@@ -52,9 +65,9 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.body.xRot = (float) (Math.PI / 2);
-		this.leg0.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-		this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.leg2.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.leg3.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
 	}
 }

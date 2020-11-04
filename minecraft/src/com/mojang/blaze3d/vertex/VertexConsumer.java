@@ -59,13 +59,15 @@ public interface VertexConsumer {
 	}
 
 	default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
-		int[] js = bakedQuad.getVertices();
+		float[] gs = new float[]{fs[0], fs[1], fs[2], fs[3]};
+		int[] js = new int[]{is[0], is[1], is[2], is[3]};
+		int[] ks = bakedQuad.getVertices();
 		Vec3i vec3i = bakedQuad.getDirection().getNormal();
 		Vector3f vector3f = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 		Matrix4f matrix4f = pose.pose();
 		vector3f.transform(pose.normal());
 		int j = 8;
-		int k = js.length / 8;
+		int k = ks.length / 8;
 
 		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
 			ByteBuffer byteBuffer = memoryStack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
@@ -73,7 +75,7 @@ public interface VertexConsumer {
 
 			for (int l = 0; l < k; l++) {
 				intBuffer.clear();
-				intBuffer.put(js, l * 8, 8);
+				intBuffer.put(ks, l * 8, 8);
 				float m = byteBuffer.getFloat(0);
 				float n = byteBuffer.getFloat(4);
 				float o = byteBuffer.getFloat(8);
@@ -84,16 +86,16 @@ public interface VertexConsumer {
 					float p = (float)(byteBuffer.get(12) & 255) / 255.0F;
 					float q = (float)(byteBuffer.get(13) & 255) / 255.0F;
 					float r = (float)(byteBuffer.get(14) & 255) / 255.0F;
-					s = p * fs[l] * f;
-					t = q * fs[l] * g;
-					u = r * fs[l] * h;
+					s = p * gs[l] * f;
+					t = q * gs[l] * g;
+					u = r * gs[l] * h;
 				} else {
-					s = fs[l] * f;
-					t = fs[l] * g;
-					u = fs[l] * h;
+					s = gs[l] * f;
+					t = gs[l] * g;
+					u = gs[l] * h;
 				}
 
-				int v = is[l];
+				int v = js[l];
 				float q = byteBuffer.getFloat(16);
 				float r = byteBuffer.getFloat(20);
 				Vector4f vector4f = new Vector4f(m, n, o, 1.0F);

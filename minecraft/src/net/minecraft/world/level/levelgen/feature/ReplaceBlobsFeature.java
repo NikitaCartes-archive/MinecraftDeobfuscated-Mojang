@@ -21,15 +21,20 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSphereConfiguration replaceSphereConfiguration
 	) {
 		Block block = replaceSphereConfiguration.targetState.getBlock();
-		BlockPos blockPos2 = findTarget(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), block);
+		BlockPos blockPos2 = findTarget(
+			worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinBuildHeight() + 1, worldGenLevel.getMaxBuildHeight() - 1), block
+		);
 		if (blockPos2 == null) {
 			return false;
 		} else {
 			int i = replaceSphereConfiguration.radius().sample(random);
+			int j = replaceSphereConfiguration.radius().sample(random);
+			int k = replaceSphereConfiguration.radius().sample(random);
+			int l = Math.max(i, Math.max(j, k));
 			boolean bl = false;
 
-			for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, i, i, i)) {
-				if (blockPos3.distManhattan(blockPos2) > i) {
+			for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, i, j, k)) {
+				if (blockPos3.distManhattan(blockPos2) > l) {
 					break;
 				}
 
@@ -46,7 +51,7 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 
 	@Nullable
 	private static BlockPos findTarget(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, Block block) {
-		while (mutableBlockPos.getY() > 1) {
+		while (mutableBlockPos.getY() > levelAccessor.getMinBuildHeight() + 1) {
 			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
 			if (blockState.is(block)) {
 				return mutableBlockPos;

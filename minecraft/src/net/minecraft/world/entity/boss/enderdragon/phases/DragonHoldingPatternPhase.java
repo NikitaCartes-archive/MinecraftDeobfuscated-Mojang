@@ -65,7 +65,7 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
 			}
 
 			if (player != null
-				&& !player.abilities.invulnerable
+				&& !player.getAbilities().invulnerable
 				&& (this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
 				this.strafePlayer(player);
 				return;
@@ -129,7 +129,7 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
 
 	@Override
 	public void onCrystalDestroyed(EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource, @Nullable Player player) {
-		if (player != null && !player.abilities.invulnerable) {
+		if (player != null && !player.getAbilities().invulnerable) {
 			this.strafePlayer(player);
 		}
 	}

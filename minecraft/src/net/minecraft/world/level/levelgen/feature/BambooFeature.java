@@ -46,7 +46,7 @@ public class BambooFeature extends Feature<ProbabilityFeatureConfiguration> {
 							int o = m - blockPos.getZ();
 							if (n * n + o * o <= k * k) {
 								mutableBlockPos2.set(l, worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE, l, m) - 1, m);
-								if (isDirt(worldGenLevel.getBlockState(mutableBlockPos2).getBlock())) {
+								if (isDirt(worldGenLevel.getBlockState(mutableBlockPos2))) {
 									worldGenLevel.setBlock(mutableBlockPos2, Blocks.PODZOL.defaultBlockState(), 2);
 								}
 							}

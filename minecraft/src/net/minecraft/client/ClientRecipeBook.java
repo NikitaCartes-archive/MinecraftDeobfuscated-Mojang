@@ -56,7 +56,7 @@ public class ClientRecipeBook extends RecipeBook {
 		Table<RecipeBookCategories, String, List<Recipe<?>>> table = HashBasedTable.create();
 
 		for (Recipe<?> recipe : iterable) {
-			if (!recipe.isSpecial()) {
+			if (!recipe.isSpecial() && !recipe.isIncomplete()) {
 				RecipeBookCategories recipeBookCategories = getCategory(recipe);
 				String string = recipe.getGroup();
 				if (string.isEmpty()) {

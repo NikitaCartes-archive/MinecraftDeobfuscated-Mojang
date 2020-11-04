@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,6 +30,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -99,7 +99,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		int s,
 		int t,
 		@Nullable UUID uUID,
-		LinkedHashSet<String> linkedHashSet,
+		Set<String> set,
 		TimerQueue<MinecraftServer> timerQueue,
 		@Nullable CompoundTag compoundTag2,
 		CompoundTag compoundTag3,
@@ -127,7 +127,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.wanderingTraderSpawnDelay = s;
 		this.wanderingTraderSpawnChance = t;
 		this.wanderingTraderId = uUID;
-		this.knownServerBrands = linkedHashSet;
+		this.knownServerBrands = set;
 		this.loadedPlayerTag = compoundTag;
 		this.playerDataVersion = i;
 		this.scheduledEvents = timerQueue;
@@ -162,7 +162,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			0,
 			0,
 			null,
-			Sets.newLinkedHashSet(),
+			Sets.<String>newLinkedHashSet(),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS),
 			null,
 			new CompoundTag(),
@@ -210,7 +210,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			dynamic.get("WanderingTraderSpawnDelay").asInt(0),
 			dynamic.get("WanderingTraderSpawnChance").asInt(0),
 			(UUID)dynamic.get("WanderingTraderId").read(SerializableUUID.CODEC).result().orElse(null),
-			(LinkedHashSet<String>)dynamic.get("ServerBrands")
+			(Set<String>)dynamic.get("ServerBrands")
 				.asStream()
 				.flatMap(dynamicx -> Util.toStream(dynamicx.asString().result()))
 				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
@@ -510,8 +510,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-		ServerLevelData.super.fillCrashReportCategory(crashReportCategory);
+	public void fillCrashReportCategory(CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor) {
+		ServerLevelData.super.fillCrashReportCategory(crashReportCategory, levelHeightAccessor);
 		WorldData.super.fillCrashReportCategory(crashReportCategory);
 	}
 

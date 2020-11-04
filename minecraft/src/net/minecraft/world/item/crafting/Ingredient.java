@@ -61,7 +61,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 				return itemStack.isEmpty();
 			} else {
 				for (ItemStack itemStack2 : this.itemStacks) {
-					if (itemStack2.getItem() == itemStack.getItem()) {
+					if (itemStack2.is(itemStack.getItem())) {
 						return true;
 					}
 				}

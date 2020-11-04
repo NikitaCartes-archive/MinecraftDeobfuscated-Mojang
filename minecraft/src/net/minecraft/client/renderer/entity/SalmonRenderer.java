@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SalmonModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Salmon;
@@ -13,8 +14,8 @@ import net.minecraft.world.entity.animal.Salmon;
 public class SalmonRenderer extends MobRenderer<Salmon, SalmonModel<Salmon>> {
 	private static final ResourceLocation SALMON_LOCATION = new ResourceLocation("textures/entity/fish/salmon.png");
 
-	public SalmonRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new SalmonModel<>(), 0.4F);
+	public SalmonRenderer(EntityRendererProvider.Context context) {
+		super(context, new SalmonModel<>(context.getLayer(ModelLayers.SALMON)), 0.4F);
 	}
 
 	public ResourceLocation getTextureLocation(Salmon salmon) {

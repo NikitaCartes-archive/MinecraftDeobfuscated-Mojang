@@ -7,7 +7,14 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -17,27 +24,55 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.ConduitBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
+public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> {
 	public static final Material SHELL_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/base"));
 	public static final Material ACTIVE_SHELL_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/cage"));
 	public static final Material WIND_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/wind"));
 	public static final Material VERTICAL_WIND_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/wind_vertical"));
 	public static final Material OPEN_EYE_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/open_eye"));
 	public static final Material CLOSED_EYE_TEXTURE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/conduit/closed_eye"));
-	private final ModelPart eye = new ModelPart(16, 16, 0, 0);
+	private final ModelPart eye;
 	private final ModelPart wind;
 	private final ModelPart shell;
 	private final ModelPart cage;
+	private final BlockEntityRenderDispatcher renderer;
 
-	public ConduitRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
-		this.eye.addBox(-4.0F, -4.0F, 0.0F, 8.0F, 8.0F, 0.0F, 0.01F);
-		this.wind = new ModelPart(64, 32, 0, 0);
-		this.wind.addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F);
-		this.shell = new ModelPart(32, 16, 0, 0);
-		this.shell.addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F);
-		this.cage = new ModelPart(32, 16, 0, 0);
-		this.cage.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
+	public ConduitRenderer(BlockEntityRendererProvider.Context context) {
+		this.renderer = context.getBlockEntityRenderDispatcher();
+		this.eye = context.getLayer(ModelLayers.CONDUIT_EYE);
+		this.wind = context.getLayer(ModelLayers.CONDUIT_WIND);
+		this.shell = context.getLayer(ModelLayers.CONDUIT_SHELL);
+		this.cage = context.getLayer(ModelLayers.CONDUIT_CAGE);
+	}
+
+	public static LayerDefinition createEyeLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"eye", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, 0.0F, 8.0F, 8.0F, 0.0F, new CubeDeformation(0.01F)), PartPose.ZERO
+		);
+		return LayerDefinition.create(meshDefinition, 16, 16);
+	}
+
+	public static LayerDefinition createWindLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild("wind", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F), PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 64, 32);
+	}
+
+	public static LayerDefinition createShellLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild("shell", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F), PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 32, 16);
+	}
+
+	public static LayerDefinition createCageLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild("shell", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 32, 16);
 	}
 
 	public void render(ConduitBlockEntity conduitBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

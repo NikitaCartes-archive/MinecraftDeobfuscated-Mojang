@@ -43,7 +43,7 @@ public class BuriedTreasurePieces {
 			int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.x0, this.boundingBox.z0);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.x0, i, this.boundingBox.z0);
 
-			while (mutableBlockPos.getY() > 0) {
+			while (mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight()) {
 				BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
 				BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos.below());
 				if (blockState2 == Blocks.SANDSTONE.defaultBlockState()

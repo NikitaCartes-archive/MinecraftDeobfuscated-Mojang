@@ -24,6 +24,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -265,7 +266,7 @@ public class KeyboardHandler {
 			compoundTag.remove("UUID");
 			compoundTag.remove("Pos");
 			compoundTag.remove("Dimension");
-			String string = compoundTag.getPrettyDisplay().getString();
+			String string = NbtUtils.toPrettyComponent(compoundTag).getString();
 			string2 = String.format(Locale.ROOT, "/summon %s %.2f %.2f %.2f %s", resourceLocation.toString(), vec3.x, vec3.y, vec3.z, string);
 		} else {
 			string2 = String.format(Locale.ROOT, "/summon %s %.2f %.2f %.2f", resourceLocation.toString(), vec3.x, vec3.y, vec3.z);

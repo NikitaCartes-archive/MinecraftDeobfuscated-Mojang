@@ -104,7 +104,7 @@ public class EvokerFangs extends Entity {
 			}
 
 			if (--this.lifeTicks < 0) {
-				this.remove();
+				this.discard();
 			}
 		}
 	}

@@ -7,7 +7,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
@@ -95,13 +94,12 @@ public class MoveControl {
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 			BlockPos blockPos = this.mob.blockPosition();
 			BlockState blockState = this.mob.level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
 			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
 			if (o > (double)this.mob.maxUpStep && d * d + e * e < (double)Math.max(1.0F, this.mob.getBbWidth())
 				|| !voxelShape.isEmpty()
 					&& this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY()
-					&& !block.is(BlockTags.DOORS)
-					&& !block.is(BlockTags.FENCES)) {
+					&& !blockState.is(BlockTags.DOORS)
+					&& !blockState.is(BlockTags.FENCES)) {
 				this.mob.getJumpControl().jump();
 				this.operation = MoveControl.Operation.JUMPING;
 			}
@@ -120,9 +118,7 @@ public class MoveControl {
 		if (pathNavigation != null) {
 			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
 			if (nodeEvaluator != null
-				&& nodeEvaluator.getBlockPathType(
-						this.mob.level, Mth.floor(this.mob.getX() + (double)f), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)g)
-					)
+				&& nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
 					!= BlockPathTypes.WALKABLE) {
 				return false;
 			}

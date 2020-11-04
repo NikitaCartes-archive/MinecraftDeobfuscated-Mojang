@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal.target;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -69,7 +70,7 @@ public class HurtByTargetGoal extends TargetGoal {
 	protected void alertOthers() {
 		double d = this.getFollowDistance();
 		AABB aABB = AABB.unitCubeFromLowerCorner(this.mob.position()).inflate(d, 10.0, d);
-		List<Mob> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), aABB);
+		List<? extends Mob> list = this.mob.level.getEntitiesOfClass(this.mob.getClass(), aABB, EntitySelector.NO_SPECTATORS);
 		Iterator var5 = list.iterator();
 
 		while (true) {

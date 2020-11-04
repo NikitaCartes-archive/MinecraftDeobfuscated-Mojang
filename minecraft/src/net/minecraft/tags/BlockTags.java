@@ -49,6 +49,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> PIGLIN_REPELLENTS = bind("piglin_repellents");
 	public static final Tag.Named<Block> GOLD_ORES = bind("gold_ores");
 	public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
+	public static final Tag.Named<Block> CANDLES = bind("candles");
 	public static final Tag.Named<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag.Named<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag.Named<Block> ICE = bind("ice");
@@ -92,6 +93,9 @@ public final class BlockTags {
 	public static final Tag.Named<Block> INFINIBURN_END = bind("infiniburn_end");
 	public static final Tag.Named<Block> BASE_STONE_OVERWORLD = bind("base_stone_overworld");
 	public static final Tag.Named<Block> BASE_STONE_NETHER = bind("base_stone_nether");
+	public static final Tag.Named<Block> CANDLE_CAKES = bind("candle_cakes");
+	public static final Tag.Named<Block> CAULDRONS = bind("cauldrons");
+	public static final Tag.Named<Block> CRYSTAL_SOUND_BLOCKS = bind("crystal_sound_blocks");
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

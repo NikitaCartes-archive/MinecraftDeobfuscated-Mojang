@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ChickenModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Chicken;
@@ -11,8 +12,8 @@ import net.minecraft.world.entity.animal.Chicken;
 public class ChickenRenderer extends MobRenderer<Chicken, ChickenModel<Chicken>> {
 	private static final ResourceLocation CHICKEN_LOCATION = new ResourceLocation("textures/entity/chicken.png");
 
-	public ChickenRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new ChickenModel<>(), 0.3F);
+	public ChickenRenderer(EntityRendererProvider.Context context) {
+		super(context, new ChickenModel<>(context.getLayer(ModelLayers.CHICKEN)), 0.3F);
 	}
 
 	public ResourceLocation getTextureLocation(Chicken chicken) {

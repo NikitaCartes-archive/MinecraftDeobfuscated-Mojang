@@ -15,7 +15,7 @@ public interface ItemSteerable {
 		if (!mob.isAlive()) {
 			return false;
 		} else {
-			Entity entity = mob.getPassengers().isEmpty() ? null : (Entity)mob.getPassengers().get(0);
+			Entity entity = mob.getFirstPassenger();
 			if (mob.isVehicle() && mob.canBeControlledByRider() && entity instanceof Player) {
 				mob.yRot = entity.yRot;
 				mob.yRotO = mob.yRot;

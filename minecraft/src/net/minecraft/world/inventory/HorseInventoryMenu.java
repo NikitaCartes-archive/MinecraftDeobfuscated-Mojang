@@ -24,7 +24,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 		this.addSlot(new Slot(container, 0, 8, 18) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return itemStack.getItem() == Items.SADDLE && !this.hasItem() && abstractHorse.isSaddleable();
+				return itemStack.is(Items.SADDLE) && !this.hasItem() && abstractHorse.isSaddleable();
 			}
 
 			@Environment(EnvType.CLIENT)
@@ -77,7 +77,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();

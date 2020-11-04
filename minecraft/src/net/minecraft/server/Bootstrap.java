@@ -9,6 +9,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.core.Registry;
+import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.locale.Language;
 import net.minecraft.tags.StaticTags;
@@ -45,6 +46,7 @@ public class Bootstrap {
 					PotionBrewing.bootStrap();
 					EntitySelectorOptions.bootStrap();
 					DispenseItemBehavior.bootStrap();
+					CauldronInteraction.bootStrap();
 					ArgumentTypes.bootStrap();
 					StaticTags.bootStrap();
 					wrapStreams();
@@ -93,7 +95,7 @@ public class Bootstrap {
 			throw new IllegalArgumentException("Not bootstrapped");
 		} else {
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: " + string));
+				getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: {}", string));
 				Commands.validate();
 			}
 

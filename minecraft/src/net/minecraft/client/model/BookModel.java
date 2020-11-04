@@ -1,36 +1,57 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class BookModel extends Model {
-	private final ModelPart leftLid = new ModelPart(64, 32, 0, 0).addBox(-6.0F, -5.0F, -0.005F, 6.0F, 10.0F, 0.005F);
-	private final ModelPart rightLid = new ModelPart(64, 32, 16, 0).addBox(0.0F, -5.0F, -0.005F, 6.0F, 10.0F, 0.005F);
+	private final ModelPart root;
+	private final ModelPart leftLid;
+	private final ModelPart rightLid;
 	private final ModelPart leftPages;
 	private final ModelPart rightPages;
 	private final ModelPart flipPage1;
 	private final ModelPart flipPage2;
-	private final ModelPart seam = new ModelPart(64, 32, 12, 0).addBox(-1.0F, -5.0F, 0.0F, 2.0F, 10.0F, 0.005F);
-	private final List<ModelPart> parts;
 
-	public BookModel() {
+	public BookModel(ModelPart modelPart) {
 		super(RenderType::entitySolid);
-		this.leftPages = new ModelPart(64, 32, 0, 10).addBox(0.0F, -4.0F, -0.99F, 5.0F, 8.0F, 1.0F);
-		this.rightPages = new ModelPart(64, 32, 12, 10).addBox(0.0F, -4.0F, -0.01F, 5.0F, 8.0F, 1.0F);
-		this.flipPage1 = new ModelPart(64, 32, 24, 10).addBox(0.0F, -4.0F, 0.0F, 5.0F, 8.0F, 0.005F);
-		this.flipPage2 = new ModelPart(64, 32, 24, 10).addBox(0.0F, -4.0F, 0.0F, 5.0F, 8.0F, 0.005F);
-		this.parts = ImmutableList.of(this.leftLid, this.rightLid, this.seam, this.leftPages, this.rightPages, this.flipPage1, this.flipPage2);
-		this.leftLid.setPos(0.0F, 0.0F, -1.0F);
-		this.rightLid.setPos(0.0F, 0.0F, 1.0F);
-		this.seam.yRot = (float) (Math.PI / 2);
+		this.root = modelPart;
+		this.leftLid = modelPart.getChild("left_lid");
+		this.rightLid = modelPart.getChild("right_lid");
+		this.leftPages = modelPart.getChild("left_pages");
+		this.rightPages = modelPart.getChild("right_pages");
+		this.flipPage1 = modelPart.getChild("flip_page1");
+		this.flipPage2 = modelPart.getChild("flip_page2");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"left_lid", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -5.0F, -0.005F, 6.0F, 10.0F, 0.005F), PartPose.offset(0.0F, 0.0F, -1.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_lid", CubeListBuilder.create().texOffs(16, 0).addBox(0.0F, -5.0F, -0.005F, 6.0F, 10.0F, 0.005F), PartPose.offset(0.0F, 0.0F, 1.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"seam", CubeListBuilder.create().texOffs(12, 0).addBox(-1.0F, -5.0F, 0.0F, 2.0F, 10.0F, 0.005F), PartPose.rotation(0.0F, (float) (Math.PI / 2), 0.0F)
+		);
+		partDefinition.addOrReplaceChild("left_pages", CubeListBuilder.create().texOffs(0, 10).addBox(0.0F, -4.0F, -0.99F, 5.0F, 8.0F, 1.0F), PartPose.ZERO);
+		partDefinition.addOrReplaceChild("right_pages", CubeListBuilder.create().texOffs(12, 10).addBox(0.0F, -4.0F, -0.01F, 5.0F, 8.0F, 1.0F), PartPose.ZERO);
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(24, 10).addBox(0.0F, -4.0F, 0.0F, 5.0F, 8.0F, 0.005F);
+		partDefinition.addOrReplaceChild("flip_page1", cubeListBuilder, PartPose.ZERO);
+		partDefinition.addOrReplaceChild("flip_page2", cubeListBuilder, PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Override
@@ -39,7 +60,7 @@ public class BookModel extends Model {
 	}
 
 	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+		this.root.render(poseStack, vertexConsumer, i, j, f, g, h, k);
 	}
 
 	public void setupAnim(float f, float g, float h, float i) {

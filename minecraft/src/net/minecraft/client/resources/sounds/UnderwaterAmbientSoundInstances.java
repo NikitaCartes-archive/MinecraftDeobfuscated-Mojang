@@ -25,7 +25,7 @@ public class UnderwaterAmbientSoundInstances {
 
 		@Override
 		public void tick() {
-			if (this.player.removed || !this.player.isUnderWater()) {
+			if (this.player.isRemoved() || !this.player.isUnderWater()) {
 				this.stop();
 			}
 		}
@@ -48,7 +48,7 @@ public class UnderwaterAmbientSoundInstances {
 
 		@Override
 		public void tick() {
-			if (!this.player.removed && this.fade >= 0) {
+			if (!this.player.isRemoved() && this.fade >= 0) {
 				if (this.player.isUnderWater()) {
 					this.fade++;
 				} else {

@@ -1,12 +1,17 @@
 package net.minecraft.client.renderer.entity;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import java.util.Map;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -16,19 +21,20 @@ import net.minecraft.world.entity.vehicle.Boat;
 
 @Environment(EnvType.CLIENT)
 public class BoatRenderer extends EntityRenderer<Boat> {
-	private static final ResourceLocation[] BOAT_TEXTURE_LOCATIONS = new ResourceLocation[]{
-		new ResourceLocation("textures/entity/boat/oak.png"),
-		new ResourceLocation("textures/entity/boat/spruce.png"),
-		new ResourceLocation("textures/entity/boat/birch.png"),
-		new ResourceLocation("textures/entity/boat/jungle.png"),
-		new ResourceLocation("textures/entity/boat/acacia.png"),
-		new ResourceLocation("textures/entity/boat/dark_oak.png")
-	};
-	protected final BoatModel model = new BoatModel();
+	private final Map<Boat.Type, Pair<ResourceLocation, BoatModel>> boatResources;
 
-	public BoatRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public BoatRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.shadowRadius = 0.8F;
+		this.boatResources = (Map<Boat.Type, Pair<ResourceLocation, BoatModel>>)Stream.of(Boat.Type.values())
+			.collect(
+				ImmutableMap.toImmutableMap(
+					type -> type,
+					type -> Pair.of(
+							new ResourceLocation("textures/entity/boat/" + type.getName() + ".png"), new BoatModel(context.getLayer(ModelLayers.createBoatModelName(type)))
+						)
+				)
+			);
 	}
 
 	public void render(Boat boat, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -50,14 +56,17 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 			poseStack.mulPose(new Quaternion(new Vector3f(1.0F, 0.0F, 1.0F), boat.getBubbleAngle(g), true));
 		}
 
+		Pair<ResourceLocation, BoatModel> pair = (Pair<ResourceLocation, BoatModel>)this.boatResources.get(boat.getBoatType());
+		ResourceLocation resourceLocation = pair.getFirst();
+		BoatModel boatModel = pair.getSecond();
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
-		this.model.setupAnim(boat, g, 0.0F, -0.1F, 0.0F, 0.0F);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(boat)));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		boatModel.setupAnim(boat, g, 0.0F, -0.1F, 0.0F, 0.0F);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(boatModel.renderType(resourceLocation));
+		boatModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		if (!boat.isUnderWater()) {
 			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
-			this.model.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
+			boatModel.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
 		}
 
 		poseStack.popPose();
@@ -65,6 +74,6 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 	}
 
 	public ResourceLocation getTextureLocation(Boat boat) {
-		return BOAT_TEXTURE_LOCATIONS[boat.getBoatType().ordinal()];
+		return (ResourceLocation)((Pair)this.boatResources.get(boat.getBoatType())).getFirst();
 	}
 }

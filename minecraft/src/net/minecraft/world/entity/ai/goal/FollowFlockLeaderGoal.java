@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.goal;
 
+import com.mojang.datafixers.DataFixUtils;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.world.entity.animal.AbstractSchoolingFish;
@@ -30,8 +31,10 @@ public class FollowFlockLeaderGoal extends Goal {
 		} else {
 			this.nextStartTick = this.nextStartTick(this.mob);
 			Predicate<AbstractSchoolingFish> predicate = abstractSchoolingFishx -> abstractSchoolingFishx.canBeFollowed() || !abstractSchoolingFishx.isFollower();
-			List<AbstractSchoolingFish> list = this.mob.level.getEntitiesOfClass(this.mob.getClass(), this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0), predicate);
-			AbstractSchoolingFish abstractSchoolingFish = (AbstractSchoolingFish)list.stream().filter(AbstractSchoolingFish::canBeFollowed).findAny().orElse(this.mob);
+			List<? extends AbstractSchoolingFish> list = this.mob
+				.level
+				.getEntitiesOfClass(this.mob.getClass(), this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0), predicate);
+			AbstractSchoolingFish abstractSchoolingFish = DataFixUtils.orElse(list.stream().filter(AbstractSchoolingFish::canBeFollowed).findAny(), this.mob);
 			abstractSchoolingFish.addFollowers(list.stream().filter(abstractSchoolingFishx -> !abstractSchoolingFishx.isFollower()));
 			return this.mob.isFollower();
 		}

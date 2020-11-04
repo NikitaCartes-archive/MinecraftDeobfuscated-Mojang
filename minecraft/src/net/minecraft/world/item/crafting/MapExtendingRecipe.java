@@ -42,7 +42,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 
 			for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); i++) {
 				ItemStack itemStack2 = craftingContainer.getItem(i);
-				if (itemStack2.getItem() == Items.FILLED_MAP) {
+				if (itemStack2.is(Items.FILLED_MAP)) {
 					itemStack = itemStack2;
 				}
 			}
@@ -78,7 +78,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 
 		for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); i++) {
 			ItemStack itemStack2 = craftingContainer.getItem(i);
-			if (itemStack2.getItem() == Items.FILLED_MAP) {
+			if (itemStack2.is(Items.FILLED_MAP)) {
 				itemStack = itemStack2;
 			}
 		}

@@ -16,7 +16,7 @@ public class PlayerHeadItem extends StandingAndWallBlockItem {
 
 	@Override
 	public Component getName(ItemStack itemStack) {
-		if (itemStack.getItem() == Items.PLAYER_HEAD && itemStack.hasTag()) {
+		if (itemStack.is(Items.PLAYER_HEAD) && itemStack.hasTag()) {
 			String string = null;
 			CompoundTag compoundTag = itemStack.getTag();
 			if (compoundTag.contains("SkullOwner", 8)) {

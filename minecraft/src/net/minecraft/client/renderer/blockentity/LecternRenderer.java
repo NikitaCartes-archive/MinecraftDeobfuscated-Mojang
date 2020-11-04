@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -14,11 +15,11 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
-	private final BookModel bookModel = new BookModel();
+public class LecternRenderer implements BlockEntityRenderer<LecternBlockEntity> {
+	private final BookModel bookModel;
 
-	public LecternRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public LecternRenderer(BlockEntityRendererProvider.Context context) {
+		this.bookModel = new BookModel(context.getLayer(ModelLayers.BOOK));
 	}
 
 	public void render(LecternBlockEntity lecternBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

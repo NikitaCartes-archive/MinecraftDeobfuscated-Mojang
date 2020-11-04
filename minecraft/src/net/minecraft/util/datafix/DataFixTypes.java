@@ -14,7 +14,8 @@ public enum DataFixTypes {
 	SAVED_DATA(References.SAVED_DATA),
 	ADVANCEMENTS(References.ADVANCEMENTS),
 	POI_CHUNK(References.POI_CHUNK),
-	WORLD_GEN_SETTINGS(References.WORLD_GEN_SETTINGS);
+	WORLD_GEN_SETTINGS(References.WORLD_GEN_SETTINGS),
+	ENTITY_CHUNK(References.ENTITY_CHUNK);
 
 	private final TypeReference type;
 

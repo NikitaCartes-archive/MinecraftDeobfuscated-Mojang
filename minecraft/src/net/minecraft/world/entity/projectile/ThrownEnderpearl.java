@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,11 +26,6 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 		super(EntityType.ENDER_PEARL, livingEntity, level);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public ThrownEnderpearl(Level level, double d, double e, double f) {
-		super(EntityType.ENDER_PEARL, d, e, f, level);
-	}
-
 	@Override
 	protected Item getDefaultItem() {
 		return Items.ENDER_PEARL;
@@ -56,7 +49,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 				);
 		}
 
-		if (!this.level.isClientSide && !this.removed) {
+		if (!this.level.isClientSide && !this.isRemoved()) {
 			if (entity instanceof ServerPlayer) {
 				ServerPlayer serverPlayer = (ServerPlayer)entity;
 				if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
@@ -80,7 +73,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 				entity.fallDistance = 0.0F;
 			}
 
-			this.remove();
+			this.discard();
 		}
 	}
 
@@ -88,7 +81,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 	public void tick() {
 		Entity entity = this.getOwner();
 		if (entity instanceof Player && !entity.isAlive()) {
-			this.remove();
+			this.discard();
 		} else {
 			super.tick();
 		}

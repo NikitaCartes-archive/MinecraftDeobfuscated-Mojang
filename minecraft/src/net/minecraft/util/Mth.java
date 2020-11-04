@@ -272,27 +272,10 @@ public class Mth {
 		return ceillog2(i) - (isPowerOfTwo(i) ? 0 : 1);
 	}
 
-	public static int roundUp(int i, int j) {
-		if (j == 0) {
-			return 0;
-		} else if (i == 0) {
-			return j;
-		} else {
-			if (i < 0) {
-				j *= -1;
-			}
-
-			int k = i % j;
-			return k == 0 ? i : i + j - k;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	public static int color(float f, float g, float h) {
 		return color(floor(f * 255.0F), floor(g * 255.0F), floor(h * 255.0F));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static int color(int i, int j, int k) {
 		int l = (i << 8) + j;
 		return (l << 8) + k;
@@ -549,6 +532,10 @@ public class Mth {
 
 	public static float square(float f) {
 		return f * f;
+	}
+
+	public static int roundToward(int i, int j) {
+		return (i + j - 1) / j * j;
 	}
 
 	static {

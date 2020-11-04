@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -10,6 +11,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DaylightDetectorBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,23 +49,21 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 		return (Integer)blockState.getValue(POWER);
 	}
 
-	public static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
-		if (level.dimensionType().hasSkyLight()) {
-			int i = level.getBrightness(LightLayer.SKY, blockPos) - level.getSkyDarken();
-			float f = level.getSunAngle(1.0F);
-			boolean bl = (Boolean)blockState.getValue(INVERTED);
-			if (bl) {
-				i = 15 - i;
-			} else if (i > 0) {
-				float g = f < (float) Math.PI ? 0.0F : (float) (Math.PI * 2);
-				f += (g - f) * 0.2F;
-				i = Math.round((float)i * Mth.cos(f));
-			}
+	private static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
+		int i = level.getBrightness(LightLayer.SKY, blockPos) - level.getSkyDarken();
+		float f = level.getSunAngle(1.0F);
+		boolean bl = (Boolean)blockState.getValue(INVERTED);
+		if (bl) {
+			i = 15 - i;
+		} else if (i > 0) {
+			float g = f < (float) Math.PI ? 0.0F : (float) (Math.PI * 2);
+			f += (g - f) * 0.2F;
+			i = Math.round((float)i * Mth.cos(f));
+		}
 
-			i = Mth.clamp(i, 0, 15);
-			if ((Integer)blockState.getValue(POWER) != i) {
-				level.setBlock(blockPos, blockState.setValue(POWER, Integer.valueOf(i)), 3);
-			}
+		i = Mth.clamp(i, 0, 15);
+		if ((Integer)blockState.getValue(POWER) != i) {
+			level.setBlock(blockPos, blockState.setValue(POWER, Integer.valueOf(i)), 3);
 		}
 	}
 
@@ -95,8 +96,22 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new DaylightDetectorBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new DaylightDetectorBlockEntity(blockPos, blockState);
+	}
+
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+		return !level.isClientSide && level.dimensionType().hasSkyLight()
+			? createTickerHelper(blockEntityType, BlockEntityType.DAYLIGHT_DETECTOR, DaylightDetectorBlock::tickEntity)
+			: null;
+	}
+
+	private static void tickEntity(Level level, BlockPos blockPos, BlockState blockState, DaylightDetectorBlockEntity daylightDetectorBlockEntity) {
+		if (level.getGameTime() % 20L == 0L) {
+			updateSignalStrength(blockState, level, blockPos);
+		}
 	}
 
 	@Override

@@ -25,8 +25,8 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
 
-	public FishingHookRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public FishingHookRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public void render(FishingHook fishingHook, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -48,7 +48,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			poseStack.popPose();
 			int j = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			ItemStack itemStack = player.getMainHandItem();
-			if (itemStack.getItem() != Items.FISHING_ROD) {
+			if (!itemStack.is(Items.FISHING_ROD)) {
 				j = -j;
 			}
 

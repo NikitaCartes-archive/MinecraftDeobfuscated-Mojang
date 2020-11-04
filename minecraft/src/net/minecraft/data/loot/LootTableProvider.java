@@ -62,7 +62,7 @@ public class LootTableProvider implements DataProvider {
 		map.forEach((resourceLocationx, lootTable) -> LootTables.validate(validationContext, resourceLocationx, lootTable));
 		Multimap<String, String> multimap = validationContext.getProblems();
 		if (!multimap.isEmpty()) {
-			multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+			multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
 			throw new IllegalStateException("Failed to validate loot tables, see logs");
 		} else {
 			map.forEach((resourceLocationx, lootTable) -> {

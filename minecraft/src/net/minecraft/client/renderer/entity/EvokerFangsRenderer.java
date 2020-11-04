@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EvokerFangsModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -14,10 +15,11 @@ import net.minecraft.world.entity.projectile.EvokerFangs;
 @Environment(EnvType.CLIENT)
 public class EvokerFangsRenderer extends EntityRenderer<EvokerFangs> {
 	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/illager/evoker_fangs.png");
-	private final EvokerFangsModel<EvokerFangs> model = new EvokerFangsModel<>();
+	private final EvokerFangsModel<EvokerFangs> model;
 
-	public EvokerFangsRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public EvokerFangsRenderer(EntityRendererProvider.Context context) {
+		super(context);
+		this.model = new EvokerFangsModel<>(context.getLayer(ModelLayers.EVOKER_FANGS));
 	}
 
 	public void render(EvokerFangs evokerFangs, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

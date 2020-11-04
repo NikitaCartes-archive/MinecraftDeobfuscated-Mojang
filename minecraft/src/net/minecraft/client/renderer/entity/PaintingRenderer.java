@@ -23,8 +23,8 @@ import net.minecraft.world.entity.decoration.Painting;
 
 @Environment(EnvType.CLIENT)
 public class PaintingRenderer extends EntityRenderer<Painting> {
-	public PaintingRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public PaintingRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public void render(Painting painting, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -84,9 +84,9 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 				float ab = f + (float)(y * 16);
 				float ac = g + (float)((z + 1) * 16);
 				float ad = g + (float)(z * 16);
-				int ae = Mth.floor(painting.getX());
+				int ae = painting.getBlockX();
 				int af = Mth.floor(painting.getY() + (double)((ac + ad) / 2.0F / 16.0F));
-				int ag = Mth.floor(painting.getZ());
+				int ag = painting.getBlockZ();
 				Direction direction = painting.getDirection();
 				if (direction == Direction.NORTH) {
 					ae = Mth.floor(painting.getX() + (double)((aa + ab) / 2.0F / 16.0F));

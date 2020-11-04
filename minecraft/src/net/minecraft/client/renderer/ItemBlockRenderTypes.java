@@ -223,6 +223,11 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_WARPED_ROOTS, renderType3);
 		hashMap.put(Blocks.CRIMSON_DOOR, renderType3);
 		hashMap.put(Blocks.WARPED_DOOR, renderType3);
+		hashMap.put(Blocks.SMALL_AMETHYST_BUD, renderType3);
+		hashMap.put(Blocks.MEDIUM_AMETHYST_BUD, renderType3);
+		hashMap.put(Blocks.LARGE_AMETHYST_BUD, renderType3);
+		hashMap.put(Blocks.AMETHYST_CLUSTER, renderType3);
+		hashMap.put(Blocks.LIGHTNING_ROD, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType4);
@@ -262,6 +267,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.HONEY_BLOCK, renderType4);
 		hashMap.put(Blocks.FROSTED_ICE, renderType4);
 		hashMap.put(Blocks.BUBBLE_COLUMN, renderType4);
+		hashMap.put(Blocks.TINTED_GLASS, renderType4);
 	});
 	private static final Map<Fluid, RenderType> TYPE_BY_FLUID = Util.make(Maps.<Fluid, RenderType>newHashMap(), hashMap -> {
 		RenderType renderType = RenderType.translucent();

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -19,13 +20,13 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	private LockCode lockKey = LockCode.NO_LOCK;
 	private Component name;
 
-	protected BaseContainerBlockEntity(BlockEntityType<?> blockEntityType) {
-		super(blockEntityType);
+	protected BaseContainerBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
+		super(blockEntityType, blockPos, blockState);
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
 		this.lockKey = LockCode.fromTag(compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));

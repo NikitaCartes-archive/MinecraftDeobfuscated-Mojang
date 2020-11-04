@@ -12,7 +12,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
@@ -35,7 +35,6 @@ import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -94,7 +93,7 @@ public class WanderingTrader extends AbstractVillager {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return null;
 	}
 
@@ -106,7 +105,7 @@ public class WanderingTrader extends AbstractVillager {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isBaby()) {
+		if (!itemStack.is(Items.VILLAGER_SPAWN_EGG) && this.isAlive() && !this.isTrading() && !this.isBaby()) {
 			if (interactionHand == InteractionHand.MAIN_HAND) {
 				player.awardStat(Stats.TALKED_TO_VILLAGER);
 			}
@@ -195,8 +194,7 @@ public class WanderingTrader extends AbstractVillager {
 
 	@Override
 	protected SoundEvent getDrinkingSound(ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		return item == Items.MILK_BUCKET ? SoundEvents.WANDERING_TRADER_DRINK_MILK : SoundEvents.WANDERING_TRADER_DRINK_POTION;
+		return itemStack.is(Items.MILK_BUCKET) ? SoundEvents.WANDERING_TRADER_DRINK_MILK : SoundEvents.WANDERING_TRADER_DRINK_POTION;
 	}
 
 	@Override
@@ -227,7 +225,7 @@ public class WanderingTrader extends AbstractVillager {
 
 	private void maybeDespawn() {
 		if (this.despawnDelay > 0 && !this.isTrading() && --this.despawnDelay == 0) {
-			this.remove();
+			this.discard();
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -170,7 +171,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 	}
 
 	public BlockPos getLocatePos() {
-		return new BlockPos(this.chunkX << 4, 0, this.chunkZ << 4);
+		return new BlockPos(SectionPos.sectionToBlockCoord(this.chunkX), 0, SectionPos.sectionToBlockCoord(this.chunkZ));
 	}
 
 	public boolean canBeReferenced() {

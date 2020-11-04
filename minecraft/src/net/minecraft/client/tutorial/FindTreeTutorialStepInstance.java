@@ -66,7 +66,7 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 				LocalPlayer localPlayer = this.tutorial.getMinecraft().player;
 				if (localPlayer != null) {
 					for (Block block : TREE_BLOCKS) {
-						if (localPlayer.inventory.contains(new ItemStack(block))) {
+						if (localPlayer.getInventory().contains(new ItemStack(block))) {
 							this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
 							return;
 						}
@@ -107,7 +107,7 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 	@Override
 	public void onGetItem(ItemStack itemStack) {
 		for (Block block : TREE_BLOCKS) {
-			if (itemStack.getItem() == block.asItem()) {
+			if (itemStack.is(block.asItem())) {
 				this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
 				return;
 			}

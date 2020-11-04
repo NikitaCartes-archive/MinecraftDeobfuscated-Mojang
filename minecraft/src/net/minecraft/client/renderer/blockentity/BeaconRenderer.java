@@ -16,11 +16,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
+public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
 	public static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
 
-	public BeaconRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public BeaconRenderer(BlockEntityRendererProvider.Context context) {
 	}
 
 	public void render(BeaconBlockEntity beaconBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

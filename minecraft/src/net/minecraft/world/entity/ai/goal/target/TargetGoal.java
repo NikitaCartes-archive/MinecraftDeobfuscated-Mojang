@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.goal.target;
 
 import javax.annotation.Nullable;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -61,7 +60,7 @@ public abstract class TargetGoal extends Goal {
 						}
 					}
 
-					if (livingEntity instanceof Player && ((Player)livingEntity).abilities.invulnerable) {
+					if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
 						return false;
 					} else {
 						this.mob.setTarget(livingEntity);
@@ -125,8 +124,8 @@ public abstract class TargetGoal extends Goal {
 			if (node == null) {
 				return false;
 			} else {
-				int i = node.x - Mth.floor(livingEntity.getX());
-				int j = node.z - Mth.floor(livingEntity.getZ());
+				int i = node.x - livingEntity.getBlockX();
+				int j = node.z - livingEntity.getBlockZ();
 				return (double)(i * i + j * j) <= 2.25;
 			}
 		}

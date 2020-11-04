@@ -1,9 +1,10 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,11 +13,13 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,40 +27,20 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
-public class BlockEntityRenderDispatcher {
-	private final Map<BlockEntityType<?>, BlockEntityRenderer<?>> renderers = Maps.<BlockEntityType<?>, BlockEntityRenderer<?>>newHashMap();
-	public static final BlockEntityRenderDispatcher instance = new BlockEntityRenderDispatcher();
+public class BlockEntityRenderDispatcher implements ResourceManagerReloadListener {
+	private Map<BlockEntityType<?>, BlockEntityRenderer<?>> renderers = ImmutableMap.of();
 	private final BufferBuilder singleRenderBuffer = new BufferBuilder(256);
-	private Font font;
-	public TextureManager textureManager;
+	private final Font font;
+	private final EntityModelSet entityModelSet;
 	public Level level;
 	public Camera camera;
 	public HitResult cameraHitResult;
+	private final Supplier<BlockRenderDispatcher> blockRenderDispatcher;
 
-	private BlockEntityRenderDispatcher() {
-		this.register(BlockEntityType.SIGN, new SignRenderer(this));
-		this.register(BlockEntityType.MOB_SPAWNER, new SpawnerRenderer(this));
-		this.register(BlockEntityType.PISTON, new PistonHeadRenderer(this));
-		this.register(BlockEntityType.CHEST, new ChestRenderer<>(this));
-		this.register(BlockEntityType.ENDER_CHEST, new ChestRenderer<>(this));
-		this.register(BlockEntityType.TRAPPED_CHEST, new ChestRenderer<>(this));
-		this.register(BlockEntityType.ENCHANTING_TABLE, new EnchantTableRenderer(this));
-		this.register(BlockEntityType.LECTERN, new LecternRenderer(this));
-		this.register(BlockEntityType.END_PORTAL, new TheEndPortalRenderer<>(this));
-		this.register(BlockEntityType.END_GATEWAY, new TheEndGatewayRenderer(this));
-		this.register(BlockEntityType.BEACON, new BeaconRenderer(this));
-		this.register(BlockEntityType.SKULL, new SkullBlockRenderer(this));
-		this.register(BlockEntityType.BANNER, new BannerRenderer(this));
-		this.register(BlockEntityType.STRUCTURE_BLOCK, new StructureBlockRenderer(this));
-		this.register(BlockEntityType.SHULKER_BOX, new ShulkerBoxRenderer(new ShulkerModel(), this));
-		this.register(BlockEntityType.BED, new BedRenderer(this));
-		this.register(BlockEntityType.CONDUIT, new ConduitRenderer(this));
-		this.register(BlockEntityType.BELL, new BellRenderer(this));
-		this.register(BlockEntityType.CAMPFIRE, new CampfireRenderer(this));
-	}
-
-	private <E extends BlockEntity> void register(BlockEntityType<E> blockEntityType, BlockEntityRenderer<E> blockEntityRenderer) {
-		this.renderers.put(blockEntityType, blockEntityRenderer);
+	public BlockEntityRenderDispatcher(Font font, EntityModelSet entityModelSet, Supplier<BlockRenderDispatcher> supplier) {
+		this.font = font;
+		this.entityModelSet = entityModelSet;
+		this.blockRenderDispatcher = supplier;
 	}
 
 	@Nullable
@@ -65,14 +48,12 @@ public class BlockEntityRenderDispatcher {
 		return (BlockEntityRenderer<E>)this.renderers.get(blockEntity.getType());
 	}
 
-	public void prepare(Level level, TextureManager textureManager, Font font, Camera camera, HitResult hitResult) {
+	public void prepare(Level level, Camera camera, HitResult hitResult) {
 		if (this.level != level) {
 			this.setLevel(level);
 		}
 
-		this.textureManager = textureManager;
 		this.camera = camera;
-		this.font = font;
 		this.cameraHitResult = hitResult;
 	}
 
@@ -80,7 +61,7 @@ public class BlockEntityRenderDispatcher {
 		if (Vec3.atCenterOf(blockEntity.getBlockPos()).closerThan(this.camera.getPosition(), blockEntity.getViewDistance())) {
 			BlockEntityRenderer<E> blockEntityRenderer = this.getRenderer(blockEntity);
 			if (blockEntityRenderer != null) {
-				if (blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
+				if (blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState())) {
 					tryRender(blockEntity, () -> setupAndRender(blockEntityRenderer, blockEntity, f, poseStack, multiBufferSource));
 				}
 			}
@@ -129,7 +110,11 @@ public class BlockEntityRenderDispatcher {
 		}
 	}
 
-	public Font getFont() {
-		return this.font;
+	@Override
+	public void onResourceManagerReload(ResourceManager resourceManager) {
+		BlockEntityRendererProvider.Context context = new BlockEntityRendererProvider.Context(
+			this, (BlockRenderDispatcher)this.blockRenderDispatcher.get(), this.entityModelSet, this.font
+		);
+		this.renderers = BlockEntityRenderers.createEntityRenderers(context);
 	}
 }

@@ -67,7 +67,7 @@ public class SpongeBlock extends Block {
 							queue.add(new Tuple<>(blockPos3, j + 1));
 						}
 					} else if (material == Material.WATER_PLANT || material == Material.REPLACEABLE_WATER_PLANT) {
-						BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos3) : null;
+						BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos3) : null;
 						dropResources(blockState, level, blockPos3, blockEntity);
 						level.setBlock(blockPos3, Blocks.AIR.defaultBlockState(), 3);
 						i++;

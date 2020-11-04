@@ -193,8 +193,8 @@ public class ServerEntity {
 	}
 
 	public void sendPairingData(Consumer<Packet<?>> consumer) {
-		if (this.entity.removed) {
-			LOGGER.warn("Fetching packet for removed entity " + this.entity);
+		if (this.entity.isRemoved()) {
+			LOGGER.warn("Fetching packet for removed entity {}", this.entity);
 		}
 
 		Packet<?> packet = this.entity.getAddEntityPacket();

@@ -78,12 +78,13 @@ public class BlockStateProperties {
 	public static final IntegerProperty AGE_15 = IntegerProperty.create("age", 0, 15);
 	public static final IntegerProperty AGE_25 = IntegerProperty.create("age", 0, 25);
 	public static final IntegerProperty BITES = IntegerProperty.create("bites", 0, 6);
+	public static final IntegerProperty CANDLES = IntegerProperty.create("candles", 1, 4);
 	public static final IntegerProperty DELAY = IntegerProperty.create("delay", 1, 4);
 	public static final IntegerProperty DISTANCE = IntegerProperty.create("distance", 1, 7);
 	public static final IntegerProperty EGGS = IntegerProperty.create("eggs", 1, 4);
 	public static final IntegerProperty HATCH = IntegerProperty.create("hatch", 0, 2);
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, 8);
-	public static final IntegerProperty LEVEL_CAULDRON = IntegerProperty.create("level", 0, 3);
+	public static final IntegerProperty LEVEL_CAULDRON = IntegerProperty.create("level", 1, 3);
 	public static final IntegerProperty LEVEL_COMPOSTER = IntegerProperty.create("level", 0, 8);
 	public static final IntegerProperty LEVEL_FLOWING = IntegerProperty.create("level", 1, 8);
 	public static final IntegerProperty LEVEL_HONEY = IntegerProperty.create("honey_level", 0, 5);

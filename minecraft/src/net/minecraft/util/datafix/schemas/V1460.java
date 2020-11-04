@@ -406,5 +406,6 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(namespacedString()));
 		schema.registerType(false, References.POI_CHUNK, DSL::remainder);
 		schema.registerType(true, References.WORLD_GEN_SETTINGS, DSL::remainder);
+		schema.registerType(false, References.ENTITY_CHUNK, () -> DSL.optionalFields("Entities", DSL.list(References.ENTITY_TREE.in(schema))));
 	}
 }

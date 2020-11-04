@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
@@ -50,9 +49,9 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration
 	) {
 		int j = blockPos.getY();
-		if (j >= 1 && j + i + 1 < 256) {
-			Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-			if (!isDirt(block) && !block.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
+		if (j >= levelAccessor.getMinBuildHeight() + 1 && j + i + 1 < levelAccessor.getMaxBuildHeight()) {
+			BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+			if (!isDirt(blockState) && !blockState.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
 				return false;
 			} else {
 				for (int k = 0; k <= i; k++) {
@@ -60,8 +59,8 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 
 					for (int m = -l; m <= l; m++) {
 						for (int n = -l; n <= l; n++) {
-							BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
-							if (!blockState.isAir() && !blockState.is(BlockTags.LEAVES)) {
+							BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
+							if (!blockState2.isAir() && !blockState2.is(BlockTags.LEAVES)) {
 								return false;
 							}
 						}

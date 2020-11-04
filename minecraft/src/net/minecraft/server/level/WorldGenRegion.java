@@ -38,6 +38,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -139,7 +140,7 @@ public class WorldGenRegion implements WorldGenLevel {
 
 	@Override
 	public BlockState getBlockState(BlockPos blockPos) {
-		return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4).getBlockState(blockPos);
+		return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ())).getBlockState(blockPos);
 	}
 
 	@Override
@@ -186,7 +187,7 @@ public class WorldGenRegion implements WorldGenLevel {
 			return false;
 		} else {
 			if (bl) {
-				BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
+				BlockEntity blockEntity = blockState.hasBlockEntity() ? this.getBlockEntity(blockPos) : null;
 				Block.dropResources(blockState, this.level, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
@@ -206,23 +207,22 @@ public class WorldGenRegion implements WorldGenLevel {
 			BlockState blockState = chunkAccess.getBlockState(blockPos);
 			if (compoundTag != null) {
 				if ("DUMMY".equals(compoundTag.getString("id"))) {
-					Block block = blockState.getBlock();
-					if (!(block instanceof EntityBlock)) {
+					if (!blockState.hasBlockEntity()) {
 						return null;
 					}
 
-					blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
+					blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
 				} else {
-					blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
+					blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag);
 				}
 
 				if (blockEntity != null) {
-					chunkAccess.setBlockEntity(blockPos, blockEntity);
+					chunkAccess.setBlockEntity(blockEntity);
 					return blockEntity;
 				}
 			}
 
-			if (blockState.getBlock() instanceof EntityBlock) {
+			if (blockState.hasBlockEntity()) {
 				LOGGER.warn("Tried to access a block entity before it was created. {}", blockPos);
 			}
 
@@ -238,10 +238,14 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.level.onBlockStateChange(blockPos, blockState2, blockState);
 		}
 
-		Block block = blockState.getBlock();
-		if (block.isEntityBlock()) {
+		if (blockState.hasBlockEntity()) {
 			if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
-				chunkAccess.setBlockEntity(blockPos, ((EntityBlock)block).newBlockEntity(this));
+				BlockEntity blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
+				if (blockEntity != null) {
+					chunkAccess.setBlockEntity(blockEntity);
+				} else {
+					chunkAccess.removeBlockEntity(blockPos);
+				}
 			} else {
 				CompoundTag compoundTag = new CompoundTag();
 				compoundTag.putInt("x", blockPos.getX());
@@ -250,7 +254,7 @@ public class WorldGenRegion implements WorldGenLevel {
 				compoundTag.putString("id", "DUMMY");
 				chunkAccess.setBlockEntityNbt(compoundTag);
 			}
-		} else if (blockState2 != null && blockState2.getBlock().isEntityBlock()) {
+		} else if (blockState2 != null && blockState2.hasBlockEntity()) {
 			chunkAccess.removeBlockEntity(blockPos);
 		}
 
@@ -267,8 +271,8 @@ public class WorldGenRegion implements WorldGenLevel {
 
 	@Override
 	public boolean addFreshEntity(Entity entity) {
-		int i = Mth.floor(entity.getX() / 16.0);
-		int j = Mth.floor(entity.getZ() / 16.0);
+		int i = SectionPos.blockToSectionCoord(entity.getBlockX());
+		int j = SectionPos.blockToSectionCoord(entity.getBlockZ());
 		this.getChunk(i, j).addEntity(entity);
 		return true;
 	}
@@ -306,7 +310,7 @@ public class WorldGenRegion implements WorldGenLevel {
 
 	@Override
 	public DifficultyInstance getCurrentDifficultyAt(BlockPos blockPos) {
-		if (!this.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
+		if (!this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()))) {
 			throw new RuntimeException("We are asking a region for a chunk out of bound");
 		} else {
 			return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(), 0L, this.level.getMoonBrightness());
@@ -345,7 +349,7 @@ public class WorldGenRegion implements WorldGenLevel {
 
 	@Override
 	public int getHeight(Heightmap.Types types, int i, int j) {
-		return this.getChunk(i >> 4, j >> 4).getHeight(types, i & 15, j & 15) + 1;
+		return this.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j)).getHeight(types, i & 15, j & 15) + 1;
 	}
 
 	@Override
@@ -371,7 +375,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+	public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
 		return Collections.emptyList();
 	}
 
@@ -388,5 +392,15 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Override
 	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
 		return this.structureFeatureManager.startsForFeature(sectionPos, structureFeature);
+	}
+
+	@Override
+	public int getSectionsCount() {
+		return this.level.getSectionsCount();
+	}
+
+	@Override
+	public int getMinSection() {
+		return this.level.getMinSection();
 	}
 }

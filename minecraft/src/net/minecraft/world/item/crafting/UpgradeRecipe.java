@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -75,6 +76,12 @@ public class UpgradeRecipe implements Recipe<Container> {
 	@Override
 	public RecipeType<?> getType() {
 		return RecipeType.SMITHING;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public boolean isIncomplete() {
+		return Stream.of(this.base, this.addition).anyMatch(ingredient -> ingredient.getItems().length == 0);
 	}
 
 	public static class Serializer implements RecipeSerializer<UpgradeRecipe> {

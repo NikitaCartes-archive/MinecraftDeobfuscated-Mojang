@@ -3,6 +3,11 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -12,57 +17,68 @@ import net.minecraft.world.entity.monster.piglin.PiglinArmPose;
 
 @Environment(EnvType.CLIENT)
 public class PiglinModel<T extends Mob> extends PlayerModel<T> {
-	public final ModelPart earRight;
-	public final ModelPart earLeft;
-	private final ModelPart bodyDefault;
-	private final ModelPart headDefault;
-	private final ModelPart leftArmDefault;
-	private final ModelPart rightArmDefault;
+	public final ModelPart rightEar = this.head.getChild("right_ear");
+	private final ModelPart leftEar = this.head.getChild("left_ear");
+	private final PartPose bodyDefault = this.body.storePose();
+	private final PartPose headDefault = this.head.storePose();
+	private final PartPose leftArmDefault = this.leftArm.storePose();
+	private final PartPose rightArmDefault = this.rightArm.storePose();
 
-	public PiglinModel(float f, int i, int j) {
-		super(f, false);
-		this.texWidth = i;
-		this.texHeight = j;
-		this.body = new ModelPart(this, 16, 16);
-		this.body.addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, f);
-		this.head = new ModelPart(this);
-		this.head.texOffs(0, 0).addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F, f);
-		this.head.texOffs(31, 1).addBox(-2.0F, -4.0F, -5.0F, 4.0F, 4.0F, 1.0F, f);
-		this.head.texOffs(2, 4).addBox(2.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, f);
-		this.head.texOffs(2, 0).addBox(-3.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, f);
-		this.earRight = new ModelPart(this);
-		this.earRight.setPos(4.5F, -6.0F, 0.0F);
-		this.earRight.texOffs(51, 6).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
-		this.head.addChild(this.earRight);
-		this.earLeft = new ModelPart(this);
-		this.earLeft.setPos(-4.5F, -6.0F, 0.0F);
-		this.earLeft.texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
-		this.head.addChild(this.earLeft);
-		this.hat = new ModelPart(this);
-		this.bodyDefault = this.body.createShallowCopy();
-		this.headDefault = this.head.createShallowCopy();
-		this.leftArmDefault = this.leftArm.createShallowCopy();
-		this.rightArmDefault = this.leftArm.createShallowCopy();
+	public PiglinModel(ModelPart modelPart) {
+		super(modelPart, false);
+	}
+
+	public static MeshDefinition createMesh(CubeDeformation cubeDeformation) {
+		MeshDefinition meshDefinition = PlayerModel.createMesh(cubeDeformation, false);
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, cubeDeformation), PartPose.ZERO
+		);
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+			"head",
+			CubeListBuilder.create()
+				.texOffs(0, 0)
+				.addBox(-5.0F, -8.0F, -4.0F, 10.0F, 8.0F, 8.0F, cubeDeformation)
+				.texOffs(31, 1)
+				.addBox(-2.0F, -4.0F, -5.0F, 4.0F, 4.0F, 1.0F, cubeDeformation)
+				.texOffs(2, 4)
+				.addBox(2.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, cubeDeformation)
+				.texOffs(2, 0)
+				.addBox(-3.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, cubeDeformation),
+			PartPose.ZERO
+		);
+		partDefinition2.addOrReplaceChild(
+			"left_ear",
+			CubeListBuilder.create().texOffs(51, 6).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, cubeDeformation),
+			PartPose.offsetAndRotation(4.5F, -6.0F, 0.0F, 0.0F, 0.0F, (float) (-Math.PI / 6))
+		);
+		partDefinition2.addOrReplaceChild(
+			"right_ear",
+			CubeListBuilder.create().texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, cubeDeformation),
+			PartPose.offsetAndRotation(-4.5F, -6.0F, 0.0F, 0.0F, 0.0F, (float) (Math.PI / 6))
+		);
+		partDefinition.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+		return meshDefinition;
 	}
 
 	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
-		this.body.copyFrom(this.bodyDefault);
-		this.head.copyFrom(this.headDefault);
-		this.leftArm.copyFrom(this.leftArmDefault);
-		this.rightArm.copyFrom(this.rightArmDefault);
+		this.body.loadPose(this.bodyDefault);
+		this.head.loadPose(this.headDefault);
+		this.leftArm.loadPose(this.leftArmDefault);
+		this.rightArm.loadPose(this.rightArmDefault);
 		super.setupAnim(mob, f, g, h, i, j);
 		float k = (float) (Math.PI / 6);
 		float l = h * 0.1F + f * 0.5F;
 		float m = 0.08F + g * 0.4F;
-		this.earRight.zRot = (float) (-Math.PI / 6) - Mth.cos(l * 1.2F) * m;
-		this.earLeft.zRot = (float) (Math.PI / 6) + Mth.cos(l) * m;
+		this.leftEar.zRot = (float) (-Math.PI / 6) - Mth.cos(l * 1.2F) * m;
+		this.rightEar.zRot = (float) (Math.PI / 6) + Mth.cos(l) * m;
 		if (mob instanceof AbstractPiglin) {
 			AbstractPiglin abstractPiglin = (AbstractPiglin)mob;
 			PiglinArmPose piglinArmPose = abstractPiglin.getArmPose();
 			if (piglinArmPose == PiglinArmPose.DANCING) {
 				float n = h / 60.0F;
-				this.earLeft.zRot = (float) (Math.PI / 6) + (float) (Math.PI / 180.0) * Mth.sin(n * 30.0F) * 10.0F;
-				this.earRight.zRot = (float) (-Math.PI / 6) - (float) (Math.PI / 180.0) * Mth.cos(n * 30.0F) * 10.0F;
+				this.rightEar.zRot = (float) (Math.PI / 6) + (float) (Math.PI / 180.0) * Mth.sin(n * 30.0F) * 10.0F;
+				this.leftEar.zRot = (float) (-Math.PI / 6) - (float) (Math.PI / 180.0) * Mth.cos(n * 30.0F) * 10.0F;
 				this.head.x = Mth.sin(n * 10.0F);
 				this.head.y = Mth.sin(n * 40.0F) + 0.4F;
 				this.rightArm.zRot = (float) (Math.PI / 180.0) * (70.0F + Mth.cos(n * 40.0F) * 10.0F);

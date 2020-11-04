@@ -91,6 +91,7 @@ public final class Material {
 	public static final Material VEGETABLE = new Material.Builder(MaterialColor.PLANT).destroyOnPush().build();
 	public static final Material EGG = new Material.Builder(MaterialColor.PLANT).destroyOnPush().build();
 	public static final Material CAKE = new Material.Builder(MaterialColor.NONE).destroyOnPush().build();
+	public static final Material AMETHYST = new Material.Builder(MaterialColor.COLOR_PURPLE).notSolidBlocking().destroyOnPush().build();
 	private final MaterialColor color;
 	private final PushReaction pushReaction;
 	private final boolean blocksMotion;

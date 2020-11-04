@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -33,9 +33,9 @@ public class VillagerMakeLove extends Behavior<Villager> {
 	}
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
-		AgableMob agableMob = (AgableMob)villager.getBrain().getMemory(MemoryModuleType.BREED_TARGET).get();
-		BehaviorUtils.lockGazeAndWalkToEachOther(villager, agableMob, 0.5F);
-		serverLevel.broadcastEntityEvent(agableMob, (byte)18);
+		AgeableMob ageableMob = (AgeableMob)villager.getBrain().getMemory(MemoryModuleType.BREED_TARGET).get();
+		BehaviorUtils.lockGazeAndWalkToEachOther(villager, ageableMob, 0.5F);
+		serverLevel.broadcastEntityEvent(ageableMob, (byte)18);
 		serverLevel.broadcastEntityEvent(villager, (byte)18);
 		int i = 275 + villager.getRandom().nextInt(50);
 		this.birthTimestamp = l + (long)i;
@@ -78,10 +78,10 @@ public class VillagerMakeLove extends Behavior<Villager> {
 
 	private boolean isBreedingPossible(Villager villager) {
 		Brain<Villager> brain = villager.getBrain();
-		Optional<AgableMob> optional = brain.getMemory(MemoryModuleType.BREED_TARGET).filter(agableMob -> agableMob.getType() == EntityType.VILLAGER);
+		Optional<AgeableMob> optional = brain.getMemory(MemoryModuleType.BREED_TARGET).filter(ageableMob -> ageableMob.getType() == EntityType.VILLAGER);
 		return !optional.isPresent()
 			? false
-			: BehaviorUtils.targetIsValid(brain, MemoryModuleType.BREED_TARGET, EntityType.VILLAGER) && villager.canBreed() && ((AgableMob)optional.get()).canBreed();
+			: BehaviorUtils.targetIsValid(brain, MemoryModuleType.BREED_TARGET, EntityType.VILLAGER) && villager.canBreed() && ((AgeableMob)optional.get()).canBreed();
 	}
 
 	private Optional<BlockPos> takeVacantBed(ServerLevel serverLevel, Villager villager) {

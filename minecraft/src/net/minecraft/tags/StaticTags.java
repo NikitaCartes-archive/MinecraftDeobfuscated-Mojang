@@ -39,7 +39,7 @@ public class StaticTags {
 	}
 
 	public static void bootStrap() {
-		StaticTagHelper[] staticTagHelpers = new StaticTagHelper[]{BlockTags.HELPER, ItemTags.HELPER, FluidTags.HELPER, EntityTypeTags.HELPER};
+		StaticTagHelper<?>[] staticTagHelpers = new StaticTagHelper[]{BlockTags.HELPER, ItemTags.HELPER, FluidTags.HELPER, EntityTypeTags.HELPER};
 		boolean bl = Stream.of(staticTagHelpers).anyMatch(staticTagHelper -> !HELPERS.containsValue(staticTagHelper));
 		if (bl) {
 			throw new IllegalStateException("Missing helper registrations");

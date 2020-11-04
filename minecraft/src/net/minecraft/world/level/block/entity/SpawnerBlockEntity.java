@@ -4,59 +4,53 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class SpawnerBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class SpawnerBlockEntity extends BlockEntity {
 	private final BaseSpawner spawner = new BaseSpawner() {
 		@Override
-		public void broadcastEvent(int i) {
-			SpawnerBlockEntity.this.level.blockEvent(SpawnerBlockEntity.this.worldPosition, Blocks.SPAWNER, i, 0);
+		public void broadcastEvent(Level level, BlockPos blockPos, int i) {
+			level.blockEvent(blockPos, Blocks.SPAWNER, i, 0);
 		}
 
 		@Override
-		public Level getLevel() {
-			return SpawnerBlockEntity.this.level;
-		}
-
-		@Override
-		public BlockPos getPos() {
-			return SpawnerBlockEntity.this.worldPosition;
-		}
-
-		@Override
-		public void setNextSpawnData(SpawnData spawnData) {
-			super.setNextSpawnData(spawnData);
-			if (this.getLevel() != null) {
-				BlockState blockState = this.getLevel().getBlockState(this.getPos());
-				this.getLevel().sendBlockUpdated(SpawnerBlockEntity.this.worldPosition, blockState, blockState, 4);
+		public void setNextSpawnData(@Nullable Level level, BlockPos blockPos, SpawnData spawnData) {
+			super.setNextSpawnData(level, blockPos, spawnData);
+			if (level != null) {
+				BlockState blockState = level.getBlockState(blockPos);
+				level.sendBlockUpdated(blockPos, blockState, blockState, 4);
 			}
 		}
 	};
 
-	public SpawnerBlockEntity() {
-		super(BlockEntityType.MOB_SPAWNER);
+	public SpawnerBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.MOB_SPAWNER, blockPos, blockState);
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
-		this.spawner.load(compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
+		this.spawner.load(this.level, this.worldPosition, compoundTag);
 	}
 
 	@Override
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
-		this.spawner.save(compoundTag);
+		this.spawner.save(this.level, this.worldPosition, compoundTag);
 		return compoundTag;
 	}
 
-	@Override
-	public void tick() {
-		this.spawner.tick();
+	public static void clientTick(Level level, BlockPos blockPos, BlockState blockState, SpawnerBlockEntity spawnerBlockEntity) {
+		spawnerBlockEntity.spawner.clientTick(level, blockPos);
+	}
+
+	public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, SpawnerBlockEntity spawnerBlockEntity) {
+		spawnerBlockEntity.spawner.serverTick((ServerLevel)level, blockPos);
 	}
 
 	@Nullable
@@ -74,7 +68,7 @@ public class SpawnerBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	@Override
 	public boolean triggerEvent(int i, int j) {
-		return this.spawner.onEventTriggered(i) ? true : super.triggerEvent(i, j);
+		return this.spawner.onEventTriggered(this.level, i) ? true : super.triggerEvent(i, j);
 	}
 
 	@Override

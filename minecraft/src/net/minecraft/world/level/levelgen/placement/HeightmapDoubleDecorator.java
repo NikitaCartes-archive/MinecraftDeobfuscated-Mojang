@@ -22,6 +22,6 @@ public class HeightmapDoubleDecorator<DC extends DecoratorConfiguration> extends
 		int i = blockPos.getX();
 		int j = blockPos.getZ();
 		int k = decorationContext.getHeight(this.type(decoratorConfiguration), i, j);
-		return k == 0 ? Stream.of() : Stream.of(new BlockPos(i, random.nextInt(k * 2), j));
+		return k == decorationContext.getMinBuildHeight() ? Stream.of() : Stream.of(new BlockPos(i, random.nextInt(k * 2), j));
 	}
 }

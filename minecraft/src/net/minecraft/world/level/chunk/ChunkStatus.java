@@ -263,7 +263,7 @@ public class ChunkStatus {
 		return chunkAccess.getStatus().isOrAfter(chunkStatus) && chunkAccess.isLightCorrect();
 	}
 
-	public static ChunkStatus getStatus(int i) {
+	public static ChunkStatus getStatusAroundFullChunk(int i) {
 		if (i >= STATUS_BY_RANGE.size()) {
 			return EMPTY;
 		} else {

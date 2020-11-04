@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class GameTestInfo {
 	private final TestFunction testFunction;
@@ -21,15 +22,17 @@ public class GameTestInfo {
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 	private final int timeoutTicks;
 	private final Collection<GameTestSequence> sequences = Lists.<GameTestSequence>newCopyOnWriteArrayList();
-	private Object2LongMap<Runnable> runAtTickTimeMap = new Object2LongOpenHashMap<>();
+	private final Object2LongMap<Runnable> runAtTickTimeMap = new Object2LongOpenHashMap<>();
 	private long startTick;
 	private long tickCount;
-	private boolean started = false;
+	private boolean started;
 	private final Stopwatch timer = Stopwatch.createUnstarted();
-	private boolean done = false;
+	private boolean done;
 	private final Rotation rotation;
 	@Nullable
 	private Throwable error;
+	@Nullable
+	private StructureBlockEntity structureBlockEntity;
 
 	public GameTestInfo(TestFunction testFunction, Rotation rotation, ServerLevel serverLevel) {
 		this.testFunction = testFunction;
@@ -155,11 +158,20 @@ public class GameTestInfo {
 	}
 
 	public void spawnStructure(BlockPos blockPos, int i) {
-		StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(this.getStructureName(), blockPos, this.getRotation(), i, this.level, false);
-		this.setStructureBlockPos(structureBlockEntity.getBlockPos());
-		structureBlockEntity.setStructureName(this.getTestName());
+		this.structureBlockEntity = StructureUtils.spawnStructure(this.getStructureName(), blockPos, this.getRotation(), i, this.level, false);
+		this.structureBlockPos = this.structureBlockEntity.getBlockPos();
+		this.structureBlockEntity.setStructureName(this.getTestName());
 		StructureUtils.addCommandBlockAndButtonToStartTest(this.structureBlockPos, new BlockPos(1, 0, -1), this.getRotation(), this.level);
 		this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
+	}
+
+	public void clearStructure() {
+		if (this.structureBlockEntity == null) {
+			throw new IllegalStateException("Expected structure to be initialized, but it was null");
+		} else {
+			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(this.structureBlockEntity);
+			StructureUtils.clearSpaceForStructure(boundingBox, this.structureBlockPos.getY(), this.level);
+		}
 	}
 
 	public boolean isRequired() {
@@ -180,5 +192,17 @@ public class GameTestInfo {
 
 	public TestFunction getTestFunction() {
 		return this.testFunction;
+	}
+
+	public boolean isFlaky() {
+		return this.testFunction.isFlaky();
+	}
+
+	public int maxAttempts() {
+		return this.testFunction.getMaxAttempts();
+	}
+
+	public int requiredSuccesses() {
+		return this.testFunction.getRequiredSuccesses();
 	}
 }

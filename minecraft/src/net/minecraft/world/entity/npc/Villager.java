@@ -44,7 +44,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -296,7 +296,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.VILLAGER_SPAWN_EGG || !this.isAlive() || this.isTrading() || this.isSleeping()) {
+		if (itemStack.is(Items.VILLAGER_SPAWN_EGG) || !this.isAlive() || this.isTrading() || this.isSleeping()) {
 			return super.mobInteract(player, interactionHand);
 		} else if (this.isBaby()) {
 			this.setUnhappy();
@@ -734,7 +734,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public Villager getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		double d = this.random.nextDouble();
 		VillagerType villagerType;
 		if (d < 0.5) {
@@ -742,7 +742,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		} else if (d < 0.75) {
 			villagerType = this.getVillagerData().getType();
 		} else {
-			villagerType = ((Villager)agableMob).getVillagerData().getType();
+			villagerType = ((Villager)ageableMob).getVillagerData().getType();
 		}
 
 		Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
@@ -766,7 +766,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			witch.setPersistenceRequired();
 			serverLevel.addFreshEntityWithPassengers(witch);
 			this.releaseAllPois();
-			this.remove();
+			this.discard();
 		} else {
 			super.thunderHit(serverLevel, lightningBolt);
 		}
@@ -786,7 +786,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.take(itemEntity, itemStack.getCount());
 			ItemStack itemStack2 = simpleContainer.addItem(itemStack);
 			if (itemStack2.isEmpty()) {
-				itemEntity.remove();
+				itemEntity.discard();
 			} else {
 				itemStack.setCount(itemStack2.getCount());
 			}
@@ -884,7 +884,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 						return ironGolem;
 					}
 
-					ironGolem.remove();
+					ironGolem.discard();
 				}
 			}
 		}

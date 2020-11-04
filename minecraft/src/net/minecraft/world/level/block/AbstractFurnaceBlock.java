@@ -1,7 +1,9 @@
 package net.minecraft.world.level.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -13,6 +15,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -65,8 +69,11 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof AbstractFurnaceBlockEntity) {
-				Containers.dropContents(level, blockPos, (AbstractFurnaceBlockEntity)blockEntity);
-				((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience(level, Vec3.atCenterOf(blockPos));
+				if (level instanceof ServerLevel) {
+					Containers.dropContents(level, blockPos, (AbstractFurnaceBlockEntity)blockEntity);
+					((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience((ServerLevel)level, Vec3.atCenterOf(blockPos));
+				}
+
 				level.updateNeighbourForOutputSignal(blockPos, this);
 			}
 
@@ -102,5 +109,12 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, LIT);
+	}
+
+	@Nullable
+	protected static <T extends BlockEntity> BlockEntityTicker<T> createFurnaceTicker(
+		Level level, BlockEntityType<T> blockEntityType, BlockEntityType<? extends AbstractFurnaceBlockEntity> blockEntityType2
+	) {
+		return level.isClientSide ? null : createTickerHelper(blockEntityType, blockEntityType2, AbstractFurnaceBlockEntity::serverTick);
 	}
 }

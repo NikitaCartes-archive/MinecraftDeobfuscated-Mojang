@@ -85,10 +85,17 @@ public class EnderEyeItem extends Item {
 					}
 
 					level.playSound(
-						null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+						null,
+						player.getX(),
+						player.getY(),
+						player.getZ(),
+						SoundEvents.ENDER_EYE_LAUNCH,
+						SoundSource.NEUTRAL,
+						0.5F,
+						0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 					);
 					level.levelEvent(null, 1003, player.blockPosition(), 0);
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 

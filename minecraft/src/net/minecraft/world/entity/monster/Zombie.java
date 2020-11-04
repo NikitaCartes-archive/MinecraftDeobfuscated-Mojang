@@ -423,7 +423,7 @@ public class Zombie extends Monster {
 
 	@Override
 	public boolean canHoldItem(ItemStack itemStack) {
-		return itemStack.getItem() == Items.EGG && this.isBaby() && this.isPassenger() ? false : super.canHoldItem(itemStack);
+		return itemStack.is(Items.EGG) && this.isBaby() && this.isPassenger() ? false : super.canHoldItem(itemStack);
 	}
 
 	@Nullable

@@ -29,7 +29,7 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 
 					itemStack2 = itemStack3;
 				} else {
-					if (itemStack3.getItem() != Items.SHIELD) {
+					if (!itemStack3.is(Items.SHIELD)) {
 						return false;
 					}
 
@@ -58,7 +58,7 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 			if (!itemStack3.isEmpty()) {
 				if (itemStack3.getItem() instanceof BannerItem) {
 					itemStack = itemStack3;
-				} else if (itemStack3.getItem() == Items.SHIELD) {
+				} else if (itemStack3.is(Items.SHIELD)) {
 					itemStack2 = itemStack3.copy();
 				}
 			}

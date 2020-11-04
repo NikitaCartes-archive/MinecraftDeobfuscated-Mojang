@@ -34,7 +34,7 @@ public class CraftPlanksTutorialStep implements TutorialStepInstance {
 			if (this.timeWaiting == 1) {
 				LocalPlayer localPlayer = this.tutorial.getMinecraft().player;
 				if (localPlayer != null) {
-					if (localPlayer.inventory.contains(ItemTags.PLANKS)) {
+					if (localPlayer.getInventory().contains(ItemTags.PLANKS)) {
 						this.tutorial.setStep(TutorialSteps.NONE);
 						return;
 					}
@@ -63,8 +63,7 @@ public class CraftPlanksTutorialStep implements TutorialStepInstance {
 
 	@Override
 	public void onGetItem(ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		if (ItemTags.PLANKS.contains(item)) {
+		if (itemStack.is(ItemTags.PLANKS)) {
 			this.tutorial.setStep(TutorialSteps.NONE);
 		}
 	}

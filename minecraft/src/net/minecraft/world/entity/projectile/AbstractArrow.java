@@ -13,8 +13,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -174,7 +172,7 @@ public abstract class AbstractArrow extends Projectile {
 				vec32 = hitResult.getLocation();
 			}
 
-			while (!this.removed) {
+			while (!this.isRemoved()) {
 				EntityHitResult entityHitResult = this.findHitEntity(vec33, vec32);
 				if (entityHitResult != null) {
 					hitResult = entityHitResult;
@@ -273,7 +271,7 @@ public abstract class AbstractArrow extends Projectile {
 	protected void tickDespawn() {
 		this.life++;
 		if (this.life >= 1200) {
-			this.remove();
+			this.discard();
 		}
 	}
 
@@ -303,7 +301,7 @@ public abstract class AbstractArrow extends Projectile {
 			}
 
 			if (this.piercingIgnoreEntityIds.size() >= this.getPierceLevel() + 1) {
-				this.remove();
+				this.discard();
 				return;
 			}
 
@@ -376,7 +374,7 @@ public abstract class AbstractArrow extends Projectile {
 
 			this.playSound(this.soundEvent, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
 			if (this.getPierceLevel() <= 0) {
-				this.remove();
+				this.discard();
 			}
 		} else {
 			entity.setRemainingFireTicks(j);
@@ -388,7 +386,7 @@ public abstract class AbstractArrow extends Projectile {
 					this.spawnAtLocation(this.getPickupItem(), 0.1F);
 				}
 
-				this.remove();
+				this.discard();
 			}
 		}
 	}
@@ -487,7 +485,7 @@ public abstract class AbstractArrow extends Projectile {
 	public void setOwner(@Nullable Entity entity) {
 		super.setOwner(entity);
 		if (entity instanceof Player) {
-			this.pickup = ((Player)entity).abilities.instabuild ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
+			this.pickup = ((Player)entity).getAbilities().instabuild ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
 		}
 	}
 
@@ -495,15 +493,15 @@ public abstract class AbstractArrow extends Projectile {
 	public void playerTouch(Player player) {
 		if (!this.level.isClientSide && (this.inGround || this.isNoPhysics()) && this.shakeTime <= 0) {
 			boolean bl = this.pickup == AbstractArrow.Pickup.ALLOWED
-				|| this.pickup == AbstractArrow.Pickup.CREATIVE_ONLY && player.abilities.instabuild
+				|| this.pickup == AbstractArrow.Pickup.CREATIVE_ONLY && player.getAbilities().instabuild
 				|| this.isNoPhysics() && this.getOwner().getUUID() == player.getUUID();
-			if (this.pickup == AbstractArrow.Pickup.ALLOWED && !player.inventory.add(this.getPickupItem())) {
+			if (this.pickup == AbstractArrow.Pickup.ALLOWED && !player.getInventory().add(this.getPickupItem())) {
 				bl = false;
 			}
 
 			if (bl) {
 				player.take(this, 1);
-				this.remove();
+				this.discard();
 			}
 		}
 	}
@@ -600,12 +598,6 @@ public abstract class AbstractArrow extends Projectile {
 
 	public void setShotFromCrossbow(boolean bl) {
 		this.setFlag(4, bl);
-	}
-
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		Entity entity = this.getOwner();
-		return new ClientboundAddEntityPacket(this, entity == null ? 0 : entity.getId());
 	}
 
 	public static enum Pickup {

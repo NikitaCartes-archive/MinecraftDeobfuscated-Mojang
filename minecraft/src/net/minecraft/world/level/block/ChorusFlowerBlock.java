@@ -42,22 +42,21 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		BlockPos blockPos2 = blockPos.above();
-		if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < 256) {
+		if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < serverLevel.getMaxBuildHeight()) {
 			int i = (Integer)blockState.getValue(AGE);
 			if (i < 5) {
 				boolean bl = false;
 				boolean bl2 = false;
 				BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
-				Block block = blockState2.getBlock();
-				if (block == Blocks.END_STONE) {
+				if (blockState2.is(Blocks.END_STONE)) {
 					bl = true;
-				} else if (block == this.plant) {
+				} else if (blockState2.is(this.plant)) {
 					int j = 1;
 
 					for (int k = 0; k < 4; k++) {
-						Block block2 = serverLevel.getBlockState(blockPos.below(j + 1)).getBlock();
-						if (block2 != this.plant) {
-							if (block2 == Blocks.END_STONE) {
+						BlockState blockState3 = serverLevel.getBlockState(blockPos.below(j + 1));
+						if (!blockState3.is(this.plant)) {
+							if (blockState3.is(Blocks.END_STONE)) {
 								bl2 = true;
 							}
 							break;
@@ -141,7 +140,7 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-		if (blockState2.getBlock() != this.plant && !blockState2.is(Blocks.END_STONE)) {
+		if (!blockState2.is(this.plant) && !blockState2.is(Blocks.END_STONE)) {
 			if (!blockState2.isAir()) {
 				return false;
 			} else {

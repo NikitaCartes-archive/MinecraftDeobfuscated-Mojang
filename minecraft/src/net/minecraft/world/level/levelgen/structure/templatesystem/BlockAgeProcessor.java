@@ -18,6 +18,9 @@ public class BlockAgeProcessor extends StructureProcessor {
 		.fieldOf("mossiness")
 		.<BlockAgeProcessor>xmap(BlockAgeProcessor::new, blockAgeProcessor -> blockAgeProcessor.mossiness)
 		.codec();
+	private static final BlockState[] NON_MOSSY_REPLACEMENTS = new BlockState[]{
+		Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()
+	};
 	private final float mossiness;
 
 	public BlockAgeProcessor(float f) {
@@ -71,12 +74,11 @@ public class BlockAgeProcessor extends StructureProcessor {
 		if (random.nextFloat() >= 0.5F) {
 			return null;
 		} else {
-			BlockState[] blockStates = new BlockState[]{Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()};
-			BlockState[] blockStates2 = new BlockState[]{
+			BlockState[] blockStates = new BlockState[]{
 				Blocks.MOSSY_STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, direction).setValue(StairBlock.HALF, half),
 				Blocks.MOSSY_STONE_BRICK_SLAB.defaultBlockState()
 			};
-			return this.getRandomBlock(random, blockStates, blockStates2);
+			return this.getRandomBlock(random, NON_MOSSY_REPLACEMENTS, blockStates);
 		}
 	}
 

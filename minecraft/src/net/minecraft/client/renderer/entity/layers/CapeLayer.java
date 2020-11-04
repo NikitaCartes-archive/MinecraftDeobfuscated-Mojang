@@ -40,7 +40,7 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 			&& abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE)
 			&& abstractClientPlayer.getCloakTextureLocation() != null) {
 			ItemStack itemStack = abstractClientPlayer.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.getItem() != Items.ELYTRA) {
+			if (!itemStack.is(Items.ELYTRA)) {
 				poseStack.pushPose();
 				poseStack.translate(0.0, 0.0, 0.125);
 				double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak)

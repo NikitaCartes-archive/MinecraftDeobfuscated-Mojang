@@ -21,28 +21,27 @@ public class DeadBushBlock extends BushBlock {
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		Block block = blockState.getBlock();
-		return block == Blocks.SAND
-			|| block == Blocks.RED_SAND
-			|| block == Blocks.TERRACOTTA
-			|| block == Blocks.WHITE_TERRACOTTA
-			|| block == Blocks.ORANGE_TERRACOTTA
-			|| block == Blocks.MAGENTA_TERRACOTTA
-			|| block == Blocks.LIGHT_BLUE_TERRACOTTA
-			|| block == Blocks.YELLOW_TERRACOTTA
-			|| block == Blocks.LIME_TERRACOTTA
-			|| block == Blocks.PINK_TERRACOTTA
-			|| block == Blocks.GRAY_TERRACOTTA
-			|| block == Blocks.LIGHT_GRAY_TERRACOTTA
-			|| block == Blocks.CYAN_TERRACOTTA
-			|| block == Blocks.PURPLE_TERRACOTTA
-			|| block == Blocks.BLUE_TERRACOTTA
-			|| block == Blocks.BROWN_TERRACOTTA
-			|| block == Blocks.GREEN_TERRACOTTA
-			|| block == Blocks.RED_TERRACOTTA
-			|| block == Blocks.BLACK_TERRACOTTA
-			|| block == Blocks.DIRT
-			|| block == Blocks.COARSE_DIRT
-			|| block == Blocks.PODZOL;
+		return blockState.is(Blocks.SAND)
+			|| blockState.is(Blocks.RED_SAND)
+			|| blockState.is(Blocks.TERRACOTTA)
+			|| blockState.is(Blocks.WHITE_TERRACOTTA)
+			|| blockState.is(Blocks.ORANGE_TERRACOTTA)
+			|| blockState.is(Blocks.MAGENTA_TERRACOTTA)
+			|| blockState.is(Blocks.LIGHT_BLUE_TERRACOTTA)
+			|| blockState.is(Blocks.YELLOW_TERRACOTTA)
+			|| blockState.is(Blocks.LIME_TERRACOTTA)
+			|| blockState.is(Blocks.PINK_TERRACOTTA)
+			|| blockState.is(Blocks.GRAY_TERRACOTTA)
+			|| blockState.is(Blocks.LIGHT_GRAY_TERRACOTTA)
+			|| blockState.is(Blocks.CYAN_TERRACOTTA)
+			|| blockState.is(Blocks.PURPLE_TERRACOTTA)
+			|| blockState.is(Blocks.BLUE_TERRACOTTA)
+			|| blockState.is(Blocks.BROWN_TERRACOTTA)
+			|| blockState.is(Blocks.GREEN_TERRACOTTA)
+			|| blockState.is(Blocks.RED_TERRACOTTA)
+			|| blockState.is(Blocks.BLACK_TERRACOTTA)
+			|| blockState.is(Blocks.DIRT)
+			|| blockState.is(Blocks.COARSE_DIRT)
+			|| blockState.is(Blocks.PODZOL);
 	}
 }

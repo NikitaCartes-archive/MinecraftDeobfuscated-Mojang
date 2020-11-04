@@ -19,7 +19,7 @@ public class FollowParentGoal extends Goal {
 		if (this.animal.getAge() >= 0) {
 			return false;
 		} else {
-			List<Animal> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(8.0, 4.0, 8.0));
+			List<? extends Animal> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(8.0, 4.0, 8.0));
 			Animal animal = null;
 			double d = Double.MAX_VALUE;
 

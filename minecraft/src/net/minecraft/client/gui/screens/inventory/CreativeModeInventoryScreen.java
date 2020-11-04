@@ -67,7 +67,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private final Map<ResourceLocation, Tag<Item>> visibleTags = Maps.<ResourceLocation, Tag<Item>>newTreeMap();
 
 	public CreativeModeInventoryScreen(Player player) {
-		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.inventory, TextComponent.EMPTY);
+		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), TextComponent.EMPTY);
 		player.containerMenu = this.menu;
 		this.passEvents = true;
 		this.imageHeight = 136;
@@ -93,7 +93,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		boolean bl = clickType == ClickType.QUICK_MOVE;
 		clickType = i == -999 && clickType == ClickType.PICKUP ? ClickType.THROW : clickType;
 		if (slot == null && selectedTab != CreativeModeTab.TAB_INVENTORY.getId() && clickType != ClickType.QUICK_CRAFT) {
-			Inventory inventory = this.minecraft.player.inventory;
+			Inventory inventory = this.minecraft.player.getInventory();
 			if (!inventory.getCarried().isEmpty() && this.hasClickedOutside) {
 				if (j == 0) {
 					this.minecraft.player.drop(inventory.getCarried(), true);
@@ -118,17 +118,17 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				}
 			} else if (selectedTab == CreativeModeTab.TAB_INVENTORY.getId()) {
 				if (slot == this.destroyItemSlot) {
-					this.minecraft.player.inventory.setCarried(ItemStack.EMPTY);
+					this.minecraft.player.getInventory().setCarried(ItemStack.EMPTY);
 				} else if (clickType == ClickType.THROW && slot != null && slot.hasItem()) {
 					ItemStack itemStack = slot.remove(j == 0 ? 1 : slot.getItem().getMaxStackSize());
 					ItemStack itemStack2 = slot.getItem();
 					this.minecraft.player.drop(itemStack, true);
 					this.minecraft.gameMode.handleCreativeModeItemDrop(itemStack);
 					this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2, ((CreativeModeInventoryScreen.SlotWrapper)slot).target.index);
-				} else if (clickType == ClickType.THROW && !this.minecraft.player.inventory.getCarried().isEmpty()) {
-					this.minecraft.player.drop(this.minecraft.player.inventory.getCarried(), true);
-					this.minecraft.gameMode.handleCreativeModeItemDrop(this.minecraft.player.inventory.getCarried());
-					this.minecraft.player.inventory.setCarried(ItemStack.EMPTY);
+				} else if (clickType == ClickType.THROW && !this.minecraft.player.getInventory().getCarried().isEmpty()) {
+					this.minecraft.player.drop(this.minecraft.player.getInventory().getCarried(), true);
+					this.minecraft.gameMode.handleCreativeModeItemDrop(this.minecraft.player.getInventory().getCarried());
+					this.minecraft.player.getInventory().setCarried(ItemStack.EMPTY);
 				} else {
 					this.minecraft
 						.player
@@ -137,14 +137,14 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					this.minecraft.player.inventoryMenu.broadcastChanges();
 				}
 			} else if (clickType != ClickType.QUICK_CRAFT && slot.container == CONTAINER) {
-				Inventory inventory = this.minecraft.player.inventory;
+				Inventory inventory = this.minecraft.player.getInventory();
 				ItemStack itemStack2 = inventory.getCarried();
 				ItemStack itemStack3 = slot.getItem();
 				if (clickType == ClickType.SWAP) {
 					if (!itemStack3.isEmpty()) {
 						ItemStack itemStack4 = itemStack3.copy();
 						itemStack4.setCount(itemStack4.getMaxStackSize());
-						this.minecraft.player.inventory.setItem(j, itemStack4);
+						this.minecraft.player.getInventory().setItem(j, itemStack4);
 						this.minecraft.player.inventoryMenu.broadcastChanges();
 					}
 
@@ -267,7 +267,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	@Override
 	public void removed() {
 		super.removed();
-		if (this.minecraft.player != null && this.minecraft.player.inventory != null) {
+		if (this.minecraft.player != null && this.minecraft.player.getInventory() != null) {
 			this.minecraft.player.inventoryMenu.removeSlotListener(this.listener);
 		}
 
@@ -492,7 +492,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					}
 				}
 
-				Slot slot = new CreativeModeInventoryScreen.SlotWrapper((Slot)abstractContainerMenu.slots.get(jx), jx, o, kx);
+				Slot slot = new CreativeModeInventoryScreen.SlotWrapper(abstractContainerMenu.slots.get(jx), jx, o, kx);
 				this.menu.slots.add(slot);
 			}
 
@@ -600,7 +600,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			List<Component> list2 = Lists.<Component>newArrayList(list);
 			Item item = itemStack.getItem();
 			CreativeModeTab creativeModeTab = item.getItemCategory();
-			if (creativeModeTab == null && item == Items.ENCHANTED_BOOK) {
+			if (creativeModeTab == null && itemStack.is(Items.ENCHANTED_BOOK)) {
 				Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
 				if (map.size() == 1) {
 					Enchantment enchantment = (Enchantment)map.keySet().iterator().next();
@@ -615,7 +615,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			}
 
 			this.visibleTags.forEach((resourceLocation, tag) -> {
-				if (tag.contains(item)) {
+				if (itemStack.is(tag)) {
 					list2.add(1, new TextComponent("#" + resourceLocation).withStyle(ChatFormatting.DARK_PURPLE));
 				}
 			});
@@ -752,14 +752,14 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (bl) {
 			for (int j = 0; j < Inventory.getSelectionSize(); j++) {
 				ItemStack itemStack = hotbar.get(j).copy();
-				localPlayer.inventory.setItem(j, itemStack);
+				localPlayer.getInventory().setItem(j, itemStack);
 				minecraft.gameMode.handleCreativeModeItemAdd(itemStack, 36 + j);
 			}
 
 			localPlayer.inventoryMenu.broadcastChanges();
 		} else if (bl2) {
 			for (int j = 0; j < Inventory.getSelectionSize(); j++) {
-				hotbar.set(j, localPlayer.inventory.getItem(j).copy());
+				hotbar.set(j, localPlayer.getInventory().getItem(j).copy());
 			}
 
 			Component component = minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
@@ -787,7 +787,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 		public ItemPickerMenu(Player player) {
 			super(null, 0);
-			Inventory inventory = player.inventory;
+			Inventory inventory = player.getInventory();
 
 			for (int i = 0; i < 5; i++) {
 				for (int j = 0; j < 9; j++) {
@@ -833,7 +833,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		@Override
 		public ItemStack quickMoveStack(Player player, int i) {
 			if (i >= this.slots.size() - 9 && i < this.slots.size()) {
-				Slot slot = (Slot)this.slots.get(i);
+				Slot slot = this.slots.get(i);
 				if (slot != null && slot.hasItem()) {
 					slot.set(ItemStack.EMPTY);
 				}

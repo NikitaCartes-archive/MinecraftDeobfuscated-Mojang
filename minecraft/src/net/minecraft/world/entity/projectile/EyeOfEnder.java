@@ -41,12 +41,11 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 
 	public EyeOfEnder(Level level, double d, double e, double f) {
 		this(EntityType.EYE_OF_ENDER, level);
-		this.life = 0;
 		this.setPos(d, e, f);
 	}
 
 	public void setItem(ItemStack itemStack) {
-		if (itemStack.getItem() != Items.ENDER_EYE || itemStack.hasTag()) {
+		if (!itemStack.is(Items.ENDER_EYE) || itemStack.hasTag()) {
 			this.getEntityData().set(DATA_ITEM_STACK, Util.make(itemStack.copy(), itemStackx -> itemStackx.setCount(1)));
 		}
 	}
@@ -162,7 +161,7 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 			this.life++;
 			if (this.life > 80 && !this.level.isClientSide) {
 				this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
-				this.remove();
+				this.discard();
 				if (this.surviveAfterDeath) {
 					this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
 				} else {

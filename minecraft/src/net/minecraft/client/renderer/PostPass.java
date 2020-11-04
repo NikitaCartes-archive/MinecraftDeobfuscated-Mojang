@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import java.io.IOException;
 import java.util.List;
@@ -71,7 +72,7 @@ public class PostPass implements AutoCloseable {
 		this.outTarget.bindWrite(false);
 		RenderSystem.depthFunc(519);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex(0.0, 0.0, 500.0).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex((double)g, 0.0, 500.0).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex((double)g, (double)h, 500.0).color(255, 255, 255, 255).endVertex();

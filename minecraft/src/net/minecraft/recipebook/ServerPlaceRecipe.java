@@ -32,10 +32,10 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 
 	public void recipeClicked(ServerPlayer serverPlayer, @Nullable Recipe<C> recipe, boolean bl) {
 		if (recipe != null && serverPlayer.getRecipeBook().contains(recipe)) {
-			this.inventory = serverPlayer.inventory;
+			this.inventory = serverPlayer.getInventory();
 			if (this.testClearGrid() || serverPlayer.isCreative()) {
 				this.stackedContents.clear();
-				serverPlayer.inventory.fillStackedContents(this.stackedContents);
+				serverPlayer.getInventory().fillStackedContents(this.stackedContents);
 				this.menu.fillCraftSlotsStackedContents(this.stackedContents);
 				if (this.stackedContents.canCraft(recipe, null)) {
 					this.handleRecipeClicked(recipe, bl);
@@ -44,7 +44,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 					serverPlayer.connection.send(new ClientboundPlaceGhostRecipePacket(serverPlayer.containerMenu.containerId, recipe));
 				}
 
-				serverPlayer.inventory.setChanged();
+				serverPlayer.getInventory().setChanged();
 			}
 		}
 	}

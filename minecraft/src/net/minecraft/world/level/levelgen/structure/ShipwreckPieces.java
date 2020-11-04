@@ -134,7 +134,7 @@ public class ShipwreckPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			int i = 256;
+			int i = worldGenLevel.getMaxBuildHeight();
 			int j = 0;
 			BlockPos blockPos2 = this.template.getSize();
 			Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;

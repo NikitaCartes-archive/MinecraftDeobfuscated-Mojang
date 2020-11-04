@@ -1,71 +1,82 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 
 @Environment(EnvType.CLIENT)
-public class VillagerModel<T extends Entity> extends ListModel<T> implements HeadedModel, VillagerHeadModel {
-	protected ModelPart head;
-	protected ModelPart hat;
-	protected final ModelPart hatRim;
-	protected final ModelPart body;
-	protected final ModelPart jacket;
-	protected final ModelPart arms;
-	protected final ModelPart leg0;
-	protected final ModelPart leg1;
+public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implements HeadedModel, VillagerHeadModel {
+	private final ModelPart root;
+	private final ModelPart head;
+	private final ModelPart hat;
+	private final ModelPart hatRim;
+	private final ModelPart rightLeg;
+	private final ModelPart leftLeg;
 	protected final ModelPart nose;
 
-	public VillagerModel(float f) {
-		this(f, 64, 64);
+	public VillagerModel(ModelPart modelPart) {
+		this.root = modelPart;
+		this.head = modelPart.getChild("head");
+		this.hat = this.head.getChild("hat");
+		this.hatRim = this.hat.getChild("hat_rim");
+		this.nose = this.head.getChild("nose");
+		this.rightLeg = modelPart.getChild("right_leg");
+		this.leftLeg = modelPart.getChild("left_leg");
 	}
 
-	public VillagerModel(float f, int i, int j) {
-		float g = 0.5F;
-		this.head = new ModelPart(this).setTexSize(i, j);
-		this.head.setPos(0.0F, 0.0F, 0.0F);
-		this.head.texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, f);
-		this.hat = new ModelPart(this).setTexSize(i, j);
-		this.hat.setPos(0.0F, 0.0F, 0.0F);
-		this.hat.texOffs(32, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, f + 0.5F);
-		this.head.addChild(this.hat);
-		this.hatRim = new ModelPart(this).setTexSize(i, j);
-		this.hatRim.setPos(0.0F, 0.0F, 0.0F);
-		this.hatRim.texOffs(30, 47).addBox(-8.0F, -8.0F, -6.0F, 16.0F, 16.0F, 1.0F, f);
-		this.hatRim.xRot = (float) (-Math.PI / 2);
-		this.hat.addChild(this.hatRim);
-		this.nose = new ModelPart(this).setTexSize(i, j);
-		this.nose.setPos(0.0F, -2.0F, 0.0F);
-		this.nose.texOffs(24, 0).addBox(-1.0F, -1.0F, -6.0F, 2.0F, 4.0F, 2.0F, f);
-		this.head.addChild(this.nose);
-		this.body = new ModelPart(this).setTexSize(i, j);
-		this.body.setPos(0.0F, 0.0F, 0.0F);
-		this.body.texOffs(16, 20).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 12.0F, 6.0F, f);
-		this.jacket = new ModelPart(this).setTexSize(i, j);
-		this.jacket.setPos(0.0F, 0.0F, 0.0F);
-		this.jacket.texOffs(0, 38).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 18.0F, 6.0F, f + 0.5F);
-		this.body.addChild(this.jacket);
-		this.arms = new ModelPart(this).setTexSize(i, j);
-		this.arms.setPos(0.0F, 2.0F, 0.0F);
-		this.arms.texOffs(44, 22).addBox(-8.0F, -2.0F, -2.0F, 4.0F, 8.0F, 4.0F, f);
-		this.arms.texOffs(44, 22).addBox(4.0F, -2.0F, -2.0F, 4.0F, 8.0F, 4.0F, f, true);
-		this.arms.texOffs(40, 38).addBox(-4.0F, 2.0F, -2.0F, 8.0F, 4.0F, 4.0F, f);
-		this.leg0 = new ModelPart(this, 0, 22).setTexSize(i, j);
-		this.leg0.setPos(-2.0F, 12.0F, 0.0F);
-		this.leg0.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.leg1 = new ModelPart(this, 0, 22).setTexSize(i, j);
-		this.leg1.mirror = true;
-		this.leg1.setPos(2.0F, 12.0F, 0.0F);
-		this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
+	public static MeshDefinition createBodyModel() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		float f = 0.5F;
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F), PartPose.ZERO
+		);
+		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
+			"hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"hat_rim", CubeListBuilder.create().texOffs(30, 47).addBox(-8.0F, -8.0F, -6.0F, 16.0F, 16.0F, 1.0F), PartPose.rotation((float) (-Math.PI / 2), 0.0F, 0.0F)
+		);
+		partDefinition2.addOrReplaceChild(
+			"nose", CubeListBuilder.create().texOffs(24, 0).addBox(-1.0F, -1.0F, -6.0F, 2.0F, 4.0F, 2.0F), PartPose.offset(0.0F, -2.0F, 0.0F)
+		);
+		PartDefinition partDefinition4 = partDefinition.addOrReplaceChild(
+			"body", CubeListBuilder.create().texOffs(16, 20).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 12.0F, 6.0F), PartPose.ZERO
+		);
+		partDefinition4.addOrReplaceChild(
+			"jacket", CubeListBuilder.create().texOffs(0, 38).addBox(-4.0F, 0.0F, -3.0F, 8.0F, 18.0F, 6.0F, new CubeDeformation(0.5F)), PartPose.ZERO
+		);
+		partDefinition.addOrReplaceChild(
+			"arms",
+			CubeListBuilder.create()
+				.texOffs(44, 22)
+				.addBox(-8.0F, -2.0F, -2.0F, 4.0F, 8.0F, 4.0F)
+				.texOffs(44, 22)
+				.addBox(4.0F, -2.0F, -2.0F, 4.0F, 8.0F, 4.0F, true)
+				.texOffs(40, 38)
+				.addBox(-4.0F, 2.0F, -2.0F, 8.0F, 4.0F, 4.0F),
+			PartPose.offsetAndRotation(0.0F, 3.0F, -1.0F, -0.75F, 0.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_leg", CubeListBuilder.create().texOffs(0, 22).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F), PartPose.offset(-2.0F, 12.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_leg", CubeListBuilder.create().texOffs(0, 22).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F), PartPose.offset(2.0F, 12.0F, 0.0F)
+		);
+		return meshDefinition;
 	}
 
 	@Override
-	public Iterable<ModelPart> parts() {
-		return ImmutableList.<ModelPart>of(this.head, this.body, this.leg0, this.leg1, this.arms);
+	public ModelPart root() {
+		return this.root;
 	}
 
 	@Override
@@ -84,13 +95,10 @@ public class VillagerModel<T extends Entity> extends ListModel<T> implements Hea
 			this.head.zRot = 0.0F;
 		}
 
-		this.arms.y = 3.0F;
-		this.arms.z = -1.0F;
-		this.arms.xRot = -0.75F;
-		this.leg0.xRot = Mth.cos(f * 0.6662F) * 1.4F * g * 0.5F;
-		this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g * 0.5F;
-		this.leg0.yRot = 0.0F;
-		this.leg1.yRot = 0.0F;
+		this.rightLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g * 0.5F;
+		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g * 0.5F;
+		this.rightLeg.yRot = 0.0F;
+		this.leftLeg.yRot = 0.0F;
 	}
 
 	@Override

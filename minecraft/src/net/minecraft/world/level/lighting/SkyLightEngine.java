@@ -23,69 +23,39 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 
 	@Override
 	protected int computeLevelFromNeighbor(long l, long m, int i) {
-		if (m == Long.MAX_VALUE) {
+		if (m == Long.MAX_VALUE || l == Long.MAX_VALUE) {
 			return 15;
+		} else if (i >= 15) {
+			return i;
 		} else {
-			if (l == Long.MAX_VALUE) {
-				if (!this.storage.hasLightSource(m)) {
-					return 15;
-				}
-
-				i = 0;
-			}
-
-			if (i >= 15) {
-				return i;
+			MutableInt mutableInt = new MutableInt();
+			BlockState blockState = this.getStateAndOpacity(m, mutableInt);
+			if (mutableInt.getValue() >= 15) {
+				return 15;
 			} else {
-				MutableInt mutableInt = new MutableInt();
-				BlockState blockState = this.getStateAndOpacity(m, mutableInt);
-				if (mutableInt.getValue() >= 15) {
-					return 15;
+				int j = BlockPos.getX(l);
+				int k = BlockPos.getY(l);
+				int n = BlockPos.getZ(l);
+				int o = BlockPos.getX(m);
+				int p = BlockPos.getY(m);
+				int q = BlockPos.getZ(m);
+				int r = Integer.signum(o - j);
+				int s = Integer.signum(p - k);
+				int t = Integer.signum(q - n);
+				Direction direction = Direction.fromNormal(r, s, t);
+				if (direction == null) {
+					throw new IllegalStateException(String.format("Light was spread in illegal direction %d, %d, %d", r, s, t));
 				} else {
-					int j = BlockPos.getX(l);
-					int k = BlockPos.getY(l);
-					int n = BlockPos.getZ(l);
-					int o = BlockPos.getX(m);
-					int p = BlockPos.getY(m);
-					int q = BlockPos.getZ(m);
-					boolean bl = j == o && n == q;
-					int r = Integer.signum(o - j);
-					int s = Integer.signum(p - k);
-					int t = Integer.signum(q - n);
-					Direction direction;
-					if (l == Long.MAX_VALUE) {
-						direction = Direction.DOWN;
-					} else {
-						direction = Direction.fromNormal(r, s, t);
-					}
-
 					BlockState blockState2 = this.getStateAndOpacity(l, null);
-					if (direction != null) {
-						VoxelShape voxelShape = this.getShape(blockState2, l, direction);
-						VoxelShape voxelShape2 = this.getShape(blockState, m, direction.getOpposite());
-						if (Shapes.faceShapeOccludes(voxelShape, voxelShape2)) {
-							return 15;
-						}
+					VoxelShape voxelShape = this.getShape(blockState2, l, direction);
+					VoxelShape voxelShape2 = this.getShape(blockState, m, direction.getOpposite());
+					if (Shapes.faceShapeOccludes(voxelShape, voxelShape2)) {
+						return 15;
 					} else {
-						VoxelShape voxelShape = this.getShape(blockState2, l, Direction.DOWN);
-						if (Shapes.faceShapeOccludes(voxelShape, Shapes.empty())) {
-							return 15;
-						}
-
-						int u = bl ? -1 : 0;
-						Direction direction2 = Direction.fromNormal(r, u, t);
-						if (direction2 == null) {
-							return 15;
-						}
-
-						VoxelShape voxelShape3 = this.getShape(blockState, m, direction2.getOpposite());
-						if (Shapes.faceShapeOccludes(Shapes.empty(), voxelShape3)) {
-							return 15;
-						}
+						boolean bl = j == o && n == q;
+						boolean bl2 = bl && k > p;
+						return bl2 && i == 0 && mutableInt.getValue() == 0 ? 0 : i + Math.max(1, mutableInt.getValue());
 					}
-
-					boolean bl2 = l == Long.MAX_VALUE || bl && k > p;
-					return bl2 && i == 0 && mutableInt.getValue() == 0 ? 0 : i + Math.max(1, mutableInt.getValue());
 				}
 			}
 		}
@@ -134,7 +104,8 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 				}
 
 				if (this.storage.storingLightForSection(w)) {
-					this.checkNeighbor(l, v, i, bl);
+					long x = BlockPos.offset(l, 0, -u, 0);
+					this.checkNeighbor(x, v, i, bl);
 				}
 			} while (++u > o * 16);
 		}
@@ -143,62 +114,38 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 	@Override
 	protected int getComputedLevel(long l, long m, int i) {
 		int j = i;
-		if (Long.MAX_VALUE != m) {
-			int k = this.computeLevelFromNeighbor(Long.MAX_VALUE, l, 0);
-			if (i > k) {
-				j = k;
-			}
-
-			if (j == 0) {
-				return j;
-			}
-		}
-
 		long n = SectionPos.blockToSection(l);
 		DataLayer dataLayer = this.storage.getDataLayer(n, true);
 
 		for (Direction direction : DIRECTIONS) {
 			long o = BlockPos.offset(l, direction);
-			long p = SectionPos.blockToSection(o);
-			DataLayer dataLayer2;
-			if (n == p) {
-				dataLayer2 = dataLayer;
-			} else {
-				dataLayer2 = this.storage.getDataLayer(p, true);
-			}
-
-			if (dataLayer2 != null) {
-				if (o != m) {
-					int q = this.computeLevelFromNeighbor(o, l, this.getLevel(dataLayer2, o));
-					if (j > q) {
-						j = q;
-					}
-
-					if (j == 0) {
-						return j;
-					}
-				}
-			} else if (direction != Direction.DOWN) {
-				for (o = BlockPos.getFlatIndex(o); !this.storage.storingLightForSection(p) && !this.storage.isAboveData(p); o = BlockPos.offset(o, 0, 16, 0)) {
-					p = SectionPos.offset(p, Direction.UP);
+			if (o != m) {
+				long p = SectionPos.blockToSection(o);
+				DataLayer dataLayer2;
+				if (n == p) {
+					dataLayer2 = dataLayer;
+				} else {
+					dataLayer2 = this.storage.getDataLayer(p, true);
 				}
 
-				DataLayer dataLayer3 = this.storage.getDataLayer(p, true);
-				if (o != m) {
-					int r;
-					if (dataLayer3 != null) {
-						r = this.computeLevelFromNeighbor(o, l, this.getLevel(dataLayer3, o));
-					} else {
-						r = this.storage.lightOnInSection(p) ? 0 : 15;
+				int k;
+				if (dataLayer2 != null) {
+					k = this.getLevel(dataLayer2, o);
+				} else {
+					if (direction == Direction.DOWN) {
+						continue;
 					}
 
-					if (j > r) {
-						j = r;
-					}
+					k = 15 - this.storage.getLightValue(o, true);
+				}
 
-					if (j == 0) {
-						return j;
-					}
+				int q = this.computeLevelFromNeighbor(o, l, k);
+				if (j > q) {
+					j = q;
+				}
+
+				if (j == 0) {
+					return j;
 				}
 			}
 		}

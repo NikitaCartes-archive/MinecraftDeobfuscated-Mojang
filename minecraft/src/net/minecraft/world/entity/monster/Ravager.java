@@ -135,7 +135,7 @@ public class Ravager extends Raider {
 	@Nullable
 	@Override
 	public Entity getControllingPassenger() {
-		return this.getPassengers().isEmpty() ? null : (Entity)this.getPassengers().get(0);
+		return this.getFirstPassenger();
 	}
 
 	@Override
@@ -228,12 +228,12 @@ public class Ravager extends Raider {
 
 	private void roar() {
 		if (this.isAlive()) {
-			for (Entity entity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
-				if (!(entity instanceof AbstractIllager)) {
-					entity.hurt(DamageSource.mobAttack(this), 6.0F);
+			for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
+				if (!(livingEntity instanceof AbstractIllager)) {
+					livingEntity.hurt(DamageSource.mobAttack(this), 6.0F);
 				}
 
-				this.strongKnockback(entity);
+				this.strongKnockback(livingEntity);
 			}
 
 			Vec3 vec3 = this.getBoundingBox().getCenter();

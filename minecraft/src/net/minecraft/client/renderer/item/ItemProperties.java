@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ElytraItem;
@@ -98,6 +100,7 @@ public class ItemProperties {
 			new ResourceLocation("pulling"),
 			(itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
+		register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity) -> BundleItem.getFullnessDisplay(itemStack));
 		register(Items.CLOCK, new ResourceLocation("time"), new ItemPropertyFunction() {
 			private double rotation;
 			private double rota;
@@ -293,6 +296,16 @@ public class ItemProperties {
 			Items.TRIDENT,
 			new ResourceLocation("throwing"),
 			(itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
+		);
+		register(
+			Items.SPYGLASS,
+			new ResourceLocation("scoping"),
+			(itemStack, clientLevel, livingEntity) -> livingEntity != null
+						&& livingEntity.isUsingItem()
+						&& livingEntity.getUseItem() == itemStack
+						&& livingEntity.getUUID().equals(Minecraft.getInstance().player.getUUID())
+					? 1.0F
+					: 0.0F
 		);
 	}
 

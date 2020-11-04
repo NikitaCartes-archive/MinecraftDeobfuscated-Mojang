@@ -1,65 +1,69 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class DolphinModel<T extends Entity> extends ListModel<T> {
+public class DolphinModel<T extends Entity> extends HierarchicalModel<T> {
+	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart tail;
 	private final ModelPart tailFin;
 
-	public DolphinModel() {
-		this.texWidth = 64;
-		this.texHeight = 64;
+	public DolphinModel(ModelPart modelPart) {
+		this.root = modelPart;
+		this.body = modelPart.getChild("body");
+		this.tail = this.body.getChild("tail");
+		this.tailFin = this.tail.getChild("tail_fin");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
 		float f = 18.0F;
 		float g = -8.0F;
-		this.body = new ModelPart(this, 22, 0);
-		this.body.addBox(-4.0F, -7.0F, 0.0F, 8.0F, 7.0F, 13.0F);
-		this.body.setPos(0.0F, 22.0F, -5.0F);
-		ModelPart modelPart = new ModelPart(this, 51, 0);
-		modelPart.addBox(-0.5F, 0.0F, 8.0F, 1.0F, 4.0F, 5.0F);
-		modelPart.xRot = (float) (Math.PI / 3);
-		this.body.addChild(modelPart);
-		ModelPart modelPart2 = new ModelPart(this, 48, 20);
-		modelPart2.mirror = true;
-		modelPart2.addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 7.0F);
-		modelPart2.setPos(2.0F, -2.0F, 4.0F);
-		modelPart2.xRot = (float) (Math.PI / 3);
-		modelPart2.zRot = (float) (Math.PI * 2.0 / 3.0);
-		this.body.addChild(modelPart2);
-		ModelPart modelPart3 = new ModelPart(this, 48, 20);
-		modelPart3.addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 7.0F);
-		modelPart3.setPos(-2.0F, -2.0F, 4.0F);
-		modelPart3.xRot = (float) (Math.PI / 3);
-		modelPart3.zRot = (float) (-Math.PI * 2.0 / 3.0);
-		this.body.addChild(modelPart3);
-		this.tail = new ModelPart(this, 0, 19);
-		this.tail.addBox(-2.0F, -2.5F, 0.0F, 4.0F, 5.0F, 11.0F);
-		this.tail.setPos(0.0F, -2.5F, 11.0F);
-		this.tail.xRot = -0.10471976F;
-		this.body.addChild(this.tail);
-		this.tailFin = new ModelPart(this, 19, 20);
-		this.tailFin.addBox(-5.0F, -0.5F, 0.0F, 10.0F, 1.0F, 6.0F);
-		this.tailFin.setPos(0.0F, 0.0F, 9.0F);
-		this.tailFin.xRot = 0.0F;
-		this.tail.addChild(this.tailFin);
-		ModelPart modelPart4 = new ModelPart(this, 0, 0);
-		modelPart4.addBox(-4.0F, -3.0F, -3.0F, 8.0F, 7.0F, 6.0F);
-		modelPart4.setPos(0.0F, -4.0F, -3.0F);
-		ModelPart modelPart5 = new ModelPart(this, 0, 13);
-		modelPart5.addBox(-1.0F, 2.0F, -7.0F, 2.0F, 2.0F, 4.0F);
-		modelPart4.addChild(modelPart5);
-		this.body.addChild(modelPart4);
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+			"body", CubeListBuilder.create().texOffs(22, 0).addBox(-4.0F, -7.0F, 0.0F, 8.0F, 7.0F, 13.0F), PartPose.offset(0.0F, 22.0F, -5.0F)
+		);
+		partDefinition2.addOrReplaceChild(
+			"back_fin", CubeListBuilder.create().texOffs(51, 0).addBox(-0.5F, 0.0F, 8.0F, 1.0F, 4.0F, 5.0F), PartPose.rotation((float) (Math.PI / 3), 0.0F, 0.0F)
+		);
+		partDefinition2.addOrReplaceChild(
+			"left_fin",
+			CubeListBuilder.create().texOffs(48, 20).mirror().addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 7.0F),
+			PartPose.offsetAndRotation(2.0F, -2.0F, 4.0F, (float) (Math.PI / 3), 0.0F, (float) (Math.PI * 2.0 / 3.0))
+		);
+		partDefinition2.addOrReplaceChild(
+			"right_fin",
+			CubeListBuilder.create().texOffs(48, 20).addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 7.0F),
+			PartPose.offsetAndRotation(-2.0F, -2.0F, 4.0F, (float) (Math.PI / 3), 0.0F, (float) (-Math.PI * 2.0 / 3.0))
+		);
+		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
+			"tail",
+			CubeListBuilder.create().texOffs(0, 19).addBox(-2.0F, -2.5F, 0.0F, 4.0F, 5.0F, 11.0F),
+			PartPose.offsetAndRotation(0.0F, -2.5F, 11.0F, -0.10471976F, 0.0F, 0.0F)
+		);
+		partDefinition3.addOrReplaceChild(
+			"tail_fin", CubeListBuilder.create().texOffs(19, 20).addBox(-5.0F, -0.5F, 0.0F, 10.0F, 1.0F, 6.0F), PartPose.offset(0.0F, 0.0F, 9.0F)
+		);
+		PartDefinition partDefinition4 = partDefinition2.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -3.0F, -3.0F, 8.0F, 7.0F, 6.0F), PartPose.offset(0.0F, -4.0F, -3.0F)
+		);
+		partDefinition4.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(0, 13).addBox(-1.0F, 2.0F, -7.0F, 2.0F, 2.0F, 4.0F), PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
 	@Override
-	public Iterable<ModelPart> parts() {
-		return ImmutableList.<ModelPart>of(this.body);
+	public ModelPart root() {
+		return this.root;
 	}
 
 	@Override
@@ -67,7 +71,7 @@ public class DolphinModel<T extends Entity> extends ListModel<T> {
 		this.body.xRot = j * (float) (Math.PI / 180.0);
 		this.body.yRot = i * (float) (Math.PI / 180.0);
 		if (Entity.getHorizontalDistanceSqr(entity.getDeltaMovement()) > 1.0E-7) {
-			this.body.xRot = this.body.xRot + -0.05F + -0.05F * Mth.cos(h * 0.3F);
+			this.body.xRot = this.body.xRot + (-0.05F - 0.05F * Mth.cos(h * 0.3F));
 			this.tail.xRot = -0.1F * Mth.cos(h * 0.3F);
 			this.tailFin.xRot = -0.2F * Mth.cos(h * 0.3F);
 		}

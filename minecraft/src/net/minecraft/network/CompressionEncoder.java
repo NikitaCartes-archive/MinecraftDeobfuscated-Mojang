@@ -15,7 +15,7 @@ public class CompressionEncoder extends MessageToByteEncoder<ByteBuf> {
 		this.deflater = new Deflater();
 	}
 
-	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) throws Exception {
+	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
 		int i = byteBuf.readableBytes();
 		FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf2);
 		if (i < this.threshold) {

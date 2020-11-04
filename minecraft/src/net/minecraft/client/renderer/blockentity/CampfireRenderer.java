@@ -14,9 +14,8 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class CampfireRenderer extends BlockEntityRenderer<CampfireBlockEntity> {
-	public CampfireRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity> {
+	public CampfireRenderer(BlockEntityRendererProvider.Context context) {
 	}
 
 	public void render(CampfireBlockEntity campfireBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

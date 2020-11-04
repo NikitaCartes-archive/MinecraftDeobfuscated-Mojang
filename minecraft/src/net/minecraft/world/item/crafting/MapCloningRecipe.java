@@ -20,14 +20,14 @@ public class MapCloningRecipe extends CustomRecipe {
 		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
 			ItemStack itemStack2 = craftingContainer.getItem(j);
 			if (!itemStack2.isEmpty()) {
-				if (itemStack2.getItem() == Items.FILLED_MAP) {
+				if (itemStack2.is(Items.FILLED_MAP)) {
 					if (!itemStack.isEmpty()) {
 						return false;
 					}
 
 					itemStack = itemStack2;
 				} else {
-					if (itemStack2.getItem() != Items.MAP) {
+					if (!itemStack2.is(Items.MAP)) {
 						return false;
 					}
 
@@ -46,14 +46,14 @@ public class MapCloningRecipe extends CustomRecipe {
 		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
 			ItemStack itemStack2 = craftingContainer.getItem(j);
 			if (!itemStack2.isEmpty()) {
-				if (itemStack2.getItem() == Items.FILLED_MAP) {
+				if (itemStack2.is(Items.FILLED_MAP)) {
 					if (!itemStack.isEmpty()) {
 						return ItemStack.EMPTY;
 					}
 
 					itemStack = itemStack2;
 				} else {
-					if (itemStack2.getItem() != Items.MAP) {
+					if (!itemStack2.is(Items.MAP)) {
 						return ItemStack.EMPTY;
 					}
 

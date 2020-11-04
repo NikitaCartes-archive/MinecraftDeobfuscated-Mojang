@@ -61,7 +61,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.2F, AttributeModifier.Operation.MULTIPLY_BASE
 	);
 	private final SimpleContainer inventory = new SimpleContainer(8);
-	private boolean cannotHunt = false;
+	private boolean cannotHunt;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_SPECIFIC_SENSOR
 	);
@@ -329,7 +329,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	public PiglinArmPose getArmPose() {
 		if (this.isDancing()) {
 			return PiglinArmPose.DANCING;
-		} else if (PiglinAi.isLovedItem(this.getOffhandItem().getItem())) {
+		} else if (PiglinAi.isLovedItem(this.getOffhandItem())) {
 			return PiglinArmPose.ADMIRING_ITEM;
 		} else if (this.isAggressive() && this.isHoldingMeleeWeapon()) {
 			return PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON;
@@ -382,7 +382,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	}
 
 	protected void holdInOffHand(ItemStack itemStack) {
-		if (itemStack.getItem() == PiglinAi.BARTERING_ITEM) {
+		if (itemStack.is(PiglinAi.BARTERING_ITEM)) {
 			this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
 			this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
 		} else {
@@ -406,16 +406,14 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 		if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
 			return false;
 		} else {
-			boolean bl = PiglinAi.isLovedItem(itemStack.getItem()) || itemStack.getItem() == Items.CROSSBOW;
-			boolean bl2 = PiglinAi.isLovedItem(itemStack2.getItem()) || itemStack2.getItem() == Items.CROSSBOW;
+			boolean bl = PiglinAi.isLovedItem(itemStack) || itemStack.is(Items.CROSSBOW);
+			boolean bl2 = PiglinAi.isLovedItem(itemStack2) || itemStack2.is(Items.CROSSBOW);
 			if (bl && !bl2) {
 				return true;
 			} else if (!bl && bl2) {
 				return false;
 			} else {
-				return this.isAdult() && itemStack.getItem() != Items.CROSSBOW && itemStack2.getItem() == Items.CROSSBOW
-					? false
-					: super.canReplaceCurrentItem(itemStack, itemStack2);
+				return this.isAdult() && !itemStack.is(Items.CROSSBOW) && itemStack2.is(Items.CROSSBOW) ? false : super.canReplaceCurrentItem(itemStack, itemStack2);
 			}
 		}
 	}

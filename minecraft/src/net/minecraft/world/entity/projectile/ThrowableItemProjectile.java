@@ -36,7 +36,7 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
 	}
 
 	public void setItem(ItemStack itemStack) {
-		if (itemStack.getItem() != this.getDefaultItem() || itemStack.hasTag()) {
+		if (!itemStack.is(this.getDefaultItem()) || itemStack.hasTag()) {
 			this.getEntityData().set(DATA_ITEM_STACK, Util.make(itemStack.copy(), itemStackx -> itemStackx.setCount(1)));
 		}
 	}

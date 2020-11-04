@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 
 public interface PackResources extends AutoCloseable {
+	@Nullable
 	@Environment(EnvType.CLIENT)
 	InputStream getRootResource(String string) throws IOException;
 

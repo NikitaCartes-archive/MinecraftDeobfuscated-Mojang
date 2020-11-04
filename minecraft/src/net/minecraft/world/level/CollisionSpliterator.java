@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
@@ -92,8 +93,8 @@ public class CollisionSpliterator extends AbstractSpliterator<VoxelShape> {
 
 	@Nullable
 	private BlockGetter getChunk(int i, int j) {
-		int k = i >> 4;
-		int l = j >> 4;
+		int k = SectionPos.blockToSectionCoord(i);
+		int l = SectionPos.blockToSectionCoord(j);
 		return this.collisionGetter.getChunkForCollisions(k, l);
 	}
 

@@ -2,16 +2,13 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 @Environment(EnvType.CLIENT)
 public class ArmorStandArmorModel extends HumanoidModel<ArmorStand> {
-	public ArmorStandArmorModel(float f) {
-		this(f, 64, 32);
-	}
-
-	protected ArmorStandArmorModel(float f, int i, int j) {
-		super(f, 0.0F, i, j);
+	public ArmorStandArmorModel(ModelPart modelPart) {
+		super(modelPart);
 	}
 
 	public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {

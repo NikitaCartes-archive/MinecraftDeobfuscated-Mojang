@@ -10,7 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.IntRange;
 import net.minecraft.util.TimeUtil;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -86,7 +86,7 @@ public class HoglinAi {
 				new AnimalMakeLove(EntityType.HOGLIN, 0.6F),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
 				new RunIf<>(Hoglin::isAdult, new MeleeAttack(40)),
-				new RunIf<>(AgableMob::isBaby, new MeleeAttack(15)),
+				new RunIf<>(AgeableMob::isBaby, new MeleeAttack(15)),
 				new StopAttackingIfTargetInvalid(),
 				new EraseMemoryIf(HoglinAi::isBreeding, MemoryModuleType.ATTACK_TARGET)
 			),

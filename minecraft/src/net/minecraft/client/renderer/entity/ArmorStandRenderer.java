@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
@@ -20,12 +21,18 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 public class ArmorStandRenderer extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
 	public static final ResourceLocation DEFAULT_SKIN_LOCATION = new ResourceLocation("textures/entity/armorstand/wood.png");
 
-	public ArmorStandRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new ArmorStandModel(), 0.0F);
-		this.addLayer(new HumanoidArmorLayer<>(this, new ArmorStandArmorModel(0.5F), new ArmorStandArmorModel(1.0F)));
+	public ArmorStandRenderer(EntityRendererProvider.Context context) {
+		super(context, new ArmorStandModel(context.getLayer(ModelLayers.ARMOR_STAND)), 0.0F);
+		this.addLayer(
+			new HumanoidArmorLayer<>(
+				this,
+				new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_INNER_ARMOR)),
+				new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR))
+			)
+		);
 		this.addLayer(new ItemInHandLayer<>(this));
-		this.addLayer(new ElytraLayer<>(this));
-		this.addLayer(new CustomHeadLayer<>(this));
+		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(ArmorStand armorStand) {

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +35,12 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -223,7 +223,7 @@ public class ChunkRenderDispatcher {
 		private final List<BlockEntity> renderableBlockEntities = Lists.<BlockEntity>newArrayList();
 		private VisibilitySet visibilitySet = new VisibilitySet();
 		@Nullable
-		private BufferBuilder.State transparencyState;
+		private BufferBuilder.SortState transparencyState;
 
 		public boolean hasNoRenderableLayers() {
 			return this.isCompletelyEmpty;
@@ -252,7 +252,7 @@ public class ChunkRenderDispatcher {
 		private final Set<BlockEntity> globalBlockEntities = Sets.<BlockEntity>newHashSet();
 		private final Map<RenderType, VertexBuffer> buffers = (Map<RenderType, VertexBuffer>)RenderType.chunkBufferLayers()
 			.stream()
-			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer(DefaultVertexFormat.BLOCK)));
+			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer()));
 		public AABB bb;
 		private int lastFrame = -1;
 		private boolean dirty = true;
@@ -265,7 +265,9 @@ public class ChunkRenderDispatcher {
 		private boolean playerChanged;
 
 		private boolean doesChunkExistAt(BlockPos blockPos) {
-			return ChunkRenderDispatcher.this.level.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false) != null;
+			return ChunkRenderDispatcher.this.level
+					.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()), ChunkStatus.FULL, false)
+				!= null;
 		}
 
 		public boolean hasAllNeighbors() {
@@ -312,7 +314,7 @@ public class ChunkRenderDispatcher {
 		}
 
 		private void beginLayer(BufferBuilder bufferBuilder) {
-			bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 		}
 
 		public ChunkRenderDispatcher.CompiledChunk getCompiledChunk() {
@@ -502,12 +504,11 @@ public class ChunkRenderDispatcher {
 
 					for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
 						BlockState blockState = renderChunkRegion.getBlockState(blockPos3);
-						Block block = blockState.getBlock();
 						if (blockState.isSolidRender(renderChunkRegion, blockPos3)) {
 							visGraph.setOpaque(blockPos3);
 						}
 
-						if (block.isEntityBlock()) {
+						if (blockState.hasBlockEntity()) {
 							BlockEntity blockEntity = renderChunkRegion.getBlockEntity(blockPos3, LevelChunk.EntityCreationType.CHECK);
 							if (blockEntity != null) {
 								this.handleBlockEntity(compiledChunk, set, blockEntity);
@@ -548,8 +549,8 @@ public class ChunkRenderDispatcher {
 
 					if (compiledChunk.hasBlocks.contains(RenderType.translucent())) {
 						BufferBuilder bufferBuilder2 = chunkBufferBuilderPack.builder(RenderType.translucent());
-						bufferBuilder2.sortQuads(f - (float)blockPos.getX(), g - (float)blockPos.getY(), h - (float)blockPos.getZ());
-						compiledChunk.transparencyState = bufferBuilder2.getState();
+						bufferBuilder2.setQuadSortOrigin(f - (float)blockPos.getX(), g - (float)blockPos.getY(), h - (float)blockPos.getZ());
+						compiledChunk.transparencyState = bufferBuilder2.getSortState();
 					}
 
 					compiledChunk.hasLayer.stream().map(chunkBufferBuilderPack::builder).forEach(BufferBuilder::end);
@@ -561,7 +562,7 @@ public class ChunkRenderDispatcher {
 			}
 
 			private <E extends BlockEntity> void handleBlockEntity(ChunkRenderDispatcher.CompiledChunk compiledChunk, Set<BlockEntity> set, E blockEntity) {
-				BlockEntityRenderer<E> blockEntityRenderer = BlockEntityRenderDispatcher.instance.getRenderer(blockEntity);
+				BlockEntityRenderer<E> blockEntityRenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(blockEntity);
 				if (blockEntityRenderer != null) {
 					compiledChunk.renderableBlockEntities.add(blockEntity);
 					if (blockEntityRenderer.shouldRenderOffScreen(blockEntity)) {
@@ -602,13 +603,15 @@ public class ChunkRenderDispatcher {
 					float f = (float)vec3.x;
 					float g = (float)vec3.y;
 					float h = (float)vec3.z;
-					BufferBuilder.State state = this.compiledChunk.transparencyState;
-					if (state != null && this.compiledChunk.hasBlocks.contains(RenderType.translucent())) {
+					BufferBuilder.SortState sortState = this.compiledChunk.transparencyState;
+					if (sortState != null && this.compiledChunk.hasBlocks.contains(RenderType.translucent())) {
 						BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(RenderType.translucent());
 						RenderChunk.this.beginLayer(bufferBuilder);
-						bufferBuilder.restoreState(state);
-						bufferBuilder.sortQuads(f - (float)RenderChunk.this.origin.getX(), g - (float)RenderChunk.this.origin.getY(), h - (float)RenderChunk.this.origin.getZ());
-						this.compiledChunk.transparencyState = bufferBuilder.getState();
+						bufferBuilder.restoreSortState(sortState);
+						bufferBuilder.setQuadSortOrigin(
+							f - (float)RenderChunk.this.origin.getX(), g - (float)RenderChunk.this.origin.getY(), h - (float)RenderChunk.this.origin.getZ()
+						);
+						this.compiledChunk.transparencyState = bufferBuilder.getSortState();
 						bufferBuilder.end();
 						if (this.isCancelled.get()) {
 							return CompletableFuture.completedFuture(ChunkRenderDispatcher.ChunkTaskResult.CANCELLED);

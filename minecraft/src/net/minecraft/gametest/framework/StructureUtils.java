@@ -17,7 +17,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -37,8 +37,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StructureUtils {
+	private static final Logger LOGGER = LogManager.getLogger();
 	public static String testStructuresDir = "gameteststructures";
 
 	public static Rotation getRotationForRotationSteps(int i) {
@@ -140,7 +143,7 @@ public class StructureUtils {
 			(double)boundingBox2.x0, (double)boundingBox2.y0, (double)boundingBox2.z0, (double)boundingBox2.x1, (double)boundingBox2.y1, (double)boundingBox2.z1
 		);
 		List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));
-		list.forEach(Entity::remove);
+		list.forEach(Entity::discard);
 	}
 
 	public static BoundingBox getStructureBoundingBox(BlockPos blockPos, BlockPos blockPos2, Rotation rotation) {
@@ -229,7 +232,7 @@ public class StructureUtils {
 		try {
 			BufferedReader bufferedReader = Files.newBufferedReader(path);
 			String string = IOUtils.toString(bufferedReader);
-			return TagParser.parseTag(string);
+			return NbtUtils.snbtToStructure(string);
 		} catch (IOException var3) {
 			return null;
 		} catch (CommandSyntaxException var4) {
@@ -244,8 +247,9 @@ public class StructureUtils {
 		);
 		if (flatLevelGeneratorSettings instanceof FlatLevelGeneratorSettings) {
 			BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
-			if (blockPos.getY() < i && blockPos.getY() <= blockStates.length) {
-				blockState = blockStates[blockPos.getY() - 1];
+			int j = flatLevelGeneratorSettings.getLayerIndex(blockPos.getY());
+			if (blockPos.getY() < i && j > 0 && j <= blockStates.length) {
+				blockState = blockStates[j - 1];
 			}
 		} else if (blockPos.getY() == i - 1) {
 			blockState = serverLevel.getBiome(blockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();

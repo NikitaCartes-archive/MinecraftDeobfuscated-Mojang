@@ -38,7 +38,7 @@ public abstract class BaseFireBlock extends Block {
 	public static BlockState getState(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
-		return SoulFireBlock.canSurviveOnBlock(blockState.getBlock())
+		return SoulFireBlock.canSurviveOnBlock(blockState)
 			? Blocks.SOUL_FIRE.defaultBlockState()
 			: ((FireBlock)Blocks.FIRE).getStateForPlacement(blockGetter, blockPos);
 	}
@@ -184,14 +184,7 @@ public abstract class BaseFireBlock extends Block {
 				}
 			}
 
-			if (!bl) {
-				return false;
-			} else {
-				Direction.Axis axis = direction.getAxis().isHorizontal()
-					? direction.getCounterClockWise().getAxis()
-					: Direction.Plane.HORIZONTAL.getRandomAxis(level.random);
-				return PortalShape.findEmptyPortalShape(level, blockPos, axis).isPresent();
-			}
+			return bl && PortalShape.findEmptyPortalShape(level, blockPos, direction.getCounterClockWise().getAxis()).isPresent();
 		}
 	}
 }

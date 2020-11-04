@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
@@ -40,6 +41,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -255,9 +257,9 @@ public class DebugScreenOverlay extends GuiComponent {
 					blockPos.getX() & 15,
 					blockPos.getY() & 15,
 					blockPos.getZ() & 15,
-					blockPos.getX() >> 4,
-					blockPos.getY() >> 4,
-					blockPos.getZ() >> 4
+					SectionPos.blockToSectionCoord(blockPos.getX()),
+					SectionPos.blockToSectionCoord(blockPos.getY()),
+					SectionPos.blockToSectionCoord(blockPos.getZ())
 				)
 			);
 			list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, string2, Mth.wrapDegrees(entity.yRot), Mth.wrapDegrees(entity.xRot)));
@@ -309,7 +311,7 @@ public class DebugScreenOverlay extends GuiComponent {
 						}
 
 						list.add(stringBuilder.toString());
-						if (blockPos.getY() >= 0 && blockPos.getY() < 256) {
+						if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
 							list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
 							long l = 0L;
 							float h = 0.0F;
@@ -513,7 +515,7 @@ public class DebugScreenOverlay extends GuiComponent {
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 		for (Matrix4f matrix4f = Transformation.identity().getMatrix(); m != l; m = frameTimer.wrapIndex(m + 1)) {
 			int v = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);

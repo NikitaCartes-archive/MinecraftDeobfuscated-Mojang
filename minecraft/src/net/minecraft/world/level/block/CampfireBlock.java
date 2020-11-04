@@ -30,6 +30,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -81,7 +83,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 			Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
 			if (optional.isPresent()) {
 				if (!level.isClientSide
-					&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
+					&& campfireBlockEntity.placeFood(player.getAbilities().instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())
+					)
+				 {
 					player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
 					return InteractionResult.SUCCESS;
 				}
@@ -301,8 +305,20 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new CampfireBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new CampfireBlockEntity(blockPos, blockState);
+	}
+
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+		if (level.isClientSide) {
+			return blockState.getValue(LIT) ? createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::particleTick) : null;
+		} else {
+			return blockState.getValue(LIT)
+				? createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::cookTick)
+				: createTickerHelper(blockEntityType, BlockEntityType.CAMPFIRE, CampfireBlockEntity::cooldownTick);
+		}
 	}
 
 	@Override
@@ -311,10 +327,8 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	public static boolean canLight(BlockState blockState) {
-		return blockState.is(
-				BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(BlockStateProperties.WATERLOGGED) && blockStateBase.hasProperty(BlockStateProperties.LIT)
-			)
-			&& !(Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)
-			&& !(Boolean)blockState.getValue(BlockStateProperties.LIT);
+		return blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(WATERLOGGED) && blockStateBase.hasProperty(LIT))
+			&& !(Boolean)blockState.getValue(WATERLOGGED)
+			&& !(Boolean)blockState.getValue(LIT);
 	}
 }

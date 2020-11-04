@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
@@ -24,6 +25,7 @@ import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,6 +51,7 @@ public class ChunkHolder {
 	private final AtomicReferenceArray<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> futures = new AtomicReferenceArray(
 		CHUNK_STATUSES.size()
 	);
+	private final LevelHeightAccessor levelHeightAccessor;
 	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
@@ -58,7 +61,7 @@ public class ChunkHolder {
 	private int queueLevel;
 	private final ChunkPos pos;
 	private boolean hasChangedSections;
-	private final ShortSet[] changedBlocksPerSection = new ShortSet[16];
+	private final ShortSet[] changedBlocksPerSection;
 	private int blockChangedLightSectionFilter;
 	private int skyChangedLightSectionFilter;
 	private final LevelLightEngine lightEngine;
@@ -66,11 +69,18 @@ public class ChunkHolder {
 	private final ChunkHolder.PlayerProvider playerProvider;
 	private boolean wasAccessibleSinceLastSave;
 	private boolean resendLight;
+	private CompletableFuture<Void> pendingFullStateConfirmation = CompletableFuture.completedFuture(null);
 
 	public ChunkHolder(
-		ChunkPos chunkPos, int i, LevelLightEngine levelLightEngine, ChunkHolder.LevelChangeListener levelChangeListener, ChunkHolder.PlayerProvider playerProvider
+		ChunkPos chunkPos,
+		int i,
+		LevelHeightAccessor levelHeightAccessor,
+		LevelLightEngine levelLightEngine,
+		ChunkHolder.LevelChangeListener levelChangeListener,
+		ChunkHolder.PlayerProvider playerProvider
 	) {
 		this.pos = chunkPos;
+		this.levelHeightAccessor = levelHeightAccessor;
 		this.lightEngine = levelLightEngine;
 		this.onLevelChange = levelChangeListener;
 		this.playerProvider = playerProvider;
@@ -78,6 +88,7 @@ public class ChunkHolder {
 		this.ticketLevel = this.oldTicketLevel;
 		this.queueLevel = this.oldTicketLevel;
 		this.setTicketLevel(i);
+		this.changedBlocksPerSection = new ShortSet[levelHeightAccessor.getSectionsCount()];
 	}
 
 	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getFutureIfPresentUnchecked(ChunkStatus chunkStatus) {
@@ -146,7 +157,7 @@ public class ChunkHolder {
 	public void blockChanged(BlockPos blockPos) {
 		LevelChunk levelChunk = this.getTickingChunk();
 		if (levelChunk != null) {
-			byte b = (byte)SectionPos.blockToSectionCoord(blockPos.getY());
+			byte b = (byte)this.levelHeightAccessor.getSectionIndex(blockPos.getY());
 			if (this.changedBlocksPerSection[b] == null) {
 				this.hasChangedSections = true;
 				this.changedBlocksPerSection[b] = new ShortArraySet();
@@ -161,9 +172,9 @@ public class ChunkHolder {
 		if (levelChunk != null) {
 			levelChunk.setUnsaved(true);
 			if (lightLayer == LightLayer.SKY) {
-				this.skyChangedLightSectionFilter |= 1 << i - -1;
+				this.skyChangedLightSectionFilter = this.skyChangedLightSectionFilter | 1 << i - this.lightEngine.getMinLightSection();
 			} else {
-				this.blockChangedLightSectionFilter |= 1 << i - -1;
+				this.blockChangedLightSectionFilter = this.blockChangedLightSectionFilter | 1 << i - this.lightEngine.getMinLightSection();
 			}
 		}
 	}
@@ -190,14 +201,15 @@ public class ChunkHolder {
 			for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
 				ShortSet shortSet = this.changedBlocksPerSection[j];
 				if (shortSet != null) {
-					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
+					int k = this.levelHeightAccessor.getSectionYFromSectionIndex(j);
+					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), k);
 					if (shortSet.size() == 1) {
 						BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
 						BlockState blockState = level.getBlockState(blockPos);
 						this.broadcast(new ClientboundBlockUpdatePacket(blockPos, blockState), false);
 						this.broadcastBlockEntityIfNeeded(level, blockPos, blockState);
 					} else {
-						LevelChunkSection levelChunkSection = levelChunk.getSections()[sectionPos.getY()];
+						LevelChunkSection levelChunkSection = levelChunk.getSections()[j];
 						ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(
 							sectionPos, shortSet, levelChunkSection, this.resendLight
 						);
@@ -214,7 +226,7 @@ public class ChunkHolder {
 	}
 
 	private void broadcastBlockEntityIfNeeded(Level level, BlockPos blockPos, BlockState blockState) {
-		if (blockState.getBlock().isEntityBlock()) {
+		if (blockState.hasBlockEntity()) {
 			this.broadcastBlockEntity(level, blockPos);
 		}
 	}
@@ -284,7 +296,25 @@ public class ChunkHolder {
 		this.ticketLevel = i;
 	}
 
-	protected void updateFutures(ChunkMap chunkMap) {
+	private void scheduleFullChunkPromotion(
+		ChunkMap chunkMap,
+		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture,
+		Executor executor,
+		ChunkHolder.FullChunkStatus fullChunkStatus
+	) {
+		this.pendingFullStateConfirmation.cancel(false);
+		CompletableFuture<Void> completableFuture2 = new CompletableFuture();
+		completableFuture2.thenRunAsync(() -> chunkMap.onFullChunkStatusChange(this.pos, fullChunkStatus), executor);
+		this.pendingFullStateConfirmation = completableFuture2;
+		completableFuture.thenAccept(either -> either.ifLeft(levelChunk -> completableFuture2.complete(null)));
+	}
+
+	private void demoteFullChunk(ChunkMap chunkMap, ChunkHolder.FullChunkStatus fullChunkStatus) {
+		this.pendingFullStateConfirmation.cancel(false);
+		chunkMap.onFullChunkStatusChange(this.pos, fullChunkStatus);
+	}
+
+	protected void updateFutures(ChunkMap chunkMap, Executor executor) {
 		ChunkStatus chunkStatus = getStatus(this.oldTicketLevel);
 		ChunkStatus chunkStatus2 = getStatus(this.ticketLevel);
 		boolean bl = this.oldTicketLevel <= ChunkMap.MAX_CHUNK_DISTANCE;
@@ -294,7 +324,7 @@ public class ChunkHolder {
 		if (bl) {
 			Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = Either.right(new ChunkHolder.ChunkLoadingFailure() {
 				public String toString() {
-					return "Unloaded ticket level " + ChunkHolder.this.pos.toString();
+					return "Unloaded ticket level " + ChunkHolder.this.pos;
 				}
 			});
 
@@ -313,7 +343,8 @@ public class ChunkHolder {
 		boolean bl4 = fullChunkStatus2.isOrAfter(ChunkHolder.FullChunkStatus.BORDER);
 		this.wasAccessibleSinceLastSave |= bl4;
 		if (!bl3 && bl4) {
-			this.fullChunkFuture = chunkMap.unpackTicks(this);
+			this.fullChunkFuture = chunkMap.prepareAccessibleChunk(this);
+			this.scheduleFullChunkPromotion(chunkMap, this.fullChunkFuture, executor, ChunkHolder.FullChunkStatus.BORDER);
 			this.updateChunkToSave(this.fullChunkFuture);
 		}
 
@@ -326,7 +357,8 @@ public class ChunkHolder {
 		boolean bl5 = fullChunkStatus.isOrAfter(ChunkHolder.FullChunkStatus.TICKING);
 		boolean bl6 = fullChunkStatus2.isOrAfter(ChunkHolder.FullChunkStatus.TICKING);
 		if (!bl5 && bl6) {
-			this.tickingChunkFuture = chunkMap.postProcess(this);
+			this.tickingChunkFuture = chunkMap.prepareTickingChunk(this);
+			this.scheduleFullChunkPromotion(chunkMap, this.tickingChunkFuture, executor, ChunkHolder.FullChunkStatus.TICKING);
 			this.updateChunkToSave(this.tickingChunkFuture);
 		}
 
@@ -342,7 +374,8 @@ public class ChunkHolder {
 				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
 			}
 
-			this.entityTickingChunkFuture = chunkMap.getEntityTickingRangeFuture(this.pos);
+			this.entityTickingChunkFuture = chunkMap.prepareEntityTickingChunk(this.pos);
+			this.scheduleFullChunkPromotion(chunkMap, this.entityTickingChunkFuture, executor, ChunkHolder.FullChunkStatus.ENTITY_TICKING);
 			this.updateChunkToSave(this.entityTickingChunkFuture);
 		}
 
@@ -351,12 +384,16 @@ public class ChunkHolder {
 			this.entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
 
+		if (!fullChunkStatus2.isOrAfter(fullChunkStatus)) {
+			this.demoteFullChunk(chunkMap, fullChunkStatus2);
+		}
+
 		this.onLevelChange.onLevelChange(this.pos, this::getQueueLevel, this.ticketLevel, this::setQueueLevel);
 		this.oldTicketLevel = this.ticketLevel;
 	}
 
 	public static ChunkStatus getStatus(int i) {
-		return i < 33 ? ChunkStatus.FULL : ChunkStatus.getStatus(i - 33);
+		return i < 33 ? ChunkStatus.FULL : ChunkStatus.getStatusAroundFullChunk(i - 33);
 	}
 
 	public static ChunkHolder.FullChunkStatus getFullChunkStatus(int i) {
@@ -405,6 +442,7 @@ public class ChunkHolder {
 		}
 	}
 
+	@FunctionalInterface
 	public interface LevelChangeListener {
 		void onLevelChange(ChunkPos chunkPos, IntSupplier intSupplier, int i, IntConsumer intConsumer);
 	}

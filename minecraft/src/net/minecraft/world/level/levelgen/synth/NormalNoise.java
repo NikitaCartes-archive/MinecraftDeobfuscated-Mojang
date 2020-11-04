@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -8,6 +9,10 @@ public class NormalNoise {
 	private final double valueFactor;
 	private final PerlinNoise first;
 	private final PerlinNoise second;
+
+	public static NormalNoise create(WorldgenRandom worldgenRandom, int i, double... ds) {
+		return new NormalNoise(worldgenRandom, i, new DoubleArrayList(ds));
+	}
 
 	public static NormalNoise create(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
 		return new NormalNoise(worldgenRandom, i, doubleList);

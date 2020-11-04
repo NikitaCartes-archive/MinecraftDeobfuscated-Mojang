@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -15,12 +16,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
+public class EnchantTableRenderer implements BlockEntityRenderer<EnchantmentTableBlockEntity> {
 	public static final Material BOOK_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/enchanting_table_book"));
-	private final BookModel bookModel = new BookModel();
+	private final BookModel bookModel;
 
-	public EnchantTableRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public EnchantTableRenderer(BlockEntityRendererProvider.Context context) {
+		this.bookModel = new BookModel(context.getLayer(ModelLayers.BOOK));
 	}
 
 	public void render(EnchantmentTableBlockEntity enchantmentTableBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

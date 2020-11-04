@@ -3,12 +3,16 @@ package net.minecraft.client.renderer.entity.layers;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.SkullModelBase;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -23,6 +27,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
+import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,16 +36,18 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 	private final float scaleX;
 	private final float scaleY;
 	private final float scaleZ;
+	private final Map<SkullBlock.Type, SkullModelBase> skullModels;
 
-	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent) {
-		this(renderLayerParent, 1.0F, 1.0F, 1.0F);
+	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
+		this(renderLayerParent, entityModelSet, 1.0F, 1.0F, 1.0F);
 	}
 
-	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, float f, float g, float h) {
+	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, float f, float g, float h) {
 		super(renderLayerParent);
 		this.scaleX = f;
 		this.scaleY = g;
 		this.scaleZ = h;
+		this.skullModels = SkullBlockRenderer.createSkullRenderers(entityModelSet);
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
@@ -81,7 +88,10 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				}
 
 				poseStack.translate(-0.5, 0.0, -0.5);
-				SkullBlockRenderer.renderSkull(null, 180.0F, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, f, poseStack, multiBufferSource, i);
+				SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
+				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
+				RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
+				SkullBlockRenderer.renderSkull(null, 180.0F, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
 			} else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
 				float mx = 0.625F;
 				poseStack.translate(0.0, -0.25, 0.0);

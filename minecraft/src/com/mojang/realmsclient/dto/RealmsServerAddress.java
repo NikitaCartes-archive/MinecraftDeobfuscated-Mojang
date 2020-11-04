@@ -25,7 +25,7 @@ public class RealmsServerAddress extends ValueObject {
 			realmsServerAddress.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", jsonObject, null);
 			realmsServerAddress.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", jsonObject, null);
 		} catch (Exception var4) {
-			LOGGER.error("Could not parse RealmsServerAddress: " + var4.getMessage());
+			LOGGER.error("Could not parse RealmsServerAddress: {}", var4.getMessage());
 		}
 
 		return realmsServerAddress;

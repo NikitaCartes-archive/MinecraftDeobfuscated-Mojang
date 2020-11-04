@@ -11,6 +11,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -70,7 +71,7 @@ public class StorageDataAccessor implements DataAccessor {
 
 	@Override
 	public Component getPrintSuccess(Tag tag) {
-		return new TranslatableComponent("commands.data.storage.query", this.id, tag.getPrettyDisplay());
+		return new TranslatableComponent("commands.data.storage.query", this.id, NbtUtils.toPrettyComponent(tag));
 	}
 
 	@Override

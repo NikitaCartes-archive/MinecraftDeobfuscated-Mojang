@@ -7,6 +7,8 @@ interface IndexMerger {
 
 	boolean forMergedIndexes(IndexMerger.IndexConsumer indexConsumer);
 
+	int size();
+
 	public interface IndexConsumer {
 		boolean merge(int i, int j, int k);
 	}

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
@@ -23,8 +24,8 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 		.map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png"))
 		.toArray(ResourceLocation[]::new);
 
-	public ShulkerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new ShulkerModel<>(), 0.0F);
+	public ShulkerRenderer(EntityRendererProvider.Context context) {
+		super(context, new ShulkerModel<>(context.getLayer(ModelLayers.SHULKER)), 0.0F);
 		this.addLayer(new ShulkerHeadLayer(this));
 	}
 

@@ -73,7 +73,7 @@ public class SugarCaneBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-		if (blockState2.getBlock() == this) {
+		if (blockState2.is(this)) {
 			return true;
 		} else {
 			if (blockState2.is(Blocks.GRASS_BLOCK)

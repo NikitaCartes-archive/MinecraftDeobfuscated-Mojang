@@ -33,6 +33,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -88,7 +89,6 @@ public class Boat extends Entity {
 	public Boat(Level level, double d, double e, double f) {
 		this(EntityType.BOAT, level);
 		this.setPos(d, e, f);
-		this.setDeltaMovement(Vec3.ZERO);
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
@@ -148,18 +148,18 @@ public class Boat extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (!this.level.isClientSide && !this.removed) {
+		} else if (!this.level.isClientSide && !this.isRemoved()) {
 			this.setHurtDir(-this.getHurtDir());
 			this.setHurtTime(10);
 			this.setDamage(this.getDamage() + f * 10.0F);
 			this.markHurt();
-			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).abilities.instabuild;
+			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
 			if (bl || this.getDamage() > 40.0F) {
 				if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 					this.spawnAtLocation(this.getDropItem());
 				}
 
-				this.remove();
+				this.discard();
 			}
 
 			return true;
@@ -227,7 +227,7 @@ public class Boat extends Entity {
 
 	@Override
 	public boolean isPickable() {
-		return !this.removed;
+		return !this.isRemoved();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -271,7 +271,7 @@ public class Boat extends Entity {
 		super.tick();
 		this.tickLerp();
 		if (this.isControlledByLocalInstance()) {
-			if (this.getPassengers().isEmpty() || !(this.getPassengers().get(0) instanceof Player)) {
+			if (!(this.getFirstPassenger() instanceof Player)) {
 				this.setPaddleState(false, false);
 			}
 
@@ -360,7 +360,7 @@ public class Boat extends Entity {
 						this.setDeltaMovement(vec3.add(0.0, -0.7, 0.0));
 						this.ejectPassengers();
 					} else {
-						this.setDeltaMovement(vec3.x, this.hasPassenger(Player.class) ? 2.7 : 0.6, vec3.z);
+						this.setDeltaMovement(vec3.x, this.hasPassenger(entity -> entity instanceof Player) ? 2.7 : 0.6, vec3.z);
 					}
 				}
 
@@ -642,7 +642,7 @@ public class Boat extends Entity {
 	public void positionRider(Entity entity) {
 		if (this.hasPassenger(entity)) {
 			float f = 0.0F;
-			float g = (float)((this.removed ? 0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
+			float g = (float)((this.isRemoved() ? 0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
 			if (this.getPassengers().size() > 1) {
 				int i = this.getPassengers().indexOf(entity);
 				if (i == 0) {
@@ -752,8 +752,8 @@ public class Boat extends Entity {
 					}
 
 					this.causeFallDamage(this.fallDistance, 1.0F);
-					if (!this.level.isClientSide && !this.removed) {
-						this.remove();
+					if (!this.level.isClientSide && !this.isRemoved()) {
+						this.kill();
 						if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 							for (int i = 0; i < 3; i++) {
 								this.spawnAtLocation(this.getBoatType().getPlanks());
@@ -830,8 +830,7 @@ public class Boat extends Entity {
 	@Nullable
 	@Override
 	public Entity getControllingPassenger() {
-		List<Entity> list = this.getPassengers();
-		return list.isEmpty() ? null : (Entity)list.get(0);
+		return this.getFirstPassenger();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -850,6 +849,12 @@ public class Boat extends Entity {
 	@Override
 	public boolean isUnderWater() {
 		return this.status == Boat.Status.UNDER_WATER || this.status == Boat.Status.UNDER_FLOWING_WATER;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ItemStack getPickResult() {
+		return new ItemStack(this.getDropItem());
 	}
 
 	public static enum Status {

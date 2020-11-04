@@ -3,8 +3,6 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 public class EndTag implements Tag {
 	public static final TagType<EndTag> TYPE = new TagType<EndTag>() {
@@ -49,7 +47,7 @@ public class EndTag implements Tag {
 
 	@Override
 	public String toString() {
-		return "END";
+		return this.getAsString();
 	}
 
 	public EndTag copy() {
@@ -57,7 +55,7 @@ public class EndTag implements Tag {
 	}
 
 	@Override
-	public Component getPrettyDisplay(String string, int i) {
-		return TextComponent.EMPTY;
+	public void accept(TagVisitor tagVisitor) {
+		tagVisitor.visitEnd(this);
 	}
 }

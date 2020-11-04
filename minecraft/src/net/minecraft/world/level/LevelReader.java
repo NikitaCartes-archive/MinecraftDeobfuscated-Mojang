@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
@@ -103,7 +104,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 	}
 
 	default ChunkAccess getChunk(BlockPos blockPos) {
-		return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+		return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
 	}
 
 	default ChunkAccess getChunk(int i, int j) {
@@ -159,7 +160,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	@Deprecated
 	default boolean hasChunkAt(BlockPos blockPos) {
-		return this.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+		return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
 	}
 
 	@Deprecated
@@ -169,7 +170,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	@Deprecated
 	default boolean hasChunksAt(int i, int j, int k, int l, int m, int n) {
-		if (m >= 0 && j < 256) {
+		if (m >= this.getMinBuildHeight() && j < this.getMaxBuildHeight()) {
 			i >>= 4;
 			k >>= 4;
 			l >>= 4;

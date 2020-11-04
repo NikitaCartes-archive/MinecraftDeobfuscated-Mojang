@@ -105,7 +105,7 @@ public class ScheduleCommand {
 				timerQueue.schedule(string, l, new FunctionCallback(resourceLocation));
 				commandSourceStack.sendSuccess(new TranslatableComponent("commands.schedule.created.function", resourceLocation, i, l), true);
 			}).ifRight(tag -> {
-				String string = "#" + resourceLocation.toString();
+				String string = "#" + resourceLocation;
 				if (bl) {
 					timerQueue.remove(string);
 				}

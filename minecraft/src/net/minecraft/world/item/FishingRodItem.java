@@ -32,11 +32,18 @@ public class FishingRodItem extends Item implements Vanishable {
 				SoundEvents.FISHING_BOBBER_RETRIEVE,
 				SoundSource.NEUTRAL,
 				1.0F,
-				0.4F / (random.nextFloat() * 0.4F + 0.8F)
+				0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 			);
 		} else {
 			level.playSound(
-				null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+				null,
+				player.getX(),
+				player.getY(),
+				player.getZ(),
+				SoundEvents.FISHING_BOBBER_THROW,
+				SoundSource.NEUTRAL,
+				0.5F,
+				0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 			);
 			if (!level.isClientSide) {
 				int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);

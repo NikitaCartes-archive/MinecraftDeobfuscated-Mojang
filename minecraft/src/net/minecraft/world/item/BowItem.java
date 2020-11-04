@@ -22,7 +22,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 		if (livingEntity instanceof Player) {
 			Player player = (Player)livingEntity;
-			boolean bl = player.abilities.instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
+			boolean bl = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
 			ItemStack itemStack2 = player.getProjectile(itemStack);
 			if (!itemStack2.isEmpty() || bl) {
 				if (itemStack2.isEmpty()) {
@@ -32,7 +32,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 				int j = this.getUseDuration(itemStack) - i;
 				float f = getPowerForTime(j);
 				if (!((double)f < 0.1)) {
-					boolean bl2 = bl && itemStack2.getItem() == Items.ARROW;
+					boolean bl2 = bl && itemStack2.is(Items.ARROW);
 					if (!level.isClientSide) {
 						ArrowItem arrowItem = (ArrowItem)(itemStack2.getItem() instanceof ArrowItem ? itemStack2.getItem() : Items.ARROW);
 						AbstractArrow abstractArrow = arrowItem.createArrow(level, itemStack2, player);
@@ -56,7 +56,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 						}
 
 						itemStack.hurtAndBreak(1, player, player2 -> player2.broadcastBreakEvent(player.getUsedItemHand()));
-						if (bl2 || player.abilities.instabuild && (itemStack2.getItem() == Items.SPECTRAL_ARROW || itemStack2.getItem() == Items.TIPPED_ARROW)) {
+						if (bl2 || player.getAbilities().instabuild && (itemStack2.is(Items.SPECTRAL_ARROW) || itemStack2.is(Items.TIPPED_ARROW))) {
 							abstractArrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 						}
 
@@ -71,12 +71,12 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 						SoundEvents.ARROW_SHOOT,
 						SoundSource.PLAYERS,
 						1.0F,
-						1.0F / (random.nextFloat() * 0.4F + 1.2F) + f * 0.5F
+						1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F
 					);
-					if (!bl2 && !player.abilities.instabuild) {
+					if (!bl2 && !player.getAbilities().instabuild) {
 						itemStack2.shrink(1);
 						if (itemStack2.isEmpty()) {
-							player.inventory.removeItem(itemStack2);
+							player.getInventory().removeItem(itemStack2);
 						}
 					}
 
@@ -110,7 +110,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		boolean bl = !player.getProjectile(itemStack).isEmpty();
-		if (!player.abilities.instabuild && !bl) {
+		if (!player.getAbilities().instabuild && !bl) {
 			return InteractionResultHolder.fail(itemStack);
 		} else {
 			player.startUsingItem(interactionHand);

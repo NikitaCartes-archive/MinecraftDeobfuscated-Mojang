@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
@@ -39,8 +40,8 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 			Biome biome,
 			OceanRuinConfiguration oceanRuinConfiguration
 		) {
-			int k = i * 16;
-			int l = j * 16;
+			int k = SectionPos.sectionToBlockCoord(i);
+			int l = SectionPos.sectionToBlockCoord(j);
 			BlockPos blockPos = new BlockPos(k, 90, l);
 			Rotation rotation = Rotation.getRandom(this.random);
 			OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);

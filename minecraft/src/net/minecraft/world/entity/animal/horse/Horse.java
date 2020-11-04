@@ -15,7 +15,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
@@ -204,7 +204,7 @@ public class Horse extends AbstractHorse {
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 
-			boolean bl = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+			boolean bl = !this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE);
 			if (this.isArmor(itemStack) || bl) {
 				this.openInventory(player);
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -229,12 +229,12 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		AbstractHorse abstractHorse;
-		if (agableMob instanceof Donkey) {
+		if (ageableMob instanceof Donkey) {
 			abstractHorse = EntityType.MULE.create(serverLevel);
 		} else {
-			Horse horse = (Horse)agableMob;
+			Horse horse = (Horse)ageableMob;
 			abstractHorse = EntityType.HORSE.create(serverLevel);
 			int i = this.random.nextInt(9);
 			Variant variant;
@@ -259,7 +259,7 @@ public class Horse extends AbstractHorse {
 			((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
 		}
 
-		this.setOffspringAttributes(agableMob, abstractHorse);
+		this.setOffspringAttributes(ageableMob, abstractHorse);
 		return abstractHorse;
 	}
 
@@ -294,7 +294,7 @@ public class Horse extends AbstractHorse {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public static class HorseGroupData extends AgableMob.AgableMobGroupData {
+	public static class HorseGroupData extends AgeableMob.AgeableMobGroupData {
 		public final Variant variant;
 
 		public HorseGroupData(Variant variant) {

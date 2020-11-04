@@ -54,7 +54,7 @@ public class PredicateManager extends SimpleJsonResourceReloadListener {
 		map2.forEach(
 			(resourceLocation, lootItemCondition) -> lootItemCondition.validate(validationContext.enterCondition("{" + resourceLocation + "}", resourceLocation))
 		);
-		validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+		validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
 		this.conditions = map2;
 	}
 

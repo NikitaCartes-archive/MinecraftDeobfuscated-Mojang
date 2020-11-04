@@ -1,11 +1,15 @@
 package net.minecraft.world.level.block;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,8 +24,16 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Wear
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new SkullBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new SkullBlockEntity(blockPos, blockState);
+	}
+
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+		return !level.isClientSide || !blockState.is(Blocks.DRAGON_HEAD) && !blockState.is(Blocks.DRAGON_WALL_HEAD)
+			? null
+			: createTickerHelper(blockEntityType, BlockEntityType.SKULL, SkullBlockEntity::dragonHeadAnimation);
 	}
 
 	@Environment(EnvType.CLIENT)

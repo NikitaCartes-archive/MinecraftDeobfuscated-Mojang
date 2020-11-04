@@ -15,7 +15,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 	private final Container beacon = new SimpleContainer(1) {
 		@Override
 		public boolean canPlaceItem(int i, ItemStack itemStack) {
-			return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
+			return itemStack.is(ItemTags.BEACON_PAYMENT_ITEMS);
 		}
 
 		@Override
@@ -78,7 +78,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
@@ -157,7 +157,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 
 		@Override
 		public boolean mayPlace(ItemStack itemStack) {
-			return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
+			return itemStack.is(ItemTags.BEACON_PAYMENT_ITEMS);
 		}
 
 		@Override

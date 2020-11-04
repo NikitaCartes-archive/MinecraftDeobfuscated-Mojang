@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -81,7 +81,8 @@ public class AnimalMakeLove extends Behavior<Animal> {
 
 	private boolean hasBreedTargetOfRightType(Animal animal) {
 		Brain<?> brain = animal.getBrain();
-		return brain.hasMemoryValue(MemoryModuleType.BREED_TARGET) && ((AgableMob)brain.getMemory(MemoryModuleType.BREED_TARGET).get()).getType() == this.partnerType;
+		return brain.hasMemoryValue(MemoryModuleType.BREED_TARGET)
+			&& ((AgeableMob)brain.getMemory(MemoryModuleType.BREED_TARGET).get()).getType() == this.partnerType;
 	}
 
 	private Optional<? extends Animal> findValidBreedPartner(Animal animal) {

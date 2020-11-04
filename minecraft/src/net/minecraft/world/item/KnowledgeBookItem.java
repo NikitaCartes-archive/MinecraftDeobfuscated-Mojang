@@ -27,7 +27,7 @@ public class KnowledgeBookItem extends Item {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		CompoundTag compoundTag = itemStack.getTag();
-		if (!player.abilities.instabuild) {
+		if (!player.getAbilities().instabuild) {
 			player.setItemInHand(interactionHand, ItemStack.EMPTY);
 		}
 

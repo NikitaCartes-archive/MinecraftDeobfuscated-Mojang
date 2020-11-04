@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
@@ -34,7 +35,7 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/loom.png");
 	private static final int TOTAL_PATTERN_ROWS = (BannerPattern.COUNT - BannerPattern.PATTERN_ITEM_COUNT - 1 + 4 - 1) / 4;
-	private final ModelPart flag;
+	private ModelPart flag;
 	@Nullable
 	private List<Pair<BannerPattern, DyeColor>> resultBannerPatterns;
 	private ItemStack bannerStack = ItemStack.EMPTY;
@@ -49,9 +50,14 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 
 	public LoomScreen(LoomMenu loomMenu, Inventory inventory, Component component) {
 		super(loomMenu, inventory, component);
-		this.flag = BannerRenderer.makeFlag();
 		loomMenu.registerUpdateListener(this::containerChanged);
 		this.titleLabelY -= 2;
+	}
+
+	@Override
+	protected void init() {
+		super.init();
+		this.flag = this.minecraft.getEntityModels().getLayer(ModelLayers.BANNER).getChild("flag");
 	}
 
 	@Override

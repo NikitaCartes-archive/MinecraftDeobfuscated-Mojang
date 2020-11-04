@@ -5,7 +5,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.TallSeagrass;
+import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -30,7 +30,7 @@ public class SeagrassFeature extends Feature<ProbabilityFeatureConfiguration> {
 			BlockState blockState = bl2 ? Blocks.TALL_SEAGRASS.defaultBlockState() : Blocks.SEAGRASS.defaultBlockState();
 			if (blockState.canSurvive(worldGenLevel, blockPos2)) {
 				if (bl2) {
-					BlockState blockState2 = blockState.setValue(TallSeagrass.HALF, DoubleBlockHalf.UPPER);
+					BlockState blockState2 = blockState.setValue(TallSeagrassBlock.HALF, DoubleBlockHalf.UPPER);
 					BlockPos blockPos3 = blockPos2.above();
 					if (worldGenLevel.getBlockState(blockPos3).is(Blocks.WATER)) {
 						worldGenLevel.setBlock(blockPos2, blockState, 2);

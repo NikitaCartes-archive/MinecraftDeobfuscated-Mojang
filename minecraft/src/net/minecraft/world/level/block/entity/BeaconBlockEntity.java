@@ -31,6 +31,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeaconBeamBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -38,7 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
-public class BeaconBlockEntity extends BlockEntity implements MenuProvider, TickableBlockEntity {
+public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 	public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{
 		{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}
 	};
@@ -46,7 +47,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	private List<BeaconBlockEntity.BeaconBeamSection> beamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private List<BeaconBlockEntity.BeaconBeamSection> checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private int levels;
-	private int lastCheckY = -1;
+	private int lastCheckY;
 	@Nullable
 	private MobEffect primaryPower;
 	@Nullable
@@ -77,7 +78,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 					break;
 				case 1:
 					if (!BeaconBlockEntity.this.level.isClientSide && !BeaconBlockEntity.this.beamSections.isEmpty()) {
-						BeaconBlockEntity.this.playSound(SoundEvents.BEACON_POWER_SELECT);
+						BeaconBlockEntity.playSound(BeaconBlockEntity.this.level, BeaconBlockEntity.this.worldPosition, SoundEvents.BEACON_POWER_SELECT);
 					}
 
 					BeaconBlockEntity.this.primaryPower = BeaconBlockEntity.getValidEffectById(j);
@@ -93,37 +94,36 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 		}
 	};
 
-	public BeaconBlockEntity() {
-		super(BlockEntityType.BEACON);
+	public BeaconBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.BEACON, blockPos, blockState);
 	}
 
-	@Override
-	public void tick() {
-		int i = this.worldPosition.getX();
-		int j = this.worldPosition.getY();
-		int k = this.worldPosition.getZ();
-		BlockPos blockPos;
-		if (this.lastCheckY < j) {
-			blockPos = this.worldPosition;
-			this.checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
-			this.lastCheckY = blockPos.getY() - 1;
+	public static void tick(Level level, BlockPos blockPos, BlockState blockState, BeaconBlockEntity beaconBlockEntity) {
+		int i = blockPos.getX();
+		int j = blockPos.getY();
+		int k = blockPos.getZ();
+		BlockPos blockPos2;
+		if (beaconBlockEntity.lastCheckY < j) {
+			blockPos2 = blockPos;
+			beaconBlockEntity.checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
+			beaconBlockEntity.lastCheckY = blockPos.getY() - 1;
 		} else {
-			blockPos = new BlockPos(i, this.lastCheckY + 1, k);
+			blockPos2 = new BlockPos(i, beaconBlockEntity.lastCheckY + 1, k);
 		}
 
-		BeaconBlockEntity.BeaconBeamSection beaconBeamSection = this.checkingBeamSections.isEmpty()
+		BeaconBlockEntity.BeaconBeamSection beaconBeamSection = beaconBlockEntity.checkingBeamSections.isEmpty()
 			? null
-			: (BeaconBlockEntity.BeaconBeamSection)this.checkingBeamSections.get(this.checkingBeamSections.size() - 1);
-		int l = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k);
+			: (BeaconBlockEntity.BeaconBeamSection)beaconBlockEntity.checkingBeamSections.get(beaconBlockEntity.checkingBeamSections.size() - 1);
+		int l = level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k);
 
-		for (int m = 0; m < 10 && blockPos.getY() <= l; m++) {
-			BlockState blockState = this.level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
+		for (int m = 0; m < 10 && blockPos2.getY() <= l; m++) {
+			BlockState blockState2 = level.getBlockState(blockPos2);
+			Block block = blockState2.getBlock();
 			if (block instanceof BeaconBeamBlock) {
 				float[] fs = ((BeaconBeamBlock)block).getColor().getTextureDiffuseColors();
-				if (this.checkingBeamSections.size() <= 1) {
+				if (beaconBlockEntity.checkingBeamSections.size() <= 1) {
 					beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(fs);
-					this.checkingBeamSections.add(beaconBeamSection);
+					beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
 				} else if (beaconBeamSection != null) {
 					if (Arrays.equals(fs, beaconBeamSection.color)) {
 						beaconBeamSection.increaseHeight();
@@ -131,69 +131,70 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 						beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(
 							new float[]{(beaconBeamSection.color[0] + fs[0]) / 2.0F, (beaconBeamSection.color[1] + fs[1]) / 2.0F, (beaconBeamSection.color[2] + fs[2]) / 2.0F}
 						);
-						this.checkingBeamSections.add(beaconBeamSection);
+						beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
 					}
 				}
 			} else {
-				if (beaconBeamSection == null || blockState.getLightBlock(this.level, blockPos) >= 15 && block != Blocks.BEDROCK) {
-					this.checkingBeamSections.clear();
-					this.lastCheckY = l;
+				if (beaconBeamSection == null || blockState2.getLightBlock(level, blockPos2) >= 15 && !blockState2.is(Blocks.BEDROCK)) {
+					beaconBlockEntity.checkingBeamSections.clear();
+					beaconBlockEntity.lastCheckY = l;
 					break;
 				}
 
 				beaconBeamSection.increaseHeight();
 			}
 
-			blockPos = blockPos.above();
-			this.lastCheckY++;
+			blockPos2 = blockPos2.above();
+			beaconBlockEntity.lastCheckY++;
 		}
 
-		int m = this.levels;
-		if (this.level.getGameTime() % 80L == 0L) {
-			if (!this.beamSections.isEmpty()) {
-				this.updateBase(i, j, k);
+		int m = beaconBlockEntity.levels;
+		if (level.getGameTime() % 80L == 0L) {
+			if (!beaconBlockEntity.beamSections.isEmpty()) {
+				beaconBlockEntity.levels = updateBase(level, i, j, k);
 			}
 
-			if (this.levels > 0 && !this.beamSections.isEmpty()) {
-				this.applyEffects();
-				this.playSound(SoundEvents.BEACON_AMBIENT);
+			if (beaconBlockEntity.levels > 0 && !beaconBlockEntity.beamSections.isEmpty()) {
+				applyEffects(level, blockPos, beaconBlockEntity.levels, beaconBlockEntity.primaryPower, beaconBlockEntity.secondaryPower);
+				playSound(level, blockPos, SoundEvents.BEACON_AMBIENT);
 			}
 		}
 
-		if (this.lastCheckY >= l) {
-			this.lastCheckY = -1;
+		if (beaconBlockEntity.lastCheckY >= l) {
+			beaconBlockEntity.lastCheckY = level.getMinBuildHeight() - 1;
 			boolean bl = m > 0;
-			this.beamSections = this.checkingBeamSections;
-			if (!this.level.isClientSide) {
-				boolean bl2 = this.levels > 0;
+			beaconBlockEntity.beamSections = beaconBlockEntity.checkingBeamSections;
+			if (!level.isClientSide) {
+				boolean bl2 = beaconBlockEntity.levels > 0;
 				if (!bl && bl2) {
-					this.playSound(SoundEvents.BEACON_ACTIVATE);
+					playSound(level, blockPos, SoundEvents.BEACON_ACTIVATE);
 
-					for (ServerPlayer serverPlayer : this.level
-						.getEntitiesOfClass(ServerPlayer.class, new AABB((double)i, (double)j, (double)k, (double)i, (double)(j - 4), (double)k).inflate(10.0, 5.0, 10.0))) {
-						CriteriaTriggers.CONSTRUCT_BEACON.trigger(serverPlayer, this);
+					for (ServerPlayer serverPlayer : level.getEntitiesOfClass(
+						ServerPlayer.class, new AABB((double)i, (double)j, (double)k, (double)i, (double)(j - 4), (double)k).inflate(10.0, 5.0, 10.0)
+					)) {
+						CriteriaTriggers.CONSTRUCT_BEACON.trigger(serverPlayer, beaconBlockEntity.levels);
 					}
 				} else if (bl && !bl2) {
-					this.playSound(SoundEvents.BEACON_DEACTIVATE);
+					playSound(level, blockPos, SoundEvents.BEACON_DEACTIVATE);
 				}
 			}
 		}
 	}
 
-	private void updateBase(int i, int j, int k) {
-		this.levels = 0;
+	private static int updateBase(Level level, int i, int j, int k) {
+		int l = 0;
 
-		for (int l = 1; l <= 4; this.levels = l++) {
-			int m = j - l;
-			if (m < 0) {
+		for (int m = 1; m <= 4; l = m++) {
+			int n = j - m;
+			if (n < level.getMinBuildHeight()) {
 				break;
 			}
 
 			boolean bl = true;
 
-			for (int n = i - l; n <= i + l && bl; n++) {
-				for (int o = k - l; o <= k + l; o++) {
-					if (!this.level.getBlockState(new BlockPos(n, m, o)).is(BlockTags.BEACON_BASE_BLOCKS)) {
+			for (int o = i - m; o <= i + m && bl; o++) {
+				for (int p = k - m; p <= k + m; p++) {
+					if (!level.getBlockState(new BlockPos(o, n, p)).is(BlockTags.BEACON_BASE_BLOCKS)) {
 						bl = false;
 						break;
 					}
@@ -204,49 +205,47 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 				break;
 			}
 		}
+
+		return l;
 	}
 
 	@Override
 	public void setRemoved() {
-		this.playSound(SoundEvents.BEACON_DEACTIVATE);
+		playSound(this.level, this.worldPosition, SoundEvents.BEACON_DEACTIVATE);
 		super.setRemoved();
 	}
 
-	private void applyEffects() {
-		if (!this.level.isClientSide && this.primaryPower != null) {
-			double d = (double)(this.levels * 10 + 10);
-			int i = 0;
-			if (this.levels >= 4 && this.primaryPower == this.secondaryPower) {
-				i = 1;
+	private static void applyEffects(Level level, BlockPos blockPos, int i, @Nullable MobEffect mobEffect, @Nullable MobEffect mobEffect2) {
+		if (!level.isClientSide && mobEffect != null) {
+			double d = (double)(i * 10 + 10);
+			int j = 0;
+			if (i >= 4 && mobEffect == mobEffect2) {
+				j = 1;
 			}
 
-			int j = (9 + this.levels * 2) * 20;
-			AABB aABB = new AABB(this.worldPosition).inflate(d).expandTowards(0.0, (double)this.level.getMaxBuildHeight(), 0.0);
-			List<Player> list = this.level.getEntitiesOfClass(Player.class, aABB);
+			int k = (9 + i * 2) * 20;
+			AABB aABB = new AABB(blockPos).inflate(d).expandTowards(0.0, (double)level.getMaxBuildHeight(), 0.0);
+			List<Player> list = level.getEntitiesOfClass(Player.class, aABB);
 
 			for (Player player : list) {
-				player.addEffect(new MobEffectInstance(this.primaryPower, j, i, true, true));
+				player.addEffect(new MobEffectInstance(mobEffect, k, j, true, true));
 			}
 
-			if (this.levels >= 4 && this.primaryPower != this.secondaryPower && this.secondaryPower != null) {
+			if (i >= 4 && mobEffect != mobEffect2 && mobEffect2 != null) {
 				for (Player player : list) {
-					player.addEffect(new MobEffectInstance(this.secondaryPower, j, 0, true, true));
+					player.addEffect(new MobEffectInstance(mobEffect2, k, 0, true, true));
 				}
 			}
 		}
 	}
 
-	public void playSound(SoundEvent soundEvent) {
-		this.level.playSound(null, this.worldPosition, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
+	public static void playSound(Level level, BlockPos blockPos, SoundEvent soundEvent) {
+		level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public List<BeaconBlockEntity.BeaconBeamSection> getBeamSections() {
 		return (List<BeaconBlockEntity.BeaconBeamSection>)(this.levels == 0 ? ImmutableList.of() : this.beamSections);
-	}
-
-	public int getLevels() {
-		return this.levels;
 	}
 
 	@Nullable
@@ -273,8 +272,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
 		this.primaryPower = getValidEffectById(compoundTag.getInt("Primary"));
 		this.secondaryPower = getValidEffectById(compoundTag.getInt("Secondary"));
 		if (compoundTag.contains("CustomName", 8)) {
@@ -313,6 +312,12 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	@Override
 	public Component getDisplayName() {
 		return (Component)(this.name != null ? this.name : new TranslatableComponent("container.beacon"));
+	}
+
+	@Override
+	public void setLevel(Level level) {
+		super.setLevel(level);
+		this.lastCheckY = level.getMinBuildHeight() - 1;
 	}
 
 	public static class BeaconBeamSection {

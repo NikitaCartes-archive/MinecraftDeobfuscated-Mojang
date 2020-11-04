@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IronGolemModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.IronGolemCrackinessLayer;
 import net.minecraft.client.renderer.entity.layers.IronGolemFlowerLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -14,8 +15,8 @@ import net.minecraft.world.entity.animal.IronGolem;
 public class IronGolemRenderer extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
 	private static final ResourceLocation GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem/iron_golem.png");
 
-	public IronGolemRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new IronGolemModel<>(), 0.7F);
+	public IronGolemRenderer(EntityRendererProvider.Context context) {
+		super(context, new IronGolemModel<>(context.getLayer(ModelLayers.IRON_GOLEM)), 0.7F);
 		this.addLayer(new IronGolemCrackinessLayer(this));
 		this.addLayer(new IronGolemFlowerLayer(this));
 	}

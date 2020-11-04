@@ -22,11 +22,11 @@ public class SoulFireBlock extends BaseFireBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return canSurviveOnBlock(levelReader.getBlockState(blockPos.below()).getBlock());
+		return canSurviveOnBlock(levelReader.getBlockState(blockPos.below()));
 	}
 
-	public static boolean canSurviveOnBlock(Block block) {
-		return block.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
+	public static boolean canSurviveOnBlock(BlockState blockState) {
+		return blockState.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
 	}
 
 	@Override

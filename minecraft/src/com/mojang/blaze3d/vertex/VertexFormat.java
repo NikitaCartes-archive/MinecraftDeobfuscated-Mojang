@@ -80,4 +80,67 @@ public class VertexFormat {
 			}
 		}
 	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum IndexType {
+		BYTE(5121, 1),
+		SHORT(5123, 2),
+		INT(5125, 4);
+
+		public final int asGLType;
+		public final int bytes;
+
+		private IndexType(int j, int k) {
+			this.asGLType = j;
+			this.bytes = k;
+		}
+
+		public static VertexFormat.IndexType least(int i) {
+			if ((i & -65536) != 0) {
+				return INT;
+			} else {
+				return (i & 0xFF00) != 0 ? SHORT : BYTE;
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum Mode {
+		LINES(1, 2, 2),
+		LINE_STRIP(3, 2, 1),
+		TRIANGLES(4, 3, 3),
+		TRIANGLE_STRIP(5, 3, 1),
+		TRIANGLE_FAN(6, 3, 1),
+		QUADS(4, 4, 4);
+
+		public final int asGLMode;
+		public final int primitiveLength;
+		public final int primitiveStride;
+
+		private Mode(int j, int k, int l) {
+			this.asGLMode = j;
+			this.primitiveLength = k;
+			this.primitiveStride = l;
+		}
+
+		public int indexCount(int i) {
+			int j;
+			switch (this) {
+				case LINES:
+				case LINE_STRIP:
+				case TRIANGLES:
+				case TRIANGLE_STRIP:
+				case TRIANGLE_FAN:
+					j = i;
+					break;
+				case QUADS:
+					j = i / 4 * 6;
+					break;
+				default:
+					j = 0;
+			}
+
+			return j;
+		}
+	}
 }

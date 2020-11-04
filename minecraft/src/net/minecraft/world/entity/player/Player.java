@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -128,7 +129,7 @@ public abstract class Player extends LivingEntity {
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	private long timeEntitySatOnShoulder;
-	public final Inventory inventory = new Inventory(this);
+	private final Inventory inventory = new Inventory(this);
 	protected PlayerEnderChestContainer enderChestInventory = new PlayerEnderChestContainer();
 	public final InventoryMenu inventoryMenu;
 	public AbstractContainerMenu containerMenu;
@@ -145,7 +146,7 @@ public abstract class Player extends LivingEntity {
 	public double zCloak;
 	private int sleepCounter;
 	protected boolean wasUnderwater;
-	public final Abilities abilities = new Abilities();
+	private final Abilities abilities = new Abilities();
 	public int experienceLevel;
 	public int totalExperience;
 	public float experienceProgress;
@@ -294,7 +295,7 @@ public abstract class Player extends LivingEntity {
 
 	private void turtleHelmetTick() {
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
-		if (itemStack.getItem() == Items.TURTLE_HELMET && !this.isEyeInFluid(FluidTags.WATER)) {
+		if (itemStack.is(Items.TURTLE_HELMET) && !this.isEyeInFluid(FluidTags.WATER)) {
 			this.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
 		}
 	}
@@ -516,19 +517,26 @@ public abstract class Player extends LivingEntity {
 		this.bob = this.bob + (f - this.bob) * 0.4F;
 		if (this.getHealth() > 0.0F && !this.isSpectator()) {
 			AABB aABB;
-			if (this.isPassenger() && !this.getVehicle().removed) {
+			if (this.isPassenger() && !this.getVehicle().isRemoved()) {
 				aABB = this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0);
 			} else {
 				aABB = this.getBoundingBox().inflate(1.0, 0.5, 1.0);
 			}
 
 			List<Entity> list = this.level.getEntities(this, aABB);
+			List<Entity> list2 = Lists.<Entity>newArrayList();
 
 			for (int i = 0; i < list.size(); i++) {
 				Entity entity = (Entity)list.get(i);
-				if (!entity.removed) {
+				if (entity.getType() == EntityType.EXPERIENCE_ORB) {
+					list2.add(entity);
+				} else if (!entity.isRemoved()) {
 					this.touch(entity);
 				}
+			}
+
+			if (!list2.isEmpty()) {
+				this.touch(Util.getRandom(list2, this.random));
 			}
 		}
 
@@ -868,7 +876,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected void hurtCurrentlyUsedShield(float f) {
-		if (this.useItem.getItem() == Items.SHIELD) {
+		if (this.useItem.is(Items.SHIELD)) {
 			if (!this.level.isClientSide) {
 				this.awardStat(Stats.ITEM_USED.get(this.useItem.getItem()));
 			}
@@ -1264,8 +1272,8 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public void remove() {
-		super.remove();
+	public void remove(Entity.RemovalReason removalReason) {
+		super.remove(removalReason);
 		this.inventoryMenu.removed(this);
 		if (this.containerMenu != null) {
 			this.containerMenu.removed(this);
@@ -1278,6 +1286,14 @@ public abstract class Player extends LivingEntity {
 
 	public GameProfile getGameProfile() {
 		return this.gameProfile;
+	}
+
+	public Inventory getInventory() {
+		return this.inventory;
+	}
+
+	public Abilities getAbilities() {
+		return this.abilities;
 	}
 
 	public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
@@ -1509,7 +1525,7 @@ public abstract class Player extends LivingEntity {
 	public boolean tryToStartFallFlying() {
 		if (!this.onGround && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
+			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
 				this.startFallFlying();
 				return true;
 			}
@@ -2054,6 +2070,16 @@ public abstract class Player extends LivingEntity {
 			double e = this.isCrouching() ? -0.2 : 0.07;
 			return this.getPosition(f).add(new Vec3(d, m, e).yRot(-h));
 		}
+	}
+
+	@Override
+	public boolean isAlwaysTicking() {
+		return true;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isScoping() {
+		return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
 	}
 
 	public static enum BedSleepingProblem {

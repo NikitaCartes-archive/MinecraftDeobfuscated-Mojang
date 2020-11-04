@@ -168,7 +168,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			this.goalSelector.removeGoal(this.meleeGoal);
 			this.goalSelector.removeGoal(this.bowGoal);
 			ItemStack itemStack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
-			if (itemStack.getItem() == Items.BOW) {
+			if (itemStack.is(Items.BOW)) {
 				int i = 20;
 				if (this.level.getDifficulty() != Difficulty.HARD) {
 					i = 40;

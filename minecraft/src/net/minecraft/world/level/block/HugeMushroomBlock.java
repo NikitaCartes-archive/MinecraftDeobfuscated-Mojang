@@ -40,12 +40,12 @@ public class HugeMushroomBlock extends Block {
 		BlockGetter blockGetter = blockPlaceContext.getLevel();
 		BlockPos blockPos = blockPlaceContext.getClickedPos();
 		return this.defaultBlockState()
-			.setValue(DOWN, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.below()).getBlock()))
-			.setValue(UP, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.above()).getBlock()))
-			.setValue(NORTH, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.north()).getBlock()))
-			.setValue(EAST, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.east()).getBlock()))
-			.setValue(SOUTH, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.south()).getBlock()))
-			.setValue(WEST, Boolean.valueOf(this != blockGetter.getBlockState(blockPos.west()).getBlock()));
+			.setValue(DOWN, Boolean.valueOf(!blockGetter.getBlockState(blockPos.below()).is(this)))
+			.setValue(UP, Boolean.valueOf(!blockGetter.getBlockState(blockPos.above()).is(this)))
+			.setValue(NORTH, Boolean.valueOf(!blockGetter.getBlockState(blockPos.north()).is(this)))
+			.setValue(EAST, Boolean.valueOf(!blockGetter.getBlockState(blockPos.east()).is(this)))
+			.setValue(SOUTH, Boolean.valueOf(!blockGetter.getBlockState(blockPos.south()).is(this)))
+			.setValue(WEST, Boolean.valueOf(!blockGetter.getBlockState(blockPos.west()).is(this)));
 	}
 
 	@Override

@@ -4,6 +4,11 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
@@ -11,106 +16,142 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 	protected final ModelPart body;
 	protected final ModelPart headParts;
-	private final ModelPart leg1;
-	private final ModelPart leg2;
-	private final ModelPart leg3;
-	private final ModelPart leg4;
-	private final ModelPart babyLeg1;
-	private final ModelPart babyLeg2;
-	private final ModelPart babyLeg3;
-	private final ModelPart babyLeg4;
+	private final ModelPart rightHindLeg;
+	private final ModelPart leftHindLeg;
+	private final ModelPart rightFrontLeg;
+	private final ModelPart leftFrontLeg;
+	private final ModelPart rightHindBabyLeg;
+	private final ModelPart leftHindBabyLeg;
+	private final ModelPart rightFrontBabyLeg;
+	private final ModelPart leftFrontBabyLeg;
 	private final ModelPart tail;
 	private final ModelPart[] saddleParts;
 	private final ModelPart[] ridingParts;
 
-	public HorseModel(float f) {
+	public HorseModel(ModelPart modelPart) {
 		super(true, 16.2F, 1.36F, 2.7272F, 2.0F, 20.0F);
-		this.texWidth = 64;
-		this.texHeight = 64;
-		this.body = new ModelPart(this, 0, 32);
-		this.body.addBox(-5.0F, -8.0F, -17.0F, 10.0F, 10.0F, 22.0F, 0.05F);
-		this.body.setPos(0.0F, 11.0F, 5.0F);
-		this.headParts = new ModelPart(this, 0, 35);
-		this.headParts.addBox(-2.05F, -6.0F, -2.0F, 4.0F, 12.0F, 7.0F);
-		this.headParts.xRot = (float) (Math.PI / 6);
-		ModelPart modelPart = new ModelPart(this, 0, 13);
-		modelPart.addBox(-3.0F, -11.0F, -2.0F, 6.0F, 5.0F, 7.0F, f);
-		ModelPart modelPart2 = new ModelPart(this, 56, 36);
-		modelPart2.addBox(-1.0F, -11.0F, 5.01F, 2.0F, 16.0F, 2.0F, f);
-		ModelPart modelPart3 = new ModelPart(this, 0, 25);
-		modelPart3.addBox(-2.0F, -11.0F, -7.0F, 4.0F, 5.0F, 5.0F, f);
-		this.headParts.addChild(modelPart);
-		this.headParts.addChild(modelPart2);
-		this.headParts.addChild(modelPart3);
-		this.addEarModels(this.headParts);
-		this.leg1 = new ModelPart(this, 48, 21);
-		this.leg1.mirror = true;
-		this.leg1.addBox(-3.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, f);
-		this.leg1.setPos(4.0F, 14.0F, 7.0F);
-		this.leg2 = new ModelPart(this, 48, 21);
-		this.leg2.addBox(-1.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, f);
-		this.leg2.setPos(-4.0F, 14.0F, 7.0F);
-		this.leg3 = new ModelPart(this, 48, 21);
-		this.leg3.mirror = true;
-		this.leg3.addBox(-3.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, f);
-		this.leg3.setPos(4.0F, 6.0F, -12.0F);
-		this.leg4 = new ModelPart(this, 48, 21);
-		this.leg4.addBox(-1.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, f);
-		this.leg4.setPos(-4.0F, 6.0F, -12.0F);
-		float g = 5.5F;
-		this.babyLeg1 = new ModelPart(this, 48, 21);
-		this.babyLeg1.mirror = true;
-		this.babyLeg1.addBox(-3.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, f, f + 5.5F, f);
-		this.babyLeg1.setPos(4.0F, 14.0F, 7.0F);
-		this.babyLeg2 = new ModelPart(this, 48, 21);
-		this.babyLeg2.addBox(-1.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, f, f + 5.5F, f);
-		this.babyLeg2.setPos(-4.0F, 14.0F, 7.0F);
-		this.babyLeg3 = new ModelPart(this, 48, 21);
-		this.babyLeg3.mirror = true;
-		this.babyLeg3.addBox(-3.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, f, f + 5.5F, f);
-		this.babyLeg3.setPos(4.0F, 6.0F, -12.0F);
-		this.babyLeg4 = new ModelPart(this, 48, 21);
-		this.babyLeg4.addBox(-1.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, f, f + 5.5F, f);
-		this.babyLeg4.setPos(-4.0F, 6.0F, -12.0F);
-		this.tail = new ModelPart(this, 42, 36);
-		this.tail.addBox(-1.5F, 0.0F, 0.0F, 3.0F, 14.0F, 4.0F, f);
-		this.tail.setPos(0.0F, -5.0F, 2.0F);
-		this.tail.xRot = (float) (Math.PI / 6);
-		this.body.addChild(this.tail);
-		ModelPart modelPart4 = new ModelPart(this, 26, 0);
-		modelPart4.addBox(-5.0F, -8.0F, -9.0F, 10.0F, 9.0F, 9.0F, 0.5F);
-		this.body.addChild(modelPart4);
-		ModelPart modelPart5 = new ModelPart(this, 29, 5);
-		modelPart5.addBox(2.0F, -9.0F, -6.0F, 1.0F, 2.0F, 2.0F, f);
-		this.headParts.addChild(modelPart5);
-		ModelPart modelPart6 = new ModelPart(this, 29, 5);
-		modelPart6.addBox(-3.0F, -9.0F, -6.0F, 1.0F, 2.0F, 2.0F, f);
-		this.headParts.addChild(modelPart6);
-		ModelPart modelPart7 = new ModelPart(this, 32, 2);
-		modelPart7.addBox(3.1F, -6.0F, -8.0F, 0.0F, 3.0F, 16.0F, f);
-		modelPart7.xRot = (float) (-Math.PI / 6);
-		this.headParts.addChild(modelPart7);
-		ModelPart modelPart8 = new ModelPart(this, 32, 2);
-		modelPart8.addBox(-3.1F, -6.0F, -8.0F, 0.0F, 3.0F, 16.0F, f);
-		modelPart8.xRot = (float) (-Math.PI / 6);
-		this.headParts.addChild(modelPart8);
-		ModelPart modelPart9 = new ModelPart(this, 1, 1);
-		modelPart9.addBox(-3.0F, -11.0F, -1.9F, 6.0F, 5.0F, 6.0F, 0.2F);
-		this.headParts.addChild(modelPart9);
-		ModelPart modelPart10 = new ModelPart(this, 19, 0);
-		modelPart10.addBox(-2.0F, -11.0F, -4.0F, 4.0F, 5.0F, 2.0F, 0.2F);
-		this.headParts.addChild(modelPart10);
-		this.saddleParts = new ModelPart[]{modelPart4, modelPart5, modelPart6, modelPart9, modelPart10};
-		this.ridingParts = new ModelPart[]{modelPart7, modelPart8};
+		this.body = modelPart.getChild("body");
+		this.headParts = modelPart.getChild("head_parts");
+		this.rightHindLeg = modelPart.getChild("right_hind_leg");
+		this.leftHindLeg = modelPart.getChild("left_hind_leg");
+		this.rightFrontLeg = modelPart.getChild("right_front_leg");
+		this.leftFrontLeg = modelPart.getChild("left_front_leg");
+		this.rightHindBabyLeg = modelPart.getChild("right_hind_baby_leg");
+		this.leftHindBabyLeg = modelPart.getChild("left_hind_baby_leg");
+		this.rightFrontBabyLeg = modelPart.getChild("right_front_baby_leg");
+		this.leftFrontBabyLeg = modelPart.getChild("left_front_baby_leg");
+		this.tail = this.body.getChild("tail");
+		ModelPart modelPart2 = this.body.getChild("saddle");
+		ModelPart modelPart3 = this.headParts.getChild("left_saddle_mouth");
+		ModelPart modelPart4 = this.headParts.getChild("right_saddle_mouth");
+		ModelPart modelPart5 = this.headParts.getChild("left_saddle_line");
+		ModelPart modelPart6 = this.headParts.getChild("right_saddle_line");
+		ModelPart modelPart7 = this.headParts.getChild("head_saddle");
+		ModelPart modelPart8 = this.headParts.getChild("mouth_saddle_wrap");
+		this.saddleParts = new ModelPart[]{modelPart2, modelPart3, modelPart4, modelPart7, modelPart8};
+		this.ridingParts = new ModelPart[]{modelPart5, modelPart6};
 	}
 
-	protected void addEarModels(ModelPart modelPart) {
-		ModelPart modelPart2 = new ModelPart(this, 19, 16);
-		modelPart2.addBox(0.55F, -13.0F, 4.0F, 2.0F, 3.0F, 1.0F, -0.001F);
-		ModelPart modelPart3 = new ModelPart(this, 19, 16);
-		modelPart3.addBox(-2.55F, -13.0F, 4.0F, 2.0F, 3.0F, 1.0F, -0.001F);
-		modelPart.addChild(modelPart2);
-		modelPart.addChild(modelPart3);
+	public static MeshDefinition createBodyMesh(CubeDeformation cubeDeformation) {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+			"body",
+			CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -8.0F, -17.0F, 10.0F, 10.0F, 22.0F, new CubeDeformation(0.05F)),
+			PartPose.offset(0.0F, 11.0F, 5.0F)
+		);
+		PartDefinition partDefinition3 = partDefinition.addOrReplaceChild(
+			"head_parts",
+			CubeListBuilder.create().texOffs(0, 35).addBox(-2.05F, -6.0F, -2.0F, 4.0F, 12.0F, 7.0F),
+			PartPose.offsetAndRotation(0.0F, 4.0F, -12.0F, (float) (Math.PI / 6), 0.0F, 0.0F)
+		);
+		PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 13).addBox(-3.0F, -11.0F, -2.0F, 6.0F, 5.0F, 7.0F, cubeDeformation), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"mane", CubeListBuilder.create().texOffs(56, 36).addBox(-1.0F, -11.0F, 5.01F, 2.0F, 16.0F, 2.0F, cubeDeformation), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"upper_mouth", CubeListBuilder.create().texOffs(0, 25).addBox(-2.0F, -11.0F, -7.0F, 4.0F, 5.0F, 5.0F, cubeDeformation), PartPose.ZERO
+		);
+		partDefinition.addOrReplaceChild(
+			"left_hind_leg",
+			CubeListBuilder.create().texOffs(48, 21).mirror().addBox(-3.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, cubeDeformation),
+			PartPose.offset(4.0F, 14.0F, 7.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_hind_leg",
+			CubeListBuilder.create().texOffs(48, 21).addBox(-1.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, cubeDeformation),
+			PartPose.offset(-4.0F, 14.0F, 7.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_front_leg",
+			CubeListBuilder.create().texOffs(48, 21).mirror().addBox(-3.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, cubeDeformation),
+			PartPose.offset(4.0F, 14.0F, -12.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_front_leg",
+			CubeListBuilder.create().texOffs(48, 21).addBox(-1.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, cubeDeformation),
+			PartPose.offset(-4.0F, 14.0F, -12.0F)
+		);
+		CubeDeformation cubeDeformation2 = cubeDeformation.extend(0.0F, 5.5F, 0.0F);
+		partDefinition.addOrReplaceChild(
+			"left_hind_baby_leg",
+			CubeListBuilder.create().texOffs(48, 21).mirror().addBox(-3.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, cubeDeformation2),
+			PartPose.offset(4.0F, 14.0F, 7.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_hind_baby_leg",
+			CubeListBuilder.create().texOffs(48, 21).addBox(-1.0F, -1.01F, -1.0F, 4.0F, 11.0F, 4.0F, cubeDeformation2),
+			PartPose.offset(-4.0F, 14.0F, 7.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_front_baby_leg",
+			CubeListBuilder.create().texOffs(48, 21).mirror().addBox(-3.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, cubeDeformation2),
+			PartPose.offset(4.0F, 14.0F, -12.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_front_baby_leg",
+			CubeListBuilder.create().texOffs(48, 21).addBox(-1.0F, -1.01F, -1.9F, 4.0F, 11.0F, 4.0F, cubeDeformation2),
+			PartPose.offset(-4.0F, 14.0F, -12.0F)
+		);
+		partDefinition2.addOrReplaceChild(
+			"tail",
+			CubeListBuilder.create().texOffs(42, 36).addBox(-1.5F, 0.0F, 0.0F, 3.0F, 14.0F, 4.0F, cubeDeformation),
+			PartPose.offsetAndRotation(0.0F, -5.0F, 2.0F, (float) (Math.PI / 6), 0.0F, 0.0F)
+		);
+		partDefinition2.addOrReplaceChild(
+			"saddle", CubeListBuilder.create().texOffs(26, 0).addBox(-5.0F, -8.0F, -9.0F, 10.0F, 9.0F, 9.0F, new CubeDeformation(0.5F)), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"left_saddle_mouth", CubeListBuilder.create().texOffs(29, 5).addBox(2.0F, -9.0F, -6.0F, 1.0F, 2.0F, 2.0F, cubeDeformation), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"right_saddle_mouth", CubeListBuilder.create().texOffs(29, 5).addBox(-3.0F, -9.0F, -6.0F, 1.0F, 2.0F, 2.0F, cubeDeformation), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"left_saddle_line",
+			CubeListBuilder.create().texOffs(32, 2).addBox(3.1F, -6.0F, -8.0F, 0.0F, 3.0F, 16.0F, cubeDeformation),
+			PartPose.rotation((float) (-Math.PI / 6), 0.0F, 0.0F)
+		);
+		partDefinition3.addOrReplaceChild(
+			"right_saddle_line",
+			CubeListBuilder.create().texOffs(32, 2).addBox(-3.1F, -6.0F, -8.0F, 0.0F, 3.0F, 16.0F, cubeDeformation),
+			PartPose.rotation((float) (-Math.PI / 6), 0.0F, 0.0F)
+		);
+		partDefinition3.addOrReplaceChild(
+			"head_saddle", CubeListBuilder.create().texOffs(1, 1).addBox(-3.0F, -11.0F, -1.9F, 6.0F, 5.0F, 6.0F, new CubeDeformation(0.2F)), PartPose.ZERO
+		);
+		partDefinition3.addOrReplaceChild(
+			"mouth_saddle_wrap", CubeListBuilder.create().texOffs(19, 0).addBox(-2.0F, -11.0F, -4.0F, 4.0F, 5.0F, 2.0F, new CubeDeformation(0.2F)), PartPose.ZERO
+		);
+		partDefinition4.addOrReplaceChild(
+			"left_ear", CubeListBuilder.create().texOffs(19, 16).addBox(0.55F, -13.0F, 4.0F, 2.0F, 3.0F, 1.0F, new CubeDeformation(-0.001F)), PartPose.ZERO
+		);
+		partDefinition4.addOrReplaceChild(
+			"right_ear", CubeListBuilder.create().texOffs(19, 16).addBox(-2.55F, -13.0F, 4.0F, 2.0F, 3.0F, 1.0F, new CubeDeformation(-0.001F)), PartPose.ZERO
+		);
+		return meshDefinition;
 	}
 
 	public void setupAnim(T abstractHorse, float f, float g, float h, float i, float j) {
@@ -135,7 +176,17 @@ public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 
 	@Override
 	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.leg1, this.leg2, this.leg3, this.leg4, this.babyLeg1, this.babyLeg2, this.babyLeg3, this.babyLeg4);
+		return ImmutableList.<ModelPart>of(
+			this.body,
+			this.rightHindLeg,
+			this.leftHindLeg,
+			this.rightFrontLeg,
+			this.leftFrontLeg,
+			this.rightHindBabyLeg,
+			this.leftHindBabyLeg,
+			this.rightFrontBabyLeg,
+			this.leftFrontBabyLeg
+		);
 	}
 
 	public void prepareMobModel(T abstractHorse, float f, float g, float h) {
@@ -179,16 +230,16 @@ public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 		this.body.xRot = o * (float) (-Math.PI / 4) + p * this.body.xRot;
 		float w = (float) (Math.PI / 12) * o;
 		float x = Mth.cos(r * 0.6F + (float) Math.PI);
-		this.leg3.y = 2.0F * o + 14.0F * p;
-		this.leg3.z = -6.0F * o - 10.0F * p;
-		this.leg4.y = this.leg3.y;
-		this.leg4.z = this.leg3.z;
+		this.leftFrontLeg.y = 2.0F * o + 14.0F * p;
+		this.leftFrontLeg.z = -6.0F * o - 10.0F * p;
+		this.rightFrontLeg.y = this.leftFrontLeg.y;
+		this.rightFrontLeg.z = this.leftFrontLeg.z;
 		float y = ((float) (-Math.PI / 3) + x) * o + u * p;
 		float z = ((float) (-Math.PI / 3) - x) * o - u * p;
-		this.leg1.xRot = w - t * 0.5F * g * p;
-		this.leg2.xRot = w + t * 0.5F * g * p;
-		this.leg3.xRot = y;
-		this.leg4.xRot = z;
+		this.leftHindLeg.xRot = w - t * 0.5F * g * p;
+		this.rightHindLeg.xRot = w + t * 0.5F * g * p;
+		this.leftFrontLeg.xRot = y;
+		this.rightFrontLeg.xRot = z;
 		this.tail.xRot = (float) (Math.PI / 6) + g * 0.75F;
 		this.tail.y = -5.0F + g;
 		this.tail.z = 2.0F + g * 2.0F;
@@ -198,27 +249,27 @@ public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 			this.tail.yRot = 0.0F;
 		}
 
-		this.babyLeg1.y = this.leg1.y;
-		this.babyLeg1.z = this.leg1.z;
-		this.babyLeg1.xRot = this.leg1.xRot;
-		this.babyLeg2.y = this.leg2.y;
-		this.babyLeg2.z = this.leg2.z;
-		this.babyLeg2.xRot = this.leg2.xRot;
-		this.babyLeg3.y = this.leg3.y;
-		this.babyLeg3.z = this.leg3.z;
-		this.babyLeg3.xRot = this.leg3.xRot;
-		this.babyLeg4.y = this.leg4.y;
-		this.babyLeg4.z = this.leg4.z;
-		this.babyLeg4.xRot = this.leg4.xRot;
+		this.rightHindBabyLeg.y = this.rightHindLeg.y;
+		this.rightHindBabyLeg.z = this.rightHindLeg.z;
+		this.rightHindBabyLeg.xRot = this.rightHindLeg.xRot;
+		this.leftHindBabyLeg.y = this.leftHindLeg.y;
+		this.leftHindBabyLeg.z = this.leftHindLeg.z;
+		this.leftHindBabyLeg.xRot = this.leftHindLeg.xRot;
+		this.rightFrontBabyLeg.y = this.rightFrontLeg.y;
+		this.rightFrontBabyLeg.z = this.rightFrontLeg.z;
+		this.rightFrontBabyLeg.xRot = this.rightFrontLeg.xRot;
+		this.leftFrontBabyLeg.y = this.leftFrontLeg.y;
+		this.leftFrontBabyLeg.z = this.leftFrontLeg.z;
+		this.leftFrontBabyLeg.xRot = this.leftFrontLeg.xRot;
 		boolean bl2 = abstractHorse.isBaby();
-		this.leg1.visible = !bl2;
-		this.leg2.visible = !bl2;
-		this.leg3.visible = !bl2;
-		this.leg4.visible = !bl2;
-		this.babyLeg1.visible = bl2;
-		this.babyLeg2.visible = bl2;
-		this.babyLeg3.visible = bl2;
-		this.babyLeg4.visible = bl2;
+		this.rightHindLeg.visible = !bl2;
+		this.leftHindLeg.visible = !bl2;
+		this.rightFrontLeg.visible = !bl2;
+		this.leftFrontLeg.visible = !bl2;
+		this.rightHindBabyLeg.visible = bl2;
+		this.leftHindBabyLeg.visible = bl2;
+		this.rightFrontBabyLeg.visible = bl2;
+		this.leftFrontBabyLeg.visible = bl2;
 		this.body.y = bl2 ? 10.8F : 0.0F;
 	}
 }

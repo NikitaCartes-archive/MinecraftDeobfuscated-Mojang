@@ -58,7 +58,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		this.addSlot(new Slot(this.enchantSlots, 1, 35, 47) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return itemStack.getItem() == Items.LAPIS_LAZULI;
+				return itemStack.is(Items.LAPIS_LAZULI);
 			}
 		});
 
@@ -163,11 +163,11 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		ItemStack itemStack = this.enchantSlots.getItem(0);
 		ItemStack itemStack2 = this.enchantSlots.getItem(1);
 		int j = i + 1;
-		if ((itemStack2.isEmpty() || itemStack2.getCount() < j) && !player.abilities.instabuild) {
+		if ((itemStack2.isEmpty() || itemStack2.getCount() < j) && !player.getAbilities().instabuild) {
 			return false;
 		} else if (this.costs[i] <= 0
 			|| itemStack.isEmpty()
-			|| (player.experienceLevel < j || player.experienceLevel < this.costs[i]) && !player.abilities.instabuild) {
+			|| (player.experienceLevel < j || player.experienceLevel < this.costs[i]) && !player.getAbilities().instabuild) {
 			return false;
 		} else {
 			this.access.execute((level, blockPos) -> {
@@ -175,7 +175,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 				List<EnchantmentInstance> list = this.getEnchantmentList(itemStack, i, this.costs[i]);
 				if (!list.isEmpty()) {
 					player.onEnchantmentPerformed(itemStack, j);
-					boolean bl = itemStack.getItem() == Items.BOOK;
+					boolean bl = itemStack.is(Items.BOOK);
 					if (bl) {
 						itemStack3 = new ItemStack(Items.ENCHANTED_BOOK);
 						CompoundTag compoundTag = itemStack.getTag();
@@ -195,7 +195,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 						}
 					}
 
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack2.shrink(j);
 						if (itemStack2.isEmpty()) {
 							this.enchantSlots.setItem(1, ItemStack.EMPTY);
@@ -220,7 +220,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 	private List<EnchantmentInstance> getEnchantmentList(ItemStack itemStack, int i, int j) {
 		this.random.setSeed((long)(this.enchantmentSeed.get() + i));
 		List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(this.random, itemStack, j, false);
-		if (itemStack.getItem() == Items.BOOK && list.size() > 1) {
+		if (itemStack.is(Items.BOOK) && list.size() > 1) {
 			list.remove(this.random.nextInt(list.size()));
 		}
 
@@ -241,7 +241,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		this.access.execute((level, blockPos) -> this.clearContainer(player, player.level, this.enchantSlots));
+		this.access.execute((level, blockPos) -> this.clearContainer(player, this.enchantSlots));
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
@@ -264,19 +264,19 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 				if (!this.moveItemStackTo(itemStack2, 2, 38, true)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (itemStack2.getItem() == Items.LAPIS_LAZULI) {
+			} else if (itemStack2.is(Items.LAPIS_LAZULI)) {
 				if (!this.moveItemStackTo(itemStack2, 1, 2, true)) {
 					return ItemStack.EMPTY;
 				}
 			} else {
-				if (((Slot)this.slots.get(0)).hasItem() || !((Slot)this.slots.get(0)).mayPlace(itemStack2)) {
+				if (this.slots.get(0).hasItem() || !this.slots.get(0).mayPlace(itemStack2)) {
 					return ItemStack.EMPTY;
 				}
 
 				ItemStack itemStack3 = itemStack2.copy();
 				itemStack3.setCount(1);
 				itemStack2.shrink(1);
-				((Slot)this.slots.get(0)).set(itemStack3);
+				this.slots.get(0).set(itemStack3);
 			}
 
 			if (itemStack2.isEmpty()) {

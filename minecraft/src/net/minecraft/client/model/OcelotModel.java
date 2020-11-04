@@ -4,51 +4,70 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
-	protected final ModelPart backLegL;
-	protected final ModelPart backLegR;
-	protected final ModelPart frontLegL;
-	protected final ModelPart frontLegR;
+	protected final ModelPart leftHindLeg;
+	protected final ModelPart rightHindLeg;
+	protected final ModelPart leftFrontLeg;
+	protected final ModelPart rightFrontLeg;
 	protected final ModelPart tail1;
 	protected final ModelPart tail2;
 	protected final ModelPart head;
 	protected final ModelPart body;
 	protected int state = 1;
 
-	public OcelotModel(float f) {
+	public OcelotModel(ModelPart modelPart) {
 		super(true, 10.0F, 4.0F);
-		this.head = new ModelPart(this);
-		this.head.addBox("main", -2.5F, -2.0F, -3.0F, 5, 4, 5, f, 0, 0);
-		this.head.addBox("nose", -1.5F, 0.0F, -4.0F, 3, 2, 2, f, 0, 24);
-		this.head.addBox("ear1", -2.0F, -3.0F, 0.0F, 1, 1, 2, f, 0, 10);
-		this.head.addBox("ear2", 1.0F, -3.0F, 0.0F, 1, 1, 2, f, 6, 10);
-		this.head.setPos(0.0F, 15.0F, -9.0F);
-		this.body = new ModelPart(this, 20, 0);
-		this.body.addBox(-2.0F, 3.0F, -8.0F, 4.0F, 16.0F, 6.0F, f);
-		this.body.setPos(0.0F, 12.0F, -10.0F);
-		this.tail1 = new ModelPart(this, 0, 15);
-		this.tail1.addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, f);
-		this.tail1.xRot = 0.9F;
-		this.tail1.setPos(0.0F, 15.0F, 8.0F);
-		this.tail2 = new ModelPart(this, 4, 15);
-		this.tail2.addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, f);
-		this.tail2.setPos(0.0F, 20.0F, 14.0F);
-		this.backLegL = new ModelPart(this, 8, 13);
-		this.backLegL.addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, f);
-		this.backLegL.setPos(1.1F, 18.0F, 5.0F);
-		this.backLegR = new ModelPart(this, 8, 13);
-		this.backLegR.addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, f);
-		this.backLegR.setPos(-1.1F, 18.0F, 5.0F);
-		this.frontLegL = new ModelPart(this, 40, 0);
-		this.frontLegL.addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F, f);
-		this.frontLegL.setPos(1.2F, 14.1F, -5.0F);
-		this.frontLegR = new ModelPart(this, 40, 0);
-		this.frontLegR.addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F, f);
-		this.frontLegR.setPos(-1.2F, 14.1F, -5.0F);
+		this.head = modelPart.getChild("head");
+		this.body = modelPart.getChild("body");
+		this.tail1 = modelPart.getChild("tail1");
+		this.tail2 = modelPart.getChild("tail2");
+		this.leftHindLeg = modelPart.getChild("left_hind_leg");
+		this.rightHindLeg = modelPart.getChild("right_hind_leg");
+		this.leftFrontLeg = modelPart.getChild("left_front_leg");
+		this.rightFrontLeg = modelPart.getChild("left_front_leg");
+	}
+
+	public static MeshDefinition createBodyMesh(CubeDeformation cubeDeformation) {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"head",
+			CubeListBuilder.create()
+				.addBox("main", -2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 5.0F, cubeDeformation)
+				.addBox("nose", -1.5F, 0.0F, -4.0F, 3, 2, 2, cubeDeformation, 0, 24)
+				.addBox("ear1", -2.0F, -3.0F, 0.0F, 1, 1, 2, cubeDeformation, 0, 10)
+				.addBox("ear2", 1.0F, -3.0F, 0.0F, 1, 1, 2, cubeDeformation, 6, 10),
+			PartPose.offset(0.0F, 15.0F, -9.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"body",
+			CubeListBuilder.create().texOffs(20, 0).addBox(-2.0F, 3.0F, -8.0F, 4.0F, 16.0F, 6.0F, cubeDeformation),
+			PartPose.offsetAndRotation(0.0F, 12.0F, -10.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"tail1",
+			CubeListBuilder.create().texOffs(0, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, cubeDeformation),
+			PartPose.offsetAndRotation(0.0F, 15.0F, 8.0F, 0.9F, 0.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"tail2", CubeListBuilder.create().texOffs(4, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, cubeDeformation), PartPose.offset(0.0F, 20.0F, 14.0F)
+		);
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(8, 13).addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, cubeDeformation);
+		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(1.1F, 18.0F, 5.0F));
+		partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-1.1F, 18.0F, 5.0F));
+		CubeListBuilder cubeListBuilder2 = CubeListBuilder.create().texOffs(40, 0).addBox(-1.0F, 0.0F, 0.0F, 2.0F, 10.0F, 2.0F, cubeDeformation);
+		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder2, PartPose.offset(1.2F, 14.1F, -5.0F));
+		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder2, PartPose.offset(-1.2F, 14.1F, -5.0F));
+		return meshDefinition;
 	}
 
 	@Override
@@ -58,7 +77,7 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 
 	@Override
 	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.backLegL, this.backLegR, this.frontLegL, this.frontLegR, this.tail1, this.tail2);
+		return ImmutableList.<ModelPart>of(this.body, this.leftHindLeg, this.rightHindLeg, this.leftFrontLeg, this.rightFrontLeg, this.tail1, this.tail2);
 	}
 
 	@Override
@@ -68,16 +87,16 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 		if (this.state != 3) {
 			this.body.xRot = (float) (Math.PI / 2);
 			if (this.state == 2) {
-				this.backLegL.xRot = Mth.cos(f * 0.6662F) * g;
-				this.backLegR.xRot = Mth.cos(f * 0.6662F + 0.3F) * g;
-				this.frontLegL.xRot = Mth.cos(f * 0.6662F + (float) Math.PI + 0.3F) * g;
-				this.frontLegR.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
+				this.leftHindLeg.xRot = Mth.cos(f * 0.6662F) * g;
+				this.rightHindLeg.xRot = Mth.cos(f * 0.6662F + 0.3F) * g;
+				this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI + 0.3F) * g;
+				this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
 				this.tail2.xRot = 1.7278761F + (float) (Math.PI / 10) * Mth.cos(f) * g;
 			} else {
-				this.backLegL.xRot = Mth.cos(f * 0.6662F) * g;
-				this.backLegR.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
-				this.frontLegL.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
-				this.frontLegR.xRot = Mth.cos(f * 0.6662F) * g;
+				this.leftHindLeg.xRot = Mth.cos(f * 0.6662F) * g;
+				this.rightHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
+				this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * g;
+				this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F) * g;
 				if (this.state == 1) {
 					this.tail2.xRot = 1.7278761F + (float) (Math.PI / 4) * Mth.cos(f) * g;
 				} else {
@@ -97,14 +116,14 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 		this.tail1.z = 8.0F;
 		this.tail2.y = 20.0F;
 		this.tail2.z = 14.0F;
-		this.frontLegL.y = 14.1F;
-		this.frontLegL.z = -5.0F;
-		this.frontLegR.y = 14.1F;
-		this.frontLegR.z = -5.0F;
-		this.backLegL.y = 18.0F;
-		this.backLegL.z = 5.0F;
-		this.backLegR.y = 18.0F;
-		this.backLegR.z = 5.0F;
+		this.leftFrontLeg.y = 14.1F;
+		this.leftFrontLeg.z = -5.0F;
+		this.rightFrontLeg.y = 14.1F;
+		this.rightFrontLeg.z = -5.0F;
+		this.leftHindLeg.y = 18.0F;
+		this.leftHindLeg.z = 5.0F;
+		this.rightHindLeg.y = 18.0F;
+		this.rightHindLeg.z = 5.0F;
 		this.tail1.xRot = 0.9F;
 		if (entity.isCrouching()) {
 			this.body.y++;

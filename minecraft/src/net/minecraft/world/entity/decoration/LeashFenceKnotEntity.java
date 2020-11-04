@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -20,6 +19,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -31,24 +32,15 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 	public LeashFenceKnotEntity(Level level, BlockPos blockPos) {
 		super(EntityType.LEASH_KNOT, level, blockPos);
-		this.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
-		float f = 0.125F;
-		float g = 0.1875F;
-		float h = 0.25F;
-		this.setBoundingBox(
-			new AABB(this.getX() - 0.1875, this.getY() - 0.25 + 0.125, this.getZ() - 0.1875, this.getX() + 0.1875, this.getY() + 0.25 + 0.125, this.getZ() + 0.1875)
-		);
-		this.forcedLoading = true;
-	}
-
-	@Override
-	public void setPos(double d, double e, double f) {
-		super.setPos((double)Mth.floor(d) + 0.5, (double)Mth.floor(e) + 0.5, (double)Mth.floor(f) + 0.5);
+		this.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 	}
 
 	@Override
 	protected void recalculateBoundingBox() {
-		this.setPosRaw((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5);
+		this.setPosRaw((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.375, (double)this.pos.getZ() + 0.5);
+		double d = (double)this.getType().getWidth() / 2.0;
+		double e = (double)this.getType().getHeight();
+		this.setBoundingBox(new AABB(this.getX() - d, this.getY(), this.getZ() - d, this.getX() + d, this.getY() + e, this.getZ() + d));
 	}
 
 	@Override
@@ -67,7 +59,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 	@Override
 	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return -0.0625F;
+		return 0.0625F;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -107,8 +99,8 @@ public class LeashFenceKnotEntity extends HangingEntity {
 			}
 
 			if (!bl) {
-				this.remove();
-				if (player.abilities.instabuild) {
+				this.discard();
+				if (player.getAbilities().instabuild) {
 					for (Mob mobx : list) {
 						if (mobx.isLeashed() && mobx.getLeashHolder() == this) {
 							mobx.dropLeash(true, false);
@@ -123,7 +115,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 	@Override
 	public boolean survives() {
-		return this.level.getBlockState(this.pos).getBlock().is(BlockTags.FENCES);
+		return this.level.getBlockState(this.pos).is(BlockTags.FENCES);
 	}
 
 	public static LeashFenceKnotEntity getOrCreateKnot(Level level, BlockPos blockPos) {
@@ -159,5 +151,11 @@ public class LeashFenceKnotEntity extends HangingEntity {
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		return this.getPosition(f).add(0.0, 0.2, 0.0);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.LEAD);
 	}
 }

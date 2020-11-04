@@ -42,7 +42,7 @@ public class BreathAirGoal extends Goal {
 	private void findAirPosition() {
 		Iterable<BlockPos> iterable = BlockPos.betweenClosed(
 			Mth.floor(this.mob.getX() - 1.0),
-			Mth.floor(this.mob.getY()),
+			this.mob.getBlockY(),
 			Mth.floor(this.mob.getZ() - 1.0),
 			Mth.floor(this.mob.getX() + 1.0),
 			Mth.floor(this.mob.getY() + 8.0),

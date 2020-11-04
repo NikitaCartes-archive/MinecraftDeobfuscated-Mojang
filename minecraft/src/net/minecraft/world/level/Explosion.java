@@ -214,7 +214,7 @@ public class Explosion {
 						entity.setDeltaMovement(entity.getDeltaMovement().add(x * ad, y * ad, z * ad));
 						if (entity instanceof Player) {
 							Player player = (Player)entity;
-							if (!player.isSpectator() && (!player.isCreative() || !player.abilities.flying)) {
+							if (!player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying)) {
 								this.hitPlayers.put(player, new Vec3(x * ac, y * ac, z * ac));
 							}
 						}
@@ -259,7 +259,7 @@ public class Explosion {
 					BlockPos blockPos2 = blockPos.immutable();
 					this.level.getProfiler().push("explosion_blocks");
 					if (block.dropFromExplosion(this) && this.level instanceof ServerLevel) {
-						BlockEntity blockEntity = block.isEntityBlock() ? this.level.getBlockEntity(blockPos) : null;
+						BlockEntity blockEntity = blockState.hasBlockEntity() ? this.level.getBlockEntity(blockPos) : null;
 						LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
 							.withRandom(this.level.random)
 							.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))

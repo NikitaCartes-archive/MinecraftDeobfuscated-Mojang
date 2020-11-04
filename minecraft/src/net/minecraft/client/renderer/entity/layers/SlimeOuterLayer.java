@@ -6,6 +6,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SlimeModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -14,10 +16,11 @@ import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
 public class SlimeOuterLayer<T extends LivingEntity> extends RenderLayer<T, SlimeModel<T>> {
-	private final EntityModel<T> model = new SlimeModel<>(0);
+	private final EntityModel<T> model;
 
-	public SlimeOuterLayer(RenderLayerParent<T, SlimeModel<T>> renderLayerParent) {
+	public SlimeOuterLayer(RenderLayerParent<T, SlimeModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
+		this.model = new SlimeModel<>(entityModelSet.getLayer(ModelLayers.SLIME_OUTER));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {

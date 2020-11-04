@@ -431,10 +431,6 @@ public enum Direction implements StringRepresentable {
 			return Util.getRandom(this.faces, random);
 		}
 
-		public Direction.Axis getRandomAxis(Random random) {
-			return Util.getRandom(this.axis, random);
-		}
-
 		public boolean test(@Nullable Direction direction) {
 			return direction != null && direction.getAxis().getPlane() == this;
 		}

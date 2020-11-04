@@ -56,7 +56,7 @@ public class LecternMenu extends AbstractContainerMenu {
 
 					ItemStack itemStack = this.lectern.removeItemNoUpdate(0);
 					this.lectern.setChanged();
-					if (!player.inventory.add(itemStack)) {
+					if (!player.getInventory().add(itemStack)) {
 						player.drop(itemStack, false);
 					}
 

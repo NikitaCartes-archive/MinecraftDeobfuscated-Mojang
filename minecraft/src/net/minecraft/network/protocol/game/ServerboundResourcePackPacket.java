@@ -28,6 +28,10 @@ public class ServerboundResourcePackPacket implements Packet<ServerGamePacketLis
 		serverGamePacketListener.handleResourcePackResponse(this);
 	}
 
+	public ServerboundResourcePackPacket.Action getAction() {
+		return this.action;
+	}
+
 	public static enum Action {
 		SUCCESSFULLY_LOADED,
 		DECLINED,

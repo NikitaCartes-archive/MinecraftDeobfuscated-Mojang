@@ -76,7 +76,7 @@ public class IntegratedServer extends MinecraftServer {
 
 	@Override
 	public boolean initServer() {
-		LOGGER.info("Starting integrated minecraft server version " + SharedConstants.getCurrentVersion().getName());
+		LOGGER.info("Starting integrated minecraft server version {}", SharedConstants.getCurrentVersion().getName());
 		this.setUsesAuthentication(true);
 		this.setPvpAllowed(true);
 		this.setFlightAllowed(true);

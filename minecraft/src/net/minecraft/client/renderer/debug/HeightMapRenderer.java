@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Vector3f;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
@@ -13,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -36,11 +38,11 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 		BlockPos blockPos = new BlockPos(d, 0.0, f);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-		for (int i = -32; i <= 32; i += 16) {
-			for (int j = -32; j <= 32; j += 16) {
-				ChunkAccess chunkAccess = levelAccessor.getChunk(blockPos.offset(i, 0, j));
+		for (int i = -2; i <= 2; i++) {
+			for (int j = -2; j <= 2; j++) {
+				ChunkAccess chunkAccess = levelAccessor.getChunk(blockPos.offset(i * 16, 0, j * 16));
 
 				for (Entry<Heightmap.Types, Heightmap> entry : chunkAccess.getHeightmaps()) {
 					Heightmap.Types types = (Heightmap.Types)entry.getKey();
@@ -49,8 +51,8 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 					for (int k = 0; k < 16; k++) {
 						for (int l = 0; l < 16; l++) {
-							int m = chunkPos.x * 16 + k;
-							int n = chunkPos.z * 16 + l;
+							int m = SectionPos.sectionToBlockCoord(chunkPos.x, k);
+							int n = SectionPos.sectionToBlockCoord(chunkPos.z, l);
 							float g = (float)((double)((float)levelAccessor.getHeight(types, m, n) + (float)types.ordinal() * 0.09375F) - e);
 							LevelRenderer.addChainedFilledBoxVertices(
 								bufferBuilder,

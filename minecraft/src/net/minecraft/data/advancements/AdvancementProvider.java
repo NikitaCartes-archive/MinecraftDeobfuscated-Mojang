@@ -30,7 +30,7 @@ public class AdvancementProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) throws IOException {
+	public void run(HashCache hashCache) {
 		Path path = this.generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		Consumer<Advancement> consumer = advancement -> {

@@ -16,7 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public interface BlockGetter {
+public interface BlockGetter extends LevelHeightAccessor {
 	@Nullable
 	BlockEntity getBlockEntity(BlockPos blockPos);
 
@@ -30,10 +30,6 @@ public interface BlockGetter {
 
 	default int getMaxLightLevel() {
 		return 15;
-	}
-
-	default int getMaxBuildHeight() {
-		return 256;
 	}
 
 	default Stream<BlockState> getBlockStates(AABB aABB) {

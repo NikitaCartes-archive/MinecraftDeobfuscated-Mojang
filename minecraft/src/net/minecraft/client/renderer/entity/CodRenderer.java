@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CodModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Cod;
@@ -13,8 +14,8 @@ import net.minecraft.world.entity.animal.Cod;
 public class CodRenderer extends MobRenderer<Cod, CodModel<Cod>> {
 	private static final ResourceLocation COD_LOCATION = new ResourceLocation("textures/entity/fish/cod.png");
 
-	public CodRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new CodModel<>(), 0.3F);
+	public CodRenderer(EntityRendererProvider.Context context) {
+		super(context, new CodModel<>(context.getLayer(ModelLayers.COD)), 0.3F);
 	}
 
 	public ResourceLocation getTextureLocation(Cod cod) {

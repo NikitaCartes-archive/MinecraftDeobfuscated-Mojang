@@ -6,6 +6,11 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -15,53 +20,66 @@ import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
-	public ModelPart head;
-	public ModelPart hat;
-	public ModelPart body;
-	public ModelPart rightArm;
-	public ModelPart leftArm;
-	public ModelPart rightLeg;
-	public ModelPart leftLeg;
+	public final ModelPart head;
+	public final ModelPart hat;
+	public final ModelPart body;
+	public final ModelPart rightArm;
+	public final ModelPart leftArm;
+	public final ModelPart rightLeg;
+	public final ModelPart leftLeg;
 	public HumanoidModel.ArmPose leftArmPose = HumanoidModel.ArmPose.EMPTY;
 	public HumanoidModel.ArmPose rightArmPose = HumanoidModel.ArmPose.EMPTY;
 	public boolean crouching;
 	public float swimAmount;
 
-	public HumanoidModel(float f) {
-		this(RenderType::entityCutoutNoCull, f, 0.0F, 64, 32);
+	public HumanoidModel(ModelPart modelPart) {
+		this(modelPart, RenderType::entityCutoutNoCull);
 	}
 
-	protected HumanoidModel(float f, float g, int i, int j) {
-		this(RenderType::entityCutoutNoCull, f, g, i, j);
-	}
-
-	public HumanoidModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {
+	public HumanoidModel(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
 		super(function, true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
-		this.texWidth = i;
-		this.texHeight = j;
-		this.head = new ModelPart(this, 0, 0);
-		this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, f);
-		this.head.setPos(0.0F, 0.0F + g, 0.0F);
-		this.hat = new ModelPart(this, 32, 0);
-		this.hat.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, f + 0.5F);
-		this.hat.setPos(0.0F, 0.0F + g, 0.0F);
-		this.body = new ModelPart(this, 16, 16);
-		this.body.addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, f);
-		this.body.setPos(0.0F, 0.0F + g, 0.0F);
-		this.rightArm = new ModelPart(this, 40, 16);
-		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.rightArm.setPos(-5.0F, 2.0F + g, 0.0F);
-		this.leftArm = new ModelPart(this, 40, 16);
-		this.leftArm.mirror = true;
-		this.leftArm.addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.leftArm.setPos(5.0F, 2.0F + g, 0.0F);
-		this.rightLeg = new ModelPart(this, 0, 16);
-		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.rightLeg.setPos(-1.9F, 12.0F + g, 0.0F);
-		this.leftLeg = new ModelPart(this, 0, 16);
-		this.leftLeg.mirror = true;
-		this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.leftLeg.setPos(1.9F, 12.0F + g, 0.0F);
+		this.head = modelPart.getChild("head");
+		this.hat = modelPart.getChild("hat");
+		this.body = modelPart.getChild("body");
+		this.rightArm = modelPart.getChild("right_arm");
+		this.leftArm = modelPart.getChild("left_arm");
+		this.rightLeg = modelPart.getChild("right_leg");
+		this.leftLeg = modelPart.getChild("left_leg");
+	}
+
+	public static MeshDefinition createMesh(CubeDeformation cubeDeformation, float f) {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, 0.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"hat",
+			CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation.extend(0.5F)),
+			PartPose.offset(0.0F, 0.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, cubeDeformation), PartPose.offset(0.0F, 0.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_arm",
+			CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation),
+			PartPose.offset(-5.0F, 2.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_arm",
+			CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation),
+			PartPose.offset(5.0F, 2.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation), PartPose.offset(-1.9F, 12.0F + f, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_leg",
+			CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation),
+			PartPose.offset(1.9F, 12.0F + f, 0.0F)
+		);
+		return meshDefinition;
 	}
 
 	@Override
@@ -237,6 +255,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 				break;
 			case CROSSBOW_HOLD:
 				AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
+				break;
+			case SPYGLASS:
+				this.rightArm.xRot = Mth.clamp(this.head.xRot + AnimationUtils.getSpyglassArmXRot(this.rightArm), -2.4F, 3.3F);
+				this.rightArm.yRot = Mth.clamp(this.head.yRot + (float) (-Math.PI / 4), -1.1F, 0.0F);
 		}
 	}
 
@@ -268,6 +290,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 				break;
 			case CROSSBOW_HOLD:
 				AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
+				break;
+			case SPYGLASS:
+				this.leftArm.xRot = AnimationUtils.getSpyglassArmXRot(this.leftArm);
+				this.leftArm.yRot = (float) (Math.PI / 4);
 		}
 	}
 
@@ -355,7 +381,7 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		return this.head;
 	}
 
-	protected HumanoidArm getAttackArm(T livingEntity) {
+	private HumanoidArm getAttackArm(T livingEntity) {
 		HumanoidArm humanoidArm = livingEntity.getMainArm();
 		return livingEntity.swingingArm == InteractionHand.MAIN_HAND ? humanoidArm : humanoidArm.getOpposite();
 	}
@@ -368,7 +394,8 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		BOW_AND_ARROW(true),
 		THROW_SPEAR(false),
 		CROSSBOW_CHARGE(true),
-		CROSSBOW_HOLD(true);
+		CROSSBOW_HOLD(true),
+		SPYGLASS(false);
 
 		private final boolean twoHanded;
 

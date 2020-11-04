@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.loot.LootContext;
 
@@ -25,10 +25,10 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 		return new BredAnimalsTrigger.TriggerInstance(composite, composite2, composite3, composite4);
 	}
 
-	public void trigger(ServerPlayer serverPlayer, Animal animal, Animal animal2, @Nullable AgableMob agableMob) {
+	public void trigger(ServerPlayer serverPlayer, Animal animal, Animal animal2, @Nullable AgeableMob ageableMob) {
 		LootContext lootContext = EntityPredicate.createContext(serverPlayer, animal);
 		LootContext lootContext2 = EntityPredicate.createContext(serverPlayer, animal2);
-		LootContext lootContext3 = agableMob != null ? EntityPredicate.createContext(serverPlayer, agableMob) : null;
+		LootContext lootContext3 = ageableMob != null ? EntityPredicate.createContext(serverPlayer, ageableMob) : null;
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(lootContext, lootContext2, lootContext3));
 	}
 

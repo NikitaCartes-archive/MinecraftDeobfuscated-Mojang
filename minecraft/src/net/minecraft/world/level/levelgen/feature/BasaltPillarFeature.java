@@ -5,7 +5,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -29,7 +28,7 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
 			boolean bl4 = true;
 
 			while (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
-				if (Level.isOutsideBuildHeight(mutableBlockPos)) {
+				if (worldGenLevel.isOutsideBuildHeight(mutableBlockPos)) {
 					return true;
 				}
 

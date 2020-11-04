@@ -22,6 +22,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DataResult;
@@ -88,12 +89,12 @@ import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -101,6 +102,7 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.GpuWarnlistManager;
@@ -113,6 +115,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -198,21 +201,12 @@ import net.minecraft.world.Snooper;
 import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
-import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PlayerHeadItem;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.Level;
@@ -302,6 +296,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final Game game = new Game(this);
 	private final Tutorial tutorial;
 	private final PlayerSocialManager playerSocialManager;
+	private final EntityModelSet entityModels;
+	private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 	public static byte[] reserve = new byte[10485760];
 	@Nullable
 	public MultiPlayerGameMode gameMode;
@@ -461,15 +457,22 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.itemColors = ItemColors.createDefault(this.blockColors);
 		this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
 		this.resourceManager.registerReloadListener(this.modelManager);
-		this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
-		this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
+		this.entityModels = new EntityModelSet();
+		this.resourceManager.registerReloadListener(this.entityModels);
+		this.blockEntityRenderDispatcher = new BlockEntityRenderDispatcher(this.font, this.entityModels, this::getBlockRenderer);
+		this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
+		BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
+		this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
+		this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
+		this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.font, this.options, this.entityModels);
+		this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
 		this.itemInHandRenderer = new ItemInHandRenderer(this);
 		this.resourceManager.registerReloadListener(this.itemRenderer);
 		this.renderBuffers = new RenderBuffers();
 		this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.gameRenderer);
 		this.playerSocialManager = new PlayerSocialManager(this, this.socialInteractionsService);
-		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
+		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), blockEntityWithoutLevelRenderer, this.blockColors);
 		this.resourceManager.registerReloadListener(this.blockRenderer);
 		this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.levelRenderer);
@@ -795,6 +798,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		bl |= MenuScreens.selfTest();
+		bl |= EntityRenderers.validateRegistrations();
 		if (bl) {
 			throw new IllegalStateException("Your game data is foobar, fix the errors above!");
 		}
@@ -825,11 +829,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			} else {
 				this.player.respawn();
 			}
-		}
-
-		if (screen instanceof TitleScreen || screen instanceof JoinMultiplayerScreen) {
-			this.options.renderDebug = false;
-			this.gui.getChat().clearMessages(true);
 		}
 
 		this.screen = screen;
@@ -1145,7 +1144,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		int j = this.window.getWidth() - 160 - 10;
 		int k = this.window.getHeight() - 320;
 		RenderSystem.enableBlend();
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex((double)((float)j - 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0).color(200, 0, 0, 0).endVertex();
 		bufferBuilder.vertex((double)((float)j - 176.0F), (double)(k + 320), 0.0).color(200, 0, 0, 0).endVertex();
 		bufferBuilder.vertex((double)((float)j + 176.0F), (double)(k + 320), 0.0).color(200, 0, 0, 0).endVertex();
@@ -1156,7 +1155,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		for (ResultField resultField2 : list) {
 			int l = Mth.floor(resultField2.percentage / 4.0) + 1;
-			bufferBuilder.begin(6, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
 			int m = resultField2.getColor();
 			int n = m >> 16 & 0xFF;
 			int o = m >> 8 & 0xFF;
@@ -1171,7 +1170,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			tesselator.end();
-			bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 			for (int q = l; q >= 0; q--) {
 				float f = (float)((d + resultField2.percentage * (double)q / (double)l) * (float) (Math.PI * 2) / 100.0);
@@ -1479,7 +1478,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			this.profiler.popPush("animateTick");
 			if (!this.pause && this.level != null) {
-				this.level.animateTick(Mth.floor(this.player.getX()), Mth.floor(this.player.getY()), Mth.floor(this.player.getZ()));
+				this.level.animateTick(this.player.getBlockX(), this.player.getBlockY(), this.player.getBlockZ());
 			}
 
 			this.profiler.popPush("particles");
@@ -1522,7 +1521,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				if (this.player.isSpectator()) {
 					this.gui.getSpectatorGui().onHotbarSelected(i);
 				} else if (!this.player.isCreative() || this.screen != null || !bl2 && !bl) {
-					this.player.inventory.selected = i;
+					this.player.getInventory().selected = i;
 				} else {
 					CreativeModeInventoryScreen.handleHotbarLoadOrSave(this, i, bl2, bl);
 				}
@@ -1844,7 +1843,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	) throws InterruptedException, ExecutionException {
 		DataPackConfig dataPackConfig = (DataPackConfig)function.apply(levelStorageAccess);
 		PackRepository packRepository = new PackRepository(
-			new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
+			PackType.SERVER_DATA,
+			new ServerPacksSource(),
+			new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
 		);
 
 		try {
@@ -1939,7 +1940,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private void updateLevelInEngines(@Nullable ClientLevel clientLevel) {
 		this.levelRenderer.setLevel(clientLevel);
 		this.particleEngine.setLevel(clientLevel);
-		BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
+		this.blockEntityRenderDispatcher.setLevel(clientLevel);
 		this.updateTitle();
 	}
 
@@ -1984,24 +1985,24 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private void pickBlock() {
 		if (this.hitResult != null && this.hitResult.getType() != HitResult.Type.MISS) {
-			boolean bl = this.player.abilities.instabuild;
+			boolean bl = this.player.getAbilities().instabuild;
 			BlockEntity blockEntity = null;
 			HitResult.Type type = this.hitResult.getType();
 			ItemStack itemStack;
 			if (type == HitResult.Type.BLOCK) {
 				BlockPos blockPos = ((BlockHitResult)this.hitResult).getBlockPos();
 				BlockState blockState = this.level.getBlockState(blockPos);
-				Block block = blockState.getBlock();
 				if (blockState.isAir()) {
 					return;
 				}
 
+				Block block = blockState.getBlock();
 				itemStack = block.getCloneItemStack(this.level, blockPos, blockState);
 				if (itemStack.isEmpty()) {
 					return;
 				}
 
-				if (bl && Screen.hasControlDown() && block.isEntityBlock()) {
+				if (bl && Screen.hasControlDown() && blockState.hasBlockEntity()) {
 					blockEntity = this.level.getBlockEntity(blockPos);
 				}
 			} else {
@@ -2010,55 +2011,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				}
 
 				Entity entity = ((EntityHitResult)this.hitResult).getEntity();
-				if (entity instanceof Painting) {
-					itemStack = new ItemStack(Items.PAINTING);
-				} else if (entity instanceof LeashFenceKnotEntity) {
-					itemStack = new ItemStack(Items.LEAD);
-				} else if (entity instanceof ItemFrame) {
-					ItemFrame itemFrame = (ItemFrame)entity;
-					ItemStack itemStack2 = itemFrame.getItem();
-					if (itemStack2.isEmpty()) {
-						itemStack = new ItemStack(Items.ITEM_FRAME);
-					} else {
-						itemStack = itemStack2.copy();
-					}
-				} else if (entity instanceof AbstractMinecart) {
-					AbstractMinecart abstractMinecart = (AbstractMinecart)entity;
-					Item item;
-					switch (abstractMinecart.getMinecartType()) {
-						case FURNACE:
-							item = Items.FURNACE_MINECART;
-							break;
-						case CHEST:
-							item = Items.CHEST_MINECART;
-							break;
-						case TNT:
-							item = Items.TNT_MINECART;
-							break;
-						case HOPPER:
-							item = Items.HOPPER_MINECART;
-							break;
-						case COMMAND_BLOCK:
-							item = Items.COMMAND_BLOCK_MINECART;
-							break;
-						default:
-							item = Items.MINECART;
-					}
-
-					itemStack = new ItemStack(item);
-				} else if (entity instanceof Boat) {
-					itemStack = new ItemStack(((Boat)entity).getDropItem());
-				} else if (entity instanceof ArmorStand) {
-					itemStack = new ItemStack(Items.ARMOR_STAND);
-				} else if (entity instanceof EndCrystal) {
-					itemStack = new ItemStack(Items.END_CRYSTAL);
-				} else {
-					SpawnEggItem spawnEggItem = SpawnEggItem.byId(entity.getType());
-					if (spawnEggItem == null) {
-						return;
-					}
-
-					itemStack = new ItemStack(spawnEggItem);
+				itemStack = entity.getPickResult();
+				if (itemStack == null) {
+					return;
 				}
 			}
 
@@ -2072,7 +2027,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 				LOGGER.warn("Picking on: [{}] {} gave null item", type, string);
 			} else {
-				Inventory inventory = this.player.inventory;
+				Inventory inventory = this.player.getInventory();
 				if (blockEntity != null) {
 					this.addCustomNbtData(itemStack, blockEntity);
 				}
@@ -2315,7 +2270,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
 				if (!this.musicManager.isPlayingMusic(Musics.UNDER_WATER)
 					&& (!this.player.isUnderWater() || biomeCategory != Biome.BiomeCategory.OCEAN && biomeCategory != Biome.BiomeCategory.RIVER)) {
-					return this.player.level.dimension() != Level.NETHER && this.player.abilities.instabuild && this.player.abilities.mayfly
+					return this.player.level.dimension() != Level.NETHER && this.player.getAbilities().instabuild && this.player.getAbilities().mayfly
 						? Musics.CREATIVE
 						: (Music)this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);
 				} else {
@@ -2371,6 +2326,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public EntityRenderDispatcher getEntityRenderDispatcher() {
 		return this.entityRenderDispatcher;
+	}
+
+	public BlockEntityRenderDispatcher getBlockEntityRenderDispatcher() {
+		return this.blockEntityRenderDispatcher;
 	}
 
 	public ItemRenderer getItemRenderer() {
@@ -2485,9 +2444,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private static Pack createClientPackAdapter(
 		String string,
+		Component component,
 		boolean bl,
 		Supplier<PackResources> supplier,
-		PackResources packResources,
 		PackMetadataSection packMetadataSection,
 		Pack.Position position,
 		PackSource packSource
@@ -2502,7 +2461,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			supplier2 = adaptV4(supplier2);
 		}
 
-		return new Pack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
+		return new Pack(string, component, bl, supplier2, packMetadataSection, PackType.CLIENT_RESOURCES, position, packSource);
 	}
 
 	private static Supplier<PackResources> adaptV3(Supplier<PackResources> supplier) {
@@ -2515,6 +2474,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void updateMaxMipLevel(int i) {
 		this.modelManager.updateMaxMipLevel(i);
+	}
+
+	public EntityModelSet getEntityModels() {
+		return this.entityModels;
 	}
 
 	@Environment(EnvType.CLIENT)

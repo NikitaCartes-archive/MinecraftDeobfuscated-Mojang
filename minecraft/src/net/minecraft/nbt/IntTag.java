@@ -3,8 +3,6 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 public class IntTag extends NumericTag {
 	public static final TagType<IntTag> TYPE = new TagType<IntTag>() {
@@ -35,7 +33,7 @@ public class IntTag extends NumericTag {
 	}
 
 	public static IntTag valueOf(int i) {
-		return i >= -128 && i <= 1024 ? IntTag.Cache.cache[i + 128] : new IntTag(i);
+		return i >= -128 && i <= 1024 ? IntTag.Cache.cache[i - -128] : new IntTag(i);
 	}
 
 	@Override
@@ -53,11 +51,6 @@ public class IntTag extends NumericTag {
 		return TYPE;
 	}
 
-	@Override
-	public String toString() {
-		return String.valueOf(this.data);
-	}
-
 	public IntTag copy() {
 		return this;
 	}
@@ -71,8 +64,8 @@ public class IntTag extends NumericTag {
 	}
 
 	@Override
-	public Component getPrettyDisplay(String string, int i) {
-		return new TextComponent(String.valueOf(this.data)).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+	public void accept(TagVisitor tagVisitor) {
+		tagVisitor.visitInt(this);
 	}
 
 	@Override

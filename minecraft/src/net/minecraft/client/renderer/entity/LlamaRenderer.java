@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LlamaModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.layers.LlamaDecorLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -16,9 +17,9 @@ public class LlamaRenderer extends MobRenderer<Llama, LlamaModel<Llama>> {
 		new ResourceLocation("textures/entity/llama/gray.png")
 	};
 
-	public LlamaRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new LlamaModel<>(0.0F), 0.7F);
-		this.addLayer(new LlamaDecorLayer(this));
+	public LlamaRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
+		super(context, new LlamaModel<>(context.getLayer(modelLayerLocation)), 0.7F);
+		this.addLayer(new LlamaDecorLayer(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(Llama llama) {

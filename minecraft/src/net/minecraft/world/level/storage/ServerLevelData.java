@@ -5,6 +5,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.timers.TimerQueue;
 
@@ -22,8 +23,8 @@ public interface ServerLevelData extends WritableLevelData {
 	int getThunderTime();
 
 	@Override
-	default void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-		WritableLevelData.super.fillCrashReportCategory(crashReportCategory);
+	default void fillCrashReportCategory(CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor) {
+		WritableLevelData.super.fillCrashReportCategory(crashReportCategory, levelHeightAccessor);
 		crashReportCategory.setDetail("Level name", this::getLevelName);
 		crashReportCategory.setDetail(
 			"Level game mode",

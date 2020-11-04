@@ -25,7 +25,7 @@ public class Subscription extends ValueObject {
 			subscription.daysLeft = JsonUtils.getIntOr("daysLeft", jsonObject, 0);
 			subscription.type = typeFrom(JsonUtils.getStringOr("subscriptionType", jsonObject, Subscription.SubscriptionType.NORMAL.name()));
 		} catch (Exception var4) {
-			LOGGER.error("Could not parse Subscription: " + var4.getMessage());
+			LOGGER.error("Could not parse Subscription: {}", var4.getMessage());
 		}
 
 		return subscription;

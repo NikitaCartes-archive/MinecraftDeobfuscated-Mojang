@@ -15,7 +15,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -75,25 +74,20 @@ public class PoiSection {
 		if (poiRecord2 != null) {
 			if (poiType.equals(poiRecord2.getPoiType())) {
 				return false;
+			} else {
+				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("POI data mismatch: already registered at " + blockPos));
 			}
-
-			String string = "POI data mismatch: already registered at " + blockPos;
-			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException(string));
-			}
-
-			LOGGER.error(string);
+		} else {
+			this.records.put(s, poiRecord);
+			((Set)this.byType.computeIfAbsent(poiType, poiTypex -> Sets.newHashSet())).add(poiRecord);
+			return true;
 		}
-
-		this.records.put(s, poiRecord);
-		((Set)this.byType.computeIfAbsent(poiType, poiTypex -> Sets.newHashSet())).add(poiRecord);
-		return true;
 	}
 
 	public void remove(BlockPos blockPos) {
 		PoiRecord poiRecord = this.records.remove(SectionPos.sectionRelativePos(blockPos));
 		if (poiRecord == null) {
-			LOGGER.error("POI data mismatch: never registered at " + blockPos);
+			LOGGER.error("POI data mismatch: never registered at {}", blockPos);
 		} else {
 			((Set)this.byType.get(poiRecord.getPoiType())).remove(poiRecord);
 			LOGGER.debug("Removed POI of type {} @ {}", poiRecord::getPoiType, poiRecord::getPos);

@@ -31,20 +31,24 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 
 	@Override
 	protected int getLightValue(long l) {
+		return this.getLightValue(l, false);
+	}
+
+	protected int getLightValue(long l, boolean bl) {
 		long m = SectionPos.blockToSection(l);
 		int i = SectionPos.y(m);
-		SkyLightSectionStorage.SkyDataLayerStorageMap skyDataLayerStorageMap = this.visibleSectionData;
+		SkyLightSectionStorage.SkyDataLayerStorageMap skyDataLayerStorageMap = bl ? this.updatingSectionData : this.visibleSectionData;
 		int j = skyDataLayerStorageMap.topSections.get(SectionPos.getZeroNode(m));
 		if (j != skyDataLayerStorageMap.currentLowestY && i < j) {
 			DataLayer dataLayer = this.getDataLayer(skyDataLayerStorageMap, m);
 			if (dataLayer == null) {
 				for (l = BlockPos.getFlatIndex(l); dataLayer == null; dataLayer = this.getDataLayer(skyDataLayerStorageMap, m)) {
-					m = SectionPos.offset(m, Direction.UP);
 					if (++i >= j) {
 						return 15;
 					}
 
 					l = BlockPos.offset(l, 0, 16, 0);
+					m = SectionPos.offset(m, Direction.UP);
 				}
 			}
 
@@ -52,7 +56,7 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 				SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l))
 			);
 		} else {
-			return 15;
+			return bl && !this.lightOnInSection(m) ? 0 : 15;
 		}
 	}
 
@@ -222,14 +226,14 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 							for (int s = 0; s < 16; s++) {
 								for (int t = 0; t < 16; t++) {
 									long u = BlockPos.asLong(
-										SectionPos.sectionToBlockCoord(SectionPos.x(l)) + s,
+										SectionPos.sectionToBlockCoord(SectionPos.x(l), s),
 										SectionPos.sectionToBlockCoord(SectionPos.y(l)),
-										SectionPos.sectionToBlockCoord(SectionPos.z(l)) + t
+										SectionPos.sectionToBlockCoord(SectionPos.z(l), t)
 									);
 									long n = BlockPos.asLong(
-										SectionPos.sectionToBlockCoord(SectionPos.x(l)) + s,
+										SectionPos.sectionToBlockCoord(SectionPos.x(l), s),
 										SectionPos.sectionToBlockCoord(SectionPos.y(l)) - 1,
-										SectionPos.sectionToBlockCoord(SectionPos.z(l)) + t
+										SectionPos.sectionToBlockCoord(SectionPos.z(l), t)
 									);
 									layerLightEngine.checkEdge(u, n, layerLightEngine.computeLevelFromNeighbor(u, n, 0), true);
 								}
@@ -238,9 +242,9 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 							for (int j = 0; j < 16; j++) {
 								for (int k = 0; k < 16; k++) {
 									long v = BlockPos.asLong(
-										SectionPos.sectionToBlockCoord(SectionPos.x(l)) + j,
-										SectionPos.sectionToBlockCoord(SectionPos.y(l)) + 16 - 1,
-										SectionPos.sectionToBlockCoord(SectionPos.z(l)) + k
+										SectionPos.sectionToBlockCoord(SectionPos.x(l), j),
+										SectionPos.sectionToBlockCoord(SectionPos.y(l), 15),
+										SectionPos.sectionToBlockCoord(SectionPos.z(l), k)
 									);
 									layerLightEngine.checkEdge(Long.MAX_VALUE, v, 0, true);
 								}
@@ -260,9 +264,9 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 						for (int i = 0; i < 16; i++) {
 							for (int j = 0; j < 16; j++) {
 								long w = BlockPos.asLong(
-									SectionPos.sectionToBlockCoord(SectionPos.x(l)) + i,
-									SectionPos.sectionToBlockCoord(SectionPos.y(l)) + 16 - 1,
-									SectionPos.sectionToBlockCoord(SectionPos.z(l)) + j
+									SectionPos.sectionToBlockCoord(SectionPos.x(l), i),
+									SectionPos.sectionToBlockCoord(SectionPos.y(l), 15),
+									SectionPos.sectionToBlockCoord(SectionPos.z(l), j)
 								);
 								layerLightEngine.checkEdge(Long.MAX_VALUE, w, 15, false);
 							}
@@ -278,22 +282,6 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 
 	protected boolean hasSectionsBelow(int i) {
 		return i >= this.updatingSectionData.currentLowestY;
-	}
-
-	protected boolean hasLightSource(long l) {
-		int i = BlockPos.getY(l);
-		if ((i & 15) != 15) {
-			return false;
-		} else {
-			long m = SectionPos.blockToSection(l);
-			long n = SectionPos.getZeroNode(m);
-			if (!this.columnsWithSkySources.contains(n)) {
-				return false;
-			} else {
-				int j = this.updatingSectionData.topSections.get(n);
-				return SectionPos.sectionToBlockCoord(j) == i + 16;
-			}
-		}
 	}
 
 	protected boolean isAboveData(long l) {

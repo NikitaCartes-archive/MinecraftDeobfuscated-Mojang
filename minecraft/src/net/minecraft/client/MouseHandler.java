@@ -136,11 +136,11 @@ public class MouseHandler {
 						if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
 							this.minecraft.gui.getSpectatorGui().onMouseScrolled((double)(-i));
 						} else {
-							float j = Mth.clamp(this.minecraft.player.abilities.getFlyingSpeed() + i * 0.005F, 0.0F, 0.2F);
-							this.minecraft.player.abilities.setFlyingSpeed(j);
+							float j = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + i * 0.005F, 0.0F, 0.2F);
+							this.minecraft.player.getAbilities().setFlyingSpeed(j);
 						}
 					} else {
-						this.minecraft.player.inventory.swapPaint((double)i);
+						this.minecraft.player.getInventory().swapPaint((double)i);
 					}
 				}
 			}
@@ -212,31 +212,37 @@ public class MouseHandler {
 		this.lastMouseEventTime = d;
 		if (this.isMouseGrabbed() && this.minecraft.isWindowActive()) {
 			double f = this.minecraft.options.sensitivity * 0.6F + 0.2F;
-			double g = f * f * f * 8.0;
-			double j;
+			double g = f * f * f;
+			double h = g * 8.0;
 			double k;
+			double l;
 			if (this.minecraft.options.smoothCamera) {
-				double h = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * g, e * g);
-				double i = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * g, e * g);
-				j = h;
+				double i = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * h, e * h);
+				double j = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * h, e * h);
 				k = i;
+				l = j;
+			} else if (this.minecraft.options.getCameraType().isFirstPerson() && this.minecraft.player.isScoping()) {
+				this.smoothTurnX.reset();
+				this.smoothTurnY.reset();
+				k = this.accumulatedDX * g;
+				l = this.accumulatedDY * g;
 			} else {
 				this.smoothTurnX.reset();
 				this.smoothTurnY.reset();
-				j = this.accumulatedDX * g;
-				k = this.accumulatedDY * g;
+				k = this.accumulatedDX * h;
+				l = this.accumulatedDY * h;
 			}
 
 			this.accumulatedDX = 0.0;
 			this.accumulatedDY = 0.0;
-			int l = 1;
+			int m = 1;
 			if (this.minecraft.options.invertYMouse) {
-				l = -1;
+				m = -1;
 			}
 
-			this.minecraft.getTutorial().onMouse(j, k);
+			this.minecraft.getTutorial().onMouse(k, l);
 			if (this.minecraft.player != null) {
-				this.minecraft.player.turn(j, k * (double)l);
+				this.minecraft.player.turn(k, l * (double)m);
 			}
 		} else {
 			this.accumulatedDX = 0.0;

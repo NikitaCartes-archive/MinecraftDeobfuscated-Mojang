@@ -301,7 +301,7 @@ public class CloneCommands {
 							cloneBlockInfo2x.tag.putInt("x", cloneBlockInfo2x.pos.getX());
 							cloneBlockInfo2x.tag.putInt("y", cloneBlockInfo2x.pos.getY());
 							cloneBlockInfo2x.tag.putInt("z", cloneBlockInfo2x.pos.getZ());
-							blockEntity4.load(cloneBlockInfo2x.state, cloneBlockInfo2x.tag);
+							blockEntity4.load(cloneBlockInfo2x.tag);
 							blockEntity4.setChanged();
 						}
 

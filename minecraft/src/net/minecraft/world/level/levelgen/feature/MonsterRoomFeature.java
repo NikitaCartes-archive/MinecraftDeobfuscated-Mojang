@@ -70,18 +70,18 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 					for (int u = p; u <= q; u++) {
 						BlockPos blockPos2x = blockPos.offset(s, t, u);
 						BlockState blockState = worldGenLevel.getBlockState(blockPos2x);
-						if (s != k && t != -1 && u != p && s != l && t != 4 && u != q) {
-							if (!blockState.is(Blocks.CHEST) && !blockState.is(Blocks.SPAWNER)) {
+						if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
+							if (blockPos2x.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
+							} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
+								if (t == -1 && random.nextInt(4) != 0) {
+									worldGenLevel.setBlock(blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
+								} else {
+									worldGenLevel.setBlock(blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), 2);
+								}
 							}
-						} else if (blockPos2x.getY() >= 0 && !worldGenLevel.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
+						} else if (!blockState.is(Blocks.CHEST) && !blockState.is(Blocks.SPAWNER)) {
 							worldGenLevel.setBlock(blockPos2x, AIR, 2);
-						} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
-							if (t == -1 && random.nextInt(4) != 0) {
-								worldGenLevel.setBlock(blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
-							} else {
-								worldGenLevel.setBlock(blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), 2);
-							}
 						}
 					}
 				}

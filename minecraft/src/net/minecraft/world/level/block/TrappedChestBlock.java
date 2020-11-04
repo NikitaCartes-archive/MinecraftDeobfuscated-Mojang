@@ -20,8 +20,8 @@ public class TrappedChestBlock extends ChestBlock {
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new TrappedChestBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new TrappedChestBlockEntity(blockPos, blockState);
 	}
 
 	@Override

@@ -1,29 +1,41 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class LlamaSpitModel<T extends Entity> extends ListModel<T> {
-	private final ModelPart main = new ModelPart(this);
+public class LlamaSpitModel<T extends Entity> extends HierarchicalModel<T> {
+	private final ModelPart root;
 
-	public LlamaSpitModel() {
-		this(0.0F);
+	public LlamaSpitModel(ModelPart modelPart) {
+		this.root = modelPart;
 	}
 
-	public LlamaSpitModel(float f) {
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
 		int i = 2;
-		this.main.texOffs(0, 0).addBox(-4.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(0.0F, -4.0F, 0.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(0.0F, 0.0F, -4.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(0.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(2.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(0.0F, 2.0F, 0.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.texOffs(0, 0).addBox(0.0F, 0.0F, 2.0F, 2.0F, 2.0F, 2.0F, f);
-		this.main.setPos(0.0F, 0.0F, 0.0F);
+		partDefinition.addOrReplaceChild(
+			"main",
+			CubeListBuilder.create()
+				.texOffs(0, 0)
+				.addBox(-4.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(0.0F, -4.0F, 0.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(0.0F, 0.0F, -4.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(0.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(2.0F, 0.0F, 0.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(0.0F, 2.0F, 0.0F, 2.0F, 2.0F, 2.0F)
+				.addBox(0.0F, 0.0F, 2.0F, 2.0F, 2.0F, 2.0F),
+			PartPose.ZERO
+		);
+		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Override
@@ -31,7 +43,7 @@ public class LlamaSpitModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public Iterable<ModelPart> parts() {
-		return ImmutableList.<ModelPart>of(this.main);
+	public ModelPart root() {
+		return this.root;
 	}
 }

@@ -62,8 +62,8 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 	public void checkBlock(BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.immutable();
 		this.addTask(
-			blockPos.getX() >> 4,
-			blockPos.getZ() >> 4,
+			SectionPos.blockToSectionCoord(blockPos.getX()),
+			SectionPos.blockToSectionCoord(blockPos.getZ()),
 			ThreadedLevelLightEngine.TaskType.POST_UPDATE,
 			Util.name(() -> super.checkBlock(blockPos2), () -> "checkBlock " + blockPos2)
 		);
@@ -74,12 +74,12 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			super.retainData(chunkPos, false);
 			super.enableLightSources(chunkPos, false);
 
-			for (int i = -1; i < 17; i++) {
+			for (int i = this.getMinLightSection(); i < this.getMaxLightSection(); i++) {
 				super.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, i), null, true);
 				super.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null, true);
 			}
 
-			for (int i = 0; i < 16; i++) {
+			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
 				super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
 			}
 		}, () -> "updateChunkStatus " + chunkPos + " " + true));
@@ -147,10 +147,11 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 		this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name(() -> {
 			LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
 
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < chunkAccess.getSectionsCount(); i++) {
 				LevelChunkSection levelChunkSection = levelChunkSections[i];
 				if (!LevelChunkSection.isEmpty(levelChunkSection)) {
-					super.updateSectionStatus(SectionPos.of(chunkPos, i), false);
+					int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+					super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
 				}
 			}
 

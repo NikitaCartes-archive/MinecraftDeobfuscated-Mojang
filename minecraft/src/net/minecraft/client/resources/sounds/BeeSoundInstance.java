@@ -33,7 +33,7 @@ public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
 			this.hasSwitched = true;
 		}
 
-		if (!this.bee.removed && !this.hasSwitched) {
+		if (!this.bee.isRemoved() && !this.hasSwitched) {
 			this.x = (double)((float)this.bee.getX());
 			this.y = (double)((float)this.bee.getY());
 			this.z = (double)((float)this.bee.getZ());

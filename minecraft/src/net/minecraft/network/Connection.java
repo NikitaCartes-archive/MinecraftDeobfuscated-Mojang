@@ -38,6 +38,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -102,7 +103,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	}
 
 	@Override
-	public void channelInactive(ChannelHandlerContext channelHandlerContext) throws Exception {
+	public void channelInactive(ChannelHandlerContext channelHandlerContext) {
 		this.disconnect(new TranslatableComponent("disconnect.endOfStream"));
 	}
 
@@ -121,7 +122,11 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 					Component component = new TranslatableComponent("disconnect.genericReason", "Internal Exception: " + throwable);
 					if (bl) {
 						LOGGER.debug("Failed to sent packet", throwable);
-						this.send(new ClientboundDisconnectPacket(component), future -> this.disconnect(component));
+						ConnectionProtocol connectionProtocol = this.getCurrentProtocol();
+						Packet<?> packet = (Packet<?>)(connectionProtocol == ConnectionProtocol.LOGIN
+							? new ClientboundLoginDisconnectPacket(component)
+							: new ClientboundDisconnectPacket(component));
+						this.send(packet, future -> this.disconnect(component));
 						this.setReadOnly();
 					} else {
 						LOGGER.debug("Double fault", throwable);
@@ -132,7 +137,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		}
 	}
 
-	protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet<?> packet) throws Exception {
+	protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet<?> packet) {
 		if (this.channel.isOpen()) {
 			try {
 				genericsFtw(packet, this.packetListener);
@@ -167,7 +172,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 
 	private void sendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
 		ConnectionProtocol connectionProtocol = ConnectionProtocol.getProtocolForPacket(packet);
-		ConnectionProtocol connectionProtocol2 = this.channel.attr(ATTRIBUTE_PROTOCOL).get();
+		ConnectionProtocol connectionProtocol2 = this.getCurrentProtocol();
 		this.sentPackets++;
 		if (connectionProtocol2 != connectionProtocol) {
 			LOGGER.debug("Disabled auto read");
@@ -199,6 +204,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				channelFuturex.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 			});
 		}
+	}
+
+	private ConnectionProtocol getCurrentProtocol() {
+		return this.channel.attr(ATTRIBUTE_PROTOCOL).get();
 	}
 
 	private void flushQueue() {
@@ -271,7 +280,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			.handler(
 				new ChannelInitializer<Channel>() {
 					@Override
-					protected void initChannel(Channel channel) throws Exception {
+					protected void initChannel(Channel channel) {
 						try {
 							channel.config().setOption(ChannelOption.TCP_NODELAY, true);
 						} catch (ChannelException var3) {
@@ -298,7 +307,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
 		new Bootstrap().group(LOCAL_WORKER_GROUP.get()).handler(new ChannelInitializer<Channel>() {
 			@Override
-			protected void initChannel(Channel channel) throws Exception {
+			protected void initChannel(Channel channel) {
 				channel.pipeline().addLast("packet_handler", connection);
 			}
 		}).channel(LocalChannel.class).connect(socketAddress).syncUninterruptibly();

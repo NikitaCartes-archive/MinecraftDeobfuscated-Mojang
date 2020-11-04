@@ -106,7 +106,7 @@ public class PiglinBrute extends AbstractPiglin {
 
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
-		return itemStack.getItem() == Items.GOLDEN_AXE ? super.wantsToPickUp(itemStack) : false;
+		return itemStack.is(Items.GOLDEN_AXE) ? super.wantsToPickUp(itemStack) : false;
 	}
 
 	@Override

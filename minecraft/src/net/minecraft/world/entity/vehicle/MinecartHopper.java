@@ -67,11 +67,6 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 	}
 
 	@Override
-	public Level getLevel() {
-		return this.level;
-	}
-
-	@Override
 	public double getLevelX() {
 		return this.getX();
 	}
@@ -108,7 +103,7 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 	}
 
 	public boolean suckInItems() {
-		if (HopperBlockEntity.suckInItems(this)) {
+		if (HopperBlockEntity.suckInItems(this.level, this)) {
 			return true;
 		} else {
 			List<ItemEntity> list = this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(0.25, 0.0, 0.25), EntitySelector.ENTITY_STILL_ALIVE);

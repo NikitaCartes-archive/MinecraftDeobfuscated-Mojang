@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,9 +61,11 @@ public class VanillaPackResources implements PackResources {
 			}
 		}
 	});
+	public final PackMetadataSection packMetadata;
 	public final Set<String> namespaces;
 
-	public VanillaPackResources(String... strings) {
+	public VanillaPackResources(PackMetadataSection packMetadataSection, String... strings) {
+		this.packMetadata = packMetadataSection;
 		this.namespaces = ImmutableSet.copyOf(strings);
 	}
 
@@ -238,19 +241,28 @@ public class VanillaPackResources implements PackResources {
 			InputStream inputStream = this.getRootResource("pack.mcmeta");
 			Throwable var3 = null;
 
-			Object var4;
+			Object var5;
 			try {
-				var4 = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
-			} catch (Throwable var14) {
-				var3 = var14;
-				throw var14;
+				if (inputStream == null) {
+					return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
+				}
+
+				T object = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
+				if (object == null) {
+					return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
+				}
+
+				var5 = object;
+			} catch (Throwable var16) {
+				var3 = var16;
+				throw var16;
 			} finally {
 				if (inputStream != null) {
 					if (var3 != null) {
 						try {
 							inputStream.close();
-						} catch (Throwable var13) {
-							var3.addSuppressed(var13);
+						} catch (Throwable var15) {
+							var3.addSuppressed(var15);
 						}
 					} else {
 						inputStream.close();
@@ -258,9 +270,9 @@ public class VanillaPackResources implements PackResources {
 				}
 			}
 
-			return (T)var4;
-		} catch (FileNotFoundException | RuntimeException var16) {
-			return null;
+			return (T)var5;
+		} catch (FileNotFoundException | RuntimeException var18) {
+			return (T)(metadataSectionSerializer == PackMetadataSection.SERIALIZER ? this.packMetadata : null);
 		}
 	}
 

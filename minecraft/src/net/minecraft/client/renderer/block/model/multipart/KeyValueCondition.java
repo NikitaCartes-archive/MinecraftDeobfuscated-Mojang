@@ -28,7 +28,7 @@ public class KeyValueCondition implements Condition {
 	public Predicate<BlockState> getPredicate(StateDefinition<Block, BlockState> stateDefinition) {
 		Property<?> property = stateDefinition.getProperty(this.key);
 		if (property == null) {
-			throw new RuntimeException(String.format("Unknown property '%s' on '%s'", this.key, stateDefinition.getOwner().toString()));
+			throw new RuntimeException(String.format("Unknown property '%s' on '%s'", this.key, stateDefinition.getOwner()));
 		} else {
 			String string = this.value;
 			boolean bl = !string.isEmpty() && string.charAt(0) == '!';
@@ -38,7 +38,7 @@ public class KeyValueCondition implements Condition {
 
 			List<String> list = PIPE_SPLITTER.splitToList(string);
 			if (list.isEmpty()) {
-				throw new RuntimeException(String.format("Empty value '%s' for property '%s' on '%s'", this.value, this.key, stateDefinition.getOwner().toString()));
+				throw new RuntimeException(String.format("Empty value '%s' for property '%s' on '%s'", this.value, this.key, stateDefinition.getOwner()));
 			} else {
 				Predicate<BlockState> predicate;
 				if (list.size() == 1) {
@@ -58,9 +58,7 @@ public class KeyValueCondition implements Condition {
 	private Predicate<BlockState> getBlockStatePredicate(StateDefinition<Block, BlockState> stateDefinition, Property<?> property, String string) {
 		Optional<?> optional = property.getValue(string);
 		if (!optional.isPresent()) {
-			throw new RuntimeException(
-				String.format("Unknown value '%s' for property '%s' on '%s' in '%s'", string, this.key, stateDefinition.getOwner().toString(), this.value)
-			);
+			throw new RuntimeException(String.format("Unknown value '%s' for property '%s' on '%s' in '%s'", string, this.key, stateDefinition.getOwner(), this.value));
 		} else {
 			return blockState -> blockState.getValue(property).equals(optional.get());
 		}

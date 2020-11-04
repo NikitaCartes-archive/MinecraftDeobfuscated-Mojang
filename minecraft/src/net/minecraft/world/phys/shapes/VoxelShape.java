@@ -123,17 +123,7 @@ public abstract class VoxelShape {
 	}
 
 	protected int findIndex(Direction.Axis axis, double d) {
-		return Mth.binarySearch(0, this.shape.getSize(axis) + 1, i -> {
-			if (i < 0) {
-				return false;
-			} else {
-				return i > this.shape.getSize(axis) ? true : d < this.get(axis, i);
-			}
-		}) - 1;
-	}
-
-	protected boolean isFullWide(double d, double e, double f) {
-		return this.shape.isFullWide(this.findIndex(Direction.Axis.X, d), this.findIndex(Direction.Axis.Y, e), this.findIndex(Direction.Axis.Z, f));
+		return Mth.binarySearch(0, this.shape.getSize(axis) + 1, i -> d < this.get(axis, i)) - 1;
 	}
 
 	@Nullable
@@ -146,7 +136,12 @@ public abstract class VoxelShape {
 				return null;
 			} else {
 				Vec3 vec34 = vec3.add(vec33.scale(0.001));
-				return this.isFullWide(vec34.x - (double)blockPos.getX(), vec34.y - (double)blockPos.getY(), vec34.z - (double)blockPos.getZ())
+				return this.shape
+						.isFullWide(
+							this.findIndex(Direction.Axis.X, vec34.x - (double)blockPos.getX()),
+							this.findIndex(Direction.Axis.Y, vec34.y - (double)blockPos.getY()),
+							this.findIndex(Direction.Axis.Z, vec34.z - (double)blockPos.getZ())
+						)
 					? new BlockHitResult(vec34, Direction.getNearest(vec33.x, vec33.y, vec33.z).getOpposite(), blockPos, true)
 					: AABB.clip(this.toAabbs(), vec3, vec32, blockPos);
 			}
@@ -174,11 +169,11 @@ public abstract class VoxelShape {
 
 	private VoxelShape calculateFace(Direction direction) {
 		Direction.Axis axis = direction.getAxis();
-		Direction.AxisDirection axisDirection = direction.getAxisDirection();
 		DoubleList doubleList = this.getCoords(axis);
 		if (doubleList.size() == 2 && DoubleMath.fuzzyEquals(doubleList.getDouble(0), 0.0, 1.0E-7) && DoubleMath.fuzzyEquals(doubleList.getDouble(1), 1.0, 1.0E-7)) {
 			return this;
 		} else {
+			Direction.AxisDirection axisDirection = direction.getAxisDirection();
 			int i = this.findIndex(axis, axisDirection == Direction.AxisDirection.POSITIVE ? 0.9999999 : 1.0E-7);
 			return new SliceShape(this, axis, i);
 		}

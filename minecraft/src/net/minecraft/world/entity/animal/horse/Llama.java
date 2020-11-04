@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,7 +43,6 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -184,12 +183,11 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		int j = 0;
 		float f = 0.0F;
 		boolean bl = false;
-		Item item = itemStack.getItem();
-		if (item == Items.WHEAT) {
+		if (itemStack.is(Items.WHEAT)) {
 			i = 10;
 			j = 3;
 			f = 2.0F;
-		} else if (item == Blocks.HAY_BLOCK.asItem()) {
+		} else if (itemStack.is(Blocks.HAY_BLOCK.asItem())) {
 			i = 90;
 			j = 6;
 			f = 10.0F;
@@ -328,8 +326,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 
 	@Override
 	public boolean isArmor(ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		return ItemTags.CARPETS.contains(item);
+		return itemStack.is(ItemTags.CARPETS);
 	}
 
 	@Override
@@ -381,10 +378,10 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		return animal != this && animal instanceof Llama && this.canParent() && ((Llama)animal).canParent();
 	}
 
-	public Llama getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public Llama getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Llama llama = this.makeBabyLlama();
-		this.setOffspringAttributes(agableMob, llama);
-		Llama llama2 = (Llama)agableMob;
+		this.setOffspringAttributes(ageableMob, llama);
+		Llama llama2 = (Llama)ageableMob;
 		int i = this.random.nextInt(Math.max(this.getStrength(), llama2.getStrength())) + 1;
 		if (this.random.nextFloat() < 0.03F) {
 			i++;
@@ -513,7 +510,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 	}
 
-	static class LlamaGroupData extends AgableMob.AgableMobGroupData {
+	static class LlamaGroupData extends AgeableMob.AgeableMobGroupData {
 		public final int variant;
 
 		private LlamaGroupData(int i) {

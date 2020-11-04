@@ -5,6 +5,12 @@ import com.google.common.collect.Iterables;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.Vex;
@@ -14,18 +20,23 @@ public class VexModel extends HumanoidModel<Vex> {
 	private final ModelPart leftWing;
 	private final ModelPart rightWing;
 
-	public VexModel() {
-		super(0.0F, 0.0F, 64, 64);
+	public VexModel(ModelPart modelPart) {
+		super(modelPart);
 		this.leftLeg.visible = false;
 		this.hat.visible = false;
-		this.rightLeg = new ModelPart(this, 32, 0);
-		this.rightLeg.addBox(-1.0F, -1.0F, -2.0F, 6.0F, 10.0F, 4.0F, 0.0F);
-		this.rightLeg.setPos(-1.9F, 12.0F, 0.0F);
-		this.rightWing = new ModelPart(this, 0, 32);
-		this.rightWing.addBox(-20.0F, 0.0F, 0.0F, 20.0F, 12.0F, 1.0F);
-		this.leftWing = new ModelPart(this, 0, 32);
-		this.leftWing.mirror = true;
-		this.leftWing.addBox(0.0F, 0.0F, 0.0F, 20.0F, 12.0F, 1.0F);
+		this.rightWing = modelPart.getChild("right_wing");
+		this.leftWing = modelPart.getChild("left_wing");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"right_leg", CubeListBuilder.create().texOffs(32, 0).addBox(-1.0F, -1.0F, -2.0F, 6.0F, 10.0F, 4.0F), PartPose.offset(-1.9F, 12.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(0, 32).addBox(-20.0F, 0.0F, 0.0F, 20.0F, 12.0F, 1.0F), PartPose.ZERO);
+		partDefinition.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 32).mirror().addBox(0.0F, 0.0F, 0.0F, 20.0F, 12.0F, 1.0F), PartPose.ZERO);
+		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
 	@Override

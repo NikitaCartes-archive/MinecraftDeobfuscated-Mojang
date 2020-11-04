@@ -24,7 +24,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -222,7 +222,7 @@ public class Sheep extends Animal implements Shearable {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.SHEARS) {
+		if (itemStack.is(Items.SHEARS)) {
 			if (!this.level.isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
@@ -332,8 +332,8 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
-	public Sheep getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
-		Sheep sheep = (Sheep)agableMob;
+	public Sheep getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+		Sheep sheep = (Sheep)ageableMob;
 		Sheep sheep2 = EntityType.SHEEP.create(serverLevel);
 		sheep2.setColor(this.getOffspringColor(this, sheep));
 		return sheep2;

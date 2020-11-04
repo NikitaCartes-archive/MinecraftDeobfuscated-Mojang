@@ -8,8 +8,8 @@ import net.minecraft.world.entity.AreaEffectCloud;
 
 @Environment(EnvType.CLIENT)
 public class AreaEffectCloudRenderer extends EntityRenderer<AreaEffectCloud> {
-	public AreaEffectCloudRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public AreaEffectCloudRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public ResourceLocation getTextureLocation(AreaEffectCloud areaEffectCloud) {

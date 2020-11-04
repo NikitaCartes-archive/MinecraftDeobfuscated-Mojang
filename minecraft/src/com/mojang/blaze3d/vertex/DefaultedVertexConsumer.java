@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public abstract class DefaultedVertexConsumer implements VertexConsumer {
-	protected boolean defaultColorSet = false;
+	protected boolean defaultColorSet;
 	protected int defaultR = 255;
 	protected int defaultG = 255;
 	protected int defaultB = 255;

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LeashKnotModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -13,10 +14,11 @@ import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 @Environment(EnvType.CLIENT)
 public class LeashKnotRenderer extends EntityRenderer<LeashFenceKnotEntity> {
 	private static final ResourceLocation KNOT_LOCATION = new ResourceLocation("textures/entity/lead_knot.png");
-	private final LeashKnotModel<LeashFenceKnotEntity> model = new LeashKnotModel<>();
+	private final LeashKnotModel<LeashFenceKnotEntity> model;
 
-	public LeashKnotRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public LeashKnotRenderer(EntityRendererProvider.Context context) {
+		super(context);
+		this.model = new LeashKnotModel<>(context.getLayer(ModelLayers.LEASH_KNOT));
 	}
 
 	public void render(LeashFenceKnotEntity leashFenceKnotEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

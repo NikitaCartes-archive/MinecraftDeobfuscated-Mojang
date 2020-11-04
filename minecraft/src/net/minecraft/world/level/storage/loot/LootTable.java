@@ -224,7 +224,7 @@ public class LootTable {
 				if (resourceLocation != null) {
 					jsonObject.addProperty("type", resourceLocation.toString());
 				} else {
-					LootTable.LOGGER.warn("Failed to find id for param set " + lootTable.paramSet);
+					LootTable.LOGGER.warn("Failed to find id for param set {}", lootTable.paramSet);
 				}
 			}
 

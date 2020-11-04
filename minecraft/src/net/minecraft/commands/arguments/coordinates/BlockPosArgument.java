@@ -16,7 +16,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerLevel;
 
 public class BlockPosArgument implements ArgumentType<Coordinates> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "~ ~ ~", "^ ^ ^", "^1 ^ ^-5", "~0.5 ~1 ~-5");
@@ -31,17 +30,14 @@ public class BlockPosArgument implements ArgumentType<Coordinates> {
 		BlockPos blockPos = commandContext.<Coordinates>getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
 		if (!commandContext.getSource().getLevel().hasChunkAt(blockPos)) {
 			throw ERROR_NOT_LOADED.create();
+		} else if (!commandContext.getSource().getLevel().isInWorldBounds(blockPos)) {
+			throw ERROR_OUT_OF_WORLD.create();
 		} else {
-			commandContext.getSource().getLevel();
-			if (!ServerLevel.isInWorldBounds(blockPos)) {
-				throw ERROR_OUT_OF_WORLD.create();
-			} else {
-				return blockPos;
-			}
+			return blockPos;
 		}
 	}
 
-	public static BlockPos getOrLoadBlockPos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+	public static BlockPos getOrLoadBlockPos(CommandContext<CommandSourceStack> commandContext, String string) {
 		return commandContext.<Coordinates>getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
 	}
 

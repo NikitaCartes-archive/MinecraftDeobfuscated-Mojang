@@ -62,9 +62,9 @@ public class ClearInventoryCommands {
 		int j = 0;
 
 		for (ServerPlayer serverPlayer : collection) {
-			j += serverPlayer.inventory.clearOrCountMatchingItems(predicate, i, serverPlayer.inventoryMenu.getCraftSlots());
+			j += serverPlayer.getInventory().clearOrCountMatchingItems(predicate, i, serverPlayer.inventoryMenu.getCraftSlots());
 			serverPlayer.containerMenu.broadcastChanges();
-			serverPlayer.inventoryMenu.slotsChanged(serverPlayer.inventory);
+			serverPlayer.inventoryMenu.slotsChanged(serverPlayer.getInventory());
 			serverPlayer.broadcastCarriedItem();
 		}
 

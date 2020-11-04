@@ -86,7 +86,7 @@ public class SnowLayerBlock extends Block {
 		} else {
 			return !blockState2.is(Blocks.HONEY_BLOCK) && !blockState2.is(Blocks.SOUL_SAND)
 				? Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP)
-					|| blockState2.getBlock() == this && (Integer)blockState2.getValue(LAYERS) == 8
+					|| blockState2.is(this) && (Integer)blockState2.getValue(LAYERS) == 8
 				: true;
 		}
 	}
@@ -111,7 +111,7 @@ public class SnowLayerBlock extends Block {
 	@Override
 	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		int i = (Integer)blockState.getValue(LAYERS);
-		if (blockPlaceContext.getItemInHand().getItem() != this.asItem() || i >= 8) {
+		if (!blockPlaceContext.getItemInHand().is(this.asItem()) || i >= 8) {
 			return i == 1;
 		} else {
 			return blockPlaceContext.replacingClickedOnBlock() ? blockPlaceContext.getClickedFace() == Direction.UP : true;

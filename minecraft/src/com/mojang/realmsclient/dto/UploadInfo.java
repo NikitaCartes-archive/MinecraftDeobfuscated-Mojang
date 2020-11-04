@@ -45,7 +45,7 @@ public class UploadInfo extends ValueObject {
 				}
 			}
 		} catch (Exception var8) {
-			LOGGER.error("Could not parse UploadInfo: " + var8.getMessage());
+			LOGGER.error("Could not parse UploadInfo: {}", var8.getMessage());
 		}
 
 		return null;

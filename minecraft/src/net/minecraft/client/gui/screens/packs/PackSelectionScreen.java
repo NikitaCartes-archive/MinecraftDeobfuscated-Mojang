@@ -218,25 +218,29 @@ public class PackSelectionScreen extends Screen {
 			InputStream inputStream = packResources.getRootResource("pack.png");
 			Throwable var6 = null;
 
-			ResourceLocation var10;
+			ResourceLocation string;
 			try {
-				String string = pack.getId();
-				ResourceLocation resourceLocation = new ResourceLocation(
-					"minecraft", "pack/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon"
-				);
-				NativeImage nativeImage = NativeImage.read(inputStream);
-				textureManager.register(resourceLocation, new DynamicTexture(nativeImage));
-				var10 = resourceLocation;
-			} catch (Throwable var37) {
-				var6 = var37;
-				throw var37;
+				if (inputStream != null) {
+					String stringx = pack.getId();
+					ResourceLocation resourceLocation = new ResourceLocation(
+						"minecraft", "pack/" + Util.sanitizeName(stringx, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(stringx) + "/icon"
+					);
+					NativeImage nativeImage = NativeImage.read(inputStream);
+					textureManager.register(resourceLocation, new DynamicTexture(nativeImage));
+					return resourceLocation;
+				}
+
+				string = DEFAULT_ICON;
+			} catch (Throwable var40) {
+				var6 = var40;
+				throw var40;
 			} finally {
 				if (inputStream != null) {
 					if (var6 != null) {
 						try {
 							inputStream.close();
-						} catch (Throwable var36) {
-							var6.addSuppressed(var36);
+						} catch (Throwable var39) {
+							var6.addSuppressed(var39);
 						}
 					} else {
 						inputStream.close();
@@ -244,10 +248,10 @@ public class PackSelectionScreen extends Screen {
 				}
 			}
 
-			return var10;
-		} catch (FileNotFoundException var41) {
-		} catch (Exception var42) {
-			LOGGER.warn("Failed to load icon from pack {}", pack.getId(), var42);
+			return string;
+		} catch (FileNotFoundException var44) {
+		} catch (Exception var45) {
+			LOGGER.warn("Failed to load icon from pack {}", pack.getId(), var45);
 		}
 
 		return DEFAULT_ICON;

@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -56,7 +55,7 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
 		if (!this.baseClass.isAssignableFrom(class_)) {
 			throw new IllegalArgumentException("Don't know how to search for " + class_);
 		} else {
-			List<T> list = (List<T>)this.byClass
+			List<? extends T> list = (List<? extends T>)this.byClass
 				.computeIfAbsent(class_, class_x -> (List)this.allInstances.stream().filter(class_x::isInstance).collect(Collectors.toList()));
 			return Collections.unmodifiableCollection(list);
 		}
@@ -64,10 +63,6 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
 
 	public Iterator<T> iterator() {
 		return (Iterator<T>)(this.allInstances.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.allInstances.iterator()));
-	}
-
-	public List<T> getAllInstances() {
-		return ImmutableList.copyOf(this.allInstances);
 	}
 
 	public int size() {

@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,10 +27,10 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 
 	public PathNavigationRegion(Level level, BlockPos blockPos, BlockPos blockPos2) {
 		this.level = level;
-		this.centerX = blockPos.getX() >> 4;
-		this.centerZ = blockPos.getZ() >> 4;
-		int i = blockPos2.getX() >> 4;
-		int j = blockPos2.getZ() >> 4;
+		this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
+		this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
+		int i = SectionPos.blockToSectionCoord(blockPos2.getX());
+		int j = SectionPos.blockToSectionCoord(blockPos2.getZ());
 		this.chunks = new ChunkAccess[i - this.centerX + 1][j - this.centerZ + 1];
 		ChunkSource chunkSource = level.getChunkSource();
 		this.allEmpty = true;
@@ -40,8 +41,8 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 			}
 		}
 
-		for (int k = blockPos.getX() >> 4; k <= blockPos2.getX() >> 4; k++) {
-			for (int l = blockPos.getZ() >> 4; l <= blockPos2.getZ() >> 4; l++) {
+		for (int k = SectionPos.blockToSectionCoord(blockPos.getX()); k <= SectionPos.blockToSectionCoord(blockPos2.getX()); k++) {
+			for (int l = SectionPos.blockToSectionCoord(blockPos.getZ()); l <= SectionPos.blockToSectionCoord(blockPos2.getZ()); l++) {
 				ChunkAccess chunkAccess = this.chunks[k - this.centerX][l - this.centerZ];
 				if (chunkAccess != null && !chunkAccess.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) {
 					this.allEmpty = false;
@@ -52,7 +53,7 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 	}
 
 	private ChunkAccess getChunk(BlockPos blockPos) {
-		return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+		return this.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
 	}
 
 	private ChunkAccess getChunk(int i, int j) {
@@ -85,7 +86,7 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 
 	@Override
 	public BlockState getBlockState(BlockPos blockPos) {
-		if (Level.isOutsideBuildHeight(blockPos)) {
+		if (this.isOutsideBuildHeight(blockPos)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			ChunkAccess chunkAccess = this.getChunk(blockPos);
@@ -105,11 +106,21 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 
 	@Override
 	public FluidState getFluidState(BlockPos blockPos) {
-		if (Level.isOutsideBuildHeight(blockPos)) {
+		if (this.isOutsideBuildHeight(blockPos)) {
 			return Fluids.EMPTY.defaultFluidState();
 		} else {
 			ChunkAccess chunkAccess = this.getChunk(blockPos);
 			return chunkAccess.getFluidState(blockPos);
 		}
+	}
+
+	@Override
+	public int getSectionsCount() {
+		return this.level.getSectionsCount();
+	}
+
+	@Override
+	public int getMinSection() {
+		return this.level.getMinSection();
 	}
 }

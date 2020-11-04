@@ -77,7 +77,7 @@ public class RealmsServer extends ValueObject {
 				try {
 					string2 = RealmsUtil.uuidToName(string);
 				} catch (Exception var8) {
-					LOGGER.error("Could not get name for " + string, (Throwable)var8);
+					LOGGER.error("Could not get name for {}", string, var8);
 					continue;
 				}
 
@@ -123,7 +123,7 @@ public class RealmsServer extends ValueObject {
 			realmsServer.minigameId = JsonUtils.getIntOr("minigameId", jsonObject, -1);
 			realmsServer.minigameImage = JsonUtils.getStringOr("minigameImage", jsonObject, null);
 		} catch (Exception var3) {
-			LOGGER.error("Could not parse McoServer: " + var3.getMessage());
+			LOGGER.error("Could not parse McoServer: {}", var3.getMessage());
 		}
 
 		return realmsServer;
@@ -201,7 +201,7 @@ public class RealmsServer extends ValueObject {
 		try {
 			return parse(new JsonParser().parse(string).getAsJsonObject());
 		} catch (Exception var2) {
-			LOGGER.error("Could not parse McoServer: " + var2.getMessage());
+			LOGGER.error("Could not parse McoServer: {}", var2.getMessage());
 			return new RealmsServer();
 		}
 	}

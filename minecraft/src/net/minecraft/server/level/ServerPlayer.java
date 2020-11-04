@@ -85,6 +85,7 @@ import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -100,7 +101,6 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ComplexItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -289,7 +289,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 		Entity entity = this.getRootVehicle();
 		Entity entity2 = this.getVehicle();
-		if (entity2 != null && entity != this && entity.hasOnePlayerPassenger()) {
+		if (entity2 != null && entity != this && entity.hasExactlyOnePlayerPassenger()) {
 			CompoundTag compoundTag3 = new CompoundTag();
 			CompoundTag compoundTag4 = new CompoundTag();
 			entity.save(compoundTag4);
@@ -418,8 +418,8 @@ public class ServerPlayer extends Player implements ContainerListener {
 				super.tick();
 			}
 
-			for (int i = 0; i < this.inventory.getContainerSize(); i++) {
-				ItemStack itemStack = this.inventory.getItem(i);
+			for (int i = 0; i < this.getInventory().getContainerSize(); i++) {
+				ItemStack itemStack = this.getInventory().getItem(i);
 				if (itemStack.getItem().isComplex()) {
 					Packet<?> packet = ((ComplexItem)itemStack.getItem()).getUpdatePacket(itemStack, this.level, this);
 					if (packet != null) {
@@ -546,7 +546,11 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	private void tellNeutralMobsThatIDied() {
 		AABB aABB = new AABB(this.blockPosition()).inflate(32.0, 10.0, 32.0);
-		this.level.getLoadedEntitiesOfClass(Mob.class, aABB).stream().filter(mob -> mob instanceof NeutralMob).forEach(mob -> ((NeutralMob)mob).playerDied(this));
+		this.level
+			.getEntitiesOfClass(Mob.class, aABB, EntitySelector.NO_SPECTATORS)
+			.stream()
+			.filter(mob -> mob instanceof NeutralMob)
+			.forEach(mob -> ((NeutralMob)mob).playerDied(this));
 	}
 
 	@Override
@@ -638,7 +642,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 		ResourceKey<Level> resourceKey = serverLevel2.dimension();
 		if (resourceKey == Level.END && serverLevel.dimension() == Level.OVERWORLD) {
 			this.unRide();
-			this.getLevel().removePlayerImmediately(this);
+			this.getLevel().removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
 			if (!this.wonGame) {
 				this.wonGame = true;
 				this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.WIN_GAME, this.seenCredits ? 0.0F : 1.0F));
@@ -664,8 +668,8 @@ public class ServerPlayer extends Player implements ContainerListener {
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 			PlayerList playerList = this.server.getPlayerList();
 			playerList.sendPlayerPermissionLevel(this);
-			serverLevel2.removePlayerImmediately(this);
-			this.removed = false;
+			serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
+			this.unsetRemoved();
 			PortalInfo portalInfo = this.findDimensionEntryPoint(serverLevel);
 			if (portalInfo != null) {
 				serverLevel2.getProfiler().push("moving");
@@ -684,7 +688,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 				serverLevel2.getProfiler().pop();
 				this.triggerDimensionChangeTriggers(serverLevel2);
 				this.gameMode.setLevel(serverLevel);
-				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.abilities));
+				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
 				playerList.sendLevelInfo(this, serverLevel);
 				playerList.sendAllPlayerInfo(this);
 
@@ -868,7 +872,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	@Override
 	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return super.isInvulnerableTo(damageSource) || this.isChangingDimension() || this.abilities.invulnerable && damageSource == DamageSource.WITHER;
+		return super.isInvulnerableTo(damageSource) || this.isChangingDimension() || this.getAbilities().invulnerable && damageSource == DamageSource.WITHER;
 	}
 
 	@Override
@@ -909,7 +913,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 			}
 
 			this.nextContainerCounter();
-			AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.inventory, this);
+			AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.getInventory(), this);
 			if (abstractContainerMenu == null) {
 				if (this.isSpectator()) {
 					this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
@@ -938,14 +942,13 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 		this.nextContainerCounter();
 		this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, container.getContainerSize(), abstractHorse.getId()));
-		this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.inventory, container, abstractHorse);
+		this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), container, abstractHorse);
 		this.containerMenu.addSlotListener(this);
 	}
 
 	@Override
 	public void openItemGui(ItemStack itemStack, InteractionHand interactionHand) {
-		Item item = itemStack.getItem();
-		if (item == Items.WRITTEN_BOOK) {
+		if (itemStack.is(Items.WRITTEN_BOOK)) {
 			if (WrittenBookItem.resolveBookComponents(itemStack, this.createCommandSourceStack(), this)) {
 				this.containerMenu.broadcastChanges();
 			}
@@ -964,7 +967,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
 		if (!(abstractContainerMenu.getSlot(i) instanceof ResultSlot)) {
 			if (abstractContainerMenu == this.inventoryMenu) {
-				CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory, itemStack);
+				CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.getInventory(), itemStack);
 			}
 
 			if (!this.ignoreSlotUpdateHack) {
@@ -980,7 +983,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	@Override
 	public void refreshContainer(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList) {
 		this.connection.send(new ClientboundContainerSetContentPacket(abstractContainerMenu.containerId, nonNullList));
-		this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.inventory.getCarried()));
+		this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.getInventory().getCarried()));
 	}
 
 	@Override
@@ -996,7 +999,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	public void broadcastCarriedItem() {
 		if (!this.ignoreSlotUpdateHack) {
-			this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.inventory.getCarried()));
+			this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.getInventory().getCarried()));
 		}
 	}
 
@@ -1102,7 +1105,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	public void restoreFrom(ServerPlayer serverPlayer, boolean bl) {
 		if (bl) {
-			this.inventory.replaceWith(serverPlayer.inventory);
+			this.getInventory().replaceWith(serverPlayer.getInventory());
 			this.setHealth(serverPlayer.getHealth());
 			this.foodData = serverPlayer.foodData;
 			this.experienceLevel = serverPlayer.experienceLevel;
@@ -1111,7 +1114,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 			this.setScore(serverPlayer.getScore());
 			this.portalEntrancePos = serverPlayer.portalEntrancePos;
 		} else if (this.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || serverPlayer.isSpectator()) {
-			this.inventory.replaceWith(serverPlayer.inventory);
+			this.getInventory().replaceWith(serverPlayer.getInventory());
 			this.experienceLevel = serverPlayer.experienceLevel;
 			this.totalExperience = serverPlayer.totalExperience;
 			this.experienceProgress = serverPlayer.experienceProgress;
@@ -1186,7 +1189,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	@Override
 	public void onUpdateAbilities() {
 		if (this.connection != null) {
-			this.connection.send(new ClientboundPlayerAbilitiesPacket(this.abilities));
+			this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
 			this.updateInvisibilityStatus();
 		}
 	}
@@ -1262,8 +1265,8 @@ public class ServerPlayer extends Player implements ContainerListener {
 		return this.chatVisibility;
 	}
 
-	public void sendTexturePack(String string, String string2) {
-		this.connection.send(new ClientboundResourcePackPacket(string, string2));
+	public void sendTexturePack(String string, String string2, boolean bl) {
+		this.connection.send(new ClientboundResourcePackPacket(string, string2, bl));
 	}
 
 	@Override
@@ -1384,8 +1387,8 @@ public class ServerPlayer extends Player implements ContainerListener {
 				);
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 			this.server.getPlayerList().sendPlayerPermissionLevel(this);
-			serverLevel2.removePlayerImmediately(this);
-			this.removed = false;
+			serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
+			this.unsetRemoved();
 			this.moveTo(d, e, f, g, h);
 			this.setLevel(serverLevel);
 			serverLevel.addDuringCommandTeleport(this);

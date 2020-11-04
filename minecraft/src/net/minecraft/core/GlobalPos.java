@@ -49,6 +49,6 @@ public final class GlobalPos {
 	}
 
 	public String toString() {
-		return this.dimension.toString() + " " + this.pos;
+		return this.dimension + " " + this.pos;
 	}
 }

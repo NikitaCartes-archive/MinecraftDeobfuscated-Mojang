@@ -20,7 +20,7 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -140,7 +140,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
 		}
 
-		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
+		this.readPersistentAngerSaveData(this.level, compoundTag);
 	}
 
 	@Override
@@ -325,12 +325,12 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
 		if (this.level.isClientSide) {
-			boolean bl = this.isOwnedBy(player) || this.isTame() || item == Items.BONE && !this.isTame() && !this.isAngry();
+			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
 			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
 		} else {
 			if (this.isTame()) {
 				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 
@@ -354,14 +354,14 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 				DyeColor dyeColor = ((DyeItem)item).getDyeColor();
 				if (dyeColor != this.getCollarColor()) {
 					this.setCollarColor(dyeColor);
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 
 					return InteractionResult.SUCCESS;
 				}
-			} else if (item == Items.BONE && !this.isAngry()) {
-				if (!player.abilities.instabuild) {
+			} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
+				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
 
@@ -450,7 +450,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		this.entityData.set(DATA_COLLAR_COLOR, dyeColor.getId());
 	}
 
-	public Wolf getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Wolf wolf = EntityType.WOLF.create(serverLevel);
 		UUID uUID = this.getOwnerUUID();
 		if (uUID != null) {

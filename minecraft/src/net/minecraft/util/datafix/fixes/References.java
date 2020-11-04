@@ -13,6 +13,7 @@ public class References {
 	public static final TypeReference SAVED_DATA = () -> "saved_data";
 	public static final TypeReference ADVANCEMENTS = () -> "advancements";
 	public static final TypeReference POI_CHUNK = () -> "poi_chunk";
+	public static final TypeReference ENTITY_CHUNK = () -> "entity_chunk";
 	public static final TypeReference BLOCK_ENTITY = () -> "block_entity";
 	public static final TypeReference ITEM_STACK = () -> "item_stack";
 	public static final TypeReference BLOCK_STATE = () -> "block_state";

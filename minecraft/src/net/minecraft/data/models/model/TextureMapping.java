@@ -9,6 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class TextureMapping {
 	private final Map<TextureSlot, ResourceLocation> slots = Maps.<TextureSlot, ResourceLocation>newHashMap();
@@ -255,6 +256,25 @@ public class TextureMapping {
 
 	public static TextureMapping campfire(Block block) {
 		return new TextureMapping().put(TextureSlot.LIT_LOG, getBlockTexture(block, "_log_lit")).put(TextureSlot.FIRE, getBlockTexture(block, "_fire"));
+	}
+
+	public static TextureMapping candleCake(Block block) {
+		return new TextureMapping()
+			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.CAKE, "_side"))
+			.put(TextureSlot.BOTTOM, getBlockTexture(Blocks.CAKE, "_bottom"))
+			.put(TextureSlot.TOP, getBlockTexture(Blocks.CAKE, "_top"))
+			.put(TextureSlot.SIDE, getBlockTexture(Blocks.CAKE, "_side"))
+			.put(TextureSlot.CANDLE, getBlockTexture(block));
+	}
+
+	public static TextureMapping cauldron(Block block) {
+		return new TextureMapping()
+			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.CAULDRON, "_side"))
+			.put(TextureSlot.SIDE, getBlockTexture(Blocks.CAULDRON, "_side"))
+			.put(TextureSlot.TOP, getBlockTexture(Blocks.CAULDRON, "_top"))
+			.put(TextureSlot.BOTTOM, getBlockTexture(Blocks.CAULDRON, "_bottom"))
+			.put(TextureSlot.INSIDE, getBlockTexture(Blocks.CAULDRON, "_inner"))
+			.put(TextureSlot.CONTENT, getBlockTexture(block, "_still"));
 	}
 
 	public static TextureMapping layer0(Item item) {

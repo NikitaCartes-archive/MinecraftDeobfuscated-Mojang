@@ -31,18 +31,15 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
 		}
 
 		GrowingPlantHeadBlock growingPlantHeadBlock = this.getHeadBlock();
-		if (direction == this.growthDirection) {
-			Block block = blockState2.getBlock();
-			if (block != this && block != growingPlantHeadBlock) {
-				return growingPlantHeadBlock.getStateForPlacement(levelAccessor);
+		if (direction == this.growthDirection && !blockState2.is(this) && !blockState2.is(growingPlantHeadBlock)) {
+			return growingPlantHeadBlock.getStateForPlacement(levelAccessor);
+		} else {
+			if (this.scheduleFluidTicks) {
+				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 			}
-		}
 
-		if (this.scheduleFluidTicks) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		}
-
-		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -74,19 +71,19 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
 	private Optional<BlockPos> getHeadPos(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		BlockPos blockPos2 = blockPos;
 
-		Block block;
+		BlockState blockState2;
 		do {
 			blockPos2 = blockPos2.relative(this.growthDirection);
-			block = blockGetter.getBlockState(blockPos2).getBlock();
-		} while (block == blockState.getBlock());
+			blockState2 = blockGetter.getBlockState(blockPos2);
+		} while (blockState2.is(blockState.getBlock()));
 
-		return block == this.getHeadBlock() ? Optional.of(blockPos2) : Optional.empty();
+		return blockState2.is(this.getHeadBlock()) ? Optional.of(blockPos2) : Optional.empty();
 	}
 
 	@Override
 	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		boolean bl = super.canBeReplaced(blockState, blockPlaceContext);
-		return bl && blockPlaceContext.getItemInHand().getItem() == this.getHeadBlock().asItem() ? false : bl;
+		return bl && blockPlaceContext.getItemInHand().is(this.getHeadBlock().asItem()) ? false : bl;
 	}
 
 	@Override

@@ -61,6 +61,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
 		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
+		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,
@@ -128,6 +129,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.GOLDEN_AXE,
 				Items.GOLDEN_HOE
 			);
+		this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
+		this.tag(ItemTags.PIGLIN_FOOD).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
 			.add(
 				Items.WARPED_STEM,

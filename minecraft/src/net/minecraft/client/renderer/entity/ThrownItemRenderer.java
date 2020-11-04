@@ -19,15 +19,15 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 	private final float scale;
 	private final boolean fullBright;
 
-	public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer, float f, boolean bl) {
-		super(entityRenderDispatcher);
-		this.itemRenderer = itemRenderer;
+	public ThrownItemRenderer(EntityRendererProvider.Context context, float f, boolean bl) {
+		super(context);
+		this.itemRenderer = context.getItemRenderer();
 		this.scale = f;
 		this.fullBright = bl;
 	}
 
-	public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
-		this(entityRenderDispatcher, itemRenderer, 1.0F, false);
+	public ThrownItemRenderer(EntityRendererProvider.Context context) {
+		this(context, 1.0F, false);
 	}
 
 	@Override

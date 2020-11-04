@@ -33,8 +33,8 @@ public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockConta
 	}
 
 	@Override
-	protected boolean canAttachToBlock(Block block) {
-		return block != Blocks.MAGMA_BLOCK;
+	protected boolean canAttachTo(BlockState blockState) {
+		return !blockState.is(Blocks.MAGMA_BLOCK);
 	}
 
 	@Override

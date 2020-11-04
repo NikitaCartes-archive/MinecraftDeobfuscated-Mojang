@@ -3,6 +3,8 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SpiderModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.SpiderEyesLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Spider;
@@ -11,8 +13,12 @@ import net.minecraft.world.entity.monster.Spider;
 public class SpiderRenderer<T extends Spider> extends MobRenderer<T, SpiderModel<T>> {
 	private static final ResourceLocation SPIDER_LOCATION = new ResourceLocation("textures/entity/spider/spider.png");
 
-	public SpiderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new SpiderModel<>(), 0.8F);
+	public SpiderRenderer(EntityRendererProvider.Context context) {
+		this(context, ModelLayers.SPIDER);
+	}
+
+	public SpiderRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
+		super(context, new SpiderModel<>(context.getLayer(modelLayerLocation)), 0.8F);
 		this.addLayer(new SpiderEyesLayer<>(this));
 	}
 

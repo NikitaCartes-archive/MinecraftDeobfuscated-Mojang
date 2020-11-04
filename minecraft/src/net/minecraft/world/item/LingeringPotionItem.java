@@ -27,7 +27,14 @@ public class LingeringPotionItem extends ThrowablePotionItem {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		level.playSound(
-			null, player.getX(), player.getY(), player.getZ(), SoundEvents.LINGERING_POTION_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+			null,
+			player.getX(),
+			player.getY(),
+			player.getZ(),
+			SoundEvents.LINGERING_POTION_THROW,
+			SoundSource.NEUTRAL,
+			0.5F,
+			0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 		);
 		return super.use(level, player, interactionHand);
 	}

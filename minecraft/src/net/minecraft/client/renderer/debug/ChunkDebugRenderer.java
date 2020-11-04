@@ -16,6 +16,7 @@ import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -68,7 +69,9 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				int i = 0;
 
 				for (String string2 : strings) {
-					DebugRenderer.renderFloatingText(string2, (double)((chunkPos.x << 4) + 8), h + (double)i, (double)((chunkPos.z << 4) + 8), -1, 0.15F);
+					DebugRenderer.renderFloatingText(
+						string2, (double)SectionPos.sectionToBlockCoord(chunkPos.x, 8), h + (double)i, (double)SectionPos.sectionToBlockCoord(chunkPos.z, 8), -1, 0.15F
+					);
 					i -= 2;
 				}
 			}
@@ -87,8 +90,8 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		private ChunkData(IntegratedServer integratedServer, double d, double e) {
 			ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
 			ResourceKey<Level> resourceKey = clientLevel.dimension();
-			int i = (int)d >> 4;
-			int j = (int)e >> 4;
+			int i = SectionPos.posToSectionCoord(d);
+			int j = SectionPos.posToSectionCoord(e);
 			Builder<ChunkPos, String> builder = ImmutableMap.builder();
 			ClientChunkCache clientChunkCache = clientLevel.getChunkSource();
 

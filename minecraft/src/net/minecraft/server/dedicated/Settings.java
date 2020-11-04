@@ -51,7 +51,7 @@ public abstract class Settings<T extends Settings<T>> {
 				}
 			}
 		} catch (IOException var15) {
-			LOGGER.error("Failed to load properties from file: " + path);
+			LOGGER.error("Failed to load properties from file: {}", path);
 		}
 
 		return properties;
@@ -81,7 +81,7 @@ public abstract class Settings<T extends Settings<T>> {
 				}
 			}
 		} catch (IOException var15) {
-			LOGGER.error("Failed to store properties to file: " + path);
+			LOGGER.error("Failed to store properties to file: {}", path);
 		}
 	}
 

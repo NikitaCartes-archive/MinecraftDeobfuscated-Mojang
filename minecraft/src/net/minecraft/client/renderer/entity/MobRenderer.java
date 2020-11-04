@@ -19,8 +19,8 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
-	public MobRenderer(EntityRenderDispatcher entityRenderDispatcher, M entityModel, float f) {
-		super(entityRenderDispatcher, entityModel, f);
+	public MobRenderer(EntityRendererProvider.Context context, M entityModel, float f) {
+		super(context, entityModel, f);
 	}
 
 	protected boolean shouldShowName(T mob) {
@@ -70,49 +70,47 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		int s = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
 		int t = mob.level.getBrightness(LightLayer.SKY, blockPos);
 		int u = mob.level.getBrightness(LightLayer.SKY, blockPos2);
-		renderSide(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.025F, p, q);
-		renderSide(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.0F, p, q);
+
+		for (int v = 0; v <= 24; v++) {
+			addVertexPair(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.025F, p, q, v, false);
+		}
+
+		for (int v = 24; v >= 0; v--) {
+			addVertexPair(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.0F, p, q, v, true);
+		}
+
 		poseStack.popPose();
 	}
 
-	public static void renderSide(
-		VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, int i, int j, int k, int l, float m, float n, float o, float p
+	private static void addVertexPair(
+		VertexConsumer vertexConsumer,
+		Matrix4f matrix4f,
+		float f,
+		float g,
+		float h,
+		int i,
+		int j,
+		int k,
+		int l,
+		float m,
+		float n,
+		float o,
+		float p,
+		int q,
+		boolean bl
 	) {
-		int q = 24;
-
-		for (int r = 0; r < 24; r++) {
-			float s = (float)r / 23.0F;
-			int t = (int)Mth.lerp(s, (float)i, (float)j);
-			int u = (int)Mth.lerp(s, (float)k, (float)l);
-			int v = LightTexture.pack(t, u);
-			addVertexPair(vertexConsumer, matrix4f, v, f, g, h, m, n, 24, r, false, o, p);
-			addVertexPair(vertexConsumer, matrix4f, v, f, g, h, m, n, 24, r + 1, true, o, p);
-		}
-	}
-
-	public static void addVertexPair(
-		VertexConsumer vertexConsumer, Matrix4f matrix4f, int i, float f, float g, float h, float j, float k, int l, int m, boolean bl, float n, float o
-	) {
-		float p = 0.5F;
-		float q = 0.4F;
-		float r = 0.3F;
-		if (m % 2 == 0) {
-			p *= 0.7F;
-			q *= 0.7F;
-			r *= 0.7F;
-		}
-
-		float s = (float)m / (float)l;
-		float t = f * s;
-		float u = g > 0.0F ? g * s * s : g - g * (1.0F - s) * (1.0F - s);
-		float v = h * s;
-		if (!bl) {
-			vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0F).uv2(i).endVertex();
-		}
-
-		vertexConsumer.vertex(matrix4f, t - n, u + k, v + o).color(p, q, r, 1.0F).uv2(i).endVertex();
-		if (bl) {
-			vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0F).uv2(i).endVertex();
-		}
+		float r = (float)q / 24.0F;
+		int s = (int)Mth.lerp(r, (float)i, (float)j);
+		int t = (int)Mth.lerp(r, (float)k, (float)l);
+		int u = LightTexture.pack(s, t);
+		float v = q % 2 == (bl ? 1 : 0) ? 0.7F : 1.0F;
+		float w = 0.5F * v;
+		float x = 0.4F * v;
+		float y = 0.3F * v;
+		float z = f * r;
+		float aa = g > 0.0F ? g * r * r : g - g * (1.0F - r) * (1.0F - r);
+		float ab = h * r;
+		vertexConsumer.vertex(matrix4f, z - o, aa + n, ab + p).color(w, x, y, 1.0F).uv2(u).endVertex();
+		vertexConsumer.vertex(matrix4f, z + o, aa + m - n, ab - p).color(w, x, y, 1.0F).uv2(u).endVertex();
 	}
 }

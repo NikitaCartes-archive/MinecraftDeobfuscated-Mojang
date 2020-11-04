@@ -36,7 +36,7 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
 			if (this.timeWaiting == 1) {
 				LocalPlayer localPlayer = this.tutorial.getMinecraft().player;
 				if (localPlayer != null) {
-					if (localPlayer.inventory.contains(ItemTags.LOGS)) {
+					if (localPlayer.getInventory().contains(ItemTags.LOGS)) {
 						this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
 						return;
 					}
@@ -83,7 +83,7 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
 
 	@Override
 	public void onGetItem(ItemStack itemStack) {
-		if (ItemTags.LOGS.contains(itemStack.getItem())) {
+		if (itemStack.is(ItemTags.LOGS)) {
 			this.tutorial.setStep(TutorialSteps.CRAFT_PLANKS);
 		}
 	}

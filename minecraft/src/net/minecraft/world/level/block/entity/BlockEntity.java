@@ -11,8 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,14 +20,14 @@ public abstract class BlockEntity {
 	private final BlockEntityType<?> type;
 	@Nullable
 	protected Level level;
-	protected BlockPos worldPosition = BlockPos.ZERO;
+	protected final BlockPos worldPosition;
 	protected boolean remove;
-	@Nullable
 	private BlockState blockState;
-	private boolean hasLoggedInvalidStateBefore;
 
-	public BlockEntity(BlockEntityType<?> blockEntityType) {
+	public BlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		this.type = blockEntityType;
+		this.worldPosition = blockPos.immutable();
+		this.blockState = blockState;
 	}
 
 	@Nullable
@@ -37,17 +35,15 @@ public abstract class BlockEntity {
 		return this.level;
 	}
 
-	public void setLevelAndPosition(Level level, BlockPos blockPos) {
+	public void setLevel(Level level) {
 		this.level = level;
-		this.worldPosition = blockPos.immutable();
 	}
 
 	public boolean hasLevel() {
 		return this.level != null;
 	}
 
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		this.worldPosition = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+	public void load(CompoundTag compoundTag) {
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {
@@ -68,21 +64,21 @@ public abstract class BlockEntity {
 	}
 
 	@Nullable
-	public static BlockEntity loadStatic(BlockState blockState, CompoundTag compoundTag) {
+	public static BlockEntity loadStatic(BlockPos blockPos, BlockState blockState, CompoundTag compoundTag) {
 		String string = compoundTag.getString("id");
 		return (BlockEntity)Registry.BLOCK_ENTITY_TYPE.getOptional(new ResourceLocation(string)).map(blockEntityType -> {
 			try {
-				return blockEntityType.create();
-			} catch (Throwable var3) {
-				LOGGER.error("Failed to create block entity {}", string, var3);
+				return blockEntityType.create(blockPos, blockState);
+			} catch (Throwable var5) {
+				LOGGER.error("Failed to create block entity {}", string, var5);
 				return null;
 			}
 		}).map(blockEntity -> {
 			try {
-				blockEntity.load(blockState, compoundTag);
+				blockEntity.load(compoundTag);
 				return blockEntity;
-			} catch (Throwable var5) {
-				LOGGER.error("Failed to load data for block entity {}", string, var5);
+			} catch (Throwable var4) {
+				LOGGER.error("Failed to load data for block entity {}", string, var4);
 				return null;
 			}
 		}).orElseGet(() -> {
@@ -93,11 +89,14 @@ public abstract class BlockEntity {
 
 	public void setChanged() {
 		if (this.level != null) {
-			this.blockState = this.level.getBlockState(this.worldPosition);
-			this.level.blockEntityChanged(this.worldPosition, this);
-			if (!this.blockState.isAir()) {
-				this.level.updateNeighbourForOutputSignal(this.worldPosition, this.blockState.getBlock());
-			}
+			setChanged(this.level, this.worldPosition, this.blockState);
+		}
+	}
+
+	protected static void setChanged(Level level, BlockPos blockPos, BlockState blockState) {
+		level.blockEntityChanged(blockPos);
+		if (!blockState.isAir()) {
+			level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
 		}
 	}
 
@@ -111,10 +110,6 @@ public abstract class BlockEntity {
 	}
 
 	public BlockState getBlockState() {
-		if (this.blockState == null) {
-			this.blockState = this.level.getBlockState(this.worldPosition);
-		}
-
 		return this.blockState;
 	}
 
@@ -143,42 +138,26 @@ public abstract class BlockEntity {
 		return false;
 	}
 
-	public void clearCache() {
-		this.blockState = null;
-	}
-
 	public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
 		crashReportCategory.setDetail(
 			"Name", (CrashReportDetail<String>)(() -> Registry.BLOCK_ENTITY_TYPE.getKey(this.getType()) + " // " + this.getClass().getCanonicalName())
 		);
 		if (this.level != null) {
-			CrashReportCategory.populateBlockDetails(crashReportCategory, this.worldPosition, this.getBlockState());
-			CrashReportCategory.populateBlockDetails(crashReportCategory, this.worldPosition, this.level.getBlockState(this.worldPosition));
+			CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, this.worldPosition, this.getBlockState());
+			CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, this.worldPosition, this.level.getBlockState(this.worldPosition));
 		}
-	}
-
-	public void setPosition(BlockPos blockPos) {
-		this.worldPosition = blockPos.immutable();
 	}
 
 	public boolean onlyOpCanSetNbt() {
 		return false;
 	}
 
-	public void rotate(Rotation rotation) {
-	}
-
-	public void mirror(Mirror mirror) {
-	}
-
 	public BlockEntityType<?> getType() {
 		return this.type;
 	}
 
-	public void logInvalidState() {
-		if (!this.hasLoggedInvalidStateBefore) {
-			this.hasLoggedInvalidStateBefore = true;
-			LOGGER.warn("Block entity invalid: {} @ {}", () -> Registry.BLOCK_ENTITY_TYPE.getKey(this.getType()), this::getBlockPos);
-		}
+	@Deprecated
+	public void setBlockState(BlockState blockState) {
+		this.blockState = blockState;
 	}
 }

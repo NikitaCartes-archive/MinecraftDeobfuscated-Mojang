@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableBlock {
 	public GrassBlock(BlockBehaviour.Properties properties) {
@@ -55,9 +56,7 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 						continue;
 					}
 
-					ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)list.get(0);
-					AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;
-					blockState4 = abstractFlowerFeature.getRandomFlower(random, blockPos3, configuredFeature.config());
+					blockState4 = getBlockState(random, blockPos3, (ConfiguredFeature)list.get(0));
 				} else {
 					blockState4 = blockState2;
 				}
@@ -67,5 +66,10 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 				}
 			}
 		}
+	}
+
+	private static <U extends FeatureConfiguration> BlockState getBlockState(Random random, BlockPos blockPos, ConfiguredFeature<U, ?> configuredFeature) {
+		AbstractFlowerFeature<U> abstractFlowerFeature = (AbstractFlowerFeature<U>)configuredFeature.feature;
+		return abstractFlowerFeature.getRandomFlower(random, blockPos, configuredFeature.config());
 	}
 }

@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -53,16 +54,14 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 			Biome biome,
 			ProbabilityFeatureConfiguration probabilityFeatureConfiguration
 		) {
-			int k = i * 16;
-			int l = j * 16;
-			BlockPos blockPos = new BlockPos(k + 9, 90, l + 9);
+			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 9), 90, SectionPos.sectionToBlockCoord(j, 9));
 			this.pieces.add(new BuriedTreasurePieces.BuriedTreasurePiece(blockPos));
 			this.calculateBoundingBox();
 		}
 
 		@Override
 		public BlockPos getLocatePos() {
-			return new BlockPos((this.getChunkX() << 4) + 9, 0, (this.getChunkZ() << 4) + 9);
+			return new BlockPos(SectionPos.sectionToBlockCoord(this.getChunkX(), 9), 0, SectionPos.sectionToBlockCoord(this.getChunkZ(), 9));
 		}
 	}
 }

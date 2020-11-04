@@ -206,7 +206,7 @@ public class VineBlock extends Block {
 					}
 				}
 			} else {
-				if (direction == Direction.UP && blockPos.getY() < 255) {
+				if (direction == Direction.UP && blockPos.getY() < serverLevel.getMaxBuildHeight() - 1) {
 					if (this.canSupportAtFace(serverLevel, blockPos, direction)) {
 						serverLevel.setBlock(blockPos, blockState.setValue(UP, Boolean.valueOf(true)), 2);
 						return;
@@ -233,7 +233,7 @@ public class VineBlock extends Block {
 					}
 				}
 
-				if (blockPos.getY() > 0) {
+				if (blockPos.getY() > serverLevel.getMinBuildHeight()) {
 					BlockPos blockPos3 = blockPos.below();
 					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
 					if (blockState2.isAir() || blockState2.is(this)) {

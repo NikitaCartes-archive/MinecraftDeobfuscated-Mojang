@@ -5,11 +5,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,8 +29,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ItemLike;
@@ -40,12 +41,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Item implements ItemLike {
+	private static final Logger LOGGER = LogManager.getLogger();
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
 	protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
-	protected static final Random random = new Random();
 	protected final CreativeModeTab category;
 	private final Rarity rarity;
 	private final int maxStackSize;
@@ -78,6 +81,12 @@ public class Item implements ItemLike {
 		this.maxStackSize = properties.maxStackSize;
 		this.foodProperties = properties.foodProperties;
 		this.isFireResistant = properties.isFireResistant;
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			String string = this.getClass().getSimpleName();
+			if (!string.endsWith("Item")) {
+				LOGGER.error("Item classes should end with Item and {} doesn't.", string);
+			}
+		}
 	}
 
 	public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int i) {
@@ -132,6 +141,30 @@ public class Item implements ItemLike {
 
 	public boolean canBeDepleted() {
 		return this.maxDamage > 0;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isBarVisible(ItemStack itemStack) {
+		return itemStack.isDamaged();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public int getBarWidth(ItemStack itemStack) {
+		return Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)this.maxDamage);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public int getBarColor(ItemStack itemStack) {
+		float f = Math.max(0.0F, ((float)this.maxDamage - (float)itemStack.getDamageValue()) / (float)this.maxDamage);
+		return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
+	}
+
+	public boolean overrideStackedOnOther(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
+		return false;
+	}
+
+	public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
+		return false;
 	}
 
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
@@ -290,15 +323,11 @@ public class Item implements ItemLike {
 	}
 
 	public boolean useOnRelease(ItemStack itemStack) {
-		return itemStack.getItem() == Items.CROSSBOW;
+		return false;
 	}
 
 	public ItemStack getDefaultInstance() {
 		return new ItemStack(this);
-	}
-
-	public boolean is(Tag<Item> tag) {
-		return tag.contains(this);
 	}
 
 	public boolean isEdible() {
@@ -324,6 +353,15 @@ public class Item implements ItemLike {
 
 	public boolean canBeHurtBy(DamageSource damageSource) {
 		return !this.isFireResistant || !damageSource.isFire();
+	}
+
+	@Nullable
+	public SoundEvent getEquipSound() {
+		return null;
+	}
+
+	public boolean canFitInsideContainerItems() {
+		return true;
 	}
 
 	public static class Properties {

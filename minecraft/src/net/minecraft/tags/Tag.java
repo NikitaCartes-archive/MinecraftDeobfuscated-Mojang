@@ -154,7 +154,7 @@ public interface Tag<T> {
 		}
 
 		public String toString() {
-			return this.entry.toString() + " (from " + this.source + ")";
+			return this.entry + " (from " + this.source + ")";
 		}
 	}
 
@@ -222,7 +222,7 @@ public interface Tag<T> {
 		}
 
 		public String toString() {
-			return this.id.toString() + "?";
+			return this.id + "?";
 		}
 	}
 

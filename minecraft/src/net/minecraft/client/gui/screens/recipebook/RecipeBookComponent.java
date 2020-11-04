@@ -69,7 +69,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 		this.menu = recipeBookMenu;
 		minecraft.player.containerMenu = recipeBookMenu;
 		this.book = minecraft.player.getRecipeBook();
-		this.timesInventoryChanged = minecraft.player.inventory.getTimesChanged();
+		this.timesInventoryChanged = minecraft.player.getInventory().getTimesChanged();
 		if (this.isVisible()) {
 			this.initVisuals(bl);
 		}
@@ -82,7 +82,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 		int i = (this.width - 147) / 2 - this.xOffset;
 		int j = (this.height - 166) / 2;
 		this.stackedContents.clear();
-		this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
+		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
 		String string = this.searchBox != null ? this.searchBox.getValue() : "";
 		this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, 9 + 5, new TranslatableComponent("itemGroup.search"));
@@ -211,9 +211,9 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 
 	public void tick() {
 		if (this.isVisible()) {
-			if (this.timesInventoryChanged != this.minecraft.player.inventory.getTimesChanged()) {
+			if (this.timesInventoryChanged != this.minecraft.player.getInventory().getTimesChanged()) {
 				this.updateStackedContents();
-				this.timesInventoryChanged = this.minecraft.player.inventory.getTimesChanged();
+				this.timesInventoryChanged = this.minecraft.player.getInventory().getTimesChanged();
 			}
 
 			this.searchBox.tick();
@@ -222,7 +222,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 
 	private void updateStackedContents() {
 		this.stackedContents.clear();
-		this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
+		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
 		this.updateCollections(false);
 	}
@@ -461,7 +461,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	public void addItemToSlot(Iterator<Ingredient> iterator, int i, int j, int k, int l) {
 		Ingredient ingredient = (Ingredient)iterator.next();
 		if (!ingredient.isEmpty()) {
-			Slot slot = (Slot)this.menu.slots.get(i);
+			Slot slot = this.menu.slots.get(i);
 			this.ghostRecipe.addIngredient(ingredient, slot.x, slot.y);
 		}
 	}

@@ -27,7 +27,7 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 	@Nullable
 	BlockState setBlockState(BlockPos blockPos, BlockState blockState, boolean bl);
 
-	void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity);
+	void setBlockEntity(BlockEntity blockEntity);
 
 	void addEntity(Entity entity);
 
@@ -47,7 +47,7 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	default int getHighestSectionPosition() {
 		LevelChunkSection levelChunkSection = this.getHighestSection();
-		return levelChunkSection == null ? 0 : levelChunkSection.bottomBlockY();
+		return levelChunkSection == null ? this.getMinBuildHeight() : levelChunkSection.bottomBlockY();
 	}
 
 	Set<BlockPos> getBlockEntitiesPos();
@@ -64,23 +64,21 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	ChunkPos getPos();
 
-	void setLastSaveTime(long l);
-
 	Map<StructureFeature<?>, StructureStart<?>> getAllStarts();
 
 	void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map);
 
 	default boolean isYSpaceEmpty(int i, int j) {
-		if (i < 0) {
-			i = 0;
+		if (i < this.getMinBuildHeight()) {
+			i = this.getMinBuildHeight();
 		}
 
-		if (j >= 256) {
-			j = 255;
+		if (j >= this.getMaxBuildHeight()) {
+			j = this.getMaxBuildHeight() - 1;
 		}
 
 		for (int k = i; k <= j; k += 16) {
-			if (!LevelChunkSection.isEmpty(this.getSections()[k >> 4])) {
+			if (!LevelChunkSection.isEmpty(this.getSections()[this.getSectionIndex(k)])) {
 				return false;
 			}
 		}

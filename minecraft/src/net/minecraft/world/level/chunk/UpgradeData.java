@@ -12,10 +12,13 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -32,18 +35,19 @@ import org.apache.logging.log4j.Logger;
 
 public class UpgradeData {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public static final UpgradeData EMPTY = new UpgradeData();
+	public static final UpgradeData EMPTY = new UpgradeData(EmptyBlockGetter.INSTANCE);
 	private static final Direction8[] DIRECTIONS = Direction8.values();
 	private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
-	private final int[][] index = new int[16][];
+	private final int[][] index;
 	private static final Map<Block, UpgradeData.BlockFixer> MAP = new IdentityHashMap();
 	private static final Set<UpgradeData.BlockFixer> CHUNKY_FIXERS = Sets.<UpgradeData.BlockFixer>newHashSet();
 
-	private UpgradeData() {
+	private UpgradeData(LevelHeightAccessor levelHeightAccessor) {
+		this.index = new int[levelHeightAccessor.getSectionsCount()][];
 	}
 
-	public UpgradeData(CompoundTag compoundTag) {
-		this();
+	public UpgradeData(CompoundTag compoundTag, LevelHeightAccessor levelHeightAccessor) {
+		this(levelHeightAccessor);
 		if (compoundTag.contains("Indices", 10)) {
 			CompoundTag compoundTag2 = compoundTag.getCompound("Indices");
 
@@ -94,7 +98,7 @@ public class UpgradeData {
 			Direction[] directions = Direction.values();
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			for (BlockPos blockPos : BlockPos.betweenClosed(k, 0, m, l, level.getMaxBuildHeight() - 1, n)) {
+			for (BlockPos blockPos : BlockPos.betweenClosed(k, level.getMinBuildHeight(), m, l, level.getMaxBuildHeight() - 1, n)) {
 				BlockState blockState = level.getBlockState(blockPos);
 				BlockState blockState2 = blockState;
 
@@ -119,7 +123,7 @@ public class UpgradeData {
 		ChunkPos chunkPos = levelChunk.getPos();
 		LevelAccessor levelAccessor = levelChunk.getLevel();
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < this.index.length; i++) {
 			LevelChunkSection levelChunkSection = levelChunk.getSections()[i];
 			int[] is = this.index[i];
 			this.index[i] = null;
@@ -131,13 +135,13 @@ public class UpgradeData {
 					int k = j & 15;
 					int l = j >> 8 & 15;
 					int m = j >> 4 & 15;
-					mutableBlockPos.set(chunkPos.getMinBlockX() + k, (i << 4) + l, chunkPos.getMinBlockZ() + m);
+					mutableBlockPos.set(chunkPos.getMinBlockX() + k, levelChunkSection.bottomBlockY() + l, chunkPos.getMinBlockZ() + m);
 					BlockState blockState = palettedContainer.get(j);
 					BlockState blockState2 = blockState;
 
 					for (Direction direction : directions) {
 						mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
-						if (mutableBlockPos.getX() >> 4 == chunkPos.x && mutableBlockPos.getZ() >> 4 == chunkPos.z) {
+						if (SectionPos.blockToSectionCoord(mutableBlockPos.getX()) == chunkPos.x && SectionPos.blockToSectionCoord(mutableBlockPos.getZ()) == chunkPos.z) {
 							blockState2 = updateState(blockState2, direction, levelAccessor, mutableBlockPos, mutableBlockPos2);
 						}
 					}
@@ -149,7 +153,7 @@ public class UpgradeData {
 
 		for (int ix = 0; ix < this.index.length; ix++) {
 			if (this.index[ix] != null) {
-				LOGGER.warn("Discarding update data for section {} for chunk ({} {})", ix, chunkPos.x, chunkPos.z);
+				LOGGER.warn("Discarding update data for section {} for chunk ({} {})", levelAccessor.getSectionYFromSectionIndex(ix), chunkPos.x, chunkPos.z);
 			}
 
 			this.index[ix] = null;

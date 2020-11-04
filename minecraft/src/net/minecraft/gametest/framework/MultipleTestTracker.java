@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 public class MultipleTestTracker {
 	private final Collection<GameTestInfo> tests = Lists.<GameTestInfo>newArrayList();
 	@Nullable
-	private Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
+	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 
 	public MultipleTestTracker() {
 	}

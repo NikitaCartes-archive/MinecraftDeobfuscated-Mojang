@@ -2,10 +2,14 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -23,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CakeBlock extends Block {
 	public static final IntegerProperty BITES = BlockStateProperties.BITES;
+	public static final int FULL_CAKE_SIGNAL = getOutputSignal(0);
 	protected static final VoxelShape[] SHAPE_BY_BITE = new VoxelShape[]{
 		Block.box(1.0, 0.0, 1.0, 15.0, 8.0, 15.0),
 		Block.box(3.0, 0.0, 1.0, 15.0, 8.0, 15.0),
@@ -47,9 +52,19 @@ public class CakeBlock extends Block {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		Item item = itemStack.getItem();
+		if (!level.isClientSide && itemStack.is(ItemTags.CANDLES) && (Integer)blockState.getValue(BITES) == 0) {
+			Block block = Block.byItem(item);
+			if (block instanceof CandleBlock) {
+				level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
+				return InteractionResult.SUCCESS;
+			}
+		}
+
 		if (level.isClientSide) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (this.eat(level, blockPos, blockState, player).consumesAction()) {
+			if (eat(level, blockPos, blockState, player).consumesAction()) {
 				return InteractionResult.SUCCESS;
 			}
 
@@ -58,10 +73,10 @@ public class CakeBlock extends Block {
 			}
 		}
 
-		return this.eat(level, blockPos, blockState, player);
+		return eat(level, blockPos, blockState, player);
 	}
 
-	private InteractionResult eat(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Player player) {
+	protected static InteractionResult eat(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!player.canEat(false)) {
 			return InteractionResult.PASS;
 		} else {
@@ -99,7 +114,11 @@ public class CakeBlock extends Block {
 
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		return (7 - (Integer)blockState.getValue(BITES)) * 2;
+		return getOutputSignal((Integer)blockState.getValue(BITES));
+	}
+
+	public static int getOutputSignal(int i) {
+		return (7 - i) * 2;
 	}
 
 	@Override

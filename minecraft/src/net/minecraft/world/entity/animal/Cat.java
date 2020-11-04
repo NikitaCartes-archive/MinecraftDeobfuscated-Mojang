@@ -22,7 +22,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
@@ -320,13 +320,13 @@ public class Cat extends TamableAnimal {
 		return Mth.lerp(f, this.relaxStateOneAmountO, this.relaxStateOneAmount);
 	}
 
-	public Cat getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Cat cat = EntityType.CAT.create(serverLevel);
-		if (agableMob instanceof Cat) {
+		if (ageableMob instanceof Cat) {
 			if (this.random.nextBoolean()) {
 				cat.setCatType(this.getCatType());
 			} else {
-				cat.setCatType(((Cat)agableMob).getCatType());
+				cat.setCatType(((Cat)ageableMob).getCatType());
 			}
 
 			if (this.isTame()) {
@@ -335,7 +335,7 @@ public class Cat extends TamableAnimal {
 				if (this.random.nextBoolean()) {
 					cat.setCollarColor(this.getCollarColor());
 				} else {
-					cat.setCollarColor(((Cat)agableMob).getCollarColor());
+					cat.setCollarColor(((Cat)ageableMob).getCollarColor());
 				}
 			}
 		}
@@ -412,7 +412,7 @@ public class Cat extends TamableAnimal {
 					DyeColor dyeColor = ((DyeItem)item).getDyeColor();
 					if (dyeColor != this.getCollarColor()) {
 						this.setCollarColor(dyeColor);
-						if (!player.abilities.instabuild) {
+						if (!player.getAbilities().instabuild) {
 							itemStack.shrink(1);
 						}
 
@@ -519,7 +519,7 @@ public class Cat extends TamableAnimal {
 
 					BlockPos blockPos = this.ownerPlayer.blockPosition();
 					BlockState blockState = this.cat.level.getBlockState(blockPos);
-					if (blockState.getBlock().is(BlockTags.BEDS)) {
+					if (blockState.is(BlockTags.BEDS)) {
 						this.goalPos = (BlockPos)blockState.getOptionalValue(BedBlock.FACING)
 							.map(direction -> blockPos.relative(direction.getOpposite()))
 							.orElseGet(() -> new BlockPos(blockPos));

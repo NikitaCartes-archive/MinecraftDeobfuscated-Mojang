@@ -217,7 +217,7 @@ public class ItemInHandRenderer {
 		boolean bl2 = true;
 		if (localPlayer.isUsingItem()) {
 			ItemStack itemStack = localPlayer.getUseItem();
-			if (itemStack.getItem() == Items.BOW || itemStack.getItem() == Items.CROSSBOW) {
+			if (itemStack.is(Items.BOW) || itemStack.is(Items.CROSSBOW)) {
 				bl = localPlayer.getUsedItemHand() == InteractionHand.MAIN_HAND;
 				bl2 = !bl;
 			}
@@ -225,18 +225,18 @@ public class ItemInHandRenderer {
 			InteractionHand interactionHand2 = localPlayer.getUsedItemHand();
 			if (interactionHand2 == InteractionHand.MAIN_HAND) {
 				ItemStack itemStack2 = localPlayer.getOffhandItem();
-				if (itemStack2.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack2)) {
+				if (itemStack2.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack2)) {
 					bl2 = false;
 				}
 			}
 		} else {
 			ItemStack itemStackx = localPlayer.getMainHandItem();
 			ItemStack itemStack3 = localPlayer.getOffhandItem();
-			if (itemStackx.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStackx)) {
+			if (itemStackx.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStackx)) {
 				bl2 = !bl;
 			}
 
-			if (itemStack3.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack3)) {
+			if (itemStack3.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack3)) {
 				bl = !itemStackx.isEmpty();
 				bl2 = !bl;
 			}
@@ -280,13 +280,13 @@ public class ItemInHandRenderer {
 			if (bl && !abstractClientPlayer.isInvisible()) {
 				this.renderPlayerArm(poseStack, multiBufferSource, j, i, h, humanoidArm);
 			}
-		} else if (itemStack.getItem() == Items.FILLED_MAP) {
+		} else if (itemStack.is(Items.FILLED_MAP)) {
 			if (bl && this.offHandItem.isEmpty()) {
 				this.renderTwoHandedMap(poseStack, multiBufferSource, j, g, i, h);
 			} else {
 				this.renderOneHandedMap(poseStack, multiBufferSource, j, i, humanoidArm, h, itemStack);
 			}
-		} else if (itemStack.getItem() == Items.CROSSBOW) {
+		} else if (itemStack.is(Items.CROSSBOW)) {
 			boolean bl2 = CrossbowItem.isCharged(itemStack);
 			boolean bl3 = humanoidArm == HumanoidArm.RIGHT;
 			int k = bl3 ? 1 : -1;

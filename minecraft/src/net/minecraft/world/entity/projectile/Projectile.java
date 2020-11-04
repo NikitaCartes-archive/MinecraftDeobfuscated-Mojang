@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -163,5 +165,21 @@ public abstract class Projectile extends Entity {
 		}
 
 		return Mth.lerp(0.2F, f, g);
+	}
+
+	@Override
+	public Packet<?> getAddEntityPacket() {
+		Entity entity = this.getOwner();
+		return new ClientboundAddEntityPacket(this, entity == null ? 0 : entity.getId());
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		super.recreateFromPacket(clientboundAddEntityPacket);
+		Entity entity = this.level.getEntity(clientboundAddEntityPacket.getData());
+		if (entity != null) {
+			this.setOwner(entity);
+		}
 	}
 }

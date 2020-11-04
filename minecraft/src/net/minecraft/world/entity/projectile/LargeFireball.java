@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -20,11 +18,6 @@ public class LargeFireball extends Fireball {
 		super(entityType, level);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public LargeFireball(Level level, double d, double e, double f, double g, double h, double i) {
-		super(EntityType.FIREBALL, d, e, f, g, h, i, level);
-	}
-
 	public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
 		super(EntityType.FIREBALL, livingEntity, d, e, f, level);
 	}
@@ -38,7 +31,7 @@ public class LargeFireball extends Fireball {
 				.explode(
 					null, this.getX(), this.getY(), this.getZ(), (float)this.explosionPower, bl, bl ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE
 				);
-			this.remove();
+			this.discard();
 		}
 	}
 

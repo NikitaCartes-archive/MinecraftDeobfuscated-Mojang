@@ -16,9 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 
 @Environment(EnvType.CLIENT)
-public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEntity> {
-	public StructureBlockRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+public class StructureBlockRenderer implements BlockEntityRenderer<StructureBlockEntity> {
+	public StructureBlockRenderer(BlockEntityRendererProvider.Context context) {
 	}
 
 	public void render(StructureBlockEntity structureBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

@@ -2,55 +2,72 @@ package net.minecraft.world.phys.shapes;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleLists;
 
-public final class IndirectMerger implements IndexMerger {
-	private final DoubleArrayList result;
-	private final IntArrayList firstIndices;
-	private final IntArrayList secondIndices;
+public class IndirectMerger implements IndexMerger {
+	private static final DoubleList EMPTY = DoubleLists.unmodifiable(DoubleArrayList.wrap(new double[]{0.0}));
+	private final double[] result;
+	private final int[] firstIndices;
+	private final int[] secondIndices;
+	private final int resultLength;
 
-	protected IndirectMerger(DoubleList doubleList, DoubleList doubleList2, boolean bl, boolean bl2) {
-		int i = 0;
-		int j = 0;
+	public IndirectMerger(DoubleList doubleList, DoubleList doubleList2, boolean bl, boolean bl2) {
 		double d = Double.NaN;
-		int k = doubleList.size();
-		int l = doubleList2.size();
-		int m = k + l;
-		this.result = new DoubleArrayList(m);
-		this.firstIndices = new IntArrayList(m);
-		this.secondIndices = new IntArrayList(m);
+		int i = doubleList.size();
+		int j = doubleList2.size();
+		int k = i + j;
+		this.result = new double[k];
+		this.firstIndices = new int[k];
+		this.secondIndices = new int[k];
+		boolean bl3 = !bl;
+		boolean bl4 = !bl2;
+		int l = 0;
+		int m = 0;
+		int n = 0;
 
 		while (true) {
-			boolean bl3 = i < k;
-			boolean bl4 = j < l;
-			if (!bl3 && !bl4) {
-				if (this.result.isEmpty()) {
-					this.result.add(Math.min(doubleList.getDouble(k - 1), doubleList2.getDouble(l - 1)));
-				}
-
+			boolean bl5 = m >= i;
+			boolean bl6 = n >= j;
+			if (bl5 && bl6) {
+				this.resultLength = Math.max(1, l);
 				return;
 			}
 
-			boolean bl5 = bl3 && (!bl4 || doubleList.getDouble(i) < doubleList2.getDouble(j) + 1.0E-7);
-			double e = bl5 ? doubleList.getDouble(i++) : doubleList2.getDouble(j++);
-			if ((i != 0 && bl3 || bl5 || bl2) && (j != 0 && bl4 || !bl5 || bl)) {
-				if (!(d >= e - 1.0E-7)) {
-					this.firstIndices.add(i - 1);
-					this.secondIndices.add(j - 1);
-					this.result.add(e);
-					d = e;
-				} else if (!this.result.isEmpty()) {
-					this.firstIndices.set(this.firstIndices.size() - 1, i - 1);
-					this.secondIndices.set(this.secondIndices.size() - 1, j - 1);
+			boolean bl7 = !bl5 && (bl6 || doubleList.getDouble(m) < doubleList2.getDouble(n) + 1.0E-7);
+			if (bl7) {
+				m++;
+				if (bl3 && (n == 0 || bl6)) {
+					continue;
 				}
+			} else {
+				n++;
+				if (bl4 && (m == 0 || bl5)) {
+					continue;
+				}
+			}
+
+			int o = m - 1;
+			int p = n - 1;
+			double e = bl7 ? doubleList.getDouble(o) : doubleList2.getDouble(p);
+			if (!(d >= e - 1.0E-7)) {
+				this.firstIndices[l] = o;
+				this.secondIndices[l] = p;
+				this.result[l] = e;
+				l++;
+				d = e;
+			} else {
+				this.firstIndices[l - 1] = o;
+				this.secondIndices[l - 1] = p;
 			}
 		}
 	}
 
 	@Override
 	public boolean forMergedIndexes(IndexMerger.IndexConsumer indexConsumer) {
-		for (int i = 0; i < this.result.size() - 1; i++) {
-			if (!indexConsumer.merge(this.firstIndices.getInt(i), this.secondIndices.getInt(i), i)) {
+		int i = this.resultLength - 1;
+
+		for (int j = 0; j < i; j++) {
+			if (!indexConsumer.merge(this.firstIndices[j], this.secondIndices[j], j)) {
 				return false;
 			}
 		}
@@ -59,7 +76,12 @@ public final class IndirectMerger implements IndexMerger {
 	}
 
 	@Override
+	public int size() {
+		return this.resultLength;
+	}
+
+	@Override
 	public DoubleList getList() {
-		return this.result;
+		return (DoubleList)(this.resultLength <= 1 ? EMPTY : DoubleArrayList.wrap(this.result, this.resultLength));
 	}
 }

@@ -8,7 +8,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -56,7 +55,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
@@ -129,7 +128,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		}
 
 		public static boolean mayPlaceItem(ItemStack itemStack) {
-			return itemStack.getItem() == Items.BLAZE_POWDER;
+			return itemStack.is(Items.BLAZE_POWDER);
 		}
 
 		@Override
@@ -181,8 +180,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		}
 
 		public static boolean mayPlaceItem(ItemStack itemStack) {
-			Item item = itemStack.getItem();
-			return item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION || item == Items.GLASS_BOTTLE;
+			return itemStack.is(Items.POTION) || itemStack.is(Items.SPLASH_POTION) || itemStack.is(Items.LINGERING_POTION) || itemStack.is(Items.GLASS_BOTTLE);
 		}
 	}
 }

@@ -102,7 +102,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 
 			int i = potion.hasInstantEffects() ? 2007 : 2002;
 			this.level.levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
-			this.remove();
+			this.discard();
 		}
 	}
 
@@ -177,7 +177,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	}
 
 	private boolean isLingering() {
-		return this.getItem().getItem() == Items.LINGERING_POTION;
+		return this.getItem().is(Items.LINGERING_POTION);
 	}
 
 	private void dowseFire(BlockPos blockPos, Direction direction) {

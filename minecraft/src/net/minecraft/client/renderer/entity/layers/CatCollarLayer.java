@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
@@ -12,10 +14,11 @@ import net.minecraft.world.entity.animal.Cat;
 @Environment(EnvType.CLIENT)
 public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
 	private static final ResourceLocation CAT_COLLAR_LOCATION = new ResourceLocation("textures/entity/cat/cat_collar.png");
-	private final CatModel<Cat> catModel = new CatModel<>(0.01F);
+	private final CatModel<Cat> catModel;
 
-	public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent) {
+	public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
+		this.catModel = new CatModel<>(entityModelSet.getLayer(ModelLayers.CAT_COLLAR));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l) {

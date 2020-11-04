@@ -1,38 +1,75 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class BlazeModel<T extends Entity> extends ListModel<T> {
+public class BlazeModel<T extends Entity> extends HierarchicalModel<T> {
+	private final ModelPart root;
 	private final ModelPart[] upperBodyParts;
-	private final ModelPart head = new ModelPart(this, 0, 0);
-	private final ImmutableList<ModelPart> parts;
+	private final ModelPart head;
 
-	public BlazeModel() {
-		this.head.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
+	public BlazeModel(ModelPart modelPart) {
+		this.root = modelPart;
+		this.head = modelPart.getChild("head");
 		this.upperBodyParts = new ModelPart[12];
+		Arrays.setAll(this.upperBodyParts, i -> modelPart.getChild(getPartName(i)));
+	}
 
-		for (int i = 0; i < this.upperBodyParts.length; i++) {
-			this.upperBodyParts[i] = new ModelPart(this, 0, 16);
-			this.upperBodyParts[i].addBox(0.0F, 0.0F, 0.0F, 2.0F, 8.0F, 2.0F);
+	private static String getPartName(int i) {
+		return "part" + i;
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.ZERO);
+		float f = 0.0F;
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 16).addBox(0.0F, 0.0F, 0.0F, 2.0F, 8.0F, 2.0F);
+
+		for (int i = 0; i < 4; i++) {
+			float g = Mth.cos(f) * 9.0F;
+			float h = -2.0F + Mth.cos((float)(i * 2) * 0.25F);
+			float j = Mth.sin(f) * 9.0F;
+			partDefinition.addOrReplaceChild(getPartName(i), cubeListBuilder, PartPose.offset(g, h, j));
+			f++;
 		}
 
-		Builder<ModelPart> builder = ImmutableList.builder();
-		builder.add(this.head);
-		builder.addAll(Arrays.asList(this.upperBodyParts));
-		this.parts = builder.build();
+		f = (float) (Math.PI / 4);
+
+		for (int i = 4; i < 8; i++) {
+			float g = Mth.cos(f) * 7.0F;
+			float h = 2.0F + Mth.cos((float)(i * 2) * 0.25F);
+			float j = Mth.sin(f) * 7.0F;
+			partDefinition.addOrReplaceChild(getPartName(i), cubeListBuilder, PartPose.offset(g, h, j));
+			f++;
+		}
+
+		f = 0.47123894F;
+
+		for (int i = 8; i < 12; i++) {
+			float g = Mth.cos(f) * 5.0F;
+			float h = 11.0F + Mth.cos((float)i * 1.5F * 0.5F);
+			float j = Mth.sin(f) * 5.0F;
+			partDefinition.addOrReplaceChild(getPartName(i), cubeListBuilder, PartPose.offset(g, h, j));
+			f++;
+		}
+
+		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Override
-	public Iterable<ModelPart> parts() {
-		return this.parts;
+	public ModelPart root() {
+		return this.root;
 	}
 
 	@Override

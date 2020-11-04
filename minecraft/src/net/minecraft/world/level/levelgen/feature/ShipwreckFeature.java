@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -37,7 +38,7 @@ public class ShipwreckFeature extends StructureFeature<ShipwreckConfiguration> {
 			ShipwreckConfiguration shipwreckConfiguration
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
-			BlockPos blockPos = new BlockPos(i * 16, 90, j * 16);
+			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), 90, SectionPos.sectionToBlockCoord(j));
 			ShipwreckPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, shipwreckConfiguration);
 			this.calculateBoundingBox();
 		}

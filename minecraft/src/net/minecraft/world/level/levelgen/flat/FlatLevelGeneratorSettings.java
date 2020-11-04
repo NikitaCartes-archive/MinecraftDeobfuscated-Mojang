@@ -18,6 +18,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.Biomes;
@@ -35,7 +36,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatur
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FlatLevelGeneratorSettings {
+public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.<FlatLevelGeneratorSettings>create(
 			instance -> instance.group(
@@ -73,10 +74,10 @@ public class FlatLevelGeneratorSettings {
 	private final StructureSettings structureSettings;
 	private final List<FlatLayerInfo> layersInfo = Lists.<FlatLayerInfo>newArrayList();
 	private Supplier<Biome> biome;
-	private final BlockState[] layers = new BlockState[256];
+	private final BlockState[] layers;
 	private boolean voidGen;
-	private boolean decoration = false;
-	private boolean addLakes = false;
+	private boolean decoration;
+	private boolean addLakes;
 
 	public FlatLevelGeneratorSettings(
 		Registry<Biome> registry, StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Optional<Supplier<Biome>> optional
@@ -104,6 +105,7 @@ public class FlatLevelGeneratorSettings {
 		this.biomes = registry;
 		this.structureSettings = structureSettings;
 		this.biome = () -> registry.getOrThrow(Biomes.PLAINS);
+		this.layers = new BlockState[this.getHeight()];
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -172,7 +174,8 @@ public class FlatLevelGeneratorSettings {
 			BlockState blockState = blockStates[ix];
 			if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
 				this.layers[ix] = null;
-				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(ix, blockState)));
+				int j = this.getMinBuildHeight() + ix;
+				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(j, blockState)));
 			}
 		}
 
@@ -212,7 +215,7 @@ public class FlatLevelGeneratorSettings {
 
 	public void updateLayers() {
 		Arrays.fill(this.layers, 0, this.layers.length, null);
-		int i = 0;
+		int i = this.getMinBuildHeight();
 
 		for (FlatLayerInfo flatLayerInfo : this.layersInfo) {
 			flatLayerInfo.setStart(i);
@@ -226,7 +229,7 @@ public class FlatLevelGeneratorSettings {
 				BlockState blockState = flatLayerInfo2.getBlockState();
 				if (!blockState.is(Blocks.AIR)) {
 					this.voidGen = false;
-					this.layers[j] = blockState;
+					this.layers[this.getLayerIndex(j)] = blockState;
 				}
 			}
 		}
@@ -246,5 +249,19 @@ public class FlatLevelGeneratorSettings {
 		flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.GRASS_BLOCK));
 		flatLevelGeneratorSettings.updateLayers();
 		return flatLevelGeneratorSettings;
+	}
+
+	public int getLayerIndex(int i) {
+		return i - this.getMinBuildHeight();
+	}
+
+	@Override
+	public int getSectionsCount() {
+		return 16;
+	}
+
+	@Override
+	public int getMinSection() {
+		return 0;
 	}
 }

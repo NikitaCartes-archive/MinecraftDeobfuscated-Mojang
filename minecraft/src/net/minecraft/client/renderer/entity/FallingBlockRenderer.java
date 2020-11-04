@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
-	public FallingBlockRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public FallingBlockRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.shadowRadius = 0.5F;
 	}
 

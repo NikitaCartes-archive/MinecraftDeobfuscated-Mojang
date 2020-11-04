@@ -30,7 +30,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public abstract class AbstractMinecartContainer extends AbstractMinecart implements Container, MenuProvider {
 	private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
-	private boolean dropEquipment = true;
 	@Nullable
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
@@ -117,23 +116,16 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.removed ? false : !(player.distanceToSqr(this) > 64.0);
-	}
-
-	@Nullable
-	@Override
-	public Entity changeDimension(ServerLevel serverLevel) {
-		this.dropEquipment = false;
-		return super.changeDimension(serverLevel);
+		return this.isRemoved() ? false : !(player.distanceToSqr(this) > 64.0);
 	}
 
 	@Override
-	public void remove() {
-		if (!this.level.isClientSide && this.dropEquipment) {
+	public void remove(Entity.RemovalReason removalReason) {
+		if (!this.level.isClientSide && removalReason.shouldDestroy()) {
 			Containers.dropContents(this.level, this, this);
 		}
 
-		super.remove();
+		super.remove(removalReason);
 	}
 
 	@Override
@@ -178,6 +170,10 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 		if (this.lootTable == null) {
 			int i = 15 - AbstractContainerMenu.getRedstoneSignalFromContainer(this);
 			f += (float)i * 0.001F;
+		}
+
+		if (this.isInWater()) {
+			f *= 0.95F;
 		}
 
 		this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.0, (double)f));

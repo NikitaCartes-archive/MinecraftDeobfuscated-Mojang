@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.Blocks;
 
 @Environment(EnvType.CLIENT)
 public class TntRenderer extends EntityRenderer<PrimedTnt> {
-	public TntRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public TntRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.shadowRadius = 0.5F;
 	}
 

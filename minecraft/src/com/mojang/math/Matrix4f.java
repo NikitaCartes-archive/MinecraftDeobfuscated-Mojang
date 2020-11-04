@@ -380,6 +380,14 @@ public final class Matrix4f {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public void multiplyWithTranslation(float f, float g, float h) {
+		this.m03 = this.m00 * f + this.m01 * g + this.m02 * h + this.m03;
+		this.m13 = this.m10 * f + this.m11 * g + this.m12 * h + this.m13;
+		this.m23 = this.m20 * f + this.m21 * g + this.m22 * h + this.m23;
+		this.m33 = this.m30 * f + this.m31 * g + this.m32 * h + this.m33;
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static Matrix4f createScaleMatrix(float f, float g, float h) {
 		Matrix4f matrix4f = new Matrix4f();
 		matrix4f.m00 = f;

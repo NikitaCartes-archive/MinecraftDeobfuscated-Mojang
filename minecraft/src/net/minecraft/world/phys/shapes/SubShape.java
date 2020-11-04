@@ -1,6 +1,7 @@
 package net.minecraft.world.phys.shapes;
 
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 
 public final class SubShape extends DiscreteVoxelShape {
 	private final DiscreteVoxelShape parent;
@@ -28,17 +29,23 @@ public final class SubShape extends DiscreteVoxelShape {
 	}
 
 	@Override
-	public void setFull(int i, int j, int k, boolean bl, boolean bl2) {
-		this.parent.setFull(this.startX + i, this.startY + j, this.startZ + k, bl, bl2);
+	public void fill(int i, int j, int k) {
+		this.parent.fill(this.startX + i, this.startY + j, this.startZ + k);
 	}
 
 	@Override
 	public int firstFull(Direction.Axis axis) {
-		return Math.max(0, this.parent.firstFull(axis) - axis.choose(this.startX, this.startY, this.startZ));
+		return this.clampToShape(axis, this.parent.firstFull(axis));
 	}
 
 	@Override
 	public int lastFull(Direction.Axis axis) {
-		return Math.min(axis.choose(this.endX, this.endY, this.endZ), this.parent.lastFull(axis) - axis.choose(this.startX, this.startY, this.startZ));
+		return this.clampToShape(axis, this.parent.lastFull(axis));
+	}
+
+	private int clampToShape(Direction.Axis axis, int i) {
+		int j = axis.choose(this.startX, this.startY, this.startZ);
+		int k = axis.choose(this.endX, this.endY, this.endZ);
+		return Mth.clamp(i, j, k) - j;
 	}
 }

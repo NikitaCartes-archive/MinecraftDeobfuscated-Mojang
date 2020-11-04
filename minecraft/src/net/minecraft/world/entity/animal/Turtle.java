@@ -22,7 +22,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
@@ -44,7 +44,7 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -279,13 +279,13 @@ public class Turtle extends Animal {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.TURTLE.create(serverLevel);
 	}
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.getItem() == Blocks.SEAGRASS.asItem();
+		return itemStack.is(Blocks.SEAGRASS.asItem());
 	}
 
 	@Override
@@ -424,13 +424,13 @@ public class Turtle extends Animal {
 
 			if (this.turtle.getNavigation().isDone()) {
 				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
+				Vec3 vec32 = DefaultRandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
-					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
+					vec32 = DefaultRandomPos.getPosTowards(this.turtle, 8, 7, vec3, (float) (Math.PI / 2));
 				}
 
 				if (vec32 != null && !bl && !this.turtle.level.getBlockState(new BlockPos(vec32)).is(Blocks.WATER)) {
-					vec32 = RandomPos.getPosTowards(this.turtle, 16, 5, vec3);
+					vec32 = DefaultRandomPos.getPosTowards(this.turtle, 16, 5, vec3, (float) (Math.PI / 2));
 				}
 
 				if (vec32 == null) {
@@ -725,9 +725,9 @@ public class Turtle extends Animal {
 		public void tick() {
 			if (this.turtle.getNavigation().isDone()) {
 				Vec3 vec3 = Vec3.atBottomCenterOf(this.turtle.getTravelPos());
-				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
+				Vec3 vec32 = DefaultRandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
-					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
+					vec32 = DefaultRandomPos.getPosTowards(this.turtle, 8, 7, vec3, (float) (Math.PI / 2));
 				}
 
 				if (vec32 != null) {

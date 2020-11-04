@@ -33,8 +33,8 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	protected M model;
 	protected final List<RenderLayer<T, M>> layers = Lists.<RenderLayer<T, M>>newArrayList();
 
-	public LivingEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, M entityModel, float f) {
-		super(entityRenderDispatcher);
+	public LivingEntityRenderer(EntityRendererProvider.Context context, M entityModel, float f) {
+		super(context);
 		this.model = entityModel;
 		this.shadowRadius = f;
 	}

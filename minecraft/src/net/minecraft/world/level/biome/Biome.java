@@ -178,7 +178,9 @@ public final class Biome {
 		if (this.getTemperature(blockPos) >= 0.15F) {
 			return false;
 		} else {
-			if (blockPos.getY() >= 0 && blockPos.getY() < 256 && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
+			if (blockPos.getY() >= levelReader.getMinBuildHeight()
+				&& blockPos.getY() < levelReader.getMaxBuildHeight()
+				&& levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
 				BlockState blockState = levelReader.getBlockState(blockPos);
 				FluidState fluidState = levelReader.getFluidState(blockPos);
 				if (fluidState.getType() == Fluids.WATER && blockState.getBlock() instanceof LiquidBlock) {
@@ -204,7 +206,9 @@ public final class Biome {
 		if (this.getTemperature(blockPos) >= 0.15F) {
 			return false;
 		} else {
-			if (blockPos.getY() >= 0 && blockPos.getY() < 256 && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
+			if (blockPos.getY() >= levelReader.getMinBuildHeight()
+				&& blockPos.getY() < levelReader.getMaxBuildHeight()
+				&& levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
 				BlockState blockState = levelReader.getBlockState(blockPos);
 				if (blockState.isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos)) {
 					return true;
@@ -235,16 +239,21 @@ public final class Biome {
 			if (structureFeatureManager.shouldGenerateFeatures()) {
 				for (StructureFeature<?> structureFeature : (List)this.structuresByStep.getOrDefault(j, Collections.emptyList())) {
 					worldgenRandom.setFeatureSeed(l, k, j);
-					int m = blockPos.getX() >> 4;
-					int n = blockPos.getZ() >> 4;
-					int o = m << 4;
-					int p = n << 4;
+					int m = SectionPos.blockToSectionCoord(blockPos.getX());
+					int n = SectionPos.blockToSectionCoord(blockPos.getZ());
+					int o = SectionPos.sectionToBlockCoord(m);
+					int p = SectionPos.sectionToBlockCoord(n);
 
 					try {
 						structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
 							.forEach(
 								structureStart -> structureStart.placeInChunk(
-										worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, p, o + 15, p + 15), new ChunkPos(m, n)
+										worldGenRegion,
+										structureFeatureManager,
+										chunkGenerator,
+										worldgenRandom,
+										new BoundingBox(o, worldGenRegion.getMinBuildHeight() + 1, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15),
+										new ChunkPos(m, n)
 									)
 							);
 					} catch (Exception var21) {

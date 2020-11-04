@@ -28,12 +28,14 @@ import net.minecraft.world.level.material.FluidState;
 public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 	private final BlockModelShaper blockModelShaper;
 	private final ModelBlockRenderer modelRenderer;
+	private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
 	private final LiquidBlockRenderer liquidBlockRenderer;
 	private final Random random = new Random();
 	private final BlockColors blockColors;
 
-	public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockColors blockColors) {
+	public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer, BlockColors blockColors) {
 		this.blockModelShaper = blockModelShaper;
+		this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
 		this.blockColors = blockColors;
 		this.modelRenderer = new ModelBlockRenderer(this.blockColors);
 		this.liquidBlockRenderer = new LiquidBlockRenderer();
@@ -83,7 +85,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		} catch (Throwable var11) {
 			CrashReport crashReport = CrashReport.forThrowable(var11, "Tesselating block in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
-			CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
+			CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, blockState);
 			throw new ReportedException(crashReport);
 		}
 	}
@@ -94,7 +96,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		} catch (Throwable var8) {
 			CrashReport crashReport = CrashReport.forThrowable(var8, "Tesselating liquid in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
-			CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, null);
+			CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, null);
 			throw new ReportedException(crashReport);
 		}
 	}
@@ -121,8 +123,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 						.renderModel(poseStack.last(), multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState, false)), blockState, bakedModel, f, g, h, i, j);
 					break;
 				case ENTITYBLOCK_ANIMATED:
-					BlockEntityWithoutLevelRenderer.instance
-						.renderByItem(new ItemStack(blockState.getBlock()), ItemTransforms.TransformType.NONE, poseStack, multiBufferSource, i, j);
+					this.blockEntityRenderer.renderByItem(new ItemStack(blockState.getBlock()), ItemTransforms.TransformType.NONE, poseStack, multiBufferSource, i, j);
 			}
 		}
 	}

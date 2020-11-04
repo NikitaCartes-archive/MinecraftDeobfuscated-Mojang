@@ -13,30 +13,36 @@ import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 
 public class GameTestRegistry {
-	private static final Collection<TestFunction> testFunctions = Lists.<TestFunction>newArrayList();
-	private static final Set<String> testClassNames = Sets.<String>newHashSet();
-	private static final Map<String, Consumer<ServerLevel>> beforeBatchFunctions = Maps.<String, Consumer<ServerLevel>>newHashMap();
-	private static final Collection<TestFunction> lastFailedTests = Sets.<TestFunction>newHashSet();
+	private static final Collection<TestFunction> TEST_FUNCTIONS = Lists.<TestFunction>newArrayList();
+	private static final Set<String> TEST_CLASS_NAMES = Sets.<String>newHashSet();
+	private static final Map<String, Consumer<ServerLevel>> BEFORE_BATCH_FUNCTIONS = Maps.<String, Consumer<ServerLevel>>newHashMap();
+	private static final Map<String, Consumer<ServerLevel>> AFTER_BATCH_FUNCTIONS = Maps.<String, Consumer<ServerLevel>>newHashMap();
+	private static final Collection<TestFunction> LAST_FAILED_TESTS = Sets.<TestFunction>newHashSet();
 
 	public static Collection<TestFunction> getTestFunctionsForClassName(String string) {
-		return (Collection<TestFunction>)testFunctions.stream().filter(testFunction -> isTestFunctionPartOfClass(testFunction, string)).collect(Collectors.toList());
+		return (Collection<TestFunction>)TEST_FUNCTIONS.stream().filter(testFunction -> isTestFunctionPartOfClass(testFunction, string)).collect(Collectors.toList());
 	}
 
 	public static Collection<TestFunction> getAllTestFunctions() {
-		return testFunctions;
+		return TEST_FUNCTIONS;
 	}
 
 	public static Collection<String> getAllTestClassNames() {
-		return testClassNames;
+		return TEST_CLASS_NAMES;
 	}
 
 	public static boolean isTestClass(String string) {
-		return testClassNames.contains(string);
+		return TEST_CLASS_NAMES.contains(string);
 	}
 
 	@Nullable
 	public static Consumer<ServerLevel> getBeforeBatchFunction(String string) {
-		return (Consumer<ServerLevel>)beforeBatchFunctions.get(string);
+		return (Consumer<ServerLevel>)BEFORE_BATCH_FUNCTIONS.get(string);
+	}
+
+	@Nullable
+	public static Consumer<ServerLevel> getAfterBatchFunction(String string) {
+		return (Consumer<ServerLevel>)AFTER_BATCH_FUNCTIONS.get(string);
 	}
 
 	public static Optional<TestFunction> findTestFunction(String string) {
@@ -57,14 +63,14 @@ public class GameTestRegistry {
 	}
 
 	public static Collection<TestFunction> getLastFailedTests() {
-		return lastFailedTests;
+		return LAST_FAILED_TESTS;
 	}
 
 	public static void rememberFailedTest(TestFunction testFunction) {
-		lastFailedTests.add(testFunction);
+		LAST_FAILED_TESTS.add(testFunction);
 	}
 
 	public static void forgetFailedTests() {
-		lastFailedTests.clear();
+		LAST_FAILED_TESTS.clear();
 	}
 }

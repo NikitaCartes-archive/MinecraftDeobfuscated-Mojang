@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
 
@@ -44,7 +44,7 @@ public class PanicGoal extends Goal {
 	}
 
 	protected boolean findRandomPosition() {
-		Vec3 vec3 = RandomPos.getPos(this.mob, 5, 4);
+		Vec3 vec3 = DefaultRandomPos.getPos(this.mob, 5, 4);
 		if (vec3 == null) {
 			return false;
 		} else {

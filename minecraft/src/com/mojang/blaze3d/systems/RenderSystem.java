@@ -5,6 +5,7 @@ import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.nio.ByteBuffer;
@@ -12,6 +13,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -20,6 +22,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -38,6 +41,15 @@ public class RenderSystem {
 	private static int MAX_SUPPORTED_TEXTURE_SIZE = -1;
 	private static boolean isInInit;
 	private static double lastDrawTime = Double.MIN_VALUE;
+	private static final RenderSystem.AutoStorageIndexBuffer sharedSequential = new RenderSystem.AutoStorageIndexBuffer(1, 1, IntConsumer::accept);
+	private static final RenderSystem.AutoStorageIndexBuffer sharedSequentialQuad = new RenderSystem.AutoStorageIndexBuffer(4, 6, (intConsumer, i) -> {
+		intConsumer.accept(i + 0);
+		intConsumer.accept(i + 1);
+		intConsumer.accept(i + 2);
+		intConsumer.accept(i + 2);
+		intConsumer.accept(i + 3);
+		intConsumer.accept(i + 0);
+	});
 
 	public static void initRenderThread() {
 		if (renderThread == null && gameThread != Thread.currentThread()) {
@@ -548,9 +560,9 @@ public class RenderSystem {
 		GlStateManager._clearCurrentColor();
 	}
 
-	public static void drawArrays(int i, int j, int k) {
+	public static void drawElements(int i, int j, int k) {
 		assertThread(RenderSystem::isOnGameThread);
-		GlStateManager._drawArrays(i, j, k);
+		GlStateManager._drawElements(i, j, k, 0L);
 	}
 
 	public static void lineWidth(float f) {
@@ -832,6 +844,83 @@ public class RenderSystem {
 			options.graphicsMode = GraphicsStatus.FANCY;
 			runnable.run();
 			options.graphicsMode = graphicsStatus;
+		}
+	}
+
+	public static RenderSystem.AutoStorageIndexBuffer getSequentialBuffer(VertexFormat.Mode mode, int i) {
+		assertThread(RenderSystem::isOnRenderThread);
+		RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = mode == VertexFormat.Mode.QUADS ? sharedSequentialQuad : sharedSequential;
+		autoStorageIndexBuffer.ensureStorage(i);
+		return autoStorageIndexBuffer;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static final class AutoStorageIndexBuffer {
+		private final int vertexStride;
+		private final int indexStride;
+		private final RenderSystem.AutoStorageIndexBuffer.IndexGenerator generator;
+		private int name;
+		private VertexFormat.IndexType type = VertexFormat.IndexType.BYTE;
+		private int indexCount;
+
+		private AutoStorageIndexBuffer(int i, int j, RenderSystem.AutoStorageIndexBuffer.IndexGenerator indexGenerator) {
+			this.vertexStride = i;
+			this.indexStride = j;
+			this.generator = indexGenerator;
+		}
+
+		private void ensureStorage(int i) {
+			if (i > this.indexCount) {
+				RenderSystem.LOGGER.debug("Growing IndexBuffer: Old limit {}, new limit {}.", this.indexCount, i);
+				if (this.name == 0) {
+					this.name = GlStateManager._glGenBuffers();
+				}
+
+				VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
+				int j = Mth.roundToward(i * indexType.bytes, 4);
+				GlStateManager._glBindBuffer(34963, this.name);
+				GlStateManager._glBufferData(34963, (long)j, 35044);
+				ByteBuffer byteBuffer = GlStateManager._glMapBuffer(34963, 35001);
+				if (byteBuffer == null) {
+					throw new RuntimeException("Failed to map GL buffer");
+				} else {
+					this.type = indexType;
+					it.unimi.dsi.fastutil.ints.IntConsumer intConsumer = this.intConsumer(byteBuffer);
+
+					for (int k = 0; k < i; k += this.indexStride) {
+						this.generator.accept(intConsumer, k * this.vertexStride / this.indexStride);
+					}
+
+					GlStateManager._glUnmapBuffer(34963);
+					GlStateManager._glBindBuffer(34963, 0);
+					this.indexCount = i;
+				}
+			}
+		}
+
+		private it.unimi.dsi.fastutil.ints.IntConsumer intConsumer(ByteBuffer byteBuffer) {
+			switch (this.type) {
+				case BYTE:
+					return i -> byteBuffer.put((byte)i);
+				case SHORT:
+					return i -> byteBuffer.putShort((short)i);
+				case INT:
+				default:
+					return byteBuffer::putInt;
+			}
+		}
+
+		public int name() {
+			return this.name;
+		}
+
+		public VertexFormat.IndexType type() {
+			return this.type;
+		}
+
+		@Environment(EnvType.CLIENT)
+		interface IndexGenerator {
+			void accept(it.unimi.dsi.fastutil.ints.IntConsumer intConsumer, int i);
 		}
 	}
 }

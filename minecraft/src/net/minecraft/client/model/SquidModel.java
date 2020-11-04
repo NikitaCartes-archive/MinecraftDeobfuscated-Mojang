@@ -1,42 +1,51 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class SquidModel<T extends Entity> extends ListModel<T> {
-	private final ModelPart body;
+public class SquidModel<T extends Entity> extends HierarchicalModel<T> {
 	private final ModelPart[] tentacles = new ModelPart[8];
-	private final ImmutableList<ModelPart> parts;
+	private final ModelPart root;
 
-	public SquidModel() {
+	public SquidModel(ModelPart modelPart) {
+		this.root = modelPart;
+		Arrays.setAll(this.tentacles, i -> modelPart.getChild(createTentacleName(i)));
+	}
+
+	private static String createTentacleName(int i) {
+		return "tentacle" + i;
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
 		int i = -16;
-		this.body = new ModelPart(this, 0, 0);
-		this.body.addBox(-6.0F, -8.0F, -6.0F, 12.0F, 16.0F, 12.0F);
-		this.body.y += 8.0F;
+		partDefinition.addOrReplaceChild(
+			"body", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -8.0F, -6.0F, 12.0F, 16.0F, 12.0F), PartPose.offset(0.0F, 8.0F, 0.0F)
+		);
+		int j = 8;
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(48, 0).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 18.0F, 2.0F);
 
-		for (int j = 0; j < this.tentacles.length; j++) {
-			this.tentacles[j] = new ModelPart(this, 48, 0);
-			double d = (double)j * Math.PI * 2.0 / (double)this.tentacles.length;
+		for (int k = 0; k < 8; k++) {
+			double d = (double)k * Math.PI * 2.0 / 8.0;
 			float f = (float)Math.cos(d) * 5.0F;
-			float g = (float)Math.sin(d) * 5.0F;
-			this.tentacles[j].addBox(-1.0F, 0.0F, -1.0F, 2.0F, 18.0F, 2.0F);
-			this.tentacles[j].x = f;
-			this.tentacles[j].z = g;
-			this.tentacles[j].y = 15.0F;
-			d = (double)j * Math.PI * -2.0 / (double)this.tentacles.length + (Math.PI / 2);
-			this.tentacles[j].yRot = (float)d;
+			float g = 15.0F;
+			float h = (float)Math.sin(d) * 5.0F;
+			d = (double)k * Math.PI * -2.0 / 8.0 + (Math.PI / 2);
+			float l = (float)d;
+			partDefinition.addOrReplaceChild(createTentacleName(k), cubeListBuilder, PartPose.offsetAndRotation(f, 15.0F, h, 0.0F, l, 0.0F));
 		}
 
-		Builder<ModelPart> builder = ImmutableList.builder();
-		builder.add(this.body);
-		builder.addAll(Arrays.asList(this.tentacles));
-		this.parts = builder.build();
+		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Override
@@ -47,7 +56,7 @@ public class SquidModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public Iterable<ModelPart> parts() {
-		return this.parts;
+	public ModelPart root() {
+		return this.root;
 	}
 }

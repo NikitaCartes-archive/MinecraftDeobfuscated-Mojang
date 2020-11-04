@@ -137,7 +137,7 @@ public class FileDownload {
 						this.error = true;
 						this.request.abort();
 					} catch (Exception var93) {
-						LOGGER.error("Caught exception while downloading: " + var93.getMessage());
+						LOGGER.error("Caught exception while downloading: {}", var93.getMessage());
 						this.error = true;
 						return;
 					} finally {
@@ -167,7 +167,7 @@ public class FileDownload {
 									downloadCountingOutputStream3.setListener(resourcePackProgressListener3);
 									IOUtils.copy(httpResponse3.getEntity().getContent(), downloadCountingOutputStream3);
 								} catch (Exception var91) {
-									LOGGER.error("Caught exception while downloading: " + var91.getMessage());
+									LOGGER.error("Caught exception while downloading: {}", var91.getMessage());
 									this.error = true;
 								} finally {
 									this.request.releaseConnection();
@@ -428,12 +428,12 @@ public class FileDownload {
 						FileUtils.copyFile(this.tempFile, FileDownload.this.resourcePackPath);
 						FileDownload.this.finished = true;
 					} else {
-						FileDownload.LOGGER.error("Resourcepack had wrong hash (expected " + this.worldDownload.resourcePackHash + ", found " + string + "). Deleting it.");
+						FileDownload.LOGGER.error("Resourcepack had wrong hash (expected {}, found {}). Deleting it.", this.worldDownload.resourcePackHash, string);
 						FileUtils.deleteQuietly(this.tempFile);
 						FileDownload.this.error = true;
 					}
 				} catch (IOException var3) {
-					FileDownload.LOGGER.error("Error copying resourcepack file", var3.getMessage());
+					FileDownload.LOGGER.error("Error copying resourcepack file: {}", var3.getMessage());
 					FileDownload.this.error = true;
 				}
 			}

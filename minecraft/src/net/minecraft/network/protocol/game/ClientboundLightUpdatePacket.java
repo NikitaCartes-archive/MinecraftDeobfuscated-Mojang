@@ -16,10 +16,10 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketListener> {
 	private int x;
 	private int z;
-	private int skyYMask;
-	private int blockYMask;
-	private int emptySkyYMask;
-	private int emptyBlockYMask;
+	private long skyYMask;
+	private long blockYMask;
+	private long emptySkyYMask;
+	private long emptyBlockYMask;
 	private List<byte[]> skyUpdates;
 	private List<byte[]> blockUpdates;
 	private boolean trustEdges;
@@ -34,23 +34,24 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		this.skyUpdates = Lists.<byte[]>newArrayList();
 		this.blockUpdates = Lists.<byte[]>newArrayList();
 
-		for (int i = 0; i < 18; i++) {
-			DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, -1 + i));
-			DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, -1 + i));
+		for (int i = 0; i < levelLightEngine.getLightSectionCount(); i++) {
+			DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + i));
+			DataLayer dataLayer2 = levelLightEngine.getLayerListener(LightLayer.BLOCK)
+				.getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + i));
 			if (dataLayer != null) {
 				if (dataLayer.isEmpty()) {
-					this.emptySkyYMask |= 1 << i;
+					this.emptySkyYMask |= 1L << i;
 				} else {
-					this.skyYMask |= 1 << i;
+					this.skyYMask |= 1L << i;
 					this.skyUpdates.add(dataLayer.getData().clone());
 				}
 			}
 
 			if (dataLayer2 != null) {
 				if (dataLayer2.isEmpty()) {
-					this.emptyBlockYMask |= 1 << i;
+					this.emptyBlockYMask |= 1L << i;
 				} else {
-					this.blockYMask |= 1 << i;
+					this.blockYMask |= 1L << i;
 					this.blockUpdates.add(dataLayer2.getData().clone());
 				}
 			}
@@ -61,32 +62,34 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		this.x = chunkPos.x;
 		this.z = chunkPos.z;
 		this.trustEdges = bl;
-		this.skyYMask = i;
-		this.blockYMask = j;
+		this.skyYMask = (long)i;
+		this.blockYMask = (long)j;
 		this.skyUpdates = Lists.<byte[]>newArrayList();
 		this.blockUpdates = Lists.<byte[]>newArrayList();
 
-		for (int k = 0; k < 18; k++) {
-			if ((this.skyYMask & 1 << k) != 0) {
-				DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY).getDataLayerData(SectionPos.of(chunkPos, -1 + k));
+		for (int k = 0; k < levelLightEngine.getLightSectionCount(); k++) {
+			if ((this.skyYMask & 1L << k) != 0L) {
+				DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.SKY)
+					.getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + k));
 				if (dataLayer != null && !dataLayer.isEmpty()) {
 					this.skyUpdates.add(dataLayer.getData().clone());
 				} else {
-					this.skyYMask &= ~(1 << k);
+					this.skyYMask &= ~(1L << k);
 					if (dataLayer != null) {
-						this.emptySkyYMask |= 1 << k;
+						this.emptySkyYMask |= 1L << k;
 					}
 				}
 			}
 
-			if ((this.blockYMask & 1 << k) != 0) {
-				DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK).getDataLayerData(SectionPos.of(chunkPos, -1 + k));
+			if ((this.blockYMask & 1L << k) != 0L) {
+				DataLayer dataLayer = levelLightEngine.getLayerListener(LightLayer.BLOCK)
+					.getDataLayerData(SectionPos.of(chunkPos, levelLightEngine.getMinLightSection() + k));
 				if (dataLayer != null && !dataLayer.isEmpty()) {
 					this.blockUpdates.add(dataLayer.getData().clone());
 				} else {
-					this.blockYMask &= ~(1 << k);
+					this.blockYMask &= ~(1L << k);
 					if (dataLayer != null) {
-						this.emptyBlockYMask |= 1 << k;
+						this.emptyBlockYMask |= 1L << k;
 					}
 				}
 			}
@@ -98,22 +101,22 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		this.x = friendlyByteBuf.readVarInt();
 		this.z = friendlyByteBuf.readVarInt();
 		this.trustEdges = friendlyByteBuf.readBoolean();
-		this.skyYMask = friendlyByteBuf.readVarInt();
-		this.blockYMask = friendlyByteBuf.readVarInt();
-		this.emptySkyYMask = friendlyByteBuf.readVarInt();
-		this.emptyBlockYMask = friendlyByteBuf.readVarInt();
+		this.skyYMask = friendlyByteBuf.readVarLong();
+		this.blockYMask = friendlyByteBuf.readVarLong();
+		this.emptySkyYMask = friendlyByteBuf.readVarLong();
+		this.emptyBlockYMask = friendlyByteBuf.readVarLong();
 		this.skyUpdates = Lists.<byte[]>newArrayList();
 
-		for (int i = 0; i < 18; i++) {
-			if ((this.skyYMask & 1 << i) != 0) {
+		for (int i = 0; i < 64; i++) {
+			if ((this.skyYMask & 1L << i) != 0L) {
 				this.skyUpdates.add(friendlyByteBuf.readByteArray(2048));
 			}
 		}
 
 		this.blockUpdates = Lists.<byte[]>newArrayList();
 
-		for (int ix = 0; ix < 18; ix++) {
-			if ((this.blockYMask & 1 << ix) != 0) {
+		for (int ix = 0; ix < 64; ix++) {
+			if ((this.blockYMask & 1L << ix) != 0L) {
 				this.blockUpdates.add(friendlyByteBuf.readByteArray(2048));
 			}
 		}
@@ -124,10 +127,10 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeVarInt(this.x);
 		friendlyByteBuf.writeVarInt(this.z);
 		friendlyByteBuf.writeBoolean(this.trustEdges);
-		friendlyByteBuf.writeVarInt(this.skyYMask);
-		friendlyByteBuf.writeVarInt(this.blockYMask);
-		friendlyByteBuf.writeVarInt(this.emptySkyYMask);
-		friendlyByteBuf.writeVarInt(this.emptyBlockYMask);
+		friendlyByteBuf.writeVarLong(this.skyYMask);
+		friendlyByteBuf.writeVarLong(this.blockYMask);
+		friendlyByteBuf.writeVarLong(this.emptySkyYMask);
+		friendlyByteBuf.writeVarLong(this.emptyBlockYMask);
 
 		for (byte[] bs : this.skyUpdates) {
 			friendlyByteBuf.writeByteArray(bs);
@@ -153,12 +156,12 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	}
 
 	@Environment(EnvType.CLIENT)
-	public int getSkyYMask() {
+	public long getSkyYMask() {
 		return this.skyYMask;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public int getEmptySkyYMask() {
+	public long getEmptySkyYMask() {
 		return this.emptySkyYMask;
 	}
 
@@ -168,12 +171,12 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	}
 
 	@Environment(EnvType.CLIENT)
-	public int getBlockYMask() {
+	public long getBlockYMask() {
 		return this.blockYMask;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public int getEmptyBlockYMask() {
+	public long getEmptyBlockYMask() {
 		return this.emptyBlockYMask;
 	}
 

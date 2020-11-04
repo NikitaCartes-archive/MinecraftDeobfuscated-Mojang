@@ -55,15 +55,6 @@ public class BoundingBox {
 		return new BoundingBox(Math.min(i, l), Math.min(j, m), Math.min(k, n), Math.max(i, l), Math.max(j, m), Math.max(k, n));
 	}
 
-	public BoundingBox(BoundingBox boundingBox) {
-		this.x0 = boundingBox.x0;
-		this.y0 = boundingBox.y0;
-		this.z0 = boundingBox.z0;
-		this.x1 = boundingBox.x1;
-		this.y1 = boundingBox.y1;
-		this.z1 = boundingBox.z1;
-	}
-
 	public BoundingBox(int i, int j, int k, int l, int m, int n) {
 		this.x0 = i;
 		this.y0 = j;
@@ -80,15 +71,6 @@ public class BoundingBox {
 		this.x1 = Math.max(vec3i.getX(), vec3i2.getX());
 		this.y1 = Math.max(vec3i.getY(), vec3i2.getY());
 		this.z1 = Math.max(vec3i.getZ(), vec3i2.getZ());
-	}
-
-	public BoundingBox(int i, int j, int k, int l) {
-		this.x0 = i;
-		this.z0 = j;
-		this.x1 = k;
-		this.z1 = l;
-		this.y0 = 1;
-		this.y1 = 512;
 	}
 
 	public boolean intersects(BoundingBox boundingBox) {

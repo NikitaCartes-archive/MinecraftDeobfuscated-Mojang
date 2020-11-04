@@ -19,7 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,7 +43,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -301,16 +300,16 @@ public class Rabbit extends Animal {
 		return this.isInvulnerableTo(damageSource) ? false : super.hurt(damageSource, f);
 	}
 
-	private boolean isTemptingItem(Item item) {
-		return item == Items.CARROT || item == Items.GOLDEN_CARROT || item == Blocks.DANDELION.asItem();
+	private static boolean isTemptingItem(ItemStack itemStack) {
+		return itemStack.is(Items.CARROT) || itemStack.is(Items.GOLDEN_CARROT) || itemStack.is(Blocks.DANDELION.asItem());
 	}
 
-	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
 		int i = this.getRandomRabbitType(serverLevel);
 		if (this.random.nextInt(20) != 0) {
-			if (agableMob instanceof Rabbit && this.random.nextBoolean()) {
-				i = ((Rabbit)agableMob).getRabbitType();
+			if (ageableMob instanceof Rabbit && this.random.nextBoolean()) {
+				i = ((Rabbit)ageableMob).getRabbitType();
 			} else {
 				i = this.getRabbitType();
 			}
@@ -322,7 +321,7 @@ public class Rabbit extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return this.isTemptingItem(itemStack.getItem());
+		return isTemptingItem(itemStack);
 	}
 
 	public int getRabbitType() {
@@ -430,7 +429,7 @@ public class Rabbit extends Animal {
 		}
 	}
 
-	public static class RabbitGroupData extends AgableMob.AgableMobGroupData {
+	public static class RabbitGroupData extends AgeableMob.AgeableMobGroupData {
 		public final int rabbitType;
 
 		public RabbitGroupData(int i) {
@@ -561,12 +560,12 @@ public class Rabbit extends Animal {
 				BlockState blockState = level.getBlockState(blockPos);
 				Block block = blockState.getBlock();
 				if (this.canRaid && block instanceof CarrotBlock) {
-					Integer integer = blockState.getValue(CarrotBlock.AGE);
-					if (integer == 0) {
+					int i = (Integer)blockState.getValue(CarrotBlock.AGE);
+					if (i == 0) {
 						level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 						level.destroyBlock(blockPos, true, this.rabbit);
 					} else {
-						level.setBlock(blockPos, blockState.setValue(CarrotBlock.AGE, Integer.valueOf(integer - 1)), 2);
+						level.setBlock(blockPos, blockState.setValue(CarrotBlock.AGE, Integer.valueOf(i - 1)), 2);
 						level.levelEvent(2001, blockPos, Block.getId(blockState));
 					}
 
@@ -580,12 +579,10 @@ public class Rabbit extends Animal {
 
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-			Block block = levelReader.getBlockState(blockPos).getBlock();
-			if (block == Blocks.FARMLAND && this.wantsToRaid && !this.canRaid) {
-				blockPos = blockPos.above();
-				BlockState blockState = levelReader.getBlockState(blockPos);
-				block = blockState.getBlock();
-				if (block instanceof CarrotBlock && ((CarrotBlock)block).isMaxAge(blockState)) {
+			BlockState blockState = levelReader.getBlockState(blockPos);
+			if (blockState.is(Blocks.FARMLAND) && this.wantsToRaid && !this.canRaid) {
+				blockState = levelReader.getBlockState(blockPos.above());
+				if (blockState.getBlock() instanceof CarrotBlock && ((CarrotBlock)blockState.getBlock()).isMaxAge(blockState)) {
 					this.canRaid = true;
 					return true;
 				}

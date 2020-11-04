@@ -6,53 +6,43 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.Model;
 import net.minecraft.core.Direction;
 
 @Environment(EnvType.CLIENT)
-public class ModelPart {
-	private float xTexSize = 64.0F;
-	private float yTexSize = 32.0F;
-	private int xTexOffs;
-	private int yTexOffs;
+public final class ModelPart {
 	public float x;
 	public float y;
 	public float z;
 	public float xRot;
 	public float yRot;
 	public float zRot;
-	public boolean mirror;
 	public boolean visible = true;
-	private final ObjectList<ModelPart.Cube> cubes = new ObjectArrayList<>();
-	private final ObjectList<ModelPart> children = new ObjectArrayList<>();
+	private final List<ModelPart.Cube> cubes;
+	private final Map<String, ModelPart> children;
 
-	public ModelPart(Model model) {
-		model.accept(this);
-		this.setTexSize(model.texWidth, model.texHeight);
+	public ModelPart(List<ModelPart.Cube> list, Map<String, ModelPart> map) {
+		this.cubes = list;
+		this.children = map;
 	}
 
-	public ModelPart(Model model, int i, int j) {
-		this(model.texWidth, model.texHeight, i, j);
-		model.accept(this);
+	public PartPose storePose() {
+		return PartPose.offsetAndRotation(this.x, this.y, this.z, this.xRot, this.yRot, this.zRot);
 	}
 
-	public ModelPart(int i, int j, int k, int l) {
-		this.setTexSize(i, j);
-		this.texOffs(k, l);
-	}
-
-	private ModelPart() {
-	}
-
-	public ModelPart createShallowCopy() {
-		ModelPart modelPart = new ModelPart();
-		modelPart.copyFrom(this);
-		return modelPart;
+	public void loadPose(PartPose partPose) {
+		this.x = partPose.x;
+		this.y = partPose.y;
+		this.z = partPose.z;
+		this.xRot = partPose.xRot;
+		this.yRot = partPose.yRot;
+		this.zRot = partPose.zRot;
 	}
 
 	public void copyFrom(ModelPart modelPart) {
@@ -64,46 +54,13 @@ public class ModelPart {
 		this.z = modelPart.z;
 	}
 
-	public void addChild(ModelPart modelPart) {
-		this.children.add(modelPart);
-	}
-
-	public ModelPart texOffs(int i, int j) {
-		this.xTexOffs = i;
-		this.yTexOffs = j;
-		return this;
-	}
-
-	public ModelPart addBox(String string, float f, float g, float h, int i, int j, int k, float l, int m, int n) {
-		this.texOffs(m, n);
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, (float)i, (float)j, (float)k, l, l, l, this.mirror, false);
-		return this;
-	}
-
-	public ModelPart addBox(float f, float g, float h, float i, float j, float k) {
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0F, 0.0F, 0.0F, this.mirror, false);
-		return this;
-	}
-
-	public ModelPart addBox(float f, float g, float h, float i, float j, float k, boolean bl) {
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0F, 0.0F, 0.0F, bl, false);
-		return this;
-	}
-
-	public void addBox(float f, float g, float h, float i, float j, float k, float l) {
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, l, l, this.mirror, false);
-	}
-
-	public void addBox(float f, float g, float h, float i, float j, float k, float l, float m, float n) {
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, m, n, this.mirror, false);
-	}
-
-	public void addBox(float f, float g, float h, float i, float j, float k, float l, boolean bl) {
-		this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, l, l, bl, false);
-	}
-
-	private void addBox(int i, int j, float f, float g, float h, float k, float l, float m, float n, float o, float p, boolean bl, boolean bl2) {
-		this.cubes.add(new ModelPart.Cube(i, j, f, g, h, k, l, m, n, o, p, bl, this.xTexSize, this.yTexSize));
+	public ModelPart getChild(String string) {
+		ModelPart modelPart = (ModelPart)this.children.get(string);
+		if (modelPart == null) {
+			throw new NoSuchElementException("Can't find part " + string);
+		} else {
+			return modelPart;
+		}
 	}
 
 	public void setPos(float f, float g, float h) {
@@ -123,7 +80,7 @@ public class ModelPart {
 				this.translateAndRotate(poseStack);
 				this.compile(poseStack.last(), vertexConsumer, i, j, f, g, h, k);
 
-				for (ModelPart modelPart : this.children) {
+				for (ModelPart modelPart : this.children.values()) {
 					modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k);
 				}
 
@@ -148,38 +105,21 @@ public class ModelPart {
 	}
 
 	private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		Matrix4f matrix4f = pose.pose();
-		Matrix3f matrix3f = pose.normal();
-
 		for (ModelPart.Cube cube : this.cubes) {
-			for (ModelPart.Polygon polygon : cube.polygons) {
-				Vector3f vector3f = polygon.normal.copy();
-				vector3f.transform(matrix3f);
-				float l = vector3f.x();
-				float m = vector3f.y();
-				float n = vector3f.z();
-
-				for (int o = 0; o < 4; o++) {
-					ModelPart.Vertex vertex = polygon.vertices[o];
-					float p = vertex.pos.x() / 16.0F;
-					float q = vertex.pos.y() / 16.0F;
-					float r = vertex.pos.z() / 16.0F;
-					Vector4f vector4f = new Vector4f(p, q, r, 1.0F);
-					vector4f.transform(matrix4f);
-					vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
-				}
-			}
+			cube.compile(pose, vertexConsumer, i, j, f, g, h, k);
 		}
-	}
-
-	public ModelPart setTexSize(int i, int j) {
-		this.xTexSize = (float)i;
-		this.yTexSize = (float)j;
-		return this;
 	}
 
 	public ModelPart.Cube getRandomCube(Random random) {
 		return (ModelPart.Cube)this.cubes.get(random.nextInt(this.cubes.size()));
+	}
+
+	public boolean isEmpty() {
+		return this.cubes.isEmpty();
+	}
+
+	public Stream<ModelPart> getAllParts() {
+		return Stream.concat(Stream.of(this), this.children.values().stream().flatMap(ModelPart::getAllParts));
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -238,6 +178,28 @@ public class ModelPart {
 			this.polygons[4] = new ModelPart.Polygon(new ModelPart.Vertex[]{vertex2, vertex, vertex4, vertex3}, x, ad, y, ae, q, r, bl, Direction.NORTH);
 			this.polygons[0] = new ModelPart.Polygon(new ModelPart.Vertex[]{vertex6, vertex2, vertex3, vertex7}, y, ad, aa, ae, q, r, bl, Direction.EAST);
 			this.polygons[5] = new ModelPart.Polygon(new ModelPart.Vertex[]{vertex5, vertex6, vertex7, vertex8}, aa, ad, ab, ae, q, r, bl, Direction.SOUTH);
+		}
+
+		public void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+			Matrix4f matrix4f = pose.pose();
+			Matrix3f matrix3f = pose.normal();
+
+			for (ModelPart.Polygon polygon : this.polygons) {
+				Vector3f vector3f = polygon.normal.copy();
+				vector3f.transform(matrix3f);
+				float l = vector3f.x();
+				float m = vector3f.y();
+				float n = vector3f.z();
+
+				for (ModelPart.Vertex vertex : polygon.vertices) {
+					float o = vertex.pos.x() / 16.0F;
+					float p = vertex.pos.y() / 16.0F;
+					float q = vertex.pos.z() / 16.0F;
+					Vector4f vector4f = new Vector4f(o, p, q, 1.0F);
+					vector4f.transform(matrix4f);
+					vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
+				}
+			}
 		}
 	}
 

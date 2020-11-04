@@ -35,7 +35,7 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 	}
 
 	public void setItem(ItemStack itemStack) {
-		if (itemStack.getItem() != Items.FIRE_CHARGE || itemStack.hasTag()) {
+		if (!itemStack.is(Items.FIRE_CHARGE) || itemStack.hasTag()) {
 			this.getEntityData().set(DATA_ITEM_STACK, Util.make(itemStack.copy(), itemStackx -> itemStackx.setCount(1)));
 		}
 	}

@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -111,7 +111,7 @@ public class CommandFunction {
 
 		@Override
 		public void execute(
-			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, ArrayDeque<ServerFunctionManager.QueuedCommand> arrayDeque, int i
+			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i
 		) throws CommandSyntaxException {
 			serverFunctionManager.getDispatcher()
 				.execute(new ParseResults<>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
@@ -123,9 +123,7 @@ public class CommandFunction {
 	}
 
 	public interface Entry {
-		void execute(
-			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, ArrayDeque<ServerFunctionManager.QueuedCommand> arrayDeque, int i
-		) throws CommandSyntaxException;
+		void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i) throws CommandSyntaxException;
 	}
 
 	public static class FunctionEntry implements CommandFunction.Entry {
@@ -137,15 +135,15 @@ public class CommandFunction {
 
 		@Override
 		public void execute(
-			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, ArrayDeque<ServerFunctionManager.QueuedCommand> arrayDeque, int i
+			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i
 		) {
 			this.function.get(serverFunctionManager).ifPresent(commandFunction -> {
 				CommandFunction.Entry[] entrys = commandFunction.getEntries();
-				int j = i - arrayDeque.size();
+				int j = i - deque.size();
 				int k = Math.min(entrys.length, j);
 
 				for (int l = k - 1; l >= 0; l--) {
-					arrayDeque.addFirst(new ServerFunctionManager.QueuedCommand(serverFunctionManager, commandSourceStack, entrys[l]));
+					deque.addFirst(new ServerFunctionManager.QueuedCommand(serverFunctionManager, commandSourceStack, entrys[l]));
 				}
 			});
 		}

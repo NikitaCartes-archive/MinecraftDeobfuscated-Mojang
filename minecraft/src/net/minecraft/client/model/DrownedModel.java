@@ -3,6 +3,12 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -12,25 +18,27 @@ import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
 public class DrownedModel<T extends Zombie> extends ZombieModel<T> {
-	public DrownedModel(float f, float g, int i, int j) {
-		super(f, g, i, j);
-		this.rightArm = new ModelPart(this, 32, 48);
-		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.rightArm.setPos(-5.0F, 2.0F + g, 0.0F);
-		this.rightLeg = new ModelPart(this, 16, 48);
-		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.rightLeg.setPos(-1.9F, 12.0F + g, 0.0F);
+	public DrownedModel(ModelPart modelPart) {
+		super(modelPart);
 	}
 
-	public DrownedModel(float f, boolean bl) {
-		super(f, 0.0F, 64, bl ? 32 : 64);
+	public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
+		MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0F);
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation), PartPose.offset(5.0F, 2.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation), PartPose.offset(1.9F, 12.0F, 0.0F)
+		);
+		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
 	public void prepareMobModel(T zombie, float f, float g, float h) {
 		this.rightArmPose = HumanoidModel.ArmPose.EMPTY;
 		this.leftArmPose = HumanoidModel.ArmPose.EMPTY;
 		ItemStack itemStack = zombie.getItemInHand(InteractionHand.MAIN_HAND);
-		if (itemStack.getItem() == Items.TRIDENT && zombie.isAggressive()) {
+		if (itemStack.is(Items.TRIDENT) && zombie.isAggressive()) {
 			if (zombie.getMainArm() == HumanoidArm.RIGHT) {
 				this.rightArmPose = HumanoidModel.ArmPose.THROW_SPEAR;
 			} else {

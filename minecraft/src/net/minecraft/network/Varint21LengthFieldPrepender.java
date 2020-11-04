@@ -7,7 +7,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 @Sharable
 public class Varint21LengthFieldPrepender extends MessageToByteEncoder<ByteBuf> {
-	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) throws Exception {
+	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
 		int i = byteBuf.readableBytes();
 		int j = FriendlyByteBuf.getVarIntSize(i);
 		if (j > 3) {

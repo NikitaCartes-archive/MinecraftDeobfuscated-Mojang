@@ -57,8 +57,8 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new SignBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new SignBlockEntity(blockPos, blockState);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild;
+		boolean bl = itemStack.getItem() instanceof DyeItem && player.getAbilities().mayBuild;
 		if (level.isClientSide) {
 			return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
 		} else {

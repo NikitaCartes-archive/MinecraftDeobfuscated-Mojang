@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -21,11 +20,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.PistonType;
 
 @Environment(EnvType.CLIENT)
-public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEntity> {
-	private final BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlockEntity> {
+	private final BlockRenderDispatcher blockRenderer;
 
-	public PistonHeadRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public PistonHeadRenderer(BlockEntityRendererProvider.Context context) {
+		this.blockRenderer = context.getBlockRenderDispatcher();
 	}
 
 	public void render(PistonMovingBlockEntity pistonMovingBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

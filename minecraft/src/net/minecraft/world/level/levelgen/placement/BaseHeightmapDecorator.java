@@ -16,6 +16,6 @@ public abstract class BaseHeightmapDecorator<DC extends DecoratorConfiguration> 
 		int i = blockPos.getX();
 		int j = blockPos.getZ();
 		int k = decorationContext.getHeight(this.type(decoratorConfiguration), i, j);
-		return k > 0 ? Stream.of(new BlockPos(i, k, j)) : Stream.of();
+		return k > decorationContext.getMinBuildHeight() ? Stream.of(new BlockPos(i, k, j)) : Stream.of();
 	}
 }

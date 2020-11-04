@@ -14,8 +14,8 @@ import net.minecraft.world.entity.LightningBolt;
 
 @Environment(EnvType.CLIENT)
 public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
-	public LightningBoltRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public LightningBoltRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public void render(LightningBolt lightningBolt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

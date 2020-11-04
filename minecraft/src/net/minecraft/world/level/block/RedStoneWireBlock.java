@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -69,8 +70,16 @@ public class RedStoneWireBlock extends Block {
 			Shapes.or((VoxelShape)SHAPES_FLOOR.get(Direction.WEST), Block.box(0.0, 0.0, 3.0, 1.0, 16.0, 13.0))
 		)
 	);
-	private final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.<BlockState, VoxelShape>newHashMap();
-	private static final Vector3f[] COLORS = new Vector3f[16];
+	private static final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.<BlockState, VoxelShape>newHashMap();
+	private static final Vector3f[] COLORS = Util.make(new Vector3f[16], vector3fs -> {
+		for (int i = 0; i <= 15; i++) {
+			float f = (float)i / 15.0F;
+			float g = f * 0.6F + (f > 0.0F ? 0.4F : 0.3F);
+			float h = Mth.clamp(f * f * 0.7F - 0.5F, 0.0F, 1.0F);
+			float j = Mth.clamp(f * f * 0.6F - 0.7F, 0.0F, 1.0F);
+			vector3fs[i] = new Vector3f(g, h, j);
+		}
+	});
 	private final BlockState crossState;
 	private boolean shouldSignal = true;
 
@@ -93,7 +102,7 @@ public class RedStoneWireBlock extends Block {
 
 		for (BlockState blockState : this.getStateDefinition().getPossibleStates()) {
 			if ((Integer)blockState.getValue(POWER) == 0) {
-				this.SHAPES_CACHE.put(blockState, this.calculateShape(blockState));
+				SHAPES_CACHE.put(blockState, this.calculateShape(blockState));
 			}
 		}
 	}
@@ -115,7 +124,7 @@ public class RedStoneWireBlock extends Block {
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return (VoxelShape)this.SHAPES_CACHE.get(blockState.setValue(POWER, Integer.valueOf(0)));
+		return (VoxelShape)SHAPES_CACHE.get(blockState.setValue(POWER, Integer.valueOf(0)));
 	}
 
 	@Override
@@ -516,7 +525,7 @@ public class RedStoneWireBlock extends Block {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (!player.abilities.mayBuild) {
+		if (!player.getAbilities().mayBuild) {
 			return InteractionResult.PASS;
 		} else {
 			if (isCross(blockState) || isDot(blockState)) {
@@ -542,16 +551,6 @@ public class RedStoneWireBlock extends Block {
 				&& level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
 				level.updateNeighborsAtExceptFromFacing(blockPos2, blockState2.getBlock(), direction.getOpposite());
 			}
-		}
-	}
-
-	static {
-		for (int i = 0; i <= 15; i++) {
-			float f = (float)i / 15.0F;
-			float g = f * 0.6F + (f > 0.0F ? 0.4F : 0.3F);
-			float h = Mth.clamp(f * f * 0.7F - 0.5F, 0.0F, 1.0F);
-			float j = Mth.clamp(f * f * 0.6F - 0.7F, 0.0F, 1.0F);
-			COLORS[i] = new Vector3f(g, h, j);
 		}
 	}
 }

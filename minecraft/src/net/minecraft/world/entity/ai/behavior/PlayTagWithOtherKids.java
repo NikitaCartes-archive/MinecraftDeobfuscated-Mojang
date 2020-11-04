@@ -16,7 +16,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class PlayTagWithOtherKids extends Behavior<PathfinderMob> {
@@ -55,7 +55,7 @@ public class PlayTagWithOtherKids extends Behavior<PathfinderMob> {
 
 	private void fleeFromChaser(ServerLevel serverLevel, PathfinderMob pathfinderMob, LivingEntity livingEntity) {
 		for (int i = 0; i < 10; i++) {
-			Vec3 vec3 = RandomPos.getLandPos(pathfinderMob, 20, 8);
+			Vec3 vec3 = LandRandomPos.getPos(pathfinderMob, 20, 8);
 			if (vec3 != null && serverLevel.isVillage(new BlockPos(vec3))) {
 				pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, 0.6F, 0));
 				return;

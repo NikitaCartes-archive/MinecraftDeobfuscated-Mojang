@@ -117,7 +117,7 @@ public abstract class LavaFluid extends FlowingFluid {
 	}
 
 	private boolean isFlammable(LevelReader levelReader, BlockPos blockPos) {
-		return blockPos.getY() >= 0 && blockPos.getY() < 256 && !levelReader.hasChunkAt(blockPos)
+		return blockPos.getY() >= levelReader.getMinBuildHeight() && blockPos.getY() < levelReader.getMaxBuildHeight() && !levelReader.hasChunkAt(blockPos)
 			? false
 			: levelReader.getBlockState(blockPos).getMaterial().isFlammable();
 	}

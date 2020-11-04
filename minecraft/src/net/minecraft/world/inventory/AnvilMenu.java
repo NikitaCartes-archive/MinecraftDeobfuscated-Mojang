@@ -40,12 +40,12 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 	@Override
 	protected boolean mayPickup(Player player, boolean bl) {
-		return (player.abilities.instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() > 0;
+		return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() > 0;
 	}
 
 	@Override
 	protected ItemStack onTake(Player player, ItemStack itemStack) {
-		if (!player.abilities.instabuild) {
+		if (!player.getAbilities().instabuild) {
 			player.giveExperienceLevels(-this.cost.get());
 		}
 
@@ -65,7 +65,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 		this.cost.set(0);
 		this.access.execute((level, blockPos) -> {
 			BlockState blockState = level.getBlockState(blockPos);
-			if (!player.abilities.instabuild && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
+			if (!player.getAbilities().instabuild && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
 				BlockState blockState2 = AnvilBlock.damage(blockState);
 				if (blockState2 == null) {
 					level.removeBlock(blockPos, false);
@@ -98,7 +98,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 			j += itemStack.getBaseRepairCost() + (itemStack3.isEmpty() ? 0 : itemStack3.getBaseRepairCost());
 			this.repairItemCountCost = 0;
 			if (!itemStack3.isEmpty()) {
-				boolean bl = itemStack3.getItem() == Items.ENCHANTED_BOOK && !EnchantedBookItem.getEnchantments(itemStack3).isEmpty();
+				boolean bl = itemStack3.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(itemStack3).isEmpty();
 				if (itemStack2.isDamageableItem() && itemStack2.getItem().isValidRepairItem(itemStack, itemStack3)) {
 					int l = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
 					if (l <= 0) {
@@ -117,7 +117,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 					this.repairItemCountCost = m;
 				} else {
-					if (!bl && (itemStack2.getItem() != itemStack3.getItem() || !itemStack2.isDamageableItem())) {
+					if (!bl && (!itemStack2.is(itemStack3.getItem()) || !itemStack2.isDamageableItem())) {
 						this.resultSlots.setItem(0, ItemStack.EMPTY);
 						this.cost.set(0);
 						return;
@@ -149,7 +149,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 							int r = (Integer)map2.get(enchantment);
 							r = q == r ? r + 1 : Math.max(r, q);
 							boolean bl4 = enchantment.canEnchant(itemStack);
-							if (this.player.abilities.instabuild || itemStack.getItem() == Items.ENCHANTED_BOOK) {
+							if (this.player.getAbilities().instabuild || itemStack.is(Items.ENCHANTED_BOOK)) {
 								bl4 = true;
 							}
 
@@ -225,7 +225,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 				this.cost.set(39);
 			}
 
-			if (this.cost.get() >= 40 && !this.player.abilities.instabuild) {
+			if (this.cost.get() >= 40 && !this.player.getAbilities().instabuild) {
 				itemStack2 = ItemStack.EMPTY;
 			}
 

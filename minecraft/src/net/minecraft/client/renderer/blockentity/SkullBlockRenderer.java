@@ -1,6 +1,8 @@
 package net.minecraft.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
@@ -12,9 +14,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidHeadModel;
 import net.minecraft.client.model.SkullModel;
+import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.dragon.DragonHeadModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -29,18 +33,8 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
-	private static final Map<SkullBlock.Type, SkullModel> MODEL_BY_TYPE = Util.make(Maps.<SkullBlock.Type, SkullModel>newHashMap(), hashMap -> {
-		SkullModel skullModel = new SkullModel(0, 0, 64, 32);
-		SkullModel skullModel2 = new HumanoidHeadModel();
-		DragonHeadModel dragonHeadModel = new DragonHeadModel(0.0F);
-		hashMap.put(SkullBlock.Types.SKELETON, skullModel);
-		hashMap.put(SkullBlock.Types.WITHER_SKELETON, skullModel);
-		hashMap.put(SkullBlock.Types.PLAYER, skullModel2);
-		hashMap.put(SkullBlock.Types.ZOMBIE, skullModel2);
-		hashMap.put(SkullBlock.Types.CREEPER, skullModel);
-		hashMap.put(SkullBlock.Types.DRAGON, dragonHeadModel);
-	});
+public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity> {
+	private final Map<SkullBlock.Type, SkullModelBase> modelByType;
 	private static final Map<SkullBlock.Type, ResourceLocation> SKIN_BY_TYPE = Util.make(Maps.<SkullBlock.Type, ResourceLocation>newHashMap(), hashMap -> {
 		hashMap.put(SkullBlock.Types.SKELETON, new ResourceLocation("textures/entity/skeleton/skeleton.png"));
 		hashMap.put(SkullBlock.Types.WITHER_SKELETON, new ResourceLocation("textures/entity/skeleton/wither_skeleton.png"));
@@ -50,8 +44,19 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		hashMap.put(SkullBlock.Types.PLAYER, DefaultPlayerSkin.getDefaultSkin());
 	});
 
-	public SkullBlockRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public static Map<SkullBlock.Type, SkullModelBase> createSkullRenderers(EntityModelSet entityModelSet) {
+		Builder<SkullBlock.Type, SkullModelBase> builder = ImmutableMap.builder();
+		builder.put(SkullBlock.Types.SKELETON, new SkullModel(entityModelSet.getLayer(ModelLayers.SKELETON_SKULL)));
+		builder.put(SkullBlock.Types.WITHER_SKELETON, new SkullModel(entityModelSet.getLayer(ModelLayers.WITHER_SKELETON_SKULL)));
+		builder.put(SkullBlock.Types.PLAYER, new SkullModel(entityModelSet.getLayer(ModelLayers.PLAYER_HEAD)));
+		builder.put(SkullBlock.Types.ZOMBIE, new SkullModel(entityModelSet.getLayer(ModelLayers.ZOMBIE_HEAD)));
+		builder.put(SkullBlock.Types.CREEPER, new SkullModel(entityModelSet.getLayer(ModelLayers.CREEPER_HEAD)));
+		builder.put(SkullBlock.Types.DRAGON, new DragonHeadModel(entityModelSet.getLayer(ModelLayers.DRAGON_SKULL)));
+		return builder.build();
+	}
+
+	public SkullBlockRenderer(BlockEntityRendererProvider.Context context) {
+		this.modelByType = createSkullRenderers(context.getModelSet());
 	}
 
 	public void render(SkullBlockEntity skullBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -60,20 +65,22 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		boolean bl = blockState.getBlock() instanceof WallSkullBlock;
 		Direction direction = bl ? blockState.getValue(WallSkullBlock.FACING) : null;
 		float h = 22.5F * (float)(bl ? (2 + direction.get2DDataValue()) * 4 : (Integer)blockState.getValue(SkullBlock.ROTATION));
-		renderSkull(direction, h, ((AbstractSkullBlock)blockState.getBlock()).getType(), skullBlockEntity.getOwnerProfile(), g, poseStack, multiBufferSource, i);
+		SkullBlock.Type type = ((AbstractSkullBlock)blockState.getBlock()).getType();
+		SkullModelBase skullModelBase = (SkullModelBase)this.modelByType.get(type);
+		RenderType renderType = getRenderType(type, skullBlockEntity.getOwnerProfile());
+		renderSkull(direction, h, g, poseStack, multiBufferSource, i, skullModelBase, renderType);
 	}
 
 	public static void renderSkull(
 		@Nullable Direction direction,
 		float f,
-		SkullBlock.Type type,
-		@Nullable GameProfile gameProfile,
 		float g,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
-		int i
+		int i,
+		SkullModelBase skullModelBase,
+		RenderType renderType
 	) {
-		SkullModel skullModel = (SkullModel)MODEL_BY_TYPE.get(type);
 		poseStack.pushPose();
 		if (direction == null) {
 			poseStack.translate(0.5, 0.0, 0.5);
@@ -83,13 +90,13 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		}
 
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(getRenderType(type, gameProfile));
-		skullModel.setupAnim(g, f, 0.0F);
-		skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
+		skullModelBase.setupAnim(g, f, 0.0F);
+		skullModelBase.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();
 	}
 
-	private static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
+	public static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
 		ResourceLocation resourceLocation = (ResourceLocation)SKIN_BY_TYPE.get(type);
 		if (type == SkullBlock.Types.PLAYER && gameProfile != null) {
 			Minecraft minecraft = Minecraft.getInstance();

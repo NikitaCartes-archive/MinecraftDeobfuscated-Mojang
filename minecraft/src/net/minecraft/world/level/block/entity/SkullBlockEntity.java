@@ -7,15 +7,16 @@ import com.mojang.authlib.properties.Property;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity {
+public class SkullBlockEntity extends BlockEntity {
 	@Nullable
 	private static GameProfileCache profileCache;
 	@Nullable
@@ -25,8 +26,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 	private int mouthTickCount;
 	private boolean isMovingMouth;
 
-	public SkullBlockEntity() {
-		super(BlockEntityType.SKULL);
+	public SkullBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.SKULL, blockPos, blockState);
 	}
 
 	public static void setProfileCache(GameProfileCache gameProfileCache) {
@@ -50,8 +51,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
 		if (compoundTag.contains("SkullOwner", 10)) {
 			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
 		} else if (compoundTag.contains("ExtraType", 8)) {
@@ -62,16 +63,12 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 		}
 	}
 
-	@Override
-	public void tick() {
-		BlockState blockState = this.getBlockState();
-		if (blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD)) {
-			if (this.level.hasNeighborSignal(this.worldPosition)) {
-				this.isMovingMouth = true;
-				this.mouthTickCount++;
-			} else {
-				this.isMovingMouth = false;
-			}
+	public static void dragonHeadAnimation(Level level, BlockPos blockPos, BlockState blockState, SkullBlockEntity skullBlockEntity) {
+		if (level.hasNeighborSignal(blockPos)) {
+			skullBlockEntity.isMovingMouth = true;
+			skullBlockEntity.mouthTickCount++;
+		} else {
+			skullBlockEntity.isMovingMouth = false;
 		}
 	}
 

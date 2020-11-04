@@ -57,7 +57,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		if (itemStack.getItem() != Items.MAP) {
+		if (!itemStack.is(Items.MAP)) {
 			return itemStack;
 		} else {
 			Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
@@ -153,7 +153,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 				type = MapDecoration.Type.valueOf(string.toUpperCase(Locale.ROOT));
 			} catch (IllegalArgumentException var10) {
 				ExplorationMapFunction.LOGGER
-					.error("Error while parsing loot table decoration entry. Found {}. Defaulting to " + ExplorationMapFunction.DEFAULT_DECORATION, string);
+					.error("Error while parsing loot table decoration entry. Found {}. Defaulting to {}", string, ExplorationMapFunction.DEFAULT_DECORATION);
 			}
 
 			byte b = GsonHelper.getAsByte(jsonObject, "zoom", (byte)2);

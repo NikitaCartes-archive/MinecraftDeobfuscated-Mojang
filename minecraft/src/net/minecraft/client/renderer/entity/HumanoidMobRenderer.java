@@ -13,14 +13,14 @@ import net.minecraft.world.entity.Mob;
 public class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel<T>> extends MobRenderer<T, M> {
 	private static final ResourceLocation DEFAULT_LOCATION = new ResourceLocation("textures/entity/steve.png");
 
-	public HumanoidMobRenderer(EntityRenderDispatcher entityRenderDispatcher, M humanoidModel, float f) {
-		this(entityRenderDispatcher, humanoidModel, f, 1.0F, 1.0F, 1.0F);
+	public HumanoidMobRenderer(EntityRendererProvider.Context context, M humanoidModel, float f) {
+		this(context, humanoidModel, f, 1.0F, 1.0F, 1.0F);
 	}
 
-	public HumanoidMobRenderer(EntityRenderDispatcher entityRenderDispatcher, M humanoidModel, float f, float g, float h, float i) {
-		super(entityRenderDispatcher, humanoidModel, f);
-		this.addLayer(new CustomHeadLayer<>(this, g, h, i));
-		this.addLayer(new ElytraLayer<>(this));
+	public HumanoidMobRenderer(EntityRendererProvider.Context context, M humanoidModel, float f, float g, float h, float i) {
+		super(context, humanoidModel, f);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), g, h, i));
+		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
 		this.addLayer(new ItemInHandLayer<>(this));
 	}
 

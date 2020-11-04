@@ -49,7 +49,8 @@ public class DoublePlantBlock extends BushBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockPos blockPos = blockPlaceContext.getClickedPos();
-		return blockPos.getY() < 255 && blockPlaceContext.getLevel().getBlockState(blockPos.above()).canBeReplaced(blockPlaceContext)
+		Level level = blockPlaceContext.getLevel();
+		return blockPos.getY() < level.getMaxBuildHeight() - 1 && level.getBlockState(blockPos.above()).canBeReplaced(blockPlaceContext)
 			? super.getStateForPlacement(blockPlaceContext)
 			: null;
 	}
@@ -97,7 +98,7 @@ public class DoublePlantBlock extends BushBlock {
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
 			BlockPos blockPos2 = blockPos.below();
 			BlockState blockState2 = level.getBlockState(blockPos2);
-			if (blockState2.getBlock() == blockState.getBlock() && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			if (blockState2.is(blockState.getBlock()) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER) {
 				level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
 				level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
 			}

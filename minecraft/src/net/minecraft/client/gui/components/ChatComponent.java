@@ -32,7 +32,7 @@ public class ChatComponent extends GuiComponent {
 	private final Deque<Component> chatQueue = Queues.<Component>newArrayDeque();
 	private int chatScrollbarPos;
 	private boolean newMessageSinceScroll;
-	private long lastMessage = 0L;
+	private long lastMessage;
 
 	public ChatComponent(Minecraft minecraft) {
 		this.minecraft = minecraft;

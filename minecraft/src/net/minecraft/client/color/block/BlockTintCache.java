@@ -7,6 +7,7 @@ import java.util.function.IntSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 
 @Environment(EnvType.CLIENT)
@@ -16,8 +17,8 @@ public class BlockTintCache {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	public int getColor(BlockPos blockPos, IntSupplier intSupplier) {
-		int i = blockPos.getX() >> 4;
-		int j = blockPos.getZ() >> 4;
+		int i = SectionPos.blockToSectionCoord(blockPos.getX());
+		int j = SectionPos.blockToSectionCoord(blockPos.getZ());
 		BlockTintCache.LatestCacheInfo latestCacheInfo = (BlockTintCache.LatestCacheInfo)this.latestChunkOnThread.get();
 		if (latestCacheInfo.x != i || latestCacheInfo.z != j) {
 			latestCacheInfo.x = i;

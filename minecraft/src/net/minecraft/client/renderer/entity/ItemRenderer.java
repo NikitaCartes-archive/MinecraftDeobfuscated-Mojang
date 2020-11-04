@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import java.util.List;
 import java.util.Random;
@@ -64,10 +65,14 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	private final ItemModelShaper itemModelShaper;
 	private final TextureManager textureManager;
 	private final ItemColors itemColors;
+	private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
 
-	public ItemRenderer(TextureManager textureManager, ModelManager modelManager, ItemColors itemColors) {
+	public ItemRenderer(
+		TextureManager textureManager, ModelManager modelManager, ItemColors itemColors, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer
+	) {
 		this.textureManager = textureManager;
 		this.itemModelShaper = new ItemModelShaper(modelManager);
+		this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
 
 		for (Item item : Registry.ITEM) {
 			if (!IGNORED.contains(item)) {
@@ -110,13 +115,13 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			boolean bl2 = transformType == ItemTransforms.TransformType.GUI
 				|| transformType == ItemTransforms.TransformType.GROUND
 				|| transformType == ItemTransforms.TransformType.FIXED;
-			if (itemStack.getItem() == Items.TRIDENT && bl2) {
+			if (itemStack.is(Items.TRIDENT) && bl2) {
 				bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
 			}
 
 			bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
 			poseStack.translate(-0.5, -0.5, -0.5);
-			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl2)) {
+			if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl2)) {
 				boolean bl3;
 				if (transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem) {
 					Block block = ((BlockItem)itemStack.getItem()).getBlock();
@@ -127,7 +132,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
 				VertexConsumer vertexConsumer;
-				if (itemStack.getItem() == Items.COMPASS && itemStack.hasFoil()) {
+				if (itemStack.is(Items.COMPASS) && itemStack.hasFoil()) {
 					poseStack.pushPose();
 					PoseStack.Pose pose = poseStack.last();
 					if (transformType == ItemTransforms.TransformType.GUI) {
@@ -151,7 +156,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 				this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
 			} else {
-				BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
+				this.blockEntityRenderer.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
 			}
 
 			poseStack.popPose();
@@ -214,9 +219,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-		Item item = itemStack.getItem();
 		BakedModel bakedModel;
-		if (item == Items.TRIDENT) {
+		if (itemStack.is(Items.TRIDENT)) {
 			bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory"));
 		} else {
 			bakedModel = this.itemModelShaper.getItemModel(itemStack);
@@ -336,18 +340,15 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				bufferSource.endBatch();
 			}
 
-			if (itemStack.isDamaged()) {
+			if (itemStack.isBarVisible()) {
 				RenderSystem.disableDepthTest();
 				RenderSystem.disableTexture();
 				RenderSystem.disableAlphaTest();
 				RenderSystem.disableBlend();
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = tesselator.getBuilder();
-				float f = (float)itemStack.getDamageValue();
-				float g = (float)itemStack.getMaxDamage();
-				float h = Math.max(0.0F, (g - f) / g);
-				int k = Math.round(13.0F - f * 13.0F / g);
-				int l = Mth.hsvToRgb(h / 3.0F, 1.0F, 1.0F);
+				int k = itemStack.getBarWidth();
+				int l = itemStack.getBarColor();
 				this.fillRect(bufferBuilder, i + 2, j + 13, 13, 2, 0, 0, 0, 255);
 				this.fillRect(bufferBuilder, i + 2, j + 13, k, 1, l >> 16 & 0xFF, l >> 8 & 0xFF, l & 0xFF, 255);
 				RenderSystem.enableBlend();
@@ -357,15 +358,15 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			}
 
 			LocalPlayer localPlayer = Minecraft.getInstance().player;
-			float m = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
-			if (m > 0.0F) {
+			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
+			if (f > 0.0F) {
 				RenderSystem.disableDepthTest();
 				RenderSystem.disableTexture();
 				RenderSystem.enableBlend();
 				RenderSystem.defaultBlendFunc();
 				Tesselator tesselator2 = Tesselator.getInstance();
 				BufferBuilder bufferBuilder2 = tesselator2.getBuilder();
-				this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0F * (1.0F - m)), 16, Mth.ceil(16.0F * m), 255, 255, 255, 127);
+				this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0F * (1.0F - f)), 16, Mth.ceil(16.0F * f), 255, 255, 255, 127);
 				RenderSystem.enableTexture();
 				RenderSystem.enableDepthTest();
 			}
@@ -373,7 +374,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	private void fillRect(BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o, int p) {
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex((double)(i + 0), (double)(j + 0), 0.0).color(m, n, o, p).endVertex();
 		bufferBuilder.vertex((double)(i + 0), (double)(j + l), 0.0).color(m, n, o, p).endVertex();
 		bufferBuilder.vertex((double)(i + k), (double)(j + l), 0.0).color(m, n, o, p).endVertex();

@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 
@@ -16,10 +16,10 @@ public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
 	public boolean place(
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration
 	) {
-		while (blockPos.getY() > 3) {
+		while (blockPos.getY() > worldGenLevel.getMinBuildHeight() + 3) {
 			if (!worldGenLevel.isEmptyBlock(blockPos.below())) {
-				Block block = worldGenLevel.getBlockState(blockPos.below()).getBlock();
-				if (isDirt(block) || isStone(block)) {
+				BlockState blockState = worldGenLevel.getBlockState(blockPos.below());
+				if (isDirt(blockState) || isStone(blockState)) {
 					break;
 				}
 			}
@@ -27,7 +27,7 @@ public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
 			blockPos = blockPos.below();
 		}
 
-		if (blockPos.getY() <= 3) {
+		if (blockPos.getY() <= worldGenLevel.getMinBuildHeight() + 3) {
 			return false;
 		} else {
 			for (int i = 0; i < 3; i++) {

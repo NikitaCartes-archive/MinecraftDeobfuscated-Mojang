@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -44,13 +43,6 @@ public class ShulkerBullet extends Projectile {
 	public ShulkerBullet(EntityType<? extends ShulkerBullet> entityType, Level level) {
 		super(entityType, level);
 		this.noPhysics = true;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public ShulkerBullet(Level level, double d, double e, double f, double g, double h, double i) {
-		this(EntityType.SHULKER_BULLET, level);
-		this.moveTo(d, e, f, this.yRot, this.xRot);
-		this.setDeltaMovement(g, h, i);
 	}
 
 	public ShulkerBullet(Level level, LivingEntity livingEntity, Entity entity, Direction.Axis axis) {
@@ -189,7 +181,7 @@ public class ShulkerBullet extends Projectile {
 	@Override
 	public void checkDespawn() {
 		if (this.level.getDifficulty() == Difficulty.PEACEFUL) {
-			this.remove();
+			this.discard();
 		}
 	}
 
@@ -228,7 +220,7 @@ public class ShulkerBullet extends Projectile {
 		ProjectileUtil.rotateTowardsMovement(this, 0.5F);
 		if (this.level.isClientSide) {
 			this.level.addParticle(ParticleTypes.END_ROD, this.getX() - vec3.x, this.getY() - vec3.y + 0.15, this.getZ() - vec3.z, 0.0, 0.0, 0.0);
-		} else if (this.finalTarget != null && !this.finalTarget.removed) {
+		} else if (this.finalTarget != null && !this.finalTarget.isRemoved()) {
 			if (this.flightSteps > 0) {
 				this.flightSteps--;
 				if (this.flightSteps == 0) {
@@ -299,7 +291,7 @@ public class ShulkerBullet extends Projectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		this.remove();
+		this.discard();
 	}
 
 	@Override
@@ -312,14 +304,19 @@ public class ShulkerBullet extends Projectile {
 		if (!this.level.isClientSide) {
 			this.playSound(SoundEvents.SHULKER_BULLET_HURT, 1.0F, 1.0F);
 			((ServerLevel)this.level).sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.0);
-			this.remove();
+			this.discard();
 		}
 
 		return true;
 	}
 
+	@Environment(EnvType.CLIENT)
 	@Override
-	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
+	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		super.recreateFromPacket(clientboundAddEntityPacket);
+		double d = clientboundAddEntityPacket.getXa();
+		double e = clientboundAddEntityPacket.getYa();
+		double f = clientboundAddEntityPacket.getZa();
+		this.setDeltaMovement(d, e, f);
 	}
 }

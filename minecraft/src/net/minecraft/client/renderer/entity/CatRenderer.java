@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.CatCollarLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -15,9 +16,9 @@ import net.minecraft.world.phys.AABB;
 
 @Environment(EnvType.CLIENT)
 public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
-	public CatRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new CatModel<>(0.0F), 0.4F);
-		this.addLayer(new CatCollarLayer(this));
+	public CatRenderer(EntityRendererProvider.Context context) {
+		super(context, new CatModel<>(context.getLayer(ModelLayers.CAT)), 0.4F);
+		this.addLayer(new CatCollarLayer(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(Cat cat) {

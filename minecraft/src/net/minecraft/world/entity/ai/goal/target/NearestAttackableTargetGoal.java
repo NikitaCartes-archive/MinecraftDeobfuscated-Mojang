@@ -51,8 +51,13 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 		if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
 			this.target = this.mob
 				.level
-				.getNearestLoadedEntity(
-					this.targetType, this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ(), this.getTargetSearchArea(this.getFollowDistance())
+				.getNearestEntity(
+					this.mob.level.getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> true),
+					this.targetConditions,
+					this.mob,
+					this.mob.getX(),
+					this.mob.getEyeY(),
+					this.mob.getZ()
 				);
 		} else {
 			this.target = this.mob.level.getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());

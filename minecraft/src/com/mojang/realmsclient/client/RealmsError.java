@@ -27,8 +27,8 @@ public class RealmsError {
 			int i = JsonUtils.getIntOr("errorCode", jsonObject, -1);
 			return new RealmsError(string2, i);
 		} catch (Exception var5) {
-			LOGGER.error("Could not parse RealmsError: " + var5.getMessage());
-			LOGGER.error("The error was: " + string);
+			LOGGER.error("Could not parse RealmsError: {}", var5.getMessage());
+			LOGGER.error("The error was: {}", string);
 			return new RealmsError("Failed to parse response from server", -1);
 		}
 	}

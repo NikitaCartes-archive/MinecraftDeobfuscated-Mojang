@@ -51,12 +51,12 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	@Override
 	public Node getStart() {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int i = Mth.floor(this.mob.getY());
+		int i = this.mob.getBlockY();
 		BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
 		if (!this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
 			if (this.canFloat() && this.mob.isInWater()) {
 				while (true) {
-					if (blockState.getBlock() != Blocks.WATER && blockState.getFluidState() != Fluids.WATER.getSource(false)) {
+					if (!blockState.is(Blocks.WATER) && blockState.getFluidState() != Fluids.WATER.getSource(false)) {
 						i--;
 						break;
 					}
@@ -70,7 +70,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 
 				while (
 					(this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND))
-						&& blockPos.getY() > 0
+						&& blockPos.getY() > this.mob.level.getMinBuildHeight()
 				) {
 					blockPos = blockPos.below();
 				}
@@ -263,7 +263,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 						return node;
 					}
 
-					while (j > 0) {
+					while (j > this.mob.level.getMinBuildHeight()) {
 						blockPathTypes2 = this.getCachedBlockType(this.mob, i, --j, k);
 						if (blockPathTypes2 != BlockPathTypes.WATER) {
 							return node;
@@ -280,7 +280,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					int o = j;
 
 					while (blockPathTypes2 == BlockPathTypes.OPEN) {
-						if (--j < 0) {
+						if (--j < this.mob.level.getMinBuildHeight()) {
 							Node node2 = this.getNode(i, o, k);
 							node2.type = BlockPathTypes.BLOCKED;
 							node2.costMalus = -1.0F;
@@ -433,7 +433,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		int j = mutableBlockPos.getY();
 		int k = mutableBlockPos.getZ();
 		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, mutableBlockPos);
-		if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
+		if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
 			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
 			blockPathTypes = blockPathTypes2 != BlockPathTypes.WALKABLE
 					&& blockPathTypes2 != BlockPathTypes.OPEN
@@ -533,8 +533,8 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				return BlockPathTypes.RAIL;
 			} else if (block instanceof LeavesBlock) {
 				return BlockPathTypes.LEAVES;
-			} else if (!block.is(BlockTags.FENCES)
-				&& !block.is(BlockTags.WALLS)
+			} else if (!blockState.is(BlockTags.FENCES)
+				&& !blockState.is(BlockTags.WALLS)
 				&& (!(block instanceof FenceGateBlock) || (Boolean)blockState.getValue(FenceGateBlock.OPEN))) {
 				return !blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND) ? BlockPathTypes.BLOCKED : BlockPathTypes.OPEN;
 			} else {

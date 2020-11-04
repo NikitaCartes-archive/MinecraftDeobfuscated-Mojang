@@ -21,11 +21,8 @@ public class GameTestBatchRunner {
 	private final GameTestTicker testTicker;
 	private final int testsPerRow;
 	private final List<GameTestInfo> allTestInfos = Lists.<GameTestInfo>newArrayList();
-	private final Map<GameTestInfo, BlockPos> northWestCorners = Maps.<GameTestInfo, BlockPos>newHashMap();
 	private final List<Pair<GameTestBatch, Collection<GameTestInfo>>> batches = Lists.<Pair<GameTestBatch, Collection<GameTestInfo>>>newArrayList();
-	private MultipleTestTracker currentBatchTracker;
-	private int currentBatchIndex = 0;
-	private BlockPos.MutableBlockPos nextTestNorthWestCorner;
+	private final BlockPos.MutableBlockPos nextTestNorthWestCorner;
 
 	public GameTestBatchRunner(
 		Collection<GameTestBatch> collection, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, GameTestTicker gameTestTicker, int i
@@ -57,41 +54,42 @@ public class GameTestBatchRunner {
 	}
 
 	private void runBatch(int i) {
-		this.currentBatchIndex = i;
-		this.currentBatchTracker = new MultipleTestTracker();
 		if (i < this.batches.size()) {
-			Pair<GameTestBatch, Collection<GameTestInfo>> pair = (Pair<GameTestBatch, Collection<GameTestInfo>>)this.batches.get(this.currentBatchIndex);
-			GameTestBatch gameTestBatch = pair.getFirst();
+			Pair<GameTestBatch, Collection<GameTestInfo>> pair = (Pair<GameTestBatch, Collection<GameTestInfo>>)this.batches.get(i);
+			final GameTestBatch gameTestBatch = pair.getFirst();
 			Collection<GameTestInfo> collection = pair.getSecond();
-			this.createStructuresForBatch(collection);
-			gameTestBatch.runBeforeBatchFunction(this.level);
+			Map<GameTestInfo, BlockPos> map = this.createStructuresForBatch(collection);
 			String string = gameTestBatch.getName();
-			LOGGER.info("Running test batch '" + string + "' (" + collection.size() + " tests)...");
-			collection.forEach(gameTestInfo -> {
-				this.currentBatchTracker.addTestToTrack(gameTestInfo);
-				this.currentBatchTracker.addListener(new GameTestListener() {
-					@Override
-					public void testStructureLoaded(GameTestInfo gameTestInfo) {
+			LOGGER.info("Running test batch '{}' ({} tests)...", string, collection.size());
+			gameTestBatch.runBeforeBatchFunction(this.level);
+			final MultipleTestTracker multipleTestTracker = new MultipleTestTracker();
+			collection.forEach(multipleTestTracker::addTestToTrack);
+			multipleTestTracker.addListener(new GameTestListener() {
+				private void testCompleted() {
+					if (multipleTestTracker.isDone()) {
+						gameTestBatch.runAfterBatchFunction(GameTestBatchRunner.this.level);
+						GameTestBatchRunner.this.runBatch(i + 1);
 					}
+				}
 
-					@Override
-					public void testFailed(GameTestInfo gameTestInfo) {
-						GameTestBatchRunner.this.testCompleted(gameTestInfo);
-					}
-				});
-				BlockPos blockPos = (BlockPos)this.northWestCorners.get(gameTestInfo);
+				@Override
+				public void testStructureLoaded(GameTestInfo gameTestInfo) {
+				}
+
+				@Override
+				public void testFailed(GameTestInfo gameTestInfo) {
+					this.testCompleted();
+				}
+			});
+			collection.forEach(gameTestInfo -> {
+				BlockPos blockPos = (BlockPos)map.get(gameTestInfo);
 				GameTestRunner.runTest(gameTestInfo, blockPos, this.testTicker);
 			});
 		}
 	}
 
-	private void testCompleted(GameTestInfo gameTestInfo) {
-		if (this.currentBatchTracker.isDone()) {
-			this.runBatch(this.currentBatchIndex + 1);
-		}
-	}
-
-	private void createStructuresForBatch(Collection<GameTestInfo> collection) {
+	private Map<GameTestInfo, BlockPos> createStructuresForBatch(Collection<GameTestInfo> collection) {
+		Map<GameTestInfo, BlockPos> map = Maps.<GameTestInfo, BlockPos>newHashMap();
 		int i = 0;
 		AABB aABB = new AABB(this.nextTestNorthWestCorner);
 
@@ -102,7 +100,7 @@ public class GameTestBatchRunner {
 			);
 			AABB aABB2 = StructureUtils.getStructureBounds(structureBlockEntity);
 			gameTestInfo.setStructureBlockPos(structureBlockEntity.getBlockPos());
-			this.northWestCorners.put(gameTestInfo, new BlockPos(this.nextTestNorthWestCorner));
+			map.put(gameTestInfo, new BlockPos(this.nextTestNorthWestCorner));
 			aABB = aABB.minmax(aABB2);
 			this.nextTestNorthWestCorner.move((int)aABB2.getXsize() + 5, 0, 0);
 			if (i++ % this.testsPerRow == this.testsPerRow - 1) {
@@ -111,5 +109,7 @@ public class GameTestBatchRunner {
 				aABB = new AABB(this.nextTestNorthWestCorner);
 			}
 		}
+
+		return map;
 	}
 }

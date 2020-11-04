@@ -268,7 +268,7 @@ public class ModelBakery {
 
 		Block block = stateDefinition.getOwner();
 		return blockState -> {
-			if (blockState != null && block == blockState.getBlock()) {
+			if (blockState != null && blockState.is(block)) {
 				for (Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
 					if (!Objects.equals(blockState.getValue((Property)entry.getKey()), entry.getValue())) {
 						return false;

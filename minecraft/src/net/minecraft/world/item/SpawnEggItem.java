@@ -16,7 +16,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -35,12 +35,12 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class SpawnEggItem extends Item {
-	private static final Map<EntityType<?>, SpawnEggItem> BY_ID = Maps.<EntityType<?>, SpawnEggItem>newIdentityHashMap();
+	private static final Map<EntityType<? extends Mob>, SpawnEggItem> BY_ID = Maps.<EntityType<? extends Mob>, SpawnEggItem>newIdentityHashMap();
 	private final int color1;
 	private final int color2;
 	private final EntityType<?> defaultType;
 
-	public SpawnEggItem(EntityType<?> entityType, int i, int j, Item.Properties properties) {
+	public SpawnEggItem(EntityType<? extends Mob> entityType, int i, int j, Item.Properties properties) {
 		super(properties);
 		this.defaultType = entityType;
 		this.color1 = i;
@@ -114,7 +114,7 @@ public class SpawnEggItem extends Item {
 				if (entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
 					return InteractionResultHolder.pass(itemStack);
 				} else {
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 
@@ -164,8 +164,8 @@ public class SpawnEggItem extends Item {
 			return Optional.empty();
 		} else {
 			Mob mob2;
-			if (mob instanceof AgableMob) {
-				mob2 = ((AgableMob)mob).getBreedOffspring(serverLevel, (AgableMob)mob);
+			if (mob instanceof AgeableMob) {
+				mob2 = ((AgeableMob)mob).getBreedOffspring(serverLevel, (AgeableMob)mob);
 			} else {
 				mob2 = entityType.create(serverLevel);
 			}
@@ -183,7 +183,7 @@ public class SpawnEggItem extends Item {
 						mob2.setCustomName(itemStack.getHoverName());
 					}
 
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 

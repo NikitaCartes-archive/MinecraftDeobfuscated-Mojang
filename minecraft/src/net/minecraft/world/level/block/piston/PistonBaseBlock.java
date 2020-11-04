@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -186,7 +187,9 @@ public class PistonBaseBlock extends DirectionalBlock {
 				.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
 			level.setBlock(blockPos, blockState2, 20);
 			level.setBlockEntity(
-				blockPos, MovingPistonBlock.newMovingBlockEntity(this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true)
+				MovingPistonBlock.newMovingBlockEntity(
+					blockPos, blockState2, this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true
+				)
 			);
 			level.blockUpdated(blockPos, blockState2.getBlock());
 			blockState2.updateNeighbourShapes(level, blockPos, 2);
@@ -226,13 +229,13 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
-		if (blockPos.getY() < 0 || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
+		if (blockPos.getY() < level.getMinBuildHeight() || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
 			return false;
 		} else if (blockState.isAir()) {
 			return true;
 		} else if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
 			return false;
-		} else if (direction == Direction.DOWN && blockPos.getY() == 0) {
+		} else if (direction == Direction.DOWN && blockPos.getY() == level.getMinBuildHeight()) {
 			return false;
 		} else if (direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
 			return false;
@@ -254,7 +257,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 				return false;
 			}
 
-			return !blockState.getBlock().isEntityBlock();
+			return !blockState.hasBlockEntity();
 		}
 	}
 
@@ -287,9 +290,13 @@ public class PistonBaseBlock extends DirectionalBlock {
 			for (int k = list3.size() - 1; k >= 0; k--) {
 				BlockPos blockPos4 = (BlockPos)list3.get(k);
 				BlockState blockState2 = level.getBlockState(blockPos4);
-				BlockEntity blockEntity = blockState2.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos4) : null;
+				BlockEntity blockEntity = blockState2.hasBlockEntity() ? level.getBlockEntity(blockPos4) : null;
 				dropResources(blockState2, level, blockPos4, blockEntity);
 				level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
+				if (!blockState2.is(BlockTags.FIRE)) {
+					level.addDestroyBlockEffect(blockPos4, blockState2);
+				}
+
 				blockStates[j++] = blockState2;
 			}
 
@@ -298,35 +305,36 @@ public class PistonBaseBlock extends DirectionalBlock {
 				BlockState blockState2 = level.getBlockState(blockPos4);
 				blockPos4 = blockPos4.relative(direction2);
 				map.remove(blockPos4);
-				level.setBlock(blockPos4, Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
-				level.setBlockEntity(blockPos4, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k), direction, bl, false));
+				BlockState blockState3 = Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction);
+				level.setBlock(blockPos4, blockState3, 68);
+				level.setBlockEntity(MovingPistonBlock.newMovingBlockEntity(blockPos4, blockState3, (BlockState)list2.get(k), direction, bl, false));
 				blockStates[j++] = blockState2;
 			}
 
 			if (bl) {
 				PistonType pistonType = this.isSticky ? PistonType.STICKY : PistonType.DEFAULT;
-				BlockState blockState3 = Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction).setValue(PistonHeadBlock.TYPE, pistonType);
+				BlockState blockState4 = Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction).setValue(PistonHeadBlock.TYPE, pistonType);
 				BlockState blockState2 = Blocks.MOVING_PISTON
 					.defaultBlockState()
 					.setValue(MovingPistonBlock.FACING, direction)
 					.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
 				map.remove(blockPos2);
 				level.setBlock(blockPos2, blockState2, 68);
-				level.setBlockEntity(blockPos2, MovingPistonBlock.newMovingBlockEntity(blockState3, direction, true, true));
+				level.setBlockEntity(MovingPistonBlock.newMovingBlockEntity(blockPos2, blockState2, blockState4, direction, true, true));
 			}
 
-			BlockState blockState4 = Blocks.AIR.defaultBlockState();
+			BlockState blockState5 = Blocks.AIR.defaultBlockState();
 
 			for (BlockPos blockPos5 : map.keySet()) {
-				level.setBlock(blockPos5, blockState4, 82);
+				level.setBlock(blockPos5, blockState5, 82);
 			}
 
 			for (Entry<BlockPos, BlockState> entry : map.entrySet()) {
 				BlockPos blockPos6 = (BlockPos)entry.getKey();
-				BlockState blockState5 = (BlockState)entry.getValue();
+				BlockState blockState6 = (BlockState)entry.getValue();
+				blockState6.updateIndirectNeighbourShapes(level, blockPos6, 2);
+				blockState5.updateNeighbourShapes(level, blockPos6, 2);
 				blockState5.updateIndirectNeighbourShapes(level, blockPos6, 2);
-				blockState4.updateNeighbourShapes(level, blockPos6, 2);
-				blockState4.updateIndirectNeighbourShapes(level, blockPos6, 2);
 			}
 
 			j = 0;

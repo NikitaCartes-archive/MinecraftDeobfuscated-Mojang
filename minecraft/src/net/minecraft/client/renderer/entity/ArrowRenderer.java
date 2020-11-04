@@ -15,8 +15,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Environment(EnvType.CLIENT)
 public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRenderer<T> {
-	public ArrowRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public ArrowRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public void render(T abstractArrow, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

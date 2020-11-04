@@ -1,10 +1,17 @@
 package net.minecraft.server.packs.repository;
 
 import java.util.function.Consumer;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 
 public class ServerPacksSource implements RepositorySource {
-	private final VanillaPackResources vanillaPack = new VanillaPackResources("minecraft");
+	public static final PackMetadataSection BUILT_IN_METADATA = new PackMetadataSection(
+		new TranslatableComponent("dataPack.vanilla.description"), PackType.SERVER_DATA.getVersion(SharedConstants.getCurrentVersion())
+	);
+	private final VanillaPackResources vanillaPack = new VanillaPackResources(BUILT_IN_METADATA, "minecraft");
 
 	@Override
 	public void loadPacks(Consumer<Pack> consumer, Pack.PackConstructor packConstructor) {

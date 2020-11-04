@@ -26,9 +26,7 @@ public class SectionPos extends Vec3i {
 	}
 
 	public static SectionPos of(Entity entity) {
-		return new SectionPos(
-			blockToSectionCoord(Mth.floor(entity.getX())), blockToSectionCoord(Mth.floor(entity.getY())), blockToSectionCoord(Mth.floor(entity.getZ()))
-		);
+		return new SectionPos(blockToSectionCoord(entity.getBlockX()), blockToSectionCoord(entity.getBlockY()), blockToSectionCoord(entity.getBlockZ()));
 	}
 
 	public static SectionPos of(long l) {
@@ -41,6 +39,10 @@ public class SectionPos extends Vec3i {
 
 	public static long offset(long l, int i, int j, int k) {
 		return asLong(x(l) + i, y(l) + j, z(l) + k);
+	}
+
+	public static int posToSectionCoord(double d) {
+		return blockToSectionCoord(Mth.floor(d));
 	}
 
 	public static int blockToSectionCoord(int i) {
@@ -90,6 +92,10 @@ public class SectionPos extends Vec3i {
 		return i << 4;
 	}
 
+	public static int sectionToBlockCoord(int i, int j) {
+		return sectionToBlockCoord(i) + j;
+	}
+
 	public static int x(long l) {
 		return (int)(l << 0 >> 42);
 	}
@@ -115,27 +121,27 @@ public class SectionPos extends Vec3i {
 	}
 
 	public int minBlockX() {
-		return this.x() << 4;
+		return sectionToBlockCoord(this.x());
 	}
 
 	public int minBlockY() {
-		return this.y() << 4;
+		return sectionToBlockCoord(this.y());
 	}
 
 	public int minBlockZ() {
-		return this.z() << 4;
+		return sectionToBlockCoord(this.z());
 	}
 
 	public int maxBlockX() {
-		return (this.x() << 4) + 15;
+		return sectionToBlockCoord(this.x(), 15);
 	}
 
 	public int maxBlockY() {
-		return (this.y() << 4) + 15;
+		return sectionToBlockCoord(this.y(), 15);
 	}
 
 	public int maxBlockZ() {
-		return (this.z() << 4) + 15;
+		return sectionToBlockCoord(this.z(), 15);
 	}
 
 	public static long blockToSection(long l) {
@@ -181,10 +187,10 @@ public class SectionPos extends Vec3i {
 		return betweenClosedStream(j - i, k - i, l - i, j + i, k + i, l + i);
 	}
 
-	public static Stream<SectionPos> aroundChunk(ChunkPos chunkPos, int i) {
-		int j = chunkPos.x;
-		int k = chunkPos.z;
-		return betweenClosedStream(j - i, 0, k - i, j + i, 15, k + i);
+	public static Stream<SectionPos> aroundChunk(ChunkPos chunkPos, int i, int j, int k) {
+		int l = chunkPos.x;
+		int m = chunkPos.z;
+		return betweenClosedStream(l - i, j, m - i, l + i, k - 1, m + i);
 	}
 
 	public static Stream<SectionPos> betweenClosedStream(int i, int j, int k, int l, int m, int n) {

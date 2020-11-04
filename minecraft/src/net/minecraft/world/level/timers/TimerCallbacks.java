@@ -41,13 +41,13 @@ public class TimerCallbacks<C> {
 		ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("Type"));
 		TimerCallback.Serializer<C, ?> serializer = (TimerCallback.Serializer<C, ?>)this.idToSerializer.get(resourceLocation);
 		if (serializer == null) {
-			LOGGER.error("Failed to deserialize timer callback: " + compoundTag);
+			LOGGER.error("Failed to deserialize timer callback: {}", compoundTag);
 			return null;
 		} else {
 			try {
 				return serializer.deserialize(compoundTag);
 			} catch (Exception var5) {
-				LOGGER.error("Failed to deserialize timer callback: " + compoundTag, (Throwable)var5);
+				LOGGER.error("Failed to deserialize timer callback: {}", compoundTag, var5);
 				return null;
 			}
 		}

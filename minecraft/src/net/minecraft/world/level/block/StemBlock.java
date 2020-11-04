@@ -1,7 +1,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -10,8 +10,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,10 +34,12 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 		Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)
 	};
 	private final StemGrownBlock fruit;
+	private final Supplier<Item> seedSupplier;
 
-	protected StemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
+	protected StemBlock(StemGrownBlock stemGrownBlock, Supplier<Item> supplier, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.fruit = stemGrownBlock;
+		this.seedSupplier = supplier;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
 
@@ -80,21 +82,10 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 		}
 	}
 
-	@Nullable
-	@Environment(EnvType.CLIENT)
-	protected Item getSeedItem() {
-		if (this.fruit == Blocks.PUMPKIN) {
-			return Items.PUMPKIN_SEEDS;
-		} else {
-			return this.fruit == Blocks.MELON ? Items.MELON_SEEDS : null;
-		}
-	}
-
 	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		Item item = this.getSeedItem();
-		return item == null ? ItemStack.EMPTY : new ItemStack(item);
+		return new ItemStack((ItemLike)this.seedSupplier.get());
 	}
 
 	@Override

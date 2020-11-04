@@ -390,8 +390,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		int k = noiseGeneratorSettings.getBedrockFloorPosition();
 		int l = this.height - 1 - noiseGeneratorSettings.getBedrockRoofPosition();
 		int m = 5;
-		boolean bl = l + 4 >= 0 && l < this.height;
-		boolean bl2 = k + 4 >= 0 && k < this.height;
+		boolean bl = l + 5 - 1 >= 0 && l < this.height;
+		boolean bl2 = k + 5 - 1 >= 0 && k < this.height;
 		if (bl || bl2) {
 			for (BlockPos blockPos : BlockPos.betweenClosed(i, 0, j, i + 15, 0, j + 15)) {
 				if (bl) {
@@ -420,8 +420,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		int i = chunkPos.x;
 		int j = chunkPos.z;
-		int k = i << 4;
-		int l = j << 4;
+		int k = SectionPos.sectionToBlockCoord(i);
+		int l = SectionPos.sectionToBlockCoord(j);
 
 		for (StructureFeature<?> structureFeature : StructureFeature.NOISE_AFFECTING_FEATURES) {
 			structureFeatureManager.startsForFeature(SectionPos.of(chunkPos, 0), structureFeature).forEach(structureStart -> {
@@ -470,7 +470,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			}
 
 			for (int o = 0; o < this.chunkCountZ; o++) {
-				LevelChunkSection levelChunkSection = protoChunk.getOrCreateSection(15);
+				LevelChunkSection levelChunkSection = protoChunk.getOrCreateSection(protoChunk.getSectionsCount() - 1);
 				levelChunkSection.acquire();
 
 				for (int p = this.chunkCountY - 1; p >= 0; p--) {
@@ -486,8 +486,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 					for (int t = this.chunkHeight - 1; t >= 0; t--) {
 						int u = p * this.chunkHeight + t;
 						int v = u & 15;
-						int w = u >> 4;
-						if (levelChunkSection.bottomBlockY() >> 4 != w) {
+						int w = protoChunk.getSectionIndex(u);
+						if (protoChunk.getSectionIndex(levelChunkSection.bottomBlockY()) != w) {
 							levelChunkSection.release();
 							levelChunkSection = protoChunk.getOrCreateSection(w);
 							levelChunkSection.acquire();
@@ -628,7 +628,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			int j = worldGenRegion.getCenterZ();
 			Biome biome = worldGenRegion.getBiome(new ChunkPos(i, j).getWorldPosition());
 			WorldgenRandom worldgenRandom = new WorldgenRandom();
-			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), i << 4, j << 4);
+			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), SectionPos.sectionToBlockCoord(i), SectionPos.sectionToBlockCoord(j));
 			NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, biome, i, j, worldgenRandom);
 		}
 	}

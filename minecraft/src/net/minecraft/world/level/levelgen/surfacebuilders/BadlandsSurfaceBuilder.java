@@ -7,7 +7,6 @@ import java.util.Random;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -100,23 +99,22 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 							}
 						} else {
 							chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
-							Block block = blockState6.getBlock();
-							if (block == Blocks.WHITE_TERRACOTTA
-								|| block == Blocks.ORANGE_TERRACOTTA
-								|| block == Blocks.MAGENTA_TERRACOTTA
-								|| block == Blocks.LIGHT_BLUE_TERRACOTTA
-								|| block == Blocks.YELLOW_TERRACOTTA
-								|| block == Blocks.LIME_TERRACOTTA
-								|| block == Blocks.PINK_TERRACOTTA
-								|| block == Blocks.GRAY_TERRACOTTA
-								|| block == Blocks.LIGHT_GRAY_TERRACOTTA
-								|| block == Blocks.CYAN_TERRACOTTA
-								|| block == Blocks.PURPLE_TERRACOTTA
-								|| block == Blocks.BLUE_TERRACOTTA
-								|| block == Blocks.BROWN_TERRACOTTA
-								|| block == Blocks.GREEN_TERRACOTTA
-								|| block == Blocks.RED_TERRACOTTA
-								|| block == Blocks.BLACK_TERRACOTTA) {
+							if (blockState6.is(Blocks.WHITE_TERRACOTTA)
+								|| blockState6.is(Blocks.ORANGE_TERRACOTTA)
+								|| blockState6.is(Blocks.MAGENTA_TERRACOTTA)
+								|| blockState6.is(Blocks.LIGHT_BLUE_TERRACOTTA)
+								|| blockState6.is(Blocks.YELLOW_TERRACOTTA)
+								|| blockState6.is(Blocks.LIME_TERRACOTTA)
+								|| blockState6.is(Blocks.PINK_TERRACOTTA)
+								|| blockState6.is(Blocks.GRAY_TERRACOTTA)
+								|| blockState6.is(Blocks.LIGHT_GRAY_TERRACOTTA)
+								|| blockState6.is(Blocks.CYAN_TERRACOTTA)
+								|| blockState6.is(Blocks.PURPLE_TERRACOTTA)
+								|| blockState6.is(Blocks.BLUE_TERRACOTTA)
+								|| blockState6.is(Blocks.BROWN_TERRACOTTA)
+								|| blockState6.is(Blocks.GREEN_TERRACOTTA)
+								|| blockState6.is(Blocks.RED_TERRACOTTA)
+								|| blockState6.is(Blocks.BLACK_TERRACOTTA)) {
 								chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
 							}
 						}

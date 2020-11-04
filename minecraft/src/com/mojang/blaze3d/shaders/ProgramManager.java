@@ -34,7 +34,7 @@ public class ProgramManager {
 		}
 	}
 
-	public static void linkProgram(Effect effect) throws IOException {
+	public static void linkProgram(Effect effect) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		effect.getFragmentProgram().attachToEffect(effect);
 		effect.getVertexProgram().attachToEffect(effect);

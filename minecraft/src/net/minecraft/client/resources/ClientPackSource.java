@@ -26,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.FolderPackResources;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
@@ -42,6 +43,9 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientPackSource implements RepositorySource {
+	private static final PackMetadataSection BUILT_IN = new PackMetadataSection(
+		new TranslatableComponent("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())
+	);
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
 	private final VanillaPackResources vanillaPack;
@@ -56,7 +60,7 @@ public class ClientPackSource implements RepositorySource {
 	public ClientPackSource(File file, AssetIndex assetIndex) {
 		this.serverPackDir = file;
 		this.assetIndex = assetIndex;
-		this.vanillaPack = new DefaultClientPackResources(assetIndex);
+		this.vanillaPack = new DefaultClientPackResources(BUILT_IN, assetIndex);
 	}
 
 	@Override
@@ -86,7 +90,7 @@ public class ClientPackSource implements RepositorySource {
 		map.put("X-Minecraft-UUID", Minecraft.getInstance().getUser().getUuid());
 		map.put("X-Minecraft-Version", SharedConstants.getCurrentVersion().getName());
 		map.put("X-Minecraft-Version-ID", SharedConstants.getCurrentVersion().getId());
-		map.put("X-Minecraft-Pack-Format", String.valueOf(SharedConstants.getCurrentVersion().getPackVersion()));
+		map.put("X-Minecraft-Pack-Format", String.valueOf(PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())));
 		map.put("User-Agent", "Minecraft Java/" + SharedConstants.getCurrentVersion().getName());
 		return map;
 	}
@@ -232,7 +236,7 @@ public class ClientPackSource implements RepositorySource {
 			() -> new FilePackResources(file),
 			new TranslatableComponent("resourcePack.server.name"),
 			packMetadataSection.getDescription(),
-			PackCompatibility.forFormat(packMetadataSection.getPackFormat()),
+			PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES),
 			Pack.Position.TOP,
 			true,
 			packSource

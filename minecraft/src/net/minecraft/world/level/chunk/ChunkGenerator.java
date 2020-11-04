@@ -93,10 +93,11 @@ public abstract class ChunkGenerator {
 					double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
 					int o = (int)Math.round(Math.cos(d) * e);
 					int p = (int)Math.round(Math.sin(d) * e);
-					BlockPos blockPos = this.biomeSource.findBiomeHorizontal((o << 4) + 8, 0, (p << 4) + 8, 112, list::contains, random);
+					BlockPos blockPos = this.biomeSource
+						.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, list::contains, random);
 					if (blockPos != null) {
-						o = blockPos.getX() >> 4;
-						p = blockPos.getZ() >> 4;
+						o = SectionPos.blockToSectionCoord(blockPos.getX());
+						p = SectionPos.blockToSectionCoord(blockPos.getZ());
 					}
 
 					this.strongholdPositions.add(new ChunkPos(o, p));
@@ -161,7 +162,7 @@ public abstract class ChunkGenerator {
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 			for (ChunkPos chunkPos : this.strongholdPositions) {
-				mutableBlockPos.set((chunkPos.x << 4) + 8, 32, (chunkPos.z << 4) + 8);
+				mutableBlockPos.set(SectionPos.sectionToBlockCoord(chunkPos.x, 8), 32, SectionPos.sectionToBlockCoord(chunkPos.z, 8));
 				double e = mutableBlockPos.distSqr(blockPos);
 				if (blockPos2 == null) {
 					blockPos2 = new BlockPos(mutableBlockPos);
@@ -186,10 +187,10 @@ public abstract class ChunkGenerator {
 	public void applyBiomeDecoration(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager) {
 		int i = worldGenRegion.getCenterX();
 		int j = worldGenRegion.getCenterZ();
-		int k = i * 16;
-		int l = j * 16;
+		int k = SectionPos.sectionToBlockCoord(i);
+		int l = SectionPos.sectionToBlockCoord(j);
 		BlockPos blockPos = new BlockPos(k, 0, l);
-		Biome biome = this.biomeSource.getNoiseBiome((i << 2) + 2, 2, (j << 2) + 2);
+		Biome biome = this.biomeSource.getPrimaryBiome(i, j);
 		WorldgenRandom worldgenRandom = new WorldgenRandom();
 		long m = worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), k, l);
 
@@ -231,7 +232,7 @@ public abstract class ChunkGenerator {
 		RegistryAccess registryAccess, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l
 	) {
 		ChunkPos chunkPos = chunkAccess.getPos();
-		Biome biome = this.biomeSource.getNoiseBiome((chunkPos.x << 2) + 2, 0, (chunkPos.z << 2) + 2);
+		Biome biome = this.biomeSource.getPrimaryBiome(chunkPos.x, chunkPos.z);
 		this.createStructure(StructureFeatures.STRONGHOLD, registryAccess, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome);
 
 		for (Supplier<ConfiguredStructureFeature<?, ?>> supplier : biome.getGenerationSettings().structures()) {
@@ -268,8 +269,8 @@ public abstract class ChunkGenerator {
 		int i = 8;
 		int j = chunkAccess.getPos().x;
 		int k = chunkAccess.getPos().z;
-		int l = j << 4;
-		int m = k << 4;
+		int l = SectionPos.sectionToBlockCoord(j);
+		int m = SectionPos.sectionToBlockCoord(k);
 		SectionPos sectionPos = SectionPos.of(chunkAccess.getPos(), 0);
 
 		for (int n = j - 8; n <= j + 8; n++) {

@@ -48,7 +48,7 @@ public class ValidateNearbyPoi extends Behavior<LivingEntity> {
 
 	private boolean bedIsOccupied(ServerLevel serverLevel, BlockPos blockPos, LivingEntity livingEntity) {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
-		return blockState.getBlock().is(BlockTags.BEDS) && (Boolean)blockState.getValue(BedBlock.OCCUPIED) && !livingEntity.isSleeping();
+		return blockState.is(BlockTags.BEDS) && (Boolean)blockState.getValue(BedBlock.OCCUPIED) && !livingEntity.isSleeping();
 	}
 
 	private boolean poiDoesntExist(ServerLevel serverLevel, BlockPos blockPos) {

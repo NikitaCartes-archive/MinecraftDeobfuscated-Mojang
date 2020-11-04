@@ -22,87 +22,76 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CampfireBlockEntity extends BlockEntity implements Clearable, TickableBlockEntity {
+public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
 	private final int[] cookingProgress = new int[4];
 	private final int[] cookingTime = new int[4];
 
-	public CampfireBlockEntity() {
-		super(BlockEntityType.CAMPFIRE);
+	public CampfireBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.CAMPFIRE, blockPos, blockState);
 	}
 
-	@Override
-	public void tick() {
-		boolean bl = (Boolean)this.getBlockState().getValue(CampfireBlock.LIT);
-		boolean bl2 = this.level.isClientSide;
-		if (bl2) {
-			if (bl) {
-				this.makeParticles();
-			}
-		} else {
-			if (bl) {
-				this.cook();
-			} else {
-				for (int i = 0; i < this.items.size(); i++) {
-					if (this.cookingProgress[i] > 0) {
-						this.cookingProgress[i] = Mth.clamp(this.cookingProgress[i] - 2, 0, this.cookingTime[i]);
-					}
-				}
-			}
-		}
-	}
+	public static void cookTick(Level level, BlockPos blockPos, BlockState blockState, CampfireBlockEntity campfireBlockEntity) {
+		boolean bl = false;
 
-	private void cook() {
-		for (int i = 0; i < this.items.size(); i++) {
-			ItemStack itemStack = this.items.get(i);
+		for (int i = 0; i < campfireBlockEntity.items.size(); i++) {
+			ItemStack itemStack = campfireBlockEntity.items.get(i);
 			if (!itemStack.isEmpty()) {
-				this.cookingProgress[i]++;
-				if (this.cookingProgress[i] >= this.cookingTime[i]) {
+				bl = true;
+				campfireBlockEntity.cookingProgress[i]++;
+				if (campfireBlockEntity.cookingProgress[i] >= campfireBlockEntity.cookingTime[i]) {
 					Container container = new SimpleContainer(itemStack);
-					ItemStack itemStack2 = (ItemStack)this.level
-						.getRecipeManager()
-						.getRecipeFor(RecipeType.CAMPFIRE_COOKING, container, this.level)
+					ItemStack itemStack2 = (ItemStack)level.getRecipeManager()
+						.getRecipeFor(RecipeType.CAMPFIRE_COOKING, container, level)
 						.map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container))
 						.orElse(itemStack);
-					BlockPos blockPos = this.getBlockPos();
-					Containers.dropItemStack(this.level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);
-					this.items.set(i, ItemStack.EMPTY);
-					this.markUpdated();
+					Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);
+					campfireBlockEntity.items.set(i, ItemStack.EMPTY);
+					level.sendBlockUpdated(blockPos, blockState, blockState, 3);
 				}
 			}
 		}
+
+		if (bl) {
+			setChanged(level, blockPos, blockState);
+		}
 	}
 
-	private void makeParticles() {
-		Level level = this.getLevel();
-		if (level != null) {
-			BlockPos blockPos = this.getBlockPos();
-			Random random = level.random;
-			if (random.nextFloat() < 0.11F) {
-				for (int i = 0; i < random.nextInt(2) + 2; i++) {
-					CampfireBlock.makeParticles(level, blockPos, (Boolean)this.getBlockState().getValue(CampfireBlock.SIGNAL_FIRE), false);
-				}
+	public static void cooldownTick(Level level, BlockPos blockPos, BlockState blockState, CampfireBlockEntity campfireBlockEntity) {
+		boolean bl = false;
+
+		for (int i = 0; i < campfireBlockEntity.items.size(); i++) {
+			if (campfireBlockEntity.cookingProgress[i] > 0) {
+				bl = true;
+				campfireBlockEntity.cookingProgress[i] = Mth.clamp(campfireBlockEntity.cookingProgress[i] - 2, 0, campfireBlockEntity.cookingTime[i]);
 			}
+		}
 
-			int i = ((Direction)this.getBlockState().getValue(CampfireBlock.FACING)).get2DDataValue();
+		if (bl) {
+			setChanged(level, blockPos, blockState);
+		}
+	}
 
-			for (int j = 0; j < this.items.size(); j++) {
-				if (!this.items.get(j).isEmpty() && random.nextFloat() < 0.2F) {
-					Direction direction = Direction.from2DDataValue(Math.floorMod(j + i, 4));
-					float f = 0.3125F;
-					double d = (double)blockPos.getX()
-						+ 0.5
-						- (double)((float)direction.getStepX() * 0.3125F)
-						+ (double)((float)direction.getClockWise().getStepX() * 0.3125F);
-					double e = (double)blockPos.getY() + 0.5;
-					double g = (double)blockPos.getZ()
-						+ 0.5
-						- (double)((float)direction.getStepZ() * 0.3125F)
-						+ (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
+	public static void particleTick(Level level, BlockPos blockPos, BlockState blockState, CampfireBlockEntity campfireBlockEntity) {
+		Random random = level.random;
+		if (random.nextFloat() < 0.11F) {
+			for (int i = 0; i < random.nextInt(2) + 2; i++) {
+				CampfireBlock.makeParticles(level, blockPos, (Boolean)blockState.getValue(CampfireBlock.SIGNAL_FIRE), false);
+			}
+		}
 
-					for (int k = 0; k < 4; k++) {
-						level.addParticle(ParticleTypes.SMOKE, d, e, g, 0.0, 5.0E-4, 0.0);
-					}
+		int i = ((Direction)blockState.getValue(CampfireBlock.FACING)).get2DDataValue();
+
+		for (int j = 0; j < campfireBlockEntity.items.size(); j++) {
+			if (!campfireBlockEntity.items.get(j).isEmpty() && random.nextFloat() < 0.2F) {
+				Direction direction = Direction.from2DDataValue(Math.floorMod(j + i, 4));
+				float f = 0.3125F;
+				double d = (double)blockPos.getX() + 0.5 - (double)((float)direction.getStepX() * 0.3125F) + (double)((float)direction.getClockWise().getStepX() * 0.3125F);
+				double e = (double)blockPos.getY() + 0.5;
+				double g = (double)blockPos.getZ() + 0.5 - (double)((float)direction.getStepZ() * 0.3125F) + (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
+
+				for (int k = 0; k < 4; k++) {
+					level.addParticle(ParticleTypes.SMOKE, d, e, g, 0.0, 5.0E-4, 0.0);
 				}
 			}
 		}
@@ -113,8 +102,8 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable, Ticka
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		if (compoundTag.contains("CookingTimes", 11)) {

@@ -35,7 +35,7 @@ public class Vec3Argument implements ArgumentType<Coordinates> {
 		return new Vec3Argument(bl);
 	}
 
-	public static Vec3 getVec3(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+	public static Vec3 getVec3(CommandContext<CommandSourceStack> commandContext, String string) {
 		return commandContext.<Coordinates>getArgument(string, Coordinates.class).getPosition(commandContext.getSource());
 	}
 

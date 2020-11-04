@@ -114,7 +114,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 		super.removed(player);
 		this.resultSlots.clearContent();
 		if (!player.level.isClientSide) {
-			this.clearContainer(player, player.level, this.craftSlots);
+			this.clearContainer(player, this.craftSlots);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
@@ -145,12 +145,12 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 				if (!this.moveItemStackTo(itemStack2, 9, 45, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR && !((Slot)this.slots.get(8 - equipmentSlot.getIndex())).hasItem()) {
+			} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR && !this.slots.get(8 - equipmentSlot.getIndex()).hasItem()) {
 				int j = 8 - equipmentSlot.getIndex();
 				if (!this.moveItemStackTo(itemStack2, j, j + 1, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (equipmentSlot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(45)).hasItem()) {
+			} else if (equipmentSlot == EquipmentSlot.OFFHAND && !this.slots.get(45).hasItem()) {
 				if (!this.moveItemStackTo(itemStack2, 45, 46, false)) {
 					return ItemStack.EMPTY;
 				}

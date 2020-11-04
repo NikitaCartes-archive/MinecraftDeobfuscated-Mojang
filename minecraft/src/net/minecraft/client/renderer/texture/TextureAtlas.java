@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -53,7 +54,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 	}
 
 	@Override
-	public void load(ResourceManager resourceManager) throws IOException {
+	public void load(ResourceManager resourceManager) {
 	}
 
 	public void reload(TextureAtlas.Preparations preparations) {
@@ -141,7 +142,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 
 	private Collection<TextureAtlasSprite.Info> getBasicSpriteInfos(ResourceManager resourceManager, Set<ResourceLocation> set) {
 		List<CompletableFuture<?>> list = Lists.<CompletableFuture<?>>newArrayList();
-		ConcurrentLinkedQueue<TextureAtlasSprite.Info> concurrentLinkedQueue = new ConcurrentLinkedQueue();
+		Queue<TextureAtlasSprite.Info> queue = new ConcurrentLinkedQueue();
 
 		for (ResourceLocation resourceLocation : set) {
 			if (!MissingTextureAtlasSprite.getLocation().equals(resourceLocation)) {
@@ -186,33 +187,33 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 						return;
 					}
 
-					concurrentLinkedQueue.add(info);
+					queue.add(info);
 				}, Util.backgroundExecutor()));
 			}
 		}
 
 		CompletableFuture.allOf((CompletableFuture[])list.toArray(new CompletableFuture[0])).join();
-		return concurrentLinkedQueue;
+		return queue;
 	}
 
 	private List<TextureAtlasSprite> getLoadedSprites(ResourceManager resourceManager, Stitcher stitcher, int i) {
-		ConcurrentLinkedQueue<TextureAtlasSprite> concurrentLinkedQueue = new ConcurrentLinkedQueue();
+		Queue<TextureAtlasSprite> queue = new ConcurrentLinkedQueue();
 		List<CompletableFuture<?>> list = Lists.<CompletableFuture<?>>newArrayList();
 		stitcher.gatherSprites((info, j, k, l, m) -> {
 			if (info == MissingTextureAtlasSprite.info()) {
 				MissingTextureAtlasSprite missingTextureAtlasSprite = MissingTextureAtlasSprite.newInstance(this, i, j, k, l, m);
-				concurrentLinkedQueue.add(missingTextureAtlasSprite);
+				queue.add(missingTextureAtlasSprite);
 			} else {
 				list.add(CompletableFuture.runAsync(() -> {
 					TextureAtlasSprite textureAtlasSprite = this.load(resourceManager, info, j, k, i, l, m);
 					if (textureAtlasSprite != null) {
-						concurrentLinkedQueue.add(textureAtlasSprite);
+						queue.add(textureAtlasSprite);
 					}
 				}, Util.backgroundExecutor()));
 			}
 		});
 		CompletableFuture.allOf((CompletableFuture[])list.toArray(new CompletableFuture[0])).join();
-		return Lists.<TextureAtlasSprite>newArrayList(concurrentLinkedQueue);
+		return Lists.<TextureAtlasSprite>newArrayList(queue);
 	}
 
 	@Nullable

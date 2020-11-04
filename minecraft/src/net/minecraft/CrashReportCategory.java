@@ -7,6 +7,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CrashReportCategory {
@@ -21,37 +23,40 @@ public class CrashReportCategory {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static String formatLocation(double d, double e, double f) {
-		return String.format(Locale.ROOT, "%.2f,%.2f,%.2f - %s", d, e, f, formatLocation(new BlockPos(d, e, f)));
+	public static String formatLocation(LevelHeightAccessor levelHeightAccessor, double d, double e, double f) {
+		return String.format(Locale.ROOT, "%.2f,%.2f,%.2f - %s", d, e, f, formatLocation(levelHeightAccessor, new BlockPos(d, e, f)));
 	}
 
-	public static String formatLocation(BlockPos blockPos) {
-		return formatLocation(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+	public static String formatLocation(LevelHeightAccessor levelHeightAccessor, BlockPos blockPos) {
+		return formatLocation(levelHeightAccessor, blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 
-	public static String formatLocation(int i, int j, int k) {
+	public static String formatLocation(LevelHeightAccessor levelHeightAccessor, int i, int j, int k) {
 		StringBuilder stringBuilder = new StringBuilder();
 
 		try {
 			stringBuilder.append(String.format("World: (%d,%d,%d)", i, j, k));
-		} catch (Throwable var16) {
+		} catch (Throwable var19) {
 			stringBuilder.append("(Error finding world loc)");
 		}
 
 		stringBuilder.append(", ");
 
 		try {
-			int l = i >> 4;
-			int m = k >> 4;
-			int n = i & 15;
-			int o = j >> 4;
-			int p = k & 15;
-			int q = l << 4;
-			int r = m << 4;
-			int s = (l + 1 << 4) - 1;
-			int t = (m + 1 << 4) - 1;
-			stringBuilder.append(String.format("Chunk: (at %d,%d,%d in %d,%d; contains blocks %d,0,%d to %d,255,%d)", n, o, p, l, m, q, r, s, t));
-		} catch (Throwable var15) {
+			int l = SectionPos.blockToSectionCoord(i);
+			int m = SectionPos.blockToSectionCoord(j);
+			int n = SectionPos.blockToSectionCoord(k);
+			int o = i & 15;
+			int p = j & 15;
+			int q = k & 15;
+			int r = SectionPos.sectionToBlockCoord(l);
+			int s = levelHeightAccessor.getMinBuildHeight();
+			int t = SectionPos.sectionToBlockCoord(n);
+			int u = SectionPos.sectionToBlockCoord(l + 1) - 1;
+			int v = levelHeightAccessor.getMaxBuildHeight() - 1;
+			int w = SectionPos.sectionToBlockCoord(n + 1) - 1;
+			stringBuilder.append(String.format("Section: (at %d,%d,%d in %d,%d,%d; chunk contains blocks %d,%d,%d to %d,%d,%d)", o, p, q, l, m, n, r, s, t, u, v, w));
+		} catch (Throwable var18) {
 			stringBuilder.append("(Error finding chunk loc)");
 		}
 
@@ -65,11 +70,13 @@ public class CrashReportCategory {
 			int p = (l + 1 << 5) - 1;
 			int q = (m + 1 << 5) - 1;
 			int r = l << 9;
-			int s = m << 9;
-			int t = (l + 1 << 9) - 1;
-			int u = (m + 1 << 9) - 1;
-			stringBuilder.append(String.format("Region: (%d,%d; contains chunks %d,%d to %d,%d, blocks %d,0,%d to %d,255,%d)", l, m, n, o, p, q, r, s, t, u));
-		} catch (Throwable var14) {
+			int s = levelHeightAccessor.getMinBuildHeight();
+			int t = m << 9;
+			int u = (l + 1 << 9) - 1;
+			int v = levelHeightAccessor.getMaxBuildHeight() - 1;
+			int w = (m + 1 << 9) - 1;
+			stringBuilder.append(String.format("Region: (%d,%d; contains chunks %d,%d to %d,%d, blocks %d,%d,%d to %d,%d,%d)", l, m, n, o, p, q, r, s, t, u, v, w));
+		} catch (Throwable var17) {
 			stringBuilder.append("(Error finding world loc)");
 		}
 
@@ -160,12 +167,14 @@ public class CrashReportCategory {
 		return this.stackTrace;
 	}
 
-	public static void populateBlockDetails(CrashReportCategory crashReportCategory, BlockPos blockPos, @Nullable BlockState blockState) {
+	public static void populateBlockDetails(
+		CrashReportCategory crashReportCategory, LevelHeightAccessor levelHeightAccessor, BlockPos blockPos, @Nullable BlockState blockState
+	) {
 		if (blockState != null) {
 			crashReportCategory.setDetail("Block", blockState::toString);
 		}
 
-		crashReportCategory.setDetail("Block location", (CrashReportDetail<String>)(() -> formatLocation(blockPos)));
+		crashReportCategory.setDetail("Block location", (CrashReportDetail<String>)(() -> formatLocation(levelHeightAccessor, blockPos)));
 	}
 
 	static class Entry {

@@ -27,7 +27,7 @@ public class PendingInvite extends ValueObject {
 			pendingInvite.worldOwnerUuid = JsonUtils.getStringOr("worldOwnerUuid", jsonObject, "");
 			pendingInvite.date = JsonUtils.getDateOr("date", jsonObject);
 		} catch (Exception var3) {
-			LOGGER.error("Could not parse PendingInvite: " + var3.getMessage());
+			LOGGER.error("Could not parse PendingInvite: {}", var3.getMessage());
 		}
 
 		return pendingInvite;

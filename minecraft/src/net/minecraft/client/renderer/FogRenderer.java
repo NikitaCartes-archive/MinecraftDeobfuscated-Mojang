@@ -122,7 +122,7 @@ public class FogRenderer {
 			biomeChangedTime = -1L;
 		}
 
-		double d = camera.getPosition().y * clientLevel.getLevelData().getClearColorScale();
+		double d = (camera.getPosition().y - (double)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
 		if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
 			int jx = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
 			if (jx < 20) {

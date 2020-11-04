@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SlimeModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.SlimeOuterLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -14,9 +15,9 @@ import net.minecraft.world.entity.monster.Slime;
 public class SlimeRenderer extends MobRenderer<Slime, SlimeModel<Slime>> {
 	private static final ResourceLocation SLIME_LOCATION = new ResourceLocation("textures/entity/slime/slime.png");
 
-	public SlimeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new SlimeModel<>(16), 0.25F);
-		this.addLayer(new SlimeOuterLayer<>(this));
+	public SlimeRenderer(EntityRendererProvider.Context context) {
+		super(context, new SlimeModel<>(context.getLayer(ModelLayers.SLIME)), 0.25F);
+		this.addLayer(new SlimeOuterLayer<>(this, context.getModelSet()));
 	}
 
 	public void render(Slime slime, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

@@ -16,16 +16,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends BlockEntityRenderer<T> {
+public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> implements BlockEntityRenderer<T> {
 	public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
 	public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
 	private static final Random RANDOM = new Random(31100L);
 	private static final List<RenderType> RENDER_TYPES = (List<RenderType>)IntStream.range(0, 16)
 		.mapToObj(i -> RenderType.endPortal(i + 1))
 		.collect(ImmutableList.toImmutableList());
+	private final BlockEntityRenderDispatcher renderer;
 
-	public TheEndPortalRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+	public TheEndPortalRenderer(BlockEntityRendererProvider.Context context) {
+		this.renderer = context.getBlockEntityRenderDispatcher();
 	}
 
 	public void render(T theEndPortalBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

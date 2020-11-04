@@ -128,7 +128,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	@Override
 	public void slotsChanged(Container container) {
 		ItemStack itemStack = this.inputSlot.getItem();
-		if (itemStack.getItem() != this.input.getItem()) {
+		if (!itemStack.is(this.input.getItem())) {
 			this.input = itemStack.copy();
 			this.setupRecipeList(container, itemStack);
 		}
@@ -173,7 +173,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			Item item = itemStack2.getItem();
@@ -221,6 +221,6 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	public void removed(Player player) {
 		super.removed(player);
 		this.resultContainer.removeItemNoUpdate(1);
-		this.access.execute((level, blockPos) -> this.clearContainer(player, player.level, this.container));
+		this.access.execute((level, blockPos) -> this.clearContainer(player, this.container));
 	}
 }

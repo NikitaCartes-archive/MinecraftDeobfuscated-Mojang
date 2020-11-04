@@ -15,7 +15,7 @@ public class LandOnOwnersShoulderGoal extends Goal {
 	@Override
 	public boolean canUse() {
 		ServerPlayer serverPlayer = (ServerPlayer)this.entity.getOwner();
-		boolean bl = serverPlayer != null && !serverPlayer.isSpectator() && !serverPlayer.abilities.flying && !serverPlayer.isInWater();
+		boolean bl = serverPlayer != null && !serverPlayer.isSpectator() && !serverPlayer.getAbilities().flying && !serverPlayer.isInWater();
 		return !this.entity.isOrderedToSit() && bl && this.entity.canSitOnShoulder();
 	}
 

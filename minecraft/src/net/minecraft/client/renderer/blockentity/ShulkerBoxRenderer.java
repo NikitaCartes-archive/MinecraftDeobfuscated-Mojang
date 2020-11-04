@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -17,12 +18,11 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
+public class ShulkerBoxRenderer implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
 	private final ShulkerModel<?> model;
 
-	public ShulkerBoxRenderer(ShulkerModel<?> shulkerModel, BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
-		this.model = shulkerModel;
+	public ShulkerBoxRenderer(BlockEntityRendererProvider.Context context) {
+		this.model = new ShulkerModel(context.getLayer(ModelLayers.SHULKER));
 	}
 
 	public void render(ShulkerBoxBlockEntity shulkerBoxBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

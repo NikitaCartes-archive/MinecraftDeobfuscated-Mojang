@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -167,7 +168,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public static void renderPathLine(Path path, double d, double e, double f) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int i = 0; i < path.getNodeCount(); i++) {
 			Node node = path.getNode(i);

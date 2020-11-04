@@ -25,7 +25,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Inventory implements Container, Nameable {
@@ -52,14 +51,10 @@ public class Inventory implements Container, Nameable {
 
 	private boolean hasRemainingSpaceForItem(ItemStack itemStack, ItemStack itemStack2) {
 		return !itemStack.isEmpty()
-			&& this.isSameItem(itemStack, itemStack2)
+			&& ItemStack.isSameItemSameTags(itemStack, itemStack2)
 			&& itemStack.isStackable()
 			&& itemStack.getCount() < itemStack.getMaxStackSize()
 			&& itemStack.getCount() < this.getMaxStackSize();
-	}
-
-	private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
 	}
 
 	public int getFreeSlot() {
@@ -108,7 +103,7 @@ public class Inventory implements Container, Nameable {
 	@Environment(EnvType.CLIENT)
 	public int findSlotMatchingItem(ItemStack itemStack) {
 		for (int i = 0; i < this.items.size(); i++) {
-			if (!this.items.get(i).isEmpty() && this.isSameItem(itemStack, this.items.get(i))) {
+			if (!this.items.get(i).isEmpty() && ItemStack.isSameItemSameTags(itemStack, this.items.get(i))) {
 				return i;
 			}
 		}
@@ -120,7 +115,7 @@ public class Inventory implements Container, Nameable {
 		for (int i = 0; i < this.items.size(); i++) {
 			ItemStack itemStack2 = this.items.get(i);
 			if (!this.items.get(i).isEmpty()
-				&& this.isSameItem(itemStack, this.items.get(i))
+				&& ItemStack.isSameItemSameTags(itemStack, this.items.get(i))
 				&& !this.items.get(i).isDamaged()
 				&& !itemStack2.isEnchanted()
 				&& !itemStack2.hasCustomHoverName()) {
@@ -269,7 +264,7 @@ public class Inventory implements Container, Nameable {
 						this.items.get(i).setPopTime(5);
 						itemStack.setCount(0);
 						return true;
-					} else if (this.player.abilities.instabuild) {
+					} else if (this.player.getAbilities().instabuild) {
 						itemStack.setCount(0);
 						return true;
 					} else {
@@ -286,7 +281,7 @@ public class Inventory implements Container, Nameable {
 						}
 					} while (!itemStack.isEmpty() && itemStack.getCount() < j);
 
-					if (itemStack.getCount() == j && this.player.abilities.instabuild) {
+					if (itemStack.getCount() == j && this.player.getAbilities().instabuild) {
 						itemStack.setCount(0);
 						return true;
 					} else {
@@ -304,23 +299,21 @@ public class Inventory implements Container, Nameable {
 		}
 	}
 
-	public void placeItemBackInInventory(Level level, ItemStack itemStack) {
-		if (!level.isClientSide) {
-			while (!itemStack.isEmpty()) {
-				int i = this.getSlotWithRemainingSpace(itemStack);
-				if (i == -1) {
-					i = this.getFreeSlot();
-				}
+	public void placeItemBackInInventory(ItemStack itemStack) {
+		while (!itemStack.isEmpty()) {
+			int i = this.getSlotWithRemainingSpace(itemStack);
+			if (i == -1) {
+				i = this.getFreeSlot();
+			}
 
-				if (i == -1) {
-					this.player.drop(itemStack, false);
-					break;
-				}
+			if (i == -1) {
+				this.player.drop(itemStack, false);
+				break;
+			}
 
-				int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
-				if (this.add(i, itemStack.split(j))) {
-					((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
-				}
+			int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
+			if (this.add(i, itemStack.split(j)) && this.player instanceof ServerPlayer) {
+				((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
 			}
 		}
 	}
@@ -551,7 +544,7 @@ public class Inventory implements Container, Nameable {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.player.removed ? false : !(player.distanceToSqr(this.player) > 64.0);
+		return this.player.isRemoved() ? false : !(player.distanceToSqr(this.player) > 64.0);
 	}
 
 	public boolean contains(ItemStack itemStack) {
@@ -570,7 +563,7 @@ public class Inventory implements Container, Nameable {
 	public boolean contains(Tag<Item> tag) {
 		for (List<ItemStack> list : this.compartments) {
 			for (ItemStack itemStack : list) {
-				if (!itemStack.isEmpty() && tag.contains(itemStack.getItem())) {
+				if (!itemStack.isEmpty() && itemStack.is(tag)) {
 					return true;
 				}
 			}

@@ -11,18 +11,19 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public interface EntityGetter {
-	List<Entity> getEntities(@Nullable Entity entity, AABB aABB, @Nullable Predicate<? super Entity> predicate);
+	List<Entity> getEntities(@Nullable Entity entity, AABB aABB, Predicate<? super Entity> predicate);
 
-	<T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate);
+	<T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate);
 
-	default <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
-		return this.getEntitiesOfClass(class_, aABB, predicate);
+	default <T extends Entity> List<T> getEntitiesOfClass(Class<T> class_, AABB aABB, Predicate<? super T> predicate) {
+		return this.getEntities(EntityTypeTest.forClass(class_), aABB, predicate);
 	}
 
 	List<? extends Player> players();
@@ -36,7 +37,7 @@ public interface EntityGetter {
 			return true;
 		} else {
 			for (Entity entity2 : this.getEntities(entity, voxelShape.bounds())) {
-				if (!entity2.removed
+				if (!entity2.isRemoved()
 					&& entity2.blocksBuilding
 					&& (entity == null || !entity2.isPassengerOfSameVehicle(entity))
 					&& Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity2.getBoundingBox()), BooleanOp.AND)) {
@@ -48,12 +49,8 @@ public interface EntityGetter {
 		}
 	}
 
-	default <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
+	default <T extends Entity> List<T> getEntitiesOfClass(Class<T> class_, AABB aABB) {
 		return this.getEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
-	}
-
-	default <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
-		return this.getLoadedEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
 	}
 
 	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
@@ -133,14 +130,7 @@ public interface EntityGetter {
 	default <T extends LivingEntity> T getNearestEntity(
 		Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB
 	) {
-		return this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
-	}
-
-	@Nullable
-	default <T extends LivingEntity> T getNearestLoadedEntity(
-		Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB
-	) {
-		return this.getNearestEntity(this.getLoadedEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
+		return this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, livingEntityx -> true), targetingConditions, livingEntity, d, e, f);
 	}
 
 	@Nullable
@@ -175,10 +165,8 @@ public interface EntityGetter {
 		return list;
 	}
 
-	default <T extends LivingEntity> List<T> getNearbyEntities(
-		Class<? extends T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB
-	) {
-		List<T> list = this.getEntitiesOfClass(class_, aABB, null);
+	default <T extends LivingEntity> List<T> getNearbyEntities(Class<T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
+		List<T> list = this.getEntitiesOfClass(class_, aABB, livingEntityx -> true);
 		List<T> list2 = Lists.<T>newArrayList();
 
 		for (T livingEntity2 : list) {

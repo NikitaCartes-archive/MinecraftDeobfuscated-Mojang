@@ -24,7 +24,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -52,7 +52,6 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -83,8 +82,8 @@ public class Panda extends Animal {
 	private float rollAmountO;
 	private Panda.PandaLookAtPlayerGoal lookAtPlayerGoal;
 	private static final Predicate<ItemEntity> PANDA_ITEMS = itemEntity -> {
-		Item item = itemEntity.getItem().getItem();
-		return (item == Blocks.BAMBOO.asItem() || item == Blocks.CAKE.asItem()) && itemEntity.isAlive() && !itemEntity.hasPickUpDelay();
+		ItemStack itemStack = itemEntity.getItem();
+		return (itemStack.is(Blocks.BAMBOO.asItem()) || itemStack.is(Blocks.CAKE.asItem())) && itemEntity.isAlive() && !itemEntity.hasPickUpDelay();
 	};
 
 	public Panda(EntityType<? extends Panda> entityType, Level level) {
@@ -232,10 +231,10 @@ public class Panda extends Animal {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Panda panda = EntityType.PANDA.create(serverLevel);
-		if (agableMob instanceof Panda) {
-			panda.setGeneFromParents(this, (Panda)agableMob);
+		if (ageableMob instanceof Panda) {
+			panda.setGeneFromParents(this, (Panda)ageableMob);
 		}
 
 		panda.setAttributes();
@@ -508,7 +507,7 @@ public class Panda extends Animal {
 			this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 			this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0F;
 			this.take(itemEntity, itemStack.getCount());
-			itemEntity.remove();
+			itemEntity.discard();
 		}
 	}
 
@@ -531,7 +530,7 @@ public class Panda extends Animal {
 		this.setHiddenGene(Panda.Gene.getRandom(this.random));
 		this.setAttributes();
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData(0.2F);
+			spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2F);
 		}
 
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
@@ -612,7 +611,7 @@ public class Panda extends Animal {
 				this.tryToSit();
 				this.eat(true);
 				ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.MAINHAND);
-				if (!itemStack2.isEmpty() && !player.abilities.instabuild) {
+				if (!itemStack2.isEmpty() && !player.getAbilities().instabuild) {
 					this.spawnAtLocation(itemStack2);
 				}
 
@@ -643,11 +642,11 @@ public class Panda extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.getItem() == Blocks.BAMBOO.asItem();
+		return itemStack.is(Blocks.BAMBOO.asItem());
 	}
 
 	private boolean isFoodOrCake(ItemStack itemStack) {
-		return this.isFood(itemStack) || itemStack.getItem() == Blocks.CAKE.asItem();
+		return this.isFood(itemStack) || itemStack.is(Blocks.CAKE.asItem());
 	}
 
 	@Nullable
@@ -905,14 +904,17 @@ public class Panda extends Animal {
 					} else {
 						this.lookAt = this.mob
 							.level
-							.getNearestLoadedEntity(
-								this.lookAtType,
+							.getNearestEntity(
+								this.mob
+									.level
+									.getEntitiesOfClass(
+										this.lookAtType, this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance), livingEntity -> true
+									),
 								this.lookAtContext,
 								this.mob,
 								this.mob.getX(),
 								this.mob.getEyeY(),
-								this.mob.getZ(),
-								this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance)
+								this.mob.getZ()
 							);
 					}
 				}

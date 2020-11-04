@@ -8,7 +8,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.npc.Villager;
@@ -45,7 +45,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 
 	@Nullable
 	private Vec3 getPositionTowardsAnywhere() {
-		return RandomPos.getLandPos(this.mob, 10, 7);
+		return LandRandomPos.getPos(this.mob, 10, 7);
 	}
 
 	@Nullable
@@ -57,7 +57,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 		} else {
 			Villager villager = (Villager)list.get(this.mob.level.random.nextInt(list.size()));
 			Vec3 vec3 = villager.position();
-			return RandomPos.getLandPosTowards(this.mob, 10, 7, vec3);
+			return LandRandomPos.getPosTowards(this.mob, 10, 7, vec3);
 		}
 	}
 
@@ -68,7 +68,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 			return null;
 		} else {
 			BlockPos blockPos = this.getRandomPoiWithinSection(sectionPos);
-			return blockPos == null ? null : RandomPos.getLandPosTowards(this.mob, 10, 7, Vec3.atBottomCenterOf(blockPos));
+			return blockPos == null ? null : LandRandomPos.getPosTowards(this.mob, 10, 7, Vec3.atBottomCenterOf(blockPos));
 		}
 	}
 

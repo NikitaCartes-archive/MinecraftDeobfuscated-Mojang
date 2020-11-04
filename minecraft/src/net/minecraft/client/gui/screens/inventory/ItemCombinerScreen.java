@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractContainerScreen<T> implements ContainerListener {
-	private ResourceLocation menuResource;
+	private final ResourceLocation menuResource;
 
 	public ItemCombinerScreen(T itemCombinerMenu, Inventory inventory, Component component, ResourceLocation resourceLocation) {
 		super(itemCombinerMenu, inventory, component);

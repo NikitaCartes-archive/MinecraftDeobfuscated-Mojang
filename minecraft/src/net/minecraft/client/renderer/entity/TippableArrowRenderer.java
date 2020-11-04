@@ -10,8 +10,8 @@ public class TippableArrowRenderer extends ArrowRenderer<Arrow> {
 	public static final ResourceLocation NORMAL_ARROW_LOCATION = new ResourceLocation("textures/entity/projectiles/arrow.png");
 	public static final ResourceLocation TIPPED_ARROW_LOCATION = new ResourceLocation("textures/entity/projectiles/tipped_arrow.png");
 
-	public TippableArrowRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public TippableArrowRenderer(EntityRendererProvider.Context context) {
+		super(context);
 	}
 
 	public ResourceLocation getTextureLocation(Arrow arrow) {

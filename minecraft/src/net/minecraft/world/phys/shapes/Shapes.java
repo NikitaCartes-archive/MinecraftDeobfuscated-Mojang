@@ -24,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 public final class Shapes {
 	private static final VoxelShape BLOCK = Util.make(() -> {
 		DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(1, 1, 1);
-		discreteVoxelShape.setFull(0, 0, 0, true, true);
+		discreteVoxelShape.fill(0, 0, 0);
 		return new CubeVoxelShape(discreteVoxelShape);
 	});
 	public static final VoxelShape INFINITY = box(
@@ -43,50 +43,59 @@ public final class Shapes {
 	}
 
 	public static VoxelShape box(double d, double e, double f, double g, double h, double i) {
-		return create(new AABB(d, e, f, g, h, i));
-	}
-
-	public static VoxelShape create(AABB aABB) {
-		int i = findBits(aABB.minX, aABB.maxX);
-		int j = findBits(aABB.minY, aABB.maxY);
-		int k = findBits(aABB.minZ, aABB.maxZ);
-		if (i >= 0 && j >= 0 && k >= 0) {
-			if (i == 0 && j == 0 && k == 0) {
-				return aABB.contains(0.5, 0.5, 0.5) ? block() : empty();
-			} else {
-				int l = 1 << i;
-				int m = 1 << j;
-				int n = 1 << k;
-				int o = (int)Math.round(aABB.minX * (double)l);
-				int p = (int)Math.round(aABB.maxX * (double)l);
-				int q = (int)Math.round(aABB.minY * (double)m);
-				int r = (int)Math.round(aABB.maxY * (double)m);
-				int s = (int)Math.round(aABB.minZ * (double)n);
-				int t = (int)Math.round(aABB.maxZ * (double)n);
-				BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(l, m, n, o, q, s, p, r, t);
-
-				for (long u = (long)o; u < (long)p; u++) {
-					for (long v = (long)q; v < (long)r; v++) {
-						for (long w = (long)s; w < (long)t; w++) {
-							bitSetDiscreteVoxelShape.setFull((int)u, (int)v, (int)w, false, true);
-						}
-					}
-				}
-
-				return new CubeVoxelShape(bitSetDiscreteVoxelShape);
-			}
+		if (!(d > g) && !(e > h) && !(f > i)) {
+			return create(d, e, f, g, h, i);
 		} else {
-			return new ArrayVoxelShape(BLOCK.shape, new double[]{aABB.minX, aABB.maxX}, new double[]{aABB.minY, aABB.maxY}, new double[]{aABB.minZ, aABB.maxZ});
+			throw new IllegalArgumentException("The min values need to be smaller or equals to the max values");
 		}
 	}
 
-	private static int findBits(double d, double e) {
+	public static VoxelShape create(double d, double e, double f, double g, double h, double i) {
+		if (!(g - d < 1.0E-7) && !(h - e < 1.0E-7) && !(i - f < 1.0E-7)) {
+			int j = findBits(d, g);
+			int k = findBits(e, h);
+			int l = findBits(f, i);
+			if (j < 0 || k < 0 || l < 0) {
+				return new ArrayVoxelShape(
+					BLOCK.shape, DoubleArrayList.wrap(new double[]{d, g}), DoubleArrayList.wrap(new double[]{e, h}), DoubleArrayList.wrap(new double[]{f, i})
+				);
+			} else if (j == 0 && k == 0 && l == 0) {
+				return block();
+			} else {
+				int m = 1 << j;
+				int n = 1 << k;
+				int o = 1 << l;
+				BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = BitSetDiscreteVoxelShape.withFilledBounds(
+					m,
+					n,
+					o,
+					(int)Math.round(d * (double)m),
+					(int)Math.round(e * (double)n),
+					(int)Math.round(f * (double)o),
+					(int)Math.round(g * (double)m),
+					(int)Math.round(h * (double)n),
+					(int)Math.round(i * (double)o)
+				);
+				return new CubeVoxelShape(bitSetDiscreteVoxelShape);
+			}
+		} else {
+			return empty();
+		}
+	}
+
+	public static VoxelShape create(AABB aABB) {
+		return create(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
+	}
+
+	@VisibleForTesting
+	protected static int findBits(double d, double e) {
 		if (!(d < -1.0E-7) && !(e > 1.0000001)) {
 			for (int i = 0; i <= 3; i++) {
-				double f = d * (double)(1 << i);
-				double g = e * (double)(1 << i);
-				boolean bl = Math.abs(f - Math.floor(f)) < 1.0E-7;
-				boolean bl2 = Math.abs(g - Math.floor(g)) < 1.0E-7;
+				int j = 1 << i;
+				double f = d * (double)j;
+				double g = e * (double)j;
+				boolean bl = Math.abs(f - (double)Math.round(f)) < 1.0E-7 * (double)j;
+				boolean bl2 = Math.abs(g - (double)Math.round(g)) < 1.0E-7 * (double)j;
 				if (bl && bl2) {
 					return i;
 				}
@@ -129,14 +138,10 @@ public final class Shapes {
 			} else {
 				IndexMerger indexMerger = createIndexMerger(1, voxelShape.getCoords(Direction.Axis.X), voxelShape2.getCoords(Direction.Axis.X), bl, bl2);
 				IndexMerger indexMerger2 = createIndexMerger(
-					indexMerger.getList().size() - 1, voxelShape.getCoords(Direction.Axis.Y), voxelShape2.getCoords(Direction.Axis.Y), bl, bl2
+					indexMerger.size() - 1, voxelShape.getCoords(Direction.Axis.Y), voxelShape2.getCoords(Direction.Axis.Y), bl, bl2
 				);
 				IndexMerger indexMerger3 = createIndexMerger(
-					(indexMerger.getList().size() - 1) * (indexMerger2.getList().size() - 1),
-					voxelShape.getCoords(Direction.Axis.Z),
-					voxelShape2.getCoords(Direction.Axis.Z),
-					bl,
-					bl2
+					(indexMerger.size() - 1) * (indexMerger2.size() - 1), voxelShape.getCoords(Direction.Axis.Z), voxelShape2.getCoords(Direction.Axis.Z), bl, bl2
 				);
 				BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = BitSetDiscreteVoxelShape.join(
 					voxelShape.shape, voxelShape2.shape, indexMerger, indexMerger2, indexMerger3, booleanOp
@@ -151,38 +156,38 @@ public final class Shapes {
 	public static boolean joinIsNotEmpty(VoxelShape voxelShape, VoxelShape voxelShape2, BooleanOp booleanOp) {
 		if (booleanOp.apply(false, false)) {
 			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException());
-		} else if (voxelShape == voxelShape2) {
-			return booleanOp.apply(true, true);
-		} else if (voxelShape.isEmpty()) {
-			return booleanOp.apply(false, !voxelShape2.isEmpty());
-		} else if (voxelShape2.isEmpty()) {
-			return booleanOp.apply(!voxelShape.isEmpty(), false);
 		} else {
-			boolean bl = booleanOp.apply(true, false);
-			boolean bl2 = booleanOp.apply(false, true);
+			boolean bl = voxelShape.isEmpty();
+			boolean bl2 = voxelShape2.isEmpty();
+			if (!bl && !bl2) {
+				if (voxelShape == voxelShape2) {
+					return booleanOp.apply(true, true);
+				} else {
+					boolean bl3 = booleanOp.apply(true, false);
+					boolean bl4 = booleanOp.apply(false, true);
 
-			for (Direction.Axis axis : AxisCycle.AXIS_VALUES) {
-				if (voxelShape.max(axis) < voxelShape2.min(axis) - 1.0E-7) {
-					return bl || bl2;
-				}
+					for (Direction.Axis axis : AxisCycle.AXIS_VALUES) {
+						if (voxelShape.max(axis) < voxelShape2.min(axis) - 1.0E-7) {
+							return bl3 || bl4;
+						}
 
-				if (voxelShape2.max(axis) < voxelShape.min(axis) - 1.0E-7) {
-					return bl || bl2;
+						if (voxelShape2.max(axis) < voxelShape.min(axis) - 1.0E-7) {
+							return bl3 || bl4;
+						}
+					}
+
+					IndexMerger indexMerger = createIndexMerger(1, voxelShape.getCoords(Direction.Axis.X), voxelShape2.getCoords(Direction.Axis.X), bl3, bl4);
+					IndexMerger indexMerger2 = createIndexMerger(
+						indexMerger.size() - 1, voxelShape.getCoords(Direction.Axis.Y), voxelShape2.getCoords(Direction.Axis.Y), bl3, bl4
+					);
+					IndexMerger indexMerger3 = createIndexMerger(
+						(indexMerger.size() - 1) * (indexMerger2.size() - 1), voxelShape.getCoords(Direction.Axis.Z), voxelShape2.getCoords(Direction.Axis.Z), bl3, bl4
+					);
+					return joinIsNotEmpty(indexMerger, indexMerger2, indexMerger3, voxelShape.shape, voxelShape2.shape, booleanOp);
 				}
+			} else {
+				return booleanOp.apply(!bl, !bl2);
 			}
-
-			IndexMerger indexMerger = createIndexMerger(1, voxelShape.getCoords(Direction.Axis.X), voxelShape2.getCoords(Direction.Axis.X), bl, bl2);
-			IndexMerger indexMerger2 = createIndexMerger(
-				indexMerger.getList().size() - 1, voxelShape.getCoords(Direction.Axis.Y), voxelShape2.getCoords(Direction.Axis.Y), bl, bl2
-			);
-			IndexMerger indexMerger3 = createIndexMerger(
-				(indexMerger.getList().size() - 1) * (indexMerger2.getList().size() - 1),
-				voxelShape.getCoords(Direction.Axis.Z),
-				voxelShape2.getCoords(Direction.Axis.Z),
-				bl,
-				bl2
-			);
-			return joinIsNotEmpty(indexMerger, indexMerger2, indexMerger3, voxelShape.shape, voxelShape2.shape, booleanOp);
 		}
 	}
 
@@ -372,12 +377,10 @@ public final class Shapes {
 			return new NonOverlappingMerger(doubleList, doubleList2, false);
 		} else if (doubleList2.getDouble(k) < doubleList.getDouble(0) - 1.0E-7) {
 			return new NonOverlappingMerger(doubleList2, doubleList, true);
-		} else if (j != k || !Objects.equals(doubleList, doubleList2)) {
-			return new IndirectMerger(doubleList, doubleList2, bl, bl2);
-		} else if (doubleList instanceof IdenticalMerger) {
-			return (IndexMerger)doubleList;
 		} else {
-			return (IndexMerger)(doubleList2 instanceof IdenticalMerger ? (IndexMerger)doubleList2 : new IdenticalMerger(doubleList));
+			return (IndexMerger)(j == k && Objects.equals(doubleList, doubleList2)
+				? new IdenticalMerger(doubleList)
+				: new IndirectMerger(doubleList, doubleList2, bl, bl2));
 		}
 	}
 

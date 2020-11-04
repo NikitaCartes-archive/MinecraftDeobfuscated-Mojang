@@ -9,9 +9,9 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(EnvType.CLIENT)
 public abstract class IllagerRenderer<T extends AbstractIllager> extends MobRenderer<T, IllagerModel<T>> {
-	protected IllagerRenderer(EntityRenderDispatcher entityRenderDispatcher, IllagerModel<T> illagerModel, float f) {
-		super(entityRenderDispatcher, illagerModel, f);
-		this.addLayer(new CustomHeadLayer<>(this));
+	protected IllagerRenderer(EntityRendererProvider.Context context, IllagerModel<T> illagerModel, float f) {
+		super(context, illagerModel, f);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	protected void scale(T abstractIllager, PoseStack poseStack, float f) {

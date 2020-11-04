@@ -43,8 +43,8 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	private static final EntityDataAccessor<Boolean> DATA_CONVERTING_ID = SynchedEntityData.defineId(ZombieVillager.class, EntityDataSerializers.BOOLEAN);
@@ -130,9 +130,9 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.GOLDEN_APPLE) {
+		if (itemStack.is(Items.GOLDEN_APPLE)) {
 			if (this.hasEffect(MobEffects.WEAKNESS)) {
-				if (!player.abilities.instabuild) {
+				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
 
@@ -245,8 +245,8 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			for (int k = (int)this.getX() - 4; k < (int)this.getX() + 4 && j < 14; k++) {
 				for (int l = (int)this.getY() - 4; l < (int)this.getY() + 4 && j < 14; l++) {
 					for (int m = (int)this.getZ() - 4; m < (int)this.getZ() + 4 && j < 14; m++) {
-						Block block = this.level.getBlockState(mutableBlockPos.set(k, l, m)).getBlock();
-						if (block == Blocks.IRON_BARS || block instanceof BedBlock) {
+						BlockState blockState = this.level.getBlockState(mutableBlockPos.set(k, l, m));
+						if (blockState.is(Blocks.IRON_BARS) || blockState.getBlock() instanceof BedBlock) {
 							if (this.random.nextFloat() < 0.3F) {
 								i++;
 							}

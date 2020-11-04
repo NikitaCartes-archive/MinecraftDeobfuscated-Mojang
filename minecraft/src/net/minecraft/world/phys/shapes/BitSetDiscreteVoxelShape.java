@@ -13,18 +13,31 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 	private int zMax;
 
 	public BitSetDiscreteVoxelShape(int i, int j, int k) {
-		this(i, j, k, i, j, k, 0, 0, 0);
-	}
-
-	public BitSetDiscreteVoxelShape(int i, int j, int k, int l, int m, int n, int o, int p, int q) {
 		super(i, j, k);
 		this.storage = new BitSet(i * j * k);
-		this.xMin = l;
-		this.yMin = m;
-		this.zMin = n;
-		this.xMax = o;
-		this.yMax = p;
-		this.zMax = q;
+		this.xMin = i;
+		this.yMin = j;
+		this.zMin = k;
+	}
+
+	public static BitSetDiscreteVoxelShape withFilledBounds(int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+		BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(i, j, k);
+		bitSetDiscreteVoxelShape.xMin = l;
+		bitSetDiscreteVoxelShape.yMin = m;
+		bitSetDiscreteVoxelShape.zMin = n;
+		bitSetDiscreteVoxelShape.xMax = o;
+		bitSetDiscreteVoxelShape.yMax = p;
+		bitSetDiscreteVoxelShape.zMax = q;
+
+		for (int r = l; r < o; r++) {
+			for (int s = m; s < p; s++) {
+				for (int t = n; t < q; t++) {
+					bitSetDiscreteVoxelShape.fillUpdateBounds(r, s, t, false);
+				}
+			}
+		}
+
+		return bitSetDiscreteVoxelShape;
 	}
 
 	public BitSetDiscreteVoxelShape(DiscreteVoxelShape discreteVoxelShape) {
@@ -62,10 +75,9 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 		return this.storage.get(this.getIndex(i, j, k));
 	}
 
-	@Override
-	public void setFull(int i, int j, int k, boolean bl, boolean bl2) {
-		this.storage.set(this.getIndex(i, j, k), bl2);
-		if (bl && bl2) {
+	private void fillUpdateBounds(int i, int j, int k, boolean bl) {
+		this.storage.set(this.getIndex(i, j, k));
+		if (bl) {
 			this.xMin = Math.min(this.xMin, i);
 			this.yMin = Math.min(this.yMin, j);
 			this.zMin = Math.min(this.zMin, k);
@@ -73,6 +85,11 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 			this.yMax = Math.max(this.yMax, j + 1);
 			this.zMax = Math.max(this.zMax, k + 1);
 		}
+	}
+
+	@Override
+	public void fill(int i, int j, int k) {
+		this.fillUpdateBounds(i, j, k, true);
 	}
 
 	@Override
@@ -90,20 +107,6 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 		return axis.choose(this.xMax, this.yMax, this.zMax);
 	}
 
-	@Override
-	protected boolean isZStripFull(int i, int j, int k, int l) {
-		if (k < 0 || l < 0 || i < 0) {
-			return false;
-		} else {
-			return k < this.xSize && l < this.ySize && j <= this.zSize ? this.storage.nextClearBit(this.getIndex(k, l, i)) >= this.getIndex(k, l, j) : false;
-		}
-	}
-
-	@Override
-	protected void setZStrip(int i, int j, int k, int l, boolean bl) {
-		this.storage.set(this.getIndex(k, l, i), this.getIndex(k, l, j), bl);
-	}
-
 	static BitSetDiscreteVoxelShape join(
 		DiscreteVoxelShape discreteVoxelShape,
 		DiscreteVoxelShape discreteVoxelShape2,
@@ -112,17 +115,14 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 		IndexMerger indexMerger3,
 		BooleanOp booleanOp
 	) {
-		BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(
-			indexMerger.getList().size() - 1, indexMerger2.getList().size() - 1, indexMerger3.getList().size() - 1
-		);
+		BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(indexMerger.size() - 1, indexMerger2.size() - 1, indexMerger3.size() - 1);
 		int[] is = new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
 		indexMerger.forMergedIndexes((i, j, k) -> {
 			boolean[] bls = new boolean[]{false};
-			boolean bl = indexMerger2.forMergedIndexes((l, m, n) -> {
+			indexMerger2.forMergedIndexes((l, m, n) -> {
 				boolean[] bls2 = new boolean[]{false};
-				boolean blx = indexMerger3.forMergedIndexes((o, p, q) -> {
-					boolean blxx = booleanOp.apply(discreteVoxelShape.isFullWide(i, l, o), discreteVoxelShape2.isFullWide(j, m, p));
-					if (blxx) {
+				indexMerger3.forMergedIndexes((o, p, q) -> {
+					if (booleanOp.apply(discreteVoxelShape.isFullWide(i, l, o), discreteVoxelShape2.isFullWide(j, m, p))) {
 						bitSetDiscreteVoxelShape.storage.set(bitSetDiscreteVoxelShape.getIndex(k, n, q));
 						is[2] = Math.min(is[2], q);
 						is[5] = Math.max(is[5], q);
@@ -137,14 +137,14 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 					bls[0] = true;
 				}
 
-				return blx;
+				return true;
 			});
 			if (bls[0]) {
 				is[0] = Math.min(is[0], k);
 				is[3] = Math.max(is[3], k);
 			}
 
-			return bl;
+			return true;
 		});
 		bitSetDiscreteVoxelShape.xMin = is[0];
 		bitSetDiscreteVoxelShape.yMin = is[1];
@@ -153,5 +153,65 @@ public final class BitSetDiscreteVoxelShape extends DiscreteVoxelShape {
 		bitSetDiscreteVoxelShape.yMax = is[4] + 1;
 		bitSetDiscreteVoxelShape.zMax = is[5] + 1;
 		return bitSetDiscreteVoxelShape;
+	}
+
+	protected static void forAllBoxes(DiscreteVoxelShape discreteVoxelShape, DiscreteVoxelShape.IntLineConsumer intLineConsumer, boolean bl) {
+		BitSetDiscreteVoxelShape bitSetDiscreteVoxelShape = new BitSetDiscreteVoxelShape(discreteVoxelShape);
+
+		for (int i = 0; i < bitSetDiscreteVoxelShape.xSize; i++) {
+			for (int j = 0; j < bitSetDiscreteVoxelShape.ySize; j++) {
+				int k = -1;
+
+				for (int l = 0; l <= bitSetDiscreteVoxelShape.zSize; l++) {
+					if (bitSetDiscreteVoxelShape.isFullWide(i, j, l)) {
+						if (bl) {
+							if (k == -1) {
+								k = l;
+							}
+						} else {
+							intLineConsumer.consume(i, j, l, i + 1, j + 1, l + 1);
+						}
+					} else if (k != -1) {
+						int m = i;
+						int n = j;
+						bitSetDiscreteVoxelShape.clearZStrip(k, l, i, j);
+
+						while (bitSetDiscreteVoxelShape.isZStripFull(k, l, m + 1, j)) {
+							bitSetDiscreteVoxelShape.clearZStrip(k, l, m + 1, j);
+							m++;
+						}
+
+						while (bitSetDiscreteVoxelShape.isXZRectangleFull(i, m + 1, k, l, n + 1)) {
+							for (int o = i; o <= m; o++) {
+								bitSetDiscreteVoxelShape.clearZStrip(k, l, o, n + 1);
+							}
+
+							n++;
+						}
+
+						intLineConsumer.consume(i, j, k, m + 1, n + 1, l);
+						k = -1;
+					}
+				}
+			}
+		}
+	}
+
+	private boolean isZStripFull(int i, int j, int k, int l) {
+		return k < this.xSize && l < this.ySize ? this.storage.nextClearBit(this.getIndex(k, l, i)) >= this.getIndex(k, l, j) : false;
+	}
+
+	private boolean isXZRectangleFull(int i, int j, int k, int l, int m) {
+		for (int n = i; n < j; n++) {
+			if (!this.isZStripFull(k, l, n, m)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void clearZStrip(int i, int j, int k, int l) {
+		this.storage.clear(this.getIndex(k, l, i), this.getIndex(k, l, j));
 	}
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -69,7 +70,9 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration
 		) {
-			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, (i << 4) + 2, (j << 4) + 2);
+			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(
+				this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2)
+			);
 			this.pieces.add(startPiece);
 			startPiece.addChildren(startPiece, this.pieces, this.random);
 			List<StructurePiece> list = startPiece.pendingChildren;

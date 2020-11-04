@@ -15,7 +15,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MobSpawnType;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
-public abstract class Animal extends AgableMob {
+public abstract class Animal extends AgeableMob {
 	private int inLove;
 	private UUID loveCause;
 
@@ -124,7 +124,7 @@ public abstract class Animal extends AgableMob {
 	}
 
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.getItem() == Items.WHEAT;
+		return itemStack.is(Items.WHEAT);
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public abstract class Animal extends AgableMob {
 	}
 
 	protected void usePlayerItem(Player player, ItemStack itemStack) {
-		if (!player.abilities.instabuild) {
+		if (!player.getAbilities().instabuild) {
 			itemStack.shrink(1);
 		}
 	}
@@ -206,8 +206,8 @@ public abstract class Animal extends AgableMob {
 	}
 
 	public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
-		AgableMob agableMob = this.getBreedOffspring(serverLevel, animal);
-		if (agableMob != null) {
+		AgeableMob ageableMob = this.getBreedOffspring(serverLevel, animal);
+		if (ageableMob != null) {
 			ServerPlayer serverPlayer = this.getLoveCause();
 			if (serverPlayer == null && animal.getLoveCause() != null) {
 				serverPlayer = animal.getLoveCause();
@@ -215,16 +215,16 @@ public abstract class Animal extends AgableMob {
 
 			if (serverPlayer != null) {
 				serverPlayer.awardStat(Stats.ANIMALS_BRED);
-				CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, agableMob);
+				CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, ageableMob);
 			}
 
 			this.setAge(6000);
 			animal.setAge(6000);
 			this.resetLove();
 			animal.resetLove();
-			agableMob.setBaby(true);
-			agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-			serverLevel.addFreshEntityWithPassengers(agableMob);
+			ageableMob.setBaby(true);
+			ageableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+			serverLevel.addFreshEntityWithPassengers(ageableMob);
 			serverLevel.broadcastEntityEvent(this, (byte)18);
 			if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));

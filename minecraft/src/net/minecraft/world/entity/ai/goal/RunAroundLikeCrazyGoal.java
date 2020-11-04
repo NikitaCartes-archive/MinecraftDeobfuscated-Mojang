@@ -2,7 +2,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.util.RandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +23,7 @@ public class RunAroundLikeCrazyGoal extends Goal {
 	@Override
 	public boolean canUse() {
 		if (!this.horse.isTamed() && this.horse.isVehicle()) {
-			Vec3 vec3 = RandomPos.getPos(this.horse, 5, 4);
+			Vec3 vec3 = DefaultRandomPos.getPos(this.horse, 5, 4);
 			if (vec3 == null) {
 				return false;
 			} else {

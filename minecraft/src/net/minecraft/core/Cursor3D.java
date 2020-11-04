@@ -1,13 +1,13 @@
 package net.minecraft.core;
 
 public class Cursor3D {
-	private int originX;
-	private int originY;
-	private int originZ;
-	private int width;
-	private int height;
-	private int depth;
-	private int end;
+	private final int originX;
+	private final int originY;
+	private final int originZ;
+	private final int width;
+	private final int height;
+	private final int depth;
+	private final int end;
 	private int index;
 	private int x;
 	private int y;

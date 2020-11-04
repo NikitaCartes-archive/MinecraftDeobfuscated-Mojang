@@ -62,6 +62,7 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_REDSTONE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_DIAMOND);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_LAPIS);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_COPPER);
 	}
 
 	public static void addExtraGold(BiomeGenerationSettings.Builder builder) {
@@ -328,6 +329,10 @@ public class BiomeDefaultFeatures {
 	public static void addAncientDebris(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Features.ORE_DEBRIS_LARGE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Features.ORE_DEBRIS_SMALL);
+	}
+
+	public static void addDefaultCrystalFormations(BiomeGenerationSettings.Builder builder) {
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Features.AMETHYST_GEODE);
 	}
 
 	public static void farmAnimals(MobSpawnSettings.Builder builder) {

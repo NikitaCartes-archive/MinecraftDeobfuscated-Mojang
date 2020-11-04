@@ -3,45 +3,52 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class WitchModel<T extends Entity> extends VillagerModel<T> {
 	private boolean holdingItem;
-	private final ModelPart mole = new ModelPart(this).setTexSize(64, 128);
 
-	public WitchModel(float f) {
-		super(f, 64, 128);
-		this.mole.setPos(0.0F, -2.0F, 0.0F);
-		this.mole.texOffs(0, 0).addBox(0.0F, 3.0F, -6.75F, 1.0F, 1.0F, 1.0F, -0.25F);
-		this.nose.addChild(this.mole);
-		this.head = new ModelPart(this).setTexSize(64, 128);
-		this.head.setPos(0.0F, 0.0F, 0.0F);
-		this.head.texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, f);
-		this.hat = new ModelPart(this).setTexSize(64, 128);
-		this.hat.setPos(-5.0F, -10.03125F, -5.0F);
-		this.hat.texOffs(0, 64).addBox(0.0F, 0.0F, 0.0F, 10.0F, 2.0F, 10.0F);
-		this.head.addChild(this.hat);
-		this.head.addChild(this.nose);
-		ModelPart modelPart = new ModelPart(this).setTexSize(64, 128);
-		modelPart.setPos(1.75F, -4.0F, 2.0F);
-		modelPart.texOffs(0, 76).addBox(0.0F, 0.0F, 0.0F, 7.0F, 4.0F, 7.0F);
-		modelPart.xRot = -0.05235988F;
-		modelPart.zRot = 0.02617994F;
-		this.hat.addChild(modelPart);
-		ModelPart modelPart2 = new ModelPart(this).setTexSize(64, 128);
-		modelPart2.setPos(1.75F, -4.0F, 2.0F);
-		modelPart2.texOffs(0, 87).addBox(0.0F, 0.0F, 0.0F, 4.0F, 4.0F, 4.0F);
-		modelPart2.xRot = -0.10471976F;
-		modelPart2.zRot = 0.05235988F;
-		modelPart.addChild(modelPart2);
-		ModelPart modelPart3 = new ModelPart(this).setTexSize(64, 128);
-		modelPart3.setPos(1.75F, -2.0F, 2.0F);
-		modelPart3.texOffs(0, 95).addBox(0.0F, 0.0F, 0.0F, 1.0F, 2.0F, 1.0F, 0.25F);
-		modelPart3.xRot = (float) (-Math.PI / 15);
-		modelPart3.zRot = 0.10471976F;
-		modelPart2.addChild(modelPart3);
+	public WitchModel(ModelPart modelPart) {
+		super(modelPart);
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = VillagerModel.createBodyModel();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F), PartPose.ZERO
+		);
+		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
+			"hat", CubeListBuilder.create().texOffs(0, 64).addBox(0.0F, 0.0F, 0.0F, 10.0F, 2.0F, 10.0F), PartPose.offset(-5.0F, -10.03125F, -5.0F)
+		);
+		PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild(
+			"hat2",
+			CubeListBuilder.create().texOffs(0, 76).addBox(0.0F, 0.0F, 0.0F, 7.0F, 4.0F, 7.0F),
+			PartPose.offsetAndRotation(1.75F, -4.0F, 2.0F, -0.05235988F, 0.0F, 0.02617994F)
+		);
+		PartDefinition partDefinition5 = partDefinition4.addOrReplaceChild(
+			"hat3",
+			CubeListBuilder.create().texOffs(0, 87).addBox(0.0F, 0.0F, 0.0F, 4.0F, 4.0F, 4.0F),
+			PartPose.offsetAndRotation(1.75F, -4.0F, 2.0F, -0.10471976F, 0.0F, 0.05235988F)
+		);
+		partDefinition5.addOrReplaceChild(
+			"hat4",
+			CubeListBuilder.create().texOffs(0, 95).addBox(0.0F, 0.0F, 0.0F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.25F)),
+			PartPose.offsetAndRotation(1.75F, -2.0F, 2.0F, (float) (-Math.PI / 15), 0.0F, 0.10471976F)
+		);
+		PartDefinition partDefinition6 = partDefinition2.getChild("nose");
+		partDefinition6.addOrReplaceChild(
+			"mole", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, 3.0F, -6.75F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)), PartPose.offset(0.0F, -2.0F, 0.0F)
+		);
+		return LayerDefinition.create(meshDefinition, 64, 128);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.MinecartModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -20,11 +21,12 @@ import net.minecraft.world.phys.Vec3;
 @Environment(EnvType.CLIENT)
 public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer<T> {
 	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
-	protected final EntityModel<T> model = new MinecartModel<>();
+	protected final EntityModel<T> model;
 
-	public MinecartRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public MinecartRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
+		super(context);
 		this.shadowRadius = 0.7F;
+		this.model = new MinecartModel<>(context.getLayer(modelLayerLocation));
 	}
 
 	public void render(T abstractMinecart, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

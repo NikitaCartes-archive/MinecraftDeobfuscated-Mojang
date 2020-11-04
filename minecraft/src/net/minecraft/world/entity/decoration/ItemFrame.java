@@ -207,7 +207,7 @@ public class ItemFrame extends HangingEntity {
 			} else {
 				if (entity instanceof Player) {
 					Player player = (Player)entity;
-					if (player.abilities.instabuild) {
+					if (player.getAbilities().instabuild) {
 						this.removeFramedMap(itemStack);
 						return;
 					}
@@ -229,7 +229,7 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void removeFramedMap(ItemStack itemStack) {
-		if (itemStack.getItem() == Items.FILLED_MAP) {
+		if (itemStack.is(Items.FILLED_MAP)) {
 			MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.level);
 			mapItemSavedData.removedFromFrame(this.pos, this.getId());
 			mapItemSavedData.setDirty(true);
@@ -348,9 +348,9 @@ public class ItemFrame extends HangingEntity {
 			return InteractionResult.PASS;
 		} else if (!this.level.isClientSide) {
 			if (!bl) {
-				if (bl2 && !this.removed) {
+				if (bl2 && !this.isRemoved()) {
 					this.setItem(itemStack);
-					if (!player.abilities.instabuild) {
+					if (!player.getAbilities().instabuild) {
 						itemStack.shrink(1);
 					}
 				}
@@ -372,5 +372,19 @@ public class ItemFrame extends HangingEntity {
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this, this.getType(), this.direction.get3DDataValue(), this.getPos());
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		super.recreateFromPacket(clientboundAddEntityPacket);
+		this.setDirection(Direction.from3DDataValue(clientboundAddEntityPacket.getData()));
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ItemStack getPickResult() {
+		ItemStack itemStack = this.getItem();
+		return itemStack.isEmpty() ? new ItemStack(Items.ITEM_FRAME) : itemStack.copy();
 	}
 }

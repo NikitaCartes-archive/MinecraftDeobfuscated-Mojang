@@ -498,7 +498,7 @@ public abstract class Mob extends LivingEntity {
 		this.level.getProfiler().push("looting");
 		if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			for (ItemEntity itemEntity : this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0))) {
-				if (!itemEntity.removed && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
+				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
 					this.pickUpItem(itemEntity);
 				}
 			}
@@ -512,7 +512,7 @@ public abstract class Mob extends LivingEntity {
 		if (this.equipItemIfPossible(itemStack)) {
 			this.onItemPickup(itemEntity);
 			this.take(itemEntity, itemStack.getCount());
-			itemEntity.remove();
+			itemEntity.discard();
 		}
 	}
 
@@ -636,7 +636,7 @@ public abstract class Mob extends LivingEntity {
 	@Override
 	public void checkDespawn() {
 		if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
-			this.remove();
+			this.discard();
 		} else if (!this.isPersistenceRequired() && !this.requiresCustomPersistence()) {
 			Entity entity = this.level.getNearestPlayer(this, -1.0);
 			if (entity != null) {
@@ -644,13 +644,13 @@ public abstract class Mob extends LivingEntity {
 				int i = this.getType().getCategory().getDespawnDistance();
 				int j = i * i;
 				if (d > (double)j && this.removeWhenFarAway(d)) {
-					this.remove();
+					this.discard();
 				}
 
 				int k = this.getType().getCategory().getNoDespawnDistance();
 				int l = k * k;
 				if (this.noActionTime > 600 && this.random.nextInt(800) == 0 && d > (double)l && this.removeWhenFarAway(d)) {
-					this.remove();
+					this.discard();
 				} else if (d < (double)l) {
 					this.noActionTime = 0;
 				}
@@ -887,13 +887,13 @@ public abstract class Mob extends LivingEntity {
 
 	public static EquipmentSlot getEquipmentSlotForItem(ItemStack itemStack) {
 		Item item = itemStack.getItem();
-		if (item != Blocks.CARVED_PUMPKIN.asItem() && (!(item instanceof BlockItem) || !(((BlockItem)item).getBlock() instanceof AbstractSkullBlock))) {
+		if (!itemStack.is(Blocks.CARVED_PUMPKIN.asItem()) && (!(item instanceof BlockItem) || !(((BlockItem)item).getBlock() instanceof AbstractSkullBlock))) {
 			if (item instanceof ArmorItem) {
 				return ((ArmorItem)item).getSlot();
-			} else if (item == Items.ELYTRA) {
+			} else if (itemStack.is(Items.ELYTRA)) {
 				return EquipmentSlot.CHEST;
 			} else {
-				return item == Items.SHIELD ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+				return itemStack.is(Items.SHIELD) ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
 			}
 		} else {
 			return EquipmentSlot.HEAD;
@@ -1042,7 +1042,7 @@ public abstract class Mob extends LivingEntity {
 		if (!this.isAlive()) {
 			return InteractionResult.PASS;
 		} else if (this.getLeashHolder() == player) {
-			this.dropLeash(true, !player.abilities.instabuild);
+			this.dropLeash(true, !player.getAbilities().instabuild);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
@@ -1057,12 +1057,12 @@ public abstract class Mob extends LivingEntity {
 
 	private InteractionResult checkAndHandleImportantInteractions(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.LEAD && this.canBeLeashed(player)) {
+		if (itemStack.is(Items.LEAD) && this.canBeLeashed(player)) {
 			this.setLeashedTo(player, true);
 			itemStack.shrink(1);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
-			if (itemStack.getItem() == Items.NAME_TAG) {
+			if (itemStack.is(Items.NAME_TAG)) {
 				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
 				if (interactionResult.consumesAction()) {
 					return interactionResult;
@@ -1120,7 +1120,7 @@ public abstract class Mob extends LivingEntity {
 
 	@Nullable
 	public <T extends Mob> T convertTo(EntityType<T> entityType, boolean bl) {
-		if (this.removed) {
+		if (this.isRemoved()) {
 			return null;
 		} else {
 			T mob = (T)entityType.create(this.level);
@@ -1157,7 +1157,7 @@ public abstract class Mob extends LivingEntity {
 				mob.startRiding(entity, true);
 			}
 
-			this.remove();
+			this.discard();
 			return mob;
 		}
 	}
@@ -1348,7 +1348,7 @@ public abstract class Mob extends LivingEntity {
 
 	@Override
 	public boolean canAttack(LivingEntity livingEntity) {
-		return livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).abilities.invulnerable ? false : super.canAttack(livingEntity);
+		return livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).getAbilities().invulnerable ? false : super.canAttack(livingEntity);
 	}
 
 	@Override
@@ -1386,7 +1386,7 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
-		if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
+		if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.is(Items.SHIELD)) {
 			float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
 			if (this.random.nextFloat() < f) {
 				player.getCooldowns().addCooldown(Items.SHIELD, 100);
@@ -1398,10 +1398,8 @@ public abstract class Mob extends LivingEntity {
 	protected boolean isSunBurnTick() {
 		if (this.level.isDay() && !this.level.isClientSide) {
 			float f = this.getBrightness();
-			BlockPos blockPos = this.getVehicle() instanceof Boat
-				? new BlockPos(this.getX(), (double)Math.round(this.getY()), this.getZ()).above()
-				: new BlockPos(this.getX(), (double)Math.round(this.getY()), this.getZ());
-			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.level.canSeeSky(blockPos)) {
+			BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
+			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !this.isInWaterRainOrBubble() && this.level.canSeeSky(blockPos)) {
 				return true;
 			}
 		}
@@ -1422,5 +1420,13 @@ public abstract class Mob extends LivingEntity {
 	protected void removeAfterChangingDimensions() {
 		super.removeAfterChangingDimensions();
 		this.dropLeash(true, false);
+	}
+
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ItemStack getPickResult() {
+		SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
+		return spawnEggItem == null ? null : new ItemStack(spawnEggItem);
 	}
 }

@@ -33,7 +33,7 @@ public class RealmsServerList extends ValueObject {
 				}
 			}
 		} catch (Exception var6) {
-			LOGGER.error("Could not parse McoServerList: " + var6.getMessage());
+			LOGGER.error("Could not parse McoServerList: {}", var6.getMessage());
 		}
 
 		return realmsServerList;

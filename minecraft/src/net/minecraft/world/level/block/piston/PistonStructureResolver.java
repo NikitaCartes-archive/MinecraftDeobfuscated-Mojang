@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
@@ -50,7 +49,7 @@ public class PistonStructureResolver {
 		} else {
 			for (int i = 0; i < this.toPush.size(); i++) {
 				BlockPos blockPos = (BlockPos)this.toPush.get(i);
-				if (isSticky(this.level.getBlockState(blockPos).getBlock()) && !this.addBranchingBlocks(blockPos)) {
+				if (isSticky(this.level.getBlockState(blockPos)) && !this.addBranchingBlocks(blockPos)) {
 					return false;
 				}
 			}
@@ -59,21 +58,20 @@ public class PistonStructureResolver {
 		}
 	}
 
-	private static boolean isSticky(Block block) {
-		return block == Blocks.SLIME_BLOCK || block == Blocks.HONEY_BLOCK;
+	private static boolean isSticky(BlockState blockState) {
+		return blockState.is(Blocks.SLIME_BLOCK) || blockState.is(Blocks.HONEY_BLOCK);
 	}
 
-	private static boolean canStickToEachOther(Block block, Block block2) {
-		if (block == Blocks.HONEY_BLOCK && block2 == Blocks.SLIME_BLOCK) {
+	private static boolean canStickToEachOther(BlockState blockState, BlockState blockState2) {
+		if (blockState.is(Blocks.HONEY_BLOCK) && blockState2.is(Blocks.SLIME_BLOCK)) {
 			return false;
 		} else {
-			return block == Blocks.SLIME_BLOCK && block2 == Blocks.HONEY_BLOCK ? false : isSticky(block) || isSticky(block2);
+			return blockState.is(Blocks.SLIME_BLOCK) && blockState2.is(Blocks.HONEY_BLOCK) ? false : isSticky(blockState) || isSticky(blockState2);
 		}
 	}
 
 	private boolean addBlockLine(BlockPos blockPos, Direction direction) {
 		BlockState blockState = this.level.getBlockState(blockPos);
-		Block block = blockState.getBlock();
 		if (blockState.isAir()) {
 			return true;
 		} else if (!PistonBaseBlock.isPushable(blockState, this.level, blockPos, this.pushDirection, false, direction)) {
@@ -87,13 +85,12 @@ public class PistonStructureResolver {
 			if (i + this.toPush.size() > 12) {
 				return false;
 			} else {
-				while (isSticky(block)) {
+				while (isSticky(blockState)) {
 					BlockPos blockPos2 = blockPos.relative(this.pushDirection.getOpposite(), i);
-					Block block2 = block;
+					BlockState blockState2 = blockState;
 					blockState = this.level.getBlockState(blockPos2);
-					block = blockState.getBlock();
 					if (blockState.isAir()
-						|| !canStickToEachOther(block2, block)
+						|| !canStickToEachOther(blockState2, blockState)
 						|| !PistonBaseBlock.isPushable(blockState, this.level, blockPos2, this.pushDirection, false, this.pushDirection.getOpposite())
 						|| blockPos2.equals(this.pistonPos)) {
 						break;
@@ -121,7 +118,7 @@ public class PistonStructureResolver {
 
 						for (int m = 0; m <= l + j; m++) {
 							BlockPos blockPos4 = (BlockPos)this.toPush.get(m);
-							if (isSticky(this.level.getBlockState(blockPos4).getBlock()) && !this.addBranchingBlocks(blockPos4)) {
+							if (isSticky(this.level.getBlockState(blockPos4)) && !this.addBranchingBlocks(blockPos4)) {
 								return false;
 							}
 						}
@@ -175,7 +172,7 @@ public class PistonStructureResolver {
 			if (direction.getAxis() != this.pushDirection.getAxis()) {
 				BlockPos blockPos2 = blockPos.relative(direction);
 				BlockState blockState2 = this.level.getBlockState(blockPos2);
-				if (canStickToEachOther(blockState2.getBlock(), blockState.getBlock()) && !this.addBlockLine(blockPos2, direction)) {
+				if (canStickToEachOther(blockState2, blockState) && !this.addBlockLine(blockPos2, direction)) {
 					return false;
 				}
 			}

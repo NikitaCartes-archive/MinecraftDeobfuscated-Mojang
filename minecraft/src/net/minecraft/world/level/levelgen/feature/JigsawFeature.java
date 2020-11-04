@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -47,7 +48,7 @@ public class JigsawFeature extends StructureFeature<JigsawConfiguration> {
 			Biome biome,
 			JigsawConfiguration jigsawConfiguration
 		) {
-			BlockPos blockPos = new BlockPos(i * 16, this.feature.startY, j * 16);
+			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), this.feature.startY, SectionPos.sectionToBlockCoord(j));
 			Pools.bootstrap();
 			JigsawPlacement.addPieces(
 				registryAccess,

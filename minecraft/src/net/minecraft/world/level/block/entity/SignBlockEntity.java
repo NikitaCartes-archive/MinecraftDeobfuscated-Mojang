@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -30,8 +31,8 @@ public class SignBlockEntity extends BlockEntity {
 	private final FormattedCharSequence[] renderMessages = new FormattedCharSequence[4];
 	private DyeColor color = DyeColor.BLACK;
 
-	public SignBlockEntity() {
-		super(BlockEntityType.SIGN);
+	public SignBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.SIGN, blockPos, blockState);
 	}
 
 	@Override
@@ -48,9 +49,9 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag) {
 		this.isEditable = false;
-		super.load(blockState, compoundTag);
+		super.load(compoundTag);
 		this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
 
 		for (int i = 0; i < 4; i++) {
@@ -59,7 +60,7 @@ public class SignBlockEntity extends BlockEntity {
 			if (this.level instanceof ServerLevel) {
 				try {
 					this.messages[i] = ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
-				} catch (CommandSyntaxException var7) {
+				} catch (CommandSyntaxException var6) {
 					this.messages[i] = component;
 				}
 			} else {

@@ -56,7 +56,7 @@ public class FireworkRocketItem extends Item {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (!level.isClientSide) {
 				level.addFreshEntity(new FireworkRocketEntity(level, itemStack, player));
-				if (!player.abilities.instabuild) {
+				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
 			}
@@ -97,6 +97,13 @@ public class FireworkRocketItem extends Item {
 				}
 			}
 		}
+	}
+
+	@Override
+	public ItemStack getDefaultInstance() {
+		ItemStack itemStack = new ItemStack(this);
+		itemStack.getOrCreateTag().putByte("Flight", (byte)1);
+		return itemStack;
 	}
 
 	public static enum Shape {

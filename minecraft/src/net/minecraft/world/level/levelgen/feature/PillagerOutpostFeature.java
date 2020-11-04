@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -36,8 +37,8 @@ public class PillagerOutpostFeature extends JigsawFeature {
 		ChunkPos chunkPos,
 		JigsawConfiguration jigsawConfiguration
 	) {
-		int k = i >> 4;
-		int m = j >> 4;
+		int k = SectionPos.blockToSectionCoord(i);
+		int m = SectionPos.blockToSectionCoord(j);
 		worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);
 		worldgenRandom.nextInt();
 		return worldgenRandom.nextInt(5) != 0 ? false : !this.isNearVillage(chunkGenerator, l, worldgenRandom, i, j);

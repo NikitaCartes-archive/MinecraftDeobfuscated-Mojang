@@ -30,9 +30,9 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private final ItemRenderer itemRenderer;
 
-	public ItemFrameRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
-		super(entityRenderDispatcher);
-		this.itemRenderer = itemRenderer;
+	public ItemFrameRenderer(EntityRendererProvider.Context context) {
+		super(context);
+		this.itemRenderer = context.getItemRenderer();
 	}
 
 	public void render(ItemFrame itemFrame, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -46,10 +46,11 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - itemFrame.yRot));
 		boolean bl = itemFrame.isInvisible();
+		ItemStack itemStack = itemFrame.getItem();
 		if (!bl) {
 			BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
 			ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
-			ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
+			ModelResourceLocation modelResourceLocation = itemStack.is(Items.FILLED_MAP) ? MAP_FRAME_LOCATION : FRAME_LOCATION;
 			poseStack.pushPose();
 			poseStack.translate(-0.5, -0.5, -0.5);
 			blockRenderDispatcher.getModelRenderer()
@@ -67,9 +68,8 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 			poseStack.popPose();
 		}
 
-		ItemStack itemStack = itemFrame.getItem();
 		if (!itemStack.isEmpty()) {
-			boolean bl2 = itemStack.getItem() == Items.FILLED_MAP;
+			boolean bl2 = itemStack.is(Items.FILLED_MAP);
 			if (bl) {
 				poseStack.translate(0.0, 0.0, 0.5);
 			} else {

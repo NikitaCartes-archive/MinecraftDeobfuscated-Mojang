@@ -107,7 +107,7 @@ public class HoverEvent {
 		public static final HoverEvent.Action<HoverEvent.EntityTooltipInfo> SHOW_ENTITY = new HoverEvent.Action<>(
 			"show_entity", true, HoverEvent.EntityTooltipInfo::create, HoverEvent.EntityTooltipInfo::serialize, HoverEvent.EntityTooltipInfo::create
 		);
-		private static final Map<String, HoverEvent.Action> LOOKUP = (Map<String, HoverEvent.Action>)Stream.of(SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY)
+		private static final Map<String, HoverEvent.Action<?>> LOOKUP = (Map<String, HoverEvent.Action<?>>)Stream.of(SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY)
 			.collect(ImmutableMap.toImmutableMap(HoverEvent.Action::getName, action -> action));
 		private final String name;
 		private final boolean allowFromServer;
@@ -132,8 +132,8 @@ public class HoverEvent {
 		}
 
 		@Nullable
-		public static HoverEvent.Action getByName(String string) {
-			return (HoverEvent.Action)LOOKUP.get(string);
+		public static HoverEvent.Action<?> getByName(String string) {
+			return (HoverEvent.Action<?>)LOOKUP.get(string);
 		}
 
 		private T cast(Object object) {

@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -34,7 +35,7 @@ public class JunglePyramidFeature extends StructureFeature<NoneFeatureConfigurat
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration
 		) {
-			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, i * 16, j * 16);
+			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, SectionPos.sectionToBlockCoord(i), SectionPos.sectionToBlockCoord(j));
 			this.pieces.add(junglePyramidPiece);
 			this.calculateBoundingBox();
 		}

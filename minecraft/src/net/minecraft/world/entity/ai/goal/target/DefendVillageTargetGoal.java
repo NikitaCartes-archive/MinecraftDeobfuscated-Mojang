@@ -24,7 +24,7 @@ public class DefendVillageTargetGoal extends TargetGoal {
 	@Override
 	public boolean canUse() {
 		AABB aABB = this.golem.getBoundingBox().inflate(10.0, 8.0, 10.0);
-		List<LivingEntity> list = this.golem.level.getNearbyEntities(Villager.class, this.attackTargeting, this.golem, aABB);
+		List<? extends LivingEntity> list = this.golem.level.getNearbyEntities(Villager.class, this.attackTargeting, this.golem, aABB);
 		List<Player> list2 = this.golem.level.getNearbyPlayers(this.attackTargeting, this.golem, aABB);
 
 		for (LivingEntity livingEntity : list) {

@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
@@ -29,10 +30,10 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 
 	@Nullable
 	public static RenderChunkRegion createIfNotEmpty(Level level, BlockPos blockPos, BlockPos blockPos2, int i) {
-		int j = blockPos.getX() - i >> 4;
-		int k = blockPos.getZ() - i >> 4;
-		int l = blockPos2.getX() + i >> 4;
-		int m = blockPos2.getZ() + i >> 4;
+		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
+		int k = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
+		int l = SectionPos.blockToSectionCoord(blockPos2.getX() + i);
+		int m = SectionPos.blockToSectionCoord(blockPos2.getZ() + i);
 		LevelChunk[][] levelChunks = new LevelChunk[l - j + 1][m - k + 1];
 
 		for (int n = j; n <= l; n++) {
@@ -52,8 +53,8 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 	}
 
 	public static boolean isAllEmpty(BlockPos blockPos, BlockPos blockPos2, int i, int j, LevelChunk[][] levelChunks) {
-		for (int k = blockPos.getX() >> 4; k <= blockPos2.getX() >> 4; k++) {
-			for (int l = blockPos.getZ() >> 4; l <= blockPos2.getZ() >> 4; l++) {
+		for (int k = SectionPos.blockToSectionCoord(blockPos.getX()); k <= SectionPos.blockToSectionCoord(blockPos2.getX()); k++) {
+			for (int l = SectionPos.blockToSectionCoord(blockPos.getZ()); l <= SectionPos.blockToSectionCoord(blockPos2.getZ()); l++) {
 				LevelChunk levelChunk = levelChunks[k - i][l - j];
 				if (!levelChunk.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) {
 					return false;
@@ -77,8 +78,8 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 		this.fluidStates = new FluidState[this.xLength * this.yLength * this.zLength];
 
 		for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
-			int k = (blockPos3.getX() >> 4) - i;
-			int l = (blockPos3.getZ() >> 4) - j;
+			int k = SectionPos.blockToSectionCoord(blockPos3.getX()) - i;
+			int l = SectionPos.blockToSectionCoord(blockPos3.getZ()) - j;
 			LevelChunk levelChunk = levelChunks[k][l];
 			int m = this.index(blockPos3);
 			this.blockStates[m] = levelChunk.getBlockState(blockPos3);
@@ -125,13 +126,23 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 
 	@Nullable
 	public BlockEntity getBlockEntity(BlockPos blockPos, LevelChunk.EntityCreationType entityCreationType) {
-		int i = (blockPos.getX() >> 4) - this.centerX;
-		int j = (blockPos.getZ() >> 4) - this.centerZ;
+		int i = SectionPos.blockToSectionCoord(blockPos.getX()) - this.centerX;
+		int j = SectionPos.blockToSectionCoord(blockPos.getZ()) - this.centerZ;
 		return this.chunks[i][j].getBlockEntity(blockPos, entityCreationType);
 	}
 
 	@Override
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		return this.level.getBlockTint(blockPos, colorResolver);
+	}
+
+	@Override
+	public int getSectionsCount() {
+		return this.level.getSectionsCount();
+	}
+
+	@Override
+	public int getMinSection() {
+		return this.level.getMinSection();
 	}
 }

@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GiantZombieModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -15,11 +16,15 @@ public class GiantMobRenderer extends MobRenderer<Giant, HumanoidModel<Giant>> {
 	private static final ResourceLocation ZOMBIE_LOCATION = new ResourceLocation("textures/entity/zombie/zombie.png");
 	private final float scale;
 
-	public GiantMobRenderer(EntityRenderDispatcher entityRenderDispatcher, float f) {
-		super(entityRenderDispatcher, new GiantZombieModel(), 0.5F * f);
+	public GiantMobRenderer(EntityRendererProvider.Context context, float f) {
+		super(context, new GiantZombieModel(context.getLayer(ModelLayers.GIANT)), 0.5F * f);
 		this.scale = f;
 		this.addLayer(new ItemInHandLayer<>(this));
-		this.addLayer(new HumanoidArmorLayer<>(this, new GiantZombieModel(0.5F, true), new GiantZombieModel(1.0F, true)));
+		this.addLayer(
+			new HumanoidArmorLayer<>(
+				this, new GiantZombieModel(context.getLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.getLayer(ModelLayers.GIANT_OUTER_ARMOR))
+			)
+		);
 	}
 
 	protected void scale(Giant giant, PoseStack poseStack, float f) {

@@ -567,7 +567,7 @@ public class RealmsMainScreen extends RealmsScreen {
 							RealmsMainScreen.REALMS_DATA_FETCHER.forceUpdate();
 						}
 					} catch (RealmsServiceException var3) {
-						RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3);
+						RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: {}", var3.toString());
 					}
 				}
 			}).start();
@@ -588,7 +588,7 @@ public class RealmsMainScreen extends RealmsScreen {
 							RealmsMainScreen.REALMS_DATA_FETCHER.forceUpdate();
 						}
 					} catch (RealmsServiceException var3) {
-						RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3);
+						RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: {}", var3.toString());
 					}
 				}
 			}).start();
@@ -795,7 +795,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			if (this.children.contains(this.realmSelectionList)) {
 				GuiEventListener guiEventListener = this.realmSelectionList;
 				if (!this.children.remove(guiEventListener)) {
-					LOGGER.error("Unable to remove widget: " + guiEventListener);
+					LOGGER.error("Unable to remove widget: {}", guiEventListener);
 				}
 			}
 
@@ -1223,7 +1223,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			if (i != 257 && i != 32 && i != 335) {
 				return super.keyPressed(i, j, k);
 			} else {
-				ObjectSelectionList.Entry entry = this.getSelected();
+				RealmsMainScreen.Entry entry = this.getSelected();
 				return entry == null ? super.keyPressed(i, j, k) : entry.mouseClicked(0.0, 0.0, 0);
 			}
 		}

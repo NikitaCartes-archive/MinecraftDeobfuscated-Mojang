@@ -12,7 +12,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -57,10 +56,9 @@ public abstract class TrunkPlacer {
 	}
 
 	private static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-		return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
-			Block block = blockState.getBlock();
-			return Feature.isDirt(block) && !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.MYCELIUM);
-		});
+		return levelSimulatedReader.isStateAtPosition(
+			blockPos, blockState -> Feature.isDirt(blockState) && !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.MYCELIUM)
+		);
 	}
 
 	protected static void setDirtAt(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos) {

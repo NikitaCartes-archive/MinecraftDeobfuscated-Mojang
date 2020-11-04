@@ -40,10 +40,9 @@ public class BlockPredicate {
 			return false;
 		} else {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			if (this.tag != null && !this.tag.contains(block)) {
+			if (this.tag != null && !blockState.is(this.tag)) {
 				return false;
-			} else if (this.block != null && block != this.block) {
+			} else if (this.block != null && !blockState.is(this.block)) {
 				return false;
 			} else if (!this.properties.matches(blockState)) {
 				return false;

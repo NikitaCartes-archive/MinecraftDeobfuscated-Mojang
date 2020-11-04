@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -176,7 +177,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			float g = 32.0F;
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
 				.uv((float)this.x0 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
 				.color(32, 32, 32, 255)
@@ -209,7 +210,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			RenderSystem.depthFunc(519);
 			float h = 32.0F;
 			int o = -100;
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.x0, (double)this.y0, -100.0).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
 			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y0, -100.0)
 				.uv((float)this.width / 32.0F, (float)this.y0 / 32.0F)
@@ -238,7 +239,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			RenderSystem.shadeModel(7425);
 			RenderSystem.disableTexture();
 			int p = 4;
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
 			bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
 			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
@@ -260,7 +261,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				p = this.y0;
 			}
 
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
 			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
 			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
@@ -458,14 +459,14 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 					RenderSystem.disableTexture();
 					float g = this.isFocused() ? 1.0F : 0.5F;
 					RenderSystem.color4f(g, g, g, 1.0F);
-					bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
+					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)t, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q - 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)t, (double)(q - 2), 0.0).endVertex();
 					tesselator.end();
 					RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
-					bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
+					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)(t + 1), (double)(q + r + 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(u - 1), (double)(q + r + 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(u - 1), (double)(q - 1), 0.0).endVertex();

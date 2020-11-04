@@ -29,7 +29,7 @@ public class RepairItemRecipe extends CustomRecipe {
 				list.add(itemStack);
 				if (list.size() > 1) {
 					ItemStack itemStack2 = (ItemStack)list.get(0);
-					if (itemStack.getItem() != itemStack2.getItem() || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
+					if (!itemStack.is(itemStack2.getItem()) || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
 						return false;
 					}
 				}
@@ -48,7 +48,7 @@ public class RepairItemRecipe extends CustomRecipe {
 				list.add(itemStack);
 				if (list.size() > 1) {
 					ItemStack itemStack2 = (ItemStack)list.get(0);
-					if (itemStack.getItem() != itemStack2.getItem() || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
+					if (!itemStack.is(itemStack2.getItem()) || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
 						return ItemStack.EMPTY;
 					}
 				}
@@ -58,7 +58,7 @@ public class RepairItemRecipe extends CustomRecipe {
 		if (list.size() == 2) {
 			ItemStack itemStack3 = (ItemStack)list.get(0);
 			ItemStack itemStack = (ItemStack)list.get(1);
-			if (itemStack3.getItem() == itemStack.getItem() && itemStack3.getCount() == 1 && itemStack.getCount() == 1 && itemStack3.getItem().canBeDepleted()) {
+			if (itemStack3.is(itemStack.getItem()) && itemStack3.getCount() == 1 && itemStack.getCount() == 1 && itemStack3.getItem().canBeDepleted()) {
 				Item item = itemStack3.getItem();
 				int j = item.getMaxDamage() - itemStack3.getDamageValue();
 				int k = item.getMaxDamage() - itemStack.getDamageValue();

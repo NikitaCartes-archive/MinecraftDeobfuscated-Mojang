@@ -4,6 +4,11 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Shulker;
@@ -11,19 +16,29 @@ import net.minecraft.world.entity.monster.Shulker;
 @Environment(EnvType.CLIENT)
 public class ShulkerModel<T extends Shulker> extends ListModel<T> {
 	private final ModelPart base;
-	private final ModelPart lid = new ModelPart(64, 64, 0, 0);
+	private final ModelPart lid;
 	private final ModelPart head;
 
-	public ShulkerModel() {
+	public ShulkerModel(ModelPart modelPart) {
 		super(RenderType::entityCutoutNoCullZOffset);
-		this.base = new ModelPart(64, 64, 0, 28);
-		this.head = new ModelPart(64, 64, 0, 52);
-		this.lid.addBox(-8.0F, -16.0F, -8.0F, 16.0F, 12.0F, 16.0F);
-		this.lid.setPos(0.0F, 24.0F, 0.0F);
-		this.base.addBox(-8.0F, -8.0F, -8.0F, 16.0F, 8.0F, 16.0F);
-		this.base.setPos(0.0F, 24.0F, 0.0F);
-		this.head.addBox(-3.0F, 0.0F, -3.0F, 6.0F, 6.0F, 6.0F);
-		this.head.setPos(0.0F, 12.0F, 0.0F);
+		this.lid = modelPart.getChild("lid");
+		this.base = modelPart.getChild("base");
+		this.head = modelPart.getChild("head");
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		partDefinition.addOrReplaceChild(
+			"lid", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -16.0F, -8.0F, 16.0F, 12.0F, 16.0F), PartPose.offset(0.0F, 24.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"base", CubeListBuilder.create().texOffs(0, 28).addBox(-8.0F, -8.0F, -8.0F, 16.0F, 8.0F, 16.0F), PartPose.offset(0.0F, 24.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"head", CubeListBuilder.create().texOffs(0, 52).addBox(-3.0F, 0.0F, -3.0F, 6.0F, 6.0F, 6.0F), PartPose.offset(0.0F, 12.0F, 0.0F)
+		);
+		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
 	public void setupAnim(T shulker, float f, float g, float h, float i, float j) {

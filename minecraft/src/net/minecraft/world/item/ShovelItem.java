@@ -33,7 +33,7 @@ public class ShovelItem extends DiggerItem {
 		Blocks.SNOW_BLOCK,
 		Blocks.SNOW,
 		Blocks.SOUL_SAND,
-		Blocks.GRASS_PATH,
+		Blocks.DIRT_PATH,
 		Blocks.WHITE_CONCRETE_POWDER,
 		Blocks.ORANGE_CONCRETE_POWDER,
 		Blocks.MAGENTA_CONCRETE_POWDER,
@@ -53,7 +53,18 @@ public class ShovelItem extends DiggerItem {
 		Blocks.SOUL_SOIL
 	);
 	protected static final Map<Block, BlockState> FLATTENABLES = Maps.<Block, BlockState>newHashMap(
-		ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.GRASS_PATH.defaultBlockState())
+		ImmutableMap.of(
+			Blocks.GRASS_BLOCK,
+			Blocks.DIRT_PATH.defaultBlockState(),
+			Blocks.DIRT,
+			Blocks.DIRT_PATH.defaultBlockState(),
+			Blocks.PODZOL,
+			Blocks.DIRT_PATH.defaultBlockState(),
+			Blocks.COARSE_DIRT,
+			Blocks.DIRT_PATH.defaultBlockState(),
+			Blocks.MYCELIUM,
+			Blocks.DIRT_PATH.defaultBlockState()
+		)
 	);
 
 	public ShovelItem(Tier tier, float f, float g, Item.Properties properties) {

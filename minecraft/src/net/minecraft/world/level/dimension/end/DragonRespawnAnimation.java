@@ -90,7 +90,7 @@ public enum DragonRespawnAnimation {
 				for (EndCrystal endCrystal : list) {
 					endCrystal.setBeamTarget(null);
 					serverLevel.explode(endCrystal, endCrystal.getX(), endCrystal.getY(), endCrystal.getZ(), 6.0F, Explosion.BlockInteraction.NONE);
-					endCrystal.remove();
+					endCrystal.discard();
 				}
 			} else if (i >= 80) {
 				serverLevel.levelEvent(3001, new BlockPos(0, 128, 0), 0);

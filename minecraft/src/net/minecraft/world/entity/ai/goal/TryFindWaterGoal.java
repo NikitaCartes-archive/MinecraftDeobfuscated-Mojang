@@ -26,7 +26,7 @@ public class TryFindWaterGoal extends Goal {
 			Mth.floor(this.mob.getY() - 2.0),
 			Mth.floor(this.mob.getZ() - 2.0),
 			Mth.floor(this.mob.getX() + 2.0),
-			Mth.floor(this.mob.getY()),
+			this.mob.getBlockY(),
 			Mth.floor(this.mob.getZ() + 2.0)
 		)) {
 			if (this.mob.level.getFluidState(blockPos2).is(FluidTags.WATER)) {

@@ -16,35 +16,30 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer {
 		double d = (double)(m & 3) / 4.0;
 		double e = (double)(n & 3) / 4.0;
 		double f = (double)(o & 3) / 4.0;
-		double[] ds = new double[8];
-
-		for (int s = 0; s < 8; s++) {
-			boolean bl = (s & 4) == 0;
-			boolean bl2 = (s & 2) == 0;
-			boolean bl3 = (s & 1) == 0;
-			int t = bl ? p : p + 1;
-			int u = bl2 ? q : q + 1;
-			int v = bl3 ? r : r + 1;
-			double g = bl ? d : d - 1.0;
-			double h = bl2 ? e : e - 1.0;
-			double w = bl3 ? f : f - 1.0;
-			ds[s] = getFiddledDistance(l, t, u, v, g, h, w);
-		}
-
 		int s = 0;
-		double x = ds[0];
+		double g = Double.POSITIVE_INFINITY;
 
-		for (int y = 1; y < 8; y++) {
-			if (x > ds[y]) {
-				s = y;
-				x = ds[y];
+		for (int t = 0; t < 8; t++) {
+			boolean bl = (t & 4) == 0;
+			boolean bl2 = (t & 2) == 0;
+			boolean bl3 = (t & 1) == 0;
+			int u = bl ? p : p + 1;
+			int v = bl2 ? q : q + 1;
+			int w = bl3 ? r : r + 1;
+			double h = bl ? d : d - 1.0;
+			double x = bl2 ? e : e - 1.0;
+			double y = bl3 ? f : f - 1.0;
+			double z = getFiddledDistance(l, u, v, w, h, x, y);
+			if (g > z) {
+				s = t;
+				g = z;
 			}
 		}
 
-		int yx = (s & 4) == 0 ? p : p + 1;
-		int t = (s & 2) == 0 ? q : q + 1;
-		int u = (s & 1) == 0 ? r : r + 1;
-		return noiseBiomeSource.getNoiseBiome(yx, t, u);
+		int tx = (s & 4) == 0 ? p : p + 1;
+		int aa = (s & 2) == 0 ? q : q + 1;
+		int ab = (s & 1) == 0 ? r : r + 1;
+		return noiseBiomeSource.getNoiseBiome(tx, aa, ab);
 	}
 
 	private static double getFiddledDistance(long l, int i, int j, int k, double d, double e, double f) {

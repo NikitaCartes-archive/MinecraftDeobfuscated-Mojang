@@ -113,16 +113,16 @@ public class HarvestFarmland extends Behavior<Villager> {
 						ItemStack itemStack = simpleContainer.getItem(i);
 						boolean bl = false;
 						if (!itemStack.isEmpty()) {
-							if (itemStack.getItem() == Items.WHEAT_SEEDS) {
+							if (itemStack.is(Items.WHEAT_SEEDS)) {
 								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.WHEAT.defaultBlockState(), 3);
 								bl = true;
-							} else if (itemStack.getItem() == Items.POTATO) {
+							} else if (itemStack.is(Items.POTATO)) {
 								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.POTATOES.defaultBlockState(), 3);
 								bl = true;
-							} else if (itemStack.getItem() == Items.CARROT) {
+							} else if (itemStack.is(Items.CARROT)) {
 								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.CARROTS.defaultBlockState(), 3);
 								bl = true;
-							} else if (itemStack.getItem() == Items.BEETROOT_SEEDS) {
+							} else if (itemStack.is(Items.BEETROOT_SEEDS)) {
 								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.BEETROOTS.defaultBlockState(), 3);
 								bl = true;
 							}

@@ -50,7 +50,15 @@ public class BiomeManager {
 		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}
 
+	public Biome getPrimaryBiomeAtChunk(int i, int j) {
+		return this.noiseBiomeSource.getPrimaryBiome(i, j);
+	}
+
 	public interface NoiseBiomeSource {
 		Biome getNoiseBiome(int i, int j, int k);
+
+		default Biome getPrimaryBiome(int i, int j) {
+			return this.getNoiseBiome((i << 2) + 2, 0, (j << 2) + 2);
+		}
 	}
 }

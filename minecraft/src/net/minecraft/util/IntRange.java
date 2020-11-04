@@ -20,7 +20,7 @@ public class IntRange {
 	}
 
 	public int randomValue(Random random) {
-		return this.minInclusive == this.maxInclusive ? this.minInclusive : random.nextInt(this.maxInclusive - this.minInclusive + 1) + this.minInclusive;
+		return Mth.nextInt(random, this.minInclusive, this.maxInclusive);
 	}
 
 	public int getMinInclusive() {

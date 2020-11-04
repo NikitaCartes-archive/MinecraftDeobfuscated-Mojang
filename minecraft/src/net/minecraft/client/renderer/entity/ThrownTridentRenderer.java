@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.TridentModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -15,10 +16,11 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 @Environment(EnvType.CLIENT)
 public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 	public static final ResourceLocation TRIDENT_LOCATION = new ResourceLocation("textures/entity/trident.png");
-	private final TridentModel model = new TridentModel();
+	private final TridentModel model;
 
-	public ThrownTridentRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher);
+	public ThrownTridentRenderer(EntityRendererProvider.Context context) {
+		super(context);
+		this.model = new TridentModel(context.getLayer(ModelLayers.TRIDENT));
 	}
 
 	public void render(ThrownTrident thrownTrident, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

@@ -320,7 +320,7 @@ public class ArmorStand extends LivingEntity {
 	@Override
 	public InteractionResult interactAt(Player player, Vec3 vec3, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (this.isMarker() || itemStack.getItem() == Items.NAME_TAG) {
+		if (this.isMarker() || itemStack.is(Items.NAME_TAG)) {
 			return InteractionResult.PASS;
 		} else if (player.isSpectator()) {
 			return InteractionResult.SUCCESS;
@@ -382,7 +382,7 @@ public class ArmorStand extends LivingEntity {
 			return false;
 		} else if (itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 16) != 0) {
 			return false;
-		} else if (player.abilities.instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
+		} else if (player.getAbilities().instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
 			ItemStack itemStack3 = itemStack.copy();
 			itemStack3.setCount(1);
 			this.setItemSlot(equipmentSlot, itemStack3);
@@ -404,16 +404,16 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.level.isClientSide || this.removed) {
+		if (this.level.isClientSide || this.isRemoved()) {
 			return false;
 		} else if (DamageSource.OUT_OF_WORLD.equals(damageSource)) {
-			this.remove();
+			this.kill();
 			return false;
 		} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
 			return false;
 		} else if (damageSource.isExplosion()) {
 			this.brokenByAnything(damageSource);
-			this.remove();
+			this.kill();
 			return false;
 		} else if (DamageSource.IN_FIRE.equals(damageSource)) {
 			if (this.isOnFire()) {
@@ -432,12 +432,12 @@ public class ArmorStand extends LivingEntity {
 			boolean bl3 = "player".equals(damageSource.getMsgId());
 			if (!bl3 && !bl) {
 				return false;
-			} else if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).abilities.mayBuild) {
+			} else if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).getAbilities().mayBuild) {
 				return false;
 			} else if (damageSource.isCreativePlayer()) {
 				this.playBrokenSound();
 				this.showBreakingParticles();
-				this.remove();
+				this.kill();
 				return bl2;
 			} else {
 				long l = this.level.getGameTime();
@@ -447,7 +447,7 @@ public class ArmorStand extends LivingEntity {
 				} else {
 					this.brokenByPlayer(damageSource);
 					this.showBreakingParticles();
-					this.remove();
+					this.kill();
 				}
 
 				return true;
@@ -502,7 +502,7 @@ public class ArmorStand extends LivingEntity {
 		g -= f;
 		if (g <= 0.5F) {
 			this.brokenByAnything(damageSource);
-			this.remove();
+			this.kill();
 		} else {
 			this.setHealth(g);
 		}
@@ -626,7 +626,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public void kill() {
-		this.remove();
+		this.remove(Entity.RemovalReason.KILLED);
 	}
 
 	@Override
@@ -832,5 +832,11 @@ public class ArmorStand extends LivingEntity {
 		} else {
 			return super.getLightProbePosition(f);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.ARMOR_STAND);
 	}
 }

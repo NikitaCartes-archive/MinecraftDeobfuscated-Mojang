@@ -12,16 +12,15 @@ import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class SpawnerRenderer extends BlockEntityRenderer<SpawnerBlockEntity> {
-	public SpawnerRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
-		super(blockEntityRenderDispatcher);
+public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> {
+	public SpawnerRenderer(BlockEntityRendererProvider.Context context) {
 	}
 
 	public void render(SpawnerBlockEntity spawnerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0.0, 0.5);
 		BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
-		Entity entity = baseSpawner.getOrCreateDisplayEntity();
+		Entity entity = baseSpawner.getOrCreateDisplayEntity(spawnerBlockEntity.getLevel());
 		if (entity != null) {
 			float g = 0.53125F;
 			float h = Math.max(entity.getBbWidth(), entity.getBbHeight());

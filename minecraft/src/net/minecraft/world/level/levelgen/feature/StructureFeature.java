@@ -201,8 +201,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		StructureFeatureConfiguration structureFeatureConfiguration
 	) {
 		int j = structureFeatureConfiguration.spacing();
-		int k = blockPos.getX() >> 4;
-		int m = blockPos.getZ() >> 4;
+		int k = SectionPos.blockToSectionCoord(blockPos.getX());
+		int m = SectionPos.blockToSectionCoord(blockPos.getZ());
 		int n = 0;
 
 		for (WorldgenRandom worldgenRandom = new WorldgenRandom(); n <= i; n++) {
@@ -215,16 +215,19 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 						int q = k + j * o;
 						int r = m + j * p;
 						ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-						ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-						StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), this, chunkAccess);
-						if (structureStart != null && structureStart.isValid()) {
-							if (bl && structureStart.canBeReferenced()) {
-								structureStart.addReference();
-								return structureStart.getLocatePos();
-							}
+						boolean bl4 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos.x, chunkPos.z).getGenerationSettings().isValidStart(this);
+						if (bl4) {
+							ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
+							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), this, chunkAccess);
+							if (structureStart != null && structureStart.isValid()) {
+								if (bl && structureStart.canBeReferenced()) {
+									structureStart.addReference();
+									return structureStart.getLocatePos();
+								}
 
-							if (!bl) {
-								return structureStart.getLocatePos();
+								if (!bl) {
+									return structureStart.getLocatePos();
+								}
 							}
 						}
 

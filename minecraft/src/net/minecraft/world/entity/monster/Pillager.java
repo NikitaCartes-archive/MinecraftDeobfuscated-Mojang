@@ -41,7 +41,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -188,7 +187,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 		super.enchantSpawnedWeapon(f);
 		if (this.random.nextInt(300) == 0) {
 			ItemStack itemStack = this.getMainHandItem();
-			if (itemStack.getItem() == Items.CROSSBOW) {
+			if (itemStack.is(Items.CROSSBOW)) {
 				Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
 				map.putIfAbsent(Enchantments.PIERCING, 1);
 				EnchantmentHelper.setEnchantments(map, itemStack);
@@ -236,22 +235,19 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 		ItemStack itemStack = itemEntity.getItem();
 		if (itemStack.getItem() instanceof BannerItem) {
 			super.pickUpItem(itemEntity);
-		} else {
-			Item item = itemStack.getItem();
-			if (this.wantsItem(item)) {
-				this.onItemPickup(itemEntity);
-				ItemStack itemStack2 = this.inventory.addItem(itemStack);
-				if (itemStack2.isEmpty()) {
-					itemEntity.remove();
-				} else {
-					itemStack.setCount(itemStack2.getCount());
-				}
+		} else if (this.wantsItem(itemStack)) {
+			this.onItemPickup(itemEntity);
+			ItemStack itemStack2 = this.inventory.addItem(itemStack);
+			if (itemStack2.isEmpty()) {
+				itemEntity.discard();
+			} else {
+				itemStack.setCount(itemStack2.getCount());
 			}
 		}
 	}
 
-	private boolean wantsItem(Item item) {
-		return this.hasActiveRaid() && item == Items.WHITE_BANNER;
+	private boolean wantsItem(ItemStack itemStack) {
+		return this.hasActiveRaid() && itemStack.is(Items.WHITE_BANNER);
 	}
 
 	@Override

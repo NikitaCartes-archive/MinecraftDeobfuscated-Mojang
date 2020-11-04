@@ -65,7 +65,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 					compoundTag.putInt("x", blockPos.getX());
 					compoundTag.putInt("y", blockPos.getY());
 					compoundTag.putInt("z", blockPos.getZ());
-					blockEntity.load(blockState, compoundTag);
+					blockEntity.load(compoundTag);
 				}
 			}
 

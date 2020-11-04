@@ -51,7 +51,7 @@ public class EnchantmentHelper {
 	}
 
 	public static Map<Enchantment, Integer> getEnchantments(ItemStack itemStack) {
-		ListTag listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantments(itemStack) : itemStack.getEnchantmentTags();
+		ListTag listTag = itemStack.is(Items.ENCHANTED_BOOK) ? EnchantedBookItem.getEnchantments(itemStack) : itemStack.getEnchantmentTags();
 		return deserializeEnchantments(listTag);
 	}
 
@@ -79,7 +79,7 @@ public class EnchantmentHelper {
 				compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
 				compoundTag.putShort("lvl", (short)i);
 				listTag.add(compoundTag);
-				if (itemStack.getItem() == Items.ENCHANTED_BOOK) {
+				if (itemStack.is(Items.ENCHANTED_BOOK)) {
 					EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
 				}
 			}
@@ -87,7 +87,7 @@ public class EnchantmentHelper {
 
 		if (listTag.isEmpty()) {
 			itemStack.removeTagKey("Enchantments");
-		} else if (itemStack.getItem() != Items.ENCHANTED_BOOK) {
+		} else if (!itemStack.is(Items.ENCHANTED_BOOK)) {
 			itemStack.addTagElement("Enchantments", listTag);
 		}
 	}
@@ -276,7 +276,7 @@ public class EnchantmentHelper {
 
 	public static ItemStack enchantItem(Random random, ItemStack itemStack, int i, boolean bl) {
 		List<EnchantmentInstance> list = selectEnchantment(random, itemStack, i, bl);
-		boolean bl2 = itemStack.getItem() == Items.BOOK;
+		boolean bl2 = itemStack.is(Items.BOOK);
 		if (bl2) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
 		}
@@ -344,7 +344,7 @@ public class EnchantmentHelper {
 	public static List<EnchantmentInstance> getAvailableEnchantmentResults(int i, ItemStack itemStack, boolean bl) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 		Item item = itemStack.getItem();
-		boolean bl2 = itemStack.getItem() == Items.BOOK;
+		boolean bl2 = itemStack.is(Items.BOOK);
 
 		for (Enchantment enchantment : Registry.ENCHANTMENT) {
 			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item) || bl2)) {

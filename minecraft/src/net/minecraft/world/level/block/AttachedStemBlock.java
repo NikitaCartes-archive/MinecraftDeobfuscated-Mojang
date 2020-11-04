@@ -3,14 +3,15 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +22,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AttachedStemBlock extends BushBlock {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-	private final StemGrownBlock fruit;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(
 		ImmutableMap.of(
 			Direction.SOUTH,
@@ -34,11 +34,14 @@ public class AttachedStemBlock extends BushBlock {
 			Block.box(6.0, 0.0, 6.0, 16.0, 10.0, 10.0)
 		)
 	);
+	private final StemGrownBlock fruit;
+	private final Supplier<Item> seedSupplier;
 
-	protected AttachedStemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
+	protected AttachedStemBlock(StemGrownBlock stemGrownBlock, Supplier<Item> supplier, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 		this.fruit = stemGrownBlock;
+		this.seedSupplier = supplier;
 	}
 
 	@Override
@@ -61,18 +64,9 @@ public class AttachedStemBlock extends BushBlock {
 	}
 
 	@Environment(EnvType.CLIENT)
-	protected Item getSeedItem() {
-		if (this.fruit == Blocks.PUMPKIN) {
-			return Items.PUMPKIN_SEEDS;
-		} else {
-			return this.fruit == Blocks.MELON ? Items.MELON_SEEDS : Items.AIR;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return new ItemStack(this.getSeedItem());
+		return new ItemStack((ItemLike)this.seedSupplier.get());
 	}
 
 	@Override

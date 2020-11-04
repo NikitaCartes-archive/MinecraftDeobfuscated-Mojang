@@ -181,7 +181,7 @@ public class Silverfish extends Monster {
 				if (InfestedBlock.isCompatibleHostBlock(blockState)) {
 					levelAccessor.setBlock(blockPos, InfestedBlock.stateByHostBlock(blockState.getBlock()), 3);
 					this.mob.spawnAnim();
-					this.mob.remove();
+					this.mob.discard();
 				}
 			}
 		}

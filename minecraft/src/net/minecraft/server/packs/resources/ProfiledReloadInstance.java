@@ -57,7 +57,7 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 	private void finish(List<ProfiledReloadInstance.State> list) {
 		this.total.stop();
 		int i = 0;
-		LOGGER.info("Resource reload finished after " + this.total.elapsed(TimeUnit.MILLISECONDS) + " ms");
+		LOGGER.info("Resource reload finished after {} ms", this.total.elapsed(TimeUnit.MILLISECONDS));
 
 		for (ProfiledReloadInstance.State state : list) {
 			ProfileResults profileResults = state.preparationResult;
@@ -66,11 +66,11 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 			int k = (int)((double)state.reloadNanos.get() / 1000000.0);
 			int l = j + k;
 			String string = state.name;
-			LOGGER.info(string + " took approximately " + l + " ms (" + j + " ms preparing, " + k + " ms applying)");
+			LOGGER.info("{} took approximately {} ms ({} ms preparing, {} ms applying)", string, l, j, k);
 			i += k;
 		}
 
-		LOGGER.info("Total blocking time: " + i + " ms");
+		LOGGER.info("Total blocking time: {} ms", i);
 	}
 
 	public static class State {

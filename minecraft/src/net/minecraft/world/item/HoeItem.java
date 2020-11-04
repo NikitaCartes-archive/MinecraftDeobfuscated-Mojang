@@ -38,7 +38,7 @@ public class HoeItem extends DiggerItem {
 		ImmutableMap.of(
 			Blocks.GRASS_BLOCK,
 			Blocks.FARMLAND.defaultBlockState(),
-			Blocks.GRASS_PATH,
+			Blocks.DIRT_PATH,
 			Blocks.FARMLAND.defaultBlockState(),
 			Blocks.DIRT,
 			Blocks.FARMLAND.defaultBlockState(),

@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.model.PandaModel;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.PandaHoldsItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -25,8 +26,8 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 		enumMap.put(Panda.Gene.AGGRESSIVE, new ResourceLocation("textures/entity/panda/aggressive_panda.png"));
 	});
 
-	public PandaRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new PandaModel<>(9, 0.0F), 0.9F);
+	public PandaRenderer(EntityRendererProvider.Context context) {
+		super(context, new PandaModel<>(context.getLayer(ModelLayers.PANDA)), 0.9F);
 		this.addLayer(new PandaHoldsItemLayer(this));
 	}
 

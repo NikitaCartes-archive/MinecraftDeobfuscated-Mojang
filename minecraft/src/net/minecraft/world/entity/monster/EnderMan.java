@@ -195,12 +195,12 @@ public class EnderMan extends Monster implements NeutralMob {
 		}
 
 		this.setCarriedBlock(blockState);
-		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
+		this.readPersistentAngerSaveData(this.level, compoundTag);
 	}
 
 	private boolean isLookingAtMe(Player player) {
-		ItemStack itemStack = player.inventory.armor.get(3);
-		if (itemStack.getItem() == Blocks.CARVED_PUMPKIN.asItem()) {
+		ItemStack itemStack = player.getInventory().armor.get(3);
+		if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
 			return false;
 		} else {
 			Vec3 vec3 = player.getViewVector(1.0F).normalize();
@@ -284,7 +284,7 @@ public class EnderMan extends Monster implements NeutralMob {
 	private boolean teleport(double d, double e, double f) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
 
-		while (mutableBlockPos.getY() > 0 && !this.level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
+		while (mutableBlockPos.getY() > this.level.getMinBuildHeight() && !this.level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
 			mutableBlockPos.move(Direction.DOWN);
 		}
 
@@ -558,12 +558,11 @@ public class EnderMan extends Monster implements NeutralMob {
 			int k = Mth.floor(this.enderman.getZ() - 2.0 + random.nextDouble() * 4.0);
 			BlockPos blockPos = new BlockPos(i, j, k);
 			BlockState blockState = level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			Vec3 vec3 = new Vec3((double)Mth.floor(this.enderman.getX()) + 0.5, (double)j + 0.5, (double)Mth.floor(this.enderman.getZ()) + 0.5);
+			Vec3 vec3 = new Vec3((double)this.enderman.getBlockX() + 0.5, (double)j + 0.5, (double)this.enderman.getBlockZ() + 0.5);
 			Vec3 vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5);
 			BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
 			boolean bl = blockHitResult.getBlockPos().equals(blockPos);
-			if (block.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
+			if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
 				level.removeBlock(blockPos, false);
 				this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
 			}

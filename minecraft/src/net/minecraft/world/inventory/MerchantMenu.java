@@ -110,7 +110,7 @@ public class MerchantMenu extends AbstractContainerMenu {
 	@Override
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
+		Slot slot = this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
@@ -173,9 +173,9 @@ public class MerchantMenu extends AbstractContainerMenu {
 				if (!itemStack.isEmpty()) {
 					player.drop(itemStack, false);
 				}
-			} else {
-				player.inventory.placeItemBackInInventory(player.level, this.tradeContainer.removeItemNoUpdate(0));
-				player.inventory.placeItemBackInInventory(player.level, this.tradeContainer.removeItemNoUpdate(1));
+			} else if (player instanceof ServerPlayer) {
+				player.getInventory().placeItemBackInInventory(this.tradeContainer.removeItemNoUpdate(0));
+				player.getInventory().placeItemBackInInventory(this.tradeContainer.removeItemNoUpdate(1));
 			}
 		}
 	}
@@ -212,8 +212,8 @@ public class MerchantMenu extends AbstractContainerMenu {
 	private void moveFromInventoryToPaymentSlot(int i, ItemStack itemStack) {
 		if (!itemStack.isEmpty()) {
 			for (int j = 3; j < 39; j++) {
-				ItemStack itemStack2 = ((Slot)this.slots.get(j)).getItem();
-				if (!itemStack2.isEmpty() && this.isSameItem(itemStack, itemStack2)) {
+				ItemStack itemStack2 = this.slots.get(j).getItem();
+				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
 					ItemStack itemStack3 = this.tradeContainer.getItem(i);
 					int k = itemStack3.isEmpty() ? 0 : itemStack3.getCount();
 					int l = Math.min(itemStack.getMaxStackSize() - k, itemStack2.getCount());
@@ -228,10 +228,6 @@ public class MerchantMenu extends AbstractContainerMenu {
 				}
 			}
 		}
-	}
-
-	private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
 	}
 
 	@Environment(EnvType.CLIENT)

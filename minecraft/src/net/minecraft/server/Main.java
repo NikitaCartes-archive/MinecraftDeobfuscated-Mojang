@@ -31,6 +31,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -114,7 +115,9 @@ public class Main {
 			}
 
 			PackRepository packRepository = new PackRepository(
-				new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
+				PackType.SERVER_DATA,
+				new ServerPacksSource(),
+				new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
 			);
 			DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(
 				packRepository, dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig, bl

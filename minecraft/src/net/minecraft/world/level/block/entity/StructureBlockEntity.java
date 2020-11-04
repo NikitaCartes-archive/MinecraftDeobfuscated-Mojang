@@ -48,8 +48,8 @@ public class StructureBlockEntity extends BlockEntity {
 	private float integrity = 1.0F;
 	private long seed;
 
-	public StructureBlockEntity() {
-		super(BlockEntityType.STRUCTURE_BLOCK);
+	public StructureBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.STRUCTURE_BLOCK, blockPos, blockState);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -83,8 +83,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(BlockState blockState, CompoundTag compoundTag) {
-		super.load(blockState, compoundTag);
+	public void load(CompoundTag compoundTag) {
+		super.load(compoundTag);
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
@@ -99,19 +99,19 @@ public class StructureBlockEntity extends BlockEntity {
 
 		try {
 			this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
-		} catch (IllegalArgumentException var12) {
+		} catch (IllegalArgumentException var11) {
 			this.rotation = Rotation.NONE;
 		}
 
 		try {
 			this.mirror = Mirror.valueOf(compoundTag.getString("mirror"));
-		} catch (IllegalArgumentException var11) {
+		} catch (IllegalArgumentException var10) {
 			this.mirror = Mirror.NONE;
 		}
 
 		try {
 			this.mode = StructureMode.valueOf(compoundTag.getString("mode"));
-		} catch (IllegalArgumentException var10) {
+		} catch (IllegalArgumentException var9) {
 			this.mode = StructureMode.DATA;
 		}
 
@@ -292,7 +292,7 @@ public class StructureBlockEntity extends BlockEntity {
 			BlockPos blockPos = this.getBlockPos();
 			int i = 80;
 			BlockPos blockPos2 = new BlockPos(blockPos.getX() - 80, 0, blockPos.getZ() - 80);
-			BlockPos blockPos3 = new BlockPos(blockPos.getX() + 80, 255, blockPos.getZ() + 80);
+			BlockPos blockPos3 = new BlockPos(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80);
 			List<StructureBlockEntity> list = this.getNearbyCornerBlocks(blockPos2, blockPos3);
 			List<StructureBlockEntity> list2 = this.filterRelatedCornerBlocks(list);
 			if (list2.size() < 1) {
