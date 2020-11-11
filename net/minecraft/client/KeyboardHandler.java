@@ -15,8 +15,10 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.Option;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -253,7 +255,6 @@ public class KeyboardHandler {
     }
 
     public void keyPress(long l, int i, int j, int k, int m) {
-        boolean bl;
         if (l != this.minecraft.getWindow().getWindow()) {
             return;
         }
@@ -283,11 +284,15 @@ public class KeyboardHandler {
                 return;
             }
         }
-        boolean bl2 = bl = containerEventHandler == null || !(containerEventHandler.getFocused() instanceof EditBox) || !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
-        if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
-            Option.NARRATOR.toggle(this.minecraft.options, 1);
-            if (containerEventHandler instanceof SimpleOptionsSubScreen) {
-                ((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
+        if (NarratorChatListener.INSTANCE.isActive()) {
+            boolean bl;
+            boolean bl2 = bl = containerEventHandler == null || !(containerEventHandler.getFocused() instanceof EditBox) || !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
+            if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
+                this.minecraft.options.narratorStatus = NarratorStatus.byId(this.minecraft.options.narratorStatus.getId() + 1);
+                NarratorChatListener.INSTANCE.updateNarratorStatus(this.minecraft.options.narratorStatus);
+                if (containerEventHandler instanceof SimpleOptionsSubScreen) {
+                    ((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
+                }
             }
         }
         if (containerEventHandler != null) {
@@ -320,19 +325,19 @@ public class KeyboardHandler {
                 if (i == 293 && this.minecraft.gameRenderer != null) {
                     this.minecraft.gameRenderer.togglePostEffect();
                 }
-                boolean bl22 = false;
+                boolean bl2 = false;
                 if (this.minecraft.screen == null) {
                     if (i == 256) {
                         boolean bl3 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
                         this.minecraft.pauseGame(bl3);
                     }
-                    bl22 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
-                    this.handledDebugKey |= bl22;
+                    bl2 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
+                    this.handledDebugKey |= bl2;
                     if (i == 290) {
-                        boolean bl3 = this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
+                        boolean bl = this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
                     }
                 }
-                if (bl22) {
+                if (bl2) {
                     KeyMapping.set(key, false);
                 } else {
                     KeyMapping.set(key, true);

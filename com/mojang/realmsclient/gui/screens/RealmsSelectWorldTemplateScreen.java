@@ -12,13 +12,13 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.gui.screens.RealmsScreenWithCallback;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.TextRenderingUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -50,7 +50,7 @@ extends RealmsScreen {
     private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
     private static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
     private static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
-    private final RealmsScreenWithCallback lastScreen;
+    private final Consumer<WorldTemplate> callback;
     private WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
     private int selectedTemplate = -1;
     private Component title;
@@ -70,12 +70,12 @@ extends RealmsScreen {
     @Nullable
     private List<TextRenderingUtils.Line> noTemplatesMessage;
 
-    public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType) {
-        this(realmsScreenWithCallback, worldType, null);
+    public RealmsSelectWorldTemplateScreen(Consumer<WorldTemplate> consumer, RealmsServer.WorldType worldType) {
+        this(consumer, worldType, null);
     }
 
-    public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType, @Nullable WorldTemplatePaginatedList worldTemplatePaginatedList) {
-        this.lastScreen = realmsScreenWithCallback;
+    public RealmsSelectWorldTemplateScreen(Consumer<WorldTemplate> consumer, RealmsServer.WorldType worldType, @Nullable WorldTemplatePaginatedList worldTemplatePaginatedList) {
+        this.callback = consumer;
         this.worldType = worldType;
         if (worldTemplatePaginatedList == null) {
             this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList();
@@ -112,7 +112,7 @@ extends RealmsScreen {
         this.trailerButton = this.addButton(new Button(this.width / 2 - 206, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.trailer"), button -> this.onTrailer()));
         this.selectButton = this.addButton(new Button(this.width / 2 - 100, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.select"), button -> this.selectTemplate()));
         Component component = this.worldType == RealmsServer.WorldType.MINIGAME ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_BACK;
-        Button button2 = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, button -> this.backButtonClicked());
+        Button button2 = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, button -> this.onClose());
         this.addButton(button2);
         this.publisherButton = this.addButton(new Button(this.width / 2 + 112, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.publisher"), button -> this.onPublish()));
         this.selectButton.active = false;
@@ -159,22 +159,13 @@ extends RealmsScreen {
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (i == 256) {
-            this.backButtonClicked();
-            return true;
-        }
-        return super.keyPressed(i, j, k);
-    }
-
-    private void backButtonClicked() {
-        this.lastScreen.callback(null);
-        this.minecraft.setScreen(this.lastScreen);
+    public void onClose() {
+        this.callback.accept(null);
     }
 
     private void selectTemplate() {
         if (this.hasValidTemplate()) {
-            this.lastScreen.callback(this.getSelectedTemplate());
+            this.callback.accept(this.getSelectedTemplate());
         }
     }
 

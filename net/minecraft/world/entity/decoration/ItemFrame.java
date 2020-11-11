@@ -22,6 +22,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -235,8 +236,8 @@ extends HangingEntity {
     }
 
     private void removeFramedMap(ItemStack itemStack) {
-        if (itemStack.is(Items.FILLED_MAP)) {
-            MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.level);
+        MapItemSavedData mapItemSavedData;
+        if (itemStack.is(Items.FILLED_MAP) && (mapItemSavedData = MapItem.getSavedData(itemStack, this.level)) != null) {
             mapItemSavedData.removedFromFrame(this.pos, this.getId());
             mapItemSavedData.setDirty(true);
         }
@@ -267,12 +268,23 @@ extends HangingEntity {
     }
 
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
+    public SlotAccess getSlot(int i) {
         if (i == 0) {
-            this.setItem(itemStack);
-            return true;
+            return new SlotAccess(){
+
+                @Override
+                public ItemStack get() {
+                    return ItemFrame.this.getItem();
+                }
+
+                @Override
+                public boolean set(ItemStack itemStack) {
+                    ItemFrame.this.setItem(itemStack);
+                    return true;
+                }
+            };
         }
-        return false;
+        return super.getSlot(i);
     }
 
     @Override

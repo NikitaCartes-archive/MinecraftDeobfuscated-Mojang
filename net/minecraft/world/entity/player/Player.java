@@ -67,6 +67,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -87,7 +88,6 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
@@ -556,6 +556,9 @@ extends LivingEntity {
         }
         if (damageSource == DamageSource.SWEET_BERRY_BUSH) {
             return SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH;
+        }
+        if (damageSource == DamageSource.FREEZE) {
+            return SoundEvents.PLAYER_HURT_FREEZE;
         }
         return SoundEvents.PLAYER_HURT;
     }
@@ -1708,33 +1711,15 @@ extends LivingEntity {
     }
 
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
+    public SlotAccess getSlot(int i) {
         if (i >= 0 && i < this.inventory.items.size()) {
-            this.inventory.setItem(i, itemStack);
-            return true;
-        }
-        EquipmentSlot equipmentSlot = i == 100 + EquipmentSlot.HEAD.getIndex() ? EquipmentSlot.HEAD : (i == 100 + EquipmentSlot.CHEST.getIndex() ? EquipmentSlot.CHEST : (i == 100 + EquipmentSlot.LEGS.getIndex() ? EquipmentSlot.LEGS : (i == 100 + EquipmentSlot.FEET.getIndex() ? EquipmentSlot.FEET : null)));
-        if (i == 98) {
-            this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-            return true;
-        }
-        if (i == 99) {
-            this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
-            return true;
-        }
-        if (equipmentSlot != null) {
-            if (!itemStack.isEmpty() && (itemStack.getItem() instanceof ArmorItem || itemStack.getItem() instanceof ElytraItem ? Mob.getEquipmentSlotForItem(itemStack) != equipmentSlot : equipmentSlot != EquipmentSlot.HEAD)) {
-                return false;
-            }
-            this.inventory.setItem(equipmentSlot.getIndex() + this.inventory.items.size(), itemStack);
-            return true;
+            return SlotAccess.forContainer(this.inventory, i);
         }
         int j = i - 200;
         if (j >= 0 && j < this.enderChestInventory.getContainerSize()) {
-            this.enderChestInventory.setItem(j, itemStack);
-            return true;
+            return SlotAccess.forContainer(this.enderChestInventory, j);
         }
-        return false;
+        return super.getSlot(i);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -1894,6 +1879,11 @@ extends LivingEntity {
     @Environment(value=EnvType.CLIENT)
     public boolean isScoping() {
         return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
+    }
+
+    @Override
+    public boolean canFreeze() {
+        return super.canFreeze() && !this.isCreative();
     }
 
     public static enum BedSleepingProblem {

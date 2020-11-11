@@ -23,6 +23,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -191,21 +192,11 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     public class BooleanRuleEntry
     extends GameRuleEntry {
-        private final Button checkbox;
+        private final CycleButton<Boolean> checkbox;
 
-        public BooleanRuleEntry(final Component component, List<FormattedCharSequence> list, final String string, final GameRules.BooleanValue booleanValue) {
+        public BooleanRuleEntry(Component component, List<FormattedCharSequence> list, String string, GameRules.BooleanValue booleanValue) {
             super(list, component);
-            this.checkbox = new Button(10, 5, 44, 20, CommonComponents.optionStatus(booleanValue.get()), button -> {
-                boolean bl = !booleanValue.get();
-                booleanValue.set(bl, null);
-                button.setMessage(CommonComponents.optionStatus(booleanValue.get()));
-            }){
-
-                @Override
-                protected MutableComponent createNarrationMessage() {
-                    return CommonComponents.optionStatus(component, booleanValue.get()).append("\n").append(string);
-                }
-            };
+            this.checkbox = CycleButton.onOffBuilder(booleanValue.get()).displayOnlyValue().withCustomNarration(cycleButton -> cycleButton.createDefaultNarrationMessage().append("\n").append(string)).create(10, 5, 44, 20, component, (cycleButton, boolean_) -> booleanValue.set((boolean)boolean_, null));
             this.children.add(this.checkbox);
         }
 

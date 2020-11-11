@@ -24,6 +24,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -78,8 +79,7 @@ extends Screen {
     private SelectedGameMode gameMode = SelectedGameMode.SURVIVAL;
     @Nullable
     private SelectedGameMode oldGameMode;
-    private Difficulty selectedDifficulty = Difficulty.NORMAL;
-    private Difficulty effectiveDifficulty = Difficulty.NORMAL;
+    private Difficulty difficulty = Difficulty.NORMAL;
     private boolean commands;
     private boolean commandsChanged;
     public boolean hardCore;
@@ -88,14 +88,14 @@ extends Screen {
     private Path tempDataPackDir;
     @Nullable
     private PackRepository tempDataPackRepository;
-    private boolean displayOptions;
+    private boolean worldGenSettingsVisible;
     private Button createButton;
-    private Button modeButton;
-    private Button difficultyButton;
+    private CycleButton<SelectedGameMode> modeButton;
+    private CycleButton<Difficulty> difficultyButton;
     private Button moreOptionsButton;
     private Button gameRulesButton;
     private Button dataPacksButton;
-    private Button commandsButton;
+    private CycleButton<Boolean> commandsButton;
     private Component gameModeHelp1;
     private Component gameModeHelp2;
     private String initName;
@@ -107,7 +107,7 @@ extends Screen {
         this.initName = levelSettings.levelName();
         this.commands = levelSettings.allowCommands();
         this.commandsChanged = true;
-        this.effectiveDifficulty = this.selectedDifficulty = levelSettings.difficulty();
+        this.difficulty = levelSettings.difficulty();
         this.gameRules.assignFrom(levelSettings.gameRules(), null);
         if (levelSettings.hardcore()) {
             this.gameMode = SelectedGameMode.HARDCORE;
@@ -157,59 +157,14 @@ extends Screen {
         this.children.add(this.nameEdit);
         int i = this.width / 2 - 155;
         int j = this.width / 2 + 5;
-        this.modeButton = this.addButton(new Button(i, 100, 150, 20, TextComponent.EMPTY, button -> {
-            switch (this.gameMode) {
-                case SURVIVAL: {
-                    this.setGameMode(SelectedGameMode.HARDCORE);
-                    break;
-                }
-                case HARDCORE: {
-                    this.setGameMode(SelectedGameMode.CREATIVE);
-                    break;
-                }
-                case CREATIVE: {
-                    this.setGameMode(SelectedGameMode.SURVIVAL);
-                }
-            }
-            button.queueNarration(250);
-        }){
-
-            @Override
-            public Component getMessage() {
-                return new TranslatableComponent("options.generic_value", GAME_MODEL_LABEL, new TranslatableComponent("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name));
-            }
-
-            @Override
-            protected MutableComponent createNarrationMessage() {
-                return super.createNarrationMessage().append(". ").append(CreateWorldScreen.this.gameModeHelp1).append(" ").append(CreateWorldScreen.this.gameModeHelp2);
-            }
-        });
-        this.difficultyButton = this.addButton(new Button(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), button -> {
-            this.effectiveDifficulty = this.selectedDifficulty = this.selectedDifficulty.nextById();
-            button.queueNarration(250);
-        }){
-
-            @Override
-            public Component getMessage() {
-                return new TranslatableComponent("options.difficulty").append(": ").append(CreateWorldScreen.this.effectiveDifficulty.getDisplayName());
-            }
-        });
-        this.commandsButton = this.addButton(new Button(i, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), button -> {
+        this.modeButton = this.addButton(CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.CREATIVE, SelectedGameMode.HARDCORE}).withInitialValue(this.gameMode).withCustomNarration(cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage()).append(". ").append(this.gameModeHelp1).append(" ").append(this.gameModeHelp2)).create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode((SelectedGameMode)((Object)selectedGameMode))));
+        this.difficultyButton = this.addButton(CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.getEffectiveDifficulty()).create(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> {
+            this.difficulty = difficulty;
+        }));
+        this.commandsButton = this.addButton(CycleButton.onOffBuilder(this.commands && !this.hardCore).withCustomNarration(cycleButton -> cycleButton.createDefaultNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.allowCommands.info"))).create(i, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
             this.commandsChanged = true;
-            this.commands = !this.commands;
-            button.queueNarration(250);
-        }){
-
-            @Override
-            public Component getMessage() {
-                return CommonComponents.optionStatus(super.getMessage(), CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore);
-            }
-
-            @Override
-            protected MutableComponent createNarrationMessage() {
-                return super.createNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.allowCommands.info"));
-            }
-        });
+            this.commands = boolean_;
+        }));
         this.dataPacksButton = this.addButton(new Button(j, 151, 150, 20, new TranslatableComponent("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()));
         this.gameRulesButton = this.addButton(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
             this.minecraft.setScreen(this);
@@ -218,14 +173,18 @@ extends Screen {
             });
         }))));
         this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
-        this.moreOptionsButton = this.addButton(new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleDisplayOptions()));
+        this.moreOptionsButton = this.addButton(new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()));
         this.createButton = this.addButton(new Button(i, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
         this.createButton.active = !this.initName.isEmpty();
         this.addButton(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
-        this.updateDisplayOptions();
+        this.refreshWorldGenSettingsVisibility();
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
         this.updateResultFolder();
+    }
+
+    private Difficulty getEffectiveDifficulty() {
+        return this.gameMode == SelectedGameMode.HARDCORE ? Difficulty.HARD : this.difficulty;
     }
 
     private void updateGameModeHelp() {
@@ -268,44 +227,47 @@ extends Screen {
             gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
             levelSettings = new LevelSettings(this.nameEdit.getValue().trim(), GameType.SPECTATOR, false, Difficulty.PEACEFUL, true, gameRules, DataPackConfig.DEFAULT);
         } else {
-            levelSettings = new LevelSettings(this.nameEdit.getValue().trim(), this.gameMode.gameType, this.hardCore, this.effectiveDifficulty, this.commands && !this.hardCore, this.gameRules, this.dataPacks);
+            levelSettings = new LevelSettings(this.nameEdit.getValue().trim(), this.gameMode.gameType, this.hardCore, this.getEffectiveDifficulty(), this.commands && !this.hardCore, this.gameRules, this.dataPacks);
         }
         this.minecraft.createLevel(this.resultFolder, levelSettings, this.worldGenSettingsComponent.registryHolder(), worldGenSettings);
     }
 
-    private void toggleDisplayOptions() {
-        this.setDisplayOptions(!this.displayOptions);
+    private void toggleWorldGenSettingsVisibility() {
+        this.setWorldGenSettingsVisible(!this.worldGenSettingsVisible);
     }
 
     private void setGameMode(SelectedGameMode selectedGameMode) {
         if (!this.commandsChanged) {
-            boolean bl = this.commands = selectedGameMode == SelectedGameMode.CREATIVE;
+            this.commands = selectedGameMode == SelectedGameMode.CREATIVE;
+            this.commandsButton.setValue(this.commands);
         }
         if (selectedGameMode == SelectedGameMode.HARDCORE) {
             this.hardCore = true;
             this.commandsButton.active = false;
-            this.worldGenSettingsComponent.bonusItemsButton.active = false;
-            this.effectiveDifficulty = Difficulty.HARD;
+            this.commandsButton.setValue(false);
+            this.worldGenSettingsComponent.switchToHardcore();
+            this.difficultyButton.setValue(Difficulty.HARD);
             this.difficultyButton.active = false;
         } else {
             this.hardCore = false;
             this.commandsButton.active = true;
-            this.worldGenSettingsComponent.bonusItemsButton.active = true;
-            this.effectiveDifficulty = this.selectedDifficulty;
+            this.commandsButton.setValue(this.commands);
+            this.worldGenSettingsComponent.switchOutOfHardcode();
+            this.difficultyButton.setValue(this.difficulty);
             this.difficultyButton.active = true;
         }
         this.gameMode = selectedGameMode;
         this.updateGameModeHelp();
     }
 
-    public void updateDisplayOptions() {
-        this.setDisplayOptions(this.displayOptions);
+    public void refreshWorldGenSettingsVisibility() {
+        this.setWorldGenSettingsVisible(this.worldGenSettingsVisible);
     }
 
-    private void setDisplayOptions(boolean bl) {
-        this.displayOptions = bl;
-        this.modeButton.visible = !this.displayOptions;
-        boolean bl2 = this.difficultyButton.visible = !this.displayOptions;
+    private void setWorldGenSettingsVisible(boolean bl) {
+        this.worldGenSettingsVisible = bl;
+        this.modeButton.visible = !bl;
+        boolean bl2 = this.difficultyButton.visible = !bl;
         if (this.worldGenSettingsComponent.isDebug()) {
             this.dataPacksButton.visible = false;
             this.modeButton.active = false;
@@ -319,17 +281,17 @@ extends Screen {
             if (this.oldGameMode != null) {
                 this.setGameMode(this.oldGameMode);
             }
-            this.commandsButton.visible = !this.displayOptions;
-            this.dataPacksButton.visible = !this.displayOptions;
+            this.commandsButton.visible = !bl;
+            this.dataPacksButton.visible = !bl;
         }
-        this.worldGenSettingsComponent.setDisplayOptions(this.displayOptions);
-        this.nameEdit.setVisible(!this.displayOptions);
-        if (this.displayOptions) {
+        this.worldGenSettingsComponent.setVisibility(bl);
+        this.nameEdit.setVisible(!bl);
+        if (bl) {
             this.moreOptionsButton.setMessage(CommonComponents.GUI_DONE);
         } else {
             this.moreOptionsButton.setMessage(new TranslatableComponent("selectWorld.moreWorldOptions"));
         }
-        this.gameRulesButton.visible = !this.displayOptions;
+        this.gameRulesButton.visible = !bl;
     }
 
     @Override
@@ -346,8 +308,8 @@ extends Screen {
 
     @Override
     public void onClose() {
-        if (this.displayOptions) {
-            this.setDisplayOptions(false);
+        if (this.worldGenSettingsVisible) {
+            this.setWorldGenSettingsVisible(false);
         } else {
             this.popScreen();
         }
@@ -369,7 +331,7 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         CreateWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, -1);
-        if (this.displayOptions) {
+        if (this.worldGenSettingsVisible) {
             CreateWorldScreen.drawString(poseStack, this.font, SEED_LABEL, this.width / 2 - 100, 47, -6250336);
             CreateWorldScreen.drawString(poseStack, this.font, SEED_INFO, this.width / 2 - 100, 85, -6250336);
             this.worldGenSettingsComponent.render(poseStack, i, j, f);
@@ -549,10 +511,16 @@ extends Screen {
 
         private final String name;
         private final GameType gameType;
+        private final Component displayName;
 
         private SelectedGameMode(String string2, GameType gameType) {
             this.name = string2;
             this.gameType = gameType;
+            this.displayName = new TranslatableComponent("selectWorld.gameMode." + string2);
+        }
+
+        public Component getDisplayName() {
+            return this.displayName;
         }
     }
 }

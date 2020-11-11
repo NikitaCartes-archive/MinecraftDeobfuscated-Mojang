@@ -43,7 +43,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
-import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -73,8 +73,6 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 
 public interface DispenseItemBehavior {
@@ -246,7 +244,7 @@ public interface DispenseItemBehavior {
                 List<AbstractHorse> list = blockSource.getLevel().getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorse -> abstractHorse.isAlive() && abstractHorse.canWearArmor());
                 for (AbstractHorse abstractHorse2 : list) {
                     if (!abstractHorse2.isArmor(itemStack) || abstractHorse2.isWearingArmor() || !abstractHorse2.isTamed()) continue;
-                    abstractHorse2.setSlot(401, itemStack.split(1));
+                    abstractHorse2.getSlot(401).set(itemStack.split(1));
                     this.setSuccess(true);
                     return itemStack;
                 }
@@ -280,7 +278,7 @@ public interface DispenseItemBehavior {
                 BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                 List<AbstractChestedHorse> list = blockSource.getLevel().getEntitiesOfClass(AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorse -> abstractChestedHorse.isAlive() && !abstractChestedHorse.hasChest());
                 for (AbstractChestedHorse abstractChestedHorse2 : list) {
-                    if (!abstractChestedHorse2.isTamed() || !abstractChestedHorse2.setSlot(499, itemStack)) continue;
+                    if (!abstractChestedHorse2.isTamed() || !abstractChestedHorse2.getSlot(499).set(itemStack)) continue;
                     itemStack.shrink(1);
                     this.setSuccess(true);
                     return itemStack;
@@ -341,11 +339,11 @@ public interface DispenseItemBehavior {
 
             @Override
             public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-                BucketItem bucketItem = (BucketItem)itemStack.getItem();
+                DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem)((Object)itemStack.getItem());
                 BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                 ServerLevel level = blockSource.getLevel();
-                if (bucketItem.emptyBucket(null, level, blockPos, null)) {
-                    bucketItem.checkExtraContent(level, itemStack, blockPos);
+                if (dispensibleContainerItem.emptyContents(null, level, blockPos, null)) {
+                    dispensibleContainerItem.checkExtraContent(level, itemStack, blockPos);
                     return new ItemStack(Items.BUCKET);
                 }
                 return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
@@ -353,6 +351,7 @@ public interface DispenseItemBehavior {
         };
         DispenserBlock.registerBehavior(Items.LAVA_BUCKET, dispenseItemBehavior);
         DispenserBlock.registerBehavior(Items.WATER_BUCKET, dispenseItemBehavior);
+        DispenserBlock.registerBehavior(Items.POWDER_SNOW_BUCKET, dispenseItemBehavior);
         DispenserBlock.registerBehavior(Items.SALMON_BUCKET, dispenseItemBehavior);
         DispenserBlock.registerBehavior(Items.COD_BUCKET, dispenseItemBehavior);
         DispenserBlock.registerBehavior(Items.PUFFERFISH_BUCKET, dispenseItemBehavior);
@@ -362,20 +361,20 @@ public interface DispenseItemBehavior {
 
             @Override
             public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-                Fluid fluid;
+                ItemStack itemStack2;
                 BlockPos blockPos;
                 ServerLevel levelAccessor = blockSource.getLevel();
                 BlockState blockState = levelAccessor.getBlockState(blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING)));
                 Block block = blockState.getBlock();
                 if (block instanceof BucketPickup) {
-                    fluid = ((BucketPickup)((Object)block)).takeLiquid(levelAccessor, blockPos, blockState);
-                    if (!(fluid instanceof FlowingFluid)) {
+                    itemStack2 = ((BucketPickup)((Object)block)).pickupBlock(levelAccessor, blockPos, blockState);
+                    if (itemStack2.isEmpty()) {
                         return super.execute(blockSource, itemStack);
                     }
                 } else {
                     return super.execute(blockSource, itemStack);
                 }
-                Item item = fluid.getBucket();
+                Item item = itemStack2.getItem();
                 itemStack.shrink(1);
                 if (itemStack.isEmpty()) {
                     return new ItemStack(item);

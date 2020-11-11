@@ -55,6 +55,7 @@ public class PresetFlatWorldScreen
 extends Screen {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final List<PresetInfo> PRESETS = Lists.newArrayList();
+    private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
     private final CreateFlatWorldScreen parent;
     private Component shareText;
     private Component listText;
@@ -126,7 +127,7 @@ extends Screen {
             return FlatLevelGeneratorSettings.getDefault(registry);
         }
         FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureSettings());
-        ResourceKey<Biome> resourceKey = Biomes.PLAINS;
+        ResourceKey<Biome> resourceKey = DEFAULT_BIOME;
         if (iterator.hasNext()) {
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(iterator.next());
@@ -134,6 +135,7 @@ extends Screen {
                 registry.getOptional(resourceKey).orElseThrow(() -> new IllegalArgumentException("Invalid Biome: " + resourceLocation));
             } catch (Exception exception) {
                 LOGGER.error("Error while parsing flat world string => {}", (Object)exception.getMessage());
+                resourceKey = DEFAULT_BIOME;
             }
         }
         ResourceKey<Biome> resourceKey2 = resourceKey;

@@ -57,7 +57,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -289,7 +289,7 @@ AutoCloseable {
     }
 
     private double getFov(Camera camera, float f, boolean bl) {
-        FluidState fluidState;
+        FogType fogType;
         if (this.panoramicMode) {
             return 90.0;
         }
@@ -302,7 +302,7 @@ AutoCloseable {
             float g = Math.min((float)((LivingEntity)camera.getEntity()).deathTime + f, 20.0f);
             d /= (double)((1.0f - 500.0f / (g + 500.0f)) * 2.0f + 1.0f);
         }
-        if (!(fluidState = camera.getFluidInCamera()).isEmpty()) {
+        if ((fogType = camera.getFluidInCamera()) == FogType.LAVA || fogType == FogType.WATER) {
             d = d * 60.0 / 70.0;
         }
         return d;

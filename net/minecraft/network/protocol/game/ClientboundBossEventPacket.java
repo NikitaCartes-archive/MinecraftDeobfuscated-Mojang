@@ -32,7 +32,7 @@ implements Packet<ClientGamePacketListener> {
         this.operation = operation;
         this.id = bossEvent.getId();
         this.name = bossEvent.getName();
-        this.pct = bossEvent.getPercent();
+        this.pct = bossEvent.getProgress();
         this.color = bossEvent.getColor();
         this.overlay = bossEvent.getOverlay();
         this.darkenScreen = bossEvent.shouldDarkenScreen();
@@ -56,7 +56,7 @@ implements Packet<ClientGamePacketListener> {
             case REMOVE: {
                 break;
             }
-            case UPDATE_PCT: {
+            case UPDATE_PROGRESS: {
                 this.pct = friendlyByteBuf.readFloat();
                 break;
             }
@@ -97,7 +97,7 @@ implements Packet<ClientGamePacketListener> {
             case REMOVE: {
                 break;
             }
-            case UPDATE_PCT: {
+            case UPDATE_PROGRESS: {
                 friendlyByteBuf.writeFloat(this.pct);
                 break;
             }
@@ -183,7 +183,7 @@ implements Packet<ClientGamePacketListener> {
     public static enum Operation {
         ADD,
         REMOVE,
-        UPDATE_PCT,
+        UPDATE_PROGRESS,
         UPDATE_NAME,
         UPDATE_STYLE,
         UPDATE_PROPERTIES;

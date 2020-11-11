@@ -145,7 +145,7 @@ implements RenderLayerParent<T, M> {
     }
 
     public static int getOverlayCoords(LivingEntity livingEntity, float f) {
-        return OverlayTexture.pack(OverlayTexture.u(f), OverlayTexture.v(livingEntity.hurtTime > 0 || livingEntity.deathTime > 0));
+        return OverlayTexture.pack(OverlayTexture.u(f), OverlayTexture.v(livingEntity.hurtTime > 0 || livingEntity.deathTime > 0, livingEntity.getLastDamageSource()));
     }
 
     protected boolean isBodyVisible(T livingEntity) {

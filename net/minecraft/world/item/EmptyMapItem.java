@@ -22,20 +22,23 @@ extends ComplexItem {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = MapItem.create(level, player.getBlockX(), player.getBlockZ(), (byte)0, true, false);
-        ItemStack itemStack2 = player.getItemInHand(interactionHand);
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        if (level.isClientSide) {
+            return InteractionResultHolder.success(itemStack);
+        }
         if (!player.getAbilities().instabuild) {
-            itemStack2.shrink(1);
+            itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
         player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1.0f, 1.0f);
-        if (itemStack2.isEmpty()) {
-            return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+        ItemStack itemStack2 = MapItem.create(level, player.getBlockX(), player.getBlockZ(), (byte)0, true, false);
+        if (itemStack.isEmpty()) {
+            return InteractionResultHolder.consume(itemStack2);
         }
-        if (!player.getInventory().add(itemStack.copy())) {
-            player.drop(itemStack, false);
+        if (!player.getInventory().add(itemStack2.copy())) {
+            player.drop(itemStack2, false);
         }
-        return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
+        return InteractionResultHolder.consume(itemStack);
     }
 }
 

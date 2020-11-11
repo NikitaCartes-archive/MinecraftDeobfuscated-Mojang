@@ -3,12 +3,16 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 
 public interface BucketPickup {
-    public Fluid takeLiquid(LevelAccessor var1, BlockPos var2, BlockState var3);
+    public ItemStack pickupBlock(LevelAccessor var1, BlockPos var2, BlockState var3);
+
+    public Optional<SoundEvent> getPickupSound();
 }
 

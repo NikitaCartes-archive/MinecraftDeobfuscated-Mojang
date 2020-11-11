@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
@@ -32,35 +33,33 @@ public class DimensionDataStorage {
         return new File(this.dataFolder, string + ".dat");
     }
 
-    public <T extends SavedData> T computeIfAbsent(Supplier<T> supplier, String string) {
-        T savedData = this.get(supplier, string);
+    public <T extends SavedData> T computeIfAbsent(Function<CompoundTag, T> function, Supplier<T> supplier, String string) {
+        T savedData = this.get(function, string);
         if (savedData != null) {
             return savedData;
         }
         SavedData savedData2 = (SavedData)supplier.get();
-        this.set(savedData2);
+        this.set(string, savedData2);
         return (T)savedData2;
     }
 
     @Nullable
-    public <T extends SavedData> T get(Supplier<T> supplier, String string) {
+    public <T extends SavedData> T get(Function<CompoundTag, T> function, String string) {
         SavedData savedData = this.cache.get(string);
         if (savedData == null && !this.cache.containsKey(string)) {
-            savedData = this.readSavedData(supplier, string);
+            savedData = this.readSavedData(function, string);
             this.cache.put(string, savedData);
         }
         return (T)savedData;
     }
 
     @Nullable
-    private <T extends SavedData> T readSavedData(Supplier<T> supplier, String string) {
+    private <T extends SavedData> T readSavedData(Function<CompoundTag, T> function, String string) {
         try {
             File file = this.getDataFile(string);
             if (file.exists()) {
-                SavedData savedData = (SavedData)supplier.get();
                 CompoundTag compoundTag = this.readTagFromDisk(string, SharedConstants.getCurrentVersion().getWorldVersion());
-                savedData.load(compoundTag.getCompound("data"));
-                return (T)savedData;
+                return (T)((SavedData)function.apply(compoundTag.getCompound("data")));
             }
         } catch (Exception exception) {
             LOGGER.error("Error loading saved data: {}", (Object)string, (Object)exception);
@@ -68,8 +67,8 @@ public class DimensionDataStorage {
         return null;
     }
 
-    public void set(SavedData savedData) {
-        this.cache.put(savedData.getId(), savedData);
+    public void set(String string, SavedData savedData) {
+        this.cache.put(string, savedData);
     }
 
     /*
@@ -140,10 +139,11 @@ public class DimensionDataStorage {
     }
 
     public void save() {
-        for (SavedData savedData : this.cache.values()) {
-            if (savedData == null) continue;
-            savedData.save(this.getDataFile(savedData.getId()));
-        }
+        this.cache.forEach((string, savedData) -> {
+            if (savedData != null) {
+                savedData.save(this.getDataFile((String)string));
+            }
+        });
     }
 }
 

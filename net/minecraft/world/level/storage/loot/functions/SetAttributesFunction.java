@@ -4,6 +4,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -15,6 +16,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -25,11 +27,12 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import org.jetbrains.annotations.Nullable;
 
 public class SetAttributesFunction
@@ -47,6 +50,11 @@ extends LootItemConditionalFunction {
     }
 
     @Override
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return this.modifiers.stream().flatMap(modifier -> ((Modifier)modifier).amount.getReferencedContextParams().stream()).collect(ImmutableSet.toImmutableSet());
+    }
+
+    @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         Random random = lootContext.getRandom();
         for (Modifier modifier : this.modifiers) {
@@ -55,7 +63,7 @@ extends LootItemConditionalFunction {
                 uUID = UUID.randomUUID();
             }
             EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, random);
-            itemStack.addAttributeModifier(modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(random), modifier.operation), equipmentSlot);
+            itemStack.addAttributeModifier(modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot);
         }
         return itemStack;
     }
@@ -64,16 +72,16 @@ extends LootItemConditionalFunction {
         private final String name;
         private final Attribute attribute;
         private final AttributeModifier.Operation operation;
-        private final RandomValueBounds amount;
+        private final NumberProvider amount;
         @Nullable
         private final UUID id;
         private final EquipmentSlot[] slots;
 
-        private Modifier(String string, Attribute attribute, AttributeModifier.Operation operation, RandomValueBounds randomValueBounds, EquipmentSlot[] equipmentSlots, @Nullable UUID uUID) {
+        private Modifier(String string, Attribute attribute, AttributeModifier.Operation operation, NumberProvider numberProvider, EquipmentSlot[] equipmentSlots, @Nullable UUID uUID) {
             this.name = string;
             this.attribute = attribute;
             this.operation = operation;
-            this.amount = randomValueBounds;
+            this.amount = numberProvider;
             this.id = uUID;
             this.slots = equipmentSlots;
         }
@@ -108,7 +116,7 @@ extends LootItemConditionalFunction {
                 throw new JsonSyntaxException("Unknown attribute: " + resourceLocation);
             }
             AttributeModifier.Operation operation = Modifier.operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
-            RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
+            NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, NumberProvider.class);
             UUID uUID = null;
             if (GsonHelper.isStringValue(jsonObject, "slot")) {
                 equipmentSlots = new EquipmentSlot[]{EquipmentSlot.byName(GsonHelper.getAsString(jsonObject, "slot"))};
@@ -133,7 +141,7 @@ extends LootItemConditionalFunction {
                     throw new JsonSyntaxException("Invalid attribute modifier id '" + string2 + "' (must be UUID format, with dashes)");
                 }
             }
-            return new Modifier(string, attribute, operation, randomValueBounds, equipmentSlots, uUID);
+            return new Modifier(string, attribute, operation, numberProvider, equipmentSlots, uUID);
         }
 
         private static String operationToString(AttributeModifier.Operation operation) {

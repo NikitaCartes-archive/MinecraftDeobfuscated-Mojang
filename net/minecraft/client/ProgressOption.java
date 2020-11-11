@@ -3,16 +3,20 @@
  */
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.SliderButton;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,8 +28,9 @@ extends Option {
     private final Function<Options, Double> getter;
     private final BiConsumer<Options, Double> setter;
     private final BiFunction<Options, ProgressOption, Component> toString;
+    private final Function<Minecraft, List<FormattedCharSequence>> tooltipSupplier;
 
-    public ProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, Component> biFunction) {
+    public ProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, Component> biFunction, Function<Minecraft, List<FormattedCharSequence>> function2) {
         super(string);
         this.minValue = d;
         this.maxValue = e;
@@ -33,11 +38,17 @@ extends Option {
         this.getter = function;
         this.setter = biConsumer;
         this.toString = biFunction;
+        this.tooltipSupplier = function2;
+    }
+
+    public ProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, Component> biFunction) {
+        this(string, d, e, f, function, biConsumer, biFunction, minecraft -> ImmutableList.of());
     }
 
     @Override
     public AbstractWidget createButton(Options options, int i, int j, int k) {
-        return new SliderButton(options, i, j, k, 20, this);
+        List<FormattedCharSequence> list = this.tooltipSupplier.apply(Minecraft.getInstance());
+        return new SliderButton(options, i, j, k, 20, this, list);
     }
 
     public double toPct(double d) {

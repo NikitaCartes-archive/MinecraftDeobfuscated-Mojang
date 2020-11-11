@@ -13,10 +13,11 @@ import com.google.gson.JsonSerializationContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
@@ -26,10 +27,10 @@ import net.minecraft.world.scores.Scoreboard;
 
 public class EntityHasScoreCondition
 implements LootItemCondition {
-    private final Map<String, RandomValueBounds> scores;
+    private final Map<String, IntRange> scores;
     private final LootContext.EntityTarget entityTarget;
 
-    private EntityHasScoreCondition(Map<String, RandomValueBounds> map, LootContext.EntityTarget entityTarget) {
+    private EntityHasScoreCondition(Map<String, IntRange> map, LootContext.EntityTarget entityTarget) {
         this.scores = ImmutableMap.copyOf(map);
         this.entityTarget = entityTarget;
     }
@@ -41,7 +42,7 @@ implements LootItemCondition {
 
     @Override
     public Set<LootContextParam<?>> getReferencedContextParams() {
-        return ImmutableSet.of(this.entityTarget.getParam());
+        return Stream.concat(Stream.of(this.entityTarget.getParam()), this.scores.values().stream().flatMap(intRange -> intRange.getReferencedContextParams().stream())).collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -51,14 +52,14 @@ implements LootItemCondition {
             return false;
         }
         Scoreboard scoreboard = entity.level.getScoreboard();
-        for (Map.Entry<String, RandomValueBounds> entry : this.scores.entrySet()) {
-            if (this.hasScore(entity, scoreboard, entry.getKey(), entry.getValue())) continue;
+        for (Map.Entry<String, IntRange> entry : this.scores.entrySet()) {
+            if (this.hasScore(lootContext, entity, scoreboard, entry.getKey(), entry.getValue())) continue;
             return false;
         }
         return true;
     }
 
-    protected boolean hasScore(Entity entity, Scoreboard scoreboard, String string, RandomValueBounds randomValueBounds) {
+    protected boolean hasScore(LootContext lootContext, Entity entity, Scoreboard scoreboard, String string, IntRange intRange) {
         Objective objective = scoreboard.getObjective(string);
         if (objective == null) {
             return false;
@@ -67,7 +68,7 @@ implements LootItemCondition {
         if (!scoreboard.hasPlayerScore(string2, objective)) {
             return false;
         }
-        return randomValueBounds.matchesValue(scoreboard.getOrCreatePlayerScore(string2, objective).getScore());
+        return intRange.test(lootContext, scoreboard.getOrCreatePlayerScore(string2, objective).getScore());
     }
 
     @Override
@@ -90,9 +91,9 @@ implements LootItemCondition {
         @Override
         public EntityHasScoreCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             Set<Map.Entry<String, JsonElement>> set = GsonHelper.getAsJsonObject(jsonObject, "scores").entrySet();
-            LinkedHashMap<String, RandomValueBounds> map = Maps.newLinkedHashMap();
+            LinkedHashMap<String, IntRange> map = Maps.newLinkedHashMap();
             for (Map.Entry<String, JsonElement> entry : set) {
-                map.put(entry.getKey(), GsonHelper.convertToObject(entry.getValue(), "score", jsonDeserializationContext, RandomValueBounds.class));
+                map.put(entry.getKey(), GsonHelper.convertToObject(entry.getValue(), "score", jsonDeserializationContext, IntRange.class));
             }
             return new EntityHasScoreCondition(map, GsonHelper.getAsObject(jsonObject, "entity", jsonDeserializationContext, LootContext.EntityTarget.class));
         }

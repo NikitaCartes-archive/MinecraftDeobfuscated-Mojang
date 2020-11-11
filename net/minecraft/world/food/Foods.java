@@ -37,7 +37,7 @@ public class Foods {
     public static final FoodProperties POISONOUS_POTATO = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(new MobEffectInstance(MobEffects.POISON, 100, 0), 0.6f).build();
     public static final FoodProperties PORKCHOP = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).meat().build();
     public static final FoodProperties POTATO = new FoodProperties.Builder().nutrition(1).saturationMod(0.3f).build();
-    public static final FoodProperties PUFFERFISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).effect(new MobEffectInstance(MobEffects.POISON, 1200, 3), 1.0f).effect(new MobEffectInstance(MobEffects.HUNGER, 300, 2), 1.0f).effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 0), 1.0f).build();
+    public static final FoodProperties PUFFERFISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).effect(new MobEffectInstance(MobEffects.POISON, 1200, 1), 1.0f).effect(new MobEffectInstance(MobEffects.HUNGER, 300, 2), 1.0f).effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 0), 1.0f).build();
     public static final FoodProperties PUMPKIN_PIE = new FoodProperties.Builder().nutrition(8).saturationMod(0.3f).build();
     public static final FoodProperties RABBIT = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).meat().build();
     public static final FoodProperties RABBIT_STEW = Foods.stew(10);

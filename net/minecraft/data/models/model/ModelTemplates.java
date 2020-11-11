@@ -98,6 +98,8 @@ public class ModelTemplates {
     public static final ModelTemplate THREE_TURTLE_EGGS = ModelTemplates.create("template_three_turtle_eggs", TextureSlot.ALL);
     public static final ModelTemplate FOUR_TURTLE_EGGS = ModelTemplates.create("template_four_turtle_eggs", TextureSlot.ALL);
     public static final ModelTemplate SINGLE_FACE = ModelTemplates.create("template_single_face", TextureSlot.TEXTURE);
+    public static final ModelTemplate CAULDRON_LEVEL1 = ModelTemplates.create("template_cauldron_level1", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
+    public static final ModelTemplate CAULDRON_LEVEL2 = ModelTemplates.create("template_cauldron_level2", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
     public static final ModelTemplate CAULDRON_FULL = ModelTemplates.create("template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
     public static final ModelTemplate FLAT_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ITEM = ModelTemplates.createItem("handheld", TextureSlot.LAYER0);

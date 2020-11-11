@@ -18,7 +18,6 @@ import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPlayerScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
-import com.mojang.realmsclient.gui.screens.RealmsScreenWithCallback;
 import com.mojang.realmsclient.gui.screens.RealmsSelectWorldTemplateScreen;
 import com.mojang.realmsclient.gui.screens.RealmsSettingsScreen;
 import com.mojang.realmsclient.gui.screens.RealmsSlotOptionsScreen;
@@ -35,6 +34,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsConfigureWorldScreen
-extends RealmsScreenWithCallback {
+extends RealmsScreen {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation ON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/on_icon.png");
     private static final ResourceLocation OFF_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/off_icon.png");
@@ -95,7 +95,7 @@ extends RealmsScreenWithCallback {
             this.addSlotButton(i);
         }
         this.switchMinigameButton = this.addButton(new Button(this.leftButton(0), RealmsConfigureWorldScreen.row(13) - 5, 100, 20, new TranslatableComponent("mco.configure.world.buttons.switchminigame"), button -> {
-            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this, RealmsServer.WorldType.MINIGAME);
+            RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.MINIGAME);
             realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.template.title.minigame"));
             this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
         }));
@@ -264,7 +264,7 @@ extends RealmsScreenWithCallback {
     }
 
     private void switchToMinigame() {
-        RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this, RealmsServer.WorldType.MINIGAME);
+        RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this::templateSelectionCallback, RealmsServer.WorldType.MINIGAME);
         realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.template.title.minigame"));
         realmsSelectWorldTemplateScreen.setWarning(new TranslatableComponent("mco.minigame.world.info.line1"), new TranslatableComponent("mco.minigame.world.info.line2"));
         this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
@@ -430,13 +430,11 @@ extends RealmsScreenWithCallback {
         this.stateChanged = true;
     }
 
-    @Override
-    protected void callback(@Nullable WorldTemplate worldTemplate) {
-        if (worldTemplate == null) {
-            return;
-        }
-        if (WorldTemplate.WorldTemplateType.MINIGAME == worldTemplate.type) {
+    private void templateSelectionCallback(@Nullable WorldTemplate worldTemplate) {
+        if (worldTemplate != null && WorldTemplate.WorldTemplateType.MINIGAME == worldTemplate.type) {
             this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchMinigameTask(this.serverData.id, worldTemplate, this.getNewScreen())));
+        } else {
+            this.minecraft.setScreen(this);
         }
     }
 

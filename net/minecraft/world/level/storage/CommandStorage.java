@@ -19,23 +19,21 @@ public class CommandStorage {
         this.storage = dimensionDataStorage;
     }
 
-    private Container newStorage(String string, String string2) {
-        Container container = new Container(string2);
+    private Container newStorage(String string) {
+        Container container = new Container();
         this.namespaces.put(string, container);
         return container;
     }
 
     public CompoundTag get(ResourceLocation resourceLocation) {
-        String string2;
         String string = resourceLocation.getNamespace();
-        Container container = this.storage.get(() -> this.method_22549(string, string2 = CommandStorage.createId(string)), string2);
+        Container container = this.storage.get(compoundTag -> this.newStorage(string).load(compoundTag), CommandStorage.createId(string));
         return container != null ? container.get(resourceLocation.getPath()) : new CompoundTag();
     }
 
-    public void set(ResourceLocation resourceLocation, CompoundTag compoundTag) {
+    public void set(ResourceLocation resourceLocation, CompoundTag compoundTag2) {
         String string = resourceLocation.getNamespace();
-        String string2 = CommandStorage.createId(string);
-        this.storage.computeIfAbsent(() -> this.newStorage(string, string2), string2).put(resourceLocation.getPath(), compoundTag);
+        this.storage.computeIfAbsent(compoundTag -> this.newStorage(string).load(compoundTag), () -> this.newStorage(string), CommandStorage.createId(string)).put(resourceLocation.getPath(), compoundTag2);
     }
 
     public Stream<ResourceLocation> keys() {
@@ -46,24 +44,19 @@ public class CommandStorage {
         return "command_storage_" + string;
     }
 
-    private /* synthetic */ Container method_22549(String string, String string2) {
-        return this.newStorage(string, string2);
-    }
-
     static class Container
     extends SavedData {
         private final Map<String, CompoundTag> storage = Maps.newHashMap();
 
-        public Container(String string) {
-            super(string);
+        private Container() {
         }
 
-        @Override
-        public void load(CompoundTag compoundTag) {
+        private Container load(CompoundTag compoundTag) {
             CompoundTag compoundTag2 = compoundTag.getCompound("contents");
             for (String string : compoundTag2.getAllKeys()) {
                 this.storage.put(string, compoundTag2.getCompound(string));
             }
+            return this;
         }
 
         @Override

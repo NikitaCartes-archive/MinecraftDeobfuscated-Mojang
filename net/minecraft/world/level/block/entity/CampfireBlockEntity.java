@@ -168,9 +168,6 @@ implements Clearable {
 
     public void dowse() {
         if (this.level != null) {
-            if (!this.level.isClientSide) {
-                Containers.dropContents(this.level, this.getBlockPos(), this.getItems());
-            }
             this.markUpdated();
         }
     }

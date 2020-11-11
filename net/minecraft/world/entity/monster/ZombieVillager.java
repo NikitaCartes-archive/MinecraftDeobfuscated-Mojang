@@ -183,7 +183,7 @@ implements VillagerDataHolder {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
             if (itemStack.isEmpty()) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) {
-                villager.setSlot(equipmentSlot.getIndex() + 300, itemStack);
+                villager.getSlot(equipmentSlot.getIndex() + 300).set(itemStack);
                 continue;
             }
             double d = this.getEquipmentDropChance(equipmentSlot);

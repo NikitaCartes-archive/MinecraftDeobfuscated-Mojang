@@ -38,6 +38,7 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsBrokenWorldScreen
@@ -220,7 +221,7 @@ extends RealmsScreen {
         return this.serverData != null && this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
     }
 
-    private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, String string2, boolean bl2) {
+    private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, @Nullable String string2, boolean bl2) {
         if (bl2) {
             this.minecraft.getTextureManager().bind(RealmsWorldSlotButton.EMPTY_SLOT_LOCATION);
         } else if (string2 != null && n != -1L) {

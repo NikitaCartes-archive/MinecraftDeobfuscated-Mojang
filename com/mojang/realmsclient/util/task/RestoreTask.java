@@ -38,7 +38,7 @@ extends LongRunningTask {
                     return;
                 }
                 realmsClient.restoreWorld(this.worldId, this.backup.backupId);
-                RestoreTask.pause(1);
+                RestoreTask.pause(1L);
                 if (this.aborted()) {
                     return;
                 }

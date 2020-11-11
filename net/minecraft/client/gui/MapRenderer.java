@@ -3,12 +3,12 @@
  */
 package net.minecraft.client.gui;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,32 +31,28 @@ implements AutoCloseable {
     private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
     private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
     private final TextureManager textureManager;
-    private final Map<String, MapInstance> maps = Maps.newHashMap();
+    private final Int2ObjectMap<MapInstance> maps = new Int2ObjectOpenHashMap<MapInstance>();
 
     public MapRenderer(TextureManager textureManager) {
         this.textureManager = textureManager;
     }
 
-    public void update(MapItemSavedData mapItemSavedData) {
-        this.getMapInstance(mapItemSavedData).updateTexture();
+    public void update(int i, MapItemSavedData mapItemSavedData) {
+        this.getOrCreateMapInstance(i, mapItemSavedData).updateTexture();
     }
 
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, MapItemSavedData mapItemSavedData, boolean bl, int i) {
-        this.getMapInstance(mapItemSavedData).draw(poseStack, multiBufferSource, bl, i);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, MapItemSavedData mapItemSavedData, boolean bl, int j) {
+        this.getOrCreateMapInstance(i, mapItemSavedData).draw(poseStack, multiBufferSource, bl, j);
     }
 
-    private MapInstance getMapInstance(MapItemSavedData mapItemSavedData) {
-        MapInstance mapInstance = this.maps.get(mapItemSavedData.getId());
-        if (mapInstance == null) {
-            mapInstance = new MapInstance(mapItemSavedData);
-            this.maps.put(mapItemSavedData.getId(), mapInstance);
-        }
-        return mapInstance;
+    private MapInstance getOrCreateMapInstance(int i2, MapItemSavedData mapItemSavedData) {
+        return this.maps.computeIfAbsent(i2, i -> new MapInstance(i, mapItemSavedData));
     }
 
     @Nullable
-    public MapInstance getMapInstanceIfExists(String string) {
-        return this.maps.get(string);
+    public MapItemSavedData retrieveMapFromRenderer(int i) {
+        MapInstance mapInstance = (MapInstance)this.maps.get(i);
+        return mapInstance != null ? mapInstance.data : null;
     }
 
     public void resetData() {
@@ -64,14 +60,6 @@ implements AutoCloseable {
             mapInstance.close();
         }
         this.maps.clear();
-    }
-
-    @Nullable
-    public MapItemSavedData getData(@Nullable MapInstance mapInstance) {
-        if (mapInstance != null) {
-            return mapInstance.data;
-        }
-        return null;
     }
 
     @Override
@@ -86,10 +74,10 @@ implements AutoCloseable {
         private final DynamicTexture texture;
         private final RenderType renderType;
 
-        private MapInstance(MapItemSavedData mapItemSavedData) {
+        private MapInstance(int i, MapItemSavedData mapItemSavedData) {
             this.data = mapItemSavedData;
             this.texture = new DynamicTexture(128, 128, true);
-            ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + mapItemSavedData.getId(), this.texture);
+            ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + i, this.texture);
             this.renderType = RenderType.text(resourceLocation);
         }
 
@@ -119,7 +107,7 @@ implements AutoCloseable {
             vertexConsumer.vertex(matrix4f, 128.0f, 0.0f, -0.01f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(i).endVertex();
             vertexConsumer.vertex(matrix4f, 0.0f, 0.0f, -0.01f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(i).endVertex();
             int l = 0;
-            for (MapDecoration mapDecoration : this.data.decorations.values()) {
+            for (MapDecoration mapDecoration : this.data.getDecorations()) {
                 if (bl && !mapDecoration.renderOnFrame()) continue;
                 poseStack.pushPose();
                 poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f, -0.02f);

@@ -21,7 +21,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -36,6 +38,7 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.ClickEvent;
@@ -43,6 +46,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.apache.logging.log4j.LogManager;
@@ -123,7 +127,13 @@ Widget {
     }
 
     protected void renderTooltip(PoseStack poseStack, ItemStack itemStack, int i, int j) {
-        this.renderComponentTooltip(poseStack, this.getTooltipFromItem(itemStack), i, j);
+        this.renderTooltip(poseStack, this.getTooltipFromItem(itemStack), itemStack.getTooltipImage(), i, j);
+    }
+
+    public void renderTooltip(PoseStack poseStack, List<Component> list, Optional<TooltipComponent> optional, int i, int j) {
+        List<ClientTooltipComponent> list2 = list.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
+        optional.ifPresent(tooltipComponent -> list2.add(1, ClientTooltipComponent.create(tooltipComponent)));
+        this.renderTooltipInternal(poseStack, list2, i, j);
     }
 
     public List<Component> getTooltipFromItem(ItemStack itemStack) {
@@ -138,52 +148,56 @@ Widget {
         this.renderTooltip(poseStack, Lists.transform(list, Component::getVisualOrderText), i, j);
     }
 
-    /*
-     * WARNING - void declaration
-     */
     public void renderTooltip(PoseStack poseStack, List<? extends FormattedCharSequence> list, int i, int j) {
-        int n;
-        int l;
+        this.renderTooltipInternal(poseStack, list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j);
+    }
+
+    private void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i, int j) {
+        ClientTooltipComponent clientTooltipComponent2;
+        int v;
+        int m;
         if (list.isEmpty()) {
             return;
         }
         int k = 0;
-        for (FormattedCharSequence formattedCharSequence : list) {
-            l = this.font.width(formattedCharSequence);
-            if (l <= k) continue;
-            k = l;
+        int l = list.size() == 1 ? -2 : 0;
+        for (ClientTooltipComponent clientTooltipComponent : list) {
+            m = clientTooltipComponent.getWidth(this.font);
+            if (m > k) {
+                k = m;
+            }
+            l += clientTooltipComponent.getHeight();
         }
-        int m = i + 12;
-        int n2 = j - 12;
-        l = k;
-        int o = 8;
-        if (list.size() > 1) {
-            o += 2 + (list.size() - 1) * 10;
+        int n = i + 12;
+        int o = j - 12;
+        m = k;
+        int p = l;
+        if (n + k > this.width) {
+            n -= 28 + k;
         }
-        if (m + k > this.width) {
-            m -= 28 + k;
-        }
-        if (n2 + o + 6 > this.height) {
-            n = this.height - o - 6;
+        if (o + p + 6 > this.height) {
+            o = this.height - p - 6;
         }
         poseStack.pushPose();
-        int p = -267386864;
-        int q = 0x505000FF;
-        int r = 1344798847;
-        int s = 400;
+        int q = -267386864;
+        int r = 0x505000FF;
+        int s = 1344798847;
+        int t = 400;
+        float f = this.itemRenderer.blitOffset;
+        this.itemRenderer.blitOffset = 400.0f;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f matrix4f = poseStack.last().pose();
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 4, m + l + 3, n - 3, 400, -267386864, -267386864);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 3, m + l + 3, n + o + 4, 400, -267386864, -267386864);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + l + 3, n + o + 3, 400, -267386864, -267386864);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 4, n - 3, m - 3, n + o + 3, 400, -267386864, -267386864);
-        Screen.fillGradient(matrix4f, bufferBuilder, m + l + 3, n - 3, m + l + 4, n + o + 3, 400, -267386864, -267386864);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 400, 0x505000FF, 1344798847);
-        Screen.fillGradient(matrix4f, bufferBuilder, m + l + 2, n - 3 + 1, m + l + 3, n + o + 3 - 1, 400, 0x505000FF, 1344798847);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + l + 3, n - 3 + 1, 400, 0x505000FF, 0x505000FF);
-        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 2, m + l + 3, n + o + 3, 400, 1344798847, 1344798847);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o - 4, n + m + 3, o - 3, 400, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o + p + 3, n + m + 3, o + p + 4, 400, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + m + 3, o + p + 3, 400, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 4, o - 3, n - 3, o + p + 3, 400, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, n + m + 3, o - 3, n + m + 4, o + p + 3, 400, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o - 3 + 1, n - 3 + 1, o + p + 3 - 1, 400, 0x505000FF, 1344798847);
+        Screen.fillGradient(matrix4f, bufferBuilder, n + m + 2, o - 3 + 1, n + m + 3, o + p + 3 - 1, 400, 0x505000FF, 1344798847);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + m + 3, o - 3 + 1, 400, 0x505000FF, 0x505000FF);
+        Screen.fillGradient(matrix4f, bufferBuilder, n - 3, o + p + 2, n + m + 3, o + p + 3, 400, 1344798847, 1344798847);
         RenderSystem.enableDepthTest();
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
@@ -196,19 +210,21 @@ Widget {
         RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0, 0.0, 400.0);
-        for (int t = 0; t < list.size(); ++t) {
-            FormattedCharSequence formattedCharSequence2 = list.get(t);
-            if (formattedCharSequence2 != null) {
-                void var7_11;
-                this.font.drawInBatch(formattedCharSequence2, (float)m, (float)var7_11, -1, true, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
-            }
-            if (t == 0) {
-                var7_11 += 2;
-            }
-            var7_11 += 10;
+        int u = o;
+        for (v = 0; v < list.size(); ++v) {
+            clientTooltipComponent2 = list.get(v);
+            clientTooltipComponent2.renderText(this.font, n, u, matrix4f, bufferSource);
+            u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
         }
         bufferSource.endBatch();
         poseStack.popPose();
+        u = o;
+        for (v = 0; v < list.size(); ++v) {
+            clientTooltipComponent2 = list.get(v);
+            clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400, this.minecraft.getTextureManager());
+            u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
+        }
+        this.itemRenderer.blitOffset = f;
     }
 
     protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Style style, int i, int j) {

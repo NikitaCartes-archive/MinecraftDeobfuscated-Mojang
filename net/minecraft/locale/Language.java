@@ -100,7 +100,7 @@ public abstract class Language {
 
     @Environment(value=EnvType.CLIENT)
     public List<FormattedCharSequence> getVisualOrder(List<FormattedText> list) {
-        return list.stream().map(Language.getInstance()::getVisualOrder).collect(ImmutableList.toImmutableList());
+        return list.stream().map(this::getVisualOrder).collect(ImmutableList.toImmutableList());
     }
 }
 

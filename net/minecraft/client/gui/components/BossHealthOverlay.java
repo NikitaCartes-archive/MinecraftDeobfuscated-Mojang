@@ -57,7 +57,7 @@ extends GuiComponent {
         if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
             this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
         }
-        if ((k = (int)(bossEvent.getPercent() * 183.0f)) > 0) {
+        if ((k = (int)(bossEvent.getProgress() * 183.0f)) > 0) {
             this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + 5, k, 5);
             if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
                 this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + 5, k, 5);

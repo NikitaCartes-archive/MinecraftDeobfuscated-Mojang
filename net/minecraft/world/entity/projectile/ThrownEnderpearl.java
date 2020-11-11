@@ -55,7 +55,6 @@ extends ThrowableItemProjectile {
                 if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
                     if (this.random.nextFloat() < 0.05f && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
                         Endermite endermite = EntityType.ENDERMITE.create(this.level);
-                        endermite.setPlayerSpawned(true);
                         endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
                         this.level.addFreshEntity(endermite);
                     }

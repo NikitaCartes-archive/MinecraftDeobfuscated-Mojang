@@ -4,6 +4,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
@@ -16,6 +17,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -24,18 +26,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetStewEffectFunction
 extends LootItemConditionalFunction {
-    private final Map<MobEffect, RandomValueBounds> effectDurationMap;
+    private final Map<MobEffect, NumberProvider> effectDurationMap;
 
-    private SetStewEffectFunction(LootItemCondition[] lootItemConditions, Map<MobEffect, RandomValueBounds> map) {
+    private SetStewEffectFunction(LootItemCondition[] lootItemConditions, Map<MobEffect, NumberProvider> map) {
         super(lootItemConditions);
         this.effectDurationMap = ImmutableMap.copyOf(map);
     }
@@ -46,15 +49,20 @@ extends LootItemConditionalFunction {
     }
 
     @Override
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return this.effectDurationMap.values().stream().flatMap(numberProvider -> numberProvider.getReferencedContextParams().stream()).collect(ImmutableSet.toImmutableSet());
+    }
+
+    @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         if (!itemStack.is(Items.SUSPICIOUS_STEW) || this.effectDurationMap.isEmpty()) {
             return itemStack;
         }
         Random random = lootContext.getRandom();
         int i = random.nextInt(this.effectDurationMap.size());
-        Map.Entry<MobEffect, RandomValueBounds> entry = Iterables.get(this.effectDurationMap.entrySet(), i);
+        Map.Entry<MobEffect, NumberProvider> entry = Iterables.get(this.effectDurationMap.entrySet(), i);
         MobEffect mobEffect = entry.getKey();
-        int j = entry.getValue().getInt(random);
+        int j = entry.getValue().getInt(lootContext);
         if (!mobEffect.isInstantenous()) {
             j *= 20;
         }
@@ -89,14 +97,14 @@ extends LootItemConditionalFunction {
 
         @Override
         public SetStewEffectFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            HashMap<MobEffect, RandomValueBounds> map = Maps.newHashMap();
+            HashMap<MobEffect, NumberProvider> map = Maps.newHashMap();
             if (jsonObject.has("effects")) {
                 JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "effects");
                 for (JsonElement jsonElement : jsonArray) {
                     String string = GsonHelper.getAsString(jsonElement.getAsJsonObject(), "type");
                     MobEffect mobEffect = Registry.MOB_EFFECT.getOptional(new ResourceLocation(string)).orElseThrow(() -> new JsonSyntaxException("Unknown mob effect '" + string + "'"));
-                    RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonElement.getAsJsonObject(), "duration", jsonDeserializationContext, RandomValueBounds.class);
-                    map.put(mobEffect, randomValueBounds);
+                    NumberProvider numberProvider = GsonHelper.getAsObject(jsonElement.getAsJsonObject(), "duration", jsonDeserializationContext, NumberProvider.class);
+                    map.put(mobEffect, numberProvider);
                 }
             }
             return new SetStewEffectFunction(lootItemConditions, map);
@@ -110,15 +118,15 @@ extends LootItemConditionalFunction {
 
     public static class Builder
     extends LootItemConditionalFunction.Builder<Builder> {
-        private final Map<MobEffect, RandomValueBounds> effectDurationMap = Maps.newHashMap();
+        private final Map<MobEffect, NumberProvider> effectDurationMap = Maps.newHashMap();
 
         @Override
         protected Builder getThis() {
             return this;
         }
 
-        public Builder withEffect(MobEffect mobEffect, RandomValueBounds randomValueBounds) {
-            this.effectDurationMap.put(mobEffect, randomValueBounds);
+        public Builder withEffect(MobEffect mobEffect, NumberProvider numberProvider) {
+            this.effectDurationMap.put(mobEffect, numberProvider);
             return this;
         }
 

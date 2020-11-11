@@ -13,7 +13,6 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.LanguageInfo;
@@ -30,8 +29,6 @@ extends OptionsSubScreen {
     private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")").withStyle(ChatFormatting.GRAY);
     private LanguageSelectionList packSelectionList;
     private final LanguageManager languageManager;
-    private OptionButton forceUnicodeButton;
-    private Button doneButton;
 
     public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
         super(screen, options, new TranslatableComponent("options.language"));
@@ -42,20 +39,13 @@ extends OptionsSubScreen {
     protected void init() {
         this.packSelectionList = new LanguageSelectionList(this.minecraft);
         this.children.add(this.packSelectionList);
-        this.forceUnicodeButton = this.addButton(new OptionButton(this.width / 2 - 155, this.height - 38, 150, 20, Option.FORCE_UNICODE_FONT, Option.FORCE_UNICODE_FONT.getMessage(this.options), button -> {
-            Option.FORCE_UNICODE_FONT.toggle(this.options);
-            this.options.save();
-            button.setMessage(Option.FORCE_UNICODE_FONT.getMessage(this.options));
-            this.minecraft.resizeDisplay();
-        }));
-        this.doneButton = this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 38, 150, 20, CommonComponents.GUI_DONE, button -> {
+        this.addButton(Option.FORCE_UNICODE_FONT.createButton(this.options, this.width / 2 - 155, this.height - 38, 150));
+        this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 38, 150, 20, CommonComponents.GUI_DONE, button -> {
             LanguageSelectionList.Entry entry = (LanguageSelectionList.Entry)this.packSelectionList.getSelected();
             if (entry != null && !entry.language.getCode().equals(this.languageManager.getSelected().getCode())) {
                 this.languageManager.setSelected(entry.language);
                 this.options.languageCode = entry.language.getCode();
                 this.minecraft.reloadResourcePacks();
-                this.doneButton.setMessage(CommonComponents.GUI_DONE);
-                this.forceUnicodeButton.setMessage(Option.FORCE_UNICODE_FONT.getMessage(this.options));
                 this.options.save();
             }
             this.minecraft.setScreen(this.lastScreen);

@@ -6,9 +6,10 @@ package net.minecraft.server.level;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -147,7 +148,7 @@ implements ContainerListener {
     public ServerGamePacketListenerImpl connection;
     public final MinecraftServer server;
     public final ServerPlayerGameMode gameMode;
-    private final List<Integer> entitiesToRemove = Lists.newLinkedList();
+    private final IntList entitiesToRemove = new IntArrayList();
     private final PlayerAdvancements advancements;
     private final ServerStatsCounter stats;
     private float lastRecordedHealthAndAbsorption = Float.MIN_VALUE;
@@ -356,6 +357,7 @@ implements ContainerListener {
 
     @Override
     public void tick() {
+        Entity entity;
         this.gameMode.tick();
         --this.spawnInvulnerableTime;
         if (this.invulnerableTime > 0) {
@@ -366,19 +368,11 @@ implements ContainerListener {
             this.closeContainer();
             this.containerMenu = this.inventoryMenu;
         }
-        while (!this.entitiesToRemove.isEmpty()) {
-            int i = Math.min(this.entitiesToRemove.size(), Integer.MAX_VALUE);
-            int[] is = new int[i];
-            Iterator<Integer> iterator = this.entitiesToRemove.iterator();
-            int j = 0;
-            while (iterator.hasNext() && j < i) {
-                is[j++] = iterator.next();
-                iterator.remove();
-            }
-            this.connection.send(new ClientboundRemoveEntitiesPacket(is));
+        if (!this.entitiesToRemove.isEmpty()) {
+            this.connection.send(new ClientboundRemoveEntitiesPacket(this.entitiesToRemove.toIntArray()));
+            this.entitiesToRemove.clear();
         }
-        Entity entity = this.getCamera();
-        if (entity != this) {
+        if ((entity = this.getCamera()) != this) {
             if (entity.isAlive()) {
                 this.absMoveTo(entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
                 this.getLevel().getChunkSource().move(this);
@@ -1198,7 +1192,7 @@ implements ContainerListener {
     }
 
     public void cancelRemoveEntity(Entity entity) {
-        this.entitiesToRemove.remove((Object)entity.getId());
+        this.entitiesToRemove.rem(entity.getId());
     }
 
     @Override

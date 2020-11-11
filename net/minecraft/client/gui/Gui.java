@@ -91,6 +91,7 @@ extends GuiComponent {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
     private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
+    private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = new ResourceLocation("textures/misc/powder_snow_outline.png");
     private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
     private final Random random = new Random();
     private final Minecraft minecraft;
@@ -124,6 +125,7 @@ extends GuiComponent {
     private int screenWidth;
     private int screenHeight;
     private final Map<ChatType, List<ChatListener>> chatListeners = Maps.newHashMap();
+    private float scopeScale;
 
     public Gui(Minecraft minecraft) {
         this.minecraft = minecraft;
@@ -153,8 +155,8 @@ extends GuiComponent {
     }
 
     public void render(PoseStack poseStack, float f) {
-        int k;
-        float g;
+        int l;
+        float h;
         this.screenWidth = this.minecraft.getWindow().getGuiScaledWidth();
         this.screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
         Font font = this.getFont();
@@ -165,16 +167,24 @@ extends GuiComponent {
             RenderSystem.enableDepthTest();
             RenderSystem.defaultBlendFunc();
         }
-        ItemStack itemStack = this.minecraft.player.getInventory().getArmor(3);
+        float g = this.minecraft.getDeltaFrameTime();
+        this.scopeScale = Mth.lerp(0.5f * g, this.scopeScale, 1.125f);
         if (this.minecraft.options.getCameraType().isFirstPerson()) {
             if (this.minecraft.player.isScoping()) {
-                this.renderFullScreenOverlay(SPYGLASS_SCOPE_LOCATION, 0.5f, -16777216);
-            } else if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
-                this.renderFullScreenOverlay(PUMPKIN_BLUR_LOCATION);
+                this.renderSpyglassOverlay(this.scopeScale);
+            } else {
+                this.scopeScale = 0.5f;
+                ItemStack itemStack = this.minecraft.player.getInventory().getArmor(3);
+                if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
+                    this.renderTextureOverlay(PUMPKIN_BLUR_LOCATION, 1.0f);
+                }
             }
         }
-        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-            this.renderPortalOverlay(g);
+        if (this.minecraft.player.getTicksFrozen() > 0) {
+            this.renderTextureOverlay(POWDER_SNOW_OUTLINE_LOCATION, this.minecraft.player.getPercentFrozen());
+        }
+        if ((h = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
+            this.renderPortalOverlay(h);
         }
         if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
             this.spectatorGui.renderHotbar(poseStack, f);
@@ -214,13 +224,13 @@ extends GuiComponent {
             this.minecraft.getProfiler().push("sleep");
             RenderSystem.disableDepthTest();
             RenderSystem.disableAlphaTest();
-            float h = this.minecraft.player.getSleepTimer();
-            float j = h / 100.0f;
-            if (j > 1.0f) {
-                j = 1.0f - (h - 100.0f) / 10.0f;
+            float j = this.minecraft.player.getSleepTimer();
+            float k = j / 100.0f;
+            if (k > 1.0f) {
+                k = 1.0f - (j - 100.0f) / 10.0f;
             }
-            k = (int)(220.0f * j) << 24 | 0x101020;
-            Gui.fill(poseStack, 0, 0, this.screenWidth, this.screenHeight, k);
+            l = (int)(220.0f * k) << 24 | 0x101020;
+            Gui.fill(poseStack, 0, 0, this.screenWidth, this.screenHeight, l);
             RenderSystem.enableAlphaTest();
             RenderSystem.enableDepthTest();
             this.minecraft.getProfiler().pop();
@@ -235,28 +245,28 @@ extends GuiComponent {
         }
         if (!this.minecraft.options.hideGui) {
             Objective objective2;
+            int o;
             int n;
-            int m;
             if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
                 this.minecraft.getProfiler().push("overlayMessage");
-                float h = (float)this.overlayMessageTime - f;
-                int l = (int)(h * 255.0f / 20.0f);
-                if (l > 255) {
-                    l = 255;
+                float j = (float)this.overlayMessageTime - f;
+                int m = (int)(j * 255.0f / 20.0f);
+                if (m > 255) {
+                    m = 255;
                 }
-                if (l > 8) {
+                if (m > 8) {
                     RenderSystem.pushMatrix();
                     RenderSystem.translatef(this.screenWidth / 2, this.screenHeight - 68, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    k = 0xFFFFFF;
+                    l = 0xFFFFFF;
                     if (this.animateOverlayMessageColor) {
-                        k = Mth.hsvToRgb(h / 50.0f, 0.7f, 0.6f) & 0xFFFFFF;
+                        l = Mth.hsvToRgb(j / 50.0f, 0.7f, 0.6f) & 0xFFFFFF;
                     }
-                    m = l << 24 & 0xFF000000;
-                    n = font.width(this.overlayMessageString);
-                    this.drawBackdrop(poseStack, font, -4, n, 0xFFFFFF | m);
-                    font.draw(poseStack, this.overlayMessageString, (float)(-n / 2), -4.0f, k | m);
+                    n = m << 24 & 0xFF000000;
+                    o = font.width(this.overlayMessageString);
+                    this.drawBackdrop(poseStack, font, -4, o, 0xFFFFFF | n);
+                    font.draw(poseStack, this.overlayMessageString, (float)(-o / 2), -4.0f, l | n);
                     RenderSystem.disableBlend();
                     RenderSystem.popMatrix();
                 }
@@ -264,33 +274,33 @@ extends GuiComponent {
             }
             if (this.title != null && this.titleTime > 0) {
                 this.minecraft.getProfiler().push("titleAndSubtitle");
-                float h = (float)this.titleTime - f;
-                int l = 255;
+                float j = (float)this.titleTime - f;
+                int m = 255;
                 if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
-                    float o = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - h;
-                    l = (int)(o * 255.0f / (float)this.titleFadeInTime);
+                    float p = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - j;
+                    m = (int)(p * 255.0f / (float)this.titleFadeInTime);
                 }
                 if (this.titleTime <= this.titleFadeOutTime) {
-                    l = (int)(h * 255.0f / (float)this.titleFadeOutTime);
+                    m = (int)(j * 255.0f / (float)this.titleFadeOutTime);
                 }
-                if ((l = Mth.clamp(l, 0, 255)) > 8) {
+                if ((m = Mth.clamp(m, 0, 255)) > 8) {
                     RenderSystem.pushMatrix();
                     RenderSystem.translatef(this.screenWidth / 2, this.screenHeight / 2, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     RenderSystem.pushMatrix();
                     RenderSystem.scalef(4.0f, 4.0f, 4.0f);
-                    int k2 = l << 24 & 0xFF000000;
-                    m = font.width(this.title);
-                    this.drawBackdrop(poseStack, font, -10, m, 0xFFFFFF | k2);
-                    font.drawShadow(poseStack, this.title, (float)(-m / 2), -10.0f, 0xFFFFFF | k2);
+                    int l2 = m << 24 & 0xFF000000;
+                    n = font.width(this.title);
+                    this.drawBackdrop(poseStack, font, -10, n, 0xFFFFFF | l2);
+                    font.drawShadow(poseStack, this.title, (float)(-n / 2), -10.0f, 0xFFFFFF | l2);
                     RenderSystem.popMatrix();
                     if (this.subtitle != null) {
                         RenderSystem.pushMatrix();
                         RenderSystem.scalef(2.0f, 2.0f, 2.0f);
-                        n = font.width(this.subtitle);
-                        this.drawBackdrop(poseStack, font, 5, n, 0xFFFFFF | k2);
-                        font.drawShadow(poseStack, this.subtitle, (float)(-n / 2), 5.0f, 0xFFFFFF | k2);
+                        o = font.width(this.subtitle);
+                        this.drawBackdrop(poseStack, font, 5, o, 0xFFFFFF | l2);
+                        font.drawShadow(poseStack, this.subtitle, (float)(-o / 2), 5.0f, 0xFFFFFF | l2);
                         RenderSystem.popMatrix();
                     }
                     RenderSystem.disableBlend();
@@ -302,8 +312,8 @@ extends GuiComponent {
             Scoreboard scoreboard = this.minecraft.level.getScoreboard();
             Objective objective = null;
             PlayerTeam playerTeam = scoreboard.getPlayersTeam(this.minecraft.player.getScoreboardName());
-            if (playerTeam != null && (m = playerTeam.getColor().getId()) >= 0) {
-                objective = scoreboard.getDisplayObjective(3 + m);
+            if (playerTeam != null && (n = playerTeam.getColor().getId()) >= 0) {
+                objective = scoreboard.getDisplayObjective(3 + n);
             }
             Objective objective3 = objective2 = objective != null ? objective : scoreboard.getDisplayObjective(1);
             if (objective2 != null) {
@@ -729,6 +739,8 @@ extends GuiComponent {
                 y += 36;
             } else if (player.hasEffect(MobEffects.WITHER)) {
                 y += 72;
+            } else if (player.isFullyFrozen()) {
+                y += 126;
             }
             z = 0;
             if (bl) {
@@ -851,71 +863,70 @@ extends GuiComponent {
         }
     }
 
-    private void renderFullScreenOverlay(ResourceLocation resourceLocation) {
-        this.renderFullScreenOverlay(resourceLocation, 0.0f, 0);
-    }
-
-    private void renderFullScreenOverlay(ResourceLocation resourceLocation, float f, int i) {
+    private void renderTextureOverlay(ResourceLocation resourceLocation, float f) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, f);
         RenderSystem.disableAlphaTest();
         this.minecraft.getTextureManager().bind(resourceLocation);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        if (f == 0.0f) {
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0f, 1.0f).endVertex();
-            bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0f, 1.0f).endVertex();
-            bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0f, 0.0f).endVertex();
-            tesselator.end();
-        } else {
-            float g = Math.min(this.screenWidth, this.screenHeight);
-            float h = g * f;
-            float j = Math.min((float)this.screenWidth / g, (float)this.screenHeight / h);
-            float k = g * j;
-            float l = h * j;
-            float m = ((float)this.screenWidth - k) / 2.0f;
-            float n = ((float)this.screenHeight - l) / 2.0f;
-            float o = m + k;
-            float p = n + l;
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(m, p, -90.0).uv(0.0f, 1.0f).endVertex();
-            bufferBuilder.vertex(o, p, -90.0).uv(1.0f, 1.0f).endVertex();
-            bufferBuilder.vertex(o, n, -90.0).uv(1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(m, n, -90.0).uv(0.0f, 0.0f).endVertex();
-            tesselator.end();
-            int q = FastColor.ARGB32.red(i);
-            int r = FastColor.ARGB32.green(i);
-            int s = FastColor.ARGB32.blue(i);
-            int t = FastColor.ARGB32.alpha(i);
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(0.0, this.screenHeight, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, p, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(0.0, p, -90.0).color(q, r, s, t).endVertex();
-            tesselator.end();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(0.0, n, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, n, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, -90.0).color(q, r, s, t).endVertex();
-            tesselator.end();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(0.0, p, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(m, p, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(m, n, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(0.0, n, -90.0).color(q, r, s, t).endVertex();
-            tesselator.end();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(o, p, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, p, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(this.screenWidth, n, -90.0).color(q, r, s, t).endVertex();
-            bufferBuilder.vertex(o, n, -90.0).color(q, r, s, t).endVertex();
-            tesselator.end();
-        }
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0f, 0.0f).endVertex();
+        tesselator.end();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    private void renderSpyglassOverlay(float f) {
+        float g;
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableAlphaTest();
+        this.minecraft.getTextureManager().bind(SPYGLASS_SCOPE_LOCATION);
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        float h = g = (float)Math.min(this.screenWidth, this.screenHeight);
+        float i = Math.min((float)this.screenWidth / g, (float)this.screenHeight / h) * f;
+        float j = g * i;
+        float k = h * i;
+        float l = ((float)this.screenWidth - j) / 2.0f;
+        float m = ((float)this.screenHeight - k) / 2.0f;
+        float n = l + j;
+        float o = m + k;
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(l, o, -90.0).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(n, o, -90.0).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(n, m, -90.0).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(l, m, -90.0).uv(0.0f, 0.0f).endVertex();
+        tesselator.end();
+        RenderSystem.disableTexture();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(0.0, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(0.0, m, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, m, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(0.0, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(l, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(l, m, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(0.0, m, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(n, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, o, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.screenWidth, m, -90.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(n, m, -90.0).color(0, 0, 0, 255).endVertex();
+        tesselator.end();
+        RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.enableAlphaTest();

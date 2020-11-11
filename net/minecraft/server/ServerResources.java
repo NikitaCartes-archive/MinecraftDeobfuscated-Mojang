@@ -18,6 +18,7 @@ import net.minecraft.tags.TagContainer;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 
@@ -30,6 +31,7 @@ implements AutoCloseable {
     private final TagManager tagManager = new TagManager();
     private final PredicateManager predicateManager = new PredicateManager();
     private final LootTables lootTables = new LootTables(this.predicateManager);
+    private final ItemModifierManager itemModifierManager = new ItemModifierManager(this.predicateManager, this.lootTables);
     private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
     private final ServerFunctionLibrary functionLibrary;
 
@@ -40,6 +42,7 @@ implements AutoCloseable {
         this.resources.registerReloadListener(this.predicateManager);
         this.resources.registerReloadListener(this.recipes);
         this.resources.registerReloadListener(this.lootTables);
+        this.resources.registerReloadListener(this.itemModifierManager);
         this.resources.registerReloadListener(this.functionLibrary);
         this.resources.registerReloadListener(this.advancements);
     }
@@ -54,6 +57,10 @@ implements AutoCloseable {
 
     public LootTables getLootTables() {
         return this.lootTables;
+    }
+
+    public ItemModifierManager getItemModifierManager() {
+        return this.itemModifierManager;
     }
 
     public TagContainer getTags() {

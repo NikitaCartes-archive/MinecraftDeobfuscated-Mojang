@@ -29,18 +29,19 @@ extends EntityRenderer<PrimedTnt> {
     public void render(PrimedTnt primedTnt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5, 0.0);
-        if ((float)primedTnt.getLife() - g + 1.0f < 10.0f) {
-            float h = 1.0f - ((float)primedTnt.getLife() - g + 1.0f) / 10.0f;
+        int j = primedTnt.getFuse();
+        if ((float)j - g + 1.0f < 10.0f) {
+            float h = 1.0f - ((float)j - g + 1.0f) / 10.0f;
             h = Mth.clamp(h, 0.0f, 1.0f);
             h *= h;
             h *= h;
-            float j = 1.0f + h * 0.3f;
-            poseStack.scale(j, j, j);
+            float k = 1.0f + h * 0.3f;
+            poseStack.scale(k, k, k);
         }
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
         poseStack.translate(-0.5, -0.5, 0.5);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, primedTnt.getLife() / 5 % 2 == 0);
+        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
         poseStack.popPose();
         super.render(primedTnt, f, g, poseStack, multiBufferSource, i);
     }

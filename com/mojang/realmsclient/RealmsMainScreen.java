@@ -1053,7 +1053,7 @@ extends RealmsScreen {
     class NewsButton
     extends Button {
         public NewsButton() {
-            super(RealmsMainScreen.this.width - 62, 6, 20, 20, TextComponent.EMPTY, button -> {
+            super(RealmsMainScreen.this.width - 62, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
                 if (RealmsMainScreen.this.newsLink == null) {
                     return;
                 }
@@ -1065,7 +1065,6 @@ extends RealmsScreen {
                     RealmsPersistence.writeFile(realmsPersistenceData);
                 }
             });
-            this.setMessage(new TranslatableComponent("mco.news"));
         }
 
         @Override
@@ -1084,7 +1083,7 @@ extends RealmsScreen {
 
         @Override
         public void tick() {
-            this.setMessage(new TranslatableComponent(RealmsMainScreen.this.numberOfPendingInvites == 0 ? "mco.invites.nopending" : "mco.invites.pending"));
+            this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? NO_PENDING_INVITES_TEXT : PENDING_INVITES_TEXT);
         }
 
         @Override

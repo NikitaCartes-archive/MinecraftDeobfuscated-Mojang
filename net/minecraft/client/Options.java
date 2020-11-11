@@ -5,7 +5,6 @@ package net.minecraft.client;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -237,67 +236,67 @@ public class Options {
             }
             CompoundTag compoundTag2 = this.dataFix(compoundTag);
             if (!compoundTag2.contains("graphicsMode") && compoundTag2.contains("fancyGraphics")) {
-                this.graphicsMode = "true".equals(compoundTag2.getString("fancyGraphics")) ? GraphicsStatus.FANCY : GraphicsStatus.FAST;
+                this.graphicsMode = Options.isTrue(compoundTag2.getString("fancyGraphics")) ? GraphicsStatus.FANCY : GraphicsStatus.FAST;
             }
             for (String string2 : compoundTag2.getAllKeys()) {
                 String string22 = compoundTag2.getString(string2);
                 try {
                     if ("autoJump".equals(string2)) {
-                        Option.AUTO_JUMP.set(this, string22);
+                        this.autoJump = Options.isTrue(string22);
                     }
                     if ("autoSuggestions".equals(string2)) {
-                        Option.AUTO_SUGGESTIONS.set(this, string22);
+                        this.autoSuggestions = Options.isTrue(string22);
                     }
                     if ("chatColors".equals(string2)) {
-                        Option.CHAT_COLOR.set(this, string22);
+                        this.chatColors = Options.isTrue(string22);
                     }
                     if ("chatLinks".equals(string2)) {
-                        Option.CHAT_LINKS.set(this, string22);
+                        this.chatLinks = Options.isTrue(string22);
                     }
                     if ("chatLinksPrompt".equals(string2)) {
-                        Option.CHAT_LINKS_PROMPT.set(this, string22);
+                        this.chatLinksPrompt = Options.isTrue(string22);
                     }
                     if ("enableVsync".equals(string2)) {
-                        Option.ENABLE_VSYNC.set(this, string22);
+                        this.enableVsync = Options.isTrue(string22);
                     }
                     if ("entityShadows".equals(string2)) {
-                        Option.ENTITY_SHADOWS.set(this, string22);
+                        this.entityShadows = Options.isTrue(string22);
                     }
                     if ("forceUnicodeFont".equals(string2)) {
-                        Option.FORCE_UNICODE_FONT.set(this, string22);
+                        this.forceUnicodeFont = Options.isTrue(string22);
                     }
                     if ("discrete_mouse_scroll".equals(string2)) {
-                        Option.DISCRETE_MOUSE_SCROLL.set(this, string22);
+                        this.discreteMouseScroll = Options.isTrue(string22);
                     }
                     if ("invertYMouse".equals(string2)) {
-                        Option.INVERT_MOUSE.set(this, string22);
+                        this.invertYMouse = Options.isTrue(string22);
                     }
                     if ("realmsNotifications".equals(string2)) {
-                        Option.REALMS_NOTIFICATIONS.set(this, string22);
+                        this.realmsNotifications = Options.isTrue(string22);
                     }
                     if ("reducedDebugInfo".equals(string2)) {
-                        Option.REDUCED_DEBUG_INFO.set(this, string22);
+                        this.reducedDebugInfo = Options.isTrue(string22);
                     }
                     if ("showSubtitles".equals(string2)) {
-                        Option.SHOW_SUBTITLES.set(this, string22);
+                        this.showSubtitles = Options.isTrue(string22);
                     }
                     if ("snooperEnabled".equals(string2)) {
-                        Option.SNOOPER_ENABLED.set(this, string22);
+                        this.snooperEnabled = Options.isTrue(string22);
                     }
                     if ("touchscreen".equals(string2)) {
-                        Option.TOUCHSCREEN.set(this, string22);
+                        this.touchscreen = Options.isTrue(string22);
                     }
                     if ("fullscreen".equals(string2)) {
-                        Option.USE_FULLSCREEN.set(this, string22);
+                        this.fullscreen = Options.isTrue(string22);
                     }
                     if ("bobView".equals(string2)) {
-                        Option.VIEW_BOBBING.set(this, string22);
+                        this.bobView = Options.isTrue(string22);
                     }
                     if ("toggleCrouch".equals(string2)) {
-                        this.toggleCrouch = "true".equals(string22);
+                        this.toggleCrouch = Options.isTrue(string22);
                     }
                     if ("toggleSprint".equals(string2)) {
-                        this.toggleSprint = "true".equals(string22);
+                        this.toggleSprint = Options.isTrue(string22);
                     }
                     if ("mouseSensitivity".equals(string2)) {
                         this.sensitivity = Options.readFloat(string22);
@@ -342,12 +341,12 @@ public class Options {
                         this.tutorialStep = TutorialSteps.getByName(string22);
                     }
                     if ("ao".equals(string2)) {
-                        this.ambientOcclusion = "true".equals(string22) ? AmbientOcclusionStatus.MAX : ("false".equals(string22) ? AmbientOcclusionStatus.OFF : AmbientOcclusionStatus.byId(Integer.parseInt(string22)));
+                        this.ambientOcclusion = Options.isTrue(string22) ? AmbientOcclusionStatus.MAX : (Options.isFalse(string22) ? AmbientOcclusionStatus.OFF : AmbientOcclusionStatus.byId(Integer.parseInt(string22)));
                     }
                     if ("renderClouds".equals(string2)) {
-                        if ("true".equals(string22)) {
+                        if (Options.isTrue(string22)) {
                             this.renderClouds = CloudStatus.FANCY;
-                        } else if ("false".equals(string22)) {
+                        } else if (Options.isFalse(string22)) {
                             this.renderClouds = CloudStatus.OFF;
                         } else if ("fast".equals(string22)) {
                             this.renderClouds = CloudStatus.FAST;
@@ -387,19 +386,19 @@ public class Options {
                         this.textBackgroundOpacity = Options.readFloat(string22);
                     }
                     if ("backgroundForChatOnly".equals(string2)) {
-                        this.backgroundForChatOnly = "true".equals(string22);
+                        this.backgroundForChatOnly = Options.isTrue(string22);
                     }
                     if ("fullscreenResolution".equals(string2)) {
                         this.fullscreenVideoModeString = string22;
                     }
                     if ("hideServerAddress".equals(string2)) {
-                        this.hideServerAddress = "true".equals(string22);
+                        this.hideServerAddress = Options.isTrue(string22);
                     }
                     if ("advancedItemTooltips".equals(string2)) {
-                        this.advancedItemTooltips = "true".equals(string22);
+                        this.advancedItemTooltips = Options.isTrue(string22);
                     }
                     if ("pauseOnLostFocus".equals(string2)) {
-                        this.pauseOnLostFocus = "true".equals(string22);
+                        this.pauseOnLostFocus = Options.isTrue(string22);
                     }
                     if ("overrideHeight".equals(string2)) {
                         this.overrideHeight = Integer.parseInt(string22);
@@ -408,7 +407,7 @@ public class Options {
                         this.overrideWidth = Integer.parseInt(string22);
                     }
                     if ("heldItemTooltips".equals(string2)) {
-                        this.heldItemTooltips = "true".equals(string22);
+                        this.heldItemTooltips = Options.isTrue(string22);
                     }
                     if ("chatHeightFocused".equals(string2)) {
                         this.chatHeightFocused = Options.readFloat(string22);
@@ -429,7 +428,7 @@ public class Options {
                         this.mipmapLevels = Integer.parseInt(string22);
                     }
                     if ("useNativeTransport".equals(string2)) {
-                        this.useNativeTransport = "true".equals(string22);
+                        this.useNativeTransport = Options.isTrue(string22);
                     }
                     if ("mainHand".equals(string2)) {
                         HumanoidArm humanoidArm = this.mainHand = "left".equals(string22) ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
@@ -444,13 +443,13 @@ public class Options {
                         this.mouseWheelSensitivity = Options.readFloat(string22);
                     }
                     if ("rawMouseInput".equals(string2)) {
-                        this.rawMouseInput = "true".equals(string22);
+                        this.rawMouseInput = Options.isTrue(string22);
                     }
                     if ("glDebugVerbosity".equals(string2)) {
                         this.glDebugVerbosity = Integer.parseInt(string22);
                     }
                     if ("skipMultiplayerWarning".equals(string2)) {
-                        this.skipMultiplayerWarning = "true".equals(string22);
+                        this.skipMultiplayerWarning = Options.isTrue(string22);
                     }
                     if ("hideMatchedNames".equals(string2)) {
                         this.hideMatchedNames = "true".equals(string22);
@@ -459,7 +458,7 @@ public class Options {
                         this.joinedFirstServer = "true".equals(string22);
                     }
                     if ("syncChunkWrites".equals(string2)) {
-                        this.syncWrites = "true".equals(string22);
+                        this.syncWrites = Options.isTrue(string22);
                     }
                     for (KeyMapping keyMapping : this.keyMappings) {
                         if (!string2.equals("key_" + keyMapping.getName())) continue;
@@ -471,7 +470,7 @@ public class Options {
                     }
                     for (PlayerModelPart playerModelPart : PlayerModelPart.values()) {
                         if (!string2.equals("modelPart_" + playerModelPart.getId())) continue;
-                        this.setModelPart(playerModelPart, "true".equals(string22));
+                        this.setModelPart(playerModelPart, Options.isTrue(string22));
                     }
                 } catch (Exception exception) {
                     LOGGER.warn("Skipping bad option: {}:{}", (Object)string2, (Object)string22);
@@ -481,6 +480,14 @@ public class Options {
         } catch (Exception exception2) {
             LOGGER.error("Failed to load options", (Throwable)exception2);
         }
+    }
+
+    private static boolean isTrue(String string) {
+        return "true".equals(string);
+    }
+
+    private static boolean isFalse(String string) {
+        return "false".equals(string);
     }
 
     private CompoundTag dataFix(CompoundTag compoundTag) {
@@ -494,10 +501,10 @@ public class Options {
     }
 
     private static float readFloat(String string) {
-        if ("true".equals(string)) {
+        if (Options.isTrue(string)) {
             return 1.0f;
         }
-        if ("false".equals(string)) {
+        if (Options.isFalse(string)) {
             return 0.0f;
         }
         return Float.parseFloat(string);
@@ -506,23 +513,23 @@ public class Options {
     public void save() {
         try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter((OutputStream)new FileOutputStream(this.optionsFile), StandardCharsets.UTF_8));){
             printWriter.println("version:" + SharedConstants.getCurrentVersion().getWorldVersion());
-            printWriter.println("autoJump:" + Option.AUTO_JUMP.get(this));
-            printWriter.println("autoSuggestions:" + Option.AUTO_SUGGESTIONS.get(this));
-            printWriter.println("chatColors:" + Option.CHAT_COLOR.get(this));
-            printWriter.println("chatLinks:" + Option.CHAT_LINKS.get(this));
-            printWriter.println("chatLinksPrompt:" + Option.CHAT_LINKS_PROMPT.get(this));
-            printWriter.println("enableVsync:" + Option.ENABLE_VSYNC.get(this));
-            printWriter.println("entityShadows:" + Option.ENTITY_SHADOWS.get(this));
-            printWriter.println("forceUnicodeFont:" + Option.FORCE_UNICODE_FONT.get(this));
-            printWriter.println("discrete_mouse_scroll:" + Option.DISCRETE_MOUSE_SCROLL.get(this));
-            printWriter.println("invertYMouse:" + Option.INVERT_MOUSE.get(this));
-            printWriter.println("realmsNotifications:" + Option.REALMS_NOTIFICATIONS.get(this));
-            printWriter.println("reducedDebugInfo:" + Option.REDUCED_DEBUG_INFO.get(this));
-            printWriter.println("snooperEnabled:" + Option.SNOOPER_ENABLED.get(this));
-            printWriter.println("showSubtitles:" + Option.SHOW_SUBTITLES.get(this));
-            printWriter.println("touchscreen:" + Option.TOUCHSCREEN.get(this));
-            printWriter.println("fullscreen:" + Option.USE_FULLSCREEN.get(this));
-            printWriter.println("bobView:" + Option.VIEW_BOBBING.get(this));
+            printWriter.println("autoJump:" + this.autoJump);
+            printWriter.println("autoSuggestions:" + this.autoSuggestions);
+            printWriter.println("chatColors:" + this.chatColors);
+            printWriter.println("chatLinks:" + this.chatLinks);
+            printWriter.println("chatLinksPrompt:" + this.chatLinksPrompt);
+            printWriter.println("enableVsync:" + this.enableVsync);
+            printWriter.println("entityShadows:" + this.entityShadows);
+            printWriter.println("forceUnicodeFont:" + this.forceUnicodeFont);
+            printWriter.println("discrete_mouse_scroll:" + this.discreteMouseScroll);
+            printWriter.println("invertYMouse:" + this.invertYMouse);
+            printWriter.println("realmsNotifications:" + this.realmsNotifications);
+            printWriter.println("reducedDebugInfo:" + this.reducedDebugInfo);
+            printWriter.println("snooperEnabled:" + this.snooperEnabled);
+            printWriter.println("showSubtitles:" + this.showSubtitles);
+            printWriter.println("touchscreen:" + this.touchscreen);
+            printWriter.println("fullscreen:" + this.fullscreen);
+            printWriter.println("bobView:" + this.bobView);
             printWriter.println("toggleCrouch:" + this.toggleCrouch);
             printWriter.println("toggleSprint:" + this.toggleSprint);
             printWriter.println("mouseSensitivity:" + this.sensitivity);
@@ -582,7 +589,7 @@ public class Options {
             printWriter.println("narrator:" + this.narratorStatus.getId());
             printWriter.println("tutorialStep:" + this.tutorialStep.getName());
             printWriter.println("mouseWheelSensitivity:" + this.mouseWheelSensitivity);
-            printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
+            printWriter.println("rawMouseInput:" + this.rawMouseInput);
             printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
             printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
             printWriter.println("hideMatchedNames:" + this.hideMatchedNames);
@@ -625,10 +632,6 @@ public class Options {
         }
     }
 
-    public Set<PlayerModelPart> getModelParts() {
-        return ImmutableSet.copyOf(this.modelParts);
-    }
-
     public void setModelPart(PlayerModelPart playerModelPart, boolean bl) {
         if (bl) {
             this.modelParts.add(playerModelPart);
@@ -638,8 +641,12 @@ public class Options {
         this.broadcastOptions();
     }
 
-    public void toggleModelPart(PlayerModelPart playerModelPart) {
-        if (this.getModelParts().contains((Object)playerModelPart)) {
+    public boolean isModelPartEnabled(PlayerModelPart playerModelPart) {
+        return this.modelParts.contains((Object)playerModelPart);
+    }
+
+    public void toggleModelPart(PlayerModelPart playerModelPart, boolean bl) {
+        if (!bl) {
             this.modelParts.remove((Object)playerModelPart);
         } else {
             this.modelParts.add(playerModelPart);

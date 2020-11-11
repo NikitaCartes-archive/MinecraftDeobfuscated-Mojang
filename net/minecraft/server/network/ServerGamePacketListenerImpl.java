@@ -108,6 +108,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
@@ -161,7 +162,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerGamePacketListenerImpl
-implements ServerGamePacketListener {
+implements ServerPlayerConnection,
+ServerGamePacketListener {
     private static final Logger LOGGER = LogManager.getLogger();
     public final Connection connection;
     private final MinecraftServer server;
@@ -1023,6 +1025,7 @@ implements ServerGamePacketListener {
         }
     }
 
+    @Override
     public void send(Packet<?> packet) {
         this.send(packet, null);
     }
@@ -1402,6 +1405,11 @@ implements ServerGamePacketListener {
             return;
         }
         this.server.setDifficultyLocked(serverboundLockDifficultyPacket.isLocked());
+    }
+
+    @Override
+    public ServerPlayer getPlayer() {
+        return this.player;
     }
 }
 

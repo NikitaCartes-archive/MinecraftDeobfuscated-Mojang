@@ -40,7 +40,7 @@ extends LongRunningTask {
                     return;
                 }
                 WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.worldId, this.slot);
-                DownloadTask.pause(1);
+                DownloadTask.pause(1L);
                 if (this.aborted()) {
                     return;
                 }

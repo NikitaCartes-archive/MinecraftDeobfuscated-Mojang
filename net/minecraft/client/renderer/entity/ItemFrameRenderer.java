@@ -78,10 +78,11 @@ extends EntityRenderer<ItemFrame> {
                 float h = 0.0078125f;
                 poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
                 poseStack.translate(-64.0, -64.0, 0.0);
-                MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, itemFrame.level);
+                Integer integer = MapItem.getMapId(itemStack);
+                MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, itemFrame.level);
                 poseStack.translate(0.0, 0.0, -1.0);
                 if (mapItemSavedData != null) {
-                    this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true, i);
+                    this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, true, i);
                 }
             } else {
                 poseStack.scale(0.5f, 0.5f, 0.5f);

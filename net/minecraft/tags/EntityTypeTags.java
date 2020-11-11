@@ -19,6 +19,7 @@ public final class EntityTypeTags {
     public static final Tag.Named<EntityType<?>> BEEHIVE_INHABITORS = EntityTypeTags.bind("beehive_inhabitors");
     public static final Tag.Named<EntityType<?>> ARROWS = EntityTypeTags.bind("arrows");
     public static final Tag.Named<EntityType<?>> IMPACT_PROJECTILES = EntityTypeTags.bind("impact_projectiles");
+    public static final Tag.Named<EntityType<?>> POWDER_SNOW_WALKABLE_MOBS = EntityTypeTags.bind("powder_snow_walkable_mobs");
 
     private static Tag.Named<EntityType<?>> bind(String string) {
         return HELPER.bind(string);

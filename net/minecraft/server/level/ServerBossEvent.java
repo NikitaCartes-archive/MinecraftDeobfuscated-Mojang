@@ -26,10 +26,10 @@ extends BossEvent {
     }
 
     @Override
-    public void setPercent(float f) {
-        if (f != this.percent) {
-            super.setPercent(f);
-            this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PCT);
+    public void setProgress(float f) {
+        if (f != this.progress) {
+            super.setProgress(f);
+            this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROGRESS);
         }
     }
 

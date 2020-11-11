@@ -188,7 +188,6 @@ extends RecipeBookMenu<CraftingContainer> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getSize() {
         return 5;
     }
@@ -201,6 +200,11 @@ extends RecipeBookMenu<CraftingContainer> {
     @Environment(value=EnvType.CLIENT)
     public RecipeBookType getRecipeBookType() {
         return RecipeBookType.CRAFTING;
+    }
+
+    @Override
+    public boolean shouldMoveToInventory(int i) {
+        return i != this.getResultSlotIndex();
     }
 }
 

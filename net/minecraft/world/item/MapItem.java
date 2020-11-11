@@ -54,31 +54,36 @@ extends ComplexItem {
     }
 
     @Nullable
-    public static MapItemSavedData getSavedData(ItemStack itemStack, Level level) {
-        return level.getMapData(MapItem.makeKey(MapItem.getMapId(itemStack)));
+    public static MapItemSavedData getSavedData(@Nullable Integer integer, Level level) {
+        return integer == null ? null : level.getMapData(MapItem.makeKey(integer));
     }
 
     @Nullable
-    public static MapItemSavedData getOrCreateSavedData(ItemStack itemStack, Level level) {
-        MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
-        if (mapItemSavedData == null && level instanceof ServerLevel) {
-            mapItemSavedData = MapItem.createAndStoreSavedData(itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension());
-        }
-        return mapItemSavedData;
+    public static MapItemSavedData getSavedData(ItemStack itemStack, Level level) {
+        Integer integer = MapItem.getMapId(itemStack);
+        return MapItem.getSavedData(integer, level);
     }
 
-    public static int getMapId(ItemStack itemStack) {
+    @Nullable
+    public static Integer getMapId(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag != null && compoundTag.contains("map", 99) ? compoundTag.getInt("map") : 0;
+        return compoundTag != null && compoundTag.contains("map", 99) ? Integer.valueOf(compoundTag.getInt("map")) : null;
     }
 
-    private static MapItemSavedData createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
+    private static int createNewSavedData(Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
+        MapItemSavedData mapItemSavedData = MapItemSavedData.createFresh(i, j, (byte)k, bl, bl2, resourceKey);
         int l = level.getFreeMapId();
-        MapItemSavedData mapItemSavedData = new MapItemSavedData(MapItem.makeKey(l));
-        mapItemSavedData.setProperties(i, j, k, bl, bl2, resourceKey);
-        level.setMapData(mapItemSavedData);
-        itemStack.getOrCreateTag().putInt("map", l);
-        return mapItemSavedData;
+        level.setMapData(MapItem.makeKey(l), mapItemSavedData);
+        return l;
+    }
+
+    private static void storeMapData(ItemStack itemStack, int i) {
+        itemStack.getOrCreateTag().putInt("map", i);
+    }
+
+    private static void createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
+        int l = MapItem.createNewSavedData(level, i, j, k, bl, bl2, resourceKey);
+        MapItem.storeMapData(itemStack, l);
     }
 
     public static String makeKey(int i) {
@@ -106,8 +111,6 @@ extends ComplexItem {
             bl = false;
             double d = 0.0;
             for (int p = m - n - 1; p < m + n; ++p) {
-                byte c;
-                byte b;
                 MaterialColor materialColor;
                 int y;
                 if (o < 0 || p < -1 || o >= 128 || p >= 128) continue;
@@ -183,10 +186,8 @@ extends ComplexItem {
                     }
                 }
                 d = e;
-                if (p < 0 || q * q + r * r >= n * n || bl2 && (o + p & 1) == 0 || (b = mapItemSavedData.colors[o + p * 128]) == (c = (byte)(materialColor.id * 4 + y))) continue;
-                mapItemSavedData.colors[o + p * 128] = c;
-                mapItemSavedData.setDirty(o, p);
-                bl = true;
+                if (p < 0 || q * q + r * r >= n * n || bl2 && (o + p & 1) == 0) continue;
+                bl |= mapItemSavedData.updateColor(o, p, (byte)(materialColor.id * 4 + y));
             }
         }
     }
@@ -206,7 +207,7 @@ extends ComplexItem {
     public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
         int m;
         int l;
-        MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, serverLevel);
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, (Level)serverLevel);
         if (mapItemSavedData == null) {
             return;
         }
@@ -276,8 +277,7 @@ extends ComplexItem {
                     o = n > 3 ? 1 : 3;
                 }
                 if (materialColor == MaterialColor.NONE) continue;
-                mapItemSavedData.colors[l + m * 128] = (byte)(materialColor.id * 4 + o);
-                mapItemSavedData.setDirty(l, m);
+                mapItemSavedData.setColor(l, m, (byte)(materialColor.id * 4 + o));
             }
         }
     }
@@ -287,7 +287,7 @@ extends ComplexItem {
         if (level.isClientSide) {
             return;
         }
-        MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, level);
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
         if (mapItemSavedData == null) {
             return;
         }
@@ -303,7 +303,12 @@ extends ComplexItem {
     @Override
     @Nullable
     public Packet<?> getUpdatePacket(ItemStack itemStack, Level level, Player player) {
-        return MapItem.getOrCreateSavedData(itemStack, level).getUpdatePacket(itemStack, level, player);
+        Integer integer = MapItem.getMapId(itemStack);
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, level);
+        if (mapItemSavedData != null) {
+            return mapItemSavedData.getUpdatePacket(integer, player);
+        }
+        return null;
     }
 
     @Override
@@ -318,18 +323,23 @@ extends ComplexItem {
         }
     }
 
-    protected static void scaleMap(ItemStack itemStack, Level level, int i) {
-        MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, level);
+    private static void scaleMap(ItemStack itemStack, Level level, int i) {
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
         if (mapItemSavedData != null) {
-            MapItem.createAndStoreSavedData(itemStack, level, mapItemSavedData.x, mapItemSavedData.z, Mth.clamp(mapItemSavedData.scale + i, 0, 4), mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension);
+            int j = level.getFreeMapId();
+            level.setMapData(MapItem.makeKey(j), mapItemSavedData.scaled(i));
+            MapItem.storeMapData(itemStack, j);
         }
     }
 
     public static void lockMap(Level level, ItemStack itemStack) {
-        MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, level);
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
         if (mapItemSavedData != null) {
-            MapItemSavedData mapItemSavedData2 = MapItem.createAndStoreSavedData(itemStack, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension);
-            mapItemSavedData2.lockData(mapItemSavedData);
+            int i = level.getFreeMapId();
+            String string = MapItem.makeKey(i);
+            MapItemSavedData mapItemSavedData2 = mapItemSavedData.locked();
+            level.setMapData(string, mapItemSavedData2);
+            MapItem.storeMapData(itemStack, i);
         }
     }
 
@@ -337,13 +347,14 @@ extends ComplexItem {
     @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         MapItemSavedData mapItemSavedData;
-        MapItemSavedData mapItemSavedData2 = mapItemSavedData = level == null ? null : MapItem.getOrCreateSavedData(itemStack, level);
+        Integer integer = MapItem.getMapId(itemStack);
+        MapItemSavedData mapItemSavedData2 = mapItemSavedData = level == null ? null : MapItem.getSavedData(integer, level);
         if (mapItemSavedData != null && mapItemSavedData.locked) {
-            list.add(new TranslatableComponent("filled_map.locked", MapItem.getMapId(itemStack)).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent("filled_map.locked", integer).withStyle(ChatFormatting.GRAY));
         }
         if (tooltipFlag.isAdvanced()) {
             if (mapItemSavedData != null) {
-                list.add(new TranslatableComponent("filled_map.id", MapItem.getMapId(itemStack)).withStyle(ChatFormatting.GRAY));
+                list.add(new TranslatableComponent("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
                 list.add(new TranslatableComponent("filled_map.scale", 1 << mapItemSavedData.scale).withStyle(ChatFormatting.GRAY));
                 list.add(new TranslatableComponent("filled_map.level", mapItemSavedData.scale, 4).withStyle(ChatFormatting.GRAY));
             } else {
@@ -366,8 +377,8 @@ extends ComplexItem {
     public InteractionResult useOn(UseOnContext useOnContext) {
         BlockState blockState = useOnContext.getLevel().getBlockState(useOnContext.getClickedPos());
         if (blockState.is(BlockTags.BANNERS)) {
-            if (!useOnContext.getLevel().isClientSide) {
-                MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
+            MapItemSavedData mapItemSavedData;
+            if (!useOnContext.getLevel().isClientSide && (mapItemSavedData = MapItem.getSavedData(useOnContext.getItemInHand(), useOnContext.getLevel())) != null) {
                 mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
             }
             return InteractionResult.sidedSuccess(useOnContext.getLevel().isClientSide);

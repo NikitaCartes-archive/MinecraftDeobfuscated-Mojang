@@ -25,6 +25,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithLootingCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraft.world.level.storage.loot.predicates.TimeCheck;
+import net.minecraft.world.level.storage.loot.predicates.ValueCheckCondition;
 import net.minecraft.world.level.storage.loot.predicates.WeatherCheck;
 
 public class LootItemConditions {
@@ -44,6 +45,7 @@ public class LootItemConditions {
     public static final LootItemConditionType WEATHER_CHECK = LootItemConditions.register("weather_check", new WeatherCheck.Serializer());
     public static final LootItemConditionType REFERENCE = LootItemConditions.register("reference", new ConditionReference.Serializer());
     public static final LootItemConditionType TIME_CHECK = LootItemConditions.register("time_check", new TimeCheck.Serializer());
+    public static final LootItemConditionType VALUE_CHECK = LootItemConditions.register("value_check", new ValueCheckCondition.Serializer());
 
     private static LootItemConditionType register(String string, Serializer<? extends LootItemCondition> serializer) {
         return Registry.register(Registry.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(serializer));

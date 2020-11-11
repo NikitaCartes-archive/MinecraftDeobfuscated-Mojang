@@ -44,6 +44,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
@@ -60,6 +61,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -415,8 +417,8 @@ extends Level {
     }
 
     @Override
-    public void setMapData(MapItemSavedData mapItemSavedData) {
-        this.mapData.put(mapItemSavedData.getId(), mapItemSavedData);
+    public void setMapData(String string, MapItemSavedData mapItemSavedData) {
+        this.mapData.put(string, mapItemSavedData);
     }
 
     @Override
@@ -517,45 +519,43 @@ extends Level {
         return h * 0.8f + 0.2f;
     }
 
-    public Vec3 getSkyColor(BlockPos blockPos, float f) {
-        float o;
+    public Vec3 getSkyColor(Vec3 vec3, float f) {
         float n;
+        float m;
         float g = this.getTimeOfDay(f);
+        Vec3 vec32 = vec3.subtract(2.0, 2.0, 2.0).scale(0.25);
+        BiomeManager biomeManager = this.getBiomeManager();
+        Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(i, j, k).getSkyColor()));
         float h = Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.5f;
         h = Mth.clamp(h, 0.0f, 1.0f);
-        Biome biome = this.getBiome(blockPos);
-        int i = biome.getSkyColor();
-        float j = (float)(i >> 16 & 0xFF) / 255.0f;
-        float k = (float)(i >> 8 & 0xFF) / 255.0f;
-        float l = (float)(i & 0xFF) / 255.0f;
-        j *= h;
-        k *= h;
-        l *= h;
-        float m = this.getRainLevel(f);
-        if (m > 0.0f) {
-            n = (j * 0.3f + k * 0.59f + l * 0.11f) * 0.6f;
-            o = 1.0f - m * 0.75f;
-            j = j * o + n * (1.0f - o);
-            k = k * o + n * (1.0f - o);
-            l = l * o + n * (1.0f - o);
+        float i2 = (float)vec33.x * h;
+        float j2 = (float)vec33.y * h;
+        float k2 = (float)vec33.z * h;
+        float l = this.getRainLevel(f);
+        if (l > 0.0f) {
+            m = (i2 * 0.3f + j2 * 0.59f + k2 * 0.11f) * 0.6f;
+            n = 1.0f - l * 0.75f;
+            i2 = i2 * n + m * (1.0f - n);
+            j2 = j2 * n + m * (1.0f - n);
+            k2 = k2 * n + m * (1.0f - n);
         }
-        if ((n = this.getThunderLevel(f)) > 0.0f) {
-            o = (j * 0.3f + k * 0.59f + l * 0.11f) * 0.2f;
-            float p = 1.0f - n * 0.75f;
-            j = j * p + o * (1.0f - p);
-            k = k * p + o * (1.0f - p);
-            l = l * p + o * (1.0f - p);
+        if ((m = this.getThunderLevel(f)) > 0.0f) {
+            n = (i2 * 0.3f + j2 * 0.59f + k2 * 0.11f) * 0.2f;
+            float o = 1.0f - m * 0.75f;
+            i2 = i2 * o + n * (1.0f - o);
+            j2 = j2 * o + n * (1.0f - o);
+            k2 = k2 * o + n * (1.0f - o);
         }
         if (this.skyFlashTime > 0) {
-            o = (float)this.skyFlashTime - f;
-            if (o > 1.0f) {
-                o = 1.0f;
+            n = (float)this.skyFlashTime - f;
+            if (n > 1.0f) {
+                n = 1.0f;
             }
-            j = j * (1.0f - (o *= 0.45f)) + 0.8f * o;
-            k = k * (1.0f - o) + 0.8f * o;
-            l = l * (1.0f - o) + 1.0f * o;
+            i2 = i2 * (1.0f - (n *= 0.45f)) + 0.8f * n;
+            j2 = j2 * (1.0f - n) + 0.8f * n;
+            k2 = k2 * (1.0f - n) + 1.0f * n;
         }
-        return new Vec3(j, k, l);
+        return new Vec3(i2, j2, k2);
     }
 
     public Vec3 getCloudColor(float f) {

@@ -36,10 +36,11 @@ extends AbstractContainerMenu {
 
     public abstract int getGridHeight();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract int getSize();
 
     @Environment(value=EnvType.CLIENT)
     public abstract RecipeBookType getRecipeBookType();
+
+    public abstract boolean shouldMoveToInventory(int var1);
 }
 

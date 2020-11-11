@@ -13,17 +13,16 @@ extends SavedData {
     private final Object2IntMap<String> usedAuxIds = new Object2IntOpenHashMap<String>();
 
     public MapIndex() {
-        super("idcounts");
         this.usedAuxIds.defaultReturnValue(-1);
     }
 
-    @Override
-    public void load(CompoundTag compoundTag) {
-        this.usedAuxIds.clear();
+    public static MapIndex load(CompoundTag compoundTag) {
+        MapIndex mapIndex = new MapIndex();
         for (String string : compoundTag.getAllKeys()) {
             if (!compoundTag.contains(string, 99)) continue;
-            this.usedAuxIds.put(string, compoundTag.getInt(string));
+            mapIndex.usedAuxIds.put(string, compoundTag.getInt(string));
         }
+        return mapIndex;
     }
 
     @Override

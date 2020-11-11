@@ -43,6 +43,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -886,26 +887,48 @@ Saddleable {
         return false;
     }
 
+    private SlotAccess createEquipmentSlotAccess(final int i, final Predicate<ItemStack> predicate) {
+        return new SlotAccess(){
+
+            @Override
+            public ItemStack get() {
+                return AbstractHorse.this.inventory.getItem(i);
+            }
+
+            @Override
+            public boolean set(ItemStack itemStack) {
+                if (!predicate.test(itemStack)) {
+                    return false;
+                }
+                AbstractHorse.this.inventory.setItem(i, itemStack);
+                AbstractHorse.this.updateContainerEquipment();
+                return true;
+            }
+        };
+    }
+
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
+    public SlotAccess getSlot(int i) {
+        int k;
         int j = i - 400;
         if (j >= 0 && j < 2 && j < this.inventory.getContainerSize()) {
-            if (j == 0 && !itemStack.is(Items.SADDLE)) {
-                return false;
+            if (j == 0) {
+                if (!this.canWearArmor()) {
+                    return SlotAccess.NULL;
+                }
+                return this.createEquipmentSlotAccess(j, itemStack -> itemStack.isEmpty() || itemStack.is(Items.SADDLE));
             }
-            if (!(j != 1 || this.canWearArmor() && this.isArmor(itemStack))) {
-                return false;
+            if (j == 1) {
+                if (!this.canWearArmor()) {
+                    return SlotAccess.NULL;
+                }
+                return this.createEquipmentSlotAccess(j, itemStack -> itemStack.isEmpty() || this.isArmor((ItemStack)itemStack));
             }
-            this.inventory.setItem(j, itemStack);
-            this.updateContainerEquipment();
-            return true;
         }
-        int k = i - 500 + 2;
-        if (k >= 2 && k < this.inventory.getContainerSize()) {
-            this.inventory.setItem(k, itemStack);
-            return true;
+        if ((k = i - 500 + 2) >= 2 && k < this.inventory.getContainerSize()) {
+            return SlotAccess.forContainer(this.inventory, k);
         }
-        return false;
+        return super.getSlot(i);
     }
 
     @Override

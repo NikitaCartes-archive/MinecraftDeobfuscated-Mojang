@@ -63,7 +63,8 @@ extends Screen {
         this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
         Button button2 = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.shareToLan"), button -> this.minecraft.setScreen(new ShareToLanScreen(this))));
         button2.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
-        Button button22 = this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, new TranslatableComponent("menu.returnToMenu"), button -> {
+        TranslatableComponent component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
+        this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, button -> {
             boolean bl = this.minecraft.isLocalServer();
             boolean bl2 = this.minecraft.isConnectedToRealms();
             button.active = false;
@@ -82,9 +83,6 @@ extends Screen {
                 this.minecraft.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
             }
         }));
-        if (!this.minecraft.isLocalServer()) {
-            button22.setMessage(new TranslatableComponent("menu.disconnect"));
-        }
     }
 
     @Override

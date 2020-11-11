@@ -19,6 +19,7 @@ public class SoundType {
     public static final SoundType WOOL = new SoundType(1.0f, 1.0f, SoundEvents.WOOL_BREAK, SoundEvents.WOOL_STEP, SoundEvents.WOOL_PLACE, SoundEvents.WOOL_HIT, SoundEvents.WOOL_FALL);
     public static final SoundType SAND = new SoundType(1.0f, 1.0f, SoundEvents.SAND_BREAK, SoundEvents.SAND_STEP, SoundEvents.SAND_PLACE, SoundEvents.SAND_HIT, SoundEvents.SAND_FALL);
     public static final SoundType SNOW = new SoundType(1.0f, 1.0f, SoundEvents.SNOW_BREAK, SoundEvents.SNOW_STEP, SoundEvents.SNOW_PLACE, SoundEvents.SNOW_HIT, SoundEvents.SNOW_FALL);
+    public static final SoundType POWDER_SNOW = new SoundType(1.0f, 1.0f, SoundEvents.POWDER_SNOW_BREAK, SoundEvents.POWDER_SNOW_STEP, SoundEvents.POWDER_SNOW_PLACE, SoundEvents.POWDER_SNOW_HIT, SoundEvents.POWDER_SNOW_FALL);
     public static final SoundType LADDER = new SoundType(1.0f, 1.0f, SoundEvents.LADDER_BREAK, SoundEvents.LADDER_STEP, SoundEvents.LADDER_PLACE, SoundEvents.LADDER_HIT, SoundEvents.LADDER_FALL);
     public static final SoundType ANVIL = new SoundType(0.3f, 1.0f, SoundEvents.ANVIL_BREAK, SoundEvents.ANVIL_STEP, SoundEvents.ANVIL_PLACE, SoundEvents.ANVIL_HIT, SoundEvents.ANVIL_FALL);
     public static final SoundType SLIME_BLOCK = new SoundType(1.0f, 1.0f, SoundEvents.SLIME_BLOCK_BREAK, SoundEvents.SLIME_BLOCK_STEP, SoundEvents.SLIME_BLOCK_PLACE, SoundEvents.SLIME_BLOCK_HIT, SoundEvents.SLIME_BLOCK_FALL);

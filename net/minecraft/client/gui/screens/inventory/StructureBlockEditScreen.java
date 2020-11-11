@@ -3,14 +3,17 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.List;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -37,6 +40,8 @@ extends Screen {
     private static final Component DETECT_SIZE_LABEL = new TranslatableComponent("structure_block.detect_size");
     private static final Component SHOW_AIR_LABEL = new TranslatableComponent("structure_block.show_air");
     private static final Component SHOW_BOUNDING_BOX_LABEL = new TranslatableComponent("structure_block.show_boundingbox");
+    private static final ImmutableList<StructureMode> ALL_MODES = ImmutableList.copyOf(StructureMode.values());
+    private static final ImmutableList<StructureMode> DEFAULT_MODES = ALL_MODES.stream().filter(structureMode -> structureMode != StructureMode.DATA).collect(ImmutableList.toImmutableList());
     private final StructureBlockEntity structure;
     private Mirror initialMirror = Mirror.NONE;
     private Rotation initialRotation = Rotation.NONE;
@@ -54,20 +59,17 @@ extends Screen {
     private EditBox integrityEdit;
     private EditBox seedEdit;
     private EditBox dataEdit;
-    private Button doneButton;
-    private Button cancelButton;
     private Button saveButton;
     private Button loadButton;
     private Button rot0Button;
     private Button rot90Button;
     private Button rot180Button;
     private Button rot270Button;
-    private Button modeButton;
     private Button detectButton;
-    private Button entitiesButton;
-    private Button mirrorButton;
-    private Button toggleAirButton;
-    private Button toggleBoundingBox;
+    private CycleButton<Boolean> entitiesButton;
+    private CycleButton<Mirror> mirrorButton;
+    private CycleButton<Boolean> toggleAirButton;
+    private CycleButton<Boolean> toggleBoundingBox;
     private final DecimalFormat decimalFormat = new DecimalFormat("0.0###");
 
     public StructureBlockEditScreen(StructureBlockEntity structureBlockEntity) {
@@ -109,8 +111,14 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-        this.cancelButton = this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
+        this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
+        this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
+        this.initialMirror = this.structure.getMirror();
+        this.initialRotation = this.structure.getRotation();
+        this.initialMode = this.structure.getMode();
+        this.initialEntityIgnoring = this.structure.isIgnoreEntities();
+        this.initialShowAir = this.structure.getShowAir();
+        this.initialShowBoundingBox = this.structure.getShowBoundingBox();
         this.saveButton = this.addButton(new Button(this.width / 2 + 4 + 100, 185, 50, 20, new TranslatableComponent("structure_block.button.save"), button -> {
             if (this.structure.getMode() == StructureMode.SAVE) {
                 this.sendToServer(StructureBlockEntity.UpdateType.SAVE_AREA);
@@ -123,9 +131,9 @@ extends Screen {
                 this.minecraft.setScreen(null);
             }
         }));
-        this.modeButton = this.addButton(new Button(this.width / 2 - 4 - 150, 185, 50, 20, new TextComponent("MODE"), button -> {
-            this.structure.nextMode();
-            this.updateMode();
+        this.addButton(CycleButton.builder(structureMode -> new TranslatableComponent("structure_block.mode." + structureMode.getSerializedName())).withValues((List<StructureMode>)DEFAULT_MODES, (List<StructureMode>)ALL_MODES).displayOnlyValue().withInitialValue(this.initialMode).create(this.width / 2 - 4 - 150, 185, 50, 20, new TextComponent("MODE"), (cycleButton, structureMode) -> {
+            this.structure.setMode((StructureMode)structureMode);
+            this.updateMode((StructureMode)structureMode);
         }));
         this.detectButton = this.addButton(new Button(this.width / 2 + 4 + 100, 120, 50, 20, new TranslatableComponent("structure_block.button.detect_size"), button -> {
             if (this.structure.getMode() == StructureMode.SAVE) {
@@ -133,34 +141,10 @@ extends Screen {
                 this.minecraft.setScreen(null);
             }
         }));
-        this.entitiesButton = this.addButton(new Button(this.width / 2 + 4 + 100, 160, 50, 20, new TextComponent("ENTITIES"), button -> {
-            this.structure.setIgnoreEntities(!this.structure.isIgnoreEntities());
-            this.updateEntitiesButton();
-        }));
-        this.mirrorButton = this.addButton(new Button(this.width / 2 - 20, 185, 40, 20, new TextComponent("MIRROR"), button -> {
-            switch (this.structure.getMirror()) {
-                case NONE: {
-                    this.structure.setMirror(Mirror.LEFT_RIGHT);
-                    break;
-                }
-                case LEFT_RIGHT: {
-                    this.structure.setMirror(Mirror.FRONT_BACK);
-                    break;
-                }
-                case FRONT_BACK: {
-                    this.structure.setMirror(Mirror.NONE);
-                }
-            }
-            this.updateMirrorButton();
-        }));
-        this.toggleAirButton = this.addButton(new Button(this.width / 2 + 4 + 100, 80, 50, 20, new TextComponent("SHOWAIR"), button -> {
-            this.structure.setShowAir(!this.structure.getShowAir());
-            this.updateToggleAirButton();
-        }));
-        this.toggleBoundingBox = this.addButton(new Button(this.width / 2 + 4 + 100, 80, 50, 20, new TextComponent("SHOWBB"), button -> {
-            this.structure.setShowBoundingBox(!this.structure.getShowBoundingBox());
-            this.updateToggleBoundingBox();
-        }));
+        this.entitiesButton = this.addButton(CycleButton.onOffBuilder(this.structure.isIgnoreEntities()).displayOnlyValue().create(this.width / 2 + 4 + 100, 160, 50, 20, INCLUDE_ENTITIES_LABEL, (cycleButton, boolean_) -> this.structure.setIgnoreEntities((boolean)boolean_)));
+        this.mirrorButton = this.addButton(CycleButton.builder(Mirror::symbol).withValues((Mirror[])Mirror.values()).displayOnlyValue().withInitialValue(this.initialMirror).create(this.width / 2 - 20, 185, 40, 20, new TextComponent("MIRROR"), (cycleButton, mirror) -> this.structure.setMirror((Mirror)((Object)mirror))));
+        this.toggleAirButton = this.addButton(CycleButton.onOffBuilder(this.structure.getShowAir()).displayOnlyValue().create(this.width / 2 + 4 + 100, 80, 50, 20, SHOW_AIR_LABEL, (cycleButton, boolean_) -> this.structure.setShowAir((boolean)boolean_)));
+        this.toggleBoundingBox = this.addButton(CycleButton.onOffBuilder(this.structure.getShowBoundingBox()).displayOnlyValue().create(this.width / 2 + 4 + 100, 80, 50, 20, SHOW_BOUNDING_BOX_LABEL, (cycleButton, boolean_) -> this.structure.setShowBoundingBox((boolean)boolean_)));
         this.rot0Button = this.addButton(new Button(this.width / 2 - 1 - 40 - 1 - 40 - 20, 185, 40, 20, new TextComponent("0"), button -> {
             this.structure.setRotation(Rotation.NONE);
             this.updateDirectionButtons();
@@ -228,18 +212,8 @@ extends Screen {
         this.dataEdit.setMaxLength(128);
         this.dataEdit.setValue(this.structure.getMetaData());
         this.children.add(this.dataEdit);
-        this.initialMirror = this.structure.getMirror();
-        this.updateMirrorButton();
-        this.initialRotation = this.structure.getRotation();
         this.updateDirectionButtons();
-        this.initialMode = this.structure.getMode();
-        this.updateMode();
-        this.initialEntityIgnoring = this.structure.isIgnoreEntities();
-        this.updateEntitiesButton();
-        this.initialShowAir = this.structure.getShowAir();
-        this.updateToggleAirButton();
-        this.initialShowBoundingBox = this.structure.getShowBoundingBox();
-        this.updateToggleBoundingBox();
+        this.updateMode(this.initialMode);
         this.setInitialFocus(this.nameEdit);
     }
 
@@ -273,35 +247,6 @@ extends Screen {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
-    private void updateEntitiesButton() {
-        this.entitiesButton.setMessage(CommonComponents.optionStatus(!this.structure.isIgnoreEntities()));
-    }
-
-    private void updateToggleAirButton() {
-        this.toggleAirButton.setMessage(CommonComponents.optionStatus(this.structure.getShowAir()));
-    }
-
-    private void updateToggleBoundingBox() {
-        this.toggleBoundingBox.setMessage(CommonComponents.optionStatus(this.structure.getShowBoundingBox()));
-    }
-
-    private void updateMirrorButton() {
-        Mirror mirror = this.structure.getMirror();
-        switch (mirror) {
-            case NONE: {
-                this.mirrorButton.setMessage(new TextComponent("|"));
-                break;
-            }
-            case LEFT_RIGHT: {
-                this.mirrorButton.setMessage(new TextComponent("< >"));
-                break;
-            }
-            case FRONT_BACK: {
-                this.mirrorButton.setMessage(new TextComponent("^ v"));
-            }
-        }
-    }
-
     private void updateDirectionButtons() {
         this.rot0Button.active = true;
         this.rot90Button.active = true;
@@ -326,7 +271,7 @@ extends Screen {
         }
     }
 
-    private void updateMode() {
+    private void updateMode(StructureMode structureMode) {
         this.nameEdit.setVisible(false);
         this.posXEdit.setVisible(false);
         this.posYEdit.setVisible(false);
@@ -348,7 +293,7 @@ extends Screen {
         this.rot270Button.visible = false;
         this.toggleAirButton.visible = false;
         this.toggleBoundingBox.visible = false;
-        switch (this.structure.getMode()) {
+        switch (structureMode) {
             case SAVE: {
                 this.nameEdit.setVisible(true);
                 this.posXEdit.setVisible(true);
@@ -389,7 +334,6 @@ extends Screen {
                 this.dataEdit.setVisible(true);
             }
         }
-        this.modeButton.setMessage(new TranslatableComponent("structure_block.mode." + this.structure.getMode().getSerializedName()));
     }
 
     private boolean sendToServer(StructureBlockEntity.UpdateType updateType) {

@@ -36,6 +36,11 @@ implements LiquidBlockContainer {
     }
 
     @Override
+    protected boolean canAttachTo(BlockState blockState) {
+        return this.getHeadBlock().canAttachTo(blockState);
+    }
+
+    @Override
     public boolean canPlaceLiquid(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Fluid fluid) {
         return false;
     }

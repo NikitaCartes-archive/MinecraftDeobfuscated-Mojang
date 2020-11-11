@@ -60,10 +60,6 @@ extends ListModel<T> {
         return ImmutableList.of(this.base, this.lid);
     }
 
-    public ModelPart getBase() {
-        return this.base;
-    }
-
     public ModelPart getLid() {
         return this.lid;
     }

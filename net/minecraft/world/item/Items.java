@@ -85,6 +85,7 @@ import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SignItem;
 import net.minecraft.world.item.SimpleFoiledItem;
 import net.minecraft.world.item.SnowballItem;
+import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SpectralArrowItem;
 import net.minecraft.world.item.SplashPotionItem;
@@ -1140,6 +1141,7 @@ public class Items {
     public static final Item WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB = Items.registerBlock(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB = Items.registerBlock(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item LIGHTNING_ROD = Items.registerBlock(Blocks.LIGHTNING_ROD, CreativeModeTab.TAB_REDSTONE);
+    public static final Item POWDER_SNOW_BUCKET = Items.registerItem("powder_snow_bucket", (Item)new SolidBucketItem(Blocks.POWDER_SNOW, SoundEvents.BUCKET_EMPTY_POWDER_SNOW, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
 
     private static Item registerBlock(Block block) {
         return Items.registerBlock(new BlockItem(block, new Item.Properties()));

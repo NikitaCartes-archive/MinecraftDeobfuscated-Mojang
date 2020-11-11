@@ -13,14 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class SavedData {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final String id;
     private boolean dirty;
-
-    public SavedData(String string) {
-        this.id = string;
-    }
-
-    public abstract void load(CompoundTag var1);
 
     public abstract CompoundTag save(CompoundTag var1);
 
@@ -34,10 +27,6 @@ public abstract class SavedData {
 
     public boolean isDirty() {
         return this.dirty;
-    }
-
-    public String getId() {
-        return this.id;
     }
 
     public void save(File file) {

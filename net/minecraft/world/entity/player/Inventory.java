@@ -273,6 +273,10 @@ Nameable {
     }
 
     public void placeItemBackInInventory(ItemStack itemStack) {
+        this.placeItemBackInInventory(itemStack, true);
+    }
+
+    public void placeItemBackInInventory(ItemStack itemStack, boolean bl) {
         while (!itemStack.isEmpty()) {
             int i = this.getSlotWithRemainingSpace(itemStack);
             if (i == -1) {
@@ -283,7 +287,7 @@ Nameable {
                 break;
             }
             int j = itemStack.getMaxStackSize() - this.getItem(i).getCount();
-            if (!this.add(i, itemStack.split(j)) || !(this.player instanceof ServerPlayer)) continue;
+            if (!this.add(i, itemStack.split(j)) || !bl || !(this.player instanceof ServerPlayer)) continue;
             ((ServerPlayer)this.player).connection.send(new ClientboundContainerSetSlotPacket(-2, i, this.getItem(i)));
         }
     }

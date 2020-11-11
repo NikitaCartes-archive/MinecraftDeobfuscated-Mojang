@@ -12,9 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class MapDecoration {
     private final Type type;
-    private byte x;
-    private byte y;
-    private byte rot;
+    private final byte x;
+    private final byte y;
+    private final byte rot;
+    @Nullable
     private final Component name;
 
     public MapDecoration(Type type, byte b, byte c, byte d, @Nullable Component component) {
@@ -64,19 +65,7 @@ public class MapDecoration {
             return false;
         }
         MapDecoration mapDecoration = (MapDecoration)object;
-        if (this.type != mapDecoration.type) {
-            return false;
-        }
-        if (this.rot != mapDecoration.rot) {
-            return false;
-        }
-        if (this.x != mapDecoration.x) {
-            return false;
-        }
-        if (this.y != mapDecoration.y) {
-            return false;
-        }
-        return Objects.equals(this.name, mapDecoration.name);
+        return this.type == mapDecoration.type && this.rot == mapDecoration.rot && this.x == mapDecoration.x && this.y == mapDecoration.y && Objects.equals(this.name, mapDecoration.name);
     }
 
     public int hashCode() {

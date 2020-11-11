@@ -23,6 +23,7 @@ import net.minecraft.realms.RealmsScreen;
 @Environment(value=EnvType.CLIENT)
 public class RealmsBackupInfoScreen
 extends RealmsScreen {
+    private static final Component TEXT_UNKNOWN = new TextComponent("UNKNOWN");
     private final Screen lastScreen;
     private final Backup backup;
     private BackupInfoList backupInfoList;
@@ -80,17 +81,17 @@ extends RealmsScreen {
 
     private Component gameDifficultyMetadata(String string) {
         try {
-            return RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)];
+            return RealmsSlotOptionsScreen.DIFFICULTIES.get(Integer.parseInt(string)).getDisplayName();
         } catch (Exception exception) {
-            return new TextComponent("UNKNOWN");
+            return TEXT_UNKNOWN;
         }
     }
 
     private Component gameModeMetadata(String string) {
         try {
-            return RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)];
+            return RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string)).getDisplayName();
         } catch (Exception exception) {
-            return new TextComponent("UNKNOWN");
+            return TEXT_UNKNOWN;
         }
     }
 

@@ -65,6 +65,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -950,7 +951,7 @@ implements ChunkHolder.PlayerProvider {
         private final Entity entity;
         private final int range;
         private SectionPos lastSectionPos;
-        private final Set<ServerPlayer> seenBy = Sets.newHashSet();
+        private final Set<ServerPlayerConnection> seenBy = Sets.newIdentityHashSet();
 
         public TrackedEntity(Entity entity, int i, int j, boolean bl) {
             this.serverEntity = new ServerEntity(ChunkMap.this.level, entity, j, bl, this::broadcast);
@@ -971,8 +972,8 @@ implements ChunkHolder.PlayerProvider {
         }
 
         public void broadcast(Packet<?> packet) {
-            for (ServerPlayer serverPlayer : this.seenBy) {
-                serverPlayer.connection.send(packet);
+            for (ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+                serverPlayerConnection.send(packet);
             }
         }
 
@@ -984,13 +985,13 @@ implements ChunkHolder.PlayerProvider {
         }
 
         public void broadcastRemoved() {
-            for (ServerPlayer serverPlayer : this.seenBy) {
-                this.serverEntity.removePairing(serverPlayer);
+            for (ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+                this.serverEntity.removePairing(serverPlayerConnection.getPlayer());
             }
         }
 
         public void removePlayer(ServerPlayer serverPlayer) {
-            if (this.seenBy.remove(serverPlayer)) {
+            if (this.seenBy.remove(serverPlayer.connection)) {
                 this.serverEntity.removePairing(serverPlayer);
             }
         }
@@ -1010,10 +1011,10 @@ implements ChunkHolder.PlayerProvider {
                 if (!bl22 && (chunkHolder = ChunkMap.this.getVisibleChunkIfPresent((chunkPos = this.entity.chunkPosition()).toLong())) != null && chunkHolder.getTickingChunk() != null) {
                     boolean bl3 = bl22 = ChunkMap.checkerboardDistance(chunkPos, serverPlayer, false) <= ChunkMap.this.viewDistance;
                 }
-                if (bl22 && this.seenBy.add(serverPlayer)) {
+                if (bl22 && this.seenBy.add(serverPlayer.connection)) {
                     this.serverEntity.addPairing(serverPlayer);
                 }
-            } else if (this.seenBy.remove(serverPlayer)) {
+            } else if (this.seenBy.remove(serverPlayer.connection)) {
                 this.serverEntity.removePairing(serverPlayer);
             }
         }

@@ -68,7 +68,7 @@ implements GameMasterBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(MODE, StructureMode.DATA);
+        return (BlockState)this.defaultBlockState().setValue(MODE, StructureMode.LOAD);
     }
 
     @Override

@@ -18,6 +18,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -103,12 +104,23 @@ MenuProvider {
     }
 
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
+    public SlotAccess getSlot(final int i) {
         if (i >= 0 && i < this.getContainerSize()) {
-            this.setItem(i, itemStack);
-            return true;
+            return new SlotAccess(){
+
+                @Override
+                public ItemStack get() {
+                    return AbstractMinecartContainer.this.getItem(i);
+                }
+
+                @Override
+                public boolean set(ItemStack itemStack) {
+                    AbstractMinecartContainer.this.setItem(i, itemStack);
+                    return true;
+                }
+            };
         }
-        return false;
+        return super.getSlot(i);
     }
 
     @Override

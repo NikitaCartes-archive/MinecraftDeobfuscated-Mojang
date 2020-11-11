@@ -68,6 +68,7 @@ import net.minecraft.client.particle.PlayerCloudParticle;
 import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.ReversePortalParticle;
 import net.minecraft.client.particle.SmokeParticle;
+import net.minecraft.client.particle.SnowflakeParticle;
 import net.minecraft.client.particle.SoulParticle;
 import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.particle.SpitParticle;
@@ -184,6 +185,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.RAIN, WaterDropParticle.Provider::new);
         this.register(ParticleTypes.SMOKE, SmokeParticle.Provider::new);
         this.register(ParticleTypes.SNEEZE, PlayerCloudParticle.SneezeProvider::new);
+        this.register(ParticleTypes.SNOWFLAKE, SnowflakeParticle.Provider::new);
         this.register(ParticleTypes.SPIT, SpitParticle.Provider::new);
         this.register(ParticleTypes.SWEEP_ATTACK, AttackSweepParticle.Provider::new);
         this.register(ParticleTypes.TOTEM_OF_UNDYING, TotemParticle.Provider::new);

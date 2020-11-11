@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public enum CloudStatus {
@@ -30,10 +29,6 @@ public enum CloudStatus {
 
     public String getKey() {
         return this.key;
-    }
-
-    public static CloudStatus byId(int i) {
-        return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
     }
 
     static {

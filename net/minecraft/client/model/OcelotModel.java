@@ -38,7 +38,7 @@ extends AgeableListModel<T> {
         this.leftHindLeg = modelPart.getChild("left_hind_leg");
         this.rightHindLeg = modelPart.getChild("right_hind_leg");
         this.leftFrontLeg = modelPart.getChild("left_front_leg");
-        this.rightFrontLeg = modelPart.getChild("left_front_leg");
+        this.rightFrontLeg = modelPart.getChild("right_front_leg");
     }
 
     public static MeshDefinition createBodyMesh(CubeDeformation cubeDeformation) {

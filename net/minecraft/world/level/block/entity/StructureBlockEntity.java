@@ -47,7 +47,7 @@ extends BlockEntity {
     private BlockPos structureSize = BlockPos.ZERO;
     private Mirror mirror = Mirror.NONE;
     private Rotation rotation = Rotation.NONE;
-    private StructureMode mode = StructureMode.DATA;
+    private StructureMode mode;
     private boolean ignoreEntities = true;
     private boolean powered;
     private boolean showAir;
@@ -57,6 +57,7 @@ extends BlockEntity {
 
     public StructureBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.STRUCTURE_BLOCK, blockPos, blockState);
+        this.mode = blockState.getValue(StructureBlock.MODE);
     }
 
     @Override
@@ -235,27 +236,6 @@ extends BlockEntity {
         BlockState blockState = this.level.getBlockState(this.getBlockPos());
         if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
             this.level.setBlock(this.getBlockPos(), (BlockState)blockState.setValue(StructureBlock.MODE, structureMode), 2);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public void nextMode() {
-        switch (this.getMode()) {
-            case SAVE: {
-                this.setMode(StructureMode.LOAD);
-                break;
-            }
-            case LOAD: {
-                this.setMode(StructureMode.CORNER);
-                break;
-            }
-            case CORNER: {
-                this.setMode(StructureMode.DATA);
-                break;
-            }
-            case DATA: {
-                this.setMode(StructureMode.SAVE);
-            }
         }
     }
 

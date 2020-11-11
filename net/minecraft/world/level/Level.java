@@ -714,7 +714,7 @@ AutoCloseable {
     @Nullable
     public abstract MapItemSavedData getMapData(String var1);
 
-    public abstract void setMapData(MapItemSavedData var1);
+    public abstract void setMapData(String var1, MapItemSavedData var2);
 
     public abstract int getFreeMapId();
 

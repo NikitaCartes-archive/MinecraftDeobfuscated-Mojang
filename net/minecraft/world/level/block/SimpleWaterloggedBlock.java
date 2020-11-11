@@ -3,7 +3,11 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BucketPickup;
@@ -35,12 +39,17 @@ LiquidBlockContainer {
     }
 
     @Override
-    default public Fluid takeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+    default public ItemStack pickupBlock(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
         if (blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
             levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, false), 3);
-            return Fluids.WATER;
+            return new ItemStack(Items.WATER_BUCKET);
         }
-        return Fluids.EMPTY;
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    default public Optional<SoundEvent> getPickupSound() {
+        return Fluids.WATER.getPickupSound();
     }
 }
 

@@ -16,32 +16,16 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ScoreboardSaveData
 extends SavedData {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private Scoreboard scoreboard;
-    private CompoundTag delayLoad;
+    private final Scoreboard scoreboard;
 
-    public ScoreboardSaveData() {
-        super("scoreboard");
-    }
-
-    public void setScoreboard(Scoreboard scoreboard) {
+    public ScoreboardSaveData(Scoreboard scoreboard) {
         this.scoreboard = scoreboard;
-        if (this.delayLoad != null) {
-            this.load(this.delayLoad);
-        }
     }
 
-    @Override
-    public void load(CompoundTag compoundTag) {
-        if (this.scoreboard == null) {
-            this.delayLoad = compoundTag;
-            return;
-        }
+    public ScoreboardSaveData load(CompoundTag compoundTag) {
         this.loadObjectives(compoundTag.getList("Objectives", 10));
         this.scoreboard.loadPlayerScores(compoundTag.getList("PlayerScores", 10));
         if (compoundTag.contains("DisplaySlots", 10)) {
@@ -50,9 +34,10 @@ extends SavedData {
         if (compoundTag.contains("Teams", 9)) {
             this.loadTeams(compoundTag.getList("Teams", 10));
         }
+        return this;
     }
 
-    protected void loadTeams(ListTag listTag) {
+    private void loadTeams(ListTag listTag) {
         for (int i = 0; i < listTag.size(); ++i) {
             Team.CollisionRule collisionRule;
             Team.Visibility visibility;
@@ -95,13 +80,13 @@ extends SavedData {
         }
     }
 
-    protected void loadTeamPlayers(PlayerTeam playerTeam, ListTag listTag) {
+    private void loadTeamPlayers(PlayerTeam playerTeam, ListTag listTag) {
         for (int i = 0; i < listTag.size(); ++i) {
             this.scoreboard.addPlayerToTeam(listTag.getString(i), playerTeam);
         }
     }
 
-    protected void loadDisplaySlots(CompoundTag compoundTag) {
+    private void loadDisplaySlots(CompoundTag compoundTag) {
         for (int i = 0; i < 19; ++i) {
             if (!compoundTag.contains("slot_" + i, 8)) continue;
             String string = compoundTag.getString("slot_" + i);
@@ -110,7 +95,7 @@ extends SavedData {
         }
     }
 
-    protected void loadObjectives(ListTag listTag) {
+    private void loadObjectives(ListTag listTag) {
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
             ObjectiveCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent(objectiveCriteria -> {
@@ -127,10 +112,6 @@ extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
-        if (this.scoreboard == null) {
-            LOGGER.warn("Tried to save scoreboard without having a scoreboard...");
-            return compoundTag;
-        }
         compoundTag.put("Objectives", this.saveObjectives());
         compoundTag.put("PlayerScores", this.scoreboard.savePlayerScores());
         compoundTag.put("Teams", this.saveTeams());
@@ -138,7 +119,7 @@ extends SavedData {
         return compoundTag;
     }
 
-    protected ListTag saveTeams() {
+    private ListTag saveTeams() {
         ListTag listTag = new ListTag();
         Collection<PlayerTeam> collection = this.scoreboard.getPlayerTeams();
         for (PlayerTeam playerTeam : collection) {
@@ -165,7 +146,7 @@ extends SavedData {
         return listTag;
     }
 
-    protected void saveDisplaySlots(CompoundTag compoundTag) {
+    private void saveDisplaySlots(CompoundTag compoundTag) {
         CompoundTag compoundTag2 = new CompoundTag();
         boolean bl = false;
         for (int i = 0; i < 19; ++i) {
@@ -179,7 +160,7 @@ extends SavedData {
         }
     }
 
-    protected ListTag saveObjectives() {
+    private ListTag saveObjectives() {
         ListTag listTag = new ListTag();
         Collection<Objective> collection = this.scoreboard.getObjectives();
         for (Objective objective : collection) {

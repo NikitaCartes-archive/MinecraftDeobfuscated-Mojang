@@ -18,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ResourceLocationArgument
@@ -28,6 +30,7 @@ implements ArgumentType<ResourceLocation> {
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("recipe.notFound", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(object -> new TranslatableComponent("predicate.unknown", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(object -> new TranslatableComponent("attribute.unknown", object));
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(object -> new TranslatableComponent("item_modifier.unknown", object));
 
     public static ResourceLocationArgument id() {
         return new ResourceLocationArgument();
@@ -56,6 +59,16 @@ implements ArgumentType<ResourceLocation> {
             throw ERROR_UNKNOWN_PREDICATE.create(resourceLocation);
         }
         return lootItemCondition;
+    }
+
+    public static LootItemFunction getItemModifier(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
+        ItemModifierManager itemModifierManager = commandContext.getSource().getServer().getItemModifierManager();
+        LootItemFunction lootItemFunction = itemModifierManager.get(resourceLocation);
+        if (lootItemFunction == null) {
+            throw ERROR_UNKNOWN_ITEM_MODIFIER.create(resourceLocation);
+        }
+        return lootItemFunction;
     }
 
     public static Attribute getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {

@@ -5,11 +5,11 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -47,11 +47,11 @@ implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
         poseStack.mulPose(direction.getRotation());
         poseStack.scale(1.0f, -1.0f, -1.0f);
         poseStack.translate(0.0, -1.0, 0.0);
+        ModelPart modelPart = this.model.getLid();
+        modelPart.setPos(0.0f, 24.0f - shulkerBoxBlockEntity.getProgress(f) * 0.5f * 16.0f, 0.0f);
+        modelPart.yRot = 270.0f * shulkerBoxBlockEntity.getProgress(f) * ((float)Math.PI / 180);
         VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityCutoutNoCull);
-        this.model.getBase().render(poseStack, vertexConsumer, i, j);
-        poseStack.translate(0.0, -shulkerBoxBlockEntity.getProgress(f) * 0.5f, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0f * shulkerBoxBlockEntity.getProgress(f)));
-        this.model.getLid().render(poseStack, vertexConsumer, i, j);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 }

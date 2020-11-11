@@ -31,7 +31,7 @@ extends ServerBossEvent {
     public CustomBossEvent(ResourceLocation resourceLocation, Component component) {
         super(component, BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.PROGRESS);
         this.id = resourceLocation;
-        this.setPercent(0.0f);
+        this.setProgress(0.0f);
     }
 
     public ResourceLocation getTextId() {
@@ -70,12 +70,12 @@ extends ServerBossEvent {
 
     public void setValue(int i) {
         this.value = i;
-        this.setPercent(Mth.clamp((float)i / (float)this.max, 0.0f, 1.0f));
+        this.setProgress(Mth.clamp((float)i / (float)this.max, 0.0f, 1.0f));
     }
 
     public void setMax(int i) {
         this.max = i;
-        this.setPercent(Mth.clamp((float)this.value / (float)i, 0.0f, 1.0f));
+        this.setProgress(Mth.clamp((float)this.value / (float)i, 0.0f, 1.0f));
     }
 
     public final Component getDisplayName() {

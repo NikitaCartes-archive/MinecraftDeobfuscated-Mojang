@@ -71,7 +71,6 @@ implements NeutralMob {
     private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BLOCK_STATE);
     private static final EntityDataAccessor<Boolean> DATA_CREEPY = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_STARED_AT = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
-    private static final Predicate<LivingEntity> ENDERMITE_SELECTOR = livingEntity -> livingEntity instanceof Endermite && ((Endermite)livingEntity).isPlayerSpawned();
     private int lastStareSound = Integer.MIN_VALUE;
     private int targetChangeTime;
     private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
@@ -96,7 +95,7 @@ implements NeutralMob {
         this.goalSelector.addGoal(11, new EndermanTakeBlockGoal(this));
         this.targetSelector.addGoal(1, new EndermanLookForPlayerGoal(this, this::isAngryAt));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this, new Class[0]));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Endermite>(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Endermite>(this, Endermite.class, true, false));
         this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<EnderMan>(this, false));
     }
 

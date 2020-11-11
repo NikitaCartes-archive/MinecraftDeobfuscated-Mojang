@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -113,20 +114,36 @@ extends AbstractHorse {
     }
 
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
+    public SlotAccess getSlot(int i) {
         if (i == 499) {
-            if (this.hasChest() && itemStack.isEmpty()) {
-                this.setChest(false);
-                this.createInventory();
-                return true;
-            }
-            if (!this.hasChest() && itemStack.is(Blocks.CHEST.asItem())) {
-                this.setChest(true);
-                this.createInventory();
-                return true;
-            }
+            return new SlotAccess(){
+
+                @Override
+                public ItemStack get() {
+                    return AbstractChestedHorse.this.hasChest() ? new ItemStack(Items.CHEST) : ItemStack.EMPTY;
+                }
+
+                @Override
+                public boolean set(ItemStack itemStack) {
+                    if (itemStack.isEmpty()) {
+                        if (AbstractChestedHorse.this.hasChest()) {
+                            AbstractChestedHorse.this.setChest(false);
+                            AbstractChestedHorse.this.createInventory();
+                        }
+                        return true;
+                    }
+                    if (itemStack.is(Items.CHEST)) {
+                        if (!AbstractChestedHorse.this.hasChest()) {
+                            AbstractChestedHorse.this.setChest(true);
+                            AbstractChestedHorse.this.createInventory();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            };
         }
-        return super.setSlot(i, itemStack);
+        return super.getSlot(i);
     }
 
     @Override

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 public abstract class BossEvent {
     private final UUID id;
     protected Component name;
-    protected float percent;
+    protected float progress;
     protected BossBarColor color;
     protected BossBarOverlay overlay;
     protected boolean darkenScreen;
@@ -22,7 +22,7 @@ public abstract class BossEvent {
         this.name = component;
         this.color = bossBarColor;
         this.overlay = bossBarOverlay;
-        this.percent = 1.0f;
+        this.progress = 1.0f;
     }
 
     public UUID getId() {
@@ -37,12 +37,12 @@ public abstract class BossEvent {
         this.name = component;
     }
 
-    public float getPercent() {
-        return this.percent;
+    public float getProgress() {
+        return this.progress;
     }
 
-    public void setPercent(float f) {
-        this.percent = f;
+    public void setProgress(float f) {
+        this.progress = f;
     }
 
     public BossBarColor getColor() {

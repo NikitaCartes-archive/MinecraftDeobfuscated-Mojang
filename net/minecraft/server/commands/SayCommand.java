@@ -18,12 +18,12 @@ public class SayCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("say").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
             Component component = MessageArgument.getMessage(commandContext, "message");
-            TranslatableComponent translatableComponent = new TranslatableComponent("chat.type.announcement", ((CommandSourceStack)commandContext.getSource()).getDisplayName(), component);
+            TranslatableComponent component2 = new TranslatableComponent("chat.type.announcement", ((CommandSourceStack)commandContext.getSource()).getDisplayName(), component);
             Entity entity = ((CommandSourceStack)commandContext.getSource()).getEntity();
             if (entity != null) {
-                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(translatableComponent, ChatType.CHAT, entity.getUUID());
+                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(component2, ChatType.CHAT, entity.getUUID());
             } else {
-                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(translatableComponent, ChatType.SYSTEM, Util.NIL_UUID);
+                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(component2, ChatType.SYSTEM, Util.NIL_UUID);
             }
             return 1;
         })));

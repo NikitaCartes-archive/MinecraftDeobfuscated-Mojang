@@ -97,6 +97,11 @@ public class GsonAdapterFactory {
             this.typeGetter = function;
         }
 
+        public Builder<E, T> withDefaultSerializer(T serializerType, DefaultSerializer<? extends E> defaultSerializer) {
+            this.defaultType = Pair.of(serializerType, defaultSerializer);
+            return this;
+        }
+
         public Object build() {
             return new JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, this.defaultType);
         }

@@ -38,6 +38,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
@@ -83,13 +84,14 @@ public class ServerEntity {
             this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
         }
         if (this.entity instanceof ItemFrame && this.tickCount % 10 == 0) {
+            Integer integer;
+            MapItemSavedData mapItemSavedData;
             ItemFrame itemFrame = (ItemFrame)this.entity;
             ItemStack itemStack = itemFrame.getItem();
-            if (itemStack.getItem() instanceof MapItem) {
-                MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.level);
+            if (itemStack.getItem() instanceof MapItem && (mapItemSavedData = MapItem.getSavedData(integer = MapItem.getMapId(itemStack), (Level)this.level)) != null) {
                 for (ServerPlayer serverPlayer : this.level.players()) {
                     mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
-                    Packet<?> packet = ((MapItem)itemStack.getItem()).getUpdatePacket(itemStack, this.level, serverPlayer);
+                    Packet<?> packet = mapItemSavedData.getUpdatePacket(integer, serverPlayer);
                     if (packet == null) continue;
                     serverPlayer.connection.send(packet);
                 }

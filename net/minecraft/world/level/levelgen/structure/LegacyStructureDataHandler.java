@@ -159,9 +159,9 @@ public class LegacyStructureDataHandler {
                 this.dataMap.computeIfAbsent(string3, string -> new Long2ObjectOpenHashMap()).put(l, compoundTag2);
             }
             String string5 = string2 + "_index";
-            StructureFeatureIndexSavedData structureFeatureIndexSavedData = dimensionDataStorage.computeIfAbsent(() -> new StructureFeatureIndexSavedData(string5), string5);
+            StructureFeatureIndexSavedData structureFeatureIndexSavedData = dimensionDataStorage.computeIfAbsent(StructureFeatureIndexSavedData::load, StructureFeatureIndexSavedData::new, string5);
             if (structureFeatureIndexSavedData.getAll().isEmpty()) {
-                StructureFeatureIndexSavedData structureFeatureIndexSavedData2 = new StructureFeatureIndexSavedData(string5);
+                StructureFeatureIndexSavedData structureFeatureIndexSavedData2 = new StructureFeatureIndexSavedData();
                 this.indexMap.put(string2, structureFeatureIndexSavedData2);
                 for (String string6 : compoundTag.getAllKeys()) {
                     CompoundTag compoundTag3 = compoundTag.getCompound(string6);

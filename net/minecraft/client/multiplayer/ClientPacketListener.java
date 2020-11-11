@@ -1083,18 +1083,18 @@ implements ClientGamePacketListener {
     public void handleMapItemData(ClientboundMapItemDataPacket clientboundMapItemDataPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundMapItemDataPacket, this, this.minecraft);
         MapRenderer mapRenderer = this.minecraft.gameRenderer.getMapRenderer();
-        String string = MapItem.makeKey(clientboundMapItemDataPacket.getMapId());
+        int i = clientboundMapItemDataPacket.getMapId();
+        String string = MapItem.makeKey(i);
         MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(string);
         if (mapItemSavedData == null) {
-            MapItemSavedData mapItemSavedData2;
-            mapItemSavedData = new MapItemSavedData(string);
-            if (mapRenderer.getMapInstanceIfExists(string) != null && (mapItemSavedData2 = mapRenderer.getData(mapRenderer.getMapInstanceIfExists(string))) != null) {
-                mapItemSavedData = mapItemSavedData2;
+            mapItemSavedData = mapRenderer.retrieveMapFromRenderer(i);
+            if (mapItemSavedData == null) {
+                mapItemSavedData = MapItemSavedData.createForClient(clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension());
             }
-            this.minecraft.level.setMapData(mapItemSavedData);
+            this.minecraft.level.setMapData(string, mapItemSavedData);
         }
         clientboundMapItemDataPacket.applyToMap(mapItemSavedData);
-        mapRenderer.update(mapItemSavedData);
+        mapRenderer.update(i, mapItemSavedData);
     }
 
     @Override

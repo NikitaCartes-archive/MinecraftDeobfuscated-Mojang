@@ -29,7 +29,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.commands.ReplaceItemCommand;
+import net.minecraft.server.commands.ItemCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -37,6 +37,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +69,7 @@ public class LootCommand {
     private static Container getContainer(CommandSourceStack commandSourceStack, BlockPos blockPos) throws CommandSyntaxException {
         BlockEntity blockEntity = commandSourceStack.getLevel().getBlockEntity(blockPos);
         if (!(blockEntity instanceof Container)) {
-            throw ReplaceItemCommand.ERROR_NOT_A_CONTAINER.create();
+            throw ItemCommands.ERROR_TARGET_NOT_A_CONTAINER.create(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         }
         return (Container)((Object)blockEntity);
     }
@@ -109,7 +110,7 @@ public class LootCommand {
         Container container = LootCommand.getContainer(commandSourceStack, blockPos);
         int k = container.getContainerSize();
         if (i < 0 || i >= k) {
-            throw ReplaceItemCommand.ERROR_INAPPLICABLE_SLOT.create(i);
+            throw ItemCommands.ERROR_TARGET_INAPPLICABLE_SLOT.create(i);
         }
         ArrayList<ItemStack> list2 = Lists.newArrayListWithCapacity(list.size());
         for (int l = 0; l < j; ++l) {
@@ -142,9 +143,9 @@ public class LootCommand {
 
     private static void setSlots(Entity entity, List<ItemStack> list, int i, int j, List<ItemStack> list2) {
         for (int k = 0; k < j; ++k) {
-            ItemStack itemStack;
-            ItemStack itemStack2 = itemStack = k < list.size() ? list.get(k) : ItemStack.EMPTY;
-            if (!entity.setSlot(i + k, itemStack.copy())) continue;
+            ItemStack itemStack = k < list.size() ? list.get(k) : ItemStack.EMPTY;
+            SlotAccess slotAccess = entity.getSlot(i + k);
+            if (slotAccess == SlotAccess.NULL || !slotAccess.set(itemStack.copy())) continue;
             list2.add(itemStack);
         }
     }

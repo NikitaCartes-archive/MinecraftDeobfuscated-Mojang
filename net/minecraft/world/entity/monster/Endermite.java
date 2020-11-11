@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.state.BlockState;
 public class Endermite
 extends Monster {
     private int life;
-    private boolean playerSpawned;
 
     public Endermite(EntityType<? extends Endermite> entityType, Level level) {
         super((EntityType<? extends Monster>)entityType, level);
@@ -90,14 +89,12 @@ extends Monster {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.life = compoundTag.getInt("Lifetime");
-        this.playerSpawned = compoundTag.getBoolean("PlayerSpawned");
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         compoundTag.putInt("Lifetime", this.life);
-        compoundTag.putBoolean("PlayerSpawned", this.playerSpawned);
     }
 
     @Override
@@ -115,14 +112,6 @@ extends Monster {
     @Override
     public double getMyRidingOffset() {
         return 0.1;
-    }
-
-    public boolean isPlayerSpawned() {
-        return this.playerSpawned;
-    }
-
-    public void setPlayerSpawned(boolean bl) {
-        this.playerSpawned = bl;
     }
 
     @Override

@@ -73,10 +73,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -93,6 +95,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -105,10 +109,12 @@ import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -128,6 +134,7 @@ public abstract class LivingEntity
 extends Entity {
     private static final UUID SPEED_MODIFIER_SPRINTING_UUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
     private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
+    private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
     private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(SPEED_MODIFIER_SPRINTING_UUID, "Sprinting speed boost", (double)0.3f, AttributeModifier.Operation.MULTIPLY_TOTAL);
     protected static final EntityDataAccessor<Byte> DATA_LIVING_ENTITY_FLAGS = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Float> DATA_HEALTH_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
@@ -343,7 +350,7 @@ extends Entity {
                 this.onChangedBlock(blockPos);
             }
         }
-        if (this.isAlive() && this.isInWaterRainOrBubble()) {
+        if (this.isAlive() && (this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow)) {
             this.clearFire();
         }
         if (this.hurtTime > 0) {
@@ -428,6 +435,28 @@ extends Entity {
                 ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
                 itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.FEET));
             }
+        }
+    }
+
+    protected void removeFrost() {
+        AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (attributeInstance == null) {
+            return;
+        }
+        if (attributeInstance.getModifier(SPEED_MODIFIER_POWDER_SNOW_UUID) != null) {
+            attributeInstance.removeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID);
+        }
+    }
+
+    protected void tryAddFrost() {
+        int i;
+        if (!this.getBlockStateOn().isAir() && (i = this.getTicksFrozen()) > 0) {
+            AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (attributeInstance == null) {
+                return;
+            }
+            float f = -0.05f * this.getPercentFrozen();
+            attributeInstance.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID, "Powder snow slow", (double)f, AttributeModifier.Operation.ADDITION));
         }
     }
 
@@ -918,7 +947,7 @@ extends Entity {
             } else if (damageSource instanceof EntityDamageSource && ((EntityDamageSource)damageSource).isThorns()) {
                 this.level.broadcastEntityEvent(this, (byte)33);
             } else {
-                int b = damageSource == DamageSource.DROWN ? 36 : (damageSource.isFire() ? 37 : (damageSource == DamageSource.SWEET_BERRY_BUSH ? 44 : 2));
+                int b = damageSource == DamageSource.DROWN ? 36 : (damageSource.isFire() ? 37 : (damageSource == DamageSource.SWEET_BERRY_BUSH ? 44 : (damageSource == DamageSource.FREEZE ? 57 : 2)));
                 this.level.broadcastEntityEvent(this, (byte)b);
             }
             if (damageSource != DamageSource.DROWN && (!bl || f > 0.0f)) {
@@ -1395,13 +1424,15 @@ extends Entity {
             case 33: 
             case 36: 
             case 37: 
-            case 44: {
+            case 44: 
+            case 57: {
                 DamageSource damageSource;
                 SoundEvent soundEvent;
                 boolean bl = b == 33;
                 boolean bl2 = b == 36;
                 boolean bl3 = b == 37;
                 boolean bl4 = b == 44;
+                boolean bl5 = b == 57;
                 this.animationSpeed = 1.5f;
                 this.invulnerableTime = 20;
                 this.hurtTime = this.hurtDuration = 10;
@@ -1409,7 +1440,7 @@ extends Entity {
                 if (bl) {
                     this.playSound(SoundEvents.THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 }
-                if ((soundEvent = this.getHurtSound(damageSource = bl3 ? DamageSource.ON_FIRE : (bl2 ? DamageSource.DROWN : (bl4 ? DamageSource.SWEET_BERRY_BUSH : DamageSource.GENERIC)))) != null) {
+                if ((soundEvent = this.getHurtSound(damageSource = bl3 ? DamageSource.ON_FIRE : (bl2 ? DamageSource.DROWN : (bl4 ? DamageSource.SWEET_BERRY_BUSH : (bl5 ? DamageSource.FREEZE : DamageSource.GENERIC))))) != null) {
                     this.playSound(soundEvent, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 }
                 this.hurt(DamageSource.GENERIC, 0.0f);
@@ -1808,7 +1839,7 @@ extends Entity {
         this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
         this.move(MoverType.SELF, this.getDeltaMovement());
         Vec3 vec32 = this.getDeltaMovement();
-        if ((this.horizontalCollision || this.jumping) && this.onClimbable()) {
+        if ((this.horizontalCollision || this.jumping) && (this.onClimbable() || this.getFeetBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
             vec32 = new Vec3(vec32.x, 0.2, vec32.z);
         }
         return vec32;
@@ -2139,6 +2170,19 @@ extends Entity {
         this.updateFallFlying();
         AABB aABB = this.getBoundingBox();
         this.travel(new Vec3(this.xxa, this.yya, this.zza));
+        this.level.getProfiler().pop();
+        this.level.getProfiler().push("freezing");
+        int m = this.getTicksFrozen();
+        if (this.bodyIsInPowderSnow && this.canFreeze()) {
+            this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
+        } else {
+            this.setTicksFrozen(Math.max(0, m - 2));
+        }
+        this.removeFrost();
+        this.tryAddFrost();
+        if (this.tickCount % 60 == 0 && this.isFullyFrozen() && this.canFreeze()) {
+            this.hurt(DamageSource.FREEZE, 1.0f);
+        }
         this.level.getProfiler().pop();
         this.level.getProfiler().push("push");
         if (this.autoSpinAttackTicks > 0) {
@@ -2792,6 +2836,67 @@ extends Entity {
             return this.getBoundingBox().inflate(0.5, 0.5, 0.5);
         }
         return super.getBoundingBoxForCulling();
+    }
+
+    public static EquipmentSlot getEquipmentSlotForItem(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        if (itemStack.is(Items.CARVED_PUMPKIN) || item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
+            return EquipmentSlot.HEAD;
+        }
+        if (item instanceof ArmorItem) {
+            return ((ArmorItem)item).getSlot();
+        }
+        if (itemStack.is(Items.ELYTRA)) {
+            return EquipmentSlot.CHEST;
+        }
+        if (itemStack.is(Items.SHIELD)) {
+            return EquipmentSlot.OFFHAND;
+        }
+        return EquipmentSlot.MAINHAND;
+    }
+
+    private static SlotAccess createEquipmentSlotAccess(LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
+        if (equipmentSlot == EquipmentSlot.HEAD || equipmentSlot == EquipmentSlot.MAINHAND || equipmentSlot == EquipmentSlot.OFFHAND) {
+            return SlotAccess.forEquipmentSlot(livingEntity, equipmentSlot);
+        }
+        return SlotAccess.forEquipmentSlot(livingEntity, equipmentSlot, itemStack -> itemStack.isEmpty() || Mob.getEquipmentSlotForItem(itemStack) == equipmentSlot);
+    }
+
+    @Nullable
+    private static EquipmentSlot getEquipmentSlot(int i) {
+        if (i == 100 + EquipmentSlot.HEAD.getIndex()) {
+            return EquipmentSlot.HEAD;
+        }
+        if (i == 100 + EquipmentSlot.CHEST.getIndex()) {
+            return EquipmentSlot.CHEST;
+        }
+        if (i == 100 + EquipmentSlot.LEGS.getIndex()) {
+            return EquipmentSlot.LEGS;
+        }
+        if (i == 100 + EquipmentSlot.FEET.getIndex()) {
+            return EquipmentSlot.FEET;
+        }
+        if (i == 98) {
+            return EquipmentSlot.MAINHAND;
+        }
+        if (i == 99) {
+            return EquipmentSlot.OFFHAND;
+        }
+        return null;
+    }
+
+    @Override
+    public SlotAccess getSlot(int i) {
+        EquipmentSlot equipmentSlot = LivingEntity.getEquipmentSlot(i);
+        if (equipmentSlot != null) {
+            return LivingEntity.createEquipmentSlotAccess(this, equipmentSlot);
+        }
+        return super.getSlot(i);
+    }
+
+    @Override
+    public boolean canFreeze() {
+        return !this.isSpectator();
     }
 }
 

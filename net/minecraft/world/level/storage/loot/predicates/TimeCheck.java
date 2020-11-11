@@ -6,10 +6,12 @@ package net.minecraft.world.level.storage.loot.predicates;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
@@ -19,16 +21,21 @@ public class TimeCheck
 implements LootItemCondition {
     @Nullable
     private final Long period;
-    private final RandomValueBounds value;
+    private final IntRange value;
 
-    private TimeCheck(@Nullable Long long_, RandomValueBounds randomValueBounds) {
+    private TimeCheck(@Nullable Long long_, IntRange intRange) {
         this.period = long_;
-        this.value = randomValueBounds;
+        this.value = intRange;
     }
 
     @Override
     public LootItemConditionType getType() {
         return LootItemConditions.TIME_CHECK;
+    }
+
+    @Override
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return this.value.getReferencedContextParams();
     }
 
     @Override
@@ -38,7 +45,7 @@ implements LootItemCondition {
         if (this.period != null) {
             l %= this.period.longValue();
         }
-        return this.value.matchesValue((int)l);
+        return this.value.test(lootContext, (int)l);
     }
 
     @Override
@@ -57,8 +64,8 @@ implements LootItemCondition {
         @Override
         public TimeCheck deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             Long long_ = jsonObject.has("period") ? Long.valueOf(GsonHelper.getAsLong(jsonObject, "period")) : null;
-            RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "value", jsonDeserializationContext, RandomValueBounds.class);
-            return new TimeCheck(long_, randomValueBounds);
+            IntRange intRange = GsonHelper.getAsObject(jsonObject, "value", jsonDeserializationContext, IntRange.class);
+            return new TimeCheck(long_, intRange);
         }
 
         @Override

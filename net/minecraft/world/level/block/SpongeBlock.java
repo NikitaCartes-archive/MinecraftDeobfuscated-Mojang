@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 
 public class SpongeBlock
@@ -62,7 +61,7 @@ extends Block {
                 FluidState fluidState = level.getFluidState(blockPos3);
                 Material material = blockState.getMaterial();
                 if (!fluidState.is(FluidTags.WATER)) continue;
-                if (blockState.getBlock() instanceof BucketPickup && ((BucketPickup)((Object)blockState.getBlock())).takeLiquid(level, blockPos3, blockState) != Fluids.EMPTY) {
+                if (blockState.getBlock() instanceof BucketPickup && !((BucketPickup)((Object)blockState.getBlock())).pickupBlock(level, blockPos3, blockState).isEmpty()) {
                     ++i;
                     if (j >= 6) continue;
                     queue.add(new Tuple<BlockPos, Integer>(blockPos3, j + 1));

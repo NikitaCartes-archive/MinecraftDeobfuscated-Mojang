@@ -73,6 +73,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -188,6 +189,7 @@ CommandSource {
     private static final EntityDataAccessor<Boolean> DATA_SILENT = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_NO_GRAVITY = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Pose> DATA_POSE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.POSE);
+    private static final EntityDataAccessor<Integer> DATA_TICKS_FROZEN = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);
     private EntityInLevelCallback levelCallback = EntityInLevelCallback.NULL;
     private Vec3 packetCoordinates;
     public boolean noCulling;
@@ -205,6 +207,7 @@ CommandSource {
     private long pistonDeltasGameTime;
     private EntityDimensions dimensions;
     private float eyeHeight;
+    protected boolean bodyIsInPowderSnow;
     private float crystalSoundIntensity;
     private int lastCrystalSoundPlayTick;
 
@@ -224,6 +227,7 @@ CommandSource {
         this.entityData.define(DATA_SILENT, false);
         this.entityData.define(DATA_NO_GRAVITY, false);
         this.entityData.define(DATA_POSE, Pose.STANDING);
+        this.entityData.define(DATA_TICKS_FROZEN, 0);
         this.defineSynchedData();
         this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
     }
@@ -406,6 +410,7 @@ CommandSource {
         if (this.canSpawnSprintParticle()) {
             this.spawnSprintParticle();
         }
+        this.bodyIsInPowderSnow = false;
         this.updateInWaterStateAndDoFluidPushing();
         this.updateFluidOnEyes();
         this.updateSwimming();
@@ -423,6 +428,7 @@ CommandSource {
                 }
                 this.setRemainingFireTicks(this.remainingFireTicks - 1);
             }
+            this.setTicksFrozen(0);
         }
         if (this.isInLava()) {
             this.lavaHurt();
@@ -556,7 +562,7 @@ CommandSource {
             double d = vec32.x;
             double e = vec32.y;
             double f = vec32.z;
-            if (!blockState2.is(BlockTags.CLIMBABLE)) {
+            if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
                 e = 0.0;
             }
             this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6);
@@ -592,7 +598,7 @@ CommandSource {
         if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
-        if (this.isInWaterRainOrBubble() && this.isOnFire()) {
+        if ((this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow) && this.isOnFire()) {
             this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
@@ -822,7 +828,7 @@ CommandSource {
             this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
             this.lastCrystalSoundPlayTick = this.tickCount;
         }
-        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(Blocks.SNOW) ? blockState2.getSoundType() : blockState.getSoundType();
+        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(BlockTags.SNOW_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
         this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15f, soundType.getPitch());
     }
 
@@ -1303,6 +1309,7 @@ CommandSource {
     public CompoundTag saveWithoutId(CompoundTag compoundTag) {
         try {
             ListTag listTag;
+            int i;
             if (this.vehicle != null) {
                 compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.getY(), this.vehicle.getZ()));
             } else {
@@ -1333,6 +1340,9 @@ CommandSource {
             }
             if (this.glowing) {
                 compoundTag.putBoolean("Glowing", this.glowing);
+            }
+            if ((i = this.getTicksFrozen()) > 0) {
+                compoundTag.putInt("TicksFrozen", this.getTicksFrozen());
             }
             if (!this.tags.isEmpty()) {
                 listTag = new ListTag();
@@ -1408,6 +1418,7 @@ CommandSource {
             this.setSilent(compoundTag.getBoolean("Silent"));
             this.setNoGravity(compoundTag.getBoolean("NoGravity"));
             this.setGlowing(compoundTag.getBoolean("Glowing"));
+            this.setTicksFrozen(compoundTag.getInt("TicksFrozen"));
             if (compoundTag.contains("Tags", 9)) {
                 this.tags.clear();
                 ListTag listTag4 = compoundTag.getList("Tags", 8);
@@ -1878,6 +1889,27 @@ CommandSource {
         this.entityData.set(DATA_AIR_SUPPLY_ID, i);
     }
 
+    public int getTicksFrozen() {
+        return this.entityData.get(DATA_TICKS_FROZEN);
+    }
+
+    public void setTicksFrozen(int i) {
+        this.entityData.set(DATA_TICKS_FROZEN, i);
+    }
+
+    public float getPercentFrozen() {
+        int i = this.getTicksRequiredToFreeze();
+        return (float)Math.min(this.getTicksFrozen(), i) / (float)i;
+    }
+
+    public boolean isFullyFrozen() {
+        return this.getTicksFrozen() >= this.getTicksRequiredToFreeze();
+    }
+
+    public int getTicksRequiredToFreeze() {
+        return 300;
+    }
+
     public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
         this.setRemainingFireTicks(this.remainingFireTicks + 1);
         if (this.remainingFireTicks == 0) {
@@ -2292,8 +2324,8 @@ CommandSource {
         return new Vec3(0.0, this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
-    public boolean setSlot(int i, ItemStack itemStack) {
-        return false;
+    public SlotAccess getSlot(int i) {
+        return SlotAccess.NULL;
     }
 
     @Override
@@ -2696,6 +2728,14 @@ CommandSource {
     @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return null;
+    }
+
+    public void setBodyIsInPowderSnow(boolean bl) {
+        this.bodyIsInPowderSnow = bl;
+    }
+
+    public boolean canFreeze() {
+        return false;
     }
 
     public final boolean isRemoved() {

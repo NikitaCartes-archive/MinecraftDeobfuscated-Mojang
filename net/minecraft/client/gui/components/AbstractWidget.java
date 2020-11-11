@@ -98,7 +98,11 @@ GuiEventListener {
     }
 
     protected MutableComponent createNarrationMessage() {
-        return new TranslatableComponent("gui.narrate.button", this.getMessage());
+        return AbstractWidget.wrapDefaultNarrationMessage(this.getMessage());
+    }
+
+    public static MutableComponent wrapDefaultNarrationMessage(Component component) {
+        return new TranslatableComponent("gui.narrate.button", component);
     }
 
     public void renderButton(PoseStack poseStack, int i, int j, float f) {

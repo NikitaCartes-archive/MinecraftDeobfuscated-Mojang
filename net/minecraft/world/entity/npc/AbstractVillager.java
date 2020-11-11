@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -220,16 +221,12 @@ Merchant {
     }
 
     @Override
-    public boolean setSlot(int i, ItemStack itemStack) {
-        if (super.setSlot(i, itemStack)) {
-            return true;
-        }
+    public SlotAccess getSlot(int i) {
         int j = i - 300;
         if (j >= 0 && j < this.inventory.getContainerSize()) {
-            this.inventory.setItem(j, itemStack);
-            return true;
+            return SlotAccess.forContainer(this.inventory, j);
         }
-        return false;
+        return super.getSlot(i);
     }
 
     @Override

@@ -65,6 +65,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -102,6 +103,11 @@ public final class ItemStack {
     private boolean cachedBreakBlockResult;
     private BlockInWorld cachedPlaceBlock;
     private boolean cachedPlaceBlockResult;
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<TooltipComponent> getTooltipImage() {
+        return this.getItem().getTooltipImage(this);
+    }
 
     public ItemStack(ItemLike itemLike) {
         this(itemLike, 1);
@@ -558,14 +564,15 @@ public final class ItemStack {
     @Environment(value=EnvType.CLIENT)
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
         int i;
+        Integer integer;
         ArrayList<Component> list = Lists.newArrayList();
         MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName()).withStyle(this.getRarity().color);
         if (this.hasCustomHoverName()) {
             mutableComponent.withStyle(ChatFormatting.ITALIC);
         }
         list.add(mutableComponent);
-        if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP)) {
-            list.add(new TextComponent("#" + MapItem.getMapId(this)).withStyle(ChatFormatting.GRAY));
+        if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP) && (integer = MapItem.getMapId(this)) != null) {
+            list.add(new TextComponent("#" + integer).withStyle(ChatFormatting.GRAY));
         }
         if (ItemStack.shouldShowInTooltip(i = this.getHideFlags(), TooltipPart.ADDITIONAL)) {
             this.getItem().appendHoverText(this, player == null ? null : player.level, list, tooltipFlag);

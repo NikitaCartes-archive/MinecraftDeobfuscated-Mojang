@@ -29,6 +29,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Environment(value=EnvType.CLIENT)
@@ -132,7 +133,8 @@ public class ItemInHandRenderer {
         poseStack.scale(0.38f, 0.38f, 0.38f);
         poseStack.translate(-0.5, -0.5, 0.0);
         poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
-        MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.minecraft.level);
+        Integer integer = MapItem.getMapId(itemStack);
+        MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, (Level)this.minecraft.level);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(mapItemSavedData == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
         Matrix4f matrix4f = poseStack.last().pose();
         vertexConsumer.vertex(matrix4f, -7.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
@@ -140,7 +142,7 @@ public class ItemInHandRenderer {
         vertexConsumer.vertex(matrix4f, 135.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(i).endVertex();
         vertexConsumer.vertex(matrix4f, -7.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(i).endVertex();
         if (mapItemSavedData != null) {
-            this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, false, i);
+            this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, false, i);
         }
     }
 
@@ -251,6 +253,9 @@ public class ItemInHandRenderer {
     }
 
     private void renderArmWithItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j) {
+        if (abstractClientPlayer.isScoping()) {
+            return;
+        }
         boolean bl = interactionHand == InteractionHand.MAIN_HAND;
         HumanoidArm humanoidArm = bl ? abstractClientPlayer.getMainArm() : abstractClientPlayer.getMainArm().getOpposite();
         poseStack.pushPose();

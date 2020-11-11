@@ -44,6 +44,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -190,6 +191,9 @@ implements ItemLike {
                 return b != 0;
             }
             VoxelShape voxelShape = blockState.getFaceOcclusionShape(blockGetter, blockPos, direction);
+            if (voxelShape.isEmpty()) {
+                return true;
+            }
             VoxelShape voxelShape2 = blockState2.getFaceOcclusionShape(blockGetter, blockPos2, direction.getOpposite());
             boolean bl = Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
             if (object2ByteLinkedOpenHashMap.size() == 2048) {
@@ -359,7 +363,7 @@ implements ItemLike {
         }
     }
 
-    public void handleRain(BlockState blockState, Level level, BlockPos blockPos) {
+    public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
     }
 
     public boolean dropFromExplosion(Explosion explosion) {

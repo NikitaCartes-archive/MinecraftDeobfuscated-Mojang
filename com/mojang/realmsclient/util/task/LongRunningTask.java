@@ -20,10 +20,11 @@ Runnable {
     public static final Logger LOGGER = LogManager.getLogger();
     protected RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen;
 
-    protected static void pause(int i) {
+    protected static void pause(long l) {
         try {
-            Thread.sleep(i * 1000);
+            Thread.sleep(l * 1000L);
         } catch (InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
             LOGGER.error("", (Throwable)interruptedException);
         }
     }

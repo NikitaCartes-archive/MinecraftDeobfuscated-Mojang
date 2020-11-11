@@ -215,6 +215,7 @@ RangedAttackMob {
         int i;
         if (this.getInvulnerableTicks() > 0) {
             int i2 = this.getInvulnerableTicks() - 1;
+            this.bossEvent.setProgress(1.0f - (float)i2 / 220.0f);
             if (i2 <= 0) {
                 Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
                 this.level.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0f, false, blockInteraction);
@@ -309,7 +310,7 @@ RangedAttackMob {
         if (this.tickCount % 20 == 0) {
             this.heal(1.0f);
         }
-        this.bossEvent.setPercent(this.getHealth() / this.getMaxHealth());
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
     public static boolean canDestroy(BlockState blockState) {
@@ -318,6 +319,7 @@ RangedAttackMob {
 
     public void makeInvulnerable() {
         this.setInvulnerableTicks(220);
+        this.bossEvent.setProgress(0.0f);
         this.setHealth(this.getMaxHealth() / 3.0f);
     }
 
