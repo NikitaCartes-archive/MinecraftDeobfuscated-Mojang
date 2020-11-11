@@ -87,7 +87,7 @@ public class Raid {
 		this.level = serverLevel;
 		this.active = true;
 		this.raidCooldownTicks = 300;
-		this.raidEvent.setPercent(0.0F);
+		this.raidEvent.setProgress(0.0F);
 		this.center = blockPos;
 		this.numGroups = this.getNumGroups(serverLevel.getDifficulty());
 		this.status = Raid.RaidStatus.ONGOING;
@@ -267,7 +267,7 @@ public class Raid {
 						}
 
 						this.raidCooldownTicks--;
-						this.raidEvent.setPercent(Mth.clamp((float)(300 - this.raidCooldownTicks) / 300.0F, 0.0F, 1.0F));
+						this.raidEvent.setProgress(Mth.clamp((float)(300 - this.raidCooldownTicks) / 300.0F, 0.0F, 1.0F));
 					}
 				}
 
@@ -340,7 +340,7 @@ public class Raid {
 					this.updatePlayers();
 					this.raidEvent.setVisible(true);
 					if (this.isVictory()) {
-						this.raidEvent.setPercent(0.0F);
+						this.raidEvent.setProgress(0.0F);
 						this.raidEvent.setName(RAID_BAR_VICTORY_COMPONENT);
 					} else {
 						this.raidEvent.setName(RAID_BAR_DEFEAT_COMPONENT);
@@ -504,7 +504,7 @@ public class Raid {
 	}
 
 	public void updateBossbar() {
-		this.raidEvent.setPercent(Mth.clamp(this.getHealthOfLivingRaiders() / this.totalHealth, 0.0F, 1.0F));
+		this.raidEvent.setProgress(Mth.clamp(this.getHealthOfLivingRaiders() / this.totalHealth, 0.0F, 1.0F));
 	}
 
 	public float getHealthOfLivingRaiders() {

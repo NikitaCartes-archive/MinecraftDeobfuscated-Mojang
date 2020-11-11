@@ -1,10 +1,14 @@
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -19,6 +23,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 
 @Environment(EnvType.CLIENT)
@@ -116,10 +121,10 @@ public abstract class Option {
 		options -> Math.pow((double)options.fovEffectScale, 2.0),
 		(options, double_) -> options.fovEffectScale = Mth.sqrt(double_),
 		(options, progressOption) -> {
-			progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200));
 			double d = progressOption.toPct(progressOption.get(options));
-			return d == 0.0 ? progressOption.genericValueLabel(new TranslatableComponent("options.fovEffectScale.off")) : progressOption.percentValueLabel(d);
-		}
+			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);
+		},
+		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200)
 	);
 	private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
 	public static final ProgressOption SCREEN_EFFECTS_SCALE = new ProgressOption(
@@ -130,10 +135,10 @@ public abstract class Option {
 		options -> (double)options.screenEffectScale,
 		(options, double_) -> options.screenEffectScale = double_.floatValue(),
 		(options, progressOption) -> {
-			progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200));
 			double d = progressOption.toPct(progressOption.get(options));
-			return d == 0.0 ? progressOption.genericValueLabel(new TranslatableComponent("options.screenEffectScale.off")) : progressOption.percentValueLabel(d);
-		}
+			return d == 0.0 ? progressOption.genericValueLabel(CommonComponents.OPTION_OFF) : progressOption.percentValueLabel(d);
+		},
+		minecraft -> minecraft.font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200)
 	);
 	public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption(
 		"options.framerateLimit",
@@ -186,13 +191,15 @@ public abstract class Option {
 			return progressOption.genericValueLabel(new TextComponent(String.format("%.2f", progressOption.toValue(d))));
 		}
 	);
-	public static final BooleanOption RAW_MOUSE_INPUT = new BooleanOption("options.rawMouseInput", options -> options.rawMouseInput, (options, boolean_) -> {
-		options.rawMouseInput = boolean_;
-		Window window = Minecraft.getInstance().getWindow();
-		if (window != null) {
-			window.updateRawMouseInput(boolean_);
+	public static final CycleOption<Boolean> RAW_MOUSE_INPUT = CycleOption.createOnOff(
+		"options.rawMouseInput", options -> options.rawMouseInput, (options, option, boolean_) -> {
+			options.rawMouseInput = boolean_;
+			Window window = Minecraft.getInstance().getWindow();
+			if (window != null) {
+				window.updateRawMouseInput(boolean_);
+			}
 		}
-	});
+	);
 	public static final ProgressOption RENDER_DISTANCE = new ProgressOption(
 		"options.renderDistance", 2.0, 16.0, 1.0F, options -> (double)options.renderDistance, (options, double_) -> {
 			options.renderDistance = (int)double_.doubleValue();
@@ -230,142 +237,167 @@ public abstract class Option {
 			Minecraft.getInstance().gui.getChat().rescaleChat();
 		}, (options, progressOption) -> progressOption.percentValueLabel(progressOption.toPct(progressOption.get(options)))
 	);
-	public static final CycleOption AMBIENT_OCCLUSION = new CycleOption("options.ao", (options, integer) -> {
-		options.ambientOcclusion = AmbientOcclusionStatus.byId(options.ambientOcclusion.getId() + integer);
-		Minecraft.getInstance().levelRenderer.allChanged();
-	}, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.ambientOcclusion.getKey())));
-	public static final CycleOption ATTACK_INDICATOR = new CycleOption(
-		"options.attackIndicator",
-		(options, integer) -> options.attackIndicator = AttackIndicatorStatus.byId(options.attackIndicator.getId() + integer),
-		(options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.attackIndicator.getKey()))
+	public static final CycleOption<AmbientOcclusionStatus> AMBIENT_OCCLUSION = CycleOption.create(
+		"options.ao",
+		AmbientOcclusionStatus.values(),
+		ambientOcclusionStatus -> new TranslatableComponent(ambientOcclusionStatus.getKey()),
+		options -> options.ambientOcclusion,
+		(options, option, ambientOcclusionStatus) -> {
+			options.ambientOcclusion = ambientOcclusionStatus;
+			Minecraft.getInstance().levelRenderer.allChanged();
+		}
 	);
-	public static final CycleOption CHAT_VISIBILITY = new CycleOption(
+	public static final CycleOption<AttackIndicatorStatus> ATTACK_INDICATOR = CycleOption.create(
+		"options.attackIndicator",
+		AttackIndicatorStatus.values(),
+		attackIndicatorStatus -> new TranslatableComponent(attackIndicatorStatus.getKey()),
+		options -> options.attackIndicator,
+		(options, option, attackIndicatorStatus) -> options.attackIndicator = attackIndicatorStatus
+	);
+	public static final CycleOption<ChatVisiblity> CHAT_VISIBILITY = CycleOption.create(
 		"options.chat.visibility",
-		(options, integer) -> options.chatVisibility = ChatVisiblity.byId((options.chatVisibility.getId() + integer) % 3),
-		(options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.chatVisibility.getKey()))
+		ChatVisiblity.values(),
+		chatVisiblity -> new TranslatableComponent(chatVisiblity.getKey()),
+		options -> options.chatVisibility,
+		(options, option, chatVisiblity) -> options.chatVisibility = chatVisiblity
 	);
 	private static final Component GRAPHICS_TOOLTIP_FAST = new TranslatableComponent("options.graphics.fast.tooltip");
 	private static final Component GRAPHICS_TOOLTIP_FABULOUS = new TranslatableComponent(
 		"options.graphics.fabulous.tooltip", new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC)
 	);
 	private static final Component GRAPHICS_TOOLTIP_FANCY = new TranslatableComponent("options.graphics.fancy.tooltip");
-	public static final CycleOption GRAPHICS = new CycleOption(
-		"options.graphics",
-		(options, integer) -> {
-			Minecraft minecraft = Minecraft.getInstance();
-			GpuWarnlistManager gpuWarnlistManager = minecraft.getGpuWarnlistManager();
-			if (options.graphicsMode == GraphicsStatus.FANCY && gpuWarnlistManager.willShowWarning()) {
-				gpuWarnlistManager.showWarning();
-			} else {
-				options.graphicsMode = options.graphicsMode.cycleNext();
-				if (options.graphicsMode == GraphicsStatus.FABULOUS && (!GlStateManager.supportsFramebufferBlit() || gpuWarnlistManager.isSkippingFabulous())) {
-					options.graphicsMode = GraphicsStatus.FAST;
+	public static final CycleOption<GraphicsStatus> GRAPHICS = CycleOption.<GraphicsStatus>create(
+			"options.graphics",
+			Arrays.asList(GraphicsStatus.values()),
+			(List<GraphicsStatus>)Stream.of(GraphicsStatus.values()).filter(graphicsStatus -> graphicsStatus != GraphicsStatus.FABULOUS).collect(Collectors.toList()),
+			() -> !GlStateManager.supportsFramebufferBlit() || Minecraft.getInstance().getGpuWarnlistManager().isSkippingFabulous(),
+			graphicsStatus -> {
+				MutableComponent mutableComponent = new TranslatableComponent(graphicsStatus.getKey());
+				return graphicsStatus == GraphicsStatus.FABULOUS ? mutableComponent.withStyle(ChatFormatting.ITALIC) : mutableComponent;
+			},
+			options -> options.graphicsMode,
+			(options, option, graphicsStatus) -> {
+				Minecraft minecraft = Minecraft.getInstance();
+				GpuWarnlistManager gpuWarnlistManager = minecraft.getGpuWarnlistManager();
+				if (graphicsStatus == GraphicsStatus.FANCY && gpuWarnlistManager.willShowWarning()) {
+					gpuWarnlistManager.showWarning();
+				} else {
+					options.graphicsMode = graphicsStatus;
+					minecraft.levelRenderer.allChanged();
 				}
-
-				minecraft.levelRenderer.allChanged();
 			}
-		},
-		(options, cycleOption) -> {
-			switch (options.graphicsMode) {
-				case FAST:
-					cycleOption.setTooltip(Minecraft.getInstance().font.split(GRAPHICS_TOOLTIP_FAST, 200));
-					break;
-				case FANCY:
-					cycleOption.setTooltip(Minecraft.getInstance().font.split(GRAPHICS_TOOLTIP_FANCY, 200));
-					break;
-				case FABULOUS:
-					cycleOption.setTooltip(Minecraft.getInstance().font.split(GRAPHICS_TOOLTIP_FABULOUS, 200));
-			}
-
-			MutableComponent mutableComponent = new TranslatableComponent(options.graphicsMode.getKey());
-			return options.graphicsMode == GraphicsStatus.FABULOUS
-				? cycleOption.genericValueLabel(mutableComponent.withStyle(ChatFormatting.ITALIC))
-				: cycleOption.genericValueLabel(mutableComponent);
-		}
-	);
-	public static final CycleOption GUI_SCALE = new CycleOption(
+		)
+		.setTooltip(minecraft -> {
+			List<FormattedCharSequence> list = minecraft.font.split(GRAPHICS_TOOLTIP_FAST, 200);
+			List<FormattedCharSequence> list2 = minecraft.font.split(GRAPHICS_TOOLTIP_FANCY, 200);
+			List<FormattedCharSequence> list3 = minecraft.font.split(GRAPHICS_TOOLTIP_FABULOUS, 200);
+			return graphicsStatus -> {
+				switch (graphicsStatus) {
+					case FANCY:
+						return list2;
+					case FAST:
+						return list;
+					case FABULOUS:
+						return list3;
+					default:
+						return ImmutableList.of();
+				}
+			};
+		});
+	public static final CycleOption GUI_SCALE = CycleOption.create(
 		"options.guiScale",
-		(options, integer) -> options.guiScale = Integer.remainderUnsigned(
-				options.guiScale + integer, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()) + 1
-			),
-		(options, cycleOption) -> options.guiScale == 0
-				? cycleOption.genericValueLabel(new TranslatableComponent("options.guiScale.auto"))
-				: cycleOption.genericValueLabel(options.guiScale)
+		() -> (List)IntStream.rangeClosed(0, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()))
+				.boxed()
+				.collect(Collectors.toList()),
+		integer -> (Component)(integer == 0 ? new TranslatableComponent("options.guiScale.auto") : new TextComponent(Integer.toString(integer))),
+		options -> options.guiScale,
+		(options, option, integer) -> options.guiScale = integer
 	);
-	public static final CycleOption MAIN_HAND = new CycleOption(
-		"options.mainHand",
-		(options, integer) -> options.mainHand = options.mainHand.getOpposite(),
-		(options, cycleOption) -> cycleOption.genericValueLabel(options.mainHand.getName())
+	public static final CycleOption<HumanoidArm> MAIN_HAND = CycleOption.create(
+		"options.mainHand", HumanoidArm.values(), HumanoidArm::getName, options -> options.mainHand, (options, option, humanoidArm) -> {
+			options.mainHand = humanoidArm;
+			options.broadcastOptions();
+		}
 	);
-	public static final CycleOption NARRATOR = new CycleOption(
+	public static final CycleOption<NarratorStatus> NARRATOR = CycleOption.create(
 		"options.narrator",
-		(options, integer) -> {
-			if (NarratorChatListener.INSTANCE.isActive()) {
-				options.narratorStatus = NarratorStatus.byId(options.narratorStatus.getId() + integer);
-			} else {
-				options.narratorStatus = NarratorStatus.OFF;
-			}
-
-			NarratorChatListener.INSTANCE.updateNarratorStatus(options.narratorStatus);
-		},
-		(options, cycleOption) -> NarratorChatListener.INSTANCE.isActive()
-				? cycleOption.genericValueLabel(options.narratorStatus.getName())
-				: cycleOption.genericValueLabel(new TranslatableComponent("options.narrator.notavailable"))
+		NarratorStatus.values(),
+		narratorStatus -> (Component)(NarratorChatListener.INSTANCE.isActive()
+				? narratorStatus.getName()
+				: new TranslatableComponent("options.narrator.notavailable")),
+		options -> options.narratorStatus,
+		(options, option, narratorStatus) -> {
+			options.narratorStatus = narratorStatus;
+			NarratorChatListener.INSTANCE.updateNarratorStatus(narratorStatus);
+		}
 	);
-	public static final CycleOption PARTICLES = new CycleOption(
+	public static final CycleOption<ParticleStatus> PARTICLES = CycleOption.create(
 		"options.particles",
-		(options, integer) -> options.particles = ParticleStatus.byId(options.particles.getId() + integer),
-		(options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.particles.getKey()))
+		ParticleStatus.values(),
+		particleStatus -> new TranslatableComponent(particleStatus.getKey()),
+		options -> options.particles,
+		(options, option, particleStatus) -> options.particles = particleStatus
 	);
-	public static final CycleOption RENDER_CLOUDS = new CycleOption("options.renderClouds", (options, integer) -> {
-		options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer);
-		if (Minecraft.useShaderTransparency()) {
-			RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget();
-			if (renderTarget != null) {
-				renderTarget.clear(Minecraft.ON_OSX);
+	public static final CycleOption<CloudStatus> RENDER_CLOUDS = CycleOption.create(
+		"options.renderClouds",
+		CloudStatus.values(),
+		cloudStatus -> new TranslatableComponent(cloudStatus.getKey()),
+		options -> options.renderClouds,
+		(options, option, cloudStatus) -> {
+			options.renderClouds = cloudStatus;
+			if (Minecraft.useShaderTransparency()) {
+				RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget();
+				if (renderTarget != null) {
+					renderTarget.clear(Minecraft.ON_OSX);
+				}
 			}
 		}
-	}, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.renderClouds.getKey())));
-	public static final CycleOption TEXT_BACKGROUND = new CycleOption(
+	);
+	public static final CycleOption<Boolean> TEXT_BACKGROUND = CycleOption.createBinaryOption(
 		"options.accessibility.text_background",
-		(options, integer) -> options.backgroundForChatOnly = !options.backgroundForChatOnly,
-		(options, cycleOption) -> cycleOption.genericValueLabel(
-				new TranslatableComponent(options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere")
-			)
+		new TranslatableComponent("options.accessibility.text_background.chat"),
+		new TranslatableComponent("options.accessibility.text_background.everywhere"),
+		options -> options.backgroundForChatOnly,
+		(options, option, boolean_) -> options.backgroundForChatOnly = boolean_
 	);
 	private static final Component CHAT_TOOLTIP_HIDE_MATCHED_NAMES = new TranslatableComponent("options.hideMatchedNames.tooltip");
-	public static final BooleanOption AUTO_JUMP = new BooleanOption(
-		"options.autoJump", options -> options.autoJump, (options, boolean_) -> options.autoJump = boolean_
+	public static final CycleOption<Boolean> AUTO_JUMP = CycleOption.createOnOff(
+		"options.autoJump", options -> options.autoJump, (options, option, boolean_) -> options.autoJump = boolean_
 	);
-	public static final BooleanOption AUTO_SUGGESTIONS = new BooleanOption(
-		"options.autoSuggestCommands", options -> options.autoSuggestions, (options, boolean_) -> options.autoSuggestions = boolean_
+	public static final CycleOption<Boolean> AUTO_SUGGESTIONS = CycleOption.createOnOff(
+		"options.autoSuggestCommands", options -> options.autoSuggestions, (options, option, boolean_) -> options.autoSuggestions = boolean_
 	);
-	public static final BooleanOption HIDE_MATCHED_NAMES = new BooleanOption(
-		"options.hideMatchedNames", CHAT_TOOLTIP_HIDE_MATCHED_NAMES, options -> options.hideMatchedNames, (options, boolean_) -> options.hideMatchedNames = boolean_
+	public static final CycleOption<Boolean> CHAT_COLOR = CycleOption.createOnOff(
+		"options.chat.color", options -> options.chatColors, (options, option, boolean_) -> options.chatColors = boolean_
 	);
-	public static final BooleanOption CHAT_COLOR = new BooleanOption(
-		"options.chat.color", options -> options.chatColors, (options, boolean_) -> options.chatColors = boolean_
+	public static final CycleOption<Boolean> HIDE_MATCHED_NAMES = CycleOption.createOnOff(
+		"options.hideMatchedNames",
+		CHAT_TOOLTIP_HIDE_MATCHED_NAMES,
+		options -> options.hideMatchedNames,
+		(options, option, boolean_) -> options.hideMatchedNames = boolean_
 	);
-	public static final BooleanOption CHAT_LINKS = new BooleanOption(
-		"options.chat.links", options -> options.chatLinks, (options, boolean_) -> options.chatLinks = boolean_
+	public static final CycleOption<Boolean> CHAT_LINKS = CycleOption.createOnOff(
+		"options.chat.links", options -> options.chatLinks, (options, option, boolean_) -> options.chatLinks = boolean_
 	);
-	public static final BooleanOption CHAT_LINKS_PROMPT = new BooleanOption(
-		"options.chat.links.prompt", options -> options.chatLinksPrompt, (options, boolean_) -> options.chatLinksPrompt = boolean_
+	public static final CycleOption<Boolean> CHAT_LINKS_PROMPT = CycleOption.createOnOff(
+		"options.chat.links.prompt", options -> options.chatLinksPrompt, (options, option, boolean_) -> options.chatLinksPrompt = boolean_
 	);
-	public static final BooleanOption DISCRETE_MOUSE_SCROLL = new BooleanOption(
-		"options.discrete_mouse_scroll", options -> options.discreteMouseScroll, (options, boolean_) -> options.discreteMouseScroll = boolean_
+	public static final CycleOption<Boolean> DISCRETE_MOUSE_SCROLL = CycleOption.createOnOff(
+		"options.discrete_mouse_scroll", options -> options.discreteMouseScroll, (options, option, boolean_) -> options.discreteMouseScroll = boolean_
 	);
-	public static final BooleanOption ENABLE_VSYNC = new BooleanOption("options.vsync", options -> options.enableVsync, (options, boolean_) -> {
-		options.enableVsync = boolean_;
-		if (Minecraft.getInstance().getWindow() != null) {
-			Minecraft.getInstance().getWindow().updateVsync(options.enableVsync);
+	public static final CycleOption<Boolean> ENABLE_VSYNC = CycleOption.createOnOff(
+		"options.vsync", options -> options.enableVsync, (options, option, boolean_) -> {
+			options.enableVsync = boolean_;
+			if (Minecraft.getInstance().getWindow() != null) {
+				Minecraft.getInstance().getWindow().updateVsync(options.enableVsync);
+			}
 		}
-	});
-	public static final BooleanOption ENTITY_SHADOWS = new BooleanOption(
-		"options.entityShadows", options -> options.entityShadows, (options, boolean_) -> options.entityShadows = boolean_
 	);
-	public static final BooleanOption FORCE_UNICODE_FONT = new BooleanOption(
-		"options.forceUnicodeFont", options -> options.forceUnicodeFont, (options, boolean_) -> {
+	public static final CycleOption<Boolean> ENTITY_SHADOWS = CycleOption.createOnOff(
+		"options.entityShadows", options -> options.entityShadows, (options, option, boolean_) -> options.entityShadows = boolean_
+	);
+	public static final CycleOption<Boolean> FORCE_UNICODE_FONT = CycleOption.createOnOff(
+		"options.forceUnicodeFont", options -> options.forceUnicodeFont, (options, option, boolean_) -> {
 			options.forceUnicodeFont = boolean_;
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.getWindow() != null) {
@@ -373,50 +405,49 @@ public abstract class Option {
 			}
 		}
 	);
-	public static final BooleanOption INVERT_MOUSE = new BooleanOption(
-		"options.invertMouse", options -> options.invertYMouse, (options, boolean_) -> options.invertYMouse = boolean_
+	public static final CycleOption<Boolean> INVERT_MOUSE = CycleOption.createOnOff(
+		"options.invertMouse", options -> options.invertYMouse, (options, option, boolean_) -> options.invertYMouse = boolean_
 	);
-	public static final BooleanOption REALMS_NOTIFICATIONS = new BooleanOption(
-		"options.realmsNotifications", options -> options.realmsNotifications, (options, boolean_) -> options.realmsNotifications = boolean_
+	public static final CycleOption<Boolean> REALMS_NOTIFICATIONS = CycleOption.createOnOff(
+		"options.realmsNotifications", options -> options.realmsNotifications, (options, option, boolean_) -> options.realmsNotifications = boolean_
 	);
-	public static final BooleanOption REDUCED_DEBUG_INFO = new BooleanOption(
-		"options.reducedDebugInfo", options -> options.reducedDebugInfo, (options, boolean_) -> options.reducedDebugInfo = boolean_
+	public static final CycleOption<Boolean> REDUCED_DEBUG_INFO = CycleOption.createOnOff(
+		"options.reducedDebugInfo", options -> options.reducedDebugInfo, (options, option, boolean_) -> options.reducedDebugInfo = boolean_
 	);
-	public static final BooleanOption SHOW_SUBTITLES = new BooleanOption(
-		"options.showSubtitles", options -> options.showSubtitles, (options, boolean_) -> options.showSubtitles = boolean_
+	public static final CycleOption<Boolean> SHOW_SUBTITLES = CycleOption.createOnOff(
+		"options.showSubtitles", options -> options.showSubtitles, (options, option, boolean_) -> options.showSubtitles = boolean_
 	);
-	public static final BooleanOption SNOOPER_ENABLED = new BooleanOption("options.snooper", options -> {
+	public static final CycleOption<Boolean> SNOOPER_ENABLED = CycleOption.createOnOff("options.snooper", options -> {
 		if (options.snooperEnabled) {
 		}
 
 		return false;
-	}, (options, boolean_) -> options.snooperEnabled = boolean_);
-	public static final CycleOption TOGGLE_CROUCH = new CycleOption(
-		"key.sneak",
-		(options, integer) -> options.toggleCrouch = !options.toggleCrouch,
-		(options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.toggleCrouch ? "options.key.toggle" : "options.key.hold"))
+	}, (options, option, boolean_) -> options.snooperEnabled = boolean_);
+	private static final Component MOVEMENT_TOGGLE = new TranslatableComponent("options.key.toggle");
+	private static final Component MOVEMENT_HOLD = new TranslatableComponent("options.key.hold");
+	public static final CycleOption<Boolean> TOGGLE_CROUCH = CycleOption.createBinaryOption(
+		"key.sneak", MOVEMENT_TOGGLE, MOVEMENT_HOLD, options -> options.toggleCrouch, (options, option, boolean_) -> options.toggleCrouch = boolean_
 	);
-	public static final CycleOption TOGGLE_SPRINT = new CycleOption(
-		"key.sprint",
-		(options, integer) -> options.toggleSprint = !options.toggleSprint,
-		(options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.toggleSprint ? "options.key.toggle" : "options.key.hold"))
+	public static final CycleOption<Boolean> TOGGLE_SPRINT = CycleOption.createBinaryOption(
+		"key.sprint", MOVEMENT_TOGGLE, MOVEMENT_HOLD, options -> options.toggleSprint, (options, option, boolean_) -> options.toggleSprint = boolean_
 	);
-	public static final BooleanOption TOUCHSCREEN = new BooleanOption(
-		"options.touchscreen", options -> options.touchscreen, (options, boolean_) -> options.touchscreen = boolean_
+	public static final CycleOption<Boolean> TOUCHSCREEN = CycleOption.createOnOff(
+		"options.touchscreen", options -> options.touchscreen, (options, option, boolean_) -> options.touchscreen = boolean_
 	);
-	public static final BooleanOption USE_FULLSCREEN = new BooleanOption("options.fullscreen", options -> options.fullscreen, (options, boolean_) -> {
-		options.fullscreen = boolean_;
-		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.getWindow() != null && minecraft.getWindow().isFullscreen() != options.fullscreen) {
-			minecraft.getWindow().toggleFullScreen();
-			options.fullscreen = minecraft.getWindow().isFullscreen();
+	public static final CycleOption<Boolean> USE_FULLSCREEN = CycleOption.createOnOff(
+		"options.fullscreen", options -> options.fullscreen, (options, option, boolean_) -> {
+			options.fullscreen = boolean_;
+			Minecraft minecraft = Minecraft.getInstance();
+			if (minecraft.getWindow() != null && minecraft.getWindow().isFullscreen() != options.fullscreen) {
+				minecraft.getWindow().toggleFullScreen();
+				options.fullscreen = minecraft.getWindow().isFullscreen();
+			}
 		}
-	});
-	public static final BooleanOption VIEW_BOBBING = new BooleanOption(
-		"options.viewBobbing", options -> options.bobView, (options, boolean_) -> options.bobView = boolean_
+	);
+	public static final CycleOption<Boolean> VIEW_BOBBING = CycleOption.createOnOff(
+		"options.viewBobbing", options -> options.bobView, (options, option, boolean_) -> options.bobView = boolean_
 	);
 	private final Component caption;
-	private Optional<List<FormattedCharSequence>> toolTip = Optional.empty();
 
 	public Option(String string) {
 		this.caption = new TranslatableComponent(string);
@@ -426,14 +457,6 @@ public abstract class Option {
 
 	protected Component getCaption() {
 		return this.caption;
-	}
-
-	public void setTooltip(List<FormattedCharSequence> list) {
-		this.toolTip = Optional.of(list);
-	}
-
-	public Optional<List<FormattedCharSequence>> getTooltip() {
-		return this.toolTip;
 	}
 
 	protected Component pixelValueLabel(int i) {

@@ -1,16 +1,22 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.math.OctahedralGroup;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public enum Mirror {
-	NONE(OctahedralGroup.IDENTITY),
-	LEFT_RIGHT(OctahedralGroup.INVERT_Z),
-	FRONT_BACK(OctahedralGroup.INVERT_X);
+	NONE(new TranslatableComponent("mirror.none"), OctahedralGroup.IDENTITY),
+	LEFT_RIGHT(new TranslatableComponent("mirror.left_right"), OctahedralGroup.INVERT_Z),
+	FRONT_BACK(new TranslatableComponent("mirror.front_back"), OctahedralGroup.INVERT_X);
 
+	private final Component symbol;
 	private final OctahedralGroup rotation;
 
-	private Mirror(OctahedralGroup octahedralGroup) {
+	private Mirror(Component component, OctahedralGroup octahedralGroup) {
+		this.symbol = component;
 		this.rotation = octahedralGroup;
 	}
 
@@ -42,5 +48,10 @@ public enum Mirror {
 
 	public OctahedralGroup rotation() {
 		return this.rotation;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Component symbol() {
+		return this.symbol;
 	}
 }

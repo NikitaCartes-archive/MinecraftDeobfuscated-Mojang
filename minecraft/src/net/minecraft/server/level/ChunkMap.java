@@ -52,6 +52,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -1085,7 +1086,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		private final Entity entity;
 		private final int range;
 		private SectionPos lastSectionPos;
-		private final Set<ServerPlayer> seenBy = Sets.<ServerPlayer>newHashSet();
+		private final Set<ServerPlayerConnection> seenBy = Sets.newIdentityHashSet();
 
 		public TrackedEntity(Entity entity, int i, int j, boolean bl) {
 			this.serverEntity = new ServerEntity(ChunkMap.this.level, entity, j, bl, this::broadcast);
@@ -1103,8 +1104,8 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		}
 
 		public void broadcast(Packet<?> packet) {
-			for (ServerPlayer serverPlayer : this.seenBy) {
-				serverPlayer.connection.send(packet);
+			for (ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+				serverPlayerConnection.send(packet);
 			}
 		}
 
@@ -1116,13 +1117,13 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		}
 
 		public void broadcastRemoved() {
-			for (ServerPlayer serverPlayer : this.seenBy) {
-				this.serverEntity.removePairing(serverPlayer);
+			for (ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+				this.serverEntity.removePairing(serverPlayerConnection.getPlayer());
 			}
 		}
 
 		public void removePlayer(ServerPlayer serverPlayer) {
-			if (this.seenBy.remove(serverPlayer)) {
+			if (this.seenBy.remove(serverPlayer.connection)) {
 				this.serverEntity.removePairing(serverPlayer);
 			}
 		}
@@ -1142,10 +1143,10 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 						}
 					}
 
-					if (bl2 && this.seenBy.add(serverPlayer)) {
+					if (bl2 && this.seenBy.add(serverPlayer.connection)) {
 						this.serverEntity.addPairing(serverPlayer);
 					}
-				} else if (this.seenBy.remove(serverPlayer)) {
+				} else if (this.seenBy.remove(serverPlayer.connection)) {
 					this.serverEntity.removePairing(serverPlayer);
 				}
 			}

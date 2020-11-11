@@ -131,9 +131,11 @@ public class SoundEvents {
 	public static final SoundEvent BUCKET_EMPTY = register("item.bucket.empty");
 	public static final SoundEvent BUCKET_EMPTY_FISH = register("item.bucket.empty_fish");
 	public static final SoundEvent BUCKET_EMPTY_LAVA = register("item.bucket.empty_lava");
+	public static final SoundEvent BUCKET_EMPTY_POWDER_SNOW = register("item.bucket.empty_powder_snow");
 	public static final SoundEvent BUCKET_FILL = register("item.bucket.fill");
 	public static final SoundEvent BUCKET_FILL_FISH = register("item.bucket.fill_fish");
 	public static final SoundEvent BUCKET_FILL_LAVA = register("item.bucket.fill_lava");
+	public static final SoundEvent BUCKET_FILL_POWDER_SNOW = register("item.bucket.fill_powder_snow");
 	public static final SoundEvent CAKE_ADD_CANDLE = register("block.cake.add_candle");
 	public static final SoundEvent CALCITE_BREAK = register("block.calcite.break");
 	public static final SoundEvent CALCITE_STEP = register("block.calcite.step");
@@ -688,6 +690,7 @@ public class SoundEvents {
 	public static final SoundEvent PLAYER_DEATH = register("entity.player.death");
 	public static final SoundEvent PLAYER_HURT = register("entity.player.hurt");
 	public static final SoundEvent PLAYER_HURT_DROWN = register("entity.player.hurt_drown");
+	public static final SoundEvent PLAYER_HURT_FREEZE = register("entity.player.hurt_freeze");
 	public static final SoundEvent PLAYER_HURT_ON_FIRE = register("entity.player.hurt_on_fire");
 	public static final SoundEvent PLAYER_HURT_SWEET_BERRY_BUSH = register("entity.player.hurt_sweet_berry_bush");
 	public static final SoundEvent PLAYER_LEVELUP = register("entity.player.levelup");
@@ -704,6 +707,11 @@ public class SoundEvents {
 	public static final SoundEvent PORTAL_AMBIENT = register("block.portal.ambient");
 	public static final SoundEvent PORTAL_TRAVEL = register("block.portal.travel");
 	public static final SoundEvent PORTAL_TRIGGER = register("block.portal.trigger");
+	public static final SoundEvent POWDER_SNOW_BREAK = register("block.powder_snow.break");
+	public static final SoundEvent POWDER_SNOW_FALL = register("block.powder_snow.fall");
+	public static final SoundEvent POWDER_SNOW_HIT = register("block.powder_snow.hit");
+	public static final SoundEvent POWDER_SNOW_PLACE = register("block.powder_snow.place");
+	public static final SoundEvent POWDER_SNOW_STEP = register("block.powder_snow.step");
 	public static final SoundEvent PUFFER_FISH_AMBIENT = register("entity.puffer_fish.ambient");
 	public static final SoundEvent PUFFER_FISH_BLOW_OUT = register("entity.puffer_fish.blow_out");
 	public static final SoundEvent PUFFER_FISH_BLOW_UP = register("entity.puffer_fish.blow_up");

@@ -214,6 +214,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.POISONOUS_POTATO, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.POPPED_CHORUS_FRUIT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PORKCHOP, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POWDER_SNOW_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PRISMARINE_CRYSTALS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PRISMARINE_SHARD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PUFFERFISH, ModelTemplates.FLAT_ITEM);

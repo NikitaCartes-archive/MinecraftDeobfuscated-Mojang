@@ -215,6 +215,10 @@ public abstract class WorldPreset {
 
 	protected abstract ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l);
 
+	public static boolean isVisibleByDefault(WorldPreset worldPreset) {
+		return worldPreset != DEBUG;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public interface PresetEditor {
 		Screen createEditScreen(CreateWorldScreen createWorldScreen, WorldGenSettings worldGenSettings);

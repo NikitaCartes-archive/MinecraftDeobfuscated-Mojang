@@ -50,7 +50,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -329,8 +329,8 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				d /= (double)((1.0F - 500.0F / (g + 500.0F)) * 2.0F + 1.0F);
 			}
 
-			FluidState fluidState = camera.getFluidInCamera();
-			if (!fluidState.isEmpty()) {
+			FogType fogType = camera.getFluidInCamera();
+			if (fogType == FogType.LAVA || fogType == FogType.WATER) {
 				d = d * 60.0 / 70.0;
 			}
 

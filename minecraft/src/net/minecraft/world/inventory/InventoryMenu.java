@@ -205,7 +205,6 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 		return this.craftSlots.getHeight();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public int getSize() {
 		return 5;
@@ -219,5 +218,10 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	@Override
 	public RecipeBookType getRecipeBookType() {
 		return RecipeBookType.CRAFTING;
+	}
+
+	@Override
+	public boolean shouldMoveToInventory(int i) {
+		return i != this.getResultSlotIndex();
 	}
 }

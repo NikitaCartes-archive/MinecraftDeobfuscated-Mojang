@@ -21,19 +21,20 @@ public class TntRenderer extends EntityRenderer<PrimedTnt> {
 	public void render(PrimedTnt primedTnt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.translate(0.0, 0.5, 0.0);
-		if ((float)primedTnt.getLife() - g + 1.0F < 10.0F) {
-			float h = 1.0F - ((float)primedTnt.getLife() - g + 1.0F) / 10.0F;
+		int j = primedTnt.getFuse();
+		if ((float)j - g + 1.0F < 10.0F) {
+			float h = 1.0F - ((float)j - g + 1.0F) / 10.0F;
 			h = Mth.clamp(h, 0.0F, 1.0F);
 			h *= h;
 			h *= h;
-			float j = 1.0F + h * 0.3F;
-			poseStack.scale(j, j, j);
+			float k = 1.0F + h * 0.3F;
+			poseStack.scale(k, k, k);
 		}
 
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
 		poseStack.translate(-0.5, -0.5, 0.5);
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
-		TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, primedTnt.getLife() / 5 % 2 == 0);
+		TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
 		poseStack.popPose();
 		super.render(primedTnt, f, g, poseStack, multiBufferSource, i);
 	}

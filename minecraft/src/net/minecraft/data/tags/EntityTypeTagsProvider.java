@@ -30,6 +30,7 @@ public class EntityTypeTagsProvider extends TagsProvider<EntityType<?>> {
 				EntityType.DRAGON_FIREBALL,
 				EntityType.WITHER_SKULL
 			);
+		this.tag(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS).add(EntityType.RABBIT, EntityType.ENDERMITE, EntityType.SILVERFISH);
 	}
 
 	@Override

@@ -34,7 +34,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
-import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -65,8 +65,6 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 
 public interface DispenseItemBehavior {
@@ -236,7 +234,7 @@ public interface DispenseItemBehavior {
 				for (AbstractHorse abstractHorse : blockSource.getLevel()
 					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
 					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
-						abstractHorse.setSlot(401, itemStack.split(1));
+						abstractHorse.getSlot(401).set(itemStack.split(1));
 						this.setSuccess(true);
 						return itemStack;
 					}
@@ -276,7 +274,7 @@ public interface DispenseItemBehavior {
 						.getEntitiesOfClass(
 							AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorsex -> abstractChestedHorsex.isAlive() && !abstractChestedHorsex.hasChest()
 						)) {
-						if (abstractChestedHorse.isTamed() && abstractChestedHorse.setSlot(499, itemStack)) {
+						if (abstractChestedHorse.isTamed() && abstractChestedHorse.getSlot(499).set(itemStack)) {
 							itemStack.shrink(1);
 							this.setSuccess(true);
 							return itemStack;
@@ -343,11 +341,11 @@ public interface DispenseItemBehavior {
 
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				BucketItem bucketItem = (BucketItem)itemStack.getItem();
+				DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem)itemStack.getItem();
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				Level level = blockSource.getLevel();
-				if (bucketItem.emptyBucket(null, level, blockPos, null)) {
-					bucketItem.checkExtraContent(level, itemStack, blockPos);
+				if (dispensibleContainerItem.emptyContents(null, level, blockPos, null)) {
+					dispensibleContainerItem.checkExtraContent(level, itemStack, blockPos);
 					return new ItemStack(Items.BUCKET);
 				} else {
 					return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
@@ -356,6 +354,7 @@ public interface DispenseItemBehavior {
 		};
 		DispenserBlock.registerBehavior(Items.LAVA_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.WATER_BUCKET, dispenseItemBehavior);
+		DispenserBlock.registerBehavior(Items.POWDER_SNOW_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.SALMON_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.COD_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.PUFFERFISH_BUCKET, dispenseItemBehavior);
@@ -370,11 +369,11 @@ public interface DispenseItemBehavior {
 				BlockState blockState = levelAccessor.getBlockState(blockPos);
 				Block block = blockState.getBlock();
 				if (block instanceof BucketPickup) {
-					Fluid fluid = ((BucketPickup)block).takeLiquid(levelAccessor, blockPos, blockState);
-					if (!(fluid instanceof FlowingFluid)) {
+					ItemStack itemStack2 = ((BucketPickup)block).pickupBlock(levelAccessor, blockPos, blockState);
+					if (itemStack2.isEmpty()) {
 						return super.execute(blockSource, itemStack);
 					} else {
-						Item item = fluid.getBucket();
+						Item item = itemStack2.getItem();
 						itemStack.shrink(1);
 						if (itemStack.isEmpty()) {
 							return new ItemStack(item);

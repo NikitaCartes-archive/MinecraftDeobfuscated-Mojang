@@ -59,7 +59,7 @@ public class Foods {
 	public static final FoodProperties PUFFERFISH = new FoodProperties.Builder()
 		.nutrition(1)
 		.saturationMod(0.1F)
-		.effect(new MobEffectInstance(MobEffects.POISON, 1200, 3), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.POISON, 1200, 1), 1.0F)
 		.effect(new MobEffectInstance(MobEffects.HUNGER, 300, 2), 1.0F)
 		.effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 0), 1.0F)
 		.build();

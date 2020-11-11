@@ -9,9 +9,10 @@ import net.minecraft.util.Mth;
 
 public class MapDecoration {
 	private final MapDecoration.Type type;
-	private byte x;
-	private byte y;
-	private byte rot;
+	private final byte x;
+	private final byte y;
+	private final byte rot;
+	@Nullable
 	private final Component name;
 
 	public MapDecoration(MapDecoration.Type type, byte b, byte c, byte d, @Nullable Component component) {
@@ -60,15 +61,11 @@ public class MapDecoration {
 			return false;
 		} else {
 			MapDecoration mapDecoration = (MapDecoration)object;
-			if (this.type != mapDecoration.type) {
-				return false;
-			} else if (this.rot != mapDecoration.rot) {
-				return false;
-			} else if (this.x != mapDecoration.x) {
-				return false;
-			} else {
-				return this.y != mapDecoration.y ? false : Objects.equals(this.name, mapDecoration.name);
-			}
+			return this.type == mapDecoration.type
+				&& this.rot == mapDecoration.rot
+				&& this.x == mapDecoration.x
+				&& this.y == mapDecoration.y
+				&& Objects.equals(this.name, mapDecoration.name);
 		}
 	}
 

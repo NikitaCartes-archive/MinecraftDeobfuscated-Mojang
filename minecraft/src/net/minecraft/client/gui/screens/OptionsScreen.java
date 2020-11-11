@@ -8,12 +8,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.LockIconButton;
-import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
@@ -26,9 +25,8 @@ public class OptionsScreen extends Screen {
 	private static final Option[] OPTION_SCREEN_OPTIONS = new Option[]{Option.FOV};
 	private final Screen lastScreen;
 	private final Options options;
-	private Button difficultyButton;
+	private CycleButton<Difficulty> difficultyButton;
 	private LockIconButton lockButton;
-	private Difficulty currentDifficulty;
 
 	public OptionsScreen(Screen screen, Options options) {
 		super(new TranslatableComponent("options.title"));
@@ -48,13 +46,18 @@ public class OptionsScreen extends Screen {
 		}
 
 		if (this.minecraft.level != null) {
-			this.currentDifficulty = this.minecraft.level.getDifficulty();
 			this.difficultyButton = this.addButton(
-				new Button(this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, this.getDifficultyText(this.currentDifficulty), button -> {
-					this.currentDifficulty = Difficulty.byId(this.currentDifficulty.getId() + 1);
-					this.minecraft.getConnection().send(new ServerboundChangeDifficultyPacket(this.currentDifficulty));
-					this.difficultyButton.setMessage(this.getDifficultyText(this.currentDifficulty));
-				})
+				CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
+					.withValues(Difficulty.values())
+					.withInitialValue(this.minecraft.level.getDifficulty())
+					.create(
+						this.width / 2 - 155 + i % 2 * 160,
+						this.height / 6 - 12 + 24 * (i >> 1),
+						150,
+						20,
+						new TranslatableComponent("options.difficulty"),
+						(cycleButton, difficulty) -> this.minecraft.getConnection().send(new ServerboundChangeDifficultyPacket(difficulty))
+					)
 			);
 			if (this.minecraft.hasSingleplayerServer() && !this.minecraft.level.getLevelData().isHardcore()) {
 				this.difficultyButton.setWidth(this.difficultyButton.getWidth() - 20);
@@ -67,9 +70,7 @@ public class OptionsScreen extends Screen {
 									new ConfirmScreen(
 										this::lockCallback,
 										new TranslatableComponent("difficulty.lock.title"),
-										new TranslatableComponent(
-											"difficulty.lock.question", new TranslatableComponent("options.difficulty." + this.minecraft.level.getLevelData().getDifficulty().getKey())
-										)
+										new TranslatableComponent("difficulty.lock.question", this.minecraft.level.getLevelData().getDifficulty().getDisplayName())
 									)
 								)
 					)
@@ -81,21 +82,7 @@ public class OptionsScreen extends Screen {
 				this.difficultyButton.active = false;
 			}
 		} else {
-			this.addButton(
-				new OptionButton(
-					this.width / 2 - 155 + i % 2 * 160,
-					this.height / 6 - 12 + 24 * (i >> 1),
-					150,
-					20,
-					Option.REALMS_NOTIFICATIONS,
-					Option.REALMS_NOTIFICATIONS.getMessage(this.options),
-					button -> {
-						Option.REALMS_NOTIFICATIONS.toggle(this.options);
-						this.options.save();
-						button.setMessage(Option.REALMS_NOTIFICATIONS.getMessage(this.options));
-					}
-				)
-			);
+			this.addButton(Option.REALMS_NOTIFICATIONS.createButton(this.options, this.width / 2 - 155 + i % 2 * 160, this.height / 6 - 12 + 24 * (i >> 1), 150));
 		}
 
 		this.addButton(
@@ -211,10 +198,6 @@ public class OptionsScreen extends Screen {
 		if (!list2.equals(list)) {
 			this.minecraft.reloadResourcePacks();
 		}
-	}
-
-	private Component getDifficultyText(Difficulty difficulty) {
-		return new TranslatableComponent("options.difficulty").append(": ").append(difficulty.getDisplayName());
 	}
 
 	private void lockCallback(boolean bl) {

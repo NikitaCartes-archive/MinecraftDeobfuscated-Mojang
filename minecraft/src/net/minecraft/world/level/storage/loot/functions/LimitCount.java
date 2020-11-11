@@ -3,18 +3,20 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import java.util.Set;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.IntLimiter;
+import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LimitCount extends LootItemConditionalFunction {
-	private final IntLimiter limiter;
+	private final IntRange limiter;
 
-	private LimitCount(LootItemCondition[] lootItemConditions, IntLimiter intLimiter) {
+	private LimitCount(LootItemCondition[] lootItemConditions, IntRange intRange) {
 		super(lootItemConditions);
-		this.limiter = intLimiter;
+		this.limiter = intRange;
 	}
 
 	@Override
@@ -23,14 +25,19 @@ public class LimitCount extends LootItemConditionalFunction {
 	}
 
 	@Override
+	public Set<LootContextParam<?>> getReferencedContextParams() {
+		return this.limiter.getReferencedContextParams();
+	}
+
+	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		int i = this.limiter.applyAsInt(itemStack.getCount());
+		int i = this.limiter.clamp(lootContext, itemStack.getCount());
 		itemStack.setCount(i);
 		return itemStack;
 	}
 
-	public static LootItemConditionalFunction.Builder<?> limitCount(IntLimiter intLimiter) {
-		return simpleBuilder(lootItemConditions -> new LimitCount(lootItemConditions, intLimiter));
+	public static LootItemConditionalFunction.Builder<?> limitCount(IntRange intRange) {
+		return simpleBuilder(lootItemConditions -> new LimitCount(lootItemConditions, intRange));
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<LimitCount> {
@@ -40,8 +47,8 @@ public class LimitCount extends LootItemConditionalFunction {
 		}
 
 		public LimitCount deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			IntLimiter intLimiter = GsonHelper.getAsObject(jsonObject, "limit", jsonDeserializationContext, IntLimiter.class);
-			return new LimitCount(lootItemConditions, intLimiter);
+			IntRange intRange = GsonHelper.getAsObject(jsonObject, "limit", jsonDeserializationContext, IntRange.class);
+			return new LimitCount(lootItemConditions, intRange);
 		}
 	}
 }

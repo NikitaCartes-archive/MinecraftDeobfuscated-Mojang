@@ -10,7 +10,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -18,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
@@ -31,8 +30,9 @@ public class FogRenderer {
 	private static long biomeChangedTime = -1L;
 
 	public static void setupColor(Camera camera, float f, ClientLevel clientLevel, int i, float g) {
-		FluidState fluidState = camera.getFluidInCamera();
-		if (fluidState.is(FluidTags.WATER)) {
+		FogType fogType = camera.getFluidInCamera();
+		Entity entity = camera.getEntity();
+		if (fogType == FogType.WATER) {
 			long l = Util.getMillis();
 			int j = clientLevel.getBiome(new BlockPos(camera.getPosition())).getWaterFogColor();
 			if (biomeChangedTime < 0L) {
@@ -59,15 +59,21 @@ public class FogRenderer {
 				previousBiomeFog = Mth.floor(r) << 16 | Mth.floor(s) << 8 | Mth.floor(t);
 				biomeChangedTime = l;
 			}
-		} else if (fluidState.is(FluidTags.LAVA)) {
+		} else if (fogType == FogType.LAVA) {
 			fogRed = 0.6F;
 			fogGreen = 0.1F;
 			fogBlue = 0.0F;
 			biomeChangedTime = -1L;
+		} else if (fogType == FogType.POWDER_SNOW) {
+			fogRed = 0.623F;
+			fogGreen = 0.734F;
+			fogBlue = 0.785F;
+			biomeChangedTime = -1L;
+			RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0F);
 		} else {
 			float u = 0.25F + 0.75F * (float)i / 32.0F;
 			u = 1.0F - (float)Math.pow((double)u, 0.25);
-			Vec3 vec3 = clientLevel.getSkyColor(camera.getBlockPosition(), f);
+			Vec3 vec3 = clientLevel.getSkyColor(camera.getPosition(), f);
 			float v = (float)vec3.x;
 			float w = (float)vec3.y;
 			float x = (float)vec3.z;
@@ -132,7 +138,7 @@ public class FogRenderer {
 			}
 		}
 
-		if (d < 1.0 && !fluidState.is(FluidTags.LAVA)) {
+		if (d < 1.0 && fogType != FogType.LAVA) {
 			if (d < 0.0) {
 				d = 0.0;
 			}
@@ -149,10 +155,10 @@ public class FogRenderer {
 			fogBlue = fogBlue * (1.0F - g) + fogBlue * 0.6F * g;
 		}
 
-		if (fluidState.is(FluidTags.WATER)) {
+		if (fogType == FogType.WATER) {
 			float vx = 0.0F;
-			if (camera.getEntity() instanceof LocalPlayer) {
-				LocalPlayer localPlayer = (LocalPlayer)camera.getEntity();
+			if (entity instanceof LocalPlayer) {
+				LocalPlayer localPlayer = (LocalPlayer)entity;
 				vx = localPlayer.getWaterVision();
 			}
 
@@ -160,8 +166,8 @@ public class FogRenderer {
 			fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
 			fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
 			fogBlue = fogBlue * (1.0F - vx) + fogBlue * wx * vx;
-		} else if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.NIGHT_VISION)) {
-			float vx = GameRenderer.getNightVisionScale((LivingEntity)camera.getEntity(), f);
+		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION)) {
+			float vx = GameRenderer.getNightVisionScale((LivingEntity)entity, f);
 			float wx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
 			fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
 			fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
@@ -177,9 +183,9 @@ public class FogRenderer {
 	}
 
 	public static void setupFog(Camera camera, FogRenderer.FogMode fogMode, float f, boolean bl) {
-		FluidState fluidState = camera.getFluidInCamera();
+		FogType fogType = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
-		if (fluidState.is(FluidTags.WATER)) {
+		if (fogType == FogType.WATER) {
 			float g = 1.0F;
 			g = 0.05F;
 			if (entity instanceof LocalPlayer) {
@@ -196,7 +202,7 @@ public class FogRenderer {
 		} else {
 			float g;
 			float h;
-			if (fluidState.is(FluidTags.LAVA)) {
+			if (fogType == FogType.LAVA) {
 				if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
 					g = 0.0F;
 					h = 3.0F;
@@ -214,6 +220,9 @@ public class FogRenderer {
 					g = j * 0.25F;
 					h = j;
 				}
+			} else if (fogType == FogType.POWDER_SNOW) {
+				g = 0.0F;
+				h = 2.0F;
 			} else if (bl) {
 				g = f * 0.05F;
 				h = Math.min(f, 192.0F) * 0.5F;

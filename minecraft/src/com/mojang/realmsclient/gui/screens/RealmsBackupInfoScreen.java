@@ -11,13 +11,16 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.SelectedGameMode;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.world.Difficulty;
 
 @Environment(EnvType.CLIENT)
 public class RealmsBackupInfoScreen extends RealmsScreen {
+	private static final Component TEXT_UNKNOWN = new TextComponent("UNKNOWN");
 	private final Screen lastScreen;
 	private final Backup backup;
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
@@ -76,17 +79,17 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	private Component gameDifficultyMetadata(String string) {
 		try {
-			return RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)];
+			return ((Difficulty)RealmsSlotOptionsScreen.DIFFICULTIES.get(Integer.parseInt(string))).getDisplayName();
 		} catch (Exception var3) {
-			return new TextComponent("UNKNOWN");
+			return TEXT_UNKNOWN;
 		}
 	}
 
 	private Component gameModeMetadata(String string) {
 		try {
-			return RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)];
+			return ((SelectedGameMode)RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string))).getDisplayName();
 		} catch (Exception var3) {
-			return new TextComponent("UNKNOWN");
+			return TEXT_UNKNOWN;
 		}
 	}
 

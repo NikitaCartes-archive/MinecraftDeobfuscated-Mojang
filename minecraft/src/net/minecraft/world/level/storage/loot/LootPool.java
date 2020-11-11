@@ -25,6 +25,8 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -34,23 +36,23 @@ public class LootPool {
 	private final Predicate<LootContext> compositeCondition;
 	private final LootItemFunction[] functions;
 	private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
-	private final RandomIntGenerator rolls;
-	private final RandomValueBounds bonusRolls;
+	private final NumberProvider rolls;
+	private final NumberProvider bonusRolls;
 
 	private LootPool(
 		LootPoolEntryContainer[] lootPoolEntryContainers,
 		LootItemCondition[] lootItemConditions,
 		LootItemFunction[] lootItemFunctions,
-		RandomIntGenerator randomIntGenerator,
-		RandomValueBounds randomValueBounds
+		NumberProvider numberProvider,
+		NumberProvider numberProvider2
 	) {
 		this.entries = lootPoolEntryContainers;
 		this.conditions = lootItemConditions;
 		this.compositeCondition = LootItemConditions.andConditions(lootItemConditions);
 		this.functions = lootItemFunctions;
 		this.compositeFunction = LootItemFunctions.compose(lootItemFunctions);
-		this.rolls = randomIntGenerator;
-		this.bonusRolls = randomValueBounds;
+		this.rolls = numberProvider;
+		this.bonusRolls = numberProvider2;
 	}
 
 	private void addRandomItem(Consumer<ItemStack> consumer, LootContext lootContext) {
@@ -89,8 +91,7 @@ public class LootPool {
 	public void addRandomItems(Consumer<ItemStack> consumer, LootContext lootContext) {
 		if (this.compositeCondition.test(lootContext)) {
 			Consumer<ItemStack> consumer2 = LootItemFunction.decorate(this.compositeFunction, consumer, lootContext);
-			Random random = lootContext.getRandom();
-			int i = this.rolls.getInt(random) + Mth.floor(this.bonusRolls.getFloat(random) * lootContext.getLuck());
+			int i = this.rolls.getInt(lootContext) + Mth.floor(this.bonusRolls.getFloat(lootContext) * lootContext.getLuck());
 
 			for (int j = 0; j < i; j++) {
 				this.addRandomItem(consumer2, lootContext);
@@ -110,6 +111,9 @@ public class LootPool {
 		for (int i = 0; i < this.entries.length; i++) {
 			this.entries[i].validate(validationContext.forChild(".entries[" + i + "]"));
 		}
+
+		this.rolls.validate(validationContext.forChild(".rolls"));
+		this.bonusRolls.validate(validationContext.forChild(".bonusRolls"));
 	}
 
 	public static LootPool.Builder lootPool() {
@@ -120,11 +124,11 @@ public class LootPool {
 		private final List<LootPoolEntryContainer> entries = Lists.<LootPoolEntryContainer>newArrayList();
 		private final List<LootItemCondition> conditions = Lists.<LootItemCondition>newArrayList();
 		private final List<LootItemFunction> functions = Lists.<LootItemFunction>newArrayList();
-		private RandomIntGenerator rolls = new RandomValueBounds(1.0F);
-		private RandomValueBounds bonusRolls = new RandomValueBounds(0.0F, 0.0F);
+		private NumberProvider rolls = ConstantValue.exactly(1.0F);
+		private NumberProvider bonusRolls = ConstantValue.exactly(0.0F);
 
-		public LootPool.Builder setRolls(RandomIntGenerator randomIntGenerator) {
-			this.rolls = randomIntGenerator;
+		public LootPool.Builder setRolls(NumberProvider numberProvider) {
+			this.rolls = numberProvider;
 			return this;
 		}
 
@@ -172,21 +176,18 @@ public class LootPool {
 			LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(
 				jsonObject, "functions", new LootItemFunction[0], jsonDeserializationContext, LootItemFunction[].class
 			);
-			RandomIntGenerator randomIntGenerator = RandomIntGenerators.deserialize(jsonObject.get("rolls"), jsonDeserializationContext);
-			RandomValueBounds randomValueBounds = GsonHelper.getAsObject(
-				jsonObject, "bonus_rolls", new RandomValueBounds(0.0F, 0.0F), jsonDeserializationContext, RandomValueBounds.class
+			NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "rolls", jsonDeserializationContext, NumberProvider.class);
+			NumberProvider numberProvider2 = GsonHelper.getAsObject(
+				jsonObject, "bonus_rolls", ConstantValue.exactly(0.0F), jsonDeserializationContext, NumberProvider.class
 			);
-			return new LootPool(lootPoolEntryContainers, lootItemConditions, lootItemFunctions, randomIntGenerator, randomValueBounds);
+			return new LootPool(lootPoolEntryContainers, lootItemConditions, lootItemFunctions, numberProvider, numberProvider2);
 		}
 
 		public JsonElement serialize(LootPool lootPool, Type type, JsonSerializationContext jsonSerializationContext) {
 			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("rolls", RandomIntGenerators.serialize(lootPool.rolls, jsonSerializationContext));
+			jsonObject.add("rolls", jsonSerializationContext.serialize(lootPool.rolls));
+			jsonObject.add("bonus_rolls", jsonSerializationContext.serialize(lootPool.bonusRolls));
 			jsonObject.add("entries", jsonSerializationContext.serialize(lootPool.entries));
-			if (lootPool.bonusRolls.getMin() != 0.0F && lootPool.bonusRolls.getMax() != 0.0F) {
-				jsonObject.add("bonus_rolls", jsonSerializationContext.serialize(lootPool.bonusRolls));
-			}
-
 			if (!ArrayUtils.isEmpty((Object[])lootPool.conditions)) {
 				jsonObject.add("conditions", jsonSerializationContext.serialize(lootPool.conditions));
 			}

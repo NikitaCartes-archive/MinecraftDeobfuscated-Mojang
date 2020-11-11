@@ -149,35 +149,6 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public boolean setSlot(int i, ItemStack itemStack) {
-		EquipmentSlot equipmentSlot;
-		if (i == 98) {
-			equipmentSlot = EquipmentSlot.MAINHAND;
-		} else if (i == 99) {
-			equipmentSlot = EquipmentSlot.OFFHAND;
-		} else if (i == 100 + EquipmentSlot.HEAD.getIndex()) {
-			equipmentSlot = EquipmentSlot.HEAD;
-		} else if (i == 100 + EquipmentSlot.CHEST.getIndex()) {
-			equipmentSlot = EquipmentSlot.CHEST;
-		} else if (i == 100 + EquipmentSlot.LEGS.getIndex()) {
-			equipmentSlot = EquipmentSlot.LEGS;
-		} else {
-			if (i != 100 + EquipmentSlot.FEET.getIndex()) {
-				return false;
-			}
-
-			equipmentSlot = EquipmentSlot.FEET;
-		}
-
-		if (!itemStack.isEmpty() && !Mob.isValidSlotForItem(equipmentSlot, itemStack) && equipmentSlot != EquipmentSlot.HEAD) {
-			return false;
-		} else {
-			this.setItemSlot(equipmentSlot, itemStack);
-			return true;
-		}
-	}
-
-	@Override
 	public boolean canTakeItem(ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
 		return this.getItemBySlot(equipmentSlot).isEmpty() && !this.isDisabled(equipmentSlot);

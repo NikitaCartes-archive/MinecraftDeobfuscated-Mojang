@@ -3,10 +3,13 @@ package net.minecraft.world.level.saveddata.maps;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Dynamic;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,7 +23,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -31,73 +33,77 @@ import org.apache.logging.log4j.Logger;
 
 public class MapItemSavedData extends SavedData {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public int x;
-	public int z;
-	public ResourceKey<Level> dimension;
-	public boolean trackingPosition;
-	public boolean unlimitedTracking;
-	public byte scale;
+	public final int x;
+	public final int z;
+	public final ResourceKey<Level> dimension;
+	private final boolean trackingPosition;
+	private final boolean unlimitedTracking;
+	public final byte scale;
 	public byte[] colors = new byte[16384];
-	public boolean locked;
-	public final List<MapItemSavedData.HoldingPlayer> carriedBy = Lists.<MapItemSavedData.HoldingPlayer>newArrayList();
+	public final boolean locked;
+	private final List<MapItemSavedData.HoldingPlayer> carriedBy = Lists.<MapItemSavedData.HoldingPlayer>newArrayList();
 	private final Map<Player, MapItemSavedData.HoldingPlayer> carriedByPlayers = Maps.<Player, MapItemSavedData.HoldingPlayer>newHashMap();
 	private final Map<String, MapBanner> bannerMarkers = Maps.<String, MapBanner>newHashMap();
-	public final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
+	private final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
 	private final Map<String, MapFrame> frameMarkers = Maps.<String, MapFrame>newHashMap();
 
-	public MapItemSavedData(String string) {
-		super(string);
-	}
-
-	public void setProperties(int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
-		this.scale = (byte)k;
-		this.setOrigin((double)i, (double)j, this.scale);
+	private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
+		this.scale = b;
+		this.x = i;
+		this.z = j;
 		this.dimension = resourceKey;
 		this.trackingPosition = bl;
 		this.unlimitedTracking = bl2;
+		this.locked = bl3;
 		this.setDirty();
 	}
 
-	public void setOrigin(double d, double e, int i) {
-		int j = 128 * (1 << i);
-		int k = Mth.floor((d + 64.0) / (double)j);
-		int l = Mth.floor((e + 64.0) / (double)j);
-		this.x = k * j + j / 2 - 64;
-		this.z = l * j + j / 2 - 64;
+	public static MapItemSavedData createFresh(double d, double e, byte b, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
+		int i = 128 * (1 << b);
+		int j = Mth.floor((d + 64.0) / (double)i);
+		int k = Mth.floor((e + 64.0) / (double)i);
+		int l = j * i + i / 2 - 64;
+		int m = k * i + i / 2 - 64;
+		return new MapItemSavedData(l, m, b, bl, bl2, false, resourceKey);
 	}
 
-	@Override
-	public void load(CompoundTag compoundTag) {
-		this.dimension = (ResourceKey<Level>)DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("dimension")))
+	@Environment(EnvType.CLIENT)
+	public static MapItemSavedData createForClient(byte b, boolean bl, ResourceKey<Level> resourceKey) {
+		return new MapItemSavedData(0, 0, b, false, false, bl, resourceKey);
+	}
+
+	public static MapItemSavedData load(CompoundTag compoundTag) {
+		ResourceKey<Level> resourceKey = (ResourceKey<Level>)DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("dimension")))
 			.resultOrPartial(LOGGER::error)
 			.orElseThrow(() -> new IllegalArgumentException("Invalid map dimension: " + compoundTag.get("dimension")));
-		this.x = compoundTag.getInt("xCenter");
-		this.z = compoundTag.getInt("zCenter");
-		this.scale = (byte)Mth.clamp(compoundTag.getByte("scale"), 0, 4);
-		this.trackingPosition = !compoundTag.contains("trackingPosition", 1) || compoundTag.getBoolean("trackingPosition");
-		this.unlimitedTracking = compoundTag.getBoolean("unlimitedTracking");
-		this.locked = compoundTag.getBoolean("locked");
-		this.colors = compoundTag.getByteArray("colors");
-		if (this.colors.length != 16384) {
-			this.colors = new byte[16384];
+		int i = compoundTag.getInt("xCenter");
+		int j = compoundTag.getInt("zCenter");
+		byte b = (byte)Mth.clamp(compoundTag.getByte("scale"), 0, 4);
+		boolean bl = !compoundTag.contains("trackingPosition", 1) || compoundTag.getBoolean("trackingPosition");
+		boolean bl2 = compoundTag.getBoolean("unlimitedTracking");
+		boolean bl3 = compoundTag.getBoolean("locked");
+		MapItemSavedData mapItemSavedData = new MapItemSavedData(i, j, b, bl, bl2, bl3, resourceKey);
+		byte[] bs = compoundTag.getByteArray("colors");
+		if (bs.length == 16384) {
+			mapItemSavedData.colors = bs;
 		}
 
 		ListTag listTag = compoundTag.getList("banners", 10);
 
-		for (int i = 0; i < listTag.size(); i++) {
-			MapBanner mapBanner = MapBanner.load(listTag.getCompound(i));
-			this.bannerMarkers.put(mapBanner.getId(), mapBanner);
-			this.addDecoration(
+		for (int k = 0; k < listTag.size(); k++) {
+			MapBanner mapBanner = MapBanner.load(listTag.getCompound(k));
+			mapItemSavedData.bannerMarkers.put(mapBanner.getId(), mapBanner);
+			mapItemSavedData.addDecoration(
 				mapBanner.getDecoration(), null, mapBanner.getId(), (double)mapBanner.getPos().getX(), (double)mapBanner.getPos().getZ(), 180.0, mapBanner.getName()
 			);
 		}
 
 		ListTag listTag2 = compoundTag.getList("frames", 10);
 
-		for (int j = 0; j < listTag2.size(); j++) {
-			MapFrame mapFrame = MapFrame.load(listTag2.getCompound(j));
-			this.frameMarkers.put(mapFrame.getId(), mapFrame);
-			this.addDecoration(
+		for (int l = 0; l < listTag2.size(); l++) {
+			MapFrame mapFrame = MapFrame.load(listTag2.getCompound(l));
+			mapItemSavedData.frameMarkers.put(mapFrame.getId(), mapFrame);
+			mapItemSavedData.addDecoration(
 				MapDecoration.Type.FRAME,
 				null,
 				"frame-" + mapFrame.getEntityId(),
@@ -107,6 +113,8 @@ public class MapItemSavedData extends SavedData {
 				null
 			);
 		}
+
+		return mapItemSavedData;
 	}
 
 	@Override
@@ -139,14 +147,17 @@ public class MapItemSavedData extends SavedData {
 		return compoundTag;
 	}
 
-	public void lockData(MapItemSavedData mapItemSavedData) {
-		this.locked = true;
-		this.x = mapItemSavedData.x;
-		this.z = mapItemSavedData.z;
-		this.bannerMarkers.putAll(mapItemSavedData.bannerMarkers);
-		this.decorations.putAll(mapItemSavedData.decorations);
-		System.arraycopy(mapItemSavedData.colors, 0, this.colors, 0, mapItemSavedData.colors.length);
-		this.setDirty();
+	public MapItemSavedData locked() {
+		MapItemSavedData mapItemSavedData = new MapItemSavedData(this.x, this.z, this.scale, this.trackingPosition, this.unlimitedTracking, true, this.dimension);
+		mapItemSavedData.bannerMarkers.putAll(this.bannerMarkers);
+		mapItemSavedData.decorations.putAll(this.decorations);
+		System.arraycopy(this.colors, 0, mapItemSavedData.colors, 0, this.colors.length);
+		mapItemSavedData.setDirty();
+		return mapItemSavedData;
+	}
+
+	public MapItemSavedData scaled(int i) {
+		return createFresh((double)this.x, (double)this.z, (byte)Mth.clamp(this.scale + i, 0, 4), this.trackingPosition, this.unlimitedTracking, this.dimension);
 	}
 
 	public void tickCarriedBy(Player player, ItemStack itemStack) {
@@ -178,7 +189,7 @@ public class MapItemSavedData extends SavedData {
 			} else {
 				this.carriedByPlayers.remove(holdingPlayer2.player);
 				this.carriedBy.remove(holdingPlayer2);
-				this.decorations.remove(string);
+				this.removeDecoration(string);
 			}
 		}
 
@@ -187,7 +198,7 @@ public class MapItemSavedData extends SavedData {
 			BlockPos blockPos = itemFrame.getPos();
 			MapFrame mapFrame = (MapFrame)this.frameMarkers.get(MapFrame.frameId(blockPos));
 			if (mapFrame != null && itemFrame.getId() != mapFrame.getEntityId() && this.frameMarkers.containsKey(mapFrame.getId())) {
-				this.decorations.remove("frame-" + mapFrame.getEntityId());
+				this.removeDecoration("frame-" + mapFrame.getEntityId());
 			}
 
 			MapFrame mapFrame2 = new MapFrame(blockPos, itemFrame.getDirection().get2DDataValue() * 90, itemFrame.getId());
@@ -222,6 +233,11 @@ public class MapItemSavedData extends SavedData {
 				}
 			}
 		}
+	}
+
+	private void removeDecoration(String string) {
+		this.decorations.remove(string);
+		this.setDecorationsDirty();
 	}
 
 	public static void addTargetDecoration(ItemStack itemStack, BlockPos blockPos, String string, MapDecoration.Type type) {
@@ -265,7 +281,7 @@ public class MapItemSavedData extends SavedData {
 			}
 		} else {
 			if (type != MapDecoration.Type.PLAYER) {
-				this.decorations.remove(string);
+				this.removeDecoration(string);
 				return;
 			}
 
@@ -274,7 +290,7 @@ public class MapItemSavedData extends SavedData {
 				type = MapDecoration.Type.PLAYER_OFF_MAP;
 			} else {
 				if (!this.unlimitedTracking) {
-					this.decorations.remove(string);
+					this.removeDecoration(string);
 					return;
 				}
 
@@ -299,21 +315,30 @@ public class MapItemSavedData extends SavedData {
 			}
 		}
 
-		this.decorations.put(string, new MapDecoration(type, b, c, k, component));
+		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, component);
+		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
+		if (!mapDecoration.equals(mapDecoration2)) {
+			this.setDecorationsDirty();
+		}
 	}
 
 	@Nullable
-	public Packet<?> getUpdatePacket(ItemStack itemStack, BlockGetter blockGetter, Player player) {
+	public Packet<?> getUpdatePacket(int i, Player player) {
 		MapItemSavedData.HoldingPlayer holdingPlayer = (MapItemSavedData.HoldingPlayer)this.carriedByPlayers.get(player);
-		return holdingPlayer == null ? null : holdingPlayer.nextUpdatePacket(itemStack);
+		return holdingPlayer == null ? null : holdingPlayer.nextUpdatePacket(i);
 	}
 
-	public void setDirty(int i, int j) {
+	private void setColorsDirty(int i, int j) {
 		this.setDirty();
 
 		for (MapItemSavedData.HoldingPlayer holdingPlayer : this.carriedBy) {
-			holdingPlayer.markDirty(i, j);
+			holdingPlayer.markColorsDirty(i, j);
 		}
+	}
+
+	private void setDecorationsDirty() {
+		this.setDirty();
+		this.carriedBy.forEach(object -> ((MapItemSavedData.HoldingPlayer)object).markDecorationsDirty());
 	}
 
 	public MapItemSavedData.HoldingPlayer getHoldingPlayer(Player player) {
@@ -334,29 +359,17 @@ public class MapItemSavedData extends SavedData {
 		double f = (d - (double)this.x) / (double)i;
 		double g = (e - (double)this.z) / (double)i;
 		int j = 63;
-		boolean bl = false;
 		if (f >= -63.0 && g >= -63.0 && f <= 63.0 && g <= 63.0) {
 			MapBanner mapBanner = MapBanner.fromWorld(levelAccessor, blockPos);
 			if (mapBanner == null) {
 				return;
 			}
 
-			boolean bl2 = true;
-			if (this.bannerMarkers.containsKey(mapBanner.getId()) && ((MapBanner)this.bannerMarkers.get(mapBanner.getId())).equals(mapBanner)) {
-				this.bannerMarkers.remove(mapBanner.getId());
-				this.decorations.remove(mapBanner.getId());
-				bl2 = false;
-				bl = true;
-			}
-
-			if (bl2) {
+			if (this.bannerMarkers.remove(mapBanner.getId(), mapBanner)) {
+				this.removeDecoration(mapBanner.getId());
+			} else {
 				this.bannerMarkers.put(mapBanner.getId(), mapBanner);
 				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), d, e, 180.0, mapBanner.getName());
-				bl = true;
-			}
-
-			if (bl) {
-				this.setDirty();
 			}
 		}
 	}
@@ -370,15 +383,55 @@ public class MapItemSavedData extends SavedData {
 				MapBanner mapBanner2 = MapBanner.fromWorld(blockGetter, mapBanner.getPos());
 				if (!mapBanner.equals(mapBanner2)) {
 					iterator.remove();
-					this.decorations.remove(mapBanner.getId());
+					this.removeDecoration(mapBanner.getId());
 				}
 			}
 		}
 	}
 
 	public void removedFromFrame(BlockPos blockPos, int i) {
-		this.decorations.remove("frame-" + i);
+		this.removeDecoration("frame-" + i);
 		this.frameMarkers.remove(MapFrame.frameId(blockPos));
+	}
+
+	public boolean updateColor(int i, int j, byte b) {
+		byte c = this.colors[i + j * 128];
+		if (c != b) {
+			this.setColor(i, j, b);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void setColor(int i, int j, byte b) {
+		this.colors[i + j * 128] = b;
+		this.setColorsDirty(i, j);
+	}
+
+	public boolean isExplorationMap() {
+		for (MapDecoration mapDecoration : this.decorations.values()) {
+			if (mapDecoration.getType() == MapDecoration.Type.MANSION || mapDecoration.getType() == MapDecoration.Type.MONUMENT) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void addClientSideDecorations(MapDecoration[] mapDecorations) {
+		this.decorations.clear();
+
+		for (int i = 0; i < mapDecorations.length; i++) {
+			MapDecoration mapDecoration = mapDecorations[i];
+			this.decorations.put("icon-" + i, mapDecoration);
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Iterable<MapDecoration> getDecorations() {
+		return this.decorations.values();
 	}
 
 	public class HoldingPlayer {
@@ -388,48 +441,54 @@ public class MapItemSavedData extends SavedData {
 		private int minDirtyY;
 		private int maxDirtyX = 127;
 		private int maxDirtyY = 127;
+		private boolean dirtyDecorations = true;
 		private int tick;
 		public int step;
 
-		public HoldingPlayer(Player player) {
+		private HoldingPlayer(Player player) {
 			this.player = player;
 		}
 
-		@Nullable
-		public Packet<?> nextUpdatePacket(ItemStack itemStack) {
-			if (this.dirtyData) {
-				this.dirtyData = false;
-				return new ClientboundMapItemDataPacket(
-					MapItem.getMapId(itemStack),
-					MapItemSavedData.this.scale,
-					MapItemSavedData.this.trackingPosition,
-					MapItemSavedData.this.locked,
-					MapItemSavedData.this.decorations.values(),
-					MapItemSavedData.this.colors,
-					this.minDirtyX,
-					this.minDirtyY,
-					this.maxDirtyX + 1 - this.minDirtyX,
-					this.maxDirtyY + 1 - this.minDirtyY
-				);
-			} else {
-				return this.tick++ % 5 == 0
-					? new ClientboundMapItemDataPacket(
-						MapItem.getMapId(itemStack),
-						MapItemSavedData.this.scale,
-						MapItemSavedData.this.trackingPosition,
-						MapItemSavedData.this.locked,
-						MapItemSavedData.this.decorations.values(),
-						MapItemSavedData.this.colors,
-						0,
-						0,
-						0,
-						0
-					)
-					: null;
+		private MapItemSavedData.MapPatch createPatch() {
+			int i = this.minDirtyX;
+			int j = this.minDirtyY;
+			int k = this.maxDirtyX + 1 - this.minDirtyX;
+			int l = this.maxDirtyY + 1 - this.minDirtyY;
+			byte[] bs = new byte[k * l];
+
+			for (int m = 0; m < k; m++) {
+				for (int n = 0; n < l; n++) {
+					bs[m + n * k] = MapItemSavedData.this.colors[i + m + (j + n) * 128];
+				}
 			}
+
+			return new MapItemSavedData.MapPatch(i, j, k, l, bs);
 		}
 
-		public void markDirty(int i, int j) {
+		@Nullable
+		private Packet<?> nextUpdatePacket(int i) {
+			MapItemSavedData.MapPatch mapPatch;
+			if (this.dirtyData) {
+				this.dirtyData = false;
+				mapPatch = this.createPatch();
+			} else {
+				mapPatch = null;
+			}
+
+			Collection<MapDecoration> collection;
+			if (this.dirtyDecorations && this.tick++ % 5 == 0) {
+				this.dirtyDecorations = false;
+				collection = MapItemSavedData.this.decorations.values();
+			} else {
+				collection = null;
+			}
+
+			return collection == null && mapPatch == null
+				? null
+				: new ClientboundMapItemDataPacket(i, MapItemSavedData.this.scale, MapItemSavedData.this.locked, collection, mapPatch);
+		}
+
+		private void markColorsDirty(int i, int j) {
 			if (this.dirtyData) {
 				this.minDirtyX = Math.min(this.minDirtyX, i);
 				this.minDirtyY = Math.min(this.minDirtyY, j);
@@ -441,6 +500,35 @@ public class MapItemSavedData extends SavedData {
 				this.minDirtyY = j;
 				this.maxDirtyX = i;
 				this.maxDirtyY = j;
+			}
+		}
+
+		private void markDecorationsDirty() {
+			this.dirtyDecorations = true;
+		}
+	}
+
+	public static class MapPatch {
+		public final int startX;
+		public final int startY;
+		public final int width;
+		public final int height;
+		public final byte[] mapColors;
+
+		public MapPatch(int i, int j, int k, int l, byte[] bs) {
+			this.startX = i;
+			this.startY = j;
+			this.width = k;
+			this.height = l;
+			this.mapColors = bs;
+		}
+
+		@Environment(EnvType.CLIENT)
+		public void applyToMap(MapItemSavedData mapItemSavedData) {
+			for (int i = 0; i < this.width; i++) {
+				for (int j = 0; j < this.height; j++) {
+					mapItemSavedData.setColor(this.startX + i, this.startY + j, this.mapColors[i + j * this.width]);
+				}
 			}
 		}
 	}

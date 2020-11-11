@@ -6,15 +6,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class ForcedChunksSavedData extends SavedData {
-	private LongSet chunks = new LongOpenHashSet();
+	private final LongSet chunks;
 
-	public ForcedChunksSavedData() {
-		super("chunks");
+	private ForcedChunksSavedData(LongSet longSet) {
+		this.chunks = longSet;
 	}
 
-	@Override
-	public void load(CompoundTag compoundTag) {
-		this.chunks = new LongOpenHashSet(compoundTag.getLongArray("Forced"));
+	public ForcedChunksSavedData() {
+		this(new LongOpenHashSet());
+	}
+
+	public static ForcedChunksSavedData load(CompoundTag compoundTag) {
+		return new ForcedChunksSavedData(new LongOpenHashSet(compoundTag.getLongArray("Forced")));
 	}
 
 	@Override

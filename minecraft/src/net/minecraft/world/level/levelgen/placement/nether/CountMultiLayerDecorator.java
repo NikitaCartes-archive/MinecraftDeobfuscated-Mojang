@@ -48,7 +48,7 @@ public class CountMultiLayerDecorator extends FeatureDecorator<CountConfiguratio
 		int m = 0;
 		BlockState blockState = decorationContext.getBlockState(mutableBlockPos);
 
-		for (int n = j; n >= decorationContext.getMaxBuildHeight() + 1; n--) {
+		for (int n = j; n >= decorationContext.getMinBuildHeight() + 1; n--) {
 			mutableBlockPos.setY(n - 1);
 			BlockState blockState2 = decorationContext.getBlockState(mutableBlockPos);
 			if (!isEmpty(blockState2) && isEmpty(blockState) && !blockState2.is(Blocks.BEDROCK)) {

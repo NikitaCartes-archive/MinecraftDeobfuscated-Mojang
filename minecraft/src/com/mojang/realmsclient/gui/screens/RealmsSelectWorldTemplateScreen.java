@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -45,7 +46,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
 	private static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
 	private static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
-	private final RealmsScreenWithCallback lastScreen;
+	private final Consumer<WorldTemplate> callback;
 	private RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
 	private int selectedTemplate = -1;
 	private Component title;
@@ -65,14 +66,14 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	@Nullable
 	private List<TextRenderingUtils.Line> noTemplatesMessage;
 
-	public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType) {
-		this(realmsScreenWithCallback, worldType, null);
+	public RealmsSelectWorldTemplateScreen(Consumer<WorldTemplate> consumer, RealmsServer.WorldType worldType) {
+		this(consumer, worldType, null);
 	}
 
 	public RealmsSelectWorldTemplateScreen(
-		RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType, @Nullable WorldTemplatePaginatedList worldTemplatePaginatedList
+		Consumer<WorldTemplate> consumer, RealmsServer.WorldType worldType, @Nullable WorldTemplatePaginatedList worldTemplatePaginatedList
 	) {
-		this.lastScreen = realmsScreenWithCallback;
+		this.callback = consumer;
 		this.worldType = worldType;
 		if (worldTemplatePaginatedList == null) {
 			this.worldTemplateObjectSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList();
@@ -119,7 +120,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			new Button(this.width / 2 - 100, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.select"), buttonx -> this.selectTemplate())
 		);
 		Component component = this.worldType == RealmsServer.WorldType.MINIGAME ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_BACK;
-		Button button = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, buttonx -> this.backButtonClicked());
+		Button button = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, buttonx -> this.onClose());
 		this.addButton(button);
 		this.publisherButton = this.addButton(
 			new Button(this.width / 2 + 112, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.publisher"), buttonx -> this.onPublish())
@@ -169,23 +170,13 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.backButtonClicked();
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
-	}
-
-	private void backButtonClicked() {
-		this.lastScreen.callback(null);
-		this.minecraft.setScreen(this.lastScreen);
+	public void onClose() {
+		this.callback.accept(null);
 	}
 
 	private void selectTemplate() {
 		if (this.hasValidTemplate()) {
-			this.lastScreen.callback(this.getSelectedTemplate());
+			this.callback.accept(this.getSelectedTemplate());
 		}
 	}
 

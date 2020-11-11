@@ -766,7 +766,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Nullable
 	public abstract MapItemSavedData getMapData(String string);
 
-	public abstract void setMapData(MapItemSavedData mapItemSavedData);
+	public abstract void setMapData(String string, MapItemSavedData mapItemSavedData);
 
 	public abstract int getFreeMapId();
 

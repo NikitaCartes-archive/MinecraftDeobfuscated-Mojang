@@ -180,12 +180,12 @@ public class LegacyStructureDataHandler {
 
 				String string5 = string + "_index";
 				StructureFeatureIndexSavedData structureFeatureIndexSavedData = dimensionDataStorage.computeIfAbsent(
-					() -> new StructureFeatureIndexSavedData(string5), string5
+					StructureFeatureIndexSavedData::load, StructureFeatureIndexSavedData::new, string5
 				);
 				if (!structureFeatureIndexSavedData.getAll().isEmpty()) {
 					this.indexMap.put(string, structureFeatureIndexSavedData);
 				} else {
-					StructureFeatureIndexSavedData structureFeatureIndexSavedData2 = new StructureFeatureIndexSavedData(string5);
+					StructureFeatureIndexSavedData structureFeatureIndexSavedData2 = new StructureFeatureIndexSavedData();
 					this.indexMap.put(string, structureFeatureIndexSavedData2);
 
 					for (String string6 : compoundTag.getAllKeys()) {

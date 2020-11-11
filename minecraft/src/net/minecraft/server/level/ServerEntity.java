@@ -80,13 +80,15 @@ public class ServerEntity {
 			ItemFrame itemFrame = (ItemFrame)this.entity;
 			ItemStack itemStack = itemFrame.getItem();
 			if (itemStack.getItem() instanceof MapItem) {
-				MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.level);
-
-				for (ServerPlayer serverPlayer : this.level.players()) {
-					mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
-					Packet<?> packet = ((MapItem)itemStack.getItem()).getUpdatePacket(itemStack, this.level, serverPlayer);
-					if (packet != null) {
-						serverPlayer.connection.send(packet);
+				Integer integer = MapItem.getMapId(itemStack);
+				MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, this.level);
+				if (mapItemSavedData != null) {
+					for (ServerPlayer serverPlayer : this.level.players()) {
+						mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
+						Packet<?> packet = mapItemSavedData.getUpdatePacket(integer, serverPlayer);
+						if (packet != null) {
+							serverPlayer.connection.send(packet);
+						}
 					}
 				}
 			}

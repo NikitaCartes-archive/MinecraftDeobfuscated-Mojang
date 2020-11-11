@@ -12,11 +12,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.ConstantIntValue;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
@@ -26,6 +24,8 @@ import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
 import net.minecraft.world.level.storage.loot.predicates.LocationCheck;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 	public static final LootItemCondition.Builder IN_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE));
@@ -50,7 +50,7 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
-						.setRolls(ConstantIntValue.exactly(1))
+						.setRolls(ConstantValue.exactly(1.0F))
 						.add(LootTableReference.lootTableReference(BuiltInLootTables.FISHING_JUNK).setWeight(10).setQuality(-2))
 						.add(
 							LootTableReference.lootTableReference(BuiltInLootTables.FISHING_TREASURE)
@@ -82,7 +82,7 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 				.withPool(
 					LootPool.lootPool()
 						.add(LootItem.lootTableItem(Blocks.LILY_PAD).setWeight(17))
-						.add(LootItem.lootTableItem(Items.LEATHER_BOOTS).setWeight(10).apply(SetItemDamageFunction.setDamage(RandomValueBounds.between(0.0F, 0.9F))))
+						.add(LootItem.lootTableItem(Items.LEATHER_BOOTS).setWeight(10).apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.9F))))
 						.add(LootItem.lootTableItem(Items.LEATHER).setWeight(10))
 						.add(LootItem.lootTableItem(Items.BONE).setWeight(10))
 						.add(
@@ -91,10 +91,10 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 								.apply(SetNbtFunction.setTag(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("Potion", "minecraft:water"))))
 						)
 						.add(LootItem.lootTableItem(Items.STRING).setWeight(5))
-						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(2).apply(SetItemDamageFunction.setDamage(RandomValueBounds.between(0.0F, 0.9F))))
+						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(2).apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.9F))))
 						.add(LootItem.lootTableItem(Items.BOWL).setWeight(10))
 						.add(LootItem.lootTableItem(Items.STICK).setWeight(5))
-						.add(LootItem.lootTableItem(Items.INK_SAC).setWeight(1).apply(SetItemCountFunction.setCount(ConstantIntValue.exactly(10))))
+						.add(LootItem.lootTableItem(Items.INK_SAC).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(10.0F))))
 						.add(LootItem.lootTableItem(Blocks.TRIPWIRE_HOOK).setWeight(10))
 						.add(LootItem.lootTableItem(Items.ROTTEN_FLESH).setWeight(10))
 						.add(
@@ -115,15 +115,15 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 						.add(LootItem.lootTableItem(Items.SADDLE))
 						.add(
 							LootItem.lootTableItem(Items.BOW)
-								.apply(SetItemDamageFunction.setDamage(RandomValueBounds.between(0.0F, 0.25F)))
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantIntValue.exactly(30)).allowTreasure())
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.25F)))
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure())
 						)
 						.add(
 							LootItem.lootTableItem(Items.FISHING_ROD)
-								.apply(SetItemDamageFunction.setDamage(RandomValueBounds.between(0.0F, 0.25F)))
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantIntValue.exactly(30)).allowTreasure())
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.25F)))
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure())
 						)
-						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantIntValue.exactly(30)).allowTreasure()))
+						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
 						.add(LootItem.lootTableItem(Items.NAUTILUS_SHELL))
 				)
 		);

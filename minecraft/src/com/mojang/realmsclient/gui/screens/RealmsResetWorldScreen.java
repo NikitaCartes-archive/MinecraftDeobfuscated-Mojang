@@ -7,7 +7,10 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.util.task.ResettingWorldTask;
+import com.mojang.realmsclient.util.WorldGenerationInfo;
+import com.mojang.realmsclient.util.task.LongRunningTask;
+import com.mojang.realmsclient.util.task.ResettingGeneratedWorldTask;
+import com.mojang.realmsclient.util.task.ResettingTemplateWorldTask;
 import com.mojang.realmsclient.util.task.SwitchSlotTask;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -19,12 +22,13 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
+import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
+public class RealmsResetWorldScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Screen lastScreen;
 	private final RealmsServer serverData;
@@ -46,11 +50,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 	private WorldTemplatePaginatedList experiences;
 	private WorldTemplatePaginatedList inspirations;
 	public int slot = -1;
-	private RealmsResetWorldScreen.ResetType typeToReset = RealmsResetWorldScreen.ResetType.NONE;
-	private RealmsResetWorldScreen.ResetWorldInfo worldInfoToReset;
-	private WorldTemplate worldTemplateToReset;
-	@Nullable
-	private Component resetTitle;
+	private Component resetTitle = new TranslatableComponent("mco.reset.world.resetting.screen.title");
 	private final Runnable resetWorldRunnable;
 	private final Runnable callback;
 
@@ -110,7 +110,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 				row(0) + 10,
 				new TranslatableComponent("mco.reset.world.generate"),
 				NEW_WORLD_LOCATION,
-				button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this, this.title))
+				button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))
 			)
 		);
 		this.addButton(
@@ -121,8 +121,14 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 		);
 		this.addButton(
 			new RealmsResetWorldScreen.FrameButton(
-				this.frame(3), row(0) + 10, new TranslatableComponent("mco.reset.world.template"), SURVIVAL_SPAWN_LOCATION, button -> {
-					RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this, RealmsServer.WorldType.NORMAL, this.templates);
+				this.frame(3),
+				row(0) + 10,
+				new TranslatableComponent("mco.reset.world.template"),
+				SURVIVAL_SPAWN_LOCATION,
+				button -> {
+					RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(
+						this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates
+					);
 					realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.template"));
 					this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
 				}
@@ -136,7 +142,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 				ADVENTURE_MAP_LOCATION,
 				button -> {
 					RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(
-						this, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps
+						this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps
 					);
 					realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.adventure"));
 					this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
@@ -151,7 +157,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 				EXPERIENCE_LOCATION,
 				button -> {
 					RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(
-						this, RealmsServer.WorldType.EXPERIENCE, this.experiences
+						this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences
 					);
 					realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.experience"));
 					this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
@@ -166,7 +172,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 				INSPIRATION_LOCATION,
 				button -> {
 					RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(
-						this, RealmsServer.WorldType.INSPIRATION, this.inspirations
+						this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations
 					);
 					realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.reset.world.inspiration"));
 					this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
@@ -224,79 +230,33 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 		drawCenteredString(poseStack, this.font, component, i + 30, j, k);
 	}
 
-	@Override
-	protected void callback(@Nullable WorldTemplate worldTemplate) {
-		if (worldTemplate != null) {
-			if (this.slot == -1) {
-				this.resetWorldWithTemplate(worldTemplate);
-			} else {
-				switch (worldTemplate.type) {
-					case WORLD_TEMPLATE:
-						this.typeToReset = RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN;
-						break;
-					case ADVENTUREMAP:
-						this.typeToReset = RealmsResetWorldScreen.ResetType.ADVENTURE;
-						break;
-					case EXPERIENCE:
-						this.typeToReset = RealmsResetWorldScreen.ResetType.EXPERIENCE;
-						break;
-					case INSPIRATION:
-						this.typeToReset = RealmsResetWorldScreen.ResetType.INSPIRATION;
-				}
-
-				this.worldTemplateToReset = worldTemplate;
-				this.switchSlot();
-			}
-		}
-	}
-
-	private void switchSlot() {
-		this.switchSlot(() -> {
-			switch (this.typeToReset) {
-				case ADVENTURE:
-				case SURVIVAL_SPAWN:
-				case EXPERIENCE:
-				case INSPIRATION:
-					if (this.worldTemplateToReset != null) {
-						this.resetWorldWithTemplate(this.worldTemplateToReset);
-					}
-					break;
-				case GENERATE:
-					if (this.worldInfoToReset != null) {
-						this.triggerResetWorld(this.worldInfoToReset);
-					}
-			}
-		});
+	private void startTask(LongRunningTask longRunningTask) {
+		this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, longRunningTask));
 	}
 
 	public void switchSlot(Runnable runnable) {
-		this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchSlotTask(this.serverData.id, this.slot, runnable)));
+		this.startTask(new SwitchSlotTask(this.serverData.id, this.slot, runnable));
 	}
 
-	public void resetWorldWithTemplate(WorldTemplate worldTemplate) {
-		this.resetWorld(null, worldTemplate, -1, true);
+	private void templateSelectionCallback(@Nullable WorldTemplate worldTemplate) {
+		this.minecraft.setScreen(this);
+		if (worldTemplate != null) {
+			this.resetWorld(() -> this.startTask(new ResettingTemplateWorldTask(worldTemplate, this.serverData.id, this.resetTitle, this.resetWorldRunnable)));
+		}
 	}
 
-	private void triggerResetWorld(RealmsResetWorldScreen.ResetWorldInfo resetWorldInfo) {
-		this.resetWorld(resetWorldInfo.seed, null, resetWorldInfo.levelType, resetWorldInfo.generateStructures);
+	private void generationSelectionCallback(@Nullable WorldGenerationInfo worldGenerationInfo) {
+		this.minecraft.setScreen(this);
+		if (worldGenerationInfo != null) {
+			this.resetWorld(() -> this.startTask(new ResettingGeneratedWorldTask(worldGenerationInfo, this.serverData.id, this.resetTitle, this.resetWorldRunnable)));
+		}
 	}
 
-	private void resetWorld(@Nullable String string, @Nullable WorldTemplate worldTemplate, int i, boolean bl) {
-		this.minecraft
-			.setScreen(
-				new RealmsLongRunningMcoTaskScreen(
-					this.lastScreen, new ResettingWorldTask(string, worldTemplate, i, bl, this.serverData.id, this.resetTitle, this.resetWorldRunnable)
-				)
-			);
-	}
-
-	public void resetWorld(RealmsResetWorldScreen.ResetWorldInfo resetWorldInfo) {
+	private void resetWorld(Runnable runnable) {
 		if (this.slot == -1) {
-			this.triggerResetWorld(resetWorldInfo);
+			runnable.run();
 		} else {
-			this.typeToReset = RealmsResetWorldScreen.ResetType.GENERATE;
-			this.worldInfoToReset = resetWorldInfo;
-			this.switchSlot();
+			this.switchSlot(runnable);
 		}
 	}
 
@@ -312,30 +272,6 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 		@Override
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
 			RealmsResetWorldScreen.this.drawFrame(poseStack, this.x, this.y, this.getMessage(), this.image, this.isHovered(), this.isMouseOver((double)i, (double)j));
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static enum ResetType {
-		NONE,
-		GENERATE,
-		UPLOAD,
-		ADVENTURE,
-		SURVIVAL_SPAWN,
-		EXPERIENCE,
-		INSPIRATION;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class ResetWorldInfo {
-		private final String seed;
-		private final int levelType;
-		private final boolean generateStructures;
-
-		public ResetWorldInfo(String string, int i, boolean bl) {
-			this.seed = string;
-			this.levelType = i;
-			this.generateStructures = bl;
 		}
 	}
 }

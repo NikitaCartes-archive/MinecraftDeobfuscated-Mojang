@@ -17,7 +17,7 @@ public class LerpingBossEvent extends BossEvent {
 			clientboundBossEventPacket.getId(), clientboundBossEventPacket.getName(), clientboundBossEventPacket.getColor(), clientboundBossEventPacket.getOverlay()
 		);
 		this.targetPercent = clientboundBossEventPacket.getPercent();
-		this.percent = clientboundBossEventPacket.getPercent();
+		this.progress = clientboundBossEventPacket.getPercent();
 		this.setTime = Util.getMillis();
 		this.setDarkenScreen(clientboundBossEventPacket.shouldDarkenScreen());
 		this.setPlayBossMusic(clientboundBossEventPacket.shouldPlayMusic());
@@ -25,17 +25,17 @@ public class LerpingBossEvent extends BossEvent {
 	}
 
 	@Override
-	public void setPercent(float f) {
-		this.percent = this.getPercent();
+	public void setProgress(float f) {
+		this.progress = this.getProgress();
 		this.targetPercent = f;
 		this.setTime = Util.getMillis();
 	}
 
 	@Override
-	public float getPercent() {
+	public float getProgress() {
 		long l = Util.getMillis() - this.setTime;
 		float f = Mth.clamp((float)l / 100.0F, 0.0F, 1.0F);
-		return Mth.lerp(f, this.percent, this.targetPercent);
+		return Mth.lerp(f, this.progress, this.targetPercent);
 	}
 
 	public void update(ClientboundBossEventPacket clientboundBossEventPacket) {
@@ -43,8 +43,8 @@ public class LerpingBossEvent extends BossEvent {
 			case UPDATE_NAME:
 				this.setName(clientboundBossEventPacket.getName());
 				break;
-			case UPDATE_PCT:
-				this.setPercent(clientboundBossEventPacket.getPercent());
+			case UPDATE_PROGRESS:
+				this.setProgress(clientboundBossEventPacket.getPercent());
 				break;
 			case UPDATE_STYLE:
 				this.setColor(clientboundBossEventPacket.getColor());

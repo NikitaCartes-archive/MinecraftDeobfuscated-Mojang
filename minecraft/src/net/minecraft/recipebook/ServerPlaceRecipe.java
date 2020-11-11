@@ -11,8 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +38,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 				if (this.stackedContents.canCraft(recipe, null)) {
 					this.handleRecipeClicked(recipe, bl);
 				} else {
-					this.clearGrid();
+					this.clearGrid(true);
 					serverPlayer.connection.send(new ClientboundPlaceGhostRecipePacket(serverPlayer.containerMenu.containerId, recipe));
 				}
 
@@ -49,32 +47,16 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		}
 	}
 
-	protected void clearGrid() {
-		for (int i = 0; i < this.menu.getGridWidth() * this.menu.getGridHeight() + 1; i++) {
-			if (i != this.menu.getResultSlotIndex() || !(this.menu instanceof CraftingMenu) && !(this.menu instanceof InventoryMenu)) {
-				this.moveItemToInventory(i);
+	protected void clearGrid(boolean bl) {
+		for (int i = 0; i < this.menu.getSize(); i++) {
+			if (this.menu.shouldMoveToInventory(i)) {
+				ItemStack itemStack = this.menu.getSlot(i).getItem().copy();
+				this.inventory.placeItemBackInInventory(itemStack, false);
+				this.menu.getSlot(i).set(itemStack);
 			}
 		}
 
 		this.menu.clearCraftingContent();
-	}
-
-	protected void moveItemToInventory(int i) {
-		ItemStack itemStack = this.menu.getSlot(i).getItem();
-		if (!itemStack.isEmpty()) {
-			for (; itemStack.getCount() > 0; this.menu.getSlot(i).remove(1)) {
-				int j = this.inventory.getSlotWithRemainingSpace(itemStack);
-				if (j == -1) {
-					j = this.inventory.getFreeSlot();
-				}
-
-				ItemStack itemStack2 = itemStack.copy();
-				itemStack2.setCount(1);
-				if (!this.inventory.add(j, itemStack2)) {
-					LOGGER.error("Can't find any space for item in the inventory");
-				}
-			}
-		}
 	}
 
 	protected void handleRecipeClicked(Recipe<C> recipe, boolean bl) {
@@ -104,7 +86,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 			}
 
 			if (this.stackedContents.canCraft(recipe, intList, k)) {
-				this.clearGrid();
+				this.clearGrid(false);
 				this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipe, intList.iterator(), k);
 			}
 		}

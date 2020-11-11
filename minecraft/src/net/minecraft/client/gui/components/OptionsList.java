@@ -1,8 +1,10 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -46,10 +48,9 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 	@Nullable
 	public AbstractWidget findOption(Option option) {
 		for (OptionsList.Entry entry : this.children()) {
-			for (AbstractWidget abstractWidget : entry.children) {
-				if (abstractWidget instanceof OptionButton && ((OptionButton)abstractWidget).getOption() == option) {
-					return abstractWidget;
-				}
+			AbstractWidget abstractWidget = (AbstractWidget)entry.options.get(option);
+			if (abstractWidget != null) {
+				return abstractWidget;
 			}
 		}
 
@@ -70,21 +71,23 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 
 	@Environment(EnvType.CLIENT)
 	public static class Entry extends ContainerObjectSelectionList.Entry<OptionsList.Entry> {
+		private final Map<Option, AbstractWidget> options;
 		private final List<AbstractWidget> children;
 
-		private Entry(List<AbstractWidget> list) {
-			this.children = list;
+		private Entry(Map<Option, AbstractWidget> map) {
+			this.options = map;
+			this.children = ImmutableList.copyOf(map.values());
 		}
 
 		public static OptionsList.Entry big(Options options, int i, Option option) {
-			return new OptionsList.Entry(ImmutableList.of(option.createButton(options, i / 2 - 155, 0, 310)));
+			return new OptionsList.Entry(ImmutableMap.of(option, option.createButton(options, i / 2 - 155, 0, 310)));
 		}
 
 		public static OptionsList.Entry small(Options options, int i, Option option, @Nullable Option option2) {
 			AbstractWidget abstractWidget = option.createButton(options, i / 2 - 155, 0, 150);
 			return option2 == null
-				? new OptionsList.Entry(ImmutableList.of(abstractWidget))
-				: new OptionsList.Entry(ImmutableList.of(abstractWidget, option2.createButton(options, i / 2 - 155 + 160, 0, 150)));
+				? new OptionsList.Entry(ImmutableMap.of(option, abstractWidget))
+				: new OptionsList.Entry(ImmutableMap.of(option, abstractWidget, option2, option2.createButton(options, i / 2 - 155 + 160, 0, 150)));
 		}
 
 		@Override

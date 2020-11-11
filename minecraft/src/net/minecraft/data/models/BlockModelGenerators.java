@@ -37,6 +37,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -1935,19 +1936,87 @@ public class BlockModelGenerators {
 		this.createNonTemplateModelBlock(Blocks.CAULDRON);
 		this.blockStateOutput
 			.accept(
-				createSimpleBlock(Blocks.LAVA_CAULDRON, ModelTemplates.CAULDRON_FULL.create(Blocks.LAVA_CAULDRON, TextureMapping.cauldron(Blocks.LAVA), this.modelOutput))
+				createSimpleBlock(
+					Blocks.LAVA_CAULDRON,
+					ModelTemplates.CAULDRON_FULL
+						.create(Blocks.LAVA_CAULDRON, TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.LAVA, "_still")), this.modelOutput)
+				)
 			);
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(Blocks.WATER_CAULDRON)
 					.with(
-						PropertyDispatch.property(BlockStateProperties.LEVEL_CAULDRON)
-							.select(1, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.WATER_CAULDRON, "_level1")))
-							.select(2, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.WATER_CAULDRON, "_level2")))
+						PropertyDispatch.property(LayeredCauldronBlock.LEVEL)
+							.select(
+								1,
+								Variant.variant()
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_LEVEL1
+											.createWithSuffix(
+												Blocks.WATER_CAULDRON, "_level1", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput
+											)
+									)
+							)
+							.select(
+								2,
+								Variant.variant()
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_LEVEL2
+											.createWithSuffix(
+												Blocks.WATER_CAULDRON, "_level2", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput
+											)
+									)
+							)
 							.select(
 								3,
 								Variant.variant()
-									.with(VariantProperties.MODEL, ModelTemplates.CAULDRON_FULL.create(Blocks.WATER_CAULDRON, TextureMapping.cauldron(Blocks.WATER), this.modelOutput))
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_FULL
+											.createWithSuffix(Blocks.WATER_CAULDRON, "_full", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput)
+									)
+							)
+					)
+			);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.POWDER_SNOW_CAULDRON)
+					.with(
+						PropertyDispatch.property(LayeredCauldronBlock.LEVEL)
+							.select(
+								1,
+								Variant.variant()
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_LEVEL1
+											.createWithSuffix(
+												Blocks.POWDER_SNOW_CAULDRON, "_level1", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput
+											)
+									)
+							)
+							.select(
+								2,
+								Variant.variant()
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_LEVEL2
+											.createWithSuffix(
+												Blocks.POWDER_SNOW_CAULDRON, "_level2", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput
+											)
+									)
+							)
+							.select(
+								3,
+								Variant.variant()
+									.with(
+										VariantProperties.MODEL,
+										ModelTemplates.CAULDRON_FULL
+											.createWithSuffix(
+												Blocks.POWDER_SNOW_CAULDRON, "_full", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput
+											)
+									)
 							)
 					)
 			);
@@ -3599,6 +3668,7 @@ public class BlockModelGenerators {
 		this.createCandleAndCandleCake(Blocks.CANDLE, Blocks.CANDLE_CAKE);
 		this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
 		this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
+		this.createNonTemplateModelBlock(Blocks.POWDER_SNOW);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
 		this.createSimpleFlatItemModel(Items.BARRIER);
 		this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);

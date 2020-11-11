@@ -36,6 +36,15 @@ public class SoundType {
 	public static final SoundType SNOW = new SoundType(
 		1.0F, 1.0F, SoundEvents.SNOW_BREAK, SoundEvents.SNOW_STEP, SoundEvents.SNOW_PLACE, SoundEvents.SNOW_HIT, SoundEvents.SNOW_FALL
 	);
+	public static final SoundType POWDER_SNOW = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.POWDER_SNOW_BREAK,
+		SoundEvents.POWDER_SNOW_STEP,
+		SoundEvents.POWDER_SNOW_PLACE,
+		SoundEvents.POWDER_SNOW_HIT,
+		SoundEvents.POWDER_SNOW_FALL
+	);
 	public static final SoundType LADDER = new SoundType(
 		1.0F, 1.0F, SoundEvents.LADDER_BREAK, SoundEvents.LADDER_STEP, SoundEvents.LADDER_PLACE, SoundEvents.LADDER_HIT, SoundEvents.LADDER_FALL
 	);

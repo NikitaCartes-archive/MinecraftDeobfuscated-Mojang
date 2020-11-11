@@ -1,11 +1,11 @@
 package net.minecraft.client.gui;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,33 +26,28 @@ public class MapRenderer implements AutoCloseable {
 	private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
 	private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
 	private final TextureManager textureManager;
-	private final Map<String, MapRenderer.MapInstance> maps = Maps.<String, MapRenderer.MapInstance>newHashMap();
+	private final Int2ObjectMap<MapRenderer.MapInstance> maps = new Int2ObjectOpenHashMap<>();
 
 	public MapRenderer(TextureManager textureManager) {
 		this.textureManager = textureManager;
 	}
 
-	public void update(MapItemSavedData mapItemSavedData) {
-		this.getMapInstance(mapItemSavedData).updateTexture();
+	public void update(int i, MapItemSavedData mapItemSavedData) {
+		this.getOrCreateMapInstance(i, mapItemSavedData).updateTexture();
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, MapItemSavedData mapItemSavedData, boolean bl, int i) {
-		this.getMapInstance(mapItemSavedData).draw(poseStack, multiBufferSource, bl, i);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, MapItemSavedData mapItemSavedData, boolean bl, int j) {
+		this.getOrCreateMapInstance(i, mapItemSavedData).draw(poseStack, multiBufferSource, bl, j);
 	}
 
-	private MapRenderer.MapInstance getMapInstance(MapItemSavedData mapItemSavedData) {
-		MapRenderer.MapInstance mapInstance = (MapRenderer.MapInstance)this.maps.get(mapItemSavedData.getId());
-		if (mapInstance == null) {
-			mapInstance = new MapRenderer.MapInstance(mapItemSavedData);
-			this.maps.put(mapItemSavedData.getId(), mapInstance);
-		}
-
-		return mapInstance;
+	private MapRenderer.MapInstance getOrCreateMapInstance(int i, MapItemSavedData mapItemSavedData) {
+		return this.maps.computeIfAbsent(i, ix -> new MapRenderer.MapInstance(ix, mapItemSavedData));
 	}
 
 	@Nullable
-	public MapRenderer.MapInstance getMapInstanceIfExists(String string) {
-		return (MapRenderer.MapInstance)this.maps.get(string);
+	public MapItemSavedData retrieveMapFromRenderer(int i) {
+		MapRenderer.MapInstance mapInstance = this.maps.get(i);
+		return mapInstance != null ? mapInstance.data : null;
 	}
 
 	public void resetData() {
@@ -61,11 +56,6 @@ public class MapRenderer implements AutoCloseable {
 		}
 
 		this.maps.clear();
-	}
-
-	@Nullable
-	public MapItemSavedData getData(@Nullable MapRenderer.MapInstance mapInstance) {
-		return mapInstance != null ? mapInstance.data : null;
 	}
 
 	public void close() {
@@ -78,10 +68,10 @@ public class MapRenderer implements AutoCloseable {
 		private final DynamicTexture texture;
 		private final RenderType renderType;
 
-		private MapInstance(MapItemSavedData mapItemSavedData) {
+		private MapInstance(int i, MapItemSavedData mapItemSavedData) {
 			this.data = mapItemSavedData;
 			this.texture = new DynamicTexture(128, 128, true);
-			ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + mapItemSavedData.getId(), this.texture);
+			ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + i, this.texture);
 			this.renderType = RenderType.text(resourceLocation);
 		}
 
@@ -113,7 +103,7 @@ public class MapRenderer implements AutoCloseable {
 			vertexConsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(i).endVertex();
 			int l = 0;
 
-			for (MapDecoration mapDecoration : this.data.decorations.values()) {
+			for (MapDecoration mapDecoration : this.data.getDecorations()) {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					poseStack.pushPose();
 					poseStack.translate((double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F), -0.02F);

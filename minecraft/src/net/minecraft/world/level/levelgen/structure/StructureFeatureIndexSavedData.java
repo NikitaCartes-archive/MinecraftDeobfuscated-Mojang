@@ -6,17 +6,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class StructureFeatureIndexSavedData extends SavedData {
-	private LongSet all = new LongOpenHashSet();
-	private LongSet remaining = new LongOpenHashSet();
+	private final LongSet all;
+	private final LongSet remaining;
 
-	public StructureFeatureIndexSavedData(String string) {
-		super(string);
+	private StructureFeatureIndexSavedData(LongSet longSet, LongSet longSet2) {
+		this.all = longSet;
+		this.remaining = longSet2;
 	}
 
-	@Override
-	public void load(CompoundTag compoundTag) {
-		this.all = new LongOpenHashSet(compoundTag.getLongArray("All"));
-		this.remaining = new LongOpenHashSet(compoundTag.getLongArray("Remaining"));
+	public StructureFeatureIndexSavedData() {
+		this(new LongOpenHashSet(), new LongOpenHashSet());
+	}
+
+	public static StructureFeatureIndexSavedData load(CompoundTag compoundTag) {
+		return new StructureFeatureIndexSavedData(new LongOpenHashSet(compoundTag.getLongArray("All")), new LongOpenHashSet(compoundTag.getLongArray("Remaining")));
 	}
 
 	@Override

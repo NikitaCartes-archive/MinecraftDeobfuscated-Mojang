@@ -42,6 +42,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -187,14 +188,18 @@ public class Block extends BlockBehaviour implements ItemLike {
 				return b != 0;
 			} else {
 				VoxelShape voxelShape = blockState.getFaceOcclusionShape(blockGetter, blockPos, direction);
-				VoxelShape voxelShape2 = blockState2.getFaceOcclusionShape(blockGetter, blockPos2, direction.getOpposite());
-				boolean bl = Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
-				if (object2ByteLinkedOpenHashMap.size() == 2048) {
-					object2ByteLinkedOpenHashMap.removeLastByte();
-				}
+				if (voxelShape.isEmpty()) {
+					return true;
+				} else {
+					VoxelShape voxelShape2 = blockState2.getFaceOcclusionShape(blockGetter, blockPos2, direction.getOpposite());
+					boolean bl = Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
+					if (object2ByteLinkedOpenHashMap.size() == 2048) {
+						object2ByteLinkedOpenHashMap.removeLastByte();
+					}
 
-				object2ByteLinkedOpenHashMap.putAndMoveToFirst(blockStatePairKey, (byte)(bl ? 1 : 0));
-				return bl;
+					object2ByteLinkedOpenHashMap.putAndMoveToFirst(blockStatePairKey, (byte)(bl ? 1 : 0));
+					return bl;
+				}
 			}
 		} else {
 			return true;
@@ -369,7 +374,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 		}
 	}
 
-	public void handleRain(BlockState blockState, Level level, BlockPos blockPos) {
+	public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
 	}
 
 	public boolean dropFromExplosion(Explosion explosion) {

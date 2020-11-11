@@ -30,6 +30,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -268,7 +269,7 @@ public class LootCommand {
 	private static Container getContainer(CommandSourceStack commandSourceStack, BlockPos blockPos) throws CommandSyntaxException {
 		BlockEntity blockEntity = commandSourceStack.getLevel().getBlockEntity(blockPos);
 		if (!(blockEntity instanceof Container)) {
-			throw ReplaceItemCommand.ERROR_NOT_A_CONTAINER.create();
+			throw ItemCommands.ERROR_TARGET_NOT_A_CONTAINER.create(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 		} else {
 			return (Container)blockEntity;
 		}
@@ -332,7 +333,7 @@ public class LootCommand {
 			callback.accept(list2);
 			return list2.size();
 		} else {
-			throw ReplaceItemCommand.ERROR_INAPPLICABLE_SLOT.create(i);
+			throw ItemCommands.ERROR_TARGET_INAPPLICABLE_SLOT.create(i);
 		}
 	}
 
@@ -361,7 +362,8 @@ public class LootCommand {
 	private static void setSlots(Entity entity, List<ItemStack> list, int i, int j, List<ItemStack> list2) {
 		for (int k = 0; k < j; k++) {
 			ItemStack itemStack = k < list.size() ? (ItemStack)list.get(k) : ItemStack.EMPTY;
-			if (entity.setSlot(i + k, itemStack.copy())) {
+			SlotAccess slotAccess = entity.getSlot(i + k);
+			if (slotAccess != SlotAccess.NULL && slotAccess.set(itemStack.copy())) {
 				list2.add(itemStack);
 			}
 		}

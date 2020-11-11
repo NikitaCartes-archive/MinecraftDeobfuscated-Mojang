@@ -213,7 +213,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.updateSkyBrightness();
 		this.prepareWeather();
 		this.getWorldBorder().setAbsoluteMaxSize(minecraftServer.getAbsoluteMaxWorldSize());
-		this.raids = this.getDataStorage().computeIfAbsent(() -> new Raids(this), Raids.getFileId(this.dimensionType()));
+		this.raids = this.getDataStorage()
+			.computeIfAbsent(compoundTag -> Raids.load(this, compoundTag), () -> new Raids(this), Raids.getFileId(this.dimensionType()));
 		if (!minecraftServer.isSingleplayer()) {
 			serverLevelData.setGameType(minecraftServer.getDefaultGameType());
 		}
@@ -474,13 +475,14 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				this.setBlockAndUpdate(blockPos2, Blocks.ICE.defaultBlockState());
 			}
 
-			if (bl && biome.shouldSnow(this, blockPos)) {
-				this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
-			}
+			if (bl) {
+				if (biome.shouldSnow(this, blockPos)) {
+					this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
+				}
 
-			if (bl && this.getBiome(blockPos2).getPrecipitation() == Biome.Precipitation.RAIN) {
 				BlockState blockState = this.getBlockState(blockPos2);
-				blockState.getBlock().handleRain(blockState, this, blockPos2);
+				Biome.Precipitation precipitation = this.getBiome(blockPos2).getPrecipitation();
+				blockState.getBlock().handlePrecipitation(blockState, this, blockPos2, precipitation);
 			}
 		}
 
@@ -513,7 +515,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	private Optional<BlockPos> findLightningRod(BlockPos blockPos) {
-		Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos, 64, PoiManager.Occupancy.ANY);
+		Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos, 128, PoiManager.Occupancy.ANY);
 		if (optional.isPresent()) {
 			BlockPos blockPos2 = (BlockPos)optional.get();
 			int i = this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX(), blockPos2.getZ()) - 1;
@@ -1032,17 +1034,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Nullable
 	@Override
 	public MapItemSavedData getMapData(String string) {
-		return this.getServer().overworld().getDataStorage().get(() -> new MapItemSavedData(string), string);
+		return this.getServer().overworld().getDataStorage().get(MapItemSavedData::load, string);
 	}
 
 	@Override
-	public void setMapData(MapItemSavedData mapItemSavedData) {
-		this.getServer().overworld().getDataStorage().set(mapItemSavedData);
+	public void setMapData(String string, MapItemSavedData mapItemSavedData) {
+		this.getServer().overworld().getDataStorage().set(string, mapItemSavedData);
 	}
 
 	@Override
 	public int getFreeMapId() {
-		return this.getServer().overworld().getDataStorage().<MapIndex>computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
+		return this.getServer().overworld().getDataStorage().<MapIndex>computeIfAbsent(MapIndex::load, MapIndex::new, "idcounts").getFreeAuxValueForMap();
 	}
 
 	public void setDefaultSpawnPos(BlockPos blockPos, float f) {
@@ -1067,12 +1069,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public LongSet getForcedChunks() {
-		ForcedChunksSavedData forcedChunksSavedData = this.getDataStorage().get(ForcedChunksSavedData::new, "chunks");
+		ForcedChunksSavedData forcedChunksSavedData = this.getDataStorage().get(ForcedChunksSavedData::load, "chunks");
 		return (LongSet)(forcedChunksSavedData != null ? LongSets.unmodifiable(forcedChunksSavedData.getChunks()) : LongSets.EMPTY_SET);
 	}
 
 	public boolean setChunkForced(int i, int j, boolean bl) {
-		ForcedChunksSavedData forcedChunksSavedData = this.getDataStorage().computeIfAbsent(ForcedChunksSavedData::new, "chunks");
+		ForcedChunksSavedData forcedChunksSavedData = this.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
 		ChunkPos chunkPos = new ChunkPos(i, j);
 		long l = chunkPos.toLong();
 		boolean bl2;

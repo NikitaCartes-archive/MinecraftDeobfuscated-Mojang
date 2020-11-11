@@ -53,7 +53,7 @@ public class BossHealthOverlay extends GuiComponent {
 			this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
 		}
 
-		int k = (int)(bossEvent.getPercent() * 183.0F);
+		int k = (int)(bossEvent.getProgress() * 183.0F);
 		if (k > 0) {
 			this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + 5, k, 5);
 			if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {

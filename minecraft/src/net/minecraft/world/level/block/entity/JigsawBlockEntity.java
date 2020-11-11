@@ -10,6 +10,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -159,6 +161,11 @@ public class JigsawBlockEntity extends BlockEntity {
 
 		public static Optional<JigsawBlockEntity.JointType> byName(String string) {
 			return Arrays.stream(values()).filter(jointType -> jointType.getSerializedName().equals(string)).findFirst();
+		}
+
+		@Environment(EnvType.CLIENT)
+		public Component getTranslatedName() {
+			return new TranslatableComponent("jigsaw_block.joint." + this.name);
 		}
 	}
 }

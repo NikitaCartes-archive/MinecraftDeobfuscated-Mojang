@@ -25,6 +25,7 @@ public class LootItemConditions {
 	public static final LootItemConditionType WEATHER_CHECK = register("weather_check", new WeatherCheck.Serializer());
 	public static final LootItemConditionType REFERENCE = register("reference", new ConditionReference.Serializer());
 	public static final LootItemConditionType TIME_CHECK = register("time_check", new TimeCheck.Serializer());
+	public static final LootItemConditionType VALUE_CHECK = register("value_check", new ValueCheckCondition.Serializer());
 
 	private static LootItemConditionType register(String string, Serializer<? extends LootItemCondition> serializer) {
 		return Registry.register(Registry.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(serializer));

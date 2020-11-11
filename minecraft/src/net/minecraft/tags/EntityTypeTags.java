@@ -11,6 +11,7 @@ public final class EntityTypeTags {
 	public static final Tag.Named<EntityType<?>> BEEHIVE_INHABITORS = bind("beehive_inhabitors");
 	public static final Tag.Named<EntityType<?>> ARROWS = bind("arrows");
 	public static final Tag.Named<EntityType<?>> IMPACT_PROJECTILES = bind("impact_projectiles");
+	public static final Tag.Named<EntityType<?>> POWDER_SNOW_WALKABLE_MOBS = bind("powder_snow_walkable_mobs");
 
 	private static Tag.Named<EntityType<?>> bind(String string) {
 		return HELPER.bind(string);

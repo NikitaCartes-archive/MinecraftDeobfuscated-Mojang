@@ -795,12 +795,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.COPPER_BLOCK)
 			.define('#', Items.COPPER_INGOT)
-			.pattern("###")
-			.pattern("###")
-			.pattern("###")
+			.pattern("##")
+			.pattern("##")
 			.unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 9)
+		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4)
 			.requires(Blocks.COPPER_BLOCK)
 			.group("copper_ingot")
 			.unlockedBy("has_copper_block", has(Blocks.COPPER_BLOCK))

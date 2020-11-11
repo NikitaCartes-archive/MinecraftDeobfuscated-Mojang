@@ -349,7 +349,7 @@ public class EndDragonFight {
 
 	public void setDragonKilled(EnderDragon enderDragon) {
 		if (enderDragon.getUUID().equals(this.dragonUUID)) {
-			this.dragonEvent.setPercent(0.0F);
+			this.dragonEvent.setProgress(0.0F);
 			this.dragonEvent.setVisible(false);
 			this.spawnExitPortal(true);
 			this.spawnNewGateway();
@@ -404,7 +404,7 @@ public class EndDragonFight {
 
 	public void updateDragon(EnderDragon enderDragon) {
 		if (enderDragon.getUUID().equals(this.dragonUUID)) {
-			this.dragonEvent.setPercent(enderDragon.getHealth() / enderDragon.getMaxHealth());
+			this.dragonEvent.setProgress(enderDragon.getHealth() / enderDragon.getMaxHealth());
 			this.ticksSinceDragonSeen = 0;
 			if (enderDragon.hasCustomName()) {
 				this.dragonEvent.setName(enderDragon.getDisplayName());

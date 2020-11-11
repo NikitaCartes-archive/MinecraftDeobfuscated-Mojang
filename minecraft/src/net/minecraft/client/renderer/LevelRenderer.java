@@ -1575,7 +1575,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.renderEndSky(poseStack);
 		} else if (this.minecraft.level.effects().skyType() == DimensionSpecialEffects.SkyType.NORMAL) {
 			RenderSystem.disableTexture();
-			Vec3 vec3 = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getBlockPosition(), f);
+			Vec3 vec3 = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), f);
 			float g = (float)vec3.x;
 			float h = (float)vec3.y;
 			float i = (float)vec3.z;

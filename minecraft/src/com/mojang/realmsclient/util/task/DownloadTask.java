@@ -37,7 +37,7 @@ public class DownloadTask extends LongRunningTask {
 				}
 
 				WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.worldId, this.slot);
-				pause(1);
+				pause(1L);
 				if (this.aborted()) {
 					return;
 				}
@@ -50,7 +50,7 @@ public class DownloadTask extends LongRunningTask {
 					return;
 				}
 
-				pause(var4.delaySeconds);
+				pause((long)var4.delaySeconds);
 				i++;
 			} catch (RealmsServiceException var5) {
 				if (this.aborted()) {

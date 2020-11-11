@@ -623,7 +623,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				list2.add(1, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
 			}
 
-			this.renderComponentTooltip(poseStack, list2, i, j);
+			this.renderTooltip(poseStack, list2, itemStack.getTooltipImage(), i, j);
 		} else {
 			super.renderTooltip(poseStack, itemStack, i, j);
 		}

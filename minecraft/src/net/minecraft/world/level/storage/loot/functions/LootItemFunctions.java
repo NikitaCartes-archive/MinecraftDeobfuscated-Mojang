@@ -13,6 +13,7 @@ public class LootItemFunctions {
 	public static final LootItemFunctionType SET_COUNT = register("set_count", new SetItemCountFunction.Serializer());
 	public static final LootItemFunctionType ENCHANT_WITH_LEVELS = register("enchant_with_levels", new EnchantWithLevelsFunction.Serializer());
 	public static final LootItemFunctionType ENCHANT_RANDOMLY = register("enchant_randomly", new EnchantRandomlyFunction.Serializer());
+	public static final LootItemFunctionType SET_ENCHANTMENTS = register("set_enchantments", new SetEnchantmentsFunction.Serializer());
 	public static final LootItemFunctionType SET_NBT = register("set_nbt", new SetNbtFunction.Serializer());
 	public static final LootItemFunctionType FURNACE_SMELT = register("furnace_smelt", new SmeltItemFunction.Serializer());
 	public static final LootItemFunctionType LOOTING_ENCHANT = register("looting_enchant", new LootingEnchantFunction.Serializer());

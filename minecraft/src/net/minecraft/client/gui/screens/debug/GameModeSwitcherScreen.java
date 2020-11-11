@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(EnvType.CLIENT)
 public class GameModeSwitcherScreen extends Screen {
 	private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
-	private static final int ALL_SLOTS_WIDTH = GameModeSwitcherScreen.GameModeIcon.values().length * 30 - 5;
+	private static final int ALL_SLOTS_WIDTH = GameModeSwitcherScreen.GameModeIcon.values().length * 31 - 5;
 	private static final Component SELECT_KEY = new TranslatableComponent(
 		"debug.gamemodes.select_next", new TranslatableComponent("debug.gamemodes.press_f4").withStyle(ChatFormatting.AQUA)
 	);
@@ -65,7 +65,7 @@ public class GameModeSwitcherScreen extends Screen {
 
 		for (int i = 0; i < GameModeSwitcherScreen.GameModeIcon.VALUES.length; i++) {
 			GameModeSwitcherScreen.GameModeIcon gameModeIcon = GameModeSwitcherScreen.GameModeIcon.VALUES[i];
-			this.slots.add(new GameModeSwitcherScreen.GameModeSlot(gameModeIcon, this.width / 2 - ALL_SLOTS_WIDTH / 2 + i * 30, this.height / 2 - 30));
+			this.slots.add(new GameModeSwitcherScreen.GameModeSlot(gameModeIcon, this.width / 2 - ALL_SLOTS_WIDTH / 2 + i * 31, this.height / 2 - 31));
 		}
 	}
 
@@ -76,12 +76,12 @@ public class GameModeSwitcherScreen extends Screen {
 			RenderSystem.enableBlend();
 			this.minecraft.getTextureManager().bind(GAMEMODE_SWITCHER_LOCATION);
 			int k = this.width / 2 - 62;
-			int l = this.height / 2 - 30 - 27;
+			int l = this.height / 2 - 31 - 27;
 			blit(poseStack, k, l, 0.0F, 0.0F, 125, 75, 128, 128);
 			poseStack.popPose();
 			super.render(poseStack, i, j, f);
 			this.currentlyHovered
-				.ifPresent(gameModeIcon -> drawCenteredString(poseStack, this.font, gameModeIcon.getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
+				.ifPresent(gameModeIcon -> drawCenteredString(poseStack, this.font, gameModeIcon.getName(), this.width / 2, this.height / 2 - 31 - 20, -1));
 			drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 16777215);
 			if (!this.setFirstMousePos) {
 				this.firstMouseX = i;
@@ -206,7 +206,7 @@ public class GameModeSwitcherScreen extends Screen {
 		private boolean isSelected;
 
 		public GameModeSlot(GameModeSwitcherScreen.GameModeIcon gameModeIcon, int i, int j) {
-			super(i, j, 25, 25, gameModeIcon.getName());
+			super(i, j, 26, 26, gameModeIcon.getName());
 			this.icon = gameModeIcon;
 		}
 
@@ -234,7 +234,7 @@ public class GameModeSwitcherScreen extends Screen {
 			textureManager.bind(GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
 			poseStack.translate((double)this.x, (double)this.y, 0.0);
-			blit(poseStack, 0, 0, 0.0F, 75.0F, 25, 25, 128, 128);
+			blit(poseStack, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
 			poseStack.popPose();
 		}
 
@@ -242,7 +242,7 @@ public class GameModeSwitcherScreen extends Screen {
 			textureManager.bind(GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
 			poseStack.translate((double)this.x, (double)this.y, 0.0);
-			blit(poseStack, 0, 0, 25.0F, 75.0F, 25, 25, 128, 128);
+			blit(poseStack, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
 			poseStack.popPose();
 		}
 	}

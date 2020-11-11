@@ -16,6 +16,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -101,13 +102,19 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	}
 
 	@Override
-	public boolean setSlot(int i, ItemStack itemStack) {
-		if (i >= 0 && i < this.getContainerSize()) {
-			this.setItem(i, itemStack);
-			return true;
-		} else {
-			return false;
-		}
+	public SlotAccess getSlot(int i) {
+		return i >= 0 && i < this.getContainerSize() ? new SlotAccess() {
+			@Override
+			public ItemStack get() {
+				return AbstractMinecartContainer.this.getItem(i);
+			}
+
+			@Override
+			public boolean set(ItemStack itemStack) {
+				AbstractMinecartContainer.this.setItem(i, itemStack);
+				return true;
+			}
+		} : super.getSlot(i);
 	}
 
 	@Override

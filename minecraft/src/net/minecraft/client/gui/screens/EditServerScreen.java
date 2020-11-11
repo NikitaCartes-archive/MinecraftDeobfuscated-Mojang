@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.CommonComponents;
@@ -24,7 +25,6 @@ public class EditServerScreen extends Screen {
 	private final ServerData serverData;
 	private EditBox ipEdit;
 	private EditBox nameEdit;
-	private Button serverPackButton;
 	private final Screen lastScreen;
 	private final Predicate<String> addressFilter = string -> {
 		if (StringUtil.isNullOrEmpty(string)) {
@@ -71,31 +71,24 @@ public class EditServerScreen extends Screen {
 		this.ipEdit.setFilter(this.addressFilter);
 		this.ipEdit.setResponder(this::onEdited);
 		this.children.add(this.ipEdit);
-		this.serverPackButton = this.addButton(
-			new Button(
-				this.width / 2 - 100,
-				this.height / 4 + 72,
-				200,
-				20,
-				createServerButtonText(this.serverData.getResourcePackStatus()),
-				button -> {
-					this.serverData
-						.setResourcePackStatus(
-							ServerData.ServerPackStatus.values()[(this.serverData.getResourcePackStatus().ordinal() + 1) % ServerData.ServerPackStatus.values().length]
-						);
-					this.serverPackButton.setMessage(createServerButtonText(this.serverData.getResourcePackStatus()));
-				}
-			)
+		this.addButton(
+			CycleButton.<ServerData.ServerPackStatus>builder(ServerData.ServerPackStatus::getName)
+				.withValues(ServerData.ServerPackStatus.values())
+				.withInitialValue(this.serverData.getResourcePackStatus())
+				.create(
+					this.width / 2 - 100,
+					this.height / 4 + 72,
+					200,
+					20,
+					new TranslatableComponent("addServer.resourcePack"),
+					(cycleButton, serverPackStatus) -> this.serverData.setResourcePackStatus(serverPackStatus)
+				)
 		);
 		this.addButton = this.addButton(
 			new Button(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20, new TranslatableComponent("addServer.add"), button -> this.onAdd())
 		);
 		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
 		this.cleanUp();
-	}
-
-	private static Component createServerButtonText(ServerData.ServerPackStatus serverPackStatus) {
-		return new TranslatableComponent("addServer.resourcePack").append(": ").append(serverPackStatus.getName());
 	}
 
 	@Override

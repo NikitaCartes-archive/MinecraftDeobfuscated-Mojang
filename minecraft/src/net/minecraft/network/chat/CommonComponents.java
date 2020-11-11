@@ -15,11 +15,11 @@ public class CommonComponents {
 	public static final Component GUI_BACK = new TranslatableComponent("gui.back");
 	public static final Component CONNECT_FAILED = new TranslatableComponent("connect.failed");
 
-	public static Component optionStatus(boolean bl) {
-		return bl ? OPTION_ON : OPTION_OFF;
-	}
-
 	public static MutableComponent optionStatus(Component component, boolean bl) {
 		return new TranslatableComponent(bl ? "options.on.composed" : "options.off.composed", component);
+	}
+
+	public static MutableComponent optionNameValue(Component component, Component component2) {
+		return new TranslatableComponent("options.generic_value", component, component2);
 	}
 }

@@ -267,14 +267,14 @@ public class TextureMapping {
 			.put(TextureSlot.CANDLE, getBlockTexture(block));
 	}
 
-	public static TextureMapping cauldron(Block block) {
+	public static TextureMapping cauldron(ResourceLocation resourceLocation) {
 		return new TextureMapping()
 			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.CAULDRON, "_side"))
 			.put(TextureSlot.SIDE, getBlockTexture(Blocks.CAULDRON, "_side"))
 			.put(TextureSlot.TOP, getBlockTexture(Blocks.CAULDRON, "_top"))
 			.put(TextureSlot.BOTTOM, getBlockTexture(Blocks.CAULDRON, "_bottom"))
 			.put(TextureSlot.INSIDE, getBlockTexture(Blocks.CAULDRON, "_inner"))
-			.put(TextureSlot.CONTENT, getBlockTexture(block, "_still"));
+			.put(TextureSlot.CONTENT, resourceLocation);
 	}
 
 	public static TextureMapping layer0(Item item) {

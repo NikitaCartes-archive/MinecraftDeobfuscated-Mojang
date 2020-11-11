@@ -24,6 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -251,18 +252,9 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 	}
 
 	@Override
-	public boolean setSlot(int i, ItemStack itemStack) {
-		if (super.setSlot(i, itemStack)) {
-			return true;
-		} else {
-			int j = i - 300;
-			if (j >= 0 && j < this.inventory.getContainerSize()) {
-				this.inventory.setItem(j, itemStack);
-				return true;
-			} else {
-				return false;
-			}
-		}
+	public SlotAccess getSlot(int i) {
+		int j = i - 300;
+		return j >= 0 && j < this.inventory.getContainerSize() ? SlotAccess.forContainer(this.inventory, j) : super.getSlot(i);
 	}
 
 	@Override

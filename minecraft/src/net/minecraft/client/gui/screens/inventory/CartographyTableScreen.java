@@ -45,9 +45,11 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 		boolean bl3 = itemStack.is(Items.GLASS_PANE);
 		ItemStack itemStack2 = this.menu.getSlot(0).getItem();
 		boolean bl4 = false;
+		Integer integer;
 		MapItemSavedData mapItemSavedData;
 		if (itemStack2.is(Items.FILLED_MAP)) {
-			mapItemSavedData = MapItem.getSavedData(itemStack2, this.minecraft.level);
+			integer = MapItem.getMapId(itemStack2);
+			mapItemSavedData = MapItem.getSavedData(integer, this.minecraft.level);
 			if (mapItemSavedData != null) {
 				if (mapItemSavedData.locked) {
 					bl4 = true;
@@ -62,30 +64,33 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 				}
 			}
 		} else {
+			integer = null;
 			mapItemSavedData = null;
 		}
 
-		this.renderResultingMap(poseStack, mapItemSavedData, bl, bl2, bl3, bl4);
+		this.renderResultingMap(poseStack, integer, mapItemSavedData, bl, bl2, bl3, bl4);
 	}
 
-	private void renderResultingMap(PoseStack poseStack, @Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+	private void renderResultingMap(
+		PoseStack poseStack, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4
+	) {
 		int i = this.leftPos;
 		int j = this.topPos;
 		if (bl2 && !bl4) {
 			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 66, 66, 66);
-			this.renderMap(mapItemSavedData, i + 85, j + 31, 0.226F);
+			this.renderMap(integer, mapItemSavedData, i + 85, j + 31, 0.226F);
 		} else if (bl) {
 			this.blit(poseStack, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
-			this.renderMap(mapItemSavedData, i + 86, j + 16, 0.34F);
+			this.renderMap(integer, mapItemSavedData, i + 86, j + 16, 0.34F);
 			this.minecraft.getTextureManager().bind(BG_LOCATION);
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, 0.0F, 1.0F);
 			this.blit(poseStack, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
-			this.renderMap(mapItemSavedData, i + 70, j + 32, 0.34F);
+			this.renderMap(integer, mapItemSavedData, i + 70, j + 32, 0.34F);
 			RenderSystem.popMatrix();
 		} else if (bl3) {
 			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-			this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45F);
+			this.renderMap(integer, mapItemSavedData, i + 71, j + 17, 0.45F);
 			this.minecraft.getTextureManager().bind(BG_LOCATION);
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, 0.0F, 1.0F);
@@ -93,17 +98,17 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 			RenderSystem.popMatrix();
 		} else {
 			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-			this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45F);
+			this.renderMap(integer, mapItemSavedData, i + 71, j + 17, 0.45F);
 		}
 	}
 
-	private void renderMap(@Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
-		if (mapItemSavedData != null) {
+	private void renderMap(@Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
+		if (integer != null && mapItemSavedData != null) {
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef((float)i, (float)j, 1.0F);
 			RenderSystem.scalef(f, f, 1.0F);
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			this.minecraft.gameRenderer.getMapRenderer().render(new PoseStack(), bufferSource, mapItemSavedData, true, 15728880);
+			this.minecraft.gameRenderer.getMapRenderer().render(new PoseStack(), bufferSource, integer, mapItemSavedData, true, 15728880);
 			bufferSource.endBatch();
 			RenderSystem.popMatrix();
 		}

@@ -35,6 +35,7 @@ public class DamageSource {
 	public static final DamageSource DRAGON_BREATH = new DamageSource("dragonBreath").bypassArmor();
 	public static final DamageSource DRY_OUT = new DamageSource("dryout");
 	public static final DamageSource SWEET_BERRY_BUSH = new DamageSource("sweetBerryBush");
+	public static final DamageSource FREEZE = new DamageSource("freeze").bypassArmor();
 	private boolean bypassArmor;
 	private boolean bypassInvul;
 	private boolean bypassMagic;

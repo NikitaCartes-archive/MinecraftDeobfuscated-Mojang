@@ -11,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
@@ -314,13 +315,16 @@ public class KeyboardHandler {
 				}
 			}
 
-			boolean bl = containerEventHandler == null
-				|| !(containerEventHandler.getFocused() instanceof EditBox)
-				|| !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
-			if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
-				Option.NARRATOR.toggle(this.minecraft.options, 1);
-				if (containerEventHandler instanceof SimpleOptionsSubScreen) {
-					((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
+			if (NarratorChatListener.INSTANCE.isActive()) {
+				boolean bl = containerEventHandler == null
+					|| !(containerEventHandler.getFocused() instanceof EditBox)
+					|| !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
+				if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
+					this.minecraft.options.narratorStatus = NarratorStatus.byId(this.minecraft.options.narratorStatus.getId() + 1);
+					NarratorChatListener.INSTANCE.updateNarratorStatus(this.minecraft.options.narratorStatus);
+					if (containerEventHandler instanceof SimpleOptionsSubScreen) {
+						((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
+					}
 				}
 			}
 

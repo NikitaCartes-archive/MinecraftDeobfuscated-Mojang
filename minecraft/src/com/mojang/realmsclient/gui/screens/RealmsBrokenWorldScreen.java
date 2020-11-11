@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
@@ -272,7 +273,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 		return this.serverData != null && this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
 	}
 
-	private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, String string2, boolean bl2) {
+	private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, @Nullable String string2, boolean bl2) {
 		if (bl2) {
 			this.minecraft.getTextureManager().bind(RealmsWorldSlotButton.EMPTY_SLOT_LOCATION);
 		} else if (string2 != null && n != -1L) {

@@ -1,18 +1,22 @@
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -154,14 +158,40 @@ public class Camera {
 		return this.detached;
 	}
 
-	public FluidState getFluidInCamera() {
+	public FogType getFluidInCamera() {
 		if (!this.initialized) {
-			return Fluids.EMPTY.defaultFluidState();
+			return FogType.NONE;
 		} else {
 			FluidState fluidState = this.level.getFluidState(this.blockPosition);
-			return !fluidState.isEmpty() && this.position.y >= (double)((float)this.blockPosition.getY() + fluidState.getHeight(this.level, this.blockPosition))
-				? Fluids.EMPTY.defaultFluidState()
-				: fluidState;
+			if (fluidState.is(FluidTags.WATER) && this.position.y < (double)((float)this.blockPosition.getY() + fluidState.getHeight(this.level, this.blockPosition))) {
+				return FogType.WATER;
+			} else {
+				Vec3 vec3 = new Vec3(this.left);
+				Vec3 vec32 = new Vec3(this.forwards);
+				Vec3 vec33 = new Vec3(this.up);
+				Vec3 vec34 = vec32.add(vec33).add(vec3).scale(0.083333336F);
+				Vec3 vec35 = vec32.add(vec33).subtract(vec3).scale(0.083333336F);
+				Vec3 vec36 = vec32.subtract(vec33).add(vec3).scale(0.083333336F);
+				Vec3 vec37 = vec32.subtract(vec33).subtract(vec3).scale(0.083333336F);
+
+				for (Vec3 vec38 : ImmutableList.of(vec34, vec35, vec36, vec37)) {
+					Vec3 vec39 = this.position.add(vec38);
+					BlockPos blockPos = new BlockPos(vec39);
+					FluidState fluidState2 = this.level.getFluidState(blockPos);
+					if (!fluidState2.isEmpty()) {
+						if (!(vec39.y >= (double)((float)this.blockPosition.getY() + fluidState2.getHeight(this.level, this.blockPosition))) && fluidState2.is(FluidTags.LAVA)) {
+							return FogType.LAVA;
+						}
+					} else {
+						BlockState blockState = this.level.getBlockState(blockPos);
+						if (blockState.is(Blocks.POWDER_SNOW)) {
+							return FogType.POWDER_SNOW;
+						}
+					}
+				}
+
+				return FogType.NONE;
+			}
 		}
 	}
 

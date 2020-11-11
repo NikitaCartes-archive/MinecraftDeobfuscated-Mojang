@@ -1570,6 +1570,10 @@ public class Items {
 	);
 	public static final Item WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item LIGHTNING_ROD = registerBlock(Blocks.LIGHTNING_ROD, CreativeModeTab.TAB_REDSTONE);
+	public static final Item POWDER_SNOW_BUCKET = registerItem(
+		"powder_snow_bucket",
+		new SolidBucketItem(Blocks.POWDER_SNOW, SoundEvents.BUCKET_EMPTY_POWDER_SNOW, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+	);
 
 	private static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

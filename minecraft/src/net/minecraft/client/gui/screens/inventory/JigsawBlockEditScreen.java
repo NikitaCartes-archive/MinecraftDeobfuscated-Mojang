@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -34,7 +35,7 @@ public class JigsawBlockEditScreen extends Screen {
 	private EditBox finalStateEdit;
 	private int levels;
 	private boolean keepJigsaws = true;
-	private Button jointButton;
+	private CycleButton<JigsawBlockEntity.JointType> jointButton;
 	private Button doneButton;
 	private JigsawBlockEntity.JointType joint;
 
@@ -108,12 +109,13 @@ public class JigsawBlockEditScreen extends Screen {
 		this.children.add(this.finalStateEdit);
 		this.joint = this.jigsawEntity.getJoint();
 		int i = this.font.width(JOINT_LABEL) + 10;
-		this.jointButton = this.addButton(new Button(this.width / 2 - 152 + i, 150, 300 - i, 20, this.getJointText(), button -> {
-			JigsawBlockEntity.JointType[] jointTypes = JigsawBlockEntity.JointType.values();
-			int ix = (this.joint.ordinal() + 1) % jointTypes.length;
-			this.joint = jointTypes[ix];
-			button.setMessage(this.getJointText());
-		}));
+		this.jointButton = this.addButton(
+			CycleButton.<JigsawBlockEntity.JointType>builder(JigsawBlockEntity.JointType::getTranslatedName)
+				.withValues(JigsawBlockEntity.JointType.values())
+				.withInitialValue(this.joint)
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 150, 300 - i, 20, JOINT_LABEL, (cycleButton, jointType) -> this.joint = jointType)
+		);
 		boolean bl = JigsawBlock.getFrontFacing(this.jigsawEntity.getBlockState()).getAxis().isVertical();
 		this.jointButton.active = bl;
 		this.jointButton.visible = bl;
@@ -132,15 +134,10 @@ public class JigsawBlockEditScreen extends Screen {
 				JigsawBlockEditScreen.this.levels = Mth.floor(Mth.clampedLerp(0.0, 7.0, this.value));
 			}
 		});
-		this.addButton(new Button(this.width / 2 - 50, 180, 100, 20, new TranslatableComponent("jigsaw_block.keep_jigsaws"), button -> {
-			this.keepJigsaws = !this.keepJigsaws;
-			button.queueNarration(250);
-		}) {
-			@Override
-			public Component getMessage() {
-				return CommonComponents.optionStatus(super.getMessage(), JigsawBlockEditScreen.this.keepJigsaws);
-			}
-		});
+		this.addButton(
+			CycleButton.onOffBuilder(this.keepJigsaws)
+				.create(this.width / 2 - 50, 180, 100, 20, new TranslatableComponent("jigsaw_block.keep_jigsaws"), (cycleButton, boolean_) -> this.keepJigsaws = boolean_)
+		);
 		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
 			this.onDone();
 			this.sendGenerate();
@@ -172,11 +169,7 @@ public class JigsawBlockEditScreen extends Screen {
 		this.finalStateEdit.setValue(string4);
 		this.levels = k;
 		this.joint = jointType;
-		this.jointButton.setMessage(this.getJointText());
-	}
-
-	private Component getJointText() {
-		return new TranslatableComponent("jigsaw_block.joint." + this.joint.getSerializedName());
+		this.jointButton.setValue(jointType);
 	}
 
 	@Override

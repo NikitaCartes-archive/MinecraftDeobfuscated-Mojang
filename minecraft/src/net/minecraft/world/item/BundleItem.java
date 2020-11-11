@@ -1,17 +1,12 @@
 package net.minecraft.world.item;
 
-import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -19,6 +14,8 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.tooltip.BundleTooltip;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.level.Level;
 
 public class BundleItem extends Item {
@@ -69,7 +66,7 @@ public class BundleItem extends Item {
 	@Override
 	public boolean isBarVisible(ItemStack itemStack) {
 		int i = getContentWeight(itemStack);
-		return i != 0 && i != 64;
+		return i > 0 && i < 64;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -96,9 +93,7 @@ public class BundleItem extends Item {
 			int k = Math.min(itemStack2.getCount(), (64 - i) / j);
 			if (k != 0) {
 				ListTag listTag = compoundTag.getList("Items", 10);
-				Optional<Tag> optional = listTag.stream()
-					.filter(tag -> tag instanceof CompoundTag && ItemStack.isSameItemSameTags(ItemStack.of((CompoundTag)tag), itemStack2))
-					.findFirst();
+				Optional<CompoundTag> optional = getMatchingItem(itemStack2, listTag);
 				if (optional.isPresent()) {
 					CompoundTag compoundTag2 = (CompoundTag)optional.get();
 					ItemStack itemStack3 = ItemStack.of(compoundTag2);
@@ -117,63 +112,48 @@ public class BundleItem extends Item {
 		}
 	}
 
+	private static Optional<CompoundTag> getMatchingItem(ItemStack itemStack, ListTag listTag) {
+		return itemStack.is(Items.BUNDLE)
+			? Optional.empty()
+			: listTag.stream()
+				.filter(CompoundTag.class::isInstance)
+				.map(CompoundTag.class::cast)
+				.filter(compoundTag -> ItemStack.isSameItemSameTags(ItemStack.of(compoundTag), itemStack))
+				.findFirst();
+	}
+
 	private static int getWeight(ItemStack itemStack) {
 		return itemStack.is(Items.BUNDLE) ? 4 + getContentWeight(itemStack) : 64 / itemStack.getMaxStackSize();
 	}
 
 	private static int getContentWeight(ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		if (!compoundTag.contains("Items")) {
-			return 0;
-		} else {
-			ListTag listTag = compoundTag.getList("Items", 10);
-			return listTag.stream().map(tag -> ItemStack.of((CompoundTag)tag)).mapToInt(itemStackx -> getWeight(itemStackx) * itemStackx.getCount()).sum();
-		}
+		return getContents(itemStack).mapToInt(itemStackx -> getWeight(itemStackx) * itemStackx.getCount()).sum();
 	}
 
 	private static void removeAll(ItemStack itemStack, Inventory inventory) {
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		if (compoundTag.contains("Items")) {
-			ListTag listTag = compoundTag.getList("Items", 10);
-
-			for (int i = 0; i < listTag.size(); i++) {
-				CompoundTag compoundTag2 = listTag.getCompound(i);
-				ItemStack itemStack2 = ItemStack.of(compoundTag2);
-				if (inventory.player instanceof ServerPlayer || inventory.player.isCreative()) {
-					inventory.placeItemBackInInventory(itemStack2);
-				}
+		getContents(itemStack).forEach(itemStackx -> {
+			if (inventory.player instanceof ServerPlayer || inventory.player.isCreative()) {
+				inventory.placeItemBackInInventory(itemStackx);
 			}
+		});
+		itemStack.removeTagKey("Items");
+	}
 
-			itemStack.removeTagKey("Items");
+	private static Stream<ItemStack> getContents(ItemStack itemStack) {
+		CompoundTag compoundTag = itemStack.getTag();
+		if (compoundTag == null) {
+			return Stream.empty();
+		} else {
+			ListTag listTag = compoundTag.getList("Items", 10);
+			return listTag.stream().map(tag -> ItemStack.of((CompoundTag)tag));
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, level, list, tooltipFlag);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		if (compoundTag.contains("Items", 9)) {
-			ListTag listTag = compoundTag.getList("Items", 10);
-			int i = 0;
-			int j = 0;
-
-			for (Tag tag : listTag) {
-				ItemStack itemStack2 = ItemStack.of((CompoundTag)tag);
-				if (!itemStack2.isEmpty()) {
-					j++;
-					if (i <= 8) {
-						i++;
-						MutableComponent mutableComponent = itemStack2.getHoverName().copy();
-						mutableComponent.append(" x").append(String.valueOf(itemStack2.getCount()));
-						list.add(mutableComponent);
-					}
-				}
-			}
-
-			if (j - i > 0) {
-				list.add(new TranslatableComponent("container.shulkerBox.more", j - i).withStyle(ChatFormatting.ITALIC));
-			}
-		}
+	public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
+		NonNullList<ItemStack> nonNullList = NonNullList.create();
+		getContents(itemStack).forEach(nonNullList::add);
+		return Optional.of(new BundleTooltip(nonNullList, getContentWeight(itemStack) < 64));
 	}
 }

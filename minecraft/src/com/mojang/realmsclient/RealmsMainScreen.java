@@ -1157,7 +1157,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class NewsButton extends Button {
 		public NewsButton() {
-			super(RealmsMainScreen.this.width - 62, 6, 20, 20, TextComponent.EMPTY, button -> {
+			super(RealmsMainScreen.this.width - 62, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
 				if (RealmsMainScreen.this.newsLink != null) {
 					Util.getPlatform().openUri(RealmsMainScreen.this.newsLink);
 					if (RealmsMainScreen.this.hasUnreadNews) {
@@ -1168,7 +1168,6 @@ public class RealmsMainScreen extends RealmsScreen {
 					}
 				}
 			});
-			this.setMessage(new TranslatableComponent("mco.news"));
 		}
 
 		@Override
@@ -1185,7 +1184,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		@Override
 		public void tick() {
-			this.setMessage(new TranslatableComponent(RealmsMainScreen.this.numberOfPendingInvites == 0 ? "mco.invites.nopending" : "mco.invites.pending"));
+			this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? RealmsMainScreen.NO_PENDING_INVITES_TEXT : RealmsMainScreen.PENDING_INVITES_TEXT);
 		}
 
 		@Override

@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 public class PlayerMenuItem implements SpectatorMenuItem {
 	private final GameProfile profile;
 	private final ResourceLocation location;
-	private final TextComponent name;
+	private final Component name;
 
 	public PlayerMenuItem(GameProfile gameProfile) {
 		this.profile = gameProfile;

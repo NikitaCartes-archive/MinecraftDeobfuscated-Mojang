@@ -66,8 +66,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.AbstractSkullBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -885,21 +883,6 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
-	public static EquipmentSlot getEquipmentSlotForItem(ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		if (!itemStack.is(Blocks.CARVED_PUMPKIN.asItem()) && (!(item instanceof BlockItem) || !(((BlockItem)item).getBlock() instanceof AbstractSkullBlock))) {
-			if (item instanceof ArmorItem) {
-				return ((ArmorItem)item).getSlot();
-			} else if (itemStack.is(Items.ELYTRA)) {
-				return EquipmentSlot.CHEST;
-			} else {
-				return itemStack.is(Items.SHIELD) ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-			}
-		} else {
-			return EquipmentSlot.HEAD;
-		}
-	}
-
 	@Nullable
 	public static Item getEquipmentForSlot(EquipmentSlot equipmentSlot, int i) {
 		switch (equipmentSlot) {
@@ -1266,44 +1249,8 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	@Override
-	public boolean setSlot(int i, ItemStack itemStack) {
-		EquipmentSlot equipmentSlot;
-		if (i == 98) {
-			equipmentSlot = EquipmentSlot.MAINHAND;
-		} else if (i == 99) {
-			equipmentSlot = EquipmentSlot.OFFHAND;
-		} else if (i == 100 + EquipmentSlot.HEAD.getIndex()) {
-			equipmentSlot = EquipmentSlot.HEAD;
-		} else if (i == 100 + EquipmentSlot.CHEST.getIndex()) {
-			equipmentSlot = EquipmentSlot.CHEST;
-		} else if (i == 100 + EquipmentSlot.LEGS.getIndex()) {
-			equipmentSlot = EquipmentSlot.LEGS;
-		} else {
-			if (i != 100 + EquipmentSlot.FEET.getIndex()) {
-				return false;
-			}
-
-			equipmentSlot = EquipmentSlot.FEET;
-		}
-
-		if (!itemStack.isEmpty() && !isValidSlotForItem(equipmentSlot, itemStack) && equipmentSlot != EquipmentSlot.HEAD) {
-			return false;
-		} else {
-			this.setItemSlot(equipmentSlot, itemStack);
-			return true;
-		}
-	}
-
-	@Override
 	public boolean isControlledByLocalInstance() {
 		return this.canBeControlledByRider() && super.isControlledByLocalInstance();
-	}
-
-	public static boolean isValidSlotForItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
-		EquipmentSlot equipmentSlot2 = getEquipmentSlotForItem(itemStack);
-		return equipmentSlot2 == equipmentSlot
-			|| equipmentSlot2 == EquipmentSlot.MAINHAND && equipmentSlot == EquipmentSlot.OFFHAND
-			|| equipmentSlot2 == EquipmentSlot.OFFHAND && equipmentSlot == EquipmentSlot.MAINHAND;
 	}
 
 	@Override
@@ -1399,7 +1346,8 @@ public abstract class Mob extends LivingEntity {
 		if (this.level.isDay() && !this.level.isClientSide) {
 			float f = this.getBrightness();
 			BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
-			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !this.isInWaterRainOrBubble() && this.level.canSeeSky(blockPos)) {
+			boolean bl = this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow;
+			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level.canSeeSky(blockPos)) {
 				return true;
 			}
 		}

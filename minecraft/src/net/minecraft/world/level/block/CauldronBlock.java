@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -11,14 +12,18 @@ public class CauldronBlock extends AbstractCauldronBlock {
 		super(properties, CauldronInteraction.EMPTY);
 	}
 
-	protected static boolean shouldHandleRain(Level level, BlockPos blockPos) {
-		return level.random.nextInt(20) != 1 ? false : level.getBiome(blockPos).getTemperature(blockPos) >= 0.15F;
+	protected static boolean shouldHandlePrecipitation(Level level) {
+		return level.random.nextInt(20) == 1;
 	}
 
 	@Override
-	public void handleRain(BlockState blockState, Level level, BlockPos blockPos) {
-		if (shouldHandleRain(level, blockPos)) {
-			level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
+	public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {
+		if (shouldHandlePrecipitation(level)) {
+			if (precipitation == Biome.Precipitation.RAIN) {
+				level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
+			} else if (precipitation == Biome.Precipitation.SNOW) {
+				level.setBlockAndUpdate(blockPos, Blocks.POWDER_SNOW_CAULDRON.defaultBlockState());
+			}
 		}
 	}
 }

@@ -17,12 +17,12 @@ public class SayCommand {
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
 					Component component = MessageArgument.getMessage(commandContext, "message");
-					TranslatableComponent translatableComponent = new TranslatableComponent("chat.type.announcement", commandContext.getSource().getDisplayName(), component);
+					Component component2 = new TranslatableComponent("chat.type.announcement", commandContext.getSource().getDisplayName(), component);
 					Entity entity = commandContext.getSource().getEntity();
 					if (entity != null) {
-						commandContext.getSource().getServer().getPlayerList().broadcastMessage(translatableComponent, ChatType.CHAT, entity.getUUID());
+						commandContext.getSource().getServer().getPlayerList().broadcastMessage(component2, ChatType.CHAT, entity.getUUID());
 					} else {
-						commandContext.getSource().getServer().getPlayerList().broadcastMessage(translatableComponent, ChatType.SYSTEM, Util.NIL_UUID);
+						commandContext.getSource().getServer().getPlayerList().broadcastMessage(component2, ChatType.SYSTEM, Util.NIL_UUID);
 					}
 
 					return 1;

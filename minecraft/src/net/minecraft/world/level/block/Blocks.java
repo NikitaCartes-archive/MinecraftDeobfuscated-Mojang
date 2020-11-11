@@ -4,6 +4,7 @@ import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.util.IntRange;
@@ -947,9 +948,14 @@ public class Blocks {
 	public static final Block CAULDRON = register(
 		"cauldron", new CauldronBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F).noOcclusion())
 	);
-	public static final Block WATER_CAULDRON = register("water_cauldron", new WaterCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON)));
+	public static final Block WATER_CAULDRON = register(
+		"water_cauldron", new LayeredCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.RAIN, CauldronInteraction.WATER)
+	);
 	public static final Block LAVA_CAULDRON = register(
 		"lava_cauldron", new LavaCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON).lightLevel(blockStatex -> 15))
+	);
+	public static final Block POWDER_SNOW_CAULDRON = register(
+		"powder_snow_cauldron", new LayeredCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.SNOW, CauldronInteraction.POWDER_SNOW)
 	);
 	public static final Block END_PORTAL = register(
 		"end_portal",
@@ -3125,6 +3131,9 @@ public class Blocks {
 		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_WHITE).sound(SoundType.CALCITE).requiresCorrectToolForDrops().strength(0.75F))
 	);
 	public static final Block TINTED_GLASS = register("tinted_glass", new TintedGlassBlock(BlockBehaviour.Properties.copy(GLASS).color(MaterialColor.COLOR_GRAY)));
+	public static final Block POWDER_SNOW = register(
+		"powder_snow", new PowderSnowBlock(BlockBehaviour.Properties.of(Material.POWDER_SNOW).strength(0.1F).sound(SoundType.POWDER_SNOW).dynamicShape())
+	);
 	public static final Block WEATHERED_COPPER_BLOCK = register(
 		"weathered_copper_block",
 		new Block(

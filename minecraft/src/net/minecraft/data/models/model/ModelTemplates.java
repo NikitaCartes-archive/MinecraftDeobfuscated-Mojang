@@ -101,6 +101,12 @@ public class ModelTemplates {
 	public static final ModelTemplate THREE_TURTLE_EGGS = create("template_three_turtle_eggs", TextureSlot.ALL);
 	public static final ModelTemplate FOUR_TURTLE_EGGS = create("template_four_turtle_eggs", TextureSlot.ALL);
 	public static final ModelTemplate SINGLE_FACE = create("template_single_face", TextureSlot.TEXTURE);
+	public static final ModelTemplate CAULDRON_LEVEL1 = create(
+		"template_cauldron_level1", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
+	);
+	public static final ModelTemplate CAULDRON_LEVEL2 = create(
+		"template_cauldron_level2", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
+	);
 	public static final ModelTemplate CAULDRON_FULL = create(
 		"template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
 	);

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -11,18 +12,18 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class LootingEnchantFunction extends LootItemConditionalFunction {
-	private final RandomValueBounds value;
+	private final NumberProvider value;
 	private final int limit;
 
-	private LootingEnchantFunction(LootItemCondition[] lootItemConditions, RandomValueBounds randomValueBounds, int i) {
+	private LootingEnchantFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, int i) {
 		super(lootItemConditions);
-		this.value = randomValueBounds;
+		this.value = numberProvider;
 		this.limit = i;
 	}
 
@@ -33,7 +34,7 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.KILLER_ENTITY);
+		return Sets.<LootContextParam<?>>union(ImmutableSet.of(LootContextParams.KILLER_ENTITY), this.value.getReferencedContextParams());
 	}
 
 	private boolean hasLimit() {
@@ -49,7 +50,7 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 				return itemStack;
 			}
 
-			float f = (float)i * this.value.getFloat(lootContext.getRandom());
+			float f = (float)i * this.value.getFloat(lootContext);
 			itemStack.grow(Math.round(f));
 			if (this.hasLimit() && itemStack.getCount() > this.limit) {
 				itemStack.setCount(this.limit);
@@ -59,16 +60,16 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 		return itemStack;
 	}
 
-	public static LootingEnchantFunction.Builder lootingMultiplier(RandomValueBounds randomValueBounds) {
-		return new LootingEnchantFunction.Builder(randomValueBounds);
+	public static LootingEnchantFunction.Builder lootingMultiplier(NumberProvider numberProvider) {
+		return new LootingEnchantFunction.Builder(numberProvider);
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<LootingEnchantFunction.Builder> {
-		private final RandomValueBounds count;
+		private final NumberProvider count;
 		private int limit = 0;
 
-		public Builder(RandomValueBounds randomValueBounds) {
-			this.count = randomValueBounds;
+		public Builder(NumberProvider numberProvider) {
+			this.count = numberProvider;
 		}
 
 		protected LootingEnchantFunction.Builder getThis() {
@@ -99,7 +100,7 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 			JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions
 		) {
 			int i = GsonHelper.getAsInt(jsonObject, "limit", 0);
-			return new LootingEnchantFunction(lootItemConditions, GsonHelper.getAsObject(jsonObject, "count", jsonDeserializationContext, RandomValueBounds.class), i);
+			return new LootingEnchantFunction(lootItemConditions, GsonHelper.getAsObject(jsonObject, "count", jsonDeserializationContext, NumberProvider.class), i);
 		}
 	}
 }

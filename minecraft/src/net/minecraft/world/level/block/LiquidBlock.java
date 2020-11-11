@@ -3,12 +3,14 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -20,9 +22,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -166,12 +166,17 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public Fluid takeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+	public ItemStack pickupBlock(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
 		if ((Integer)blockState.getValue(LEVEL) == 0) {
 			levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
-			return this.fluid;
+			return new ItemStack(this.fluid.getBucket());
 		} else {
-			return Fluids.EMPTY;
+			return ItemStack.EMPTY;
 		}
+	}
+
+	@Override
+	public Optional<SoundEvent> getPickupSound() {
+		return this.fluid.getPickupSound();
 	}
 }

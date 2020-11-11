@@ -2,8 +2,6 @@ package net.minecraft.world.inventory;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.recipebook.ServerPlaceSmeltingRecipe;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -72,12 +70,8 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 
 	@Override
 	public void clearCraftingContent() {
-		this.container.clearContent();
-	}
-
-	@Override
-	public void handlePlacement(boolean bl, Recipe<?> recipe, ServerPlayer serverPlayer) {
-		new ServerPlaceSmeltingRecipe<>(this).recipeClicked(serverPlayer, (Recipe<Container>)recipe, bl);
+		this.getSlot(0).set(ItemStack.EMPTY);
+		this.getSlot(2).set(ItemStack.EMPTY);
 	}
 
 	@Override
@@ -100,7 +94,6 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 		return 1;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public int getSize() {
 		return 3;
@@ -194,5 +187,10 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	@Override
 	public RecipeBookType getRecipeBookType() {
 		return this.recipeBookType;
+	}
+
+	@Override
+	public boolean shouldMoveToInventory(int i) {
+		return i != 1;
 	}
 }

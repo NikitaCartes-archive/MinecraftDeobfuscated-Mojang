@@ -48,13 +48,13 @@ public class SlotArgument implements ArgumentType<Integer> {
 			hashMap.put("horse." + i, 500 + i);
 		}
 
-		hashMap.put("weapon", 98);
-		hashMap.put("weapon.mainhand", 98);
-		hashMap.put("weapon.offhand", 99);
-		hashMap.put("armor.head", 100 + EquipmentSlot.HEAD.getIndex());
-		hashMap.put("armor.chest", 100 + EquipmentSlot.CHEST.getIndex());
-		hashMap.put("armor.legs", 100 + EquipmentSlot.LEGS.getIndex());
-		hashMap.put("armor.feet", 100 + EquipmentSlot.FEET.getIndex());
+		hashMap.put("weapon", EquipmentSlot.MAINHAND.getIndex(98));
+		hashMap.put("weapon.mainhand", EquipmentSlot.MAINHAND.getIndex(98));
+		hashMap.put("weapon.offhand", EquipmentSlot.OFFHAND.getIndex(98));
+		hashMap.put("armor.head", EquipmentSlot.HEAD.getIndex(100));
+		hashMap.put("armor.chest", EquipmentSlot.CHEST.getIndex(100));
+		hashMap.put("armor.legs", EquipmentSlot.LEGS.getIndex(100));
+		hashMap.put("armor.feet", EquipmentSlot.FEET.getIndex(100));
 		hashMap.put("horse.saddle", 400);
 		hashMap.put("horse.armor", 401);
 		hashMap.put("horse.chest", 499);

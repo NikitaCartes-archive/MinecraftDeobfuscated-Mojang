@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -11,6 +12,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -22,8 +24,9 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.RandomValueBounds;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class SetAttributesFunction extends LootItemConditionalFunction {
 	private final List<SetAttributesFunction.Modifier> modifiers;
@@ -39,6 +42,14 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
+	public Set<LootContextParam<?>> getReferencedContextParams() {
+		return (Set<LootContextParam<?>>)this.modifiers
+			.stream()
+			.flatMap(modifier -> modifier.amount.getReferencedContextParams().stream())
+			.collect(ImmutableSet.toImmutableSet());
+	}
+
+	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Random random = lootContext.getRandom();
 
@@ -50,7 +61,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 
 			EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, random);
 			itemStack.addAttributeModifier(
-				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(random), modifier.operation), equipmentSlot
+				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot
 			);
 		}
 
@@ -61,7 +72,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		private final String name;
 		private final Attribute attribute;
 		private final AttributeModifier.Operation operation;
-		private final RandomValueBounds amount;
+		private final NumberProvider amount;
 		@Nullable
 		private final UUID id;
 		private final EquipmentSlot[] slots;
@@ -70,14 +81,14 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 			String string,
 			Attribute attribute,
 			AttributeModifier.Operation operation,
-			RandomValueBounds randomValueBounds,
+			NumberProvider numberProvider,
 			EquipmentSlot[] equipmentSlots,
 			@Nullable UUID uUID
 		) {
 			this.name = string;
 			this.attribute = attribute;
 			this.operation = operation;
-			this.amount = randomValueBounds;
+			this.amount = numberProvider;
 			this.id = uUID;
 			this.slots = equipmentSlots;
 		}
@@ -115,7 +126,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 				throw new JsonSyntaxException("Unknown attribute: " + resourceLocation);
 			} else {
 				AttributeModifier.Operation operation = operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
-				RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
+				NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, NumberProvider.class);
 				UUID uUID = null;
 				EquipmentSlot[] equipmentSlots;
 				if (GsonHelper.isStringValue(jsonObject, "slot")) {
@@ -148,7 +159,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 					}
 				}
 
-				return new SetAttributesFunction.Modifier(string, attribute, operation, randomValueBounds, equipmentSlots, uUID);
+				return new SetAttributesFunction.Modifier(string, attribute, operation, numberProvider, equipmentSlots, uUID);
 			}
 		}
 

@@ -15,23 +15,23 @@ public class CommandStorage {
 		this.storage = dimensionDataStorage;
 	}
 
-	private CommandStorage.Container newStorage(String string, String string2) {
-		CommandStorage.Container container = new CommandStorage.Container(string2);
+	private CommandStorage.Container newStorage(String string) {
+		CommandStorage.Container container = new CommandStorage.Container();
 		this.namespaces.put(string, container);
 		return container;
 	}
 
 	public CompoundTag get(ResourceLocation resourceLocation) {
 		String string = resourceLocation.getNamespace();
-		String string2 = createId(string);
-		CommandStorage.Container container = this.storage.get(() -> this.newStorage(string, string2), string2);
+		CommandStorage.Container container = this.storage.get(compoundTag -> this.newStorage(string).load(compoundTag), createId(string));
 		return container != null ? container.get(resourceLocation.getPath()) : new CompoundTag();
 	}
 
 	public void set(ResourceLocation resourceLocation, CompoundTag compoundTag) {
 		String string = resourceLocation.getNamespace();
-		String string2 = createId(string);
-		this.storage.<CommandStorage.Container>computeIfAbsent(() -> this.newStorage(string, string2), string2).put(resourceLocation.getPath(), compoundTag);
+		this.storage
+			.<CommandStorage.Container>computeIfAbsent(compoundTagx -> this.newStorage(string).load(compoundTagx), () -> this.newStorage(string), createId(string))
+			.put(resourceLocation.getPath(), compoundTag);
 	}
 
 	public Stream<ResourceLocation> keys() {
@@ -45,17 +45,17 @@ public class CommandStorage {
 	static class Container extends SavedData {
 		private final Map<String, CompoundTag> storage = Maps.<String, CompoundTag>newHashMap();
 
-		public Container(String string) {
-			super(string);
+		private Container() {
 		}
 
-		@Override
-		public void load(CompoundTag compoundTag) {
+		private CommandStorage.Container load(CompoundTag compoundTag) {
 			CompoundTag compoundTag2 = compoundTag.getCompound("contents");
 
 			for (String string : compoundTag2.getAllKeys()) {
 				this.storage.put(string, compoundTag2.getCompound(string));
 			}
+
+			return this;
 		}
 
 		@Override

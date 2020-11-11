@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -300,12 +299,7 @@ public class ItemProperties {
 		register(
 			Items.SPYGLASS,
 			new ResourceLocation("scoping"),
-			(itemStack, clientLevel, livingEntity) -> livingEntity != null
-						&& livingEntity.isUsingItem()
-						&& livingEntity.getUseItem() == itemStack
-						&& livingEntity.getUUID().equals(Minecraft.getInstance().player.getUUID())
-					? 1.0F
-					: 0.0F
+			(itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 	}
 

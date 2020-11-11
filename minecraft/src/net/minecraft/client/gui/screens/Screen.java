@@ -18,7 +18,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +36,7 @@ import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.ClickEvent;
@@ -41,6 +44,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.apache.logging.log4j.LogManager;
@@ -117,7 +121,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 	}
 
 	protected void renderTooltip(PoseStack poseStack, ItemStack itemStack, int i, int j) {
-		this.renderComponentTooltip(poseStack, this.getTooltipFromItem(itemStack), i, j);
+		this.renderTooltip(poseStack, this.getTooltipFromItem(itemStack), itemStack.getTooltipImage(), i, j);
+	}
+
+	public void renderTooltip(PoseStack poseStack, List<Component> list, Optional<TooltipComponent> optional, int i, int j) {
+		List<ClientTooltipComponent> list2 = (List<ClientTooltipComponent>)list.stream()
+			.map(Component::getVisualOrderText)
+			.map(ClientTooltipComponent::create)
+			.collect(Collectors.toList());
+		optional.ifPresent(tooltipComponent -> list2.add(1, ClientTooltipComponent.create(tooltipComponent)));
+		this.renderTooltipInternal(poseStack, list2, i, j);
 	}
 
 	public List<Component> getTooltipFromItem(ItemStack itemStack) {
@@ -135,49 +148,53 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 	}
 
 	public void renderTooltip(PoseStack poseStack, List<? extends FormattedCharSequence> list, int i, int j) {
+		this.renderTooltipInternal(poseStack, (List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j);
+	}
+
+	private void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i, int j) {
 		if (!list.isEmpty()) {
 			int k = 0;
+			int l = list.size() == 1 ? -2 : 0;
 
-			for (FormattedCharSequence formattedCharSequence : list) {
-				int l = this.font.width(formattedCharSequence);
-				if (l > k) {
-					k = l;
+			for (ClientTooltipComponent clientTooltipComponent : list) {
+				int m = clientTooltipComponent.getWidth(this.font);
+				if (m > k) {
+					k = m;
 				}
+
+				l += clientTooltipComponent.getHeight();
 			}
 
-			int m = i + 12;
-			int n = j - 12;
-			int o = 8;
-			if (list.size() > 1) {
-				o += 2 + (list.size() - 1) * 10;
+			int n = i + 12;
+			int o = j - 12;
+			if (n + k > this.width) {
+				n -= 28 + k;
 			}
 
-			if (m + k > this.width) {
-				m -= 28 + k;
-			}
-
-			if (n + o + 6 > this.height) {
-				n = this.height - o - 6;
+			if (o + l + 6 > this.height) {
+				o = this.height - l - 6;
 			}
 
 			poseStack.pushPose();
-			int p = -267386864;
-			int q = 1347420415;
-			int r = 1344798847;
-			int s = 400;
+			int q = -267386864;
+			int r = 1347420415;
+			int s = 1344798847;
+			int t = 400;
+			float f = this.itemRenderer.blitOffset;
+			this.itemRenderer.blitOffset = 400.0F;
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 			Matrix4f matrix4f = poseStack.last().pose();
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 4, m + k + 3, n - 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 3, m + k + 3, n + o + 4, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n + o + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 4, n - 3, m - 3, n + o + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m + k + 3, n - 3, m + k + 4, n + o + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 400, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, m + k + 2, n - 3 + 1, m + k + 3, n + o + 3 - 1, 400, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n - 3 + 1, 400, 1347420415, 1347420415);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 2, m + k + 3, n + o + 3, 400, 1344798847, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o - 4, n + k + 3, o - 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o + l + 3, n + k + 3, o + l + 4, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + k + 3, o + l + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, n - 4, o - 3, n - 3, o + l + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, n + k + 3, o - 3, n + k + 4, o + l + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3 + 1, n - 3 + 1, o + l + 3 - 1, 400, 1347420415, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, n + k + 2, o - 3 + 1, n + k + 3, o + l + 3 - 1, 400, 1347420415, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + k + 3, o - 3 + 1, 400, 1347420415, 1347420415);
+			fillGradient(matrix4f, bufferBuilder, n - 3, o + l + 2, n + k + 3, o + l + 3, 400, 1344798847, 1344798847);
 			RenderSystem.enableDepthTest();
 			RenderSystem.disableTexture();
 			RenderSystem.enableBlend();
@@ -190,22 +207,25 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 			RenderSystem.enableTexture();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 			poseStack.translate(0.0, 0.0, 400.0);
+			int u = o;
 
-			for (int t = 0; t < list.size(); t++) {
-				FormattedCharSequence formattedCharSequence2 = (FormattedCharSequence)list.get(t);
-				if (formattedCharSequence2 != null) {
-					this.font.drawInBatch(formattedCharSequence2, (float)m, (float)n, -1, true, matrix4f, bufferSource, false, 0, 15728880);
-				}
-
-				if (t == 0) {
-					n += 2;
-				}
-
-				n += 10;
+			for (int v = 0; v < list.size(); v++) {
+				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(v);
+				clientTooltipComponent2.renderText(this.font, n, u, matrix4f, bufferSource);
+				u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
 			}
 
 			bufferSource.endBatch();
 			poseStack.popPose();
+			u = o;
+
+			for (int v = 0; v < list.size(); v++) {
+				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(v);
+				clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400, this.minecraft.getTextureManager());
+				u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
+			}
+
+			this.itemRenderer.blitOffset = f;
 		}
 	}
 
