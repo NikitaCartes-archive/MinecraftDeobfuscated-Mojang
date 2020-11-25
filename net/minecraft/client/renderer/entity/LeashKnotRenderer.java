@@ -24,7 +24,7 @@ extends EntityRenderer<LeashFenceKnotEntity> {
 
     public LeashKnotRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new LeashKnotModel(context.getLayer(ModelLayers.LEASH_KNOT));
+        this.model = new LeashKnotModel(context.bakeLayer(ModelLayers.LEASH_KNOT));
     }
 
     @Override

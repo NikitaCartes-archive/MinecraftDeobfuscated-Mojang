@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.server;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class IntegratedServer
@@ -43,6 +45,8 @@ extends MinecraftServer {
     private final Minecraft minecraft;
     private boolean paused;
     private int publishedPort = -1;
+    @Nullable
+    private GameType publishedGameType;
     private LanServerPinger lanPinger;
     private UUID uuid;
 
@@ -156,14 +160,14 @@ extends MinecraftServer {
     }
 
     @Override
-    public boolean publishServer(GameType gameType, boolean bl, int i) {
+    public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
         try {
             this.getConnection().startTcpServerListener(null, i);
             LOGGER.info("Started serving on {}", (Object)i);
             this.publishedPort = i;
             this.lanPinger = new LanServerPinger(this.getMotd(), i + "");
             this.lanPinger.start();
-            this.getPlayerList().setOverrideGameMode(gameType);
+            this.publishedGameType = gameType;
             this.getPlayerList().setAllowCheatsForAllPlayers(bl);
             int j = this.getProfilePermissions(this.minecraft.player.getGameProfile());
             this.minecraft.player.setPermissionLevel(j);
@@ -214,7 +218,7 @@ extends MinecraftServer {
     @Override
     public void setDefaultGameType(GameType gameType) {
         super.setDefaultGameType(gameType);
-        this.getPlayerList().setOverrideGameMode(gameType);
+        this.publishedGameType = null;
     }
 
     @Override
@@ -249,6 +253,15 @@ extends MinecraftServer {
     @Override
     public boolean forceSynchronousWrites() {
         return this.minecraft.options.syncWrites;
+    }
+
+    @Override
+    @Nullable
+    public GameType getForcedGameType() {
+        if (this.isPublished()) {
+            return MoreObjects.firstNonNull(this.publishedGameType, this.worldData.getGameType());
+        }
+        return null;
     }
 }
 

@@ -721,6 +721,9 @@ extends LivingEntity {
         if (damageSource.isFire()) {
             return !this.level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE);
         }
+        if (damageSource == DamageSource.FREEZE) {
+            return !this.level.getGameRules().getBoolean(GameRules.RULE_FREEZE_DAMAGE);
+        }
         return false;
     }
 
@@ -1537,9 +1540,6 @@ extends LivingEntity {
     public void onUpdateAbilities() {
     }
 
-    public void setGameMode(GameType gameType) {
-    }
-
     @Override
     public Component getName() {
         return new TextComponent(this.gameProfile.getName());
@@ -1879,11 +1879,6 @@ extends LivingEntity {
     @Environment(value=EnvType.CLIENT)
     public boolean isScoping() {
         return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
-    }
-
-    @Override
-    public boolean canFreeze() {
-        return super.canFreeze() && !this.isCreative();
     }
 
     public static enum BedSleepingProblem {

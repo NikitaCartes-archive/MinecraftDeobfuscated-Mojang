@@ -11,7 +11,6 @@ import net.minecraft.client.tutorial.TutorialStepInstance;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.GameType;
 
 @Environment(value=EnvType.CLIENT)
 public class OpenInventoryTutorialStep
@@ -29,7 +28,7 @@ implements TutorialStepInstance {
     @Override
     public void tick() {
         ++this.timeWaiting;
-        if (this.tutorial.getGameMode() != GameType.SURVIVAL) {
+        if (!this.tutorial.isSurvival()) {
             this.tutorial.setStep(TutorialSteps.NONE);
             return;
         }

@@ -22,7 +22,7 @@ extends EnergySwirlLayer<Creeper, CreeperModel<Creeper>> {
 
     public CreeperPowerLayer(RenderLayerParent<Creeper, CreeperModel<Creeper>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new CreeperModel(entityModelSet.getLayer(ModelLayers.CREEPER_ARMOR));
+        this.model = new CreeperModel(entityModelSet.bakeLayer(ModelLayers.CREEPER_ARMOR));
     }
 
     @Override

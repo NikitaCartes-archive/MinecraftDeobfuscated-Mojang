@@ -23,7 +23,7 @@ extends AbstractHorseRenderer<T, ChestedHorseModel<T>> {
     private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.newHashMap(ImmutableMap.of(EntityType.DONKEY, new ResourceLocation("textures/entity/horse/donkey.png"), EntityType.MULE, new ResourceLocation("textures/entity/horse/mule.png")));
 
     public ChestedHorseRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
-        super(context, new ChestedHorseModel(context.getLayer(modelLayerLocation)), f);
+        super(context, new ChestedHorseModel(context.bakeLayer(modelLayerLocation)), f);
     }
 
     @Override

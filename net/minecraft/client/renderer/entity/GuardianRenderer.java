@@ -38,7 +38,7 @@ extends MobRenderer<Guardian, GuardianModel> {
     }
 
     protected GuardianRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
-        super(context, new GuardianModel(context.getLayer(modelLayerLocation)), f);
+        super(context, new GuardianModel(context.bakeLayer(modelLayerLocation)), f);
     }
 
     @Override

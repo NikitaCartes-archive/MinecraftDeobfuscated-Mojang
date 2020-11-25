@@ -131,7 +131,7 @@ extends RealmsScreen {
     }
 
     private static Component gameModeName(LevelSummary levelSummary) {
-        return levelSummary.getGameMode().getDisplayName();
+        return levelSummary.getGameMode().getLongDisplayName();
     }
 
     private static String formatLastPlayed(LevelSummary levelSummary) {

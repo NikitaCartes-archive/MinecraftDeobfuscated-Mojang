@@ -25,7 +25,7 @@ extends MobRenderer<MushroomCow, CowModel<MushroomCow>> {
     });
 
     public MushroomCowRenderer(EntityRendererProvider.Context context) {
-        super(context, new CowModel(context.getLayer(ModelLayers.MOOSHROOM)), 0.7f);
+        super(context, new CowModel(context.bakeLayer(ModelLayers.MOOSHROOM)), 0.7f);
         this.addLayer(new MushroomCowMushroomLayer<MushroomCow>(this));
     }
 

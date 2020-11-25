@@ -33,7 +33,7 @@ extends RenderLayer<T, M> {
 
     public ElytraLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.elytraModel = new ElytraModel(entityModelSet.getLayer(ModelLayers.ELYTRA));
+        this.elytraModel = new ElytraModel(entityModelSet.bakeLayer(ModelLayers.ELYTRA));
     }
 
     @Override

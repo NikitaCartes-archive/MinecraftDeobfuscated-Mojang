@@ -22,7 +22,7 @@ extends AbstractHorseRenderer<AbstractHorse, HorseModel<AbstractHorse>> {
     private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.newHashMap(ImmutableMap.of(EntityType.ZOMBIE_HORSE, new ResourceLocation("textures/entity/horse/horse_zombie.png"), EntityType.SKELETON_HORSE, new ResourceLocation("textures/entity/horse/horse_skeleton.png")));
 
     public UndeadHorseRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
-        super(context, new HorseModel(context.getLayer(modelLayerLocation)), 1.0f);
+        super(context, new HorseModel(context.bakeLayer(modelLayerLocation)), 1.0f);
     }
 
     @Override

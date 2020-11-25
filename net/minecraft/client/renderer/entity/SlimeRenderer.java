@@ -22,7 +22,7 @@ extends MobRenderer<Slime, SlimeModel<Slime>> {
     private static final ResourceLocation SLIME_LOCATION = new ResourceLocation("textures/entity/slime/slime.png");
 
     public SlimeRenderer(EntityRendererProvider.Context context) {
-        super(context, new SlimeModel(context.getLayer(ModelLayers.SLIME)), 0.25f);
+        super(context, new SlimeModel(context.bakeLayer(ModelLayers.SLIME)), 0.25f);
         this.addLayer(new SlimeOuterLayer<Slime>(this, context.getModelSet()));
     }
 

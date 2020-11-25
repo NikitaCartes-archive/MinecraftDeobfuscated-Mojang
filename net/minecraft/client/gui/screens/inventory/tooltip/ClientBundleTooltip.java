@@ -47,9 +47,10 @@ implements ClientTooltipComponent {
         int l = 0;
         int m = 0;
         int n = this.itemsPerRow();
-        for (ItemStack itemStack : this.items) {
+        for (int o = 0; o < this.items.size(); ++o) {
+            ItemStack itemStack = this.items.get(o);
             this.blitSlotBg(poseStack, l + i - 1, m + j - 1, k, textureManager, false);
-            itemRenderer.renderAndDecorateItem(itemStack, i + l, j + m);
+            itemRenderer.renderAndDecorateItem(itemStack, i + l, j + m, o);
             itemRenderer.renderGuiItemDecorations(font, itemStack, i + l, j + m);
             if ((l += 18) < 18 * n) continue;
             l = 0;

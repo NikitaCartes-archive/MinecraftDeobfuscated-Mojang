@@ -71,14 +71,6 @@ implements Enemy {
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float f) {
-        if (this.isInvulnerableTo(damageSource)) {
-            return false;
-        }
-        return super.hurt(damageSource, f);
-    }
-
-    @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
         return SoundEvents.HOSTILE_HURT;
     }

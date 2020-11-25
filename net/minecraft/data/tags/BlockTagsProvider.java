@@ -110,7 +110,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.CANDLE_CAKES).add((Block[])new Block[]{Blocks.CANDLE_CAKE, Blocks.WHITE_CANDLE_CAKE, Blocks.ORANGE_CANDLE_CAKE, Blocks.MAGENTA_CANDLE_CAKE, Blocks.LIGHT_BLUE_CANDLE_CAKE, Blocks.YELLOW_CANDLE_CAKE, Blocks.LIME_CANDLE_CAKE, Blocks.PINK_CANDLE_CAKE, Blocks.GRAY_CANDLE_CAKE, Blocks.LIGHT_GRAY_CANDLE_CAKE, Blocks.CYAN_CANDLE_CAKE, Blocks.PURPLE_CANDLE_CAKE, Blocks.BLUE_CANDLE_CAKE, Blocks.BROWN_CANDLE_CAKE, Blocks.GREEN_CANDLE_CAKE, Blocks.RED_CANDLE_CAKE, Blocks.BLACK_CANDLE_CAKE});
         this.tag(BlockTags.CRYSTAL_SOUND_BLOCKS).add((Block[])new Block[]{Blocks.AMETHYST_BLOCK, Blocks.BUDDING_AMETHYST});
         this.tag(BlockTags.CAULDRONS).add((Block[])new Block[]{Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON});
-        this.tag(BlockTags.SNOW_STEP_SOUND_BLOCKS).add((Block[])new Block[]{Blocks.SNOW, Blocks.POWDER_SNOW});
+        this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add((Block[])new Block[]{Blocks.SNOW, Blocks.POWDER_SNOW});
     }
 
     @Override

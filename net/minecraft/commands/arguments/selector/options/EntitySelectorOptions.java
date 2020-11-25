@@ -187,7 +187,7 @@ public class EntitySelectorOptions {
                     }
                 }
                 for (GameType gameType : GameType.values()) {
-                    if (gameType == GameType.NOT_SET || !gameType.getName().toLowerCase(Locale.ROOT).startsWith(string)) continue;
+                    if (!gameType.getName().toLowerCase(Locale.ROOT).startsWith(string)) continue;
                     if (bl2) {
                         suggestionsBuilder.suggest('!' + gameType.getName());
                     }
@@ -203,8 +203,8 @@ public class EntitySelectorOptions {
                 throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "gamemode");
             }
             String string = entitySelectorParser.getReader().readUnquotedString();
-            GameType gameType = GameType.byName(string, GameType.NOT_SET);
-            if (gameType == GameType.NOT_SET) {
+            GameType gameType = GameType.byName(string, null);
+            if (gameType == null) {
                 entitySelectorParser.getReader().setCursor(i);
                 throw ERROR_GAME_MODE_INVALID.createWithContext(entitySelectorParser.getReader(), string);
             }

@@ -26,7 +26,7 @@ public class PublishCommand {
         if (commandSourceStack.getServer().isPublished()) {
             throw ERROR_ALREADY_PUBLISHED.create(commandSourceStack.getServer().getPort());
         }
-        if (!commandSourceStack.getServer().publishServer(commandSourceStack.getServer().getDefaultGameType(), false, i)) {
+        if (!commandSourceStack.getServer().publishServer(null, false, i)) {
             throw ERROR_FAILED.create();
         }
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.publish.success", i), true);

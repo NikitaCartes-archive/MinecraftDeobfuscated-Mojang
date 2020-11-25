@@ -20,7 +20,7 @@ extends MobRenderer<Turtle, TurtleModel<Turtle>> {
     private static final ResourceLocation TURTLE_LOCATION = new ResourceLocation("textures/entity/turtle/big_sea_turtle.png");
 
     public TurtleRenderer(EntityRendererProvider.Context context) {
-        super(context, new TurtleModel(context.getLayer(ModelLayers.TURTLE)), 0.7f);
+        super(context, new TurtleModel(context.bakeLayer(ModelLayers.TURTLE)), 0.7f);
     }
 
     @Override

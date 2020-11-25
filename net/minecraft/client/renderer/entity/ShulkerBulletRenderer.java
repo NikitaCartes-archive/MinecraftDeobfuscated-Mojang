@@ -29,7 +29,7 @@ extends EntityRenderer<ShulkerBullet> {
 
     public ShulkerBulletRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new ShulkerBulletModel(context.getLayer(ModelLayers.SHULKER_BULLET));
+        this.model = new ShulkerBulletModel(context.bakeLayer(ModelLayers.SHULKER_BULLET));
     }
 
     @Override

@@ -18,7 +18,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value=EnvType.CLIENT)
@@ -39,7 +38,7 @@ implements TutorialStepInstance {
     public void tick() {
         LocalPlayer localPlayer;
         ++this.timeWaiting;
-        if (this.tutorial.getGameMode() != GameType.SURVIVAL) {
+        if (!this.tutorial.isSurvival()) {
             this.tutorial.setStep(TutorialSteps.NONE);
             return;
         }

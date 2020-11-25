@@ -28,9 +28,9 @@ extends MobRenderer<Pufferfish, EntityModel<Pufferfish>> {
     private final EntityModel<Pufferfish> big = this.getModel();
 
     public PufferfishRenderer(EntityRendererProvider.Context context) {
-        super(context, new PufferfishBigModel(context.getLayer(ModelLayers.PUFFERFISH_BIG)), 0.2f);
-        this.mid = new PufferfishMidModel<Pufferfish>(context.getLayer(ModelLayers.PUFFERFISH_MEDIUM));
-        this.small = new PufferfishSmallModel<Pufferfish>(context.getLayer(ModelLayers.PUFFERFISH_SMALL));
+        super(context, new PufferfishBigModel(context.bakeLayer(ModelLayers.PUFFERFISH_BIG)), 0.2f);
+        this.mid = new PufferfishMidModel<Pufferfish>(context.bakeLayer(ModelLayers.PUFFERFISH_MEDIUM));
+        this.small = new PufferfishSmallModel<Pufferfish>(context.bakeLayer(ModelLayers.PUFFERFISH_SMALL));
     }
 
     @Override

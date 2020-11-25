@@ -86,7 +86,7 @@ extends EntityRenderer<ItemFrame> {
                 }
             } else {
                 poseStack.scale(0.5f, 0.5f, 0.5f);
-                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
+                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.getId());
             }
         }
         poseStack.popPose();

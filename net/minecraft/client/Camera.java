@@ -3,11 +3,13 @@
  */
 package net.minecraft.client;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import java.util.Arrays;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -154,15 +156,19 @@ public class Camera {
         if (fluidState.is(FluidTags.WATER) && this.position.y < (double)((float)this.blockPosition.getY() + fluidState.getHeight(this.level, this.blockPosition))) {
             return FogType.WATER;
         }
-        Vec3 vec3 = new Vec3(this.left);
-        Vec3 vec32 = new Vec3(this.forwards);
-        Vec3 vec33 = new Vec3(this.up);
-        Vec3 vec34 = vec32.add(vec33).add(vec3).scale(0.0833333358168602);
-        Vec3 vec35 = vec32.add(vec33).subtract(vec3).scale(0.0833333358168602);
-        Vec3 vec36 = vec32.subtract(vec33).add(vec3).scale(0.0833333358168602);
-        Vec3 vec37 = vec32.subtract(vec33).subtract(vec3).scale(0.0833333358168602);
-        ImmutableList<Vec3> immutableList = ImmutableList.of(vec34, vec35, vec36, vec37);
-        for (Vec3 vec38 : immutableList) {
+        Minecraft minecraft = Minecraft.getInstance();
+        double d = (double)minecraft.getWindow().getWidth() / (double)minecraft.getWindow().getHeight();
+        double e = Math.tan(minecraft.options.fov * 0.01745329238474369 / 2.0) * (double)0.05f;
+        double f = e * d;
+        Vec3 vec3 = new Vec3(this.forwards).scale(0.05f);
+        Vec3 vec32 = new Vec3(this.left).scale(f);
+        Vec3 vec33 = new Vec3(this.up).scale(e);
+        Vec3 vec34 = vec3.add(vec33).add(vec32);
+        Vec3 vec35 = vec3.add(vec33).subtract(vec32);
+        Vec3 vec36 = vec3.subtract(vec33).add(vec32);
+        Vec3 vec37 = vec3.subtract(vec33).subtract(vec32);
+        List<Vec3> list = Arrays.asList(vec3, vec34, vec35, vec36, vec37);
+        for (Vec3 vec38 : list) {
             Vec3 vec39 = this.position.add(vec38);
             BlockPos blockPos = new BlockPos(vec39);
             FluidState fluidState2 = this.level.getFluidState(blockPos);

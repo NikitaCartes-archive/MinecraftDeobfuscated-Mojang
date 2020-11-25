@@ -224,7 +224,7 @@ implements MenuAccess<T> {
                 AbstractContainerScreen.fill(poseStack, i, j, i + 16, j + 16, -2130706433);
             }
             RenderSystem.enableDepthTest();
-            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j);
+            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j, slot.x + slot.y * this.imageWidth);
             this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
         }
         this.itemRenderer.blitOffset = 0.0f;

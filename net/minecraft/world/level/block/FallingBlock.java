@@ -17,12 +17,14 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Fallable;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
 public class FallingBlock
-extends Block {
+extends Block
+implements Fallable {
     public FallingBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
@@ -58,12 +60,6 @@ extends Block {
     public static boolean isFree(BlockState blockState) {
         Material material = blockState.getMaterial();
         return blockState.isAir() || blockState.is(BlockTags.FIRE) || material.isLiquid() || material.isReplaceable();
-    }
-
-    public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, FallingBlockEntity fallingBlockEntity) {
-    }
-
-    public void onBroken(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
     }
 
     @Override

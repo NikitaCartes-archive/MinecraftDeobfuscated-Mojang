@@ -37,7 +37,7 @@ extends RenderLayer<SnowGolem, SnowGolemModel<SnowGolem>> {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         poseStack.scale(0.625f, -0.625f, -0.625f);
         ItemStack itemStack = new ItemStack(Blocks.CARVED_PUMPKIN);
-        Minecraft.getInstance().getItemRenderer().renderStatic(snowGolem, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, snowGolem.level, i, LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0f));
+        Minecraft.getInstance().getItemRenderer().renderStatic(snowGolem, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, snowGolem.level, i, LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0f), snowGolem.getId());
         poseStack.popPose();
     }
 }

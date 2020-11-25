@@ -28,8 +28,8 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
     public static final ResourceLocation DEFAULT_SKIN_LOCATION = new ResourceLocation("textures/entity/armorstand/wood.png");
 
     public ArmorStandRenderer(EntityRendererProvider.Context context) {
-        super(context, new ArmorStandModel(context.getLayer(ModelLayers.ARMOR_STAND)), 0.0f);
-        this.addLayer(new HumanoidArmorLayer<ArmorStand, ArmorStandArmorModel, ArmorStandArmorModel>(this, new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_INNER_ARMOR)), new ArmorStandArmorModel(context.getLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR))));
+        super(context, new ArmorStandModel(context.bakeLayer(ModelLayers.ARMOR_STAND)), 0.0f);
+        this.addLayer(new HumanoidArmorLayer<ArmorStand, ArmorStandArmorModel, ArmorStandArmorModel>(this, new ArmorStandArmorModel(context.bakeLayer(ModelLayers.ARMOR_STAND_INNER_ARMOR)), new ArmorStandArmorModel(context.bakeLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR))));
         this.addLayer(new ItemInHandLayer<ArmorStand, ArmorStandArmorModel>(this));
         this.addLayer(new ElytraLayer<ArmorStand, ArmorStandArmorModel>(this, context.getModelSet()));
         this.addLayer(new CustomHeadLayer<ArmorStand, ArmorStandArmorModel>(this, context.getModelSet()));

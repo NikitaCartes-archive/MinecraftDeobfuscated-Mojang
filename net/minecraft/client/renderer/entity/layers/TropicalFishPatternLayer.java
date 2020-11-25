@@ -24,8 +24,8 @@ extends RenderLayer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
 
     public TropicalFishPatternLayer(RenderLayerParent<TropicalFish, ColorableHierarchicalModel<TropicalFish>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.modelA = new TropicalFishModelA(entityModelSet.getLayer(ModelLayers.TROPICAL_FISH_SMALL_PATTERN));
-        this.modelB = new TropicalFishModelB(entityModelSet.getLayer(ModelLayers.TROPICAL_FISH_LARGE_PATTERN));
+        this.modelA = new TropicalFishModelA(entityModelSet.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL_PATTERN));
+        this.modelB = new TropicalFishModelB(entityModelSet.bakeLayer(ModelLayers.TROPICAL_FISH_LARGE_PATTERN));
     }
 
     @Override

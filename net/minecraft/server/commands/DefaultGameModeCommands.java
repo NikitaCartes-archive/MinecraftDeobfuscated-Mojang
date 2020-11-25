@@ -16,7 +16,6 @@ public class DefaultGameModeCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralArgumentBuilder literalArgumentBuilder = (LiteralArgumentBuilder)Commands.literal("defaultgamemode").requires(commandSourceStack -> commandSourceStack.hasPermission(2));
         for (GameType gameType : GameType.values()) {
-            if (gameType == GameType.NOT_SET) continue;
             literalArgumentBuilder.then(Commands.literal(gameType.getName()).executes(commandContext -> DefaultGameModeCommands.setMode((CommandSourceStack)commandContext.getSource(), gameType)));
         }
         commandDispatcher.register(literalArgumentBuilder);
@@ -26,14 +25,14 @@ public class DefaultGameModeCommands {
         int i = 0;
         MinecraftServer minecraftServer = commandSourceStack.getServer();
         minecraftServer.setDefaultGameType(gameType);
-        if (minecraftServer.getForceGameType()) {
+        GameType gameType2 = minecraftServer.getForcedGameType();
+        if (gameType2 != null) {
             for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
-                if (serverPlayer.gameMode.getGameModeForPlayer() == gameType) continue;
-                serverPlayer.setGameMode(gameType);
+                if (!serverPlayer.setGameMode(gameType2)) continue;
                 ++i;
             }
         }
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.defaultgamemode.success", gameType.getDisplayName()), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.defaultgamemode.success", gameType.getLongDisplayName()), true);
         return i;
     }
 }

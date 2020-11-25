@@ -28,7 +28,7 @@ extends RenderLayer<Llama, LlamaModel<Llama>> {
 
     public LlamaDecorLayer(RenderLayerParent<Llama, LlamaModel<Llama>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new LlamaModel(entityModelSet.getLayer(ModelLayers.LLAMA_DECOR));
+        this.model = new LlamaModel(entityModelSet.bakeLayer(ModelLayers.LLAMA_DECOR));
     }
 
     @Override

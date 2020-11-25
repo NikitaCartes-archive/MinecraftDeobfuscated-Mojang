@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -45,12 +46,12 @@ extends Screen {
     }
 
     private GameType getDefaultSelected() {
-        GameType gameType = Minecraft.getInstance().gameMode.getPlayerMode();
-        GameType gameType2 = Minecraft.getInstance().gameMode.getPreviousPlayerMode();
-        if (gameType2 == GameType.NOT_SET) {
-            gameType2 = gameType == GameType.CREATIVE ? GameType.SURVIVAL : GameType.CREATIVE;
+        MultiPlayerGameMode multiPlayerGameMode = Minecraft.getInstance().gameMode;
+        GameType gameType = multiPlayerGameMode.getPreviousPlayerMode();
+        if (gameType != null) {
+            return gameType;
         }
-        return gameType2;
+        return multiPlayerGameMode.getPlayerMode() == GameType.CREATIVE ? GameType.SURVIVAL : GameType.CREATIVE;
     }
 
     @Override

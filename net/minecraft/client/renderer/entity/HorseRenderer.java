@@ -32,7 +32,7 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
     });
 
     public HorseRenderer(EntityRendererProvider.Context context) {
-        super(context, new HorseModel(context.getLayer(ModelLayers.HORSE)), 1.1f);
+        super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), 1.1f);
         this.addLayer(new HorseMarkingLayer(this));
         this.addLayer(new HorseArmorLayer(this, context.getModelSet()));
     }

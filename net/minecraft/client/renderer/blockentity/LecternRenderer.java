@@ -25,7 +25,7 @@ implements BlockEntityRenderer<LecternBlockEntity> {
     private final BookModel bookModel;
 
     public LecternRenderer(BlockEntityRendererProvider.Context context) {
-        this.bookModel = new BookModel(context.getLayer(ModelLayers.BOOK));
+        this.bookModel = new BookModel(context.bakeLayer(ModelLayers.BOOK));
     }
 
     @Override

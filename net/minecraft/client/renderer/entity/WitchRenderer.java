@@ -21,7 +21,7 @@ extends MobRenderer<Witch, WitchModel<Witch>> {
     private static final ResourceLocation WITCH_LOCATION = new ResourceLocation("textures/entity/witch.png");
 
     public WitchRenderer(EntityRendererProvider.Context context) {
-        super(context, new WitchModel(context.getLayer(ModelLayers.WITCH)), 0.5f);
+        super(context, new WitchModel(context.bakeLayer(ModelLayers.WITCH)), 0.5f);
         this.addLayer(new WitchItemLayer<Witch>(this));
     }
 

@@ -30,7 +30,7 @@ extends ComplexItem {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1.0f, 1.0f);
+        player.level.playSound(null, player, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, player.getSoundSource(), 1.0f, 1.0f);
         ItemStack itemStack2 = MapItem.create(level, player.getBlockX(), player.getBlockZ(), (byte)0, true, false);
         if (itemStack.isEmpty()) {
             return InteractionResultHolder.consume(itemStack2);

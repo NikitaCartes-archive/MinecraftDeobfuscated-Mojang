@@ -56,7 +56,7 @@ public class ItemInHandRenderer {
         if (itemStack.isEmpty()) {
             return;
         }
-        this.itemRenderer.renderStatic(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, livingEntity.level, i, OverlayTexture.NO_OVERLAY);
+        this.itemRenderer.renderStatic(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, livingEntity.level, i, OverlayTexture.NO_OVERLAY, livingEntity.getId() + transformType.ordinal());
     }
 
     private float calculateMapTilt(float f) {

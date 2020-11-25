@@ -22,7 +22,7 @@ extends IllagerRenderer<Vindicator> {
     private static final ResourceLocation VINDICATOR = new ResourceLocation("textures/entity/illager/vindicator.png");
 
     public VindicatorRenderer(EntityRendererProvider.Context context) {
-        super(context, new IllagerModel(context.getLayer(ModelLayers.VINDICATOR)), 0.5f);
+        super(context, new IllagerModel(context.bakeLayer(ModelLayers.VINDICATOR)), 0.5f);
         this.addLayer(new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>((RenderLayerParent)this){
 
             @Override

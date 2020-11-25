@@ -22,6 +22,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -153,6 +154,11 @@ implements SimpleWaterloggedBlock {
     @Environment(value=EnvType.CLIENT)
     protected Iterable<Vec3> getParticleOffsets(BlockState blockState) {
         return (Iterable)PARTICLE_OFFSETS.get(blockState.getValue(CANDLES));
+    }
+
+    @Override
+    public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+        return Block.canSupportCenter(levelReader, blockPos.below(), Direction.UP);
     }
 }
 

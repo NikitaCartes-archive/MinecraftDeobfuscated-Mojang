@@ -21,7 +21,7 @@ extends MobRenderer<Phantom, PhantomModel<Phantom>> {
     private static final ResourceLocation PHANTOM_LOCATION = new ResourceLocation("textures/entity/phantom.png");
 
     public PhantomRenderer(EntityRendererProvider.Context context) {
-        super(context, new PhantomModel(context.getLayer(ModelLayers.PHANTOM)), 0.75f);
+        super(context, new PhantomModel(context.bakeLayer(ModelLayers.PHANTOM)), 0.75f);
         this.addLayer(new PhantomEyesLayer<Phantom>(this));
     }
 

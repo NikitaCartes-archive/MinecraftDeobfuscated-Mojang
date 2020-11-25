@@ -22,7 +22,7 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 
     public WitherBossRenderer(EntityRendererProvider.Context context) {
-        super(context, new WitherBossModel(context.getLayer(ModelLayers.WITHER)), 1.0f);
+        super(context, new WitherBossModel(context.bakeLayer(ModelLayers.WITHER)), 1.0f);
         this.addLayer(new WitherArmorLayer(this, context.getModelSet()));
     }
 

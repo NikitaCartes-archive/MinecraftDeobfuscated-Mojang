@@ -187,10 +187,9 @@ implements ContainerListener {
     public int latency;
     public boolean wonGame;
 
-    public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, ServerPlayerGameMode serverPlayerGameMode) {
+    public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
         super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
-        serverPlayerGameMode.player = this;
-        this.gameMode = serverPlayerGameMode;
+        this.gameMode = minecraftServer.createGameModeForPlayer(this);
         this.server = minecraftServer;
         this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
         this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
@@ -242,13 +241,6 @@ implements ContainerListener {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("playerGameType", 99)) {
-            if (this.getServer().getForceGameType()) {
-                this.gameMode.setGameModeForPlayer(this.getServer().getDefaultGameType(), GameType.NOT_SET);
-            } else {
-                this.gameMode.setGameModeForPlayer(GameType.byId(compoundTag.getInt("playerGameType")), compoundTag.contains("previousPlayerGameType", 3) ? GameType.byId(compoundTag.getInt("previousPlayerGameType")) : GameType.NOT_SET);
-            }
-        }
         if (compoundTag.contains("enteredNetherPosition", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("enteredNetherPosition");
             this.enteredNetherPosition = new Vec3(compoundTag2.getDouble("x"), compoundTag2.getDouble("y"), compoundTag2.getDouble("z"));
@@ -273,8 +265,7 @@ implements ContainerListener {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("playerGameType", this.gameMode.getGameModeForPlayer().getId());
-        compoundTag.putInt("previousPlayerGameType", this.gameMode.getPreviousGameModeForPlayer().getId());
+        this.storeGameTypes(compoundTag);
         compoundTag.putBoolean("seenCredits", this.seenCredits);
         if (this.enteredNetherPosition != null) {
             CompoundTag compoundTag2 = new CompoundTag();
@@ -618,7 +609,6 @@ implements ContainerListener {
             this.moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z);
             serverLevel2.getProfiler().pop();
             this.triggerDimensionChangeTriggers(serverLevel2);
-            this.gameMode.setLevel(serverLevel);
             this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
             playerList.sendLevelInfo(this, serverLevel);
             playerList.sendAllPlayerInfo(this);
@@ -1012,6 +1002,7 @@ implements ContainerListener {
     }
 
     public void restoreFrom(ServerPlayer serverPlayer, boolean bl) {
+        this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
         if (bl) {
             this.getInventory().replaceWith(serverPlayer.getInventory());
             this.setHealth(serverPlayer.getHealth());
@@ -1104,9 +1095,10 @@ implements ContainerListener {
         return (ServerLevel)this.level;
     }
 
-    @Override
-    public void setGameMode(GameType gameType) {
-        this.gameMode.setGameModeForPlayer(gameType);
+    public boolean setGameMode(GameType gameType) {
+        if (!this.gameMode.changeGameModeForPlayer(gameType)) {
+            return false;
+        }
         this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE, gameType.getId()));
         if (gameType == GameType.SPECTATOR) {
             this.removeEntitiesOnShoulder();
@@ -1116,6 +1108,7 @@ implements ContainerListener {
         }
         this.onUpdateAbilities();
         this.updateEffectVisibility();
+        return true;
     }
 
     @Override
@@ -1279,7 +1272,6 @@ implements ContainerListener {
             serverLevel.addDuringCommandTeleport(this);
             this.triggerDimensionChangeTriggers(serverLevel2);
             this.connection.teleport(d, e, f, g, h);
-            this.gameMode.setLevel(serverLevel);
             this.server.getPlayerList().sendLevelInfo(this, serverLevel);
             this.server.getPlayerList().sendAllPlayerInfo(this);
         }
@@ -1370,6 +1362,36 @@ implements ContainerListener {
     @Nullable
     public TextFilter getTextFilter() {
         return this.textFilter;
+    }
+
+    public void setLevel(ServerLevel serverLevel) {
+        this.level = serverLevel;
+        this.gameMode.setLevel(serverLevel);
+    }
+
+    @Nullable
+    private static GameType readPlayerMode(@Nullable CompoundTag compoundTag, String string) {
+        return compoundTag != null && compoundTag.contains(string, 99) ? GameType.byId(compoundTag.getInt(string)) : null;
+    }
+
+    private GameType calculateGameModeForNewPlayer(@Nullable GameType gameType) {
+        GameType gameType2 = this.server.getForcedGameType();
+        if (gameType2 != null) {
+            return gameType2;
+        }
+        return gameType != null ? gameType : this.server.getDefaultGameType();
+    }
+
+    public void loadGameTypes(@Nullable CompoundTag compoundTag) {
+        this.gameMode.setGameModeForPlayer(this.calculateGameModeForNewPlayer(ServerPlayer.readPlayerMode(compoundTag, "playerGameType")), ServerPlayer.readPlayerMode(compoundTag, "previousPlayerGameType"));
+    }
+
+    private void storeGameTypes(CompoundTag compoundTag) {
+        compoundTag.putInt("playerGameType", this.gameMode.getGameModeForPlayer().getId());
+        GameType gameType = this.gameMode.getPreviousGameModeForPlayer();
+        if (gameType != null) {
+            compoundTag.putInt("previousPlayerGameType", gameType.getId());
+        }
     }
 }
 

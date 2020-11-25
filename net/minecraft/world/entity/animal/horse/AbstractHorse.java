@@ -913,9 +913,6 @@ Saddleable {
         int j = i - 400;
         if (j >= 0 && j < 2 && j < this.inventory.getContainerSize()) {
             if (j == 0) {
-                if (!this.canWearArmor()) {
-                    return SlotAccess.NULL;
-                }
                 return this.createEquipmentSlotAccess(j, itemStack -> itemStack.isEmpty() || itemStack.is(Items.SADDLE));
             }
             if (j == 1) {

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -170,11 +171,11 @@ implements ItemLike {
         return Mth.hsvToRgb(f / 3.0f, 1.0f, 1.0f);
     }
 
-    public boolean overrideStackedOnOther(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
+    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Inventory inventory) {
         return false;
     }
 
-    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Inventory inventory) {
         return false;
     }
 

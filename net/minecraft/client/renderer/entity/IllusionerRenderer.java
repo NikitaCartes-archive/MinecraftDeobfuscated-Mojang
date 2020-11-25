@@ -25,7 +25,7 @@ extends IllagerRenderer<Illusioner> {
     private static final ResourceLocation ILLUSIONER = new ResourceLocation("textures/entity/illager/illusioner.png");
 
     public IllusionerRenderer(EntityRendererProvider.Context context) {
-        super(context, new IllagerModel(context.getLayer(ModelLayers.ILLUSIONER)), 0.5f);
+        super(context, new IllagerModel(context.bakeLayer(ModelLayers.ILLUSIONER)), 0.5f);
         this.addLayer(new ItemInHandLayer<Illusioner, IllagerModel<Illusioner>>((RenderLayerParent)this){
 
             @Override

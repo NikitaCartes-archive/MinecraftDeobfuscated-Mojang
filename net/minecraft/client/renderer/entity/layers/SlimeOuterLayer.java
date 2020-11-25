@@ -26,7 +26,7 @@ extends RenderLayer<T, SlimeModel<T>> {
 
     public SlimeOuterLayer(RenderLayerParent<T, SlimeModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new SlimeModel(entityModelSet.getLayer(ModelLayers.SLIME_OUTER));
+        this.model = new SlimeModel(entityModelSet.bakeLayer(ModelLayers.SLIME_OUTER));
     }
 
     @Override

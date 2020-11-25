@@ -23,7 +23,7 @@ extends MobRenderer<Wolf, WolfModel<Wolf>> {
     private static final ResourceLocation WOLF_ANGRY_LOCATION = new ResourceLocation("textures/entity/wolf/wolf_angry.png");
 
     public WolfRenderer(EntityRendererProvider.Context context) {
-        super(context, new WolfModel(context.getLayer(ModelLayers.WOLF)), 0.5f);
+        super(context, new WolfModel(context.bakeLayer(ModelLayers.WOLF)), 0.5f);
         this.addLayer(new WolfCollarLayer(this));
     }
 

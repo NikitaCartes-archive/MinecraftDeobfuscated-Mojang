@@ -19,7 +19,7 @@ extends MobRenderer<Parrot, ParrotModel> {
     public static final ResourceLocation[] PARROT_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/parrot/parrot_red_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_green.png"), new ResourceLocation("textures/entity/parrot/parrot_yellow_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_grey.png")};
 
     public ParrotRenderer(EntityRendererProvider.Context context) {
-        super(context, new ParrotModel(context.getLayer(ModelLayers.PARROT)), 0.3f);
+        super(context, new ParrotModel(context.bakeLayer(ModelLayers.PARROT)), 0.3f);
     }
 
     @Override

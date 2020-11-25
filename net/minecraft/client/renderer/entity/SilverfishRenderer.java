@@ -20,7 +20,7 @@ extends MobRenderer<Silverfish, SilverfishModel<Silverfish>> {
     private static final ResourceLocation SILVERFISH_LOCATION = new ResourceLocation("textures/entity/silverfish.png");
 
     public SilverfishRenderer(EntityRendererProvider.Context context) {
-        super(context, new SilverfishModel(context.getLayer(ModelLayers.SILVERFISH)), 0.3f);
+        super(context, new SilverfishModel(context.bakeLayer(ModelLayers.SILVERFISH)), 0.3f);
     }
 
     @Override

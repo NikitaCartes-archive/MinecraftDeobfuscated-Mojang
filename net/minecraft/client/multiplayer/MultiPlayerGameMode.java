@@ -50,6 +50,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class MultiPlayerGameMode {
@@ -62,8 +63,9 @@ public class MultiPlayerGameMode {
     private float destroyTicks;
     private int destroyDelay;
     private boolean isDestroying;
-    private GameType localPlayerMode = GameType.SURVIVAL;
-    private GameType previousLocalPlayerMode = GameType.NOT_SET;
+    private GameType localPlayerMode = GameType.DEFAULT_MODE;
+    @Nullable
+    private GameType previousLocalPlayerMode;
     private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, Vec3> unAckedActions = new Object2ObjectLinkedOpenHashMap();
     private int carriedIndex;
 
@@ -76,8 +78,10 @@ public class MultiPlayerGameMode {
         this.localPlayerMode.updatePlayerAbilities(player.getAbilities());
     }
 
-    public void setPreviousLocalMode(GameType gameType) {
-        this.previousLocalPlayerMode = gameType;
+    public void setLocalMode(GameType gameType, @Nullable GameType gameType2) {
+        this.localPlayerMode = gameType;
+        this.previousLocalPlayerMode = gameType2;
+        this.localPlayerMode.updatePlayerAbilities(this.minecraft.player.getAbilities());
     }
 
     public void setLocalMode(GameType gameType) {
@@ -390,6 +394,7 @@ public class MultiPlayerGameMode {
         return this.localPlayerMode == GameType.SPECTATOR;
     }
 
+    @Nullable
     public GameType getPreviousPlayerMode() {
         return this.previousLocalPlayerMode;
     }

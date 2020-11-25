@@ -3,23 +3,30 @@
  */
 package net.minecraft.world.level;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Abilities;
+import org.jetbrains.annotations.Nullable;
 
 public enum GameType {
-    NOT_SET(-1, ""),
     SURVIVAL(0, "survival"),
     CREATIVE(1, "creative"),
     ADVENTURE(2, "adventure"),
     SPECTATOR(3, "spectator");
 
+    public static final GameType DEFAULT_MODE;
     private final int id;
     private final String name;
+    private final Component shortName;
+    private final Component longName;
 
     private GameType(int j, String string2) {
         this.id = j;
         this.name = string2;
+        this.shortName = new TranslatableComponent("selectWorld.gameMode." + string2);
+        this.longName = new TranslatableComponent("gameMode." + string2);
     }
 
     public int getId() {
@@ -30,8 +37,13 @@ public enum GameType {
         return this.name;
     }
 
-    public Component getDisplayName() {
-        return new TranslatableComponent("gameMode." + this.name);
+    public Component getLongDisplayName() {
+        return this.longName;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Component getShortDisplayName() {
+        return this.shortName;
     }
 
     public void updatePlayerAbilities(Abilities abilities) {
@@ -66,7 +78,7 @@ public enum GameType {
     }
 
     public static GameType byId(int i) {
-        return GameType.byId(i, SURVIVAL);
+        return GameType.byId(i, DEFAULT_MODE);
     }
 
     public static GameType byId(int i, GameType gameType) {
@@ -87,6 +99,22 @@ public enum GameType {
             return gameType2;
         }
         return gameType;
+    }
+
+    public static int getNullableId(@Nullable GameType gameType) {
+        return gameType != null ? gameType.id : -1;
+    }
+
+    @Nullable
+    public static GameType byNullableId(int i) {
+        if (i == -1) {
+            return null;
+        }
+        return GameType.byId(i);
+    }
+
+    static {
+        DEFAULT_MODE = SURVIVAL;
     }
 }
 

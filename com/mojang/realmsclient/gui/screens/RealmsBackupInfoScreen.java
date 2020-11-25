@@ -89,7 +89,7 @@ extends RealmsScreen {
 
     private Component gameModeMetadata(String string) {
         try {
-            return RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string)).getDisplayName();
+            return RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string)).getShortDisplayName();
         } catch (Exception exception) {
             return TEXT_UNKNOWN;
         }

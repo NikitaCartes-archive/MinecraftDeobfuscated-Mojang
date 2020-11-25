@@ -26,8 +26,8 @@ extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
     private final ColorableHierarchicalModel<TropicalFish> modelB;
 
     public TropicalFishRenderer(EntityRendererProvider.Context context) {
-        super(context, new TropicalFishModelA(context.getLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15f);
-        this.modelB = new TropicalFishModelB<TropicalFish>(context.getLayer(ModelLayers.TROPICAL_FISH_LARGE));
+        super(context, new TropicalFishModelA(context.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15f);
+        this.modelB = new TropicalFishModelB<TropicalFish>(context.bakeLayer(ModelLayers.TROPICAL_FISH_LARGE));
         this.addLayer(new TropicalFishPatternLayer(this, context.getModelSet()));
     }
 

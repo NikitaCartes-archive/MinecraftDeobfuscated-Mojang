@@ -567,7 +567,6 @@ FlyingAnimal {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        Entity entity = damageSource.getEntity();
         if (!this.level.isClientSide) {
             this.beePollinateGoal.stopPollinating();
         }

@@ -15,7 +15,6 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.SelectedGameMode;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -24,12 +23,13 @@ import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsSlotOptionsScreen
 extends RealmsScreen {
     public static final List<Difficulty> DIFFICULTIES = ImmutableList.of(Difficulty.PEACEFUL, Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD);
-    public static final List<SelectedGameMode> GAME_MODES = ImmutableList.of(SelectedGameMode.SURVIVAL, SelectedGameMode.CREATIVE, SelectedGameMode.ADVENTURE);
+    public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
     private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.edit.slot.name");
     private static final Component SPAWN_PROTECTION_TEXT = new TranslatableComponent("mco.configure.world.spawnProtection");
     private EditBox nameEdit;
@@ -40,7 +40,7 @@ extends RealmsScreen {
     private final RealmsServer.WorldType worldType;
     private final int activeSlot;
     private Difficulty difficulty;
-    private SelectedGameMode gameMode;
+    private GameType gameMode;
     private boolean pvp;
     private boolean spawnNPCs;
     private boolean spawnAnimals;
@@ -124,8 +124,8 @@ extends RealmsScreen {
         CycleButton<Boolean> cycleButton3 = this.addButton(CycleButton.onOffBuilder(this.pvp).create(i, RealmsSlotOptionsScreen.row(1), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.pvp"), (cycleButton, boolean_) -> {
             this.pvp = boolean_;
         }));
-        this.addButton(CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])SelectedGameMode.values()).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, selectedGameMode) -> {
-            this.gameMode = selectedGameMode;
+        this.addButton(CycleButton.builder(GameType::getShortDisplayName).withValues(GAME_MODES).withInitialValue(this.gameMode).create(this.column1X, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButton, gameType) -> {
+            this.gameMode = gameType;
         }));
         CycleButton<Boolean> cycleButton22 = this.addButton(CycleButton.onOffBuilder(this.spawnAnimals).create(i, RealmsSlotOptionsScreen.row(3), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnAnimals"), (cycleButton, boolean_) -> {
             this.spawnAnimals = boolean_;

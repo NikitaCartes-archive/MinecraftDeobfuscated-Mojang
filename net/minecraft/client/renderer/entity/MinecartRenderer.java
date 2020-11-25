@@ -33,7 +33,7 @@ extends EntityRenderer<T> {
     public MinecartRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
         super(context);
         this.shadowRadius = 0.7f;
-        this.model = new MinecartModel(context.getLayer(modelLayerLocation));
+        this.model = new MinecartModel(context.bakeLayer(modelLayerLocation));
     }
 
     @Override

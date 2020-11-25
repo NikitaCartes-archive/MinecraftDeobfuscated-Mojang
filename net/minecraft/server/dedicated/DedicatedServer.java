@@ -126,7 +126,6 @@ implements ServerInterface {
         this.setFlightAllowed(dedicatedServerProperties.allowFlight);
         this.setResourcePack(dedicatedServerProperties.resourcePack, this.getPackHash());
         this.setMotd(dedicatedServerProperties.motd);
-        this.setForceGameType(dedicatedServerProperties.forceGameMode);
         super.setPlayerIdleTimeout(dedicatedServerProperties.playerIdleTimeout.get());
         this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
         this.worldData.setGameType(dedicatedServerProperties.gamemode);
@@ -363,11 +362,6 @@ implements ServerInterface {
     }
 
     @Override
-    public boolean publishServer(GameType gameType, boolean bl, int i) {
-        return false;
-    }
-
-    @Override
     public boolean isCommandBlockEnabled() {
         return this.getProperties().enableCommandBlock;
     }
@@ -550,6 +544,12 @@ implements ServerInterface {
     @Override
     public boolean isResourcePackRequired() {
         return this.settings.getProperties().requireResourcePack;
+    }
+
+    @Override
+    @Nullable
+    public GameType getForcedGameType() {
+        return this.settings.getProperties().forceGameMode ? this.worldData.getGameType() : null;
     }
 
     @Override

@@ -23,10 +23,10 @@ extends MobRenderer<Giant, HumanoidModel<Giant>> {
     private final float scale;
 
     public GiantMobRenderer(EntityRendererProvider.Context context, float f) {
-        super(context, new GiantZombieModel(context.getLayer(ModelLayers.GIANT)), 0.5f * f);
+        super(context, new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT)), 0.5f * f);
         this.scale = f;
         this.addLayer(new ItemInHandLayer<Giant, HumanoidModel<Giant>>(this));
-        this.addLayer(new HumanoidArmorLayer<Giant, HumanoidModel<Giant>, GiantZombieModel>(this, new GiantZombieModel(context.getLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.getLayer(ModelLayers.GIANT_OUTER_ARMOR))));
+        this.addLayer(new HumanoidArmorLayer<Giant, HumanoidModel<Giant>, GiantZombieModel>(this, new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_OUTER_ARMOR))));
     }
 
     @Override

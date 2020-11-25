@@ -19,7 +19,7 @@ extends MobRenderer<Sheep, SheepModel<Sheep>> {
     private static final ResourceLocation SHEEP_LOCATION = new ResourceLocation("textures/entity/sheep/sheep.png");
 
     public SheepRenderer(EntityRendererProvider.Context context) {
-        super(context, new SheepModel(context.getLayer(ModelLayers.SHEEP)), 0.7f);
+        super(context, new SheepModel(context.bakeLayer(ModelLayers.SHEEP)), 0.7f);
         this.addLayer(new SheepFurLayer(this, context.getModelSet()));
     }
 

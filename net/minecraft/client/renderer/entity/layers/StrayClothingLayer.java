@@ -24,7 +24,7 @@ extends RenderLayer<T, M> {
 
     public StrayClothingLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.layerModel = new SkeletonModel(entityModelSet.getLayer(ModelLayers.STRAY_OUTER_LAYER));
+        this.layerModel = new SkeletonModel(entityModelSet.bakeLayer(ModelLayers.STRAY_OUTER_LAYER));
     }
 
     @Override

@@ -188,14 +188,6 @@ implements NeutralMob {
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float f) {
-        if (this.isInvulnerableTo(damageSource)) {
-            return false;
-        }
-        return super.hurt(damageSource, f);
-    }
-
-    @Override
     protected SoundEvent getAmbientSound() {
         return this.isAngry() ? SoundEvents.ZOMBIFIED_PIGLIN_ANGRY : SoundEvents.ZOMBIFIED_PIGLIN_AMBIENT;
     }

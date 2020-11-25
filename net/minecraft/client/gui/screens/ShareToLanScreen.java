@@ -9,11 +9,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.SelectedGameMode;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.world.level.GameType;
 
 @Environment(value=EnvType.CLIENT)
 public class ShareToLanScreen
@@ -22,7 +22,7 @@ extends Screen {
     private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
     private static final Component INFO_TEXT = new TranslatableComponent("lanServer.otherPlayers");
     private final Screen lastScreen;
-    private SelectedGameMode gameMode = SelectedGameMode.SURVIVAL;
+    private GameType gameMode = GameType.SURVIVAL;
     private boolean commands;
 
     public ShareToLanScreen(Screen screen) {
@@ -32,8 +32,8 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.addButton(CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.SPECTATOR, SelectedGameMode.CREATIVE, SelectedGameMode.ADVENTURE}).withInitialValue(this.gameMode).create(this.width / 2 - 155, 100, 150, 20, GAME_MODE_LABEL, (cycleButton, selectedGameMode) -> {
-            this.gameMode = selectedGameMode;
+        this.addButton(CycleButton.builder(GameType::getShortDisplayName).withValues((GameType[])new GameType[]{GameType.SURVIVAL, GameType.SPECTATOR, GameType.CREATIVE, GameType.ADVENTURE}).withInitialValue(this.gameMode).create(this.width / 2 - 155, 100, 150, 20, GAME_MODE_LABEL, (cycleButton, gameType) -> {
+            this.gameMode = gameType;
         }));
         this.addButton(CycleButton.onOffBuilder(this.commands).create(this.width / 2 + 5, 100, 150, 20, ALLOW_COMMANDS_LABEL, (cycleButton, boolean_) -> {
             this.commands = boolean_;
@@ -41,7 +41,7 @@ extends Screen {
         this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("lanServer.start"), button -> {
             this.minecraft.setScreen(null);
             int i = HttpUtil.getAvailablePort();
-            TranslatableComponent component = this.minecraft.getSingleplayerServer().publishServer(this.gameMode.getGameType(), this.commands, i) ? new TranslatableComponent("commands.publish.started", i) : new TranslatableComponent("commands.publish.failed");
+            TranslatableComponent component = this.minecraft.getSingleplayerServer().publishServer(this.gameMode, this.commands, i) ? new TranslatableComponent("commands.publish.started", i) : new TranslatableComponent("commands.publish.failed");
             this.minecraft.gui.getChat().addMessage(component);
             this.minecraft.updateTitle();
         }));

@@ -54,6 +54,10 @@ extends UseOnContext {
         return Direction.orderedByNearest(this.getPlayer())[0];
     }
 
+    public Direction getNearestLookingVerticalDirection() {
+        return Direction.getFacingAxis(this.getPlayer(), Direction.Axis.Y);
+    }
+
     public Direction[] getNearestLookingDirections() {
         int i;
         Direction[] directions = Direction.orderedByNearest(this.getPlayer());

@@ -21,7 +21,7 @@ extends MobRenderer<Cod, CodModel<Cod>> {
     private static final ResourceLocation COD_LOCATION = new ResourceLocation("textures/entity/fish/cod.png");
 
     public CodRenderer(EntityRendererProvider.Context context) {
-        super(context, new CodModel(context.getLayer(ModelLayers.COD)), 0.3f);
+        super(context, new CodModel(context.bakeLayer(ModelLayers.COD)), 0.3f);
     }
 
     @Override

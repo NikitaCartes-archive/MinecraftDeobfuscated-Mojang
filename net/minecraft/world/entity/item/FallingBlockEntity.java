@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ConcretePowderBlock;
+import net.minecraft.world.level.block.Fallable;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -147,8 +148,8 @@ extends Entity {
                             }
                             if (this.level.setBlock(blockPos, this.blockState, 3)) {
                                 BlockEntity blockEntity;
-                                if (block instanceof FallingBlock) {
-                                    ((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState, this);
+                                if (block instanceof Fallable) {
+                                    ((Fallable)((Object)block)).onLand(this.level, blockPos, this.blockState, blockState, this);
                                 }
                                 if (this.blockData != null && this.blockState.hasBlockEntity() && (blockEntity = this.level.getBlockEntity(blockPos)) != null) {
                                     CompoundTag compoundTag = blockEntity.save(new CompoundTag());
@@ -161,13 +162,15 @@ extends Entity {
                                     blockEntity.setChanged();
                                 }
                             } else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                                this.callOnBrokenAfterFall(block, blockPos);
                                 this.spawnAtLocation(block);
                             }
                         } else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                            this.callOnBrokenAfterFall(block, blockPos);
                             this.spawnAtLocation(block);
                         }
-                    } else if (block instanceof FallingBlock) {
-                        ((FallingBlock)block).onBroken(this.level, blockPos, this);
+                    } else {
+                        this.callOnBrokenAfterFall(block, blockPos);
                     }
                 }
             } else if (!(this.level.isClientSide || (this.time <= 100 || blockPos.getY() > this.level.getMinBuildHeight() && blockPos.getY() <= this.level.getMaxBuildHeight()) && this.time <= 600)) {
@@ -178,6 +181,12 @@ extends Entity {
             }
         }
         this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
+    }
+
+    public void callOnBrokenAfterFall(Block block, BlockPos blockPos) {
+        if (block instanceof Fallable) {
+            ((Fallable)((Object)block)).onBrokenAfterFall(this.level, blockPos, this);
+        }
     }
 
     @Override

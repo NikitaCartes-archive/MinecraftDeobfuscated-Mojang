@@ -1005,13 +1005,7 @@ implements ChunkHolder.PlayerProvider {
             int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
             boolean bl2 = bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
             if (bl) {
-                ChunkPos chunkPos;
-                ChunkHolder chunkHolder;
-                boolean bl22 = this.entity.forcedLoading;
-                if (!bl22 && (chunkHolder = ChunkMap.this.getVisibleChunkIfPresent((chunkPos = this.entity.chunkPosition()).toLong())) != null && chunkHolder.getTickingChunk() != null) {
-                    boolean bl3 = bl22 = ChunkMap.checkerboardDistance(chunkPos, serverPlayer, false) <= ChunkMap.this.viewDistance;
-                }
-                if (bl22 && this.seenBy.add(serverPlayer.connection)) {
+                if (this.seenBy.add(serverPlayer.connection)) {
                     this.serverEntity.addPairing(serverPlayer);
                 }
             } else if (this.seenBy.remove(serverPlayer.connection)) {

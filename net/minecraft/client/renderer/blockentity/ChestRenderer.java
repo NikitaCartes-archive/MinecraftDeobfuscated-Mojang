@@ -55,15 +55,15 @@ implements BlockEntityRenderer<T> {
         if (calendar.get(2) + 1 == 12 && calendar.get(5) >= 24 && calendar.get(5) <= 26) {
             this.xmasTextures = true;
         }
-        ModelPart modelPart = context.getLayer(ModelLayers.CHEST);
+        ModelPart modelPart = context.bakeLayer(ModelLayers.CHEST);
         this.bottom = modelPart.getChild("bottom");
         this.lid = modelPart.getChild("lid");
         this.lock = modelPart.getChild("lock");
-        ModelPart modelPart2 = context.getLayer(ModelLayers.DOUBLE_CHEST_LEFT);
+        ModelPart modelPart2 = context.bakeLayer(ModelLayers.DOUBLE_CHEST_LEFT);
         this.doubleLeftBottom = modelPart2.getChild("bottom");
         this.doubleLeftLid = modelPart2.getChild("lid");
         this.doubleLeftLock = modelPart2.getChild("lock");
-        ModelPart modelPart3 = context.getLayer(ModelLayers.DOUBLE_CHEST_RIGHT);
+        ModelPart modelPart3 = context.bakeLayer(ModelLayers.DOUBLE_CHEST_RIGHT);
         this.doubleRightBottom = modelPart3.getChild("bottom");
         this.doubleRightLid = modelPart3.getChild("lid");
         this.doubleRightLock = modelPart3.getChild("lock");

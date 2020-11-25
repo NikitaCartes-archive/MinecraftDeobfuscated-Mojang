@@ -20,7 +20,7 @@ extends MobRenderer<Endermite, EndermiteModel<Endermite>> {
     private static final ResourceLocation ENDERMITE_LOCATION = new ResourceLocation("textures/entity/endermite.png");
 
     public EndermiteRenderer(EntityRendererProvider.Context context) {
-        super(context, new EndermiteModel(context.getLayer(ModelLayers.ENDERMITE)), 0.3f);
+        super(context, new EndermiteModel(context.bakeLayer(ModelLayers.ENDERMITE)), 0.3f);
     }
 
     @Override

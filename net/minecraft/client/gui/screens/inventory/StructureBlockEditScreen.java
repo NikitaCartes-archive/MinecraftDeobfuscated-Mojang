@@ -66,7 +66,7 @@ extends Screen {
     private Button rot180Button;
     private Button rot270Button;
     private Button detectButton;
-    private CycleButton<Boolean> entitiesButton;
+    private CycleButton<Boolean> includeEntitiesButton;
     private CycleButton<Mirror> mirrorButton;
     private CycleButton<Boolean> toggleAirButton;
     private CycleButton<Boolean> toggleBoundingBox;
@@ -141,7 +141,7 @@ extends Screen {
                 this.minecraft.setScreen(null);
             }
         }));
-        this.entitiesButton = this.addButton(CycleButton.onOffBuilder(this.structure.isIgnoreEntities()).displayOnlyValue().create(this.width / 2 + 4 + 100, 160, 50, 20, INCLUDE_ENTITIES_LABEL, (cycleButton, boolean_) -> this.structure.setIgnoreEntities((boolean)boolean_)));
+        this.includeEntitiesButton = this.addButton(CycleButton.onOffBuilder(!this.structure.isIgnoreEntities()).displayOnlyValue().create(this.width / 2 + 4 + 100, 160, 50, 20, INCLUDE_ENTITIES_LABEL, (cycleButton, boolean_) -> this.structure.setIgnoreEntities(boolean_ == false)));
         this.mirrorButton = this.addButton(CycleButton.builder(Mirror::symbol).withValues((Mirror[])Mirror.values()).displayOnlyValue().withInitialValue(this.initialMirror).create(this.width / 2 - 20, 185, 40, 20, new TextComponent("MIRROR"), (cycleButton, mirror) -> this.structure.setMirror((Mirror)((Object)mirror))));
         this.toggleAirButton = this.addButton(CycleButton.onOffBuilder(this.structure.getShowAir()).displayOnlyValue().create(this.width / 2 + 4 + 100, 80, 50, 20, SHOW_AIR_LABEL, (cycleButton, boolean_) -> this.structure.setShowAir((boolean)boolean_)));
         this.toggleBoundingBox = this.addButton(CycleButton.onOffBuilder(this.structure.getShowBoundingBox()).displayOnlyValue().create(this.width / 2 + 4 + 100, 80, 50, 20, SHOW_BOUNDING_BOX_LABEL, (cycleButton, boolean_) -> this.structure.setShowBoundingBox((boolean)boolean_)));
@@ -285,7 +285,7 @@ extends Screen {
         this.saveButton.visible = false;
         this.loadButton.visible = false;
         this.detectButton.visible = false;
-        this.entitiesButton.visible = false;
+        this.includeEntitiesButton.visible = false;
         this.mirrorButton.visible = false;
         this.rot0Button.visible = false;
         this.rot90Button.visible = false;
@@ -304,7 +304,7 @@ extends Screen {
                 this.sizeZEdit.setVisible(true);
                 this.saveButton.visible = true;
                 this.detectButton.visible = true;
-                this.entitiesButton.visible = true;
+                this.includeEntitiesButton.visible = true;
                 this.toggleAirButton.visible = true;
                 break;
             }
@@ -316,7 +316,7 @@ extends Screen {
                 this.integrityEdit.setVisible(true);
                 this.seedEdit.setVisible(true);
                 this.loadButton.visible = true;
-                this.entitiesButton.visible = true;
+                this.includeEntitiesButton.visible = true;
                 this.mirrorButton.visible = true;
                 this.rot0Button.visible = true;
                 this.rot90Button.visible = true;

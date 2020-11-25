@@ -38,11 +38,11 @@ public class ItemOverride {
         return this.model;
     }
 
-    boolean test(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
+    boolean test(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
         Item item = itemStack.getItem();
         for (Map.Entry<ResourceLocation, Float> entry : this.predicates.entrySet()) {
             ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, entry.getKey());
-            if (itemPropertyFunction != null && !(itemPropertyFunction.call(itemStack, clientLevel, livingEntity) < entry.getValue().floatValue())) continue;
+            if (itemPropertyFunction != null && !(itemPropertyFunction.call(itemStack, clientLevel, livingEntity, i) < entry.getValue().floatValue())) continue;
             return false;
         }
         return true;

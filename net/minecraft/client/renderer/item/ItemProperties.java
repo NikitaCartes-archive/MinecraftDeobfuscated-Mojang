@@ -40,8 +40,8 @@ public class ItemProperties {
     private static final Map<ResourceLocation, ItemPropertyFunction> GENERIC_PROPERTIES = Maps.newHashMap();
     private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
     private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
-    private static final ItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity) -> itemStack.isDamaged() ? 1.0f : 0.0f;
-    private static final ItemPropertyFunction PROPERTY_DAMAGE = (itemStack, clientLevel, livingEntity) -> Mth.clamp((float)itemStack.getDamageValue() / (float)itemStack.getMaxDamage(), 0.0f, 1.0f);
+    private static final ItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0f : 0.0f;
+    private static final ItemPropertyFunction PROPERTY_DAMAGE = (itemStack, clientLevel, livingEntity, i) -> Mth.clamp((float)itemStack.getDamageValue() / (float)itemStack.getMaxDamage(), 0.0f, 1.0f);
     private static final Map<Item, Map<ResourceLocation, ItemPropertyFunction>> PROPERTIES = Maps.newHashMap();
 
     private static ItemPropertyFunction registerGeneric(ResourceLocation resourceLocation, ItemPropertyFunction itemPropertyFunction) {
@@ -75,10 +75,10 @@ public class ItemProperties {
     }
 
     static {
-        ItemProperties.registerGeneric(new ResourceLocation("lefthanded"), (itemStack, clientLevel, livingEntity) -> livingEntity == null || livingEntity.getMainArm() == HumanoidArm.RIGHT ? 0.0f : 1.0f);
-        ItemProperties.registerGeneric(new ResourceLocation("cooldown"), (itemStack, clientLevel, livingEntity) -> livingEntity instanceof Player ? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0f) : 0.0f);
-        ItemProperties.registerGeneric(new ResourceLocation("custom_model_data"), (itemStack, clientLevel, livingEntity) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0f);
-        ItemProperties.register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity) -> {
+        ItemProperties.registerGeneric(new ResourceLocation("lefthanded"), (itemStack, clientLevel, livingEntity, i) -> livingEntity == null || livingEntity.getMainArm() == HumanoidArm.RIGHT ? 0.0f : 1.0f);
+        ItemProperties.registerGeneric(new ResourceLocation("cooldown"), (itemStack, clientLevel, livingEntity, i) -> livingEntity instanceof Player ? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0f) : 0.0f);
+        ItemProperties.registerGeneric(new ResourceLocation("custom_model_data"), (itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0f);
+        ItemProperties.register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
             if (livingEntity == null) {
                 return 0.0f;
             }
@@ -87,15 +87,15 @@ public class ItemProperties {
             }
             return (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0f;
         });
-        ItemProperties.register(Items.BOW, new ResourceLocation("pulling"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
-        ItemProperties.register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity) -> BundleItem.getFullnessDisplay(itemStack));
+        ItemProperties.register(Items.BOW, new ResourceLocation("pulling"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
+        ItemProperties.register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
         ItemProperties.register(Items.CLOCK, new ResourceLocation("time"), new ItemPropertyFunction(){
             private double rotation;
             private double rota;
             private long lastUpdateTick;
 
             @Override
-            public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
+            public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
                 Entity entity;
                 Entity entity2 = entity = livingEntity != null ? livingEntity : itemStack.getEntityRepresentation();
                 if (entity == null) {
@@ -129,7 +129,7 @@ public class ItemProperties {
             private final CompassWobble wobbleRandom = new CompassWobble();
 
             @Override
-            public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
+            public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
                 double g;
                 Entity entity;
                 Entity entity2 = entity = livingEntity != null ? livingEntity : itemStack.getEntityRepresentation();
@@ -145,7 +145,7 @@ public class ItemProperties {
                     if (this.wobbleRandom.shouldUpdate(l)) {
                         this.wobbleRandom.update(l, Math.random());
                     }
-                    double d = this.wobbleRandom.rotation + (double)((float)itemStack.hashCode() / 2.14748365E9f);
+                    double d = this.wobbleRandom.rotation + (double)((float)this.hash(i) / 2.14748365E9f);
                     return Mth.positiveModulo((float)d, 1.0f);
                 }
                 boolean bl = livingEntity instanceof Player && ((Player)livingEntity).isLocalPlayer();
@@ -170,6 +170,10 @@ public class ItemProperties {
                     g = 0.5 - (e - 0.25 - f);
                 }
                 return Mth.positiveModulo((float)g, 1.0f);
+            }
+
+            private int hash(int i) {
+                return i * 1327217883;
             }
 
             @Nullable
@@ -198,7 +202,7 @@ public class ItemProperties {
                 return Math.atan2(vec3.z() - entity.getZ(), vec3.x() - entity.getX());
             }
         });
-        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity) -> {
+        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
             if (livingEntity == null) {
                 return 0.0f;
             }
@@ -207,11 +211,11 @@ public class ItemProperties {
             }
             return (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / (float)CrossbowItem.getChargeDuration(itemStack);
         });
-        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("pulling"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack && !CrossbowItem.isCharged(itemStack) ? 1.0f : 0.0f);
-        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("charged"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && CrossbowItem.isCharged(itemStack) ? 1.0f : 0.0f);
-        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("firework"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && CrossbowItem.isCharged(itemStack) && CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
-        ItemProperties.register(Items.ELYTRA, new ResourceLocation("broken"), (itemStack, clientLevel, livingEntity) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0f : 1.0f);
-        ItemProperties.register(Items.FISHING_ROD, new ResourceLocation("cast"), (itemStack, clientLevel, livingEntity) -> {
+        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("pulling"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack && !CrossbowItem.isCharged(itemStack) ? 1.0f : 0.0f);
+        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("charged"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && CrossbowItem.isCharged(itemStack) ? 1.0f : 0.0f);
+        ItemProperties.register(Items.CROSSBOW, new ResourceLocation("firework"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && CrossbowItem.isCharged(itemStack) && CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
+        ItemProperties.register(Items.ELYTRA, new ResourceLocation("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0f : 1.0f);
+        ItemProperties.register(Items.FISHING_ROD, new ResourceLocation("cast"), (itemStack, clientLevel, livingEntity, i) -> {
             boolean bl2;
             if (livingEntity == null) {
                 return 0.0f;
@@ -223,9 +227,8 @@ public class ItemProperties {
             }
             return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).fishing != null ? 1.0f : 0.0f;
         });
-        ItemProperties.register(Items.SHIELD, new ResourceLocation("blocking"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
-        ItemProperties.register(Items.TRIDENT, new ResourceLocation("throwing"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
-        ItemProperties.register(Items.SPYGLASS, new ResourceLocation("scoping"), (itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
+        ItemProperties.register(Items.SHIELD, new ResourceLocation("blocking"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
+        ItemProperties.register(Items.TRIDENT, new ResourceLocation("throwing"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
     }
 
     @Environment(value=EnvType.CLIENT)

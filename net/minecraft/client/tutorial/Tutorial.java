@@ -121,11 +121,11 @@ public class Tutorial {
         return this.minecraft;
     }
 
-    public GameType getGameMode() {
+    public boolean isSurvival() {
         if (this.minecraft.gameMode == null) {
-            return GameType.NOT_SET;
+            return false;
         }
-        return this.minecraft.gameMode.getPlayerMode();
+        return this.minecraft.gameMode.getPlayerMode() == GameType.SURVIVAL;
     }
 
     public static Component key(String string) {

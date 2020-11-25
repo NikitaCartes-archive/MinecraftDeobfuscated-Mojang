@@ -23,7 +23,7 @@ extends RenderLayer<T, DrownedModel<T>> {
 
     public DrownedOuterLayer(RenderLayerParent<T, DrownedModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new DrownedModel(entityModelSet.getLayer(ModelLayers.DROWNED_OUTER_LAYER));
+        this.model = new DrownedModel(entityModelSet.bakeLayer(ModelLayers.DROWNED_OUTER_LAYER));
     }
 
     @Override

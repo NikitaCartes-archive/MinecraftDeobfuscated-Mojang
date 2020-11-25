@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 public class PlayerPredicate {
     public static final PlayerPredicate ANY = new Builder().build();
     private final MinMaxBounds.Ints level;
+    @Nullable
     private final GameType gameType;
     private final Map<Stat<?>, MinMaxBounds.Ints> stats;
     private final Object2BooleanMap<ResourceLocation> recipes;
@@ -55,7 +56,7 @@ public class PlayerPredicate {
         return new AdvancementCriterionsPredicate(object2BooleanMap);
     }
 
-    private PlayerPredicate(MinMaxBounds.Ints ints, GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2) {
+    private PlayerPredicate(MinMaxBounds.Ints ints, @Nullable GameType gameType, Map<Stat<?>, MinMaxBounds.Ints> map, Object2BooleanMap<ResourceLocation> object2BooleanMap, Map<ResourceLocation, AdvancementPredicate> map2) {
         this.level = ints;
         this.gameType = gameType;
         this.stats = map;
@@ -74,7 +75,7 @@ public class PlayerPredicate {
         if (!this.level.matches(serverPlayer.experienceLevel)) {
             return false;
         }
-        if (this.gameType != GameType.NOT_SET && this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
+        if (this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
             return false;
         }
         ServerStatsCounter statsCounter = serverPlayer.getStats();
@@ -107,7 +108,7 @@ public class PlayerPredicate {
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "player");
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
         String string = GsonHelper.getAsString(jsonObject, "gamemode", "");
-        GameType gameType = GameType.byName(string, GameType.NOT_SET);
+        GameType gameType = GameType.byName(string, null);
         HashMap<Stat<?>, MinMaxBounds.Ints> map = Maps.newHashMap();
         JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "stats", null);
         if (jsonArray != null) {
@@ -161,7 +162,7 @@ public class PlayerPredicate {
         }
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("level", this.level.serializeToJson());
-        if (this.gameType != GameType.NOT_SET) {
+        if (this.gameType != null) {
             jsonObject.addProperty("gamemode", this.gameType.getName());
         }
         if (!this.stats.isEmpty()) {
@@ -190,7 +191,8 @@ public class PlayerPredicate {
 
     public static class Builder {
         private MinMaxBounds.Ints level = MinMaxBounds.Ints.ANY;
-        private GameType gameType = GameType.NOT_SET;
+        @Nullable
+        private GameType gameType;
         private final Map<Stat<?>, MinMaxBounds.Ints> stats = Maps.newHashMap();
         private final Object2BooleanMap<ResourceLocation> recipes = new Object2BooleanOpenHashMap<ResourceLocation>();
         private final Map<ResourceLocation, AdvancementPredicate> advancements = Maps.newHashMap();

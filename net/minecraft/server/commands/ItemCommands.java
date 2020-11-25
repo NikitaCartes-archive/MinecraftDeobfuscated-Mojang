@@ -72,12 +72,12 @@ public class ItemCommands {
     private static int modifyEntityItem(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, int i, LootItemFunction lootItemFunction) throws CommandSyntaxException {
         HashMap<Entity, ItemStack> map = Maps.newHashMapWithExpectedSize(collection.size());
         for (Entity entity : collection) {
+            ItemStack itemStack;
             SlotAccess slotAccess;
             if (entity instanceof ServerPlayer) {
                 ((ServerPlayer)entity).inventoryMenu.broadcastChanges();
             }
-            if ((slotAccess = entity.getSlot(i)) == SlotAccess.NULL) continue;
-            ItemStack itemStack = ItemCommands.applyModifier(commandSourceStack, lootItemFunction, slotAccess.get());
+            if ((slotAccess = entity.getSlot(i)) == SlotAccess.NULL || !slotAccess.set(itemStack = ItemCommands.applyModifier(commandSourceStack, lootItemFunction, slotAccess.get().copy()))) continue;
             map.put(entity, itemStack);
             if (!(entity instanceof ServerPlayer)) continue;
             ((ServerPlayer)entity).inventoryMenu.broadcastChanges();

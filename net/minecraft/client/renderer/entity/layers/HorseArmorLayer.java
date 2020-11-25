@@ -27,7 +27,7 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
 
     public HorseArmorLayer(RenderLayerParent<Horse, HorseModel<Horse>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new HorseModel(entityModelSet.getLayer(ModelLayers.HORSE_ARMOR));
+        this.model = new HorseModel(entityModelSet.bakeLayer(ModelLayers.HORSE_ARMOR));
     }
 
     @Override

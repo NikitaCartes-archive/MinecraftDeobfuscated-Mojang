@@ -15,8 +15,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -32,6 +34,10 @@ extends TextureSheetParticle {
         this.setSize(0.01f, 0.01f);
         this.gravity = 0.06f;
         this.type = fluid;
+    }
+
+    protected Fluid getType() {
+        return this.type;
     }
 
     @Override
@@ -157,6 +163,77 @@ extends TextureSheetParticle {
             dripParticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
             dripParticle.gravity = 0.007f;
             dripParticle.setColor(0.92f, 0.782f, 0.72f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class DripstoneLavaFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public DripstoneLavaFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+            dripParticle.setColor(1.0f, 0.2857143f, 0.083333336f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class DripstoneLavaHangProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public DripstoneLavaHangProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CoolingDripHangParticle dripParticle = new CoolingDripHangParticle(clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.FALLING_DRIPSTONE_LAVA);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class DripstoneWaterFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public DripstoneWaterFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+            dripParticle.setColor(0.2f, 0.3f, 1.0f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class DripstoneWaterHangProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public DripstoneWaterHangProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            DripHangParticle dripParticle = new DripHangParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.FALLING_DRIPSTONE_WATER);
+            dripParticle.setColor(0.2f, 0.3f, 1.0f);
             dripParticle.pickSprite(this.sprite);
             return dripParticle;
         }
@@ -335,6 +412,25 @@ extends TextureSheetParticle {
     }
 
     @Environment(value=EnvType.CLIENT)
+    static class DripstoneFallAndLandParticle
+    extends FallAndLandParticle {
+        private DripstoneFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+            super(clientLevel, d, e, f, fluid, particleOptions);
+        }
+
+        @Override
+        protected void postMoveUpdate() {
+            if (this.onGround) {
+                this.remove();
+                this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
+                SoundEvent soundEvent = this.getType() == Fluids.LAVA ? SoundEvents.POINTED_DRIPSTONE_DRIP_LAVA : SoundEvents.POINTED_DRIPSTONE_DRIP_WATER;
+                float f = Mth.randomBetween(this.random, 0.3f, 1.0f);
+                this.level.playLocalSound(this.x, this.y, this.z, soundEvent, SoundSource.BLOCKS, f, 1.0f, false);
+            }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     static class HoneyFallAndLandParticle
     extends FallAndLandParticle {
         private HoneyFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
@@ -346,7 +442,8 @@ extends TextureSheetParticle {
             if (this.onGround) {
                 this.remove();
                 this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
-                this.level.playLocalSound(this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 0.3f + this.level.random.nextFloat() * 2.0f / 3.0f, 1.0f, false);
+                float f = Mth.randomBetween(this.random, 0.3f, 1.0f);
+                this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, f, 1.0f, false);
             }
         }
     }

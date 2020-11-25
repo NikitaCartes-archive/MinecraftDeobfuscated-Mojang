@@ -19,7 +19,7 @@ extends MobRenderer<Llama, LlamaModel<Llama>> {
     private static final ResourceLocation[] LLAMA_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/llama/creamy.png"), new ResourceLocation("textures/entity/llama/white.png"), new ResourceLocation("textures/entity/llama/brown.png"), new ResourceLocation("textures/entity/llama/gray.png")};
 
     public LlamaRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
-        super(context, new LlamaModel(context.getLayer(modelLayerLocation)), 0.7f);
+        super(context, new LlamaModel(context.bakeLayer(modelLayerLocation)), 0.7f);
         this.addLayer(new LlamaDecorLayer(this, context.getModelSet()));
     }
 

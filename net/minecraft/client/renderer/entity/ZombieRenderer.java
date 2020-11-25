@@ -20,7 +20,7 @@ extends AbstractZombieRenderer<Zombie, ZombieModel<Zombie>> {
     }
 
     public ZombieRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation, ModelLayerLocation modelLayerLocation2, ModelLayerLocation modelLayerLocation3) {
-        super(context, new ZombieModel(context.getLayer(modelLayerLocation)), new ZombieModel(context.getLayer(modelLayerLocation2)), new ZombieModel(context.getLayer(modelLayerLocation3)));
+        super(context, new ZombieModel(context.bakeLayer(modelLayerLocation)), new ZombieModel(context.bakeLayer(modelLayerLocation2)), new ZombieModel(context.bakeLayer(modelLayerLocation3)));
     }
 }
 

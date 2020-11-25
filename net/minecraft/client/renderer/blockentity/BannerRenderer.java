@@ -41,7 +41,7 @@ implements BlockEntityRenderer<BannerBlockEntity> {
     private final ModelPart bar;
 
     public BannerRenderer(BlockEntityRendererProvider.Context context) {
-        ModelPart modelPart = context.getLayer(ModelLayers.BANNER);
+        ModelPart modelPart = context.bakeLayer(ModelLayers.BANNER);
         this.flag = modelPart.getChild("flag");
         this.pole = modelPart.getChild("pole");
         this.bar = modelPart.getChild("bar");

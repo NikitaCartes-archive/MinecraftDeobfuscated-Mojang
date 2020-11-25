@@ -28,7 +28,7 @@ implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
     private final ShulkerModel<?> model;
 
     public ShulkerBoxRenderer(BlockEntityRendererProvider.Context context) {
-        this.model = new ShulkerModel(context.getLayer(ModelLayers.SHULKER));
+        this.model = new ShulkerModel(context.bakeLayer(ModelLayers.SHULKER));
     }
 
     @Override

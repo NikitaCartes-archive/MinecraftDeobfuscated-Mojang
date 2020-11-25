@@ -48,12 +48,12 @@ public class ItemOverrides {
     }
 
     @Nullable
-    public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
+    public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
         if (!this.overrides.isEmpty()) {
-            for (int i = 0; i < this.overrides.size(); ++i) {
-                ItemOverride itemOverride = this.overrides.get(i);
-                if (!itemOverride.test(itemStack, clientLevel, livingEntity)) continue;
-                BakedModel bakedModel2 = this.overrideModels.get(i);
+            for (int j = 0; j < this.overrides.size(); ++j) {
+                ItemOverride itemOverride = this.overrides.get(j);
+                if (!itemOverride.test(itemStack, clientLevel, livingEntity, i)) continue;
+                BakedModel bakedModel2 = this.overrideModels.get(j);
                 if (bakedModel2 == null) {
                     return bakedModel;
                 }

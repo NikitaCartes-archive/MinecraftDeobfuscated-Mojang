@@ -25,7 +25,7 @@ extends MobRenderer<T, SpiderModel<T>> {
     }
 
     public SpiderRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
-        super(context, new SpiderModel(context.getLayer(modelLayerLocation)), 0.8f);
+        super(context, new SpiderModel(context.bakeLayer(modelLayerLocation)), 0.8f);
         this.addLayer(new SpiderEyesLayer(this));
     }
 

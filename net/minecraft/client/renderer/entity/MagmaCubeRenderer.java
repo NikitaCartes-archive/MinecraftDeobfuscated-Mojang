@@ -21,7 +21,7 @@ extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     private static final ResourceLocation MAGMACUBE_LOCATION = new ResourceLocation("textures/entity/slime/magmacube.png");
 
     public MagmaCubeRenderer(EntityRendererProvider.Context context) {
-        super(context, new LavaSlimeModel(context.getLayer(ModelLayers.MAGMA_CUBE)), 0.25f);
+        super(context, new LavaSlimeModel(context.bakeLayer(ModelLayers.MAGMA_CUBE)), 0.25f);
     }
 
     @Override

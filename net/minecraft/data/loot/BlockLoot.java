@@ -677,6 +677,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB);
         this.dropSelf(Blocks.WEATHERED_CUT_COPPER_SLAB);
         this.dropSelf(Blocks.LIGHTNING_ROD);
+        this.dropSelf(Blocks.POINTED_DRIPSTONE);
+        this.dropSelf(Blocks.DRIPSTONE_BLOCK);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);

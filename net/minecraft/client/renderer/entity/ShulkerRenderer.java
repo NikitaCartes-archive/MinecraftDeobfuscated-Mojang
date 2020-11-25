@@ -26,7 +26,7 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION.stream().map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png")).toArray(ResourceLocation[]::new);
 
     public ShulkerRenderer(EntityRendererProvider.Context context) {
-        super(context, new ShulkerModel(context.getLayer(ModelLayers.SHULKER)), 0.0f);
+        super(context, new ShulkerModel(context.bakeLayer(ModelLayers.SHULKER)), 0.0f);
         this.addLayer(new ShulkerHeadLayer(this));
     }
 

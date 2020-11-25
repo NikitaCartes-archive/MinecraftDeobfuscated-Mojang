@@ -27,7 +27,7 @@ extends RenderLayer<T, PlayerModel<T>> {
 
     public ParrotOnShoulderLayer(RenderLayerParent<T, PlayerModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new ParrotModel(entityModelSet.getLayer(ModelLayers.PARROT));
+        this.model = new ParrotModel(entityModelSet.bakeLayer(ModelLayers.PARROT));
     }
 
     @Override

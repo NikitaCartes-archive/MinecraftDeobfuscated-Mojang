@@ -73,7 +73,7 @@ public class Slot {
     }
 
     public int getMaxStackSize(ItemStack itemStack) {
-        return this.getMaxStackSize();
+        return Math.min(this.getMaxStackSize(), itemStack.getMaxStackSize());
     }
 
     @Nullable
@@ -93,6 +93,49 @@ public class Slot {
     @Environment(value=EnvType.CLIENT)
     public boolean isActive() {
         return true;
+    }
+
+    public ItemStack safeTake(int i, int j, Player player) {
+        if (!this.mayPickup(player)) {
+            return ItemStack.EMPTY;
+        }
+        if (!this.allowModification(player) && j < this.getItem().getCount()) {
+            return ItemStack.EMPTY;
+        }
+        if (!this.allowModification(player)) {
+            i = this.getItem().getCount();
+        }
+        i = Math.min(i, j);
+        ItemStack itemStack = this.remove(i);
+        if (this.getItem().isEmpty()) {
+            this.set(ItemStack.EMPTY);
+        }
+        this.onTake(player, itemStack);
+        return itemStack;
+    }
+
+    public ItemStack safeInsert(ItemStack itemStack) {
+        return this.safeInsert(itemStack, itemStack.getCount());
+    }
+
+    public ItemStack safeInsert(ItemStack itemStack, int i) {
+        if (itemStack.isEmpty() || !this.mayPlace(itemStack)) {
+            return itemStack;
+        }
+        ItemStack itemStack2 = this.getItem();
+        int j = Math.min(Math.min(i, itemStack.getCount()), this.getMaxStackSize(itemStack) - itemStack2.getCount());
+        if (itemStack2.isEmpty()) {
+            this.set(itemStack.split(j));
+        } else if (ItemStack.isSameItemSameTags(itemStack2, itemStack)) {
+            itemStack.shrink(j);
+            itemStack2.grow(j);
+            this.set(itemStack2);
+        }
+        return itemStack;
+    }
+
+    public boolean allowModification(Player player) {
+        return this.mayPickup(player) && this.mayPlace(this.getItem());
     }
 }
 

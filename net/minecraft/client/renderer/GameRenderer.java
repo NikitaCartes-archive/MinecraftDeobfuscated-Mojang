@@ -386,8 +386,12 @@ AutoCloseable {
             poseStack.translate(this.zoomX, -this.zoomY, 0.0);
             poseStack.scale(this.zoom, this.zoom, 1.0f);
         }
-        poseStack.last().pose().multiply(Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * 4.0f));
+        poseStack.last().pose().multiply(Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.getDepthFar()));
         return poseStack.last().pose();
+    }
+
+    public float getDepthFar() {
+        return this.renderDistance * 4.0f;
     }
 
     public static float getNightVisionScale(LivingEntity livingEntity, float f) {
@@ -619,7 +623,7 @@ AutoCloseable {
         poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
-        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, poseStack, bufferSource);
+        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, 0);
         poseStack.popPose();
         bufferSource.endBatch();
         RenderSystem.popAttributes();

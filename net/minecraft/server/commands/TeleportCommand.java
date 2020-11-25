@@ -130,7 +130,7 @@ public class TeleportCommand {
                     entity.restoreFrom(entity2);
                     entity.moveTo(d, e, f, i, k);
                     entity.setYHeadRot(i);
-                    serverLevel.addAndForceLoad(entity);
+                    serverLevel.addDuringTeleport(entity);
                     entity2.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
                 } else {
                     return;

@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -55,7 +56,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
         int l;
         int k;
         if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
-            k = bl ? RuinedPortalFeature.randomIntInclusive(random, 32, 100) : (random.nextFloat() < 0.5f ? RuinedPortalFeature.randomIntInclusive(random, 27, 29) : RuinedPortalFeature.randomIntInclusive(random, 29, 100));
+            k = bl ? Mth.randomBetweenInclusive(random, 32, 100) : (random.nextFloat() < 0.5f ? Mth.randomBetweenInclusive(random, 27, 29) : Mth.randomBetweenInclusive(random, 29, 100));
         } else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
             l = i - j;
             k = RuinedPortalFeature.getRandomWithinInterval(random, 70, l);
@@ -63,7 +64,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
             l = i - j;
             k = RuinedPortalFeature.getRandomWithinInterval(random, 15, l);
         } else {
-            k = verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED ? i - j + RuinedPortalFeature.randomIntInclusive(random, 2, 8) : i;
+            k = verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED ? i - j + Mth.randomBetweenInclusive(random, 2, 8) : i;
         }
         ImmutableList<BlockPos> list = ImmutableList.of(new BlockPos(boundingBox.x0, 0, boundingBox.z0), new BlockPos(boundingBox.x1, 0, boundingBox.z0), new BlockPos(boundingBox.x0, 0, boundingBox.z1), new BlockPos(boundingBox.x1, 0, boundingBox.z1));
         List list2 = list.stream().map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ())).collect(Collectors.toList());
@@ -81,13 +82,9 @@ extends StructureFeature<RuinedPortalConfiguration> {
         return m;
     }
 
-    private static int randomIntInclusive(Random random, int i, int j) {
-        return random.nextInt(j - i + 1) + i;
-    }
-
     private static int getRandomWithinInterval(Random random, int i, int j) {
         if (i < j) {
-            return RuinedPortalFeature.randomIntInclusive(random, i, j);
+            return Mth.randomBetweenInclusive(random, i, j);
         }
         return j;
     }

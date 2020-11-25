@@ -32,7 +32,7 @@ implements BlockEntityRenderer<BellBlockEntity> {
     private final ModelPart bellBody;
 
     public BellRenderer(BlockEntityRendererProvider.Context context) {
-        ModelPart modelPart = context.getLayer(ModelLayers.BELL);
+        ModelPart modelPart = context.bakeLayer(ModelLayers.BELL);
         this.bellBody = modelPart.getChild("bell_body");
     }
 

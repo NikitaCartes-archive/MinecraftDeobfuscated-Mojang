@@ -22,7 +22,7 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
     private static final ResourceLocation VILLAGER_BASE_SKIN = new ResourceLocation("textures/entity/villager/villager.png");
 
     public VillagerRenderer(EntityRendererProvider.Context context) {
-        super(context, new VillagerModel(context.getLayer(ModelLayers.VILLAGER)), 0.5f);
+        super(context, new VillagerModel(context.bakeLayer(ModelLayers.VILLAGER)), 0.5f);
         this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this, context.getModelSet()));
         this.addLayer(new VillagerProfessionLayer<Villager, VillagerModel<Villager>>(this, context.getResourceManager(), "villager"));
         this.addLayer(new CrossedArmsItemLayer<Villager, VillagerModel<Villager>>(this));

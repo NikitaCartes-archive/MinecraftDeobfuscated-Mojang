@@ -4,7 +4,6 @@
 package net.minecraft.client.model.geom;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,7 +80,6 @@ import net.minecraft.client.model.ZombieVillagerModel;
 import net.minecraft.client.model.dragon.DragonHeadModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
@@ -103,7 +101,7 @@ public class LayerDefinitions {
     private static final CubeDeformation OUTER_ARMOR_DEFORMATION = new CubeDeformation(1.0f);
     private static final CubeDeformation INNER_ARMOR_DEFORMATION = new CubeDeformation(0.5f);
 
-    public static Map<ModelLayerLocation, ModelPart> createRoots() {
+    public static Map<ModelLayerLocation, LayerDefinition> createRoots() {
         ImmutableMap.Builder<ModelLayerLocation, LayerDefinition> builder = ImmutableMap.builder();
         LayerDefinition layerDefinition = LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0.0f), 64, 64);
         LayerDefinition layerDefinition2 = LayerDefinition.create(HumanoidModel.createMesh(OUTER_ARMOR_DEFORMATION, 0.0f), 64, 32);
@@ -281,12 +279,12 @@ public class LayerDefinitions {
         }
         LayerDefinition layerDefinition20 = SignRenderer.createSignLayer();
         WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition20));
-        ImmutableMap immutableMap = builder.build();
+        ImmutableMap<ModelLayerLocation, LayerDefinition> immutableMap = builder.build();
         List list = ModelLayers.getKnownLocations().filter(modelLayerLocation -> !immutableMap.containsKey(modelLayerLocation)).collect(Collectors.toList());
         if (!list.isEmpty()) {
             throw new IllegalStateException("Missing layer definitions: " + list);
         }
-        return Maps.transformValues(immutableMap, LayerDefinition::bakeRoot);
+        return immutableMap;
     }
 }
 

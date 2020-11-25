@@ -82,8 +82,8 @@ implements ResourceManagerReloadListener {
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-        this.shieldModel = new ShieldModel(this.entityModelSet.getLayer(ModelLayers.SHIELD));
-        this.tridentModel = new TridentModel(this.entityModelSet.getLayer(ModelLayers.TRIDENT));
+        this.shieldModel = new ShieldModel(this.entityModelSet.bakeLayer(ModelLayers.SHIELD));
+        this.tridentModel = new TridentModel(this.entityModelSet.bakeLayer(ModelLayers.TRIDENT));
         this.skullModels = SkullBlockRenderer.createSkullRenderers(this.entityModelSet);
     }
 

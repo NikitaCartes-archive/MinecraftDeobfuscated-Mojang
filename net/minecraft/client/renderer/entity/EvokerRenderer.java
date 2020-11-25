@@ -21,7 +21,7 @@ extends IllagerRenderer<T> {
     private static final ResourceLocation EVOKER_ILLAGER = new ResourceLocation("textures/entity/illager/evoker.png");
 
     public EvokerRenderer(EntityRendererProvider.Context context) {
-        super(context, new IllagerModel(context.getLayer(ModelLayers.EVOKER)), 0.5f);
+        super(context, new IllagerModel(context.bakeLayer(ModelLayers.EVOKER)), 0.5f);
         this.addLayer(new ItemInHandLayer<T, IllagerModel<T>>(this){
 
             @Override

@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 @Environment(value=EnvType.CLIENT)
 public class SignRenderer
 implements BlockEntityRenderer<SignBlockEntity> {
-    private final Map<WoodType, SignModel> signModels = WoodType.values().collect(ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignModel(context.getLayer(ModelLayers.createSignModelName(woodType)))));
+    private final Map<WoodType, SignModel> signModels = WoodType.values().collect(ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignModel(context.bakeLayer(ModelLayers.createSignModelName(woodType)))));
     private final Font font;
 
     public SignRenderer(BlockEntityRendererProvider.Context context) {
@@ -102,7 +102,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
     }
 
     public static SignModel createSignModel(EntityModelSet entityModelSet, WoodType woodType) {
-        return new SignModel(entityModelSet.getLayer(ModelLayers.createSignModelName(woodType)));
+        return new SignModel(entityModelSet.bakeLayer(ModelLayers.createSignModelName(woodType)));
     }
 
     public static LayerDefinition createSignLayer() {

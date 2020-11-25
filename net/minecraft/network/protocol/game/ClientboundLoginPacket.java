@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientboundLoginPacket
 implements Packet<ClientGamePacketListener> {
@@ -24,6 +25,7 @@ implements Packet<ClientGamePacketListener> {
     private long seed;
     private boolean hardcore;
     private GameType gameType;
+    @Nullable
     private GameType previousGameType;
     private Set<ResourceKey<Level>> levels;
     private RegistryAccess.RegistryHolder registryHolder;
@@ -39,7 +41,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundLoginPacket() {
     }
 
-    public ClientboundLoginPacket(int i, GameType gameType, GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, DimensionType dimensionType, ResourceKey<Level> resourceKey, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+    public ClientboundLoginPacket(int i, GameType gameType, @Nullable GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, DimensionType dimensionType, ResourceKey<Level> resourceKey, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
         this.playerId = i;
         this.levels = set;
         this.registryHolder = registryHolder;
@@ -62,7 +64,7 @@ implements Packet<ClientGamePacketListener> {
         this.playerId = friendlyByteBuf.readInt();
         this.hardcore = friendlyByteBuf.readBoolean();
         this.gameType = GameType.byId(friendlyByteBuf.readByte());
-        this.previousGameType = GameType.byId(friendlyByteBuf.readByte());
+        this.previousGameType = GameType.byNullableId(friendlyByteBuf.readByte());
         int i = friendlyByteBuf.readVarInt();
         this.levels = Sets.newHashSet();
         for (int j = 0; j < i; ++j) {
@@ -85,7 +87,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeInt(this.playerId);
         friendlyByteBuf.writeBoolean(this.hardcore);
         friendlyByteBuf.writeByte(this.gameType.getId());
-        friendlyByteBuf.writeByte(this.previousGameType.getId());
+        friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
         friendlyByteBuf.writeVarInt(this.levels.size());
         for (ResourceKey<Level> resourceKey : this.levels) {
             friendlyByteBuf.writeResourceLocation(resourceKey.location());

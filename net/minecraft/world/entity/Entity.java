@@ -139,7 +139,6 @@ CommandSource {
     protected int boardingCooldown;
     @Nullable
     private Entity vehicle;
-    public boolean forcedLoading;
     public Level level;
     public double xo;
     public double yo;
@@ -828,7 +827,7 @@ CommandSource {
             this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
             this.lastCrystalSoundPlayTick = this.tickCount;
         }
-        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(BlockTags.SNOW_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
+        SoundType soundType = (blockState2 = this.level.getBlockState(blockPos.above())).is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState2.getSoundType() : blockState.getSoundType();
         this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15f, soundType.getPitch());
     }
 
@@ -1058,10 +1057,6 @@ CommandSource {
             return this.level.getBrightness(mutableBlockPos);
         }
         return 0.0f;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
     }
 
     public void absMoveTo(double d, double e, double f, float g, float h) {
@@ -2056,7 +2051,7 @@ CommandSource {
             ((Entity)entity).restoreFrom(this);
             ((Entity)entity).moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, ((Entity)entity).xRot);
             ((Entity)entity).setDeltaMovement(portalInfo.speed);
-            serverLevel.addAndForceLoad((Entity)entity);
+            serverLevel.addDuringTeleport((Entity)entity);
             if (serverLevel.dimension() == Level.END) {
                 ServerLevel.makeObsidianPlatform(serverLevel);
             }

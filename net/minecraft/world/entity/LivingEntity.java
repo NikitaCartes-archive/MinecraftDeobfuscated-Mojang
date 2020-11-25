@@ -55,6 +55,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -210,6 +211,7 @@ extends Entity {
     protected int fallFlyTicks;
     private BlockPos lastPos;
     private Optional<BlockPos> lastClimbablePos = Optional.empty();
+    @Nullable
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
     protected int autoSpinAttackTicks;
@@ -1428,22 +1430,19 @@ extends Entity {
             case 57: {
                 DamageSource damageSource;
                 SoundEvent soundEvent;
-                boolean bl = b == 33;
-                boolean bl2 = b == 36;
-                boolean bl3 = b == 37;
-                boolean bl4 = b == 44;
-                boolean bl5 = b == 57;
                 this.animationSpeed = 1.5f;
                 this.invulnerableTime = 20;
                 this.hurtTime = this.hurtDuration = 10;
                 this.hurtDir = 0.0f;
-                if (bl) {
+                if (b == 33) {
                     this.playSound(SoundEvents.THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 }
-                if ((soundEvent = this.getHurtSound(damageSource = bl3 ? DamageSource.ON_FIRE : (bl2 ? DamageSource.DROWN : (bl4 ? DamageSource.SWEET_BERRY_BUSH : (bl5 ? DamageSource.FREEZE : DamageSource.GENERIC))))) != null) {
+                if ((soundEvent = this.getHurtSound(damageSource = b == 37 ? DamageSource.ON_FIRE : (b == 36 ? DamageSource.DROWN : (b == 44 ? DamageSource.SWEET_BERRY_BUSH : (b == 57 ? DamageSource.FREEZE : DamageSource.GENERIC))))) != null) {
                     this.playSound(soundEvent, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 }
                 this.hurt(DamageSource.GENERIC, 0.0f);
+                this.lastDamageSource = damageSource;
+                this.lastDamageStamp = this.level.getGameTime();
                 break;
             }
             case 3: {
@@ -2896,7 +2895,10 @@ extends Entity {
 
     @Override
     public boolean canFreeze() {
-        return !this.isSpectator();
+        if (this.isSpectator()) {
+            return false;
+        }
+        return !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
     }
 }
 

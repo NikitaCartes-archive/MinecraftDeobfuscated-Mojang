@@ -163,7 +163,12 @@ HeadedModel {
             this.leftArm.y = 2.0f;
             this.rightArm.y = 2.0f;
         }
-        AnimationUtils.bobArms(this.rightArm, this.leftArm, h);
+        if (this.rightArmPose != ArmPose.SPYGLASS) {
+            AnimationUtils.bobModelPart(this.rightArm, h, 1.0f);
+        }
+        if (this.leftArmPose != ArmPose.SPYGLASS) {
+            AnimationUtils.bobModelPart(this.leftArm, h, -1.0f);
+        }
         if (this.swimAmount > 0.0f) {
             float o;
             float n;
@@ -171,29 +176,31 @@ HeadedModel {
             HumanoidArm humanoidArm = this.getAttackArm(livingEntity);
             float m = humanoidArm == HumanoidArm.RIGHT && this.attackTime > 0.0f ? 0.0f : this.swimAmount;
             float f2 = n = humanoidArm == HumanoidArm.LEFT && this.attackTime > 0.0f ? 0.0f : this.swimAmount;
-            if (l < 14.0f) {
-                this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 0.0f);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 0.0f);
-                this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI - 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
-            } else if (l >= 14.0f && l < 22.0f) {
-                o = (l - 14.0f) / 8.0f;
-                this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 1.5707964f * o);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f * o);
-                this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, 5.012389f - 1.8707964f * o);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963f + 1.8707964f * o);
-            } else if (l >= 22.0f && l < 26.0f) {
-                o = (l - 22.0f) / 4.0f;
-                this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 1.5707964f - 1.5707964f * o);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f - 1.5707964f * o);
-                this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float)Math.PI);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI);
+            if (!((LivingEntity)livingEntity).isUsingItem()) {
+                if (l < 14.0f) {
+                    this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 0.0f);
+                    this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 0.0f);
+                    this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
+                    this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
+                    this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
+                    this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI - 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
+                } else if (l >= 14.0f && l < 22.0f) {
+                    o = (l - 14.0f) / 8.0f;
+                    this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 1.5707964f * o);
+                    this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f * o);
+                    this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
+                    this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
+                    this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, 5.012389f - 1.8707964f * o);
+                    this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963f + 1.8707964f * o);
+                } else if (l >= 22.0f && l < 26.0f) {
+                    o = (l - 22.0f) / 4.0f;
+                    this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 1.5707964f - 1.5707964f * o);
+                    this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f - 1.5707964f * o);
+                    this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float)Math.PI);
+                    this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
+                    this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float)Math.PI);
+                    this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI);
+                }
             }
             o = 0.3f;
             float p = 0.33333334f;
@@ -240,8 +247,8 @@ HeadedModel {
                 break;
             }
             case SPYGLASS: {
-                this.rightArm.xRot = Mth.clamp(this.head.xRot + AnimationUtils.getSpyglassArmXRot(this.rightArm), -2.4f, 3.3f);
-                this.rightArm.yRot = Mth.clamp(this.head.yRot + -0.7853982f, -1.1f, 0.0f);
+                this.rightArm.xRot = Mth.clamp(this.head.xRot - 1.9198622f - (((Entity)livingEntity).isCrouching() ? 0.2617994f : 0.0f), -2.4f, 3.3f);
+                this.rightArm.yRot = this.head.yRot - 0.2617994f;
             }
         }
     }
@@ -283,8 +290,8 @@ HeadedModel {
                 break;
             }
             case SPYGLASS: {
-                this.leftArm.xRot = AnimationUtils.getSpyglassArmXRot(this.leftArm);
-                this.leftArm.yRot = 0.7853982f;
+                this.leftArm.xRot = Mth.clamp(this.head.xRot - 1.9198622f - (((Entity)livingEntity).isCrouching() ? 0.2617994f : 0.0f), -2.4f, 3.3f);
+                this.leftArm.yRot = this.head.yRot + 0.2617994f;
             }
         }
     }

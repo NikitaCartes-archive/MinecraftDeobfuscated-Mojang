@@ -27,7 +27,7 @@ extends EntityRenderer<ThrownTrident> {
 
     public ThrownTridentRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new TridentModel(context.getLayer(ModelLayers.TRIDENT));
+        this.model = new TridentModel(context.bakeLayer(ModelLayers.TRIDENT));
     }
 
     @Override

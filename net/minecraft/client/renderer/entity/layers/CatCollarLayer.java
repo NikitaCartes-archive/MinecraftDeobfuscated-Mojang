@@ -23,7 +23,7 @@ extends RenderLayer<Cat, CatModel<Cat>> {
 
     public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.catModel = new CatModel(entityModelSet.getLayer(ModelLayers.CAT_COLLAR));
+        this.catModel = new CatModel(entityModelSet.bakeLayer(ModelLayers.CAT_COLLAR));
     }
 
     @Override

@@ -19,7 +19,7 @@ extends IllagerRenderer<Pillager> {
     private static final ResourceLocation PILLAGER = new ResourceLocation("textures/entity/illager/pillager.png");
 
     public PillagerRenderer(EntityRendererProvider.Context context) {
-        super(context, new IllagerModel(context.getLayer(ModelLayers.PILLAGER)), 0.5f);
+        super(context, new IllagerModel(context.bakeLayer(ModelLayers.PILLAGER)), 0.5f);
         this.addLayer(new ItemInHandLayer<Pillager, IllagerModel<Pillager>>(this));
     }
 

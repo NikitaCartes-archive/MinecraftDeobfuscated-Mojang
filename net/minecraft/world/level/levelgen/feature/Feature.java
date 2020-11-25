@@ -8,6 +8,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
@@ -175,7 +176,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public abstract boolean place(WorldGenLevel var1, ChunkGenerator var2, Random var3, BlockPos var4, FC var5);
 
     protected static boolean isStone(BlockState blockState) {
-        return blockState.is(Blocks.STONE) || blockState.is(Blocks.GRANITE) || blockState.is(Blocks.DIORITE) || blockState.is(Blocks.ANDESITE);
+        return blockState.is(BlockTags.BASE_STONE_OVERWORLD);
     }
 
     public static boolean isDirt(BlockState blockState) {

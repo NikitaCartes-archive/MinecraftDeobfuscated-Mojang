@@ -18,7 +18,7 @@ extends MobRenderer<Zoglin, HoglinModel<Zoglin>> {
     private static final ResourceLocation ZOGLIN_LOCATION = new ResourceLocation("textures/entity/hoglin/zoglin.png");
 
     public ZoglinRenderer(EntityRendererProvider.Context context) {
-        super(context, new HoglinModel(context.getLayer(ModelLayers.ZOGLIN)), 0.7f);
+        super(context, new HoglinModel(context.bakeLayer(ModelLayers.ZOGLIN)), 0.7f);
     }
 
     @Override

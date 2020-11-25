@@ -25,7 +25,7 @@ extends EntityRenderer<EvokerFangs> {
 
     public EvokerFangsRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.model = new EvokerFangsModel(context.getLayer(ModelLayers.EVOKER_FANGS));
+        this.model = new EvokerFangsModel(context.bakeLayer(ModelLayers.EVOKER_FANGS));
     }
 
     @Override

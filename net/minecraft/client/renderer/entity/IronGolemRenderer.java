@@ -22,7 +22,7 @@ extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
     private static final ResourceLocation GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem/iron_golem.png");
 
     public IronGolemRenderer(EntityRendererProvider.Context context) {
-        super(context, new IronGolemModel(context.getLayer(ModelLayers.IRON_GOLEM)), 0.7f);
+        super(context, new IronGolemModel(context.bakeLayer(ModelLayers.IRON_GOLEM)), 0.7f);
         this.addLayer(new IronGolemCrackinessLayer(this));
         this.addLayer(new IronGolemFlowerLayer(this));
     }

@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
@@ -25,8 +24,8 @@ extends ServerPlayerGameMode {
     private int demoEndedReminder;
     private int gameModeTicks;
 
-    public DemoMode(ServerLevel serverLevel) {
-        super(serverLevel);
+    public DemoMode(ServerPlayer serverPlayer) {
+        super(serverPlayer);
     }
 
     @Override

@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 public interface Decoratable<R> {
     public R decorated(ConfiguredDecorator<?> var1);
 
-    default public R chance(int i) {
+    default public R rarity(int i) {
         return this.decorated(FeatureDecorator.CHANCE.configured(new ChanceDecoratorConfiguration(i)));
     }
 

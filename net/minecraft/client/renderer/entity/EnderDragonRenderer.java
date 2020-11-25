@@ -47,7 +47,7 @@ extends EntityRenderer<EnderDragon> {
     public EnderDragonRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.5f;
-        this.model = new DragonModel(context.getLayer(ModelLayers.ENDER_DRAGON));
+        this.model = new DragonModel(context.bakeLayer(ModelLayers.ENDER_DRAGON));
     }
 
     @Override

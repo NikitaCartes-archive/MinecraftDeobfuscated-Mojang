@@ -3,13 +3,17 @@
  */
 package net.minecraft.world.item;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -17,11 +21,13 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 public class BundleItem
@@ -38,32 +44,40 @@ extends Item {
     }
 
     @Override
-    public boolean overrideStackedOnOther(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
-        if (clickAction == ClickAction.SECONDARY) {
-            BundleItem.add(itemStack, itemStack2);
-            return true;
+    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Inventory inventory) {
+        if (clickAction != ClickAction.SECONDARY) {
+            return false;
         }
-        return super.overrideStackedOnOther(itemStack, itemStack2, clickAction, inventory);
+        ItemStack itemStack22 = slot.getItem();
+        if (itemStack22.isEmpty()) {
+            BundleItem.removeOne(itemStack).ifPresent(itemStack2 -> BundleItem.add(itemStack, slot.safeInsert((ItemStack)itemStack2)));
+        } else if (itemStack22.getItem().canFitInsideContainerItems()) {
+            int i = (64 - BundleItem.getContentWeight(itemStack)) / BundleItem.getWeight(itemStack22);
+            BundleItem.add(itemStack, slot.safeTake(itemStack22.getCount(), i, inventory.player));
+        }
+        return true;
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction, Inventory inventory) {
-        if (clickAction == ClickAction.SECONDARY) {
-            if (itemStack2.isEmpty()) {
-                BundleItem.removeAll(itemStack, inventory);
-            } else {
-                BundleItem.add(itemStack, itemStack2);
-            }
-            return true;
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Inventory inventory) {
+        if (clickAction != ClickAction.SECONDARY || !slot.allowModification(inventory.player)) {
+            return false;
         }
-        return super.overrideOtherStackedOnMe(itemStack, itemStack2, clickAction, inventory);
+        if (itemStack2.isEmpty()) {
+            BundleItem.removeOne(itemStack).ifPresent(inventory::setCarried);
+        } else {
+            itemStack2.shrink(BundleItem.add(itemStack, itemStack2));
+        }
+        return true;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        BundleItem.removeAll(itemStack, player.getInventory());
-        return InteractionResultHolder.success(itemStack);
+        if (BundleItem.dropContents(itemStack, player)) {
+            return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+        }
+        return InteractionResultHolder.fail(itemStack);
     }
 
     @Override
@@ -85,9 +99,9 @@ extends Item {
         return BAR_COLOR;
     }
 
-    private static void add(ItemStack itemStack, ItemStack itemStack2) {
-        if (!itemStack2.getItem().canFitInsideContainerItems()) {
-            return;
+    private static int add(ItemStack itemStack, ItemStack itemStack2) {
+        if (itemStack2.isEmpty() || !itemStack2.getItem().canFitInsideContainerItems()) {
+            return 0;
         }
         CompoundTag compoundTag = itemStack.getOrCreateTag();
         if (!compoundTag.contains("Items")) {
@@ -97,7 +111,7 @@ extends Item {
         int j = BundleItem.getWeight(itemStack2);
         int k = Math.min(itemStack2.getCount(), (64 - i) / j);
         if (k == 0) {
-            return;
+            return 0;
         }
         ListTag listTag = compoundTag.getList("Items", 10);
         Optional<CompoundTag> optional = BundleItem.getMatchingItem(itemStack2, listTag);
@@ -106,14 +120,16 @@ extends Item {
             ItemStack itemStack3 = ItemStack.of(compoundTag2);
             itemStack3.grow(k);
             itemStack3.save(compoundTag2);
+            listTag.remove(compoundTag2);
+            listTag.add(0, compoundTag2);
         } else {
             ItemStack itemStack4 = itemStack2.copy();
             itemStack4.setCount(k);
             CompoundTag compoundTag3 = new CompoundTag();
             itemStack4.save(compoundTag3);
-            listTag.add(compoundTag3);
+            listTag.add(0, compoundTag3);
         }
-        itemStack2.shrink(k);
+        return k;
     }
 
     private static Optional<CompoundTag> getMatchingItem(ItemStack itemStack, ListTag listTag) {
@@ -134,13 +150,37 @@ extends Item {
         return BundleItem.getContents(itemStack2).mapToInt(itemStack -> BundleItem.getWeight(itemStack) * itemStack.getCount()).sum();
     }
 
-    private static void removeAll(ItemStack itemStack2, Inventory inventory) {
-        BundleItem.getContents(itemStack2).forEach(itemStack -> {
-            if (inventory.player instanceof ServerPlayer || inventory.player.isCreative()) {
-                inventory.placeItemBackInInventory((ItemStack)itemStack);
+    private static Optional<ItemStack> removeOne(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getOrCreateTag();
+        if (!compoundTag.contains("Items")) {
+            return Optional.empty();
+        }
+        ListTag listTag = compoundTag.getList("Items", 10);
+        if (listTag.isEmpty()) {
+            return Optional.empty();
+        }
+        boolean i = false;
+        CompoundTag compoundTag2 = listTag.getCompound(0);
+        ItemStack itemStack2 = ItemStack.of(compoundTag2);
+        listTag.remove(0);
+        return Optional.of(itemStack2);
+    }
+
+    private static boolean dropContents(ItemStack itemStack, Player player) {
+        CompoundTag compoundTag = itemStack.getOrCreateTag();
+        if (!compoundTag.contains("Items")) {
+            return false;
+        }
+        if (player instanceof ServerPlayer) {
+            ListTag listTag = compoundTag.getList("Items", 10);
+            for (int i = 0; i < listTag.size(); ++i) {
+                CompoundTag compoundTag2 = listTag.getCompound(i);
+                ItemStack itemStack2 = ItemStack.of(compoundTag2);
+                player.drop(itemStack2, true);
             }
-        });
-        itemStack2.removeTagKey("Items");
+        }
+        itemStack.removeTagKey("Items");
+        return true;
     }
 
     private static Stream<ItemStack> getContents(ItemStack itemStack) {
@@ -149,7 +189,7 @@ extends Item {
             return Stream.empty();
         }
         ListTag listTag = compoundTag.getList("Items", 10);
-        return listTag.stream().map(tag -> ItemStack.of((CompoundTag)tag));
+        return listTag.stream().map(CompoundTag.class::cast).map(ItemStack::of);
     }
 
     @Override
@@ -158,6 +198,14 @@ extends Item {
         NonNullList<ItemStack> nonNullList = NonNullList.create();
         BundleItem.getContents(itemStack).forEach(nonNullList::add);
         return Optional.of(new BundleTooltip(nonNullList, BundleItem.getContentWeight(itemStack) < 64));
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void appendHoverText(ItemStack itemStack, Level level, List<Component> list, TooltipFlag tooltipFlag) {
+        if (tooltipFlag.isAdvanced()) {
+            list.add(new TranslatableComponent("item.minecraft.bundle.fullness", BundleItem.getContentWeight(itemStack), 64).withStyle(ChatFormatting.GRAY));
+        }
     }
 }
 

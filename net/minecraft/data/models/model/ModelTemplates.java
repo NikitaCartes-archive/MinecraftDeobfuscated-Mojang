@@ -54,6 +54,7 @@ public class ModelTemplates {
     public static final ModelTemplate ORIENTABLE_TRAPDOOR_TOP = ModelTemplates.create("template_orientable_trapdoor_top", "_top", TextureSlot.TEXTURE);
     public static final ModelTemplate ORIENTABLE_TRAPDOOR_BOTTOM = ModelTemplates.create("template_orientable_trapdoor_bottom", "_bottom", TextureSlot.TEXTURE);
     public static final ModelTemplate ORIENTABLE_TRAPDOOR_OPEN = ModelTemplates.create("template_orientable_trapdoor_open", "_open", TextureSlot.TEXTURE);
+    public static final ModelTemplate POINTED_DRIPSTONE = ModelTemplates.create("pointed_dripstone", TextureSlot.CROSS);
     public static final ModelTemplate CROSS = ModelTemplates.create("cross", TextureSlot.CROSS);
     public static final ModelTemplate TINTED_CROSS = ModelTemplates.create("tinted_cross", TextureSlot.CROSS);
     public static final ModelTemplate FLOWER_POT_CROSS = ModelTemplates.create("flower_pot_cross", TextureSlot.PLANT);

@@ -25,7 +25,7 @@ extends RenderLayer<Sheep, SheepModel<Sheep>> {
 
     public SheepFurLayer(RenderLayerParent<Sheep, SheepModel<Sheep>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
-        this.model = new SheepFurModel(entityModelSet.getLayer(ModelLayers.SHEEP_FUR));
+        this.model = new SheepFurModel(entityModelSet.bakeLayer(ModelLayers.SHEEP_FUR));
     }
 
     @Override
