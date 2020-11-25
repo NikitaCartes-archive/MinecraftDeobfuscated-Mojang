@@ -52,6 +52,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
@@ -195,6 +196,7 @@ public abstract class LivingEntity extends Entity {
 	protected int fallFlyTicks;
 	private BlockPos lastPos;
 	private Optional<BlockPos> lastClimbablePos = Optional.empty();
+	@Nullable
 	private DamageSource lastDamageSource;
 	private long lastDamageStamp;
 	protected int autoSpinAttackTicks;
@@ -1587,28 +1589,23 @@ public abstract class LivingEntity extends Entity {
 			case 37:
 			case 44:
 			case 57:
-				boolean bl = b == 33;
-				boolean bl2 = b == 36;
-				boolean bl3 = b == 37;
-				boolean bl4 = b == 44;
-				boolean bl5 = b == 57;
 				this.animationSpeed = 1.5F;
 				this.invulnerableTime = 20;
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
 				this.hurtDir = 0.0F;
-				if (bl) {
+				if (b == 33) {
 					this.playSound(SoundEvents.THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				}
 
 				DamageSource damageSource;
-				if (bl3) {
+				if (b == 37) {
 					damageSource = DamageSource.ON_FIRE;
-				} else if (bl2) {
+				} else if (b == 36) {
 					damageSource = DamageSource.DROWN;
-				} else if (bl4) {
+				} else if (b == 44) {
 					damageSource = DamageSource.SWEET_BERRY_BUSH;
-				} else if (bl5) {
+				} else if (b == 57) {
 					damageSource = DamageSource.FREEZE;
 				} else {
 					damageSource = DamageSource.GENERIC;
@@ -1620,6 +1617,8 @@ public abstract class LivingEntity extends Entity {
 				}
 
 				this.hurt(DamageSource.GENERIC, 0.0F);
+				this.lastDamageSource = damageSource;
+				this.lastDamageStamp = this.level.getGameTime();
 				break;
 			case 3:
 				SoundEvent soundEvent2 = this.getDeathSound();
@@ -3219,6 +3218,11 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	public boolean canFreeze() {
-		return !this.isSpectator();
+		return this.isSpectator()
+			? false
+			: !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
+				&& !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
+				&& !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
+				&& !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
 	}
 }

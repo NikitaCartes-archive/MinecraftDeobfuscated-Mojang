@@ -20,7 +20,7 @@ public class ChestedHorseRenderer<T extends AbstractChestedHorse> extends Abstra
 	);
 
 	public ChestedHorseRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
-		super(context, new ChestedHorseModel<>(context.getLayer(modelLayerLocation)), f);
+		super(context, new ChestedHorseModel<>(context.bakeLayer(modelLayerLocation)), f);
 	}
 
 	public ResourceLocation getTextureLocation(T abstractChestedHorse) {

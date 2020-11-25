@@ -40,7 +40,7 @@ public class LlamaDecorLayer extends RenderLayer<Llama, LlamaModel<Llama>> {
 
 	public LlamaDecorLayer(RenderLayerParent<Llama, LlamaModel<Llama>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new LlamaModel<>(entityModelSet.getLayer(ModelLayers.LLAMA_DECOR));
+		this.model = new LlamaModel<>(entityModelSet.bakeLayer(ModelLayers.LLAMA_DECOR));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l) {

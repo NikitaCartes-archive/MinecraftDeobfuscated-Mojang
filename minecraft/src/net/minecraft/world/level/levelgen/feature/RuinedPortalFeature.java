@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -64,11 +65,11 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		int k;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
 			if (bl) {
-				k = randomIntInclusive(random, 32, 100);
+				k = Mth.randomBetweenInclusive(random, 32, 100);
 			} else if (random.nextFloat() < 0.5F) {
-				k = randomIntInclusive(random, 27, 29);
+				k = Mth.randomBetweenInclusive(random, 27, 29);
 			} else {
-				k = randomIntInclusive(random, 29, 100);
+				k = Mth.randomBetweenInclusive(random, 29, 100);
 			}
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
 			int l = i - j;
@@ -77,7 +78,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			int l = i - j;
 			k = getRandomWithinInterval(random, 15, l);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
-			k = i - j + randomIntInclusive(random, 2, 8);
+			k = i - j + Mth.randomBetweenInclusive(random, 2, 8);
 		} else {
 			k = i;
 		}
@@ -114,12 +115,8 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		return m;
 	}
 
-	private static int randomIntInclusive(Random random, int i, int j) {
-		return random.nextInt(j - i + 1) + i;
-	}
-
 	private static int getRandomWithinInterval(Random random, int i, int j) {
-		return i < j ? randomIntInclusive(random, i, j) : j;
+		return i < j ? Mth.randomBetweenInclusive(random, i, j) : j;
 	}
 
 	public static class FeatureStart extends StructureStart<RuinedPortalConfiguration> {

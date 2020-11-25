@@ -18,7 +18,7 @@ public class SpiderRenderer<T extends Spider> extends MobRenderer<T, SpiderModel
 	}
 
 	public SpiderRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
-		super(context, new SpiderModel<>(context.getLayer(modelLayerLocation)), 0.8F);
+		super(context, new SpiderModel<>(context.bakeLayer(modelLayerLocation)), 0.8F);
 		this.addLayer(new SpiderEyesLayer<>(this));
 	}
 

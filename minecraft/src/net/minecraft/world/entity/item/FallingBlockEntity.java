@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ConcretePowderBlock;
+import net.minecraft.world.level.block.Fallable;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -146,8 +147,8 @@ public class FallingBlockEntity extends Entity {
 								}
 
 								if (this.level.setBlock(blockPos, this.blockState, 3)) {
-									if (block instanceof FallingBlock) {
-										((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState, this);
+									if (block instanceof Fallable) {
+										((Fallable)block).onLand(this.level, blockPos, this.blockState, blockState, this);
 									}
 
 									if (this.blockData != null && this.blockState.hasBlockEntity()) {
@@ -167,13 +168,15 @@ public class FallingBlockEntity extends Entity {
 										}
 									}
 								} else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+									this.callOnBrokenAfterFall(block, blockPos);
 									this.spawnAtLocation(block);
 								}
 							} else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+								this.callOnBrokenAfterFall(block, blockPos);
 								this.spawnAtLocation(block);
 							}
-						} else if (block instanceof FallingBlock) {
-							((FallingBlock)block).onBroken(this.level, blockPos, this);
+						} else {
+							this.callOnBrokenAfterFall(block, blockPos);
 						}
 					}
 				} else if (!this.level.isClientSide
@@ -187,6 +190,12 @@ public class FallingBlockEntity extends Entity {
 			}
 
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
+		}
+	}
+
+	public void callOnBrokenAfterFall(Block block, BlockPos blockPos) {
+		if (block instanceof Fallable) {
+			((Fallable)block).onBrokenAfterFall(this.level, blockPos, this);
 		}
 	}
 

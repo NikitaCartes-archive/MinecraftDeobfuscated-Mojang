@@ -91,7 +91,8 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 				}
 			} else {
 				poseStack.scale(0.5F, 0.5F, 0.5F);
-				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
+				this.itemRenderer
+					.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.getId());
 			}
 		}
 

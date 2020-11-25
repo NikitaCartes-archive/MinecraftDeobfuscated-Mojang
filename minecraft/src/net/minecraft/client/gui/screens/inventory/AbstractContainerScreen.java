@@ -231,7 +231,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			}
 
 			RenderSystem.enableDepthTest();
-			this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j);
+			this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j, slot.x + slot.y * this.imageWidth);
 			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
 		}
 

@@ -31,7 +31,7 @@ public class PublishCommand {
 	private static int publish(CommandSourceStack commandSourceStack, int i) throws CommandSyntaxException {
 		if (commandSourceStack.getServer().isPublished()) {
 			throw ERROR_ALREADY_PUBLISHED.create(commandSourceStack.getServer().getPort());
-		} else if (!commandSourceStack.getServer().publishServer(commandSourceStack.getServer().getDefaultGameType(), false, i)) {
+		} else if (!commandSourceStack.getServer().publishServer(null, false, i)) {
 			throw ERROR_FAILED.create();
 		} else {
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.publish.success", i), true);

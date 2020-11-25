@@ -104,6 +104,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -1235,7 +1236,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderStateShard.WEATHER_TARGET.setupRenderState();
 			profilerFiller.popPush("weather");
 			this.renderSnowAndRain(lightTexture, f, d, e, g);
-			this.renderWorldBounds(camera);
+			this.renderWorldBorder(camera);
 			RenderStateShard.WEATHER_TARGET.clearRenderState();
 			this.transparencyChain.process(f);
 			this.minecraft.getMainRenderTarget().bindWrite(false);
@@ -1243,7 +1244,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.depthMask(false);
 			profilerFiller.popPush("weather");
 			this.renderSnowAndRain(lightTexture, f, d, e, g);
-			this.renderWorldBounds(camera);
+			this.renderWorldBorder(camera);
 			RenderSystem.depthMask(true);
 		}
 
@@ -2024,7 +2025,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 	}
 
-	private void renderWorldBounds(Camera camera) {
+	private void renderWorldBorder(Camera camera) {
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		WorldBorder worldBorder = this.level.getWorldBorder();
 		double d = (double)(this.minecraft.options.renderDistance * 16);
@@ -2035,8 +2036,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			double e = 1.0 - worldBorder.getDistanceToBorder(camera.getPosition().x, camera.getPosition().z) / d;
 			e = Math.pow(e, 4.0);
 			double f = camera.getPosition().x;
-			double g = camera.getPosition().y;
-			double h = camera.getPosition().z;
+			double g = camera.getPosition().z;
+			double h = (double)this.minecraft.gameRenderer.getDepthFar();
 			RenderSystem.enableBlend();
 			RenderSystem.enableDepthTest();
 			RenderSystem.blendFuncSeparate(
@@ -2058,20 +2059,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			float m = (float)(Util.getMillis() % 3000L) / 3000.0F;
 			float n = 0.0F;
 			float o = 0.0F;
-			float p = (float)this.level.getMaxBuildHeight() * 0.5F;
+			float p = (float)h;
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-			double q = Math.max((double)Mth.floor(h - d), worldBorder.getMinZ());
-			double r = Math.min((double)Mth.ceil(h + d), worldBorder.getMaxZ());
+			double q = Math.max((double)Mth.floor(g - d), worldBorder.getMinZ());
+			double r = Math.min((double)Mth.ceil(g + d), worldBorder.getMaxZ());
 			if (f > worldBorder.getMaxX() - d) {
 				float s = 0.0F;
 
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), this.level.getMaxBuildHeight(), t, m + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), this.level.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), 0, t + u, m + v + s, m + p);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMaxX(), 0, t, m + s, m + p);
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m + v + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m + v + s, m + p).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m + s, m + p).endVertex();
 					t++;
 				}
 			}
@@ -2082,40 +2083,40 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), this.level.getMaxBuildHeight(), t, m + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), this.level.getMaxBuildHeight(), t + u, m + v + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), 0, t + u, m + v + s, m + p);
-					this.vertex(bufferBuilder, f, g, h, worldBorder.getMinX(), 0, t, m + s, m + p);
+					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t + u - g).uv(m + v + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t + u - g).uv(m + v + s, m + p).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t - g).uv(m + s, m + p).endVertex();
 					t++;
 				}
 			}
 
 			q = Math.max((double)Mth.floor(f - d), worldBorder.getMinX());
 			r = Math.min((double)Mth.ceil(f + d), worldBorder.getMaxX());
-			if (h > worldBorder.getMaxZ() - d) {
+			if (g > worldBorder.getMaxZ() - d) {
 				float s = 0.0F;
 
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					this.vertex(bufferBuilder, f, g, h, t, this.level.getMaxBuildHeight(), worldBorder.getMaxZ(), m + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, t + u, this.level.getMaxBuildHeight(), worldBorder.getMaxZ(), m + v + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, t + u, 0, worldBorder.getMaxZ(), m + v + s, m + p);
-					this.vertex(bufferBuilder, f, g, h, t, 0, worldBorder.getMaxZ(), m + s, m + p);
+					bufferBuilder.vertex(t - f, -h, worldBorder.getMaxZ() - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMaxZ() - g).uv(m + v + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t + u - f, h, worldBorder.getMaxZ() - g).uv(m + v + s, m + p).endVertex();
+					bufferBuilder.vertex(t - f, h, worldBorder.getMaxZ() - g).uv(m + s, m + p).endVertex();
 					t++;
 				}
 			}
 
-			if (h < worldBorder.getMinZ() + d) {
+			if (g < worldBorder.getMinZ() + d) {
 				float s = 0.0F;
 
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					this.vertex(bufferBuilder, f, g, h, t, this.level.getMaxBuildHeight(), worldBorder.getMinZ(), m + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, t + u, this.level.getMaxBuildHeight(), worldBorder.getMinZ(), m + v + s, m + 0.0F);
-					this.vertex(bufferBuilder, f, g, h, t + u, 0, worldBorder.getMinZ(), m + v + s, m + p);
-					this.vertex(bufferBuilder, f, g, h, t, 0, worldBorder.getMinZ(), m + s, m + p);
+					bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m + v + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m + v + s, m + p).endVertex();
+					bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m + s, m + p).endVertex();
 					t++;
 				}
 			}
@@ -2131,10 +2132,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.popMatrix();
 			RenderSystem.depthMask(true);
 		}
-	}
-
-	private void vertex(BufferBuilder bufferBuilder, double d, double e, double f, double g, int i, double h, float j, float k) {
-		bufferBuilder.vertex(g - d, (double)i - e, h - f).uv(j, k).endVertex();
 	}
 
 	private void renderHitOutline(
@@ -2584,6 +2581,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1044:
 				this.level.playLocalSound(blockPos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
 				break;
+			case 1045:
+				this.level.playLocalSound(blockPos, SoundEvents.POINTED_DRIPSTONE_LAND, SoundSource.BLOCKS, 2.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
+				break;
+			case 1046:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.POINTED_DRIPSTONE_DRIP_LAVA_INTO_CAULDRON, SoundSource.BLOCKS, 2.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false
+					);
+				break;
+			case 1047:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.POINTED_DRIPSTONE_DRIP_WATER_INTO_CAULDRON, SoundSource.BLOCKS, 2.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false
+					);
+				break;
 			case 1500:
 				ComposterBlock.handleFill(this.level, blockPos, j > 0);
 				break;
@@ -2623,6 +2635,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					double e = (double)blockPos.getZ() + (5.0 + random.nextDouble() * 6.0) / 16.0;
 					this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
 				}
+				break;
+			case 1504:
+				PointedDripstoneBlock.spawnDripParticle(this.level, blockPos, this.level.getBlockState(blockPos));
 				break;
 			case 2000:
 				Direction direction = Direction.from3DDataValue(j);

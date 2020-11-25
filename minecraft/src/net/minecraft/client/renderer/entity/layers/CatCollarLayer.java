@@ -18,7 +18,7 @@ public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
 
 	public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.catModel = new CatModel<>(entityModelSet.getLayer(ModelLayers.CAT_COLLAR));
+		this.catModel = new CatModel<>(entityModelSet.bakeLayer(ModelLayers.CAT_COLLAR));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l) {

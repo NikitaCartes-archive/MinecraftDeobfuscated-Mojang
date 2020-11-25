@@ -20,7 +20,7 @@ public class StrayClothingLayer<T extends Mob & RangedAttackMob, M extends Entit
 
 	public StrayClothingLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.layerModel = new SkeletonModel<>(entityModelSet.getLayer(ModelLayers.STRAY_OUTER_LAYER));
+		this.layerModel = new SkeletonModel<>(entityModelSet.bakeLayer(ModelLayers.STRAY_OUTER_LAYER));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l) {

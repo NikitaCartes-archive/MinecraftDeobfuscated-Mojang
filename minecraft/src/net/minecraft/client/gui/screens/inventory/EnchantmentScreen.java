@@ -51,7 +51,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	@Override
 	protected void init() {
 		super.init();
-		this.bookModel = new BookModel(this.minecraft.getEntityModels().getLayer(ModelLayers.BOOK));
+		this.bookModel = new BookModel(this.minecraft.getEntityModels().bakeLayer(ModelLayers.BOOK));
 	}
 
 	@Override

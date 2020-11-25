@@ -22,7 +22,7 @@ public class ParrotOnShoulderLayer<T extends Player> extends RenderLayer<T, Play
 
 	public ParrotOnShoulderLayer(RenderLayerParent<T, PlayerModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new ParrotModel(entityModelSet.getLayer(ModelLayers.PARROT));
+		this.model = new ParrotModel(entityModelSet.bakeLayer(ModelLayers.PARROT));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T player, float f, float g, float h, float j, float k, float l) {

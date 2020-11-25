@@ -96,7 +96,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> CANDLE_CAKES = bind("candle_cakes");
 	public static final Tag.Named<Block> CAULDRONS = bind("cauldrons");
 	public static final Tag.Named<Block> CRYSTAL_SOUND_BLOCKS = bind("crystal_sound_blocks");
-	public static final Tag.Named<Block> SNOW_STEP_SOUND_BLOCKS = bind("snow_step_sound_blocks");
+	public static final Tag.Named<Block> INSIDE_STEP_SOUND_BLOCKS = bind("inside_step_sound_blocks");
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

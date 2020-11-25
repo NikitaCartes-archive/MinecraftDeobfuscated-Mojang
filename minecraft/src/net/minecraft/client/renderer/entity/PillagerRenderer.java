@@ -13,7 +13,7 @@ public class PillagerRenderer extends IllagerRenderer<Pillager> {
 	private static final ResourceLocation PILLAGER = new ResourceLocation("textures/entity/illager/pillager.png");
 
 	public PillagerRenderer(EntityRendererProvider.Context context) {
-		super(context, new IllagerModel<>(context.getLayer(ModelLayers.PILLAGER)), 0.5F);
+		super(context, new IllagerModel<>(context.bakeLayer(ModelLayers.PILLAGER)), 0.5F);
 		this.addLayer(new ItemInHandLayer<>(this));
 	}
 

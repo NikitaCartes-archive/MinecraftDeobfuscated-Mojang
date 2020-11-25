@@ -22,7 +22,7 @@ public class HorseArmorLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 
 	public HorseArmorLayer(RenderLayerParent<Horse, HorseModel<Horse>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new HorseModel<>(entityModelSet.getLayer(ModelLayers.HORSE_ARMOR));
+		this.model = new HorseModel<>(entityModelSet.bakeLayer(ModelLayers.HORSE_ARMOR));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l) {

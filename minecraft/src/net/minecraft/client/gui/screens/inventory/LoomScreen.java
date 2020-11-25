@@ -57,7 +57,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	@Override
 	protected void init() {
 		super.init();
-		this.flag = this.minecraft.getEntityModels().getLayer(ModelLayers.BANNER).getChild("flag");
+		this.flag = this.minecraft.getEntityModels().bakeLayer(ModelLayers.BANNER).getChild("flag");
 	}
 
 	@Override

@@ -46,12 +46,12 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 
 	public static Map<SkullBlock.Type, SkullModelBase> createSkullRenderers(EntityModelSet entityModelSet) {
 		Builder<SkullBlock.Type, SkullModelBase> builder = ImmutableMap.builder();
-		builder.put(SkullBlock.Types.SKELETON, new SkullModel(entityModelSet.getLayer(ModelLayers.SKELETON_SKULL)));
-		builder.put(SkullBlock.Types.WITHER_SKELETON, new SkullModel(entityModelSet.getLayer(ModelLayers.WITHER_SKELETON_SKULL)));
-		builder.put(SkullBlock.Types.PLAYER, new SkullModel(entityModelSet.getLayer(ModelLayers.PLAYER_HEAD)));
-		builder.put(SkullBlock.Types.ZOMBIE, new SkullModel(entityModelSet.getLayer(ModelLayers.ZOMBIE_HEAD)));
-		builder.put(SkullBlock.Types.CREEPER, new SkullModel(entityModelSet.getLayer(ModelLayers.CREEPER_HEAD)));
-		builder.put(SkullBlock.Types.DRAGON, new DragonHeadModel(entityModelSet.getLayer(ModelLayers.DRAGON_SKULL)));
+		builder.put(SkullBlock.Types.SKELETON, new SkullModel(entityModelSet.bakeLayer(ModelLayers.SKELETON_SKULL)));
+		builder.put(SkullBlock.Types.WITHER_SKELETON, new SkullModel(entityModelSet.bakeLayer(ModelLayers.WITHER_SKELETON_SKULL)));
+		builder.put(SkullBlock.Types.PLAYER, new SkullModel(entityModelSet.bakeLayer(ModelLayers.PLAYER_HEAD)));
+		builder.put(SkullBlock.Types.ZOMBIE, new SkullModel(entityModelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD)));
+		builder.put(SkullBlock.Types.CREEPER, new SkullModel(entityModelSet.bakeLayer(ModelLayers.CREEPER_HEAD)));
+		builder.put(SkullBlock.Types.DRAGON, new DragonHeadModel(entityModelSet.bakeLayer(ModelLayers.DRAGON_SKULL)));
 		return builder.build();
 	}
 

@@ -20,7 +20,7 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 
 	public ThrownTridentRenderer(EntityRendererProvider.Context context) {
 		super(context);
-		this.model = new TridentModel(context.getLayer(ModelLayers.TRIDENT));
+		this.model = new TridentModel(context.bakeLayer(ModelLayers.TRIDENT));
 	}
 
 	public void render(ThrownTrident thrownTrident, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

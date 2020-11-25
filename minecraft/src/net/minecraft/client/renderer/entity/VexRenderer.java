@@ -15,7 +15,7 @@ public class VexRenderer extends HumanoidMobRenderer<Vex, VexModel> {
 	private static final ResourceLocation VEX_CHARGING_LOCATION = new ResourceLocation("textures/entity/illager/vex_charging.png");
 
 	public VexRenderer(EntityRendererProvider.Context context) {
-		super(context, new VexModel(context.getLayer(ModelLayers.VEX)), 0.3F);
+		super(context, new VexModel(context.bakeLayer(ModelLayers.VEX)), 0.3F);
 	}
 
 	protected int getBlockLightLevel(Vex vex, BlockPos blockPos) {

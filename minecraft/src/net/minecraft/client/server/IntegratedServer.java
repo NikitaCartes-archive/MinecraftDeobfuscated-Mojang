@@ -1,5 +1,6 @@
 package net.minecraft.client.server;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -37,6 +39,8 @@ public class IntegratedServer extends MinecraftServer {
 	private final Minecraft minecraft;
 	private boolean paused;
 	private int publishedPort = -1;
+	@Nullable
+	private GameType publishedGameType;
 	private LanServerPinger lanPinger;
 	private UUID uuid;
 
@@ -179,14 +183,14 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public boolean publishServer(GameType gameType, boolean bl, int i) {
+	public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
 		try {
 			this.getConnection().startTcpServerListener(null, i);
 			LOGGER.info("Started serving on {}", i);
 			this.publishedPort = i;
 			this.lanPinger = new LanServerPinger(this.getMotd(), i + "");
 			this.lanPinger.start();
-			this.getPlayerList().setOverrideGameMode(gameType);
+			this.publishedGameType = gameType;
 			this.getPlayerList().setAllowCheatsForAllPlayers(bl);
 			int j = this.getProfilePermissions(this.minecraft.player.getGameProfile());
 			this.minecraft.player.setPermissionLevel(j);
@@ -239,7 +243,7 @@ public class IntegratedServer extends MinecraftServer {
 	@Override
 	public void setDefaultGameType(GameType gameType) {
 		super.setDefaultGameType(gameType);
-		this.getPlayerList().setOverrideGameMode(gameType);
+		this.publishedGameType = null;
 	}
 
 	@Override
@@ -274,5 +278,11 @@ public class IntegratedServer extends MinecraftServer {
 	@Override
 	public boolean forceSynchronousWrites() {
 		return this.minecraft.options.syncWrites;
+	}
+
+	@Nullable
+	@Override
+	public GameType getForcedGameType() {
+		return this.isPublished() ? MoreObjects.firstNonNull(this.publishedGameType, this.worldData.getGameType()) : null;
 	}
 }

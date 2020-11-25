@@ -14,12 +14,12 @@ public class ZombieVillagerRenderer extends HumanoidMobRenderer<ZombieVillager, 
 	private static final ResourceLocation ZOMBIE_VILLAGER_LOCATION = new ResourceLocation("textures/entity/zombie_villager/zombie_villager.png");
 
 	public ZombieVillagerRenderer(EntityRendererProvider.Context context) {
-		super(context, new ZombieVillagerModel<>(context.getLayer(ModelLayers.ZOMBIE_VILLAGER)), 0.5F);
+		super(context, new ZombieVillagerModel<>(context.bakeLayer(ModelLayers.ZOMBIE_VILLAGER)), 0.5F);
 		this.addLayer(
 			new HumanoidArmorLayer<>(
 				this,
-				new ZombieVillagerModel(context.getLayer(ModelLayers.ZOMBIE_VILLAGER_INNER_ARMOR)),
-				new ZombieVillagerModel(context.getLayer(ModelLayers.ZOMBIE_VILLAGER_OUTER_ARMOR))
+				new ZombieVillagerModel(context.bakeLayer(ModelLayers.ZOMBIE_VILLAGER_INNER_ARMOR)),
+				new ZombieVillagerModel(context.bakeLayer(ModelLayers.ZOMBIE_VILLAGER_OUTER_ARMOR))
 			)
 		);
 		this.addLayer(new VillagerProfessionLayer<>(this, context.getResourceManager(), "zombie_villager"));

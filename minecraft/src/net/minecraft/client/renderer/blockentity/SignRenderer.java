@@ -41,7 +41,7 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 	public SignRenderer(BlockEntityRendererProvider.Context context) {
 		this.signModels = (Map<WoodType, SignRenderer.SignModel>)WoodType.values()
 			.collect(
-				ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignRenderer.SignModel(context.getLayer(ModelLayers.createSignModelName(woodType))))
+				ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignRenderer.SignModel(context.bakeLayer(ModelLayers.createSignModelName(woodType))))
 			);
 		this.font = context.getFont();
 	}
@@ -108,7 +108,7 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 	}
 
 	public static SignRenderer.SignModel createSignModel(EntityModelSet entityModelSet, WoodType woodType) {
-		return new SignRenderer.SignModel(entityModelSet.getLayer(ModelLayers.createSignModelName(woodType)));
+		return new SignRenderer.SignModel(entityModelSet.bakeLayer(ModelLayers.createSignModelName(woodType)));
 	}
 
 	public static LayerDefinition createSignLayer() {

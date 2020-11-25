@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.player.Input;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class MovementTutorialStepInstance implements TutorialStepInstance {
@@ -63,7 +62,7 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
 		}
 
 		if (this.moveCompleted != -1 && this.lookCompleted != -1) {
-			if (this.tutorial.getGameMode() == GameType.SURVIVAL) {
+			if (this.tutorial.isSurvival()) {
 				this.tutorial.setStep(TutorialSteps.FIND_TREE);
 			} else {
 				this.tutorial.setStep(TutorialSteps.NONE);

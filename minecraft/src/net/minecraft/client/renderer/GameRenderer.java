@@ -430,10 +430,12 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 
 		poseStack.last()
 			.pose()
-			.multiply(
-				Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05F, this.renderDistance * 4.0F)
-			);
+			.multiply(Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05F, this.getDepthFar()));
 		return poseStack.last().pose();
+	}
+
+	public float getDepthFar() {
+		return this.renderDistance * 4.0F;
 	}
 
 	public static float getNightVisionScale(LivingEntity livingEntity, float f) {
@@ -715,7 +717,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 			this.minecraft
 				.getItemRenderer()
-				.renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource);
+				.renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, 0);
 			poseStack.popPose();
 			bufferSource.endBatch();
 			RenderSystem.popAttributes();

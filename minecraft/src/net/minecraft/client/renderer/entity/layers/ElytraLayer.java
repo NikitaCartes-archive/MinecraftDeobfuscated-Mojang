@@ -28,7 +28,7 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 
 	public ElytraLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.elytraModel = new ElytraModel<>(entityModelSet.getLayer(ModelLayers.ELYTRA));
+		this.elytraModel = new ElytraModel<>(entityModelSet.bakeLayer(ModelLayers.ELYTRA));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {

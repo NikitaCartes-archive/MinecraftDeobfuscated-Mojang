@@ -11,12 +11,12 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.SelectedGameMode;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class RealmsBackupInfoScreen extends RealmsScreen {
@@ -87,7 +87,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	private Component gameModeMetadata(String string) {
 		try {
-			return ((SelectedGameMode)RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string))).getDisplayName();
+			return ((GameType)RealmsSlotOptionsScreen.GAME_MODES.get(Integer.parseInt(string))).getShortDisplayName();
 		} catch (Exception var3) {
 			return TEXT_UNKNOWN;
 		}

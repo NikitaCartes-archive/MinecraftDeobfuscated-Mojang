@@ -32,7 +32,7 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 	}
 
 	protected GuardianRenderer(EntityRendererProvider.Context context, float f, ModelLayerLocation modelLayerLocation) {
-		super(context, new GuardianModel(context.getLayer(modelLayerLocation)), f);
+		super(context, new GuardianModel(context.bakeLayer(modelLayerLocation)), f);
 	}
 
 	public boolean shouldRender(Guardian guardian, Frustum frustum, double d, double e, double f) {

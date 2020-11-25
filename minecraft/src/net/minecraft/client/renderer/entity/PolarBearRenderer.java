@@ -13,7 +13,7 @@ public class PolarBearRenderer extends MobRenderer<PolarBear, PolarBearModel<Pol
 	private static final ResourceLocation BEAR_LOCATION = new ResourceLocation("textures/entity/bear/polarbear.png");
 
 	public PolarBearRenderer(EntityRendererProvider.Context context) {
-		super(context, new PolarBearModel<>(context.getLayer(ModelLayers.POLAR_BEAR)), 0.9F);
+		super(context, new PolarBearModel<>(context.bakeLayer(ModelLayers.POLAR_BEAR)), 0.9F);
 	}
 
 	public ResourceLocation getTextureLocation(PolarBear polarBear) {

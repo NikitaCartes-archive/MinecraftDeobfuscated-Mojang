@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -2299,6 +2300,30 @@ public class BlockModelGenerators {
 		this.createAmethystCluster(Blocks.AMETHYST_CLUSTER);
 	}
 
+	private void createPointedDripstone() {
+		this.createSimpleFlatItemModel(Blocks.POINTED_DRIPSTONE.asItem());
+		PropertyDispatch.C2<Direction, DripstoneThickness> c2 = PropertyDispatch.properties(
+			BlockStateProperties.VERTICAL_DIRECTION, BlockStateProperties.DRIPSTONE_THICKNESS
+		);
+
+		for (DripstoneThickness dripstoneThickness : DripstoneThickness.values()) {
+			c2.select(Direction.UP, dripstoneThickness, this.createPointedDripstoneVariant(Direction.UP, dripstoneThickness));
+		}
+
+		for (DripstoneThickness dripstoneThickness : DripstoneThickness.values()) {
+			c2.select(Direction.DOWN, dripstoneThickness, this.createPointedDripstoneVariant(Direction.DOWN, dripstoneThickness));
+		}
+
+		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.POINTED_DRIPSTONE).with(c2));
+	}
+
+	private Variant createPointedDripstoneVariant(Direction direction, DripstoneThickness dripstoneThickness) {
+		String string = "_" + direction.getSerializedName() + "_" + dripstoneThickness.getSerializedName();
+		TextureMapping textureMapping = TextureMapping.cross(TextureMapping.getBlockTexture(Blocks.POINTED_DRIPSTONE, string));
+		return Variant.variant()
+			.with(VariantProperties.MODEL, ModelTemplates.POINTED_DRIPSTONE.createWithSuffix(Blocks.POINTED_DRIPSTONE, string, textureMapping, this.modelOutput));
+	}
+
 	private void createNyliumBlock(Block block) {
 		TextureMapping textureMapping = new TextureMapping()
 			.put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(Blocks.NETHERRACK))
@@ -3738,6 +3763,7 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.BUDDING_AMETHYST, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DRIPSTONE_BLOCK, TexturedModel.CUBE);
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.COPPER_BLOCK);
 		this.createTrivialCube(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK);
@@ -4071,6 +4097,7 @@ public class BlockModelGenerators {
 		this.createPlant(Blocks.RED_MUSHROOM, Blocks.POTTED_RED_MUSHROOM, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createPlant(Blocks.BROWN_MUSHROOM, Blocks.POTTED_BROWN_MUSHROOM, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createPlant(Blocks.DEAD_BUSH, Blocks.POTTED_DEAD_BUSH, BlockModelGenerators.TintState.NOT_TINTED);
+		this.createPointedDripstone();
 		this.createMushroomBlock(Blocks.BROWN_MUSHROOM_BLOCK);
 		this.createMushroomBlock(Blocks.RED_MUSHROOM_BLOCK);
 		this.createMushroomBlock(Blocks.MUSHROOM_STEM);

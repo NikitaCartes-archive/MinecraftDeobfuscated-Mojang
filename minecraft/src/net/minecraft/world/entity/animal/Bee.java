@@ -581,7 +581,6 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			Entity entity = damageSource.getEntity();
 			if (!this.level.isClientSide) {
 				this.beePollinateGoal.stopPollinating();
 			}

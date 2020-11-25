@@ -39,10 +39,10 @@ public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> 
 
 	public ConduitRenderer(BlockEntityRendererProvider.Context context) {
 		this.renderer = context.getBlockEntityRenderDispatcher();
-		this.eye = context.getLayer(ModelLayers.CONDUIT_EYE);
-		this.wind = context.getLayer(ModelLayers.CONDUIT_WIND);
-		this.shell = context.getLayer(ModelLayers.CONDUIT_SHELL);
-		this.cage = context.getLayer(ModelLayers.CONDUIT_CAGE);
+		this.eye = context.bakeLayer(ModelLayers.CONDUIT_EYE);
+		this.wind = context.bakeLayer(ModelLayers.CONDUIT_WIND);
+		this.shell = context.bakeLayer(ModelLayers.CONDUIT_SHELL);
+		this.cage = context.bakeLayer(ModelLayers.CONDUIT_CAGE);
 	}
 
 	public static LayerDefinition createEyeLayer() {

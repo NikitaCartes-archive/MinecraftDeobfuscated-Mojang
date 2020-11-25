@@ -16,7 +16,7 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 	private static final ResourceLocation VILLAGER_BASE_SKIN = new ResourceLocation("textures/entity/villager/villager.png");
 
 	public VillagerRenderer(EntityRendererProvider.Context context) {
-		super(context, new VillagerModel<>(context.getLayer(ModelLayers.VILLAGER)), 0.5F);
+		super(context, new VillagerModel<>(context.bakeLayer(ModelLayers.VILLAGER)), 0.5F);
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 		this.addLayer(new VillagerProfessionLayer<>(this, context.getResourceManager(), "villager"));
 		this.addLayer(new CrossedArmsItemLayer<>(this));

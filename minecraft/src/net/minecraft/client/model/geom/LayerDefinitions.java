@@ -1,7 +1,6 @@
 package net.minecraft.client.model.geom;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +97,7 @@ public class LayerDefinitions {
 	private static final CubeDeformation OUTER_ARMOR_DEFORMATION = new CubeDeformation(1.0F);
 	private static final CubeDeformation INNER_ARMOR_DEFORMATION = new CubeDeformation(0.5F);
 
-	public static Map<ModelLayerLocation, ModelPart> createRoots() {
+	public static Map<ModelLayerLocation, LayerDefinition> createRoots() {
 		Builder<ModelLayerLocation, LayerDefinition> builder = ImmutableMap.builder();
 		LayerDefinition layerDefinition = LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F), 64, 64);
 		LayerDefinition layerDefinition2 = LayerDefinition.create(HumanoidModel.createMesh(OUTER_ARMOR_DEFORMATION, 0.0F), 64, 32);
@@ -285,7 +284,7 @@ public class LayerDefinitions {
 		if (!list.isEmpty()) {
 			throw new IllegalStateException("Missing layer definitions: " + list);
 		} else {
-			return Maps.transformValues(immutableMap, LayerDefinition::bakeRoot);
+			return immutableMap;
 		}
 	}
 }

@@ -12,7 +12,7 @@ public class EndermiteRenderer extends MobRenderer<Endermite, EndermiteModel<End
 	private static final ResourceLocation ENDERMITE_LOCATION = new ResourceLocation("textures/entity/endermite.png");
 
 	public EndermiteRenderer(EntityRendererProvider.Context context) {
-		super(context, new EndermiteModel<>(context.getLayer(ModelLayers.ENDERMITE)), 0.3F);
+		super(context, new EndermiteModel<>(context.bakeLayer(ModelLayers.ENDERMITE)), 0.3F);
 	}
 
 	protected float getFlipDegrees(Endermite endermite) {

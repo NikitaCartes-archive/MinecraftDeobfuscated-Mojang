@@ -18,8 +18,8 @@ public class DemoMode extends ServerPlayerGameMode {
 	private int demoEndedReminder;
 	private int gameModeTicks;
 
-	public DemoMode(ServerLevel serverLevel) {
-		super(serverLevel);
+	public DemoMode(ServerPlayer serverPlayer) {
+		super(serverPlayer);
 	}
 
 	@Override

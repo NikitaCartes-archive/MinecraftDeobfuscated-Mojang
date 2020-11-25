@@ -2,6 +2,7 @@ package net.minecraft.client.multiplayer;
 
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
@@ -57,8 +58,9 @@ public class MultiPlayerGameMode {
 	private float destroyTicks;
 	private int destroyDelay;
 	private boolean isDestroying;
-	private GameType localPlayerMode = GameType.SURVIVAL;
-	private GameType previousLocalPlayerMode = GameType.NOT_SET;
+	private GameType localPlayerMode = GameType.DEFAULT_MODE;
+	@Nullable
+	private GameType previousLocalPlayerMode;
 	private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, Vec3> unAckedActions = new Object2ObjectLinkedOpenHashMap<>();
 	private int carriedIndex;
 
@@ -71,8 +73,10 @@ public class MultiPlayerGameMode {
 		this.localPlayerMode.updatePlayerAbilities(player.getAbilities());
 	}
 
-	public void setPreviousLocalMode(GameType gameType) {
-		this.previousLocalPlayerMode = gameType;
+	public void setLocalMode(GameType gameType, @Nullable GameType gameType2) {
+		this.localPlayerMode = gameType;
+		this.previousLocalPlayerMode = gameType2;
+		this.localPlayerMode.updatePlayerAbilities(this.minecraft.player.getAbilities());
 	}
 
 	public void setLocalMode(GameType gameType) {
@@ -397,6 +401,7 @@ public class MultiPlayerGameMode {
 		return this.localPlayerMode == GameType.SPECTATOR;
 	}
 
+	@Nullable
 	public GameType getPreviousPlayerMode() {
 		return this.previousLocalPlayerMode;
 	}

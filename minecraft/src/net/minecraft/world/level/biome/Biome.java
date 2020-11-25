@@ -578,6 +578,10 @@ public final class Biome {
 			this.offset = j;
 		}
 
+		public String toString() {
+			return "temp: " + this.temperature + ", hum: " + this.humidity + ", alt: " + this.altitude + ", weird: " + this.weirdness + ", offset: " + this.offset;
+		}
+
 		public boolean equals(Object object) {
 			if (this == object) {
 				return true;

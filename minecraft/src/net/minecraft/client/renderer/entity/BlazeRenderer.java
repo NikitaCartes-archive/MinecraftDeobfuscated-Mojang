@@ -13,7 +13,7 @@ public class BlazeRenderer extends MobRenderer<Blaze, BlazeModel<Blaze>> {
 	private static final ResourceLocation BLAZE_LOCATION = new ResourceLocation("textures/entity/blaze.png");
 
 	public BlazeRenderer(EntityRendererProvider.Context context) {
-		super(context, new BlazeModel<>(context.getLayer(ModelLayers.BLAZE)), 0.5F);
+		super(context, new BlazeModel<>(context.bakeLayer(ModelLayers.BLAZE)), 0.5F);
 	}
 
 	protected int getBlockLightLevel(Blaze blaze, BlockPos blockPos) {

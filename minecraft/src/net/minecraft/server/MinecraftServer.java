@@ -76,10 +76,12 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.bossevents.CustomBossEvents;
+import net.minecraft.server.level.DemoMode;
 import net.minecraft.server.level.PlayerRespawnLogic;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
@@ -197,7 +199,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private volatile boolean isReady;
 	private long lastOverloadWarning;
 	private boolean delayProfilerStart;
-	private boolean forceGameType;
 	private final MinecraftSessionService sessionService;
 	private final GameProfileRepository profileRepository;
 	private final GameProfileCache profileCache;
@@ -1196,7 +1197,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return false;
 	}
 
-	public abstract boolean publishServer(GameType gameType, boolean bl, int i);
+	public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
+		return false;
+	}
 
 	public int getTickCount() {
 		return this.tickCount;
@@ -1213,14 +1216,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
 		return false;
-	}
-
-	public void setForceGameType(boolean bl) {
-		this.forceGameType = bl;
-	}
-
-	public boolean getForceGameType() {
-		return this.forceGameType;
 	}
 
 	public boolean repliesToStatus() {
@@ -1722,5 +1717,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean isResourcePackRequired() {
 		return false;
+	}
+
+	public ServerPlayerGameMode createGameModeForPlayer(ServerPlayer serverPlayer) {
+		return (ServerPlayerGameMode)(this.isDemo() ? new DemoMode(serverPlayer) : new ServerPlayerGameMode(serverPlayer));
+	}
+
+	@Nullable
+	public GameType getForcedGameType() {
+		return null;
 	}
 }

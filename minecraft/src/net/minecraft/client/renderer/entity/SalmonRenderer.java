@@ -15,7 +15,7 @@ public class SalmonRenderer extends MobRenderer<Salmon, SalmonModel<Salmon>> {
 	private static final ResourceLocation SALMON_LOCATION = new ResourceLocation("textures/entity/fish/salmon.png");
 
 	public SalmonRenderer(EntityRendererProvider.Context context) {
-		super(context, new SalmonModel<>(context.getLayer(ModelLayers.SALMON)), 0.4F);
+		super(context, new SalmonModel<>(context.bakeLayer(ModelLayers.SALMON)), 0.4F);
 	}
 
 	public ResourceLocation getTextureLocation(Salmon salmon) {

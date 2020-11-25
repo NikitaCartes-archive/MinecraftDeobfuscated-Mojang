@@ -56,7 +56,19 @@ public class ItemInHandRenderer {
 		int i
 	) {
 		if (!itemStack.isEmpty()) {
-			this.itemRenderer.renderStatic(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, livingEntity.level, i, OverlayTexture.NO_OVERLAY);
+			this.itemRenderer
+				.renderStatic(
+					livingEntity,
+					itemStack,
+					transformType,
+					bl,
+					poseStack,
+					multiBufferSource,
+					livingEntity.level,
+					i,
+					OverlayTexture.NO_OVERLAY,
+					livingEntity.getId() + transformType.ordinal()
+				);
 		}
 	}
 

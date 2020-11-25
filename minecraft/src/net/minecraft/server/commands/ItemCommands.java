@@ -323,10 +323,12 @@ public class ItemCommands {
 
 			SlotAccess slotAccess = entity.getSlot(i);
 			if (slotAccess != SlotAccess.NULL) {
-				ItemStack itemStack = applyModifier(commandSourceStack, lootItemFunction, slotAccess.get());
-				map.put(entity, itemStack);
-				if (entity instanceof ServerPlayer) {
-					((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+				ItemStack itemStack = applyModifier(commandSourceStack, lootItemFunction, slotAccess.get().copy());
+				if (slotAccess.set(itemStack)) {
+					map.put(entity, itemStack);
+					if (entity instanceof ServerPlayer) {
+						((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+					}
 				}
 			}
 		}

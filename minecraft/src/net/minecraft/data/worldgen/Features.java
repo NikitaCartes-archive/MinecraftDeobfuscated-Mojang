@@ -200,7 +200,7 @@ public class Features {
 		Feature.SEAGRASS.configured(new ProbabilityFeatureConfiguration(0.8F)).count(80).decorated(Features.Decorators.TOP_SOLID_HEIGHTMAP_SQUARE)
 	);
 	public static final ConfiguredFeature<?, ?> SEA_PICKLE = register(
-		"sea_pickle", Feature.SEA_PICKLE.configured(new CountConfiguration(20)).decorated(Features.Decorators.TOP_SOLID_HEIGHTMAP_SQUARE).chance(16)
+		"sea_pickle", Feature.SEA_PICKLE.configured(new CountConfiguration(20)).decorated(Features.Decorators.TOP_SOLID_HEIGHTMAP_SQUARE).rarity(16)
 	);
 	public static final ConfiguredFeature<?, ?> ICE_SPIKE = register(
 		"ice_spike", Feature.ICE_SPIKE.configured(FeatureConfiguration.NONE).decorated(Features.Decorators.HEIGHTMAP_SQUARE).count(3)
@@ -246,14 +246,14 @@ public class Features {
 		Feature.ICEBERG
 			.configured(new BlockStateConfiguration(Features.States.PACKED_ICE))
 			.decorated(FeatureDecorator.ICEBERG.configured(NoneDecoratorConfiguration.INSTANCE))
-			.chance(16)
+			.rarity(16)
 	);
 	public static final ConfiguredFeature<?, ?> ICEBERG_BLUE = register(
 		"iceberg_blue",
 		Feature.ICEBERG
 			.configured(new BlockStateConfiguration(Features.States.BLUE_ICE))
 			.decorated(FeatureDecorator.ICEBERG.configured(NoneDecoratorConfiguration.INSTANCE))
-			.chance(200)
+			.rarity(200)
 	);
 	public static final ConfiguredFeature<?, ?> KELP_COLD = register(
 		"kelp_cold",
@@ -331,9 +331,9 @@ public class Features {
 		"monster_room", Feature.MONSTER_ROOM.configured(FeatureConfiguration.NONE).range(256).squared().count(8)
 	);
 	public static final ConfiguredFeature<?, ?> WELL = register(
-		"desert_well", Feature.DESERT_WELL.configured(FeatureConfiguration.NONE).decorated(Features.Decorators.HEIGHTMAP_SQUARE).chance(1000)
+		"desert_well", Feature.DESERT_WELL.configured(FeatureConfiguration.NONE).decorated(Features.Decorators.HEIGHTMAP_SQUARE).rarity(1000)
 	);
-	public static final ConfiguredFeature<?, ?> FOSSIL = register("fossil", Feature.FOSSIL.configured(FeatureConfiguration.NONE).chance(64));
+	public static final ConfiguredFeature<?, ?> FOSSIL = register("fossil", Feature.FOSSIL.configured(FeatureConfiguration.NONE).rarity(64));
 	public static final ConfiguredFeature<?, ?> SPRING_LAVA_DOUBLE = register(
 		"spring_lava_double",
 		Feature.SPRING
@@ -483,7 +483,7 @@ public class Features {
 					.build()
 			)
 			.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE)
-			.chance(32)
+			.rarity(32)
 	);
 	public static final ConfiguredFeature<?, ?> PATCH_TAIGA_GRASS = register(
 		"patch_taiga_grass", Feature.RANDOM_PATCH.configured(Features.Configs.TAIGA_GRASS_CONFIG)
@@ -547,7 +547,7 @@ public class Features {
 		"patch_berry_sparse", PATCH_BERRY_BUSH.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE)
 	);
 	public static final ConfiguredFeature<?, ?> PATCH_BERRY_DECORATED = register(
-		"patch_berry_decorated", PATCH_BERRY_BUSH.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).chance(12)
+		"patch_berry_decorated", PATCH_BERRY_BUSH.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).rarity(12)
 	);
 	public static final ConfiguredFeature<?, ?> PATCH_WATERLILLY = register(
 		"patch_waterlilly",
@@ -619,19 +619,19 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PATCH_SUGAR_CANE = register(
 		"patch_sugar_cane", Feature.RANDOM_PATCH.configured(Features.Configs.SUGAR_CANE_CONFIG).decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).count(10)
 	);
-	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NETHER = register("brown_mushroom_nether", PATCH_BROWN_MUSHROOM.range(128).chance(2));
-	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_NETHER = register("red_mushroom_nether", PATCH_RED_MUSHROOM.range(128).chance(2));
+	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NETHER = register("brown_mushroom_nether", PATCH_BROWN_MUSHROOM.range(128).rarity(2));
+	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_NETHER = register("red_mushroom_nether", PATCH_RED_MUSHROOM.range(128).rarity(2));
 	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NORMAL = register(
-		"brown_mushroom_normal", PATCH_BROWN_MUSHROOM.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).chance(4)
+		"brown_mushroom_normal", PATCH_BROWN_MUSHROOM.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).rarity(4)
 	);
 	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_NORMAL = register(
-		"red_mushroom_normal", PATCH_RED_MUSHROOM.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).chance(8)
+		"red_mushroom_normal", PATCH_RED_MUSHROOM.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).rarity(8)
 	);
 	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_TAIGA = register(
-		"brown_mushroom_taiga", PATCH_BROWN_MUSHROOM.chance(4).decorated(Features.Decorators.HEIGHTMAP_SQUARE)
+		"brown_mushroom_taiga", PATCH_BROWN_MUSHROOM.rarity(4).decorated(Features.Decorators.HEIGHTMAP_SQUARE)
 	);
 	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_TAIGA = register(
-		"red_mushroom_taiga", PATCH_RED_MUSHROOM.chance(8).decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE)
+		"red_mushroom_taiga", PATCH_RED_MUSHROOM.rarity(8).decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE)
 	);
 	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_GIANT = register("brown_mushroom_giant", BROWN_MUSHROOM_TAIGA.count(3));
 	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_GIANT = register("red_mushroom_giant", RED_MUSHROOM_TAIGA.count(3));
@@ -1377,7 +1377,7 @@ public class Features {
 			)
 			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(6, 0, 47)))
 			.squared()
-			.chance(48)
+			.rarity(48)
 	);
 
 	private static <FC extends FeatureConfiguration> ConfiguredFeature<FC, ?> register(String string, ConfiguredFeature<FC, ?> configuredFeature) {

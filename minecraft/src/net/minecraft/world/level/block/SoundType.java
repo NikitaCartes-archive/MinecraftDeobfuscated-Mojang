@@ -294,6 +294,24 @@ public class SoundType {
 	public static final SoundType CALCITE = new SoundType(
 		1.0F, 1.0F, SoundEvents.CALCITE_BREAK, SoundEvents.CALCITE_STEP, SoundEvents.CALCITE_PLACE, SoundEvents.CALCITE_HIT, SoundEvents.CALCITE_FALL
 	);
+	public static final SoundType DRIPSTONE_BLOCK = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.DRIPSTONE_BLOCK_BREAK,
+		SoundEvents.DRIPSTONE_BLOCK_STEP,
+		SoundEvents.DRIPSTONE_BLOCK_PLACE,
+		SoundEvents.DRIPSTONE_BLOCK_HIT,
+		SoundEvents.DRIPSTONE_BLOCK_FALL
+	);
+	public static final SoundType POINTED_DRIPSTONE = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.POINTED_DRIPSTONE_BREAK,
+		SoundEvents.POINTED_DRIPSTONE_STEP,
+		SoundEvents.POINTED_DRIPSTONE_PLACE,
+		SoundEvents.POINTED_DRIPSTONE_HIT,
+		SoundEvents.POINTED_DRIPSTONE_FALL
+	);
 	public static final SoundType COPPER = new SoundType(
 		1.0F, 1.0F, SoundEvents.COPPER_BREAK, SoundEvents.COPPER_STEP, SoundEvents.COPPER_PLACE, SoundEvents.COPPER_HIT, SoundEvents.COPPER_FALL
 	);

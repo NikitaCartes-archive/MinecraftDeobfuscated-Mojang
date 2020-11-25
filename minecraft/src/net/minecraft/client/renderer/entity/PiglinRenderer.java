@@ -34,12 +34,12 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 	) {
 		super(context, createModel(context.getModelSet(), modelLayerLocation, bl), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
 		this.addLayer(
-			new HumanoidArmorLayer<>(this, new HumanoidModel(context.getLayer(modelLayerLocation2)), new HumanoidModel(context.getLayer(modelLayerLocation3)))
+			new HumanoidArmorLayer<>(this, new HumanoidModel(context.bakeLayer(modelLayerLocation2)), new HumanoidModel(context.bakeLayer(modelLayerLocation3)))
 		);
 	}
 
 	private static PiglinModel<Mob> createModel(EntityModelSet entityModelSet, ModelLayerLocation modelLayerLocation, boolean bl) {
-		PiglinModel<Mob> piglinModel = new PiglinModel<>(entityModelSet.getLayer(modelLayerLocation));
+		PiglinModel<Mob> piglinModel = new PiglinModel<>(entityModelSet.bakeLayer(modelLayerLocation));
 		if (bl) {
 			piglinModel.rightEar.visible = false;
 		}

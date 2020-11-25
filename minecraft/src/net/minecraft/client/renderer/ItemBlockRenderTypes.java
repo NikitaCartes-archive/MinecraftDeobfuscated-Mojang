@@ -223,6 +223,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_WARPED_ROOTS, renderType3);
 		hashMap.put(Blocks.CRIMSON_DOOR, renderType3);
 		hashMap.put(Blocks.WARPED_DOOR, renderType3);
+		hashMap.put(Blocks.POINTED_DRIPSTONE, renderType3);
 		hashMap.put(Blocks.SMALL_AMETHYST_BUD, renderType3);
 		hashMap.put(Blocks.MEDIUM_AMETHYST_BUD, renderType3);
 		hashMap.put(Blocks.LARGE_AMETHYST_BUD, renderType3);

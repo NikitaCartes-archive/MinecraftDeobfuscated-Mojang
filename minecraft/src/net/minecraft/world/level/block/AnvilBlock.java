@@ -90,7 +90,7 @@ public class AnvilBlock extends FallingBlock {
 	}
 
 	@Override
-	public void onBroken(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
+	public void onBrokenAfterFall(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
 		if (!fallingBlockEntity.isSilent()) {
 			level.levelEvent(1029, blockPos, 0);
 		}

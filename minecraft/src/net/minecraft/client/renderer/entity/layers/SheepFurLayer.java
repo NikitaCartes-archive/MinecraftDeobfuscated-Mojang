@@ -20,7 +20,7 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 
 	public SheepFurLayer(RenderLayerParent<Sheep, SheepModel<Sheep>> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new SheepFurModel<>(entityModelSet.getLayer(ModelLayers.SHEEP_FUR));
+		this.model = new SheepFurModel<>(entityModelSet.bakeLayer(ModelLayers.SHEEP_FUR));
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Sheep sheep, float f, float g, float h, float j, float k, float l) {

@@ -48,8 +48,8 @@ public interface EntityRendererProvider<T extends Entity> {
 			return this.modelSet;
 		}
 
-		public ModelPart getLayer(ModelLayerLocation modelLayerLocation) {
-			return this.modelSet.getLayer(modelLayerLocation);
+		public ModelPart bakeLayer(ModelLayerLocation modelLayerLocation) {
+			return this.modelSet.bakeLayer(modelLayerLocation);
 		}
 
 		public Font getFont() {

@@ -125,6 +125,9 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_FIRE_DAMAGE = register(
 		"fireDamage", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true)
 	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_FREEZE_DAMAGE = register(
+		"freezeDamage", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true)
+	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_PATROL_SPAWNING = register(
 		"doPatrolSpawning", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(true)
 	);

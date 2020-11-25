@@ -17,7 +17,7 @@ import net.minecraft.world.phys.AABB;
 @Environment(EnvType.CLIENT)
 public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
 	public CatRenderer(EntityRendererProvider.Context context) {
-		super(context, new CatModel<>(context.getLayer(ModelLayers.CAT)), 0.4F);
+		super(context, new CatModel<>(context.bakeLayer(ModelLayers.CAT)), 0.4F);
 		this.addLayer(new CatCollarLayer(this, context.getModelSet()));
 	}
 

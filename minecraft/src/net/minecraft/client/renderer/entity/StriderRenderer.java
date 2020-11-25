@@ -15,9 +15,11 @@ public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>>
 	private static final ResourceLocation COLD_LOCATION = new ResourceLocation("textures/entity/strider/strider_cold.png");
 
 	public StriderRenderer(EntityRendererProvider.Context context) {
-		super(context, new StriderModel<>(context.getLayer(ModelLayers.STRIDER)), 0.5F);
+		super(context, new StriderModel<>(context.bakeLayer(ModelLayers.STRIDER)), 0.5F);
 		this.addLayer(
-			new SaddleLayer<>(this, new StriderModel<>(context.getLayer(ModelLayers.STRIDER_SADDLE)), new ResourceLocation("textures/entity/strider/strider_saddle.png"))
+			new SaddleLayer<>(
+				this, new StriderModel<>(context.bakeLayer(ModelLayers.STRIDER_SADDLE)), new ResourceLocation("textures/entity/strider/strider_saddle.png")
+			)
 		);
 	}
 

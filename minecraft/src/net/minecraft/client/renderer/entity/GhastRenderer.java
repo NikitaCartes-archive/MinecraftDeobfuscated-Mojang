@@ -14,7 +14,7 @@ public class GhastRenderer extends MobRenderer<Ghast, GhastModel<Ghast>> {
 	private static final ResourceLocation GHAST_SHOOTING_LOCATION = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
 
 	public GhastRenderer(EntityRendererProvider.Context context) {
-		super(context, new GhastModel<>(context.getLayer(ModelLayers.GHAST)), 1.5F);
+		super(context, new GhastModel<>(context.bakeLayer(ModelLayers.GHAST)), 1.5F);
 	}
 
 	public ResourceLocation getTextureLocation(Ghast ghast) {

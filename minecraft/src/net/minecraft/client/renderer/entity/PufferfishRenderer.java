@@ -22,9 +22,9 @@ public class PufferfishRenderer extends MobRenderer<Pufferfish, EntityModel<Puff
 	private final EntityModel<Pufferfish> big = this.getModel();
 
 	public PufferfishRenderer(EntityRendererProvider.Context context) {
-		super(context, new PufferfishBigModel<>(context.getLayer(ModelLayers.PUFFERFISH_BIG)), 0.2F);
-		this.mid = new PufferfishMidModel<>(context.getLayer(ModelLayers.PUFFERFISH_MEDIUM));
-		this.small = new PufferfishSmallModel<>(context.getLayer(ModelLayers.PUFFERFISH_SMALL));
+		super(context, new PufferfishBigModel<>(context.bakeLayer(ModelLayers.PUFFERFISH_BIG)), 0.2F);
+		this.mid = new PufferfishMidModel<>(context.bakeLayer(ModelLayers.PUFFERFISH_MEDIUM));
+		this.small = new PufferfishSmallModel<>(context.bakeLayer(ModelLayers.PUFFERFISH_SMALL));
 	}
 
 	public ResourceLocation getTextureLocation(Pufferfish pufferfish) {

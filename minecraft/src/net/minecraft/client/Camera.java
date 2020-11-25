@@ -1,8 +1,8 @@
 package net.minecraft.client;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -166,15 +166,19 @@ public class Camera {
 			if (fluidState.is(FluidTags.WATER) && this.position.y < (double)((float)this.blockPosition.getY() + fluidState.getHeight(this.level, this.blockPosition))) {
 				return FogType.WATER;
 			} else {
-				Vec3 vec3 = new Vec3(this.left);
-				Vec3 vec32 = new Vec3(this.forwards);
-				Vec3 vec33 = new Vec3(this.up);
-				Vec3 vec34 = vec32.add(vec33).add(vec3).scale(0.083333336F);
-				Vec3 vec35 = vec32.add(vec33).subtract(vec3).scale(0.083333336F);
-				Vec3 vec36 = vec32.subtract(vec33).add(vec3).scale(0.083333336F);
-				Vec3 vec37 = vec32.subtract(vec33).subtract(vec3).scale(0.083333336F);
+				Minecraft minecraft = Minecraft.getInstance();
+				double d = (double)minecraft.getWindow().getWidth() / (double)minecraft.getWindow().getHeight();
+				double e = Math.tan(minecraft.options.fov * (float) (Math.PI / 180.0) / 2.0) * 0.05F;
+				double f = e * d;
+				Vec3 vec3 = new Vec3(this.forwards).scale(0.05F);
+				Vec3 vec32 = new Vec3(this.left).scale(f);
+				Vec3 vec33 = new Vec3(this.up).scale(e);
+				Vec3 vec34 = vec3.add(vec33).add(vec32);
+				Vec3 vec35 = vec3.add(vec33).subtract(vec32);
+				Vec3 vec36 = vec3.subtract(vec33).add(vec32);
+				Vec3 vec37 = vec3.subtract(vec33).subtract(vec32);
 
-				for (Vec3 vec38 : ImmutableList.of(vec34, vec35, vec36, vec37)) {
+				for (Vec3 vec38 : Arrays.asList(vec3, vec34, vec35, vec36, vec37)) {
 					Vec3 vec39 = this.position.add(vec38);
 					BlockPos blockPos = new BlockPos(vec39);
 					FluidState fluidState2 = this.level.getFluidState(blockPos);

@@ -15,7 +15,7 @@ public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, Villag
 	private static final ResourceLocation VILLAGER_BASE_SKIN = new ResourceLocation("textures/entity/wandering_trader.png");
 
 	public WanderingTraderRenderer(EntityRendererProvider.Context context) {
-		super(context, new VillagerModel<>(context.getLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
+		super(context, new VillagerModel<>(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 		this.addLayer(new CrossedArmsItemLayer<>(this));
 	}

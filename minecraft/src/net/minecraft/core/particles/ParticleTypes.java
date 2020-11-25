@@ -79,6 +79,10 @@ public class ParticleTypes {
 	public static final SimpleParticleType WHITE_ASH = register("white_ash", false);
 	public static final SimpleParticleType SMALL_FLAME = register("small_flame", false);
 	public static final SimpleParticleType SNOWFLAKE = register("snowflake", false);
+	public static final SimpleParticleType DRIPPING_DRIPSTONE_LAVA = register("dripping_dripstone_lava", false);
+	public static final SimpleParticleType FALLING_DRIPSTONE_LAVA = register("falling_dripstone_lava", false);
+	public static final SimpleParticleType DRIPPING_DRIPSTONE_WATER = register("dripping_dripstone_water", false);
+	public static final SimpleParticleType FALLING_DRIPSTONE_WATER = register("falling_dripstone_water", false);
 	public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
 	private static SimpleParticleType register(String string, boolean bl) {

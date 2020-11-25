@@ -218,7 +218,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		}
 	}
 
-	public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
+	public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
 		BakedModel bakedModel;
 		if (itemStack.is(Items.TRIDENT)) {
 			bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory"));
@@ -227,14 +227,14 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		}
 
 		ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
-		BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity);
+		BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity, i);
 		return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
 	}
 
 	public void renderStatic(
-		ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource
+		ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, int k
 	) {
-		this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i, j);
+		this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i, j, k);
 	}
 
 	public void renderStatic(
@@ -246,16 +246,17 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		MultiBufferSource multiBufferSource,
 		@Nullable Level level,
 		int i,
-		int j
+		int j,
+		int k
 	) {
 		if (!itemStack.isEmpty()) {
-			BakedModel bakedModel = this.getModel(itemStack, level, livingEntity);
+			BakedModel bakedModel = this.getModel(itemStack, level, livingEntity, k);
 			this.render(itemStack, transformType, bl, poseStack, multiBufferSource, i, j, bakedModel);
 		}
 	}
 
 	public void renderGuiItem(ItemStack itemStack, int i, int j) {
-		this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, null));
+		this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, null, 0));
 	}
 
 	protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
@@ -292,25 +293,29 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j);
+		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, 0);
+	}
+
+	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k);
 	}
 
 	public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(null, itemStack, i, j);
+		this.tryRenderGuiItem(null, itemStack, i, j, 0);
 	}
 
-	public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(livingEntity, itemStack, i, j);
+	public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(livingEntity, itemStack, i, j, k);
 	}
 
-	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
+	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
 		if (!itemStack.isEmpty()) {
 			this.blitOffset += 50.0F;
 
 			try {
-				this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, livingEntity));
-			} catch (Throwable var8) {
-				CrashReport crashReport = CrashReport.forThrowable(var8, "Rendering item");
+				this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, livingEntity, k));
+			} catch (Throwable var9) {
+				CrashReport crashReport = CrashReport.forThrowable(var9, "Rendering item");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
 				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
 				crashReportCategory.setDetail("Item Damage", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getDamageValue())));

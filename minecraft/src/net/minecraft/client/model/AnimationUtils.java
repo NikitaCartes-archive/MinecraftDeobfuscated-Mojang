@@ -55,11 +55,14 @@ public class AnimationUtils {
 		bobArms(modelPart, modelPart2, g);
 	}
 
+	public static void bobModelPart(ModelPart modelPart, float f, float g) {
+		modelPart.zRot = modelPart.zRot + g * (Mth.cos(f * 0.09F) * 0.05F + 0.05F);
+		modelPart.xRot = modelPart.xRot + g * Mth.sin(f * 0.067F) * 0.05F;
+	}
+
 	public static void bobArms(ModelPart modelPart, ModelPart modelPart2, float f) {
-		modelPart.zRot = modelPart.zRot + Mth.cos(f * 0.09F) * 0.05F + 0.05F;
-		modelPart2.zRot = modelPart2.zRot - (Mth.cos(f * 0.09F) * 0.05F + 0.05F);
-		modelPart.xRot = modelPart.xRot + Mth.sin(f * 0.067F) * 0.05F;
-		modelPart2.xRot = modelPart2.xRot - Mth.sin(f * 0.067F) * 0.05F;
+		bobModelPart(modelPart, f, 1.0F);
+		bobModelPart(modelPart2, f, -1.0F);
 	}
 
 	public static void animateZombieArms(ModelPart modelPart, ModelPart modelPart2, boolean bl, float f, float g) {
@@ -75,9 +78,5 @@ public class AnimationUtils {
 		modelPart2.xRot += h * 1.2F - i * 0.4F;
 		modelPart.xRot += h * 1.2F - i * 0.4F;
 		bobArms(modelPart2, modelPart, g);
-	}
-
-	public static float getSpyglassArmXRot(ModelPart modelPart) {
-		return modelPart.xRot * 0.95F - 2.277655F;
 	}
 }

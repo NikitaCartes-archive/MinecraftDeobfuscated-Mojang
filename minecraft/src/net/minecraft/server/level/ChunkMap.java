@@ -1134,16 +1134,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
 				boolean bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
 				if (bl) {
-					boolean bl2 = this.entity.forcedLoading;
-					if (!bl2) {
-						ChunkPos chunkPos = this.entity.chunkPosition();
-						ChunkHolder chunkHolder = ChunkMap.this.getVisibleChunkIfPresent(chunkPos.toLong());
-						if (chunkHolder != null && chunkHolder.getTickingChunk() != null) {
-							bl2 = ChunkMap.checkerboardDistance(chunkPos, serverPlayer, false) <= ChunkMap.this.viewDistance;
-						}
-					}
-
-					if (bl2 && this.seenBy.add(serverPlayer.connection)) {
+					if (this.seenBy.add(serverPlayer.connection)) {
 						this.serverEntity.addPairing(serverPlayer);
 					}
 				} else if (this.seenBy.remove(serverPlayer.connection)) {

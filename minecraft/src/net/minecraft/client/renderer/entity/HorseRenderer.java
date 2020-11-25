@@ -26,7 +26,7 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel
 	});
 
 	public HorseRenderer(EntityRendererProvider.Context context) {
-		super(context, new HorseModel<>(context.getLayer(ModelLayers.HORSE)), 1.1F);
+		super(context, new HorseModel<>(context.bakeLayer(ModelLayers.HORSE)), 1.1F);
 		this.addLayer(new HorseMarkingLayer(this));
 		this.addLayer(new HorseArmorLayer(this, context.getModelSet()));
 	}

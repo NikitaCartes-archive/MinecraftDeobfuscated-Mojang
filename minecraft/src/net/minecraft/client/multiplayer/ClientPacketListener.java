@@ -364,8 +364,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.setScreen(new ReceivingLevelScreen());
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.isReducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.shouldShowDeathScreen());
-		this.minecraft.gameMode.setLocalMode(clientboundLoginPacket.getGameType());
-		this.minecraft.gameMode.setPreviousLocalMode(clientboundLoginPacket.getPreviousGameType());
+		this.minecraft.gameMode.setLocalMode(clientboundLoginPacket.getGameType(), clientboundLoginPacket.getPreviousGameType());
 		this.minecraft.options.broadcastOptions();
 		this.connection
 			.send(
@@ -965,8 +964,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			this.minecraft.setScreen(null);
 		}
 
-		this.minecraft.gameMode.setLocalMode(clientboundRespawnPacket.getPlayerGameType());
-		this.minecraft.gameMode.setPreviousLocalMode(clientboundRespawnPacket.getPreviousPlayerGameType());
+		this.minecraft.gameMode.setLocalMode(clientboundRespawnPacket.getPlayerGameType(), clientboundRespawnPacket.getPreviousPlayerGameType());
 	}
 
 	@Override

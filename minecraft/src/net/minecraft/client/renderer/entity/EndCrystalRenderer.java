@@ -34,7 +34,7 @@ public class EndCrystalRenderer extends EntityRenderer<EndCrystal> {
 	public EndCrystalRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		this.shadowRadius = 0.5F;
-		ModelPart modelPart = context.getLayer(ModelLayers.END_CRYSTAL);
+		ModelPart modelPart = context.bakeLayer(ModelLayers.END_CRYSTAL);
 		this.glass = modelPart.getChild("glass");
 		this.cube = modelPart.getChild("cube");
 		this.base = modelPart.getChild("base");

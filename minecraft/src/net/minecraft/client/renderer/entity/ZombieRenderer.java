@@ -18,9 +18,9 @@ public class ZombieRenderer extends AbstractZombieRenderer<Zombie, ZombieModel<Z
 	) {
 		super(
 			context,
-			new ZombieModel<>(context.getLayer(modelLayerLocation)),
-			new ZombieModel<>(context.getLayer(modelLayerLocation2)),
-			new ZombieModel<>(context.getLayer(modelLayerLocation3))
+			new ZombieModel<>(context.bakeLayer(modelLayerLocation)),
+			new ZombieModel<>(context.bakeLayer(modelLayerLocation2)),
+			new ZombieModel<>(context.bakeLayer(modelLayerLocation3))
 		);
 	}
 }

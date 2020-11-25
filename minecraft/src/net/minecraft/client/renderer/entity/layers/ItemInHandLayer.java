@@ -38,7 +38,7 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		}
 	}
 
-	private void renderArmWithItem(
+	protected void renderArmWithItem(
 		LivingEntity livingEntity,
 		ItemStack itemStack,
 		ItemTransforms.TransformType transformType,

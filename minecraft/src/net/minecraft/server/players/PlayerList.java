@@ -54,10 +54,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerScoreboard;
-import net.minecraft.server.level.DemoMode;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -70,7 +68,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
@@ -109,7 +106,6 @@ public abstract class PlayerList {
 	private final RegistryAccess.RegistryHolder registryHolder;
 	protected final int maxPlayers;
 	private int viewDistance;
-	private GameType overrideGameMode;
 	private boolean allowCheatsForAllPlayers;
 	private int sendAllPlayerInfoIn;
 
@@ -142,7 +138,6 @@ public abstract class PlayerList {
 		}
 
 		serverPlayer.setLevel(serverLevel2);
-		serverPlayer.gameMode.setLevel((ServerLevel)serverPlayer.level);
 		String string2 = "local";
 		if (connection.getRemoteAddress() != null) {
 			string2 = connection.getRemoteAddress().toString();
@@ -158,7 +153,7 @@ public abstract class PlayerList {
 			serverPlayer.getZ()
 		);
 		LevelData levelData = serverLevel2.getLevelData();
-		this.updatePlayerGameMode(serverPlayer, null, serverLevel2);
+		serverPlayer.loadGameTypes(compoundTag);
 		ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer);
 		GameRules gameRules = serverLevel2.getGameRules();
 		boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
@@ -423,15 +418,7 @@ public abstract class PlayerList {
 			serverPlayer3.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
 		}
 
-		ServerLevel serverLevel = this.server.overworld();
-		ServerPlayerGameMode serverPlayerGameMode;
-		if (this.server.isDemo()) {
-			serverPlayerGameMode = new DemoMode(serverLevel);
-		} else {
-			serverPlayerGameMode = new ServerPlayerGameMode(serverLevel);
-		}
-
-		return new ServerPlayer(this.server, serverLevel, gameProfile, serverPlayerGameMode);
+		return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
 	}
 
 	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
@@ -449,14 +436,7 @@ public abstract class PlayerList {
 		}
 
 		ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
-		ServerPlayerGameMode serverPlayerGameMode;
-		if (this.server.isDemo()) {
-			serverPlayerGameMode = new DemoMode(serverLevel2);
-		} else {
-			serverPlayerGameMode = new ServerPlayerGameMode(serverLevel2);
-		}
-
-		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayerGameMode);
+		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());
@@ -466,7 +446,6 @@ public abstract class PlayerList {
 			serverPlayer2.addTag(string);
 		}
 
-		this.updatePlayerGameMode(serverPlayer2, serverPlayer, serverLevel2);
 		boolean bl3 = false;
 		if (optional.isPresent()) {
 			BlockState blockState = serverLevel2.getBlockState(blockPos);
@@ -751,21 +730,6 @@ public abstract class PlayerList {
 
 	public CompoundTag getSingleplayerData() {
 		return null;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setOverrideGameMode(GameType gameType) {
-		this.overrideGameMode = gameType;
-	}
-
-	private void updatePlayerGameMode(ServerPlayer serverPlayer, @Nullable ServerPlayer serverPlayer2, ServerLevel serverLevel) {
-		if (serverPlayer2 != null) {
-			serverPlayer.gameMode.setGameModeForPlayer(serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.gameMode.getPreviousGameModeForPlayer());
-		} else if (this.overrideGameMode != null) {
-			serverPlayer.gameMode.setGameModeForPlayer(this.overrideGameMode, GameType.NOT_SET);
-		}
-
-		serverPlayer.gameMode.updateGameMode(serverLevel.getServer().getWorldData().getGameType());
 	}
 
 	@Environment(EnvType.CLIENT)

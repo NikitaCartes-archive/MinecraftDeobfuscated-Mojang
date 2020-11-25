@@ -21,19 +21,20 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
 	public void render(CampfireBlockEntity campfireBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		Direction direction = campfireBlockEntity.getBlockState().getValue(CampfireBlock.FACING);
 		NonNullList<ItemStack> nonNullList = campfireBlockEntity.getItems();
+		int k = (int)campfireBlockEntity.getBlockPos().asLong();
 
-		for (int k = 0; k < nonNullList.size(); k++) {
-			ItemStack itemStack = nonNullList.get(k);
+		for (int l = 0; l < nonNullList.size(); l++) {
+			ItemStack itemStack = nonNullList.get(l);
 			if (itemStack != ItemStack.EMPTY) {
 				poseStack.pushPose();
 				poseStack.translate(0.5, 0.44921875, 0.5);
-				Direction direction2 = Direction.from2DDataValue((k + direction.get2DDataValue()) % 4);
+				Direction direction2 = Direction.from2DDataValue((l + direction.get2DDataValue()) % 4);
 				float g = -direction2.toYRot();
 				poseStack.mulPose(Vector3f.YP.rotationDegrees(g));
 				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 				poseStack.translate(-0.3125, -0.3125, 0.0);
 				poseStack.scale(0.375F, 0.375F, 0.375F);
-				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource);
+				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource, k + l);
 				poseStack.popPose();
 			}
 		}

@@ -20,7 +20,7 @@ public class EndermanRenderer extends MobRenderer<EnderMan, EndermanModel<EnderM
 	private final Random random = new Random();
 
 	public EndermanRenderer(EntityRendererProvider.Context context) {
-		super(context, new EndermanModel<>(context.getLayer(ModelLayers.ENDERMAN)), 0.5F);
+		super(context, new EndermanModel<>(context.bakeLayer(ModelLayers.ENDERMAN)), 0.5F);
 		this.addLayer(new EnderEyesLayer<>(this));
 		this.addLayer(new CarriedBlockLayer(this));
 	}

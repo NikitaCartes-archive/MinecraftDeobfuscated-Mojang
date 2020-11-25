@@ -9,6 +9,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class ShareToLanScreen extends Screen {
@@ -16,7 +17,7 @@ public class ShareToLanScreen extends Screen {
 	private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
 	private static final Component INFO_TEXT = new TranslatableComponent("lanServer.otherPlayers");
 	private final Screen lastScreen;
-	private SelectedGameMode gameMode = SelectedGameMode.SURVIVAL;
+	private GameType gameMode = GameType.SURVIVAL;
 	private boolean commands;
 
 	public ShareToLanScreen(Screen screen) {
@@ -27,10 +28,10 @@ public class ShareToLanScreen extends Screen {
 	@Override
 	protected void init() {
 		this.addButton(
-			CycleButton.<SelectedGameMode>builder(SelectedGameMode::getDisplayName)
-				.withValues(SelectedGameMode.SURVIVAL, SelectedGameMode.SPECTATOR, SelectedGameMode.CREATIVE, SelectedGameMode.ADVENTURE)
+			CycleButton.<GameType>builder(GameType::getShortDisplayName)
+				.withValues(GameType.SURVIVAL, GameType.SPECTATOR, GameType.CREATIVE, GameType.ADVENTURE)
 				.withInitialValue(this.gameMode)
-				.create(this.width / 2 - 155, 100, 150, 20, GAME_MODE_LABEL, (cycleButton, selectedGameMode) -> this.gameMode = selectedGameMode)
+				.create(this.width / 2 - 155, 100, 150, 20, GAME_MODE_LABEL, (cycleButton, gameType) -> this.gameMode = gameType)
 		);
 		this.addButton(
 			CycleButton.onOffBuilder(this.commands).create(this.width / 2 + 5, 100, 150, 20, ALLOW_COMMANDS_LABEL, (cycleButton, boolean_) -> this.commands = boolean_)
@@ -39,7 +40,7 @@ public class ShareToLanScreen extends Screen {
 			this.minecraft.setScreen(null);
 			int i = HttpUtil.getAvailablePort();
 			Component component;
-			if (this.minecraft.getSingleplayerServer().publishServer(this.gameMode.getGameType(), this.commands, i)) {
+			if (this.minecraft.getSingleplayerServer().publishServer(this.gameMode, this.commands, i)) {
 				component = new TranslatableComponent("commands.publish.started", i);
 			} else {
 				component = new TranslatableComponent("commands.publish.failed");

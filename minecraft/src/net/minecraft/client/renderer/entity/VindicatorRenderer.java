@@ -15,7 +15,7 @@ public class VindicatorRenderer extends IllagerRenderer<Vindicator> {
 	private static final ResourceLocation VINDICATOR = new ResourceLocation("textures/entity/illager/vindicator.png");
 
 	public VindicatorRenderer(EntityRendererProvider.Context context) {
-		super(context, new IllagerModel<>(context.getLayer(ModelLayers.VINDICATOR)), 0.5F);
+		super(context, new IllagerModel<>(context.bakeLayer(ModelLayers.VINDICATOR)), 0.5F);
 		this.addLayer(
 			new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>(this) {
 				public void render(

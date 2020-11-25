@@ -19,7 +19,7 @@ public class LecternRenderer implements BlockEntityRenderer<LecternBlockEntity> 
 	private final BookModel bookModel;
 
 	public LecternRenderer(BlockEntityRendererProvider.Context context) {
-		this.bookModel = new BookModel(context.getLayer(ModelLayers.BOOK));
+		this.bookModel = new BookModel(context.bakeLayer(ModelLayers.BOOK));
 	}
 
 	public void render(LecternBlockEntity lecternBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {

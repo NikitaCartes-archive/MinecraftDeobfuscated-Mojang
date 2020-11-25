@@ -63,6 +63,7 @@ public final class ItemTags {
 	public static final Tag.Named<Item> BEACON_PAYMENT_ITEMS = bind("beacon_payment_items");
 	public static final Tag.Named<Item> STONE_TOOL_MATERIALS = bind("stone_tool_materials");
 	public static final Tag.Named<Item> STONE_CRAFTING_MATERIALS = bind("stone_crafting_materials");
+	public static final Tag.Named<Item> FREEZE_IMMUNE_WEARABLES = bind("freeze_immune_wearables");
 
 	private static Tag.Named<Item> bind(String string) {
 		return HELPER.bind(string);

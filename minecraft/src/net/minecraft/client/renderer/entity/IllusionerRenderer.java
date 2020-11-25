@@ -17,7 +17,7 @@ public class IllusionerRenderer extends IllagerRenderer<Illusioner> {
 	private static final ResourceLocation ILLUSIONER = new ResourceLocation("textures/entity/illager/illusioner.png");
 
 	public IllusionerRenderer(EntityRendererProvider.Context context) {
-		super(context, new IllagerModel<>(context.getLayer(ModelLayers.ILLUSIONER)), 0.5F);
+		super(context, new IllagerModel<>(context.bakeLayer(ModelLayers.ILLUSIONER)), 0.5F);
 		this.addLayer(
 			new ItemInHandLayer<Illusioner, IllagerModel<Illusioner>>(this) {
 				public void render(

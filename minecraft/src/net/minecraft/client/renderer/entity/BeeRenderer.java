@@ -15,7 +15,7 @@ public class BeeRenderer extends MobRenderer<Bee, BeeModel<Bee>> {
 	private static final ResourceLocation NECTAR_BEE_TEXTURE = new ResourceLocation("textures/entity/bee/bee_nectar.png");
 
 	public BeeRenderer(EntityRendererProvider.Context context) {
-		super(context, new BeeModel<>(context.getLayer(ModelLayers.BEE)), 0.4F);
+		super(context, new BeeModel<>(context.bakeLayer(ModelLayers.BEE)), 0.4F);
 	}
 
 	public ResourceLocation getTextureLocation(Bee bee) {

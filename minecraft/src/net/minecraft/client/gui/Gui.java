@@ -510,36 +510,37 @@ public class Gui extends GuiComponent {
 			RenderSystem.enableRescaleNormal();
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
+			int m = 1;
 
-			for (int m = 0; m < 9; m++) {
-				int n = i - 90 + m * 20 + 2;
-				int o = this.screenHeight - 16 - 3;
-				this.renderSlot(n, o, f, player, player.getInventory().items.get(m));
+			for (int n = 0; n < 9; n++) {
+				int o = i - 90 + n * 20 + 2;
+				int p = this.screenHeight - 16 - 3;
+				this.renderSlot(o, p, f, player, player.getInventory().items.get(n), m++);
 			}
 
 			if (!itemStack.isEmpty()) {
-				int m = this.screenHeight - 16 - 3;
+				int n = this.screenHeight - 16 - 3;
 				if (humanoidArm == HumanoidArm.LEFT) {
-					this.renderSlot(i - 91 - 26, m, f, player, itemStack);
+					this.renderSlot(i - 91 - 26, n, f, player, itemStack, m++);
 				} else {
-					this.renderSlot(i + 91 + 10, m, f, player, itemStack);
+					this.renderSlot(i + 91 + 10, n, f, player, itemStack, m++);
 				}
 			}
 
 			if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.HOTBAR) {
 				float g = this.minecraft.player.getAttackStrengthScale(0.0F);
 				if (g < 1.0F) {
-					int n = this.screenHeight - 20;
-					int o = i + 91 + 6;
+					int o = this.screenHeight - 20;
+					int p = i + 91 + 6;
 					if (humanoidArm == HumanoidArm.RIGHT) {
-						o = i - 91 - 22;
+						p = i - 91 - 22;
 					}
 
 					this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
-					int p = (int)(g * 19.0F);
+					int q = (int)(g * 19.0F);
 					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-					this.blit(poseStack, o, n, 0, 94, 18, 18);
-					this.blit(poseStack, o, n + 18 - p, 18, 112 - p, 18, p);
+					this.blit(poseStack, p, o, 0, 94, 18, 18);
+					this.blit(poseStack, p, o + 18 - q, 18, 112 - q, 18, q);
 				}
 			}
 
@@ -1087,7 +1088,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
-	private void renderSlot(int i, int j, float f, Player player, ItemStack itemStack) {
+	private void renderSlot(int i, int j, float f, Player player, ItemStack itemStack, int k) {
 		if (!itemStack.isEmpty()) {
 			float g = (float)itemStack.getPopTime() - f;
 			if (g > 0.0F) {
@@ -1098,7 +1099,7 @@ public class Gui extends GuiComponent {
 				RenderSystem.translatef((float)(-(i + 8)), (float)(-(j + 12)), 0.0F);
 			}
 
-			this.itemRenderer.renderAndDecorateItem(player, itemStack, i, j);
+			this.itemRenderer.renderAndDecorateItem(player, itemStack, i, j, k);
 			if (g > 0.0F) {
 				RenderSystem.popMatrix();
 			}

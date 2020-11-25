@@ -23,7 +23,7 @@ public class UndeadHorseRenderer extends AbstractHorseRenderer<AbstractHorse, Ho
 	);
 
 	public UndeadHorseRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
-		super(context, new HorseModel<>(context.getLayer(modelLayerLocation)), 1.0F);
+		super(context, new HorseModel<>(context.bakeLayer(modelLayerLocation)), 1.0F);
 	}
 
 	public ResourceLocation getTextureLocation(AbstractHorse abstractHorse) {

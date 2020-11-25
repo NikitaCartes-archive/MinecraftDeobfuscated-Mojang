@@ -26,7 +26,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 	public MinecartRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
 		super(context);
 		this.shadowRadius = 0.7F;
-		this.model = new MinecartModel<>(context.getLayer(modelLayerLocation));
+		this.model = new MinecartModel<>(context.bakeLayer(modelLayerLocation));
 	}
 
 	public void render(T abstractMinecart, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

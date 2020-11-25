@@ -19,7 +19,7 @@ public class EvokerFangsRenderer extends EntityRenderer<EvokerFangs> {
 
 	public EvokerFangsRenderer(EntityRendererProvider.Context context) {
 		super(context);
-		this.model = new EvokerFangsModel<>(context.getLayer(ModelLayers.EVOKER_FANGS));
+		this.model = new EvokerFangsModel<>(context.bakeLayer(ModelLayers.EVOKER_FANGS));
 	}
 
 	public void render(EvokerFangs evokerFangs, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

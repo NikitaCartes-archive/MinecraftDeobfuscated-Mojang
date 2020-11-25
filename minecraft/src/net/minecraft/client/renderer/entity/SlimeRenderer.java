@@ -16,7 +16,7 @@ public class SlimeRenderer extends MobRenderer<Slime, SlimeModel<Slime>> {
 	private static final ResourceLocation SLIME_LOCATION = new ResourceLocation("textures/entity/slime/slime.png");
 
 	public SlimeRenderer(EntityRendererProvider.Context context) {
-		super(context, new SlimeModel<>(context.getLayer(ModelLayers.SLIME)), 0.25F);
+		super(context, new SlimeModel<>(context.bakeLayer(ModelLayers.SLIME)), 0.25F);
 		this.addLayer(new SlimeOuterLayer<>(this, context.getModelSet()));
 	}
 
