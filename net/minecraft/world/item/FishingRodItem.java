@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Item;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class FishingRodItem
 extends Item
@@ -32,8 +34,10 @@ implements Vanishable {
                 itemStack.hurtAndBreak(i, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
+            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_CAST, player2);
         } else {
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
+            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_REEL_IN, player2);
             if (!level.isClientSide) {
                 int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);
                 int j = EnchantmentHelper.getFishingLuckBonus(itemStack);

@@ -46,7 +46,9 @@ public class Sheets {
     private static final RenderType TRANSLUCENT_CULL_BLOCK_SHEET = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
     public static final Material DEFAULT_SHULKER_TEXTURE_LOCATION = new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker"));
     public static final List<Material> SHULKER_TEXTURE_LOCATION = Stream.of("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black").map(string -> new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker_" + string))).collect(ImmutableList.toImmutableList());
-    public static final Map<WoodType, Material> SIGN_MATERIALS = WoodType.values().collect(Collectors.toMap(Function.identity(), Sheets::signTexture));
+    public static final Map<WoodType, Material> SIGN_MATERIALS = WoodType.values().collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
+    public static final Map<BannerPattern, Material> BANNER_MATERIALS = Arrays.stream(BannerPattern.values()).collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
+    public static final Map<BannerPattern, Material> SHIELD_MATERIALS = Arrays.stream(BannerPattern.values()).collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
     public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + dyeColor.getName()))).toArray(Material[]::new);
     public static final Material CHEST_TRAP_LOCATION = Sheets.chestMaterial("trapped");
     public static final Material CHEST_TRAP_LOCATION_LEFT = Sheets.chestMaterial("trapped_left");
@@ -102,10 +104,8 @@ public class Sheets {
     public static void getAllMaterials(Consumer<Material> consumer) {
         consumer.accept(DEFAULT_SHULKER_TEXTURE_LOCATION);
         SHULKER_TEXTURE_LOCATION.forEach(consumer);
-        for (BannerPattern bannerPattern : BannerPattern.values()) {
-            consumer.accept(new Material(BANNER_SHEET, bannerPattern.location(true)));
-            consumer.accept(new Material(SHIELD_SHEET, bannerPattern.location(false)));
-        }
+        BANNER_MATERIALS.values().forEach(consumer);
+        SHIELD_MATERIALS.values().forEach(consumer);
         SIGN_MATERIALS.values().forEach(consumer);
         for (Material material : BED_TEXTURES) {
             consumer.accept(material);
@@ -122,8 +122,28 @@ public class Sheets {
         consumer.accept(ENDER_CHEST_LOCATION);
     }
 
-    public static Material signTexture(WoodType woodType) {
+    private static Material createSignMaterial(WoodType woodType) {
         return new Material(SIGN_SHEET, new ResourceLocation("entity/signs/" + woodType.name()));
+    }
+
+    public static Material getSignMaterial(WoodType woodType) {
+        return SIGN_MATERIALS.get(woodType);
+    }
+
+    private static Material createBannerMaterial(BannerPattern bannerPattern) {
+        return new Material(BANNER_SHEET, bannerPattern.location(true));
+    }
+
+    public static Material getBannerMaterial(BannerPattern bannerPattern) {
+        return BANNER_MATERIALS.get((Object)bannerPattern);
+    }
+
+    private static Material createShieldMaterial(BannerPattern bannerPattern) {
+        return new Material(SHIELD_SHEET, bannerPattern.location(false));
+    }
+
+    public static Material getShieldMaterial(BannerPattern bannerPattern) {
+        return SHIELD_MATERIALS.get((Object)bannerPattern);
     }
 
     private static Material chestMaterial(String string) {

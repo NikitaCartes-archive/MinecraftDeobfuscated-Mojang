@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import org.jetbrains.annotations.Nullable;
 
 public interface EntityBlock {
@@ -17,6 +18,11 @@ public interface EntityBlock {
 
     @Nullable
     default public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        return null;
+    }
+
+    @Nullable
+    default public <T extends BlockEntity> GameEventListener getListener(Level level, T blockEntity) {
         return null;
     }
 }

@@ -16,6 +16,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class AnimationMetadataSectionSerializer
@@ -53,6 +54,7 @@ implements MetadataSectionSerializer<AnimationMetadataSection> {
         return new AnimationMetadataSection(list, k, j, i, bl);
     }
 
+    @Nullable
     private AnimationFrame getFrame(int i, JsonElement jsonElement) {
         if (jsonElement.isJsonPrimitive()) {
             return new AnimationFrame(GsonHelper.convertToInt(jsonElement, "frames[" + i + "]"));

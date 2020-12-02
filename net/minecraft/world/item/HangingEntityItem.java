@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HangingEntityItem
 extends Item {
@@ -52,6 +54,7 @@ extends Item {
         if (hangingEntity.survives()) {
             if (!level.isClientSide) {
                 hangingEntity.playPlacementSound();
+                level.gameEvent((Entity)player, GameEvent.BLOCK_PLACE, blockPos);
                 level.addFreshEntity(hangingEntity);
             }
             itemStack.shrink(1);

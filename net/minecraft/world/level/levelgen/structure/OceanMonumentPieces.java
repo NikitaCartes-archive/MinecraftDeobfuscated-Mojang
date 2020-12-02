@@ -1599,7 +1599,7 @@ public class OceanMonumentPieces {
         protected static final int GRIDROOM_RIGHTWING_CONNECT_INDEX = OceanMonumentPiece.getRoomIndex(4, 1, 0);
         protected RoomDefinition roomDefinition;
 
-        protected static final int getRoomIndex(int i, int j, int k) {
+        protected static int getRoomIndex(int i, int j, int k) {
             return j * 25 + k * 5 + i;
         }
 

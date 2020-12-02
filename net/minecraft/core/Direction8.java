@@ -18,14 +18,6 @@ public enum Direction8 {
     WEST(Direction.WEST),
     NORTH_WEST(Direction.NORTH, Direction.WEST);
 
-    private static final int NORTH_WEST_MASK;
-    private static final int WEST_MASK;
-    private static final int SOUTH_WEST_MASK;
-    private static final int SOUTH_MASK;
-    private static final int SOUTH_EAST_MASK;
-    private static final int EAST_MASK;
-    private static final int NORTH_EAST_MASK;
-    private static final int NORTH_MASK;
     private final Set<Direction> directions;
 
     private Direction8(Direction ... directions) {
@@ -34,17 +26,6 @@ public enum Direction8 {
 
     public Set<Direction> getDirections() {
         return this.directions;
-    }
-
-    static {
-        NORTH_WEST_MASK = 1 << NORTH_WEST.ordinal();
-        WEST_MASK = 1 << WEST.ordinal();
-        SOUTH_WEST_MASK = 1 << SOUTH_WEST.ordinal();
-        SOUTH_MASK = 1 << SOUTH.ordinal();
-        SOUTH_EAST_MASK = 1 << SOUTH_EAST.ordinal();
-        EAST_MASK = 1 << EAST.ordinal();
-        NORTH_EAST_MASK = 1 << NORTH_EAST.ordinal();
-        NORTH_MASK = 1 << NORTH.ordinal();
     }
 }
 

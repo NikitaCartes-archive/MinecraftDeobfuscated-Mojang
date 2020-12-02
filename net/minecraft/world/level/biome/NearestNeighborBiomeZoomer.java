@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.biome;
 
+import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeZoomer;
@@ -14,7 +15,7 @@ public enum NearestNeighborBiomeZoomer implements BiomeZoomer
 
     @Override
     public Biome getBiome(long l, int i, int j, int k, BiomeManager.NoiseBiomeSource noiseBiomeSource) {
-        return noiseBiomeSource.getNoiseBiome(i >> 2, j >> 2, k >> 2);
+        return noiseBiomeSource.getNoiseBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(j), QuartPos.fromBlock(k));
     }
 }
 

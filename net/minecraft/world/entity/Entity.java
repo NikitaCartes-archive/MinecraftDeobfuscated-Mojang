@@ -103,6 +103,8 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -331,7 +333,7 @@ CommandSource {
         if (this.level == null) {
             return;
         }
-        for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMinBuildHeight(); d += 1.0) {
+        for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMaxBuildHeight(); d += 1.0) {
             this.setPos(this.getX(), d, this.getZ());
             if (this.level.noCollision(this)) break;
         }
@@ -577,11 +579,14 @@ CommandSource {
                         h = 1.0f;
                     }
                     this.playSwimSound(h);
+                    this.gameEvent(GameEvent.SWIM);
                 } else {
                     this.playStepSound(blockPos, blockState2);
+                    this.gameEvent(GameEvent.STEP);
                 }
             } else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState2.isAir()) {
                 this.nextFlap = this.playFlySound(this.moveDist);
+                this.gameEvent(GameEvent.FLAP);
             }
         }
         try {
@@ -814,6 +819,14 @@ CommandSource {
     protected void onInsideBlock(BlockState blockState) {
     }
 
+    protected void gameEvent(@Nullable Entity entity, GameEvent gameEvent) {
+        this.level.gameEvent(entity, gameEvent, this.blockPosition);
+    }
+
+    protected void gameEvent(GameEvent gameEvent) {
+        this.level.gameEvent(this, gameEvent, this.blockPosition);
+    }
+
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
         BlockState blockState2;
         if (blockState.getMaterial().isLiquid()) {
@@ -873,6 +886,7 @@ CommandSource {
         if (bl) {
             if (this.fallDistance > 0.0f) {
                 blockState.getBlock().fallOn(this.level, blockPos, this, this.fallDistance);
+                this.gameEvent(GameEvent.HIT_GROUND);
             }
             this.fallDistance = 0.0f;
         } else if (d < 0.0) {
@@ -1004,6 +1018,7 @@ CommandSource {
             this.level.addParticle(ParticleTypes.SPLASH, this.getX() + d, h + 1.0f, this.getZ() + e, vec3.x, vec3.y, vec3.z);
             ++i;
         }
+        this.gameEvent(GameEvent.SPLASH);
     }
 
     protected BlockState getBlockStateOn() {
@@ -1179,6 +1194,7 @@ CommandSource {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
+        this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
         this.markHurt();
         return false;
     }
@@ -1837,6 +1853,11 @@ CommandSource {
             return false;
         }
         return this.isInvisible();
+    }
+
+    @Nullable
+    public GameEventListenerRegistrar getGameEventListenerRegistrar() {
+        return null;
     }
 
     @Nullable
@@ -2694,6 +2715,10 @@ CommandSource {
                 this.blockPosition = new BlockPos(i, j, k);
             }
             this.levelCallback.onMove();
+            GameEventListenerRegistrar gameEventListenerRegistrar = this.getGameEventListenerRegistrar();
+            if (gameEventListenerRegistrar != null) {
+                gameEventListenerRegistrar.onListenerMove(this.level);
+            }
         }
     }
 

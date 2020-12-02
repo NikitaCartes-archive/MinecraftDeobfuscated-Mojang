@@ -44,7 +44,7 @@ extends Goal {
     protected void setOpen(boolean bl) {
         BlockState blockState;
         if (this.hasDoor && (blockState = this.mob.level.getBlockState(this.doorPos)).getBlock() instanceof DoorBlock) {
-            ((DoorBlock)blockState.getBlock()).setOpen(this.mob.level, blockState, this.doorPos, bl);
+            ((DoorBlock)blockState.getBlock()).setOpen(this.mob, this.mob.level, blockState, this.doorPos, bl);
         }
     }
 

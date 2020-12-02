@@ -31,7 +31,7 @@ extends EdgeDecorator<DC> {
         if (k == decorationContext.getMinBuildHeight()) {
             return Stream.of(new BlockPos[0]);
         }
-        return Stream.of(new BlockPos(i, random.nextInt(k * 2), j));
+        return Stream.of(new BlockPos(i, decorationContext.getMinBuildHeight() + random.nextInt((k - decorationContext.getMinBuildHeight()) * 2), j));
     }
 }
 

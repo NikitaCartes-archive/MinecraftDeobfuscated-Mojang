@@ -66,6 +66,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -209,6 +210,7 @@ implements NeutralMob {
         } else if ((this.isWet || this.isShaking) && this.isShaking) {
             if (this.shakeAnim == 0.0f) {
                 this.playSound(SoundEvents.WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
+                this.gameEvent(GameEvent.WOLF_SHAKING);
             }
             this.shakeAnimO = this.shakeAnim;
             this.shakeAnim += 0.05f;

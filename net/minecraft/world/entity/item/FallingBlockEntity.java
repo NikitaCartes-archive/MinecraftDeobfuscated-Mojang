@@ -3,8 +3,7 @@
  */
 package net.minecraft.world.entity.item;
 
-import com.google.common.collect.Lists;
-import java.util.ArrayList;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
@@ -23,6 +22,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +52,7 @@ extends Entity {
     private boolean cancelDrop;
     private boolean hurtEntities;
     private int fallDamageMax = 40;
-    private float fallDamageAmount = 2.0f;
+    private float fallDamagePerDistance;
     public CompoundTag blockData;
     protected static final EntityDataAccessor<BlockPos> DATA_START_POS = SynchedEntityData.defineId(FallingBlockEntity.class, EntityDataSerializers.BLOCK_POS);
 
@@ -191,21 +191,32 @@ extends Entity {
 
     @Override
     public boolean causeFallDamage(float f, float g) {
-        int i;
-        if (this.hurtEntities && (i = Mth.ceil(f - 1.0f)) > 0) {
-            ArrayList<Entity> list = Lists.newArrayList(this.level.getEntities(this, this.getBoundingBox()));
-            boolean bl = this.blockState.is(BlockTags.ANVIL);
-            DamageSource damageSource = bl ? DamageSource.ANVIL : DamageSource.FALLING_BLOCK;
-            for (Entity entity : list) {
-                entity.hurt(damageSource, Math.min(Mth.floor((float)i * this.fallDamageAmount), this.fallDamageMax));
-            }
-            if (bl && (double)this.random.nextFloat() < (double)0.05f + (double)i * 0.05) {
-                BlockState blockState = AnvilBlock.damage(this.blockState);
-                if (blockState == null) {
-                    this.cancelDrop = true;
-                } else {
-                    this.blockState = blockState;
-                }
+        DamageSource damageSource;
+        Predicate<Entity> predicate;
+        if (!this.hurtEntities) {
+            return false;
+        }
+        int i = Mth.ceil(f - 1.0f);
+        if (i < 0) {
+            return false;
+        }
+        if (this.blockState.getBlock() instanceof Fallable) {
+            Fallable fallable = (Fallable)((Object)this.blockState.getBlock());
+            predicate = fallable.getHurtsEntitySelector();
+            damageSource = fallable.getFallDamageSource();
+        } else {
+            predicate = EntitySelector.NO_SPECTATORS;
+            damageSource = DamageSource.FALLING_BLOCK;
+        }
+        float h = Math.min(Mth.floor((float)i * this.fallDamagePerDistance), this.fallDamageMax);
+        this.level.getEntities(this, this.getBoundingBox(), predicate).forEach(entity -> entity.hurt(damageSource, h));
+        boolean bl = this.blockState.is(BlockTags.ANVIL);
+        if (bl && (double)this.random.nextFloat() < (double)0.05f + (double)i * 0.05) {
+            BlockState blockState = AnvilBlock.damage(this.blockState);
+            if (blockState == null) {
+                this.cancelDrop = true;
+            } else {
+                this.blockState = blockState;
             }
         }
         return false;
@@ -217,7 +228,7 @@ extends Entity {
         compoundTag.putInt("Time", this.time);
         compoundTag.putBoolean("DropItem", this.dropItem);
         compoundTag.putBoolean("HurtEntities", this.hurtEntities);
-        compoundTag.putFloat("FallHurtAmount", this.fallDamageAmount);
+        compoundTag.putFloat("FallHurtAmount", this.fallDamagePerDistance);
         compoundTag.putInt("FallHurtMax", this.fallDamageMax);
         if (this.blockData != null) {
             compoundTag.put("TileEntityData", this.blockData);
@@ -230,7 +241,7 @@ extends Entity {
         this.time = compoundTag.getInt("Time");
         if (compoundTag.contains("HurtEntities", 99)) {
             this.hurtEntities = compoundTag.getBoolean("HurtEntities");
-            this.fallDamageAmount = compoundTag.getFloat("FallHurtAmount");
+            this.fallDamagePerDistance = compoundTag.getFloat("FallHurtAmount");
             this.fallDamageMax = compoundTag.getInt("FallHurtMax");
         } else if (this.blockState.is(BlockTags.ANVIL)) {
             this.hurtEntities = true;
@@ -251,8 +262,10 @@ extends Entity {
         return this.level;
     }
 
-    public void setHurtsEntities(boolean bl) {
-        this.hurtEntities = bl;
+    public void setHurtsEntities(float f, int i) {
+        this.hurtEntities = true;
+        this.fallDamagePerDistance = f;
+        this.fallDamageMax = i;
     }
 
     @Override

@@ -4,10 +4,12 @@
 package net.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 
 public abstract class ContainerOpenersCounter {
@@ -21,19 +23,21 @@ public abstract class ContainerOpenersCounter {
 
     protected abstract boolean isOwnContainer(Player var1);
 
-    public void incrementOpeners(Level level, BlockPos blockPos, BlockState blockState) {
+    public void incrementOpeners(Player player, Level level, BlockPos blockPos, BlockState blockState) {
         int i;
         if ((i = this.openCount++) == 0) {
             this.onOpen(level, blockPos, blockState);
+            level.gameEvent((Entity)player, GameEvent.CONTAINER_OPEN, blockPos);
             ContainerOpenersCounter.scheduleRecheck(level, blockPos, blockState);
         }
         this.openerCountChanged(level, blockPos, blockState, i, this.openCount);
     }
 
-    public void decrementOpeners(Level level, BlockPos blockPos, BlockState blockState) {
+    public void decrementOpeners(Player player, Level level, BlockPos blockPos, BlockState blockState) {
         int i = this.openCount--;
         if (this.openCount == 0) {
             this.onClose(level, blockPos, blockState);
+            level.gameEvent((Entity)player, GameEvent.CONTAINER_CLOSE, blockPos);
         }
         this.openerCountChanged(level, blockPos, blockState, i, this.openCount);
     }
@@ -56,8 +60,10 @@ public abstract class ContainerOpenersCounter {
             boolean bl3 = bl2 = j != 0;
             if (bl && !bl2) {
                 this.onOpen(level, blockPos, blockState);
+                level.gameEvent(null, GameEvent.CONTAINER_OPEN, blockPos);
             } else if (!bl) {
                 this.onClose(level, blockPos, blockState);
+                level.gameEvent(null, GameEvent.CONTAINER_CLOSE, blockPos);
             }
             this.openCount = i;
         }

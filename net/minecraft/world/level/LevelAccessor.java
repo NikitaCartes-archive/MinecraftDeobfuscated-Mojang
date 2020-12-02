@@ -10,12 +10,14 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CommonLevelAccessor;
 import net.minecraft.world.level.LevelTimeAccess;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
 import org.jetbrains.annotations.Nullable;
@@ -58,12 +60,18 @@ LevelTimeAccess {
 
     public void levelEvent(@Nullable Player var1, int var2, BlockPos var3, int var4);
 
-    default public int getLogicalHeight() {
-        return this.dimensionType().logicalHeight();
-    }
-
     default public void levelEvent(int i, BlockPos blockPos, int j) {
         this.levelEvent(null, i, blockPos, j);
+    }
+
+    public void gameEvent(@Nullable Entity var1, GameEvent var2, BlockPos var3);
+
+    default public void gameEvent(GameEvent gameEvent, BlockPos blockPos) {
+        this.gameEvent(null, gameEvent, blockPos);
+    }
+
+    default public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Entity entity2) {
+        this.gameEvent(entity, gameEvent, entity2.blockPosition());
     }
 }
 

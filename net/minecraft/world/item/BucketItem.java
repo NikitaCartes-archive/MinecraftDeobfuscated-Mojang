@@ -15,6 +15,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -68,6 +70,7 @@ implements DispensibleContainerItem {
                 if (blockState.getBlock() instanceof BucketPickup && !(itemStack2 = (bucketPickup = (BucketPickup)((Object)blockState.getBlock())).pickupBlock(level, blockPos, blockState)).isEmpty()) {
                     player.awardStat(Stats.ITEM_USED.get(this));
                     bucketPickup.getPickupSound().ifPresent(soundEvent -> player.playSound((SoundEvent)soundEvent, 1.0f, 1.0f));
+                    level.gameEvent((Entity)player, GameEvent.FLUID_PICKUP, blockPos);
                     ItemStack itemStack3 = ItemUtils.createFilledResult(itemStack, player, itemStack2);
                     if (!level.isClientSide) {
                         CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, itemStack2);
@@ -144,6 +147,7 @@ implements DispensibleContainerItem {
     protected void playEmptySound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos) {
         SoundEvent soundEvent = this.content.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
         levelAccessor.playSound(player, blockPos, soundEvent, SoundSource.BLOCKS, 1.0f, 1.0f);
+        levelAccessor.gameEvent((Entity)player, GameEvent.FLUID_PLACE, blockPos);
     }
 }
 

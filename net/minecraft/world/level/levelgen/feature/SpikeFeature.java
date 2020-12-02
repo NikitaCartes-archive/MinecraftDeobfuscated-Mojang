@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
@@ -142,7 +143,7 @@ extends Feature<SpikeConfiguration> {
             this.radius = k;
             this.height = l;
             this.guarded = bl;
-            this.topBoundingBox = new AABB(i - k, 0.0, j - k, i + k, 256.0, j + k);
+            this.topBoundingBox = new AABB(i - k, DimensionType.MIN_Y, j - k, i + k, DimensionType.MAX_Y, j + k);
         }
 
         public boolean isCenterWithinChunk(BlockPos blockPos) {

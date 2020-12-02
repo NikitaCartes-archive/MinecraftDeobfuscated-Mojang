@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -66,7 +67,7 @@ BiomeManager.NoiseBiomeSource {
 
     @Override
     default public Biome getNoiseBiome(int i, int j, int k) {
-        ChunkAccess chunkAccess = this.getChunk(i >> 2, k >> 2, ChunkStatus.BIOMES, false);
+        ChunkAccess chunkAccess = this.getChunk(QuartPos.toSection(i), QuartPos.toSection(k), ChunkStatus.BIOMES, false);
         if (chunkAccess != null && chunkAccess.getBiomes() != null) {
             return chunkAccess.getBiomes().getNoiseBiome(i, j, k);
         }
@@ -81,6 +82,16 @@ BiomeManager.NoiseBiomeSource {
     public int getSeaLevel();
 
     public DimensionType dimensionType();
+
+    @Override
+    default public int getMinBuildHeight() {
+        return this.dimensionType().minY();
+    }
+
+    @Override
+    default public int getHeight() {
+        return this.dimensionType().height();
+    }
 
     default public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
         return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());

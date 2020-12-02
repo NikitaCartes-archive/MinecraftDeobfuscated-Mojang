@@ -122,7 +122,7 @@ public class SpectatorMenu {
     }
 
     public SpectatorPage getCurrentPage() {
-        return new SpectatorPage(this.category, this.getItems(), this.selectedSlot);
+        return new SpectatorPage(this.getItems(), this.selectedSlot);
     }
 
     @Environment(value=EnvType.CLIENT)

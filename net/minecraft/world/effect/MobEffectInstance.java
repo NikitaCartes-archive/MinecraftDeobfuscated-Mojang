@@ -19,7 +19,6 @@ implements Comparable<MobEffectInstance> {
     private final MobEffect effect;
     private int duration;
     private int amplifier;
-    private boolean splash;
     private boolean ambient;
     @Environment(value=EnvType.CLIENT)
     private boolean noCounter;
@@ -168,9 +167,6 @@ implements Comparable<MobEffectInstance> {
 
     public String toString() {
         String string = this.amplifier > 0 ? this.getDescriptionId() + " x " + (this.amplifier + 1) + ", Duration: " + this.duration : this.getDescriptionId() + ", Duration: " + this.duration;
-        if (this.splash) {
-            string = string + ", Splash: true";
-        }
         if (!this.visible) {
             string = string + ", Particles: false";
         }
@@ -186,7 +182,7 @@ implements Comparable<MobEffectInstance> {
         }
         if (object instanceof MobEffectInstance) {
             MobEffectInstance mobEffectInstance = (MobEffectInstance)object;
-            return this.duration == mobEffectInstance.duration && this.amplifier == mobEffectInstance.amplifier && this.splash == mobEffectInstance.splash && this.ambient == mobEffectInstance.ambient && this.effect.equals(mobEffectInstance.effect);
+            return this.duration == mobEffectInstance.duration && this.amplifier == mobEffectInstance.amplifier && this.ambient == mobEffectInstance.ambient && this.effect.equals(mobEffectInstance.effect);
         }
         return false;
     }
@@ -195,7 +191,6 @@ implements Comparable<MobEffectInstance> {
         int i = this.effect.hashCode();
         i = 31 * i + this.duration;
         i = 31 * i + this.amplifier;
-        i = 31 * i + (this.splash ? 1 : 0);
         i = 31 * i + (this.ambient ? 1 : 0);
         return i;
     }
@@ -219,6 +214,7 @@ implements Comparable<MobEffectInstance> {
         }
     }
 
+    @Nullable
     public static MobEffectInstance load(CompoundTag compoundTag) {
         byte i = compoundTag.getByte("Id");
         MobEffect mobEffect = MobEffect.byId(i);

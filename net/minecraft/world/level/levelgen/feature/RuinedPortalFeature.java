@@ -17,8 +17,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -73,8 +73,8 @@ extends StructureFeature<RuinedPortalConfiguration> {
         block0: for (m = k; m > 15; --m) {
             int n = 0;
             mutableBlockPos.set(0, m, 0);
-            for (BlockGetter blockGetter : list2) {
-                BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+            for (NoiseColumn noiseColumn : list2) {
+                BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
                 if (blockState == null || !types.isOpaque().test(blockState) || ++n != 3) continue;
                 break block0;
             }

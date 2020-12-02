@@ -164,7 +164,7 @@ extends BlockEntity {
         int i = list.size();
         int j = i / 7 * 16;
         int k = blockPos.getX();
-        AABB aABB = new AABB(k, l = blockPos.getY(), m = blockPos.getZ(), k + 1, l + 1, m + 1).inflate(j).expandTowards(0.0, level.getMaxBuildHeight(), 0.0);
+        AABB aABB = new AABB(k, l = blockPos.getY(), m = blockPos.getZ(), k + 1, l + 1, m + 1).inflate(j).expandTowards(0.0, level.getHeight(), 0.0);
         List<Player> list2 = level.getEntitiesOfClass(Player.class, aABB);
         if (list2.isEmpty()) {
             return;

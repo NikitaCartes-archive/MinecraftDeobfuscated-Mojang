@@ -17,7 +17,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
@@ -25,7 +24,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,11 +47,8 @@ implements DataProvider {
     public void run(HashCache hashCache) {
         this.builders.clear();
         this.addTags();
-        SetTag tag = SetTag.empty();
-        Function<ResourceLocation, Tag> function = resourceLocation -> this.builders.containsKey(resourceLocation) ? tag : null;
-        Function<ResourceLocation, Object> function2 = resourceLocation -> this.registry.getOptional((ResourceLocation)resourceLocation).orElse(null);
         this.builders.forEach((resourceLocation, builder) -> {
-            List list = builder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+            List list = builder.getEntries().filter(builderEntry -> !builderEntry.getEntry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).collect(Collectors.toList());
             if (!list.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", resourceLocation, list.stream().map(Objects::toString).collect(Collectors.joining(","))));
             }

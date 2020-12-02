@@ -4,26 +4,27 @@
 package net.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 
 public interface LevelHeightAccessor {
-    public int getSectionsCount();
+    public int getHeight();
 
-    public int getMinSection();
-
-    default public int getMaxSection() {
-        return this.getMinSection() + this.getSectionsCount();
-    }
-
-    default public int getHeight() {
-        return this.getSectionsCount() * 16;
-    }
-
-    default public int getMinBuildHeight() {
-        return this.getMinSection() * 16;
-    }
+    public int getMinBuildHeight();
 
     default public int getMaxBuildHeight() {
         return this.getMinBuildHeight() + this.getHeight();
+    }
+
+    default public int getSectionsCount() {
+        return this.getMaxSection() - this.getMinSection();
+    }
+
+    default public int getMinSection() {
+        return SectionPos.blockToSectionCoord(this.getMinBuildHeight());
+    }
+
+    default public int getMaxSection() {
+        return SectionPos.blockToSectionCoord(this.getMaxBuildHeight() - 1) + 1;
     }
 
     default public boolean isOutsideBuildHeight(BlockPos blockPos) {
@@ -35,7 +36,7 @@ public interface LevelHeightAccessor {
     }
 
     default public int getSectionIndex(int i) {
-        return this.getSectionIndexFromSectionY(i >> 4);
+        return this.getSectionIndexFromSectionY(SectionPos.blockToSectionCoord(i));
     }
 
     default public int getSectionIndexFromSectionY(int i) {

@@ -70,7 +70,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
         }
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        Material material = Sheets.signTexture(woodType);
+        Material material = Sheets.getSignMaterial(woodType);
         VertexConsumer vertexConsumer = material.buffer(multiBufferSource, signModel::renderType);
         signModel.root.render(poseStack, vertexConsumer, i, j);
         poseStack.popPose();

@@ -23,6 +23,7 @@ public final class Material {
     public static final Material FIRE = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().replaceable().build();
     public static final Material DECORATION = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().build();
     public static final Material WEB = Builder.method_15808(new Builder(MaterialColor.WOOL).noCollider()).destroyOnPush().build();
+    public static final Material SCULK = new Builder(MaterialColor.COLOR_BLACK).build();
     public static final Material BUILDABLE_GLASS = new Builder(MaterialColor.NONE).build();
     public static final Material CLAY = new Builder(MaterialColor.CLAY).build();
     public static final Material DIRT = new Builder(MaterialColor.DIRT).build();

@@ -42,7 +42,6 @@ implements ReloadableResourceManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Map<String, FallbackResourceManager> namespacedPacks = Maps.newHashMap();
     private final List<PreparableReloadListener> listeners = Lists.newArrayList();
-    private final List<PreparableReloadListener> recentlyRegistered = Lists.newArrayList();
     private final Set<String> namespaces = Sets.newLinkedHashSet();
     private final List<PackResources> packs = Lists.newArrayList();
     private final PackType type;
@@ -124,19 +123,12 @@ implements ReloadableResourceManager {
     @Override
     public void registerReloadListener(PreparableReloadListener preparableReloadListener) {
         this.listeners.add(preparableReloadListener);
-        this.recentlyRegistered.add(preparableReloadListener);
-    }
-
-    protected ReloadInstance createReload(Executor executor, Executor executor2, List<PreparableReloadListener> list, CompletableFuture<Unit> completableFuture) {
-        ProfiledReloadInstance reloadInstance = LOGGER.isDebugEnabled() ? new ProfiledReloadInstance(this, Lists.newArrayList(list), executor, executor2, completableFuture) : SimpleReloadInstance.of(this, Lists.newArrayList(list), executor, executor2, completableFuture);
-        this.recentlyRegistered.clear();
-        return reloadInstance;
     }
 
     @Override
-    public ReloadInstance createFullReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
-        this.clear();
+    public ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
         LOGGER.info("Reloading ResourceManager: {}", () -> list.stream().map(PackResources::getName).collect(Collectors.joining(", ")));
+        this.clear();
         for (PackResources packResources : list) {
             try {
                 this.add(packResources);
@@ -145,7 +137,10 @@ implements ReloadableResourceManager {
                 return new FailingReloadInstance(new ResourcePackLoadingFailure(packResources, (Throwable)exception));
             }
         }
-        return this.createReload(executor, executor2, this.listeners, completableFuture);
+        if (LOGGER.isDebugEnabled()) {
+            return new ProfiledReloadInstance(this, Lists.newArrayList(this.listeners), executor, executor2, completableFuture);
+        }
+        return SimpleReloadInstance.of(this, Lists.newArrayList(this.listeners), executor, executor2, completableFuture);
     }
 
     @Override

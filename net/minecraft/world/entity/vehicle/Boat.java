@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -158,6 +159,7 @@ extends Entity {
         if (this.level.isClientSide || this.isRemoved()) {
             return true;
         }
+        this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
         this.setDamage(this.getDamage() + f * 10.0f);
@@ -185,6 +187,7 @@ extends Entity {
         if (this.random.nextInt(20) == 0) {
             this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0f, 0.8f + 0.4f * this.random.nextFloat(), false);
         }
+        this.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH);
     }
 
     @Override
@@ -287,6 +290,7 @@ extends Entity {
                     double d = i == 1 ? -vec3.z : vec3.z;
                     double e = i == 1 ? vec3.x : -vec3.x;
                     this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0f, 0.8f + 0.4f * this.random.nextFloat());
+                    this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new BlockPos(this.getX() + d, this.getY(), this.getZ() + e));
                 }
                 int n = i;
                 this.paddlePositions[n] = (float)((double)this.paddlePositions[n] + (double)0.3926991f);

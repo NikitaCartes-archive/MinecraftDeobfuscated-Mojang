@@ -67,7 +67,7 @@ extends Feature<NoneFeatureConfiguration> {
                 l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
             }
         }
-        m = Math.max(l - worldGenLevel.getMinBuildHeight() - 15 - random.nextInt(10), 10);
+        m = Math.max(l - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
         BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
         BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9f);
         structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);

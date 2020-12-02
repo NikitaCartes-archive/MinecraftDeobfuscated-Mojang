@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.feature.DefaultFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.DeltaFeature;
 import net.minecraft.world.level.levelgen.feature.DesertWellFeature;
 import net.minecraft.world.level.levelgen.feature.DiskReplaceFeature;
+import net.minecraft.world.level.levelgen.feature.DripstoneClusterFeature;
 import net.minecraft.world.level.levelgen.feature.EndGatewayFeature;
 import net.minecraft.world.level.levelgen.feature.EndIslandFeature;
 import net.minecraft.world.level.levelgen.feature.FillLayerFeature;
@@ -49,6 +50,7 @@ import net.minecraft.world.level.levelgen.feature.IceSpikeFeature;
 import net.minecraft.world.level.levelgen.feature.IcebergFeature;
 import net.minecraft.world.level.levelgen.feature.KelpFeature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
+import net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature;
 import net.minecraft.world.level.levelgen.feature.MonsterRoomFeature;
 import net.minecraft.world.level.levelgen.feature.NetherForestVegetationFeature;
 import net.minecraft.world.level.levelgen.feature.NoOpFeature;
@@ -63,6 +65,7 @@ import net.minecraft.world.level.levelgen.feature.SeaPickleFeature;
 import net.minecraft.world.level.levelgen.feature.SeagrassFeature;
 import net.minecraft.world.level.levelgen.feature.SimpleBlockFeature;
 import net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature;
+import net.minecraft.world.level.levelgen.feature.SmallDripstoneFeature;
 import net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
 import net.minecraft.world.level.levelgen.feature.SpringFeature;
@@ -78,10 +81,12 @@ import net.minecraft.world.level.levelgen.feature.configurations.CountConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -93,6 +98,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockCon
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -151,6 +157,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<RandomBooleanFeatureConfiguration> RANDOM_BOOLEAN_SELECTOR = Feature.register("random_boolean_selector", new RandomBooleanSelectorFeature(RandomBooleanFeatureConfiguration.CODEC));
     public static final Feature<DecoratedFeatureConfiguration> DECORATED = Feature.register("decorated", new DecoratedFeature(DecoratedFeatureConfiguration.CODEC));
     public static final Feature<GeodeConfiguration> GEODE = Feature.register("geode", new GeodeFeature(GeodeConfiguration.CODEC));
+    public static final Feature<DripstoneClusterConfiguration> DRIPSTONE_CLUSTER = Feature.register("dripstone_cluster", new DripstoneClusterFeature(DripstoneClusterConfiguration.CODEC));
+    public static final Feature<LargeDripstoneConfiguration> LARGE_DRIPSTONE = Feature.register("large_dripstone", new LargeDripstoneFeature(LargeDripstoneConfiguration.CODEC));
+    public static final Feature<SmallDripstoneConfiguration> SMALL_DRIPSTONE = Feature.register("small_dripstone", new SmallDripstoneFeature(SmallDripstoneConfiguration.CODEC));
     private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
     private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

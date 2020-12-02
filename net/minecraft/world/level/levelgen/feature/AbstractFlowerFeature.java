@@ -25,7 +25,7 @@ extends Feature<U> {
         int i = 0;
         for (int j = 0; j < this.getCount(featureConfiguration); ++j) {
             BlockPos blockPos2 = this.getPos(random, blockPos, featureConfiguration);
-            if (!worldGenLevel.isEmptyBlock(blockPos2) || blockPos2.getY() >= 255 || !blockState.canSurvive(worldGenLevel, blockPos2) || !this.isValid(worldGenLevel, blockPos2, featureConfiguration)) continue;
+            if (!worldGenLevel.isEmptyBlock(blockPos2) || !blockState.canSurvive(worldGenLevel, blockPos2) || !this.isValid(worldGenLevel, blockPos2, featureConfiguration)) continue;
             worldGenLevel.setBlock(blockPos2, blockState, 2);
             ++i;
         }

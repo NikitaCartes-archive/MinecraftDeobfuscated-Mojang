@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -56,12 +57,12 @@ implements BiomeManager.NoiseBiomeSource {
     }
 
     public Set<Biome> getBiomesWithin(int i, int j, int k, int l) {
-        int m = i - l >> 2;
-        int n = j - l >> 2;
-        int o = k - l >> 2;
-        int p = i + l >> 2;
-        int q = j + l >> 2;
-        int r = k + l >> 2;
+        int m = QuartPos.fromBlock(i - l);
+        int n = QuartPos.fromBlock(j - l);
+        int o = QuartPos.fromBlock(k - l);
+        int p = QuartPos.fromBlock(i + l);
+        int q = QuartPos.fromBlock(j + l);
+        int r = QuartPos.fromBlock(k + l);
         int s = p - m + 1;
         int t = q - n + 1;
         int u = r - o + 1;
@@ -87,10 +88,10 @@ implements BiomeManager.NoiseBiomeSource {
     @Nullable
     public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl) {
         int s;
-        int n = i >> 2;
-        int o = k >> 2;
-        int p = l >> 2;
-        int q = j >> 2;
+        int n = QuartPos.fromBlock(i);
+        int o = QuartPos.fromBlock(k);
+        int p = QuartPos.fromBlock(l);
+        int q = QuartPos.fromBlock(j);
         BlockPos blockPos = null;
         int r = 0;
         for (int t = s = bl ? 0 : p; t <= p; t += m) {
@@ -106,7 +107,7 @@ implements BiomeManager.NoiseBiomeSource {
                     }
                     if (!predicate.test(this.getNoiseBiome(w = n + v, q, x = o + u))) continue;
                     if (blockPos == null || random.nextInt(r + 1) == 0) {
-                        blockPos = new BlockPos(w << 2, j, x << 2);
+                        blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
                         if (bl) {
                             return blockPos;
                         }

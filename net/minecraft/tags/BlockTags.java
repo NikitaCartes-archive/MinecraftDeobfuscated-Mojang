@@ -105,6 +105,8 @@ public final class BlockTags {
     public static final Tag.Named<Block> CAULDRONS = BlockTags.bind("cauldrons");
     public static final Tag.Named<Block> CRYSTAL_SOUND_BLOCKS = BlockTags.bind("crystal_sound_blocks");
     public static final Tag.Named<Block> INSIDE_STEP_SOUND_BLOCKS = BlockTags.bind("inside_step_sound_blocks");
+    public static final Tag.Named<Block> OCCLUDES_VIBRATION_SIGNALS = BlockTags.bind("occludes_vibration_signals");
+    public static final Tag.Named<Block> DRIPSTONE_REPLACEABLE = BlockTags.bind("dripstone_replaceable_blocks");
 
     private static Tag.Named<Block> bind(String string) {
         return HELPER.bind(string);

@@ -168,7 +168,7 @@ public class SpreadPlayersCommand {
         private double x;
         private double z;
 
-        Position() {
+        private Position() {
         }
 
         double dist(Position position) {

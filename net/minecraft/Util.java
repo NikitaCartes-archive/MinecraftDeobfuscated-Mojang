@@ -51,6 +51,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -498,6 +499,18 @@ public class Util {
             return DataResult.error(string);
         }
         return DataResult.success(is);
+    }
+
+    public static DataResult<double[]> fixedSize(DoubleStream doubleStream, int i) {
+        double[] ds = doubleStream.limit(i + 1).toArray();
+        if (ds.length != i) {
+            String string = "Input is not a list of " + i + " doubles";
+            if (ds.length >= i) {
+                return DataResult.error(string, Arrays.copyOf(ds, i));
+            }
+            return DataResult.error(string);
+        }
+        return DataResult.success(ds);
     }
 
     public static void startTimerHackThread() {

@@ -46,6 +46,7 @@ import net.minecraft.client.particle.CampfireSmokeParticle;
 import net.minecraft.client.particle.CritParticle;
 import net.minecraft.client.particle.DragonBreathParticle;
 import net.minecraft.client.particle.DripParticle;
+import net.minecraft.client.particle.DustColorTransitionParticle;
 import net.minecraft.client.particle.DustParticle;
 import net.minecraft.client.particle.EnchantmentTableParticle;
 import net.minecraft.client.particle.EndRodParticle;
@@ -80,6 +81,7 @@ import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.particle.TotemParticle;
 import net.minecraft.client.particle.TrackingEmitter;
+import net.minecraft.client.particle.VibrationSignalParticle;
 import net.minecraft.client.particle.WakeParticle;
 import net.minecraft.client.particle.WaterCurrentDownParticle;
 import net.minecraft.client.particle.WaterDropParticle;
@@ -154,6 +156,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.DRIPPING_WATER, DripParticle.WaterHangProvider::new);
         this.register(ParticleTypes.FALLING_WATER, DripParticle.WaterFallProvider::new);
         this.register(ParticleTypes.DUST, DustParticle.Provider::new);
+        this.register(ParticleTypes.DUST_COLOR_TRANSITION, DustColorTransitionParticle.Provider::new);
         this.register(ParticleTypes.EFFECT, SpellParticle.Provider::new);
         this.register(ParticleTypes.ELDER_GUARDIAN, new MobAppearanceParticle.Provider());
         this.register(ParticleTypes.ENCHANTED_HIT, CritParticle.MagicProvider::new);
@@ -210,6 +213,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.FALLING_DRIPSTONE_WATER, DripParticle.DripstoneWaterFallProvider::new);
         this.register(ParticleTypes.DRIPPING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaHangProvider::new);
         this.register(ParticleTypes.FALLING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaFallProvider::new);
+        this.register(ParticleTypes.VIBRATION, VibrationSignalParticle.Provider::new);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

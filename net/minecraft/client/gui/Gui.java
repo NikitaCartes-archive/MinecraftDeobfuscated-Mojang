@@ -736,12 +736,14 @@ extends GuiComponent {
         this.minecraft.getProfiler().popPush("health");
         for (x = Mth.ceil((f + (float)p) / 2.0f) - 1; x >= 0; --x) {
             y = 16;
-            if (player.hasEffect(MobEffects.POISON)) {
-                y += 36;
-            } else if (player.hasEffect(MobEffects.WITHER)) {
-                y += 72;
-            } else if (player.isFullyFrozen()) {
-                y += 126;
+            if (u <= 0) {
+                if (player.hasEffect(MobEffects.POISON)) {
+                    y += 36;
+                } else if (player.hasEffect(MobEffects.WITHER)) {
+                    y += 72;
+                } else if (player.isFullyFrozen()) {
+                    y += 126;
+                }
             }
             z = 0;
             if (bl) {

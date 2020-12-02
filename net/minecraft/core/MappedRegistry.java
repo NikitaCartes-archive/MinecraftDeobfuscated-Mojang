@@ -27,8 +27,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -192,7 +190,6 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean containsKey(ResourceLocation resourceLocation) {
         return this.storage.containsKey(resourceLocation);
     }

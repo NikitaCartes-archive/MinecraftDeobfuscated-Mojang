@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
+import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.WallSide;
@@ -895,6 +896,13 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.PISTON_HEAD).with(PropertyDispatch.properties(BlockStateProperties.SHORT, BlockStateProperties.PISTON_TYPE).select((Boolean)false, PistonType.DEFAULT, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD.createWithSuffix(Blocks.PISTON, "_head", textureMapping3, this.modelOutput))).select((Boolean)false, PistonType.STICKY, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD.createWithSuffix(Blocks.PISTON, "_head_sticky", textureMapping2, this.modelOutput))).select((Boolean)true, PistonType.DEFAULT, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD_SHORT.createWithSuffix(Blocks.PISTON, "_head_short", textureMapping3, this.modelOutput))).select((Boolean)true, PistonType.STICKY, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD_SHORT.createWithSuffix(Blocks.PISTON, "_head_short_sticky", textureMapping2, this.modelOutput)))).with(BlockModelGenerators.createFacingDispatch()));
     }
 
+    private void createSculkSensor() {
+        ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCULK_SENSOR, "_inactive");
+        ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCULK_SENSOR, "_active");
+        this.delegateItemModel(Blocks.SCULK_SENSOR, resourceLocation);
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.SCULK_SENSOR).with(PropertyDispatch.property(BlockStateProperties.SCULK_SENSOR_PHASE).generate(sculkSensorPhase -> Variant.variant().with(VariantProperties.MODEL, sculkSensorPhase == SculkSensorPhase.ACTIVE ? resourceLocation2 : resourceLocation))));
+    }
+
     private void createScaffolding() {
         ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCAFFOLDING, "_stable");
         ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCAFFOLDING, "_unstable");
@@ -1287,6 +1295,7 @@ public class BlockModelGenerators {
         this.createVine();
         this.createMagmaBlock();
         this.createJigsaw();
+        this.createSculkSensor();
         this.createNonTemplateHorizontalBlock(Blocks.LADDER);
         this.createSimpleFlatItemModel(Blocks.LADDER);
         this.createNonTemplateHorizontalBlock(Blocks.LECTERN);

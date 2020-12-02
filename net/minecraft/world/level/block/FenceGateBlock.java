@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -125,7 +127,9 @@ extends HorizontalDirectionalBlock {
             blockState = (BlockState)blockState.setValue(OPEN, true);
             level.setBlock(blockPos, blockState, 10);
         }
-        level.levelEvent(player, blockState.getValue(OPEN) != false ? 1008 : 1014, blockPos, 0);
+        boolean bl = blockState.getValue(OPEN);
+        level.levelEvent(player, bl ? 1008 : 1014, blockPos, 0);
+        level.gameEvent((Entity)player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
@@ -139,6 +143,7 @@ extends HorizontalDirectionalBlock {
             level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(POWERED, bl2)).setValue(OPEN, bl2), 2);
             if (blockState.getValue(OPEN) != bl2) {
                 level.levelEvent(null, bl2 ? 1008 : 1014, blockPos, 0);
+                level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
             }
         }
     }

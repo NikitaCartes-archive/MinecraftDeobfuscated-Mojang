@@ -138,14 +138,14 @@ implements LidBlockEntity {
     @Override
     public void startOpen(Player player) {
         if (!player.isSpectator()) {
-            this.openersCounter.incrementOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+            this.openersCounter.incrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 
     @Override
     public void stopOpen(Player player) {
         if (!player.isSpectator()) {
-            this.openersCounter.decrementOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+            this.openersCounter.decrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 

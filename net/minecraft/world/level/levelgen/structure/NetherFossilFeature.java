@@ -7,8 +7,9 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,13 +45,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
             int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
             int m = chunkGenerator.getSeaLevel();
-            BlockGetter blockGetter = chunkGenerator.getBaseColumn(k, l);
+            NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l);
             for (n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m); n > m; --n) {
-                BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+                BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
                 mutableBlockPos.move(Direction.DOWN);
-                BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos);
-                if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(blockGetter, mutableBlockPos, Direction.UP))) break;
+                BlockState blockState2 = noiseColumn.getBlockState(mutableBlockPos);
+                if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(EmptyBlockGetter.INSTANCE, mutableBlockPos, Direction.UP))) break;
             }
             if (n <= m) {
                 return;

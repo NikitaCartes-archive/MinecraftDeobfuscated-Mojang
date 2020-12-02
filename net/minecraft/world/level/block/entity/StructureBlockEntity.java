@@ -408,12 +408,12 @@ extends BlockEntity {
             serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
         }
         if (!bl || bl2) {
-            StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setMirror(this.mirror).setRotation(this.rotation).setIgnoreEntities(this.ignoreEntities).setChunkPos(null);
+            StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setMirror(this.mirror).setRotation(this.rotation).setIgnoreEntities(this.ignoreEntities);
             if (this.integrity < 1.0f) {
                 structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0f, 1.0f))).setRandom(StructureBlockEntity.createRandom(this.seed));
             }
             BlockPos blockPos3 = blockPos.offset(this.structurePos);
-            structureTemplate.placeInWorldChunk(serverLevel, blockPos3, structurePlaceSettings, StructureBlockEntity.createRandom(this.seed));
+            structureTemplate.placeInWorld(serverLevel, blockPos3, blockPos3, structurePlaceSettings, StructureBlockEntity.createRandom(this.seed), 2);
             return true;
         }
         return false;

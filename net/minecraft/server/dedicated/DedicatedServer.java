@@ -161,7 +161,6 @@ implements ServerInterface {
         }
         this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
         long l = Util.getNanos();
-        this.setMaxBuildHeight(dedicatedServerProperties.maxBuildHeight);
         SkullBlockEntity.setProfileCache(this.getProfileCache());
         SkullBlockEntity.setSessionService(this.getSessionService());
         GameProfileCache.setUsesAuthentication(this.usesAuthentication());
@@ -191,6 +190,7 @@ implements ServerInterface {
         Items.AIR.fillItemCategory(CreativeModeTab.TAB_SEARCH, NonNullList.create());
         if (dedicatedServerProperties.enableJmxMonitoring) {
             MinecraftServerStatistics.registerJmxMonitoring(this);
+            LOGGER.info("JMX monitoring enabled");
         }
         return true;
     }

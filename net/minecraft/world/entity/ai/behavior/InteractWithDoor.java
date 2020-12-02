@@ -64,12 +64,12 @@ extends Behavior<LivingEntity> {
         if (blockState.is(BlockTags.WOODEN_DOORS)) {
             DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
             if (!doorBlock.isOpen(blockState)) {
-                doorBlock.setOpen(serverLevel, blockState, blockPos, true);
+                doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
             }
             this.rememberDoorToClose(serverLevel, livingEntity, blockPos);
         }
         if ((blockState2 = serverLevel.getBlockState(blockPos2 = node2.asBlockPos())).is(BlockTags.WOODEN_DOORS) && !(doorBlock2 = (DoorBlock)blockState2.getBlock()).isOpen(blockState2)) {
-            doorBlock2.setOpen(serverLevel, blockState2, blockPos2, true);
+            doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
             this.rememberDoorToClose(serverLevel, livingEntity, blockPos2);
         }
         InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, node, node2);
@@ -101,7 +101,7 @@ extends Behavior<LivingEntity> {
                     iterator.remove();
                     continue;
                 }
-                doorBlock.setOpen(serverLevel, blockState, blockPos, false);
+                doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, false);
                 iterator.remove();
             }
         }

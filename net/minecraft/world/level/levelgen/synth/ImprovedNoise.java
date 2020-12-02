@@ -45,7 +45,7 @@ public final class ImprovedNoise {
         double s = Mth.smoothstep(p);
         double t = Mth.smoothstep(q);
         if (g != 0.0) {
-            double u = Math.min(h, p);
+            double u = h < 0.0 ? 0.0 : Math.min(h, p);
             v = (double)Mth.floor(u / g) * g;
         } else {
             v = 0.0;

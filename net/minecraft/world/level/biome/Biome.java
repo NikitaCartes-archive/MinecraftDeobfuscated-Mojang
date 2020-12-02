@@ -194,7 +194,8 @@ public final class Biome {
                     int o = SectionPos.sectionToBlockCoord(m);
                     int p = SectionPos.sectionToBlockCoord(n);
                     try {
-                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, worldGenRegion.getMinBuildHeight() + 1, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15), new ChunkPos(m, n)));
+                        int q = worldGenRegion.getMinBuildHeight() + 1;
+                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, q, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15), new ChunkPos(m, n)));
                     } catch (Exception exception) {
                         CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                         crashReport.addCategory("Feature").setDetail("Id", Registry.STRUCTURE_FEATURE.getKey(structureFeature)).setDetail("Description", () -> structureFeature.toString());

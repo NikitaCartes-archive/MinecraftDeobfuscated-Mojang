@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.PistonType;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -171,6 +172,7 @@ extends DirectionalBlock {
             if (!this.moveBlocks(level, blockPos, direction, true)) return false;
             level.setBlock(blockPos, (BlockState)blockState.setValue(EXTENDED, true), 67);
             level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5f, level.random.nextFloat() * 0.25f + 0.6f);
+            level.gameEvent(GameEvent.PISTON_EXTEND, blockPos);
             return true;
         } else {
             if (i != 1 && i != 2) return true;
@@ -204,6 +206,7 @@ extends DirectionalBlock {
                 level.removeBlock(blockPos.relative(direction), false);
             }
             level.playSound(null, blockPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5f, level.random.nextFloat() * 0.15f + 0.6f);
+            level.gameEvent(GameEvent.PISTON_CONTRACT, blockPos);
         }
         return true;
     }

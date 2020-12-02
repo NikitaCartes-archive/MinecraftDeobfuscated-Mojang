@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,8 +43,19 @@ extends LevelHeightAccessor {
         return BlockPos.betweenClosedStream(aABB).map(this::getBlockState);
     }
 
+    default public BlockHitResult isBlockInLine(ClipBlockStateContext clipBlockStateContext2) {
+        return BlockGetter.traverseBlocks(clipBlockStateContext2.getFrom(), clipBlockStateContext2.getTo(), clipBlockStateContext2, (clipBlockStateContext, blockPos) -> {
+            BlockState blockState = this.getBlockState((BlockPos)blockPos);
+            Vec3 vec3 = clipBlockStateContext.getFrom().subtract(clipBlockStateContext.getTo());
+            return clipBlockStateContext.isTargetBlock().test(blockState) ? new BlockHitResult(clipBlockStateContext.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContext.getTo()), false) : null;
+        }, clipBlockStateContext -> {
+            Vec3 vec3 = clipBlockStateContext.getFrom().subtract(clipBlockStateContext.getTo());
+            return BlockHitResult.miss(clipBlockStateContext.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContext.getTo()));
+        });
+    }
+
     default public BlockHitResult clip(ClipContext clipContext2) {
-        return BlockGetter.traverseBlocks(clipContext2, (clipContext, blockPos) -> {
+        return BlockGetter.traverseBlocks(clipContext2.getFrom(), clipContext2.getTo(), clipContext2, (clipContext, blockPos) -> {
             BlockState blockState = this.getBlockState((BlockPos)blockPos);
             FluidState fluidState = this.getFluidState((BlockPos)blockPos);
             Vec3 vec3 = clipContext.getFrom();
@@ -89,13 +101,11 @@ extends LevelHeightAccessor {
         });
     }
 
-    public static <T> T traverseBlocks(ClipContext clipContext, BiFunction<ClipContext, BlockPos, T> biFunction, Function<ClipContext, T> function) {
+    public static <T, C> T traverseBlocks(Vec3 vec3, Vec3 vec32, C object, BiFunction<C, BlockPos, T> biFunction, Function<C, T> function) {
         int l;
         int k;
-        Vec3 vec32;
-        Vec3 vec3 = clipContext.getFrom();
-        if (vec3.equals(vec32 = clipContext.getTo())) {
-            return function.apply(clipContext);
+        if (vec3.equals(vec32)) {
+            return function.apply(object);
         }
         double d = Mth.lerp(-1.0E-7, vec32.x, vec3.x);
         double e = Mth.lerp(-1.0E-7, vec32.y, vec3.y);
@@ -105,9 +115,9 @@ extends LevelHeightAccessor {
         double i = Mth.lerp(-1.0E-7, vec3.z, vec32.z);
         int j = Mth.floor(g);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(j, k = Mth.floor(h), l = Mth.floor(i));
-        T object = biFunction.apply(clipContext, mutableBlockPos);
-        if (object != null) {
-            return object;
+        T object2 = biFunction.apply(object, mutableBlockPos);
+        if (object2 != null) {
+            return object2;
         }
         double m = d - g;
         double n = e - h;
@@ -122,7 +132,7 @@ extends LevelHeightAccessor {
         double w = t * (q > 0 ? 1.0 - Mth.frac(h) : Mth.frac(h));
         double x = u * (r > 0 ? 1.0 - Mth.frac(i) : Mth.frac(i));
         while (v <= 1.0 || w <= 1.0 || x <= 1.0) {
-            T object2;
+            T object3;
             if (v < w) {
                 if (v < x) {
                     j += p;
@@ -138,10 +148,10 @@ extends LevelHeightAccessor {
                 l += r;
                 x += u;
             }
-            if ((object2 = biFunction.apply(clipContext, mutableBlockPos.set(j, k, l))) == null) continue;
-            return object2;
+            if ((object3 = biFunction.apply(object, mutableBlockPos.set(j, k, l))) == null) continue;
+            return object3;
         }
-        return function.apply(clipContext);
+        return function.apply(object);
     }
 }
 

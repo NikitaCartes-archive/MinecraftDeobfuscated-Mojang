@@ -223,7 +223,7 @@ implements MenuProvider {
             j = 1;
         }
         int k = (9 + i * 2) * 20;
-        AABB aABB = new AABB(blockPos).inflate(d).expandTowards(0.0, level.getMaxBuildHeight(), 0.0);
+        AABB aABB = new AABB(blockPos).inflate(d).expandTowards(0.0, level.getHeight(), 0.0);
         List<Player> list = level.getEntitiesOfClass(Player.class, aABB);
         for (Player player : list) {
             player.addEffect(new MobEffectInstance(mobEffect, k, j, true, true));

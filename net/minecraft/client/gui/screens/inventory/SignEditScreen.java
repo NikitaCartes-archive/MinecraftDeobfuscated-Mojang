@@ -142,7 +142,7 @@ extends Screen {
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
         MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
-        Material material = Sheets.signTexture(this.woodType);
+        Material material = Sheets.getSignMaterial(this.woodType);
         VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);
         this.signModel.stick.visible = bl;
         this.signModel.root.render(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY);

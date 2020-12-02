@@ -16,10 +16,10 @@ public interface ReloadableResourceManager
 extends ResourceManager,
 AutoCloseable {
     default public CompletableFuture<Unit> reload(Executor executor, Executor executor2, List<PackResources> list, CompletableFuture<Unit> completableFuture) {
-        return this.createFullReload(executor, executor2, completableFuture, list).done();
+        return this.createReload(executor, executor2, completableFuture, list).done();
     }
 
-    public ReloadInstance createFullReload(Executor var1, Executor var2, CompletableFuture<Unit> var3, List<PackResources> var4);
+    public ReloadInstance createReload(Executor var1, Executor var2, CompletableFuture<Unit> var3, List<PackResources> var4);
 
     public void registerReloadListener(PreparableReloadListener var1);
 

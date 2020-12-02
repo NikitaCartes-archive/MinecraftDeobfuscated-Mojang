@@ -163,8 +163,7 @@ implements ChunkAccess {
         LevelChunkSection levelChunkSection = this.getOrCreateSection(l);
         BlockState blockState2 = levelChunkSection.setBlockState(i & 0xF, j & 0xF, k & 0xF, blockState);
         if (this.status.isOrAfter(ChunkStatus.FEATURES) && blockState != blockState2 && (blockState.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos) || blockState.getLightEmission() != blockState2.getLightEmission() || blockState.useShapeForLightOcclusion() || blockState2.useShapeForLightOcclusion())) {
-            LevelLightEngine levelLightEngine = this.getLightEngine();
-            levelLightEngine.checkBlock(blockPos);
+            this.lightEngine.checkBlock(blockPos);
         }
         EnumSet<Heightmap.Types> enumSet = this.getStatus().heightmapsAfter();
         EnumSet<Heightmap.Types> enumSet2 = null;
@@ -265,11 +264,6 @@ implements ChunkAccess {
     @Override
     public LevelChunkSection[] getSections() {
         return this.sections;
-    }
-
-    @Nullable
-    public LevelLightEngine getLightEngine() {
-        return this.lightEngine;
     }
 
     @Override
@@ -465,13 +459,13 @@ implements ChunkAccess {
     }
 
     @Override
-    public int getSectionsCount() {
-        return this.levelHeightAccessor.getSectionsCount();
+    public int getMinBuildHeight() {
+        return this.levelHeightAccessor.getMinBuildHeight();
     }
 
     @Override
-    public int getMinSection() {
-        return this.levelHeightAccessor.getMinSection();
+    public int getHeight() {
+        return this.levelHeightAccessor.getHeight();
     }
 
     public /* synthetic */ TickList getLiquidTicks() {

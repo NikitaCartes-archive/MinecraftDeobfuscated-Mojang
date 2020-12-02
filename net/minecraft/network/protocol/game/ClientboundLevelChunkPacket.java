@@ -64,7 +64,7 @@ implements Packet<ClientGamePacketListener> {
         this.z = friendlyByteBuf.readInt();
         this.availableSections = friendlyByteBuf.readVarInt();
         this.heightmaps = friendlyByteBuf.readNbt();
-        this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.BIOMES_SIZE);
+        this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.MAX_SIZE);
         int i = friendlyByteBuf.readVarInt();
         if (i > 0x200000) {
             throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");

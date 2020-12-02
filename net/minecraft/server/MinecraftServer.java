@@ -200,7 +200,6 @@ AutoCloseable {
     private boolean allowFlight;
     @Nullable
     private String motd;
-    private int maxBuildHeight;
     private int playerIdleTimeout;
     public final long[] tickTimes = new long[100];
     @Nullable
@@ -1002,7 +1001,7 @@ AutoCloseable {
             snooper.setDynamicData("world[" + i + "][mode]", (Object)this.worldData.getGameType());
             snooper.setDynamicData("world[" + i + "][difficulty]", (Object)serverLevel.getDifficulty());
             snooper.setDynamicData("world[" + i + "][hardcore]", this.worldData.isHardcore());
-            snooper.setDynamicData("world[" + i + "][height]", this.maxBuildHeight);
+            snooper.setDynamicData("world[" + i + "][height]", serverLevel.getMaxBuildHeight());
             snooper.setDynamicData("world[" + i + "][chunks_loaded]", serverLevel.getChunkSource().getLoadedChunksCount());
             ++i;
         }
@@ -1063,14 +1062,6 @@ AutoCloseable {
 
     public void setMotd(String string) {
         this.motd = string;
-    }
-
-    public int getMaxBuildHeight() {
-        return this.maxBuildHeight;
-    }
-
-    public void setMaxBuildHeight(int i) {
-        this.maxBuildHeight = i;
     }
 
     public boolean isStopped() {

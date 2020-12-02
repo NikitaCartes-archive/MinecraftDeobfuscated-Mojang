@@ -26,7 +26,6 @@ public class UnderwaterAmbientSoundInstances {
             this.looping = true;
             this.delay = 0;
             this.volume = 1.0f;
-            this.priority = true;
             this.relative = true;
         }
 
@@ -53,7 +52,6 @@ public class UnderwaterAmbientSoundInstances {
             this.looping = false;
             this.delay = 0;
             this.volume = 1.0f;
-            this.priority = true;
             this.relative = true;
         }
 

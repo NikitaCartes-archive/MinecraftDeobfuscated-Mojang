@@ -3,7 +3,10 @@
  */
 package net.minecraft.tags;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.BufferedReader;
@@ -13,13 +16,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
@@ -111,25 +117,40 @@ public class TagLoader<T> {
         }, executor);
     }
 
+    private static void visitDependenciesAndElement(Map<ResourceLocation, Tag.Builder> map, Multimap<ResourceLocation, ResourceLocation> multimap, Set<ResourceLocation> set, ResourceLocation resourceLocation2, BiConsumer<ResourceLocation, Tag.Builder> biConsumer) {
+        if (!set.add(resourceLocation2)) {
+            return;
+        }
+        multimap.get(resourceLocation2).forEach(resourceLocation -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation, biConsumer));
+        Tag.Builder builder = map.get(resourceLocation2);
+        if (builder != null) {
+            biConsumer.accept(resourceLocation2, builder);
+        }
+    }
+
+    private static boolean isCyclic(Multimap<ResourceLocation, ResourceLocation> multimap, ResourceLocation resourceLocation, ResourceLocation resourceLocation22) {
+        Collection<ResourceLocation> collection = multimap.get(resourceLocation22);
+        if (collection.contains(resourceLocation)) {
+            return true;
+        }
+        return collection.stream().anyMatch(resourceLocation2 -> TagLoader.isCyclic(multimap, resourceLocation, resourceLocation2));
+    }
+
+    private static void addDependencyIfNotCyclic(Multimap<ResourceLocation, ResourceLocation> multimap, ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
+        if (!TagLoader.isCyclic(multimap, resourceLocation, resourceLocation2)) {
+            multimap.put(resourceLocation, resourceLocation2);
+        }
+    }
+
     public TagCollection<T> load(Map<ResourceLocation, Tag.Builder> map) {
         HashMap map2 = Maps.newHashMap();
-        Function function = map2::get;
+        Function<ResourceLocation, Tag> function = map2::get;
         Function<ResourceLocation, Object> function2 = resourceLocation -> this.idToValue.apply((ResourceLocation)resourceLocation).orElse(null);
-        while (!map.isEmpty()) {
-            boolean bl = false;
-            Iterator<Map.Entry<ResourceLocation, Tag.Builder>> iterator = map.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<ResourceLocation, Tag.Builder> entry = iterator.next();
-                Optional<Tag<Object>> optional = entry.getValue().build(function, function2);
-                if (!optional.isPresent()) continue;
-                map2.put(entry.getKey(), optional.get());
-                iterator.remove();
-                bl = true;
-            }
-            if (bl) continue;
-            break;
-        }
-        map.forEach((resourceLocation, builder) -> LOGGER.error("Couldn't load {} tag {} as it is missing following references: {}", (Object)this.name, resourceLocation, (Object)builder.getUnresolvedEntries(function, function2).map(Objects::toString).collect(Collectors.joining(","))));
+        HashMultimap multimap = HashMultimap.create();
+        map.forEach((resourceLocation, builder) -> builder.visitRequiredDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
+        map.forEach((resourceLocation, builder) -> builder.visitOptionalDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
+        HashSet set = Sets.newHashSet();
+        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load {} tag {} as it is missing following references: {}", (Object)this.name, resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(",")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, tag))));
         return TagCollection.of(map2);
     }
 }

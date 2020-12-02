@@ -191,6 +191,10 @@ public abstract class BlockBehaviour {
         return OffsetType.NONE;
     }
 
+    public float getMaxHorizontalOffset() {
+        return 0.25f;
+    }
+
     @Deprecated
     public BlockState rotate(BlockState blockState, Rotation rotation) {
         return blockState;
@@ -575,12 +579,17 @@ public abstract class BlockBehaviour {
         }
 
         public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {
-            OffsetType offsetType = this.getBlock().getOffsetType();
+            Block block = this.getBlock();
+            OffsetType offsetType = block.getOffsetType();
             if (offsetType == OffsetType.NONE) {
                 return Vec3.ZERO;
             }
             long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
-            return new Vec3(((double)((float)(l & 0xFL) / 15.0f) - 0.5) * 0.5, offsetType == OffsetType.XYZ ? ((double)((float)(l >> 4 & 0xFL) / 15.0f) - 1.0) * 0.2 : 0.0, ((double)((float)(l >> 8 & 0xFL) / 15.0f) - 0.5) * 0.5);
+            float f = block.getMaxHorizontalOffset();
+            double d = Mth.clamp(((double)((float)(l & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+            double e = offsetType == OffsetType.XYZ ? ((double)((float)(l >> 4 & 0xFL) / 15.0f) - 1.0) * 0.2 : 0.0;
+            double g = Mth.clamp(((double)((float)(l >> 8 & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+            return new Vec3(d, e, g);
         }
 
         public boolean triggerEvent(Level level, BlockPos blockPos, int i, int j) {

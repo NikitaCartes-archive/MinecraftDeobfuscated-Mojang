@@ -136,13 +136,13 @@ implements BlockAndTintGetter {
     }
 
     @Override
-    public int getSectionsCount() {
-        return this.level.getSectionsCount();
+    public int getMinBuildHeight() {
+        return this.level.getMinBuildHeight();
     }
 
     @Override
-    public int getMinSection() {
-        return this.level.getMinSection();
+    public int getHeight() {
+        return this.level.getHeight();
     }
 }
 

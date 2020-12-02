@@ -23,6 +23,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -33,6 +34,10 @@ import org.jetbrains.annotations.Nullable;
 public interface ChunkAccess
 extends BlockGetter,
 FeatureAccess {
+    default public GameEventDispatcher getEventDispatcher(int i) {
+        return GameEventDispatcher.NOOP;
+    }
+
     @Nullable
     public BlockState setBlockState(BlockPos var1, BlockState var2, boolean var3);
 

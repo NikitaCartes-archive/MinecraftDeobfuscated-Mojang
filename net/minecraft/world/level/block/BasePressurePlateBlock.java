@@ -16,10 +16,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class BasePressurePlateBlock
 extends Block {
@@ -63,7 +65,7 @@ extends Block {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         int i = this.getSignalForState(blockState);
         if (i > 0) {
-            this.checkPressed(serverLevel, blockPos, blockState, i);
+            this.checkPressed(null, serverLevel, blockPos, blockState, i);
         }
     }
 
@@ -74,11 +76,11 @@ extends Block {
         }
         int i = this.getSignalForState(blockState);
         if (i == 0) {
-            this.checkPressed(level, blockPos, blockState, i);
+            this.checkPressed(entity, level, blockPos, blockState, i);
         }
     }
 
-    protected void checkPressed(Level level, BlockPos blockPos, BlockState blockState, int i) {
+    protected void checkPressed(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
         boolean bl2;
         int j = this.getSignalStrength(level, blockPos);
         boolean bl = i > 0;
@@ -91,8 +93,10 @@ extends Block {
         }
         if (!bl2 && bl) {
             this.playOffSound(level, blockPos);
+            level.gameEvent(entity, GameEvent.BLOCK_UNPRESS, blockPos);
         } else if (bl2 && !bl) {
             this.playOnSound(level, blockPos);
+            level.gameEvent(entity, GameEvent.BLOCK_PRESS, blockPos);
         }
         if (bl2) {
             level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getPressedTime());

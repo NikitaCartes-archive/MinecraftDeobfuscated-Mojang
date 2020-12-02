@@ -918,7 +918,7 @@ ServerGamePacketListener {
             case START_DESTROY_BLOCK: 
             case ABORT_DESTROY_BLOCK: 
             case STOP_DESTROY_BLOCK: {
-                this.player.gameMode.handleBlockBreakAction(blockPos, action, serverboundPlayerActionPacket.getDirection(), this.server.getMaxBuildHeight());
+                this.player.gameMode.handleBlockBreakAction(blockPos, action, serverboundPlayerActionPacket.getDirection(), this.player.level.getMaxBuildHeight());
                 return;
             }
         }
@@ -943,18 +943,19 @@ ServerGamePacketListener {
         BlockPos blockPos = blockHitResult.getBlockPos();
         Direction direction = blockHitResult.getDirection();
         this.player.resetLastActionTime();
-        if (blockPos.getY() < this.server.getMaxBuildHeight()) {
+        int i = this.player.level.getMaxBuildHeight();
+        if (blockPos.getY() < i) {
             if (this.awaitingPositionFromClient == null && this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0 && serverLevel.mayInteract(this.player, blockPos)) {
                 InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
-                if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= this.server.getMaxBuildHeight() - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
-                    MutableComponent component = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
+                if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
+                    MutableComponent component = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
                     this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO, Util.NIL_UUID));
                 } else if (interactionResult.shouldSwing()) {
                     this.player.swing(interactionHand, true);
                 }
             }
         } else {
-            MutableComponent component2 = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
+            MutableComponent component2 = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
             this.player.connection.send(new ClientboundChatPacket(component2, ChatType.GAME_INFO, Util.NIL_UUID));
         }
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));

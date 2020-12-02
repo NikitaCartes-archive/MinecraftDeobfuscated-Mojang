@@ -1144,6 +1144,7 @@ public class Items {
     public static final Item POWDER_SNOW_BUCKET = Items.registerItem("powder_snow_bucket", (Item)new SolidBucketItem(Blocks.POWDER_SNOW, SoundEvents.BUCKET_EMPTY_POWDER_SNOW, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item POINTED_DRIPSTONE = Items.registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item DRIPSTONE_BLOCK = Items.registerBlock(Blocks.DRIPSTONE_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item SCULK_SENSOR = Items.registerBlock(Blocks.SCULK_SENSOR, CreativeModeTab.TAB_REDSTONE);
 
     private static Item registerBlock(Block block) {
         return Items.registerBlock(new BlockItem(block, new Item.Properties()));

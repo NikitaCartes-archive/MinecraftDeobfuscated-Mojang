@@ -17,7 +17,7 @@ public class GameTestSequence {
     public void tickAndContinue(long l) {
         try {
             this.tick(l);
-        } catch (Exception exception) {
+        } catch (GameTestAssertException gameTestAssertException) {
             // empty catch block
         }
     }
@@ -25,8 +25,8 @@ public class GameTestSequence {
     public void tickAndFailIfNotComplete(long l) {
         try {
             this.tick(l);
-        } catch (Exception exception) {
-            this.parent.fail(exception);
+        } catch (GameTestAssertException gameTestAssertException) {
+            this.parent.fail(gameTestAssertException);
         }
     }
 

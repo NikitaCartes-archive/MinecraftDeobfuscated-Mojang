@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -60,7 +59,7 @@ extends ChunkGenerator {
             if (Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
             return this.settings.getMinBuildHeight() + i - 1;
         }
-        return blockStates.length;
+        return this.settings.getMinBuildHeight() + blockStates.length;
     }
 
     @Override
@@ -95,8 +94,8 @@ extends ChunkGenerator {
     }
 
     @Override
-    public BlockGetter getBaseColumn(int i, int j) {
-        return new NoiseColumn((BlockState[])Arrays.stream(this.settings.getLayers()).map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState).toArray(BlockState[]::new));
+    public NoiseColumn getBaseColumn(int i, int j) {
+        return new NoiseColumn(0, (BlockState[])Arrays.stream(this.settings.getLayers()).map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState).toArray(BlockState[]::new));
     }
 }
 

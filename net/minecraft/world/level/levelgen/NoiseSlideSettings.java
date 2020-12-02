@@ -9,7 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public class NoiseSlideSettings {
-    public static final Codec<NoiseSlideSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("target")).forGetter(NoiseSlideSettings::target), ((MapCodec)Codec.intRange(0, 256).fieldOf("size")).forGetter(NoiseSlideSettings::size), ((MapCodec)Codec.INT.fieldOf("offset")).forGetter(NoiseSlideSettings::offset)).apply((Applicative<NoiseSlideSettings, ?>)instance, NoiseSlideSettings::new));
+    public static final Codec<NoiseSlideSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("target")).forGetter(NoiseSlideSettings::target), ((MapCodec)Codec.intRange(0, Integer.MAX_VALUE).fieldOf("size")).forGetter(NoiseSlideSettings::size), ((MapCodec)Codec.INT.fieldOf("offset")).forGetter(NoiseSlideSettings::offset)).apply((Applicative<NoiseSlideSettings, ?>)instance, NoiseSlideSettings::new));
     private final int target;
     private final int size;
     private final int offset;

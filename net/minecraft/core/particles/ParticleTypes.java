@@ -7,11 +7,13 @@ import com.mojang.serialization.Codec;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.particles.VibrationParticleOption;
 
 public class ParticleTypes {
     public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = ParticleTypes.register("ambient_entity_effect", false);
@@ -29,6 +31,7 @@ public class ParticleTypes {
     public static final SimpleParticleType DRIPPING_WATER = ParticleTypes.register("dripping_water", false);
     public static final SimpleParticleType FALLING_WATER = ParticleTypes.register("falling_water", false);
     public static final ParticleType<DustParticleOptions> DUST = ParticleTypes.register("dust", DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC);
+    public static final ParticleType<DustColorTransitionOptions> DUST_COLOR_TRANSITION = ParticleTypes.register("dust_color_transition", DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC);
     public static final SimpleParticleType EFFECT = ParticleTypes.register("effect", false);
     public static final SimpleParticleType ELDER_GUARDIAN = ParticleTypes.register("elder_guardian", true);
     public static final SimpleParticleType ENCHANTED_HIT = ParticleTypes.register("enchanted_hit", false);
@@ -49,6 +52,7 @@ public class ParticleTypes {
     public static final SimpleParticleType HEART = ParticleTypes.register("heart", false);
     public static final SimpleParticleType INSTANT_EFFECT = ParticleTypes.register("instant_effect", false);
     public static final ParticleType<ItemParticleOption> ITEM = ParticleTypes.register("item", ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
+    public static final ParticleType<VibrationParticleOption> VIBRATION = ParticleTypes.register("vibration", VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC);
     public static final SimpleParticleType ITEM_SLIME = ParticleTypes.register("item_slime", false);
     public static final SimpleParticleType ITEM_SNOWBALL = ParticleTypes.register("item_snowball", false);
     public static final SimpleParticleType LARGE_SMOKE = ParticleTypes.register("large_smoke", false);

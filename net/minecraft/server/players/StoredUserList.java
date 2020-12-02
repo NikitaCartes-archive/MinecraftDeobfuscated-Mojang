@@ -70,7 +70,7 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
     }
 
     public String[] getUserList() {
-        return this.map.keySet().toArray(new String[this.map.size()]);
+        return this.map.keySet().toArray(new String[0]);
     }
 
     public boolean isEmpty() {

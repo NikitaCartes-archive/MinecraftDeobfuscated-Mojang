@@ -117,7 +117,7 @@ extends Llama {
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
-    public class TraderLlamaDefendWanderingTraderGoal
+    public static class TraderLlamaDefendWanderingTraderGoal
     extends TargetGoal {
         private final Llama llama;
         private LivingEntity ownerLastHurtBy;

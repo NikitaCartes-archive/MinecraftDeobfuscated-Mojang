@@ -36,12 +36,14 @@ public class DamageSource {
     public static final DamageSource GENERIC = new DamageSource("generic").bypassArmor();
     public static final DamageSource MAGIC = new DamageSource("magic").bypassArmor().setMagic();
     public static final DamageSource WITHER = new DamageSource("wither").bypassArmor();
-    public static final DamageSource ANVIL = new DamageSource("anvil");
-    public static final DamageSource FALLING_BLOCK = new DamageSource("fallingBlock");
+    public static final DamageSource ANVIL = new DamageSource("anvil").damageHelmet();
+    public static final DamageSource FALLING_BLOCK = new DamageSource("fallingBlock").damageHelmet();
     public static final DamageSource DRAGON_BREATH = new DamageSource("dragonBreath").bypassArmor();
     public static final DamageSource DRY_OUT = new DamageSource("dryout");
     public static final DamageSource SWEET_BERRY_BUSH = new DamageSource("sweetBerryBush");
     public static final DamageSource FREEZE = new DamageSource("freeze").bypassArmor();
+    public static final DamageSource FALLING_STALACTITE = new DamageSource("fallingStalactite").damageHelmet();
+    private boolean damageHelmet;
     private boolean bypassArmor;
     private boolean bypassInvul;
     private boolean bypassMagic;
@@ -145,6 +147,10 @@ public class DamageSource {
         return this.bypassArmor;
     }
 
+    public boolean isDamageHelmet() {
+        return this.damageHelmet;
+    }
+
     public float getFoodExhaustion() {
         return this.exhaustion;
     }
@@ -174,6 +180,11 @@ public class DamageSource {
     protected DamageSource bypassArmor() {
         this.bypassArmor = true;
         this.exhaustion = 0.0f;
+        return this;
+    }
+
+    protected DamageSource damageHelmet() {
+        this.damageHelmet = true;
         return this;
     }
 

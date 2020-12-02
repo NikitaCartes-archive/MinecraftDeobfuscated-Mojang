@@ -7,8 +7,6 @@ import java.util.Random;
 
 public class WorldgenRandom
 extends Random {
-    private int count;
-
     public WorldgenRandom() {
     }
 
@@ -20,12 +18,6 @@ extends Random {
         for (int j = 0; j < i; ++j) {
             this.next(1);
         }
-    }
-
-    @Override
-    protected int next(int i) {
-        ++this.count;
-        return super.next(i);
     }
 
     public long setBaseChunkSeed(int i, int j) {

@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -184,6 +186,7 @@ extends Block {
         blockState = (BlockState)blockState.cycle(OPEN);
         level.setBlock(blockPos, blockState, 10);
         level.levelEvent(player, blockState.getValue(OPEN) != false ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
+        level.gameEvent((Entity)player, this.isOpen(blockState) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
@@ -191,12 +194,13 @@ extends Block {
         return blockState.getValue(OPEN);
     }
 
-    public void setOpen(Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
+    public void setOpen(@Nullable Entity entity, Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
         if (!blockState.is(this) || blockState.getValue(OPEN) == bl) {
             return;
         }
         level.setBlock(blockPos, (BlockState)blockState.setValue(OPEN, bl), 10);
         this.playSound(level, blockPos, bl);
+        level.gameEvent(entity, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
     }
 
     @Override
@@ -206,6 +210,7 @@ extends Block {
         if (!this.defaultBlockState().is(block) && bl2 != blockState.getValue(POWERED)) {
             if (bl2 != blockState.getValue(OPEN)) {
                 this.playSound(level, blockPos, bl2);
+                level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
             }
             level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(POWERED, bl2)).setValue(OPEN, bl2), 2);
         }

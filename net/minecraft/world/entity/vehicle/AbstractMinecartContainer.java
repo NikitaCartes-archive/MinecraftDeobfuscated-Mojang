@@ -27,6 +27,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -172,6 +173,7 @@ MenuProvider {
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
         player.openMenu(this);
         if (!player.level.isClientSide) {
+            this.gameEvent(player, GameEvent.CONTAINER_OPEN);
             PiglinAi.angerNearbyPiglins(player, true);
             return InteractionResult.CONSUME;
         }

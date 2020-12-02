@@ -127,12 +127,14 @@ extends ByteBuf {
         return this;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public long[] readLongArray() {
+        return this.readLongArray(null);
+    }
+
     public long[] readLongArray(@Nullable long[] ls) {
         return this.readLongArray(ls, this.readableBytes() / 8);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long[] readLongArray(@Nullable long[] ls, int i) {
         int j = this.readVarInt();
         if (ls == null || ls.length != j) {

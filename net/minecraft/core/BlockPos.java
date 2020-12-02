@@ -34,7 +34,7 @@ extends Vec3i {
     public static final BlockPos ZERO = new BlockPos(0, 0, 0);
     private static final int PACKED_X_LENGTH;
     private static final int PACKED_Z_LENGTH;
-    private static final int PACKED_Y_LENGTH;
+    public static final int PACKED_Y_LENGTH;
     private static final long PACKED_X_MASK;
     private static final long PACKED_Y_MASK;
     private static final long PACKED_Z_MASK;
@@ -215,6 +215,10 @@ extends Vec3i {
     @Override
     public BlockPos cross(Vec3i vec3i) {
         return new BlockPos(this.getY() * vec3i.getZ() - this.getZ() * vec3i.getY(), this.getZ() * vec3i.getX() - this.getX() * vec3i.getZ(), this.getX() * vec3i.getY() - this.getY() * vec3i.getX());
+    }
+
+    public BlockPos atY(int i) {
+        return new BlockPos(this.getX(), i, this.getZ());
     }
 
     public BlockPos immutable() {
@@ -551,18 +555,21 @@ extends Vec3i {
         }
 
         @Override
-        public void setX(int i) {
+        public MutableBlockPos setX(int i) {
             super.setX(i);
+            return this;
         }
 
         @Override
-        public void setY(int i) {
+        public MutableBlockPos setY(int i) {
             super.setY(i);
+            return this;
         }
 
         @Override
-        public void setZ(int i) {
+        public MutableBlockPos setZ(int i) {
             super.setZ(i);
+            return this;
         }
 
         @Override
@@ -598,6 +605,21 @@ extends Vec3i {
         @Override
         public /* synthetic */ Vec3i above() {
             return super.above();
+        }
+
+        @Override
+        public /* synthetic */ Vec3i setZ(int i) {
+            return this.setZ(i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i setY(int i) {
+            return this.setY(i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i setX(int i) {
+            return this.setX(i);
         }
     }
 }

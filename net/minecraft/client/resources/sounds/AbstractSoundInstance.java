@@ -27,7 +27,6 @@ implements SoundInstance {
     protected boolean looping;
     protected int delay;
     protected SoundInstance.Attenuation attenuation = SoundInstance.Attenuation.LINEAR;
-    protected boolean priority;
     protected boolean relative;
 
     protected AbstractSoundInstance(SoundEvent soundEvent, SoundSource soundSource) {

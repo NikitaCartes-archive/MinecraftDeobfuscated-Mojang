@@ -30,6 +30,8 @@ implements Packet<ClientGamePacketListener> {
     public static final ResourceLocation DEBUG_GAME_TEST_ADD_MARKER = new ResourceLocation("debug/game_test_add_marker");
     public static final ResourceLocation DEBUG_GAME_TEST_CLEAR = new ResourceLocation("debug/game_test_clear");
     public static final ResourceLocation DEBUG_RAIDS = new ResourceLocation("debug/raids");
+    public static final ResourceLocation DEBUG_GAME_EVENT = new ResourceLocation("debug/game_event");
+    public static final ResourceLocation DEBUG_GAME_EVENT_LISTENER = new ResourceLocation("debug/game_event_listeners");
     private ResourceLocation identifier;
     private FriendlyByteBuf data;
 

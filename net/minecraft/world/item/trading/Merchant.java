@@ -26,7 +26,7 @@ public interface Merchant {
     public MerchantOffers getOffers();
 
     @Environment(value=EnvType.CLIENT)
-    public void overrideOffers(@Nullable MerchantOffers var1);
+    public void overrideOffers(MerchantOffers var1);
 
     public void notifyTrade(MerchantOffer var1);
 
