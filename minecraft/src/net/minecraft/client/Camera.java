@@ -34,7 +34,6 @@ public class Camera {
 	private float yRot;
 	private final Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
 	private boolean detached;
-	private boolean mirror;
 	private float eyeHeight;
 	private float eyeHeightOld;
 
@@ -43,7 +42,6 @@ public class Camera {
 		this.level = blockGetter;
 		this.entity = entity;
 		this.detached = bl;
-		this.mirror = bl2;
 		this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
 		this.setPosition(
 			Mth.lerp((double)f, entity.xo, entity.getX()),

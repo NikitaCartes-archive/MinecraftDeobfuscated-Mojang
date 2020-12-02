@@ -196,15 +196,6 @@ public class StructureTemplate {
 		return transform(blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot());
 	}
 
-	public void placeInWorldChunk(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
-		structurePlaceSettings.updateBoundingBoxFromChunkPos();
-		this.placeInWorld(serverLevelAccessor, blockPos, structurePlaceSettings, random);
-	}
-
-	public void placeInWorld(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
-		this.placeInWorld(serverLevelAccessor, blockPos, blockPos, structurePlaceSettings, random, 2);
-	}
-
 	public boolean placeInWorld(
 		ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, Random random, int i
 	) {

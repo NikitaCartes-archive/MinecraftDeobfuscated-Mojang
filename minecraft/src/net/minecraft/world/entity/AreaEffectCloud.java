@@ -4,11 +4,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.Registry;
@@ -48,7 +46,9 @@ public class AreaEffectCloud extends Entity {
 	private int durationOnUse;
 	private float radiusOnUse;
 	private float radiusPerTick;
+	@Nullable
 	private LivingEntity owner;
+	@Nullable
 	private UUID ownerUUID;
 
 	public AreaEffectCloud(EntityType<? extends AreaEffectCloud> entityType, Level level) {
@@ -241,15 +241,7 @@ public class AreaEffectCloud extends Entity {
 			}
 
 			if (this.tickCount % 5 == 0) {
-				Iterator<Entry<Entity, Integer>> iterator = this.victims.entrySet().iterator();
-
-				while (iterator.hasNext()) {
-					Entry<Entity, Integer> entry = (Entry<Entity, Integer>)iterator.next();
-					if (this.tickCount >= (Integer)entry.getValue()) {
-						iterator.remove();
-					}
-				}
-
+				this.victims.entrySet().removeIf(entry -> this.tickCount >= (Integer)entry.getValue());
 				List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
 
 				for (MobEffectInstance mobEffectInstance : this.potion.getEffects()) {
@@ -403,7 +395,7 @@ public class AreaEffectCloud extends Entity {
 			compoundTag.putInt("Color", this.getColor());
 		}
 
-		if (this.potion != Potions.EMPTY && this.potion != null) {
+		if (this.potion != Potions.EMPTY) {
 			compoundTag.putString("Potion", Registry.POTION.getKey(this.potion).toString());
 		}
 

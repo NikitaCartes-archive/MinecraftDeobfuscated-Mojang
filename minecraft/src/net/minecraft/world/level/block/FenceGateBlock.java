@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -134,7 +135,9 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 			level.setBlock(blockPos, blockState, 10);
 		}
 
-		level.levelEvent(player, blockState.getValue(OPEN) ? 1008 : 1014, blockPos, 0);
+		boolean bl = (Boolean)blockState.getValue(OPEN);
+		level.levelEvent(player, bl ? 1008 : 1014, blockPos, 0);
+		level.gameEvent(player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
@@ -146,6 +149,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)).setValue(OPEN, Boolean.valueOf(bl2)), 2);
 				if ((Boolean)blockState.getValue(OPEN) != bl2) {
 					level.levelEvent(null, bl2 ? 1008 : 1014, blockPos, 0);
+					level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 				}
 			}
 		}

@@ -77,7 +77,7 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 			}
 		}
 
-		int m = Math.max(l - worldGenLevel.getMinBuildHeight() - 15 - random.nextInt(10), 10);
+		int m = Math.max(l - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
 		BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9F);
 		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);

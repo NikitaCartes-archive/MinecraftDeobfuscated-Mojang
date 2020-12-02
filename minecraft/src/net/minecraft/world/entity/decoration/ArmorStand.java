@@ -39,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -140,10 +141,12 @@ public class ArmorStand extends LivingEntity {
 		switch (equipmentSlot.getType()) {
 			case HAND:
 				this.playEquipSound(itemStack);
+				this.gameEvent(null, GameEvent.ARMOR_STAND_ADD_ITEM);
 				this.handItems.set(equipmentSlot.getIndex(), itemStack);
 				break;
 			case ARMOR:
 				this.playEquipSound(itemStack);
+				this.gameEvent(null, GameEvent.ARMOR_STAND_ADD_ITEM);
 				this.armorItems.set(equipmentSlot.getIndex(), itemStack);
 		}
 	}
@@ -407,6 +410,7 @@ public class ArmorStand extends LivingEntity {
 				return false;
 			} else if (damageSource.isCreativePlayer()) {
 				this.playBrokenSound();
+				this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 				this.showBreakingParticles();
 				this.kill();
 				return bl2;
@@ -414,6 +418,7 @@ public class ArmorStand extends LivingEntity {
 				long l = this.level.getGameTime();
 				if (l - this.lastHit > 5L && !bl) {
 					this.level.broadcastEntityEvent(this, (byte)32);
+					this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 					this.lastHit = l;
 				} else {
 					this.brokenByPlayer(damageSource);
@@ -486,6 +491,7 @@ public class ArmorStand extends LivingEntity {
 
 	private void brokenByAnything(DamageSource damageSource) {
 		this.playBrokenSound();
+		this.gameEvent(damageSource.getEntity(), GameEvent.BLOCK_DESTROY);
 		this.dropAllDeathLoot(damageSource);
 
 		for (int i = 0; i < this.handItems.size(); i++) {

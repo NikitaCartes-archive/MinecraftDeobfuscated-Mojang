@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -58,6 +59,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 					if (!itemStack2.isEmpty()) {
 						player.awardStat(Stats.ITEM_USED.get(this));
 						bucketPickup.getPickupSound().ifPresent(soundEvent -> player.playSound(soundEvent, 1.0F, 1.0F));
+						level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
 						ItemStack itemStack3 = ItemUtils.createFilledResult(itemStack, player, itemStack2);
 						if (!level.isClientSide) {
 							CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, itemStack2);
@@ -143,5 +145,6 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 	protected void playEmptySound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos) {
 		SoundEvent soundEvent = this.content.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
 		levelAccessor.playSound(player, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
+		levelAccessor.gameEvent(player, GameEvent.FLUID_PLACE, blockPos);
 	}
 }

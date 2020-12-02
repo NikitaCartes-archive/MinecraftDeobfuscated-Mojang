@@ -123,7 +123,8 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		for (int k = 0; k < 17 && k < list.size(); k++) {
 			Pair<BannerPattern, DyeColor> pair = (Pair<BannerPattern, DyeColor>)list.get(k);
 			float[] fs = pair.getSecond().getTextureDiffuseColors();
-			Material material2 = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, pair.getFirst().location(bl));
+			BannerPattern bannerPattern = pair.getFirst();
+			Material material2 = bl ? Sheets.getBannerMaterial(bannerPattern) : Sheets.getShieldMaterial(bannerPattern);
 			modelPart.render(poseStack, material2.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
 		}
 	}

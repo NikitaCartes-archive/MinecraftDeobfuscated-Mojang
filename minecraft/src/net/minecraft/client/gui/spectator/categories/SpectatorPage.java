@@ -5,17 +5,14 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
-import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 
 @Environment(EnvType.CLIENT)
 public class SpectatorPage {
-	private final SpectatorMenuCategory category;
 	private final List<SpectatorMenuItem> items;
 	private final int selection;
 
-	public SpectatorPage(SpectatorMenuCategory spectatorMenuCategory, List<SpectatorMenuItem> list, int i) {
-		this.category = spectatorMenuCategory;
+	public SpectatorPage(List<SpectatorMenuItem> list, int i) {
 		this.items = list;
 		this.selection = i;
 	}

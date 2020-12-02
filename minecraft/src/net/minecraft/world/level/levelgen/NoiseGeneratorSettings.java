@@ -24,9 +24,9 @@ public final class NoiseGeneratorSettings {
 					NoiseSettings.CODEC.fieldOf("noise").forGetter(NoiseGeneratorSettings::noiseSettings),
 					BlockState.CODEC.fieldOf("default_block").forGetter(NoiseGeneratorSettings::getDefaultBlock),
 					BlockState.CODEC.fieldOf("default_fluid").forGetter(NoiseGeneratorSettings::getDefaultFluid),
-					Codec.intRange(-20, 276).fieldOf("bedrock_roof_position").forGetter(NoiseGeneratorSettings::getBedrockRoofPosition),
-					Codec.intRange(-20, 276).fieldOf("bedrock_floor_position").forGetter(NoiseGeneratorSettings::getBedrockFloorPosition),
-					Codec.intRange(0, 255).fieldOf("sea_level").forGetter(NoiseGeneratorSettings::seaLevel),
+					Codec.INT.fieldOf("bedrock_roof_position").forGetter(NoiseGeneratorSettings::getBedrockRoofPosition),
+					Codec.INT.fieldOf("bedrock_floor_position").forGetter(NoiseGeneratorSettings::getBedrockFloorPosition),
+					Codec.INT.fieldOf("sea_level").forGetter(NoiseGeneratorSettings::seaLevel),
 					Codec.BOOL.fieldOf("disable_mob_generation").forGetter(NoiseGeneratorSettings::disableMobGeneration)
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
@@ -118,7 +118,8 @@ public final class NoiseGeneratorSettings {
 	) {
 		return new NoiseGeneratorSettings(
 			structureSettings,
-			new NoiseSettings(
+			NoiseSettings.create(
+				0,
 				128,
 				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
 				new NoiseSlideSettings(-3000, 64, -46),
@@ -134,8 +135,8 @@ public final class NoiseGeneratorSettings {
 			),
 			blockState,
 			blockState2,
-			-10,
-			-10,
+			Integer.MIN_VALUE,
+			Integer.MIN_VALUE,
 			0,
 			bl
 		);
@@ -148,7 +149,8 @@ public final class NoiseGeneratorSettings {
 		map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
 		return new NoiseGeneratorSettings(
 			new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map),
-			new NoiseSettings(
+			NoiseSettings.create(
+				0,
 				128,
 				new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0),
 				new NoiseSlideSettings(120, 3, 0),
@@ -175,7 +177,8 @@ public final class NoiseGeneratorSettings {
 		double d = 0.9999999814507745;
 		return new NoiseGeneratorSettings(
 			structureSettings,
-			new NoiseSettings(
+			NoiseSettings.create(
+				0,
 				256,
 				new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0),
 				new NoiseSlideSettings(-10, 3, 0),
@@ -191,7 +194,7 @@ public final class NoiseGeneratorSettings {
 			),
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			-10,
+			Integer.MIN_VALUE,
 			0,
 			63,
 			false

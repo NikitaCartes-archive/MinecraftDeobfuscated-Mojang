@@ -794,12 +794,14 @@ public class Gui extends GuiComponent {
 
 			for (int xx = Mth.ceil((f + (float)p) / 2.0F) - 1; xx >= 0; xx--) {
 				int yx = 16;
-				if (player.hasEffect(MobEffects.POISON)) {
-					yx += 36;
-				} else if (player.hasEffect(MobEffects.WITHER)) {
-					yx += 72;
-				} else if (player.isFullyFrozen()) {
-					yx += 126;
+				if (u <= 0) {
+					if (player.hasEffect(MobEffects.POISON)) {
+						yx += 36;
+					} else if (player.hasEffect(MobEffects.WITHER)) {
+						yx += 72;
+					} else if (player.isFullyFrozen()) {
+						yx += 126;
+					}
 				}
 
 				int z = 0;

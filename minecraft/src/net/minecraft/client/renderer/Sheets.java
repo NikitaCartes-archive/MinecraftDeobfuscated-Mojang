@@ -47,7 +47,11 @@ public class Sheets {
 		.map(string -> new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker_" + string)))
 		.collect(ImmutableList.toImmutableList());
 	public static final Map<WoodType, Material> SIGN_MATERIALS = (Map<WoodType, Material>)WoodType.values()
-		.collect(Collectors.toMap(Function.identity(), Sheets::signTexture));
+		.collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
+	public static final Map<BannerPattern, Material> BANNER_MATERIALS = (Map<BannerPattern, Material>)Arrays.stream(BannerPattern.values())
+		.collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
+	public static final Map<BannerPattern, Material> SHIELD_MATERIALS = (Map<BannerPattern, Material>)Arrays.stream(BannerPattern.values())
+		.collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
 	public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values())
 		.sorted(Comparator.comparingInt(DyeColor::getId))
 		.map(dyeColor -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + dyeColor.getName())))
@@ -106,12 +110,8 @@ public class Sheets {
 	public static void getAllMaterials(Consumer<Material> consumer) {
 		consumer.accept(DEFAULT_SHULKER_TEXTURE_LOCATION);
 		SHULKER_TEXTURE_LOCATION.forEach(consumer);
-
-		for (BannerPattern bannerPattern : BannerPattern.values()) {
-			consumer.accept(new Material(BANNER_SHEET, bannerPattern.location(true)));
-			consumer.accept(new Material(SHIELD_SHEET, bannerPattern.location(false)));
-		}
-
+		BANNER_MATERIALS.values().forEach(consumer);
+		SHIELD_MATERIALS.values().forEach(consumer);
 		SIGN_MATERIALS.values().forEach(consumer);
 
 		for (Material material : BED_TEXTURES) {
@@ -130,8 +130,28 @@ public class Sheets {
 		consumer.accept(ENDER_CHEST_LOCATION);
 	}
 
-	public static Material signTexture(WoodType woodType) {
+	private static Material createSignMaterial(WoodType woodType) {
 		return new Material(SIGN_SHEET, new ResourceLocation("entity/signs/" + woodType.name()));
+	}
+
+	public static Material getSignMaterial(WoodType woodType) {
+		return (Material)SIGN_MATERIALS.get(woodType);
+	}
+
+	private static Material createBannerMaterial(BannerPattern bannerPattern) {
+		return new Material(BANNER_SHEET, bannerPattern.location(true));
+	}
+
+	public static Material getBannerMaterial(BannerPattern bannerPattern) {
+		return (Material)BANNER_MATERIALS.get(bannerPattern);
+	}
+
+	private static Material createShieldMaterial(BannerPattern bannerPattern) {
+		return new Material(SHIELD_SHEET, bannerPattern.location(false));
+	}
+
+	public static Material getShieldMaterial(BannerPattern bannerPattern) {
+		return (Material)SHIELD_MATERIALS.get(bannerPattern);
 	}
 
 	private static Material chestMaterial(String string) {

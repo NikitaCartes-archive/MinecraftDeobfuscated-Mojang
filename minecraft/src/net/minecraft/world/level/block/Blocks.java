@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
@@ -3134,6 +3135,17 @@ public class Blocks {
 	public static final Block POWDER_SNOW = register(
 		"powder_snow", new PowderSnowBlock(BlockBehaviour.Properties.of(Material.POWDER_SNOW).strength(0.1F).sound(SoundType.POWDER_SNOW).dynamicShape())
 	);
+	public static final Block SCULK_SENSOR = register(
+		"sculk_sensor",
+		new SculkSensorBlock(
+			BlockBehaviour.Properties.of(Material.SCULK, MaterialColor.COLOR_CYAN)
+				.strength(1.5F)
+				.sound(SoundType.SCULK_SENSOR)
+				.lightLevel(blockStatex -> 1)
+				.emissiveRendering((blockStatex, blockGetter, blockPos) -> SculkSensorBlock.getPhase(blockStatex) == SculkSensorPhase.ACTIVE),
+			8
+		)
+	);
 	public static final Block WEATHERED_COPPER_BLOCK = register(
 		"weathered_copper_block",
 		new Block(
@@ -3213,14 +3225,12 @@ public class Blocks {
 		"waxed_lightly_weathered_copper", new Block(BlockBehaviour.Properties.copy(LIGHTLY_WEATHERED_COPPER_BLOCK))
 	);
 	public static final Block WAXED_SEMI_WEATHERED_CUT_COPPER = register(
-		"waxed_semi_weathered_cut_copper", new ChangeOverTimeFullBlock(BlockBehaviour.Properties.copy(SEMI_WEATHERED_COPPER_BLOCK), WEATHERED_CUT_COPPER)
+		"waxed_semi_weathered_cut_copper", new Block(BlockBehaviour.Properties.copy(SEMI_WEATHERED_COPPER_BLOCK))
 	);
 	public static final Block WAXED_LIGHTLY_WEATHERED_CUT_COPPER = register(
-		"waxed_lightly_weathered_cut_copper", new ChangeOverTimeFullBlock(BlockBehaviour.Properties.copy(LIGHTLY_WEATHERED_COPPER_BLOCK), SEMI_WEATHERED_CUT_COPPER)
+		"waxed_lightly_weathered_cut_copper", new Block(BlockBehaviour.Properties.copy(LIGHTLY_WEATHERED_COPPER_BLOCK))
 	);
-	public static final Block WAXED_CUT_COPPER = register(
-		"waxed_cut_copper", new ChangeOverTimeFullBlock(BlockBehaviour.Properties.copy(COPPER_BLOCK), LIGHTLY_WEATHERED_CUT_COPPER)
-	);
+	public static final Block WAXED_CUT_COPPER = register("waxed_cut_copper", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
 	public static final Block WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS = register(
 		"waxed_semi_weathered_cut_copper_stairs",
 		new StairBlock(WAXED_SEMI_WEATHERED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(SEMI_WEATHERED_COPPER_BLOCK))

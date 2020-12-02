@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 
 public class EndCrystalItem extends Item {
@@ -41,6 +42,7 @@ public class EndCrystalItem extends Item {
 						EndCrystal endCrystal = new EndCrystal(level, d + 0.5, e, f + 0.5);
 						endCrystal.setShowBottom(false);
 						level.addFreshEntity(endCrystal);
+						level.gameEvent(useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos2);
 						EndDragonFight endDragonFight = ((ServerLevel)level).dragonFight();
 						if (endDragonFight != null) {
 							endDragonFight.tryRespawn();

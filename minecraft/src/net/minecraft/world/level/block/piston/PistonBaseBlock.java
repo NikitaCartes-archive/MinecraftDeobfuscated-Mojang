@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.PistonType;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -175,6 +176,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 			level.setBlock(blockPos, blockState.setValue(EXTENDED, Boolean.valueOf(true)), 67);
 			level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.25F + 0.6F);
+			level.gameEvent(GameEvent.PISTON_EXTEND, blockPos);
 		} else if (i == 1 || i == 2) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos.relative(direction));
 			if (blockEntity instanceof PistonMovingBlockEntity) {
@@ -223,6 +225,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 			}
 
 			level.playSound(null, blockPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.15F + 0.6F);
+			level.gameEvent(GameEvent.PISTON_CONTRACT, blockPos);
 		}
 
 		return true;

@@ -76,18 +76,16 @@ public class ProtectionEnchantment extends Enchantment {
 	}
 
 	public static enum Type {
-		ALL("all", 1, 11),
-		FIRE("fire", 10, 8),
-		FALL("fall", 5, 6),
-		EXPLOSION("explosion", 5, 8),
-		PROJECTILE("projectile", 3, 6);
+		ALL(1, 11),
+		FIRE(10, 8),
+		FALL(5, 6),
+		EXPLOSION(5, 8),
+		PROJECTILE(3, 6);
 
-		private final String name;
 		private final int minCost;
 		private final int levelCost;
 
-		private Type(String string2, int j, int k) {
-			this.name = string2;
+		private Type(int j, int k) {
 			this.minCost = j;
 			this.levelCost = k;
 		}

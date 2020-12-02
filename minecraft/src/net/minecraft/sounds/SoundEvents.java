@@ -778,6 +778,13 @@ public class SoundEvents {
 	public static final SoundEvent SCAFFOLDING_HIT = register("block.scaffolding.hit");
 	public static final SoundEvent SCAFFOLDING_PLACE = register("block.scaffolding.place");
 	public static final SoundEvent SCAFFOLDING_STEP = register("block.scaffolding.step");
+	public static final SoundEvent SCULK_CLICKING = register("block.sculk_sensor.clicking");
+	public static final SoundEvent SCULK_CLICKING_STOP = register("block.sculk_sensor.clicking_stop");
+	public static final SoundEvent SCULK_SENSOR_BREAK = register("block.sculk_sensor.break");
+	public static final SoundEvent SCULK_SENSOR_FALL = register("block.sculk_sensor.fall");
+	public static final SoundEvent SCULK_SENSOR_HIT = register("block.sculk_sensor.hit");
+	public static final SoundEvent SCULK_SENSOR_PLACE = register("block.sculk_sensor.place");
+	public static final SoundEvent SCULK_SENSOR_STEP = register("block.sculk_sensor.step");
 	public static final SoundEvent SHEEP_AMBIENT = register("entity.sheep.ambient");
 	public static final SoundEvent SHEEP_DEATH = register("entity.sheep.death");
 	public static final SoundEvent SHEEP_HURT = register("entity.sheep.hurt");

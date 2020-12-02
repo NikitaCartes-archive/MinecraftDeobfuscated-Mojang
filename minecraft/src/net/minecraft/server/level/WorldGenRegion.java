@@ -39,6 +39,7 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -365,6 +366,10 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
+	}
+
+	@Override
 	public DimensionType dimensionType() {
 		return this.dimensionType;
 	}
@@ -395,12 +400,12 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public int getSectionsCount() {
-		return this.level.getSectionsCount();
+	public int getMinBuildHeight() {
+		return this.level.getMinBuildHeight();
 	}
 
 	@Override
-	public int getMinSection() {
-		return this.level.getMinSection();
+	public int getHeight() {
+		return this.level.getHeight();
 	}
 }

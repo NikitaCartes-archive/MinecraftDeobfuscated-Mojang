@@ -17,6 +17,7 @@ import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -24,6 +25,10 @@ import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 
 public interface ChunkAccess extends BlockGetter, FeatureAccess {
+	default GameEventDispatcher getEventDispatcher(int i) {
+		return GameEventDispatcher.NOOP;
+	}
+
 	@Nullable
 	BlockState setBlockState(BlockPos blockPos, BlockState blockState, boolean bl);
 

@@ -245,6 +245,7 @@ public final class Biome {
 					int p = SectionPos.sectionToBlockCoord(n);
 
 					try {
+						int q = worldGenRegion.getMinBuildHeight() + 1;
 						structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
 							.forEach(
 								structureStart -> structureStart.placeInChunk(
@@ -252,7 +253,7 @@ public final class Biome {
 										structureFeatureManager,
 										chunkGenerator,
 										worldgenRandom,
-										new BoundingBox(o, worldGenRegion.getMinBuildHeight() + 1, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15),
+										new BoundingBox(o, q, p, o + 15, worldGenRegion.getMaxBuildHeight(), p + 15),
 										new ChunkPos(m, n)
 									)
 							);

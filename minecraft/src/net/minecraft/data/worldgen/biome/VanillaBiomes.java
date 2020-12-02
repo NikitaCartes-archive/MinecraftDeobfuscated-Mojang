@@ -1505,4 +1505,44 @@ public class VanillaBiomes {
 			.generationSettings(builder.build())
 			.build();
 	}
+
+	public static Biome dripstoneCaves() {
+		MobSpawnSettings mobSpawnSettings = new MobSpawnSettings.Builder().build();
+		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
+		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
+		builder.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
+		BiomeDefaultFeatures.addDefaultCarvers(builder);
+		BiomeDefaultFeatures.addDefaultLakes(builder);
+		BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
+		BiomeDefaultFeatures.addDefaultMonsterRoom(builder);
+		BiomeDefaultFeatures.addPlainGrass(builder);
+		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder);
+		BiomeDefaultFeatures.addDefaultOres(builder);
+		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
+		BiomeDefaultFeatures.addPlainVegetation(builder);
+		BiomeDefaultFeatures.addDefaultMushrooms(builder);
+		BiomeDefaultFeatures.addDefaultExtraVegetation(builder);
+		BiomeDefaultFeatures.addDefaultSprings(builder);
+		BiomeDefaultFeatures.addSurfaceFreezing(builder);
+		BiomeDefaultFeatures.addDripstone(builder);
+		return new Biome.BiomeBuilder()
+			.precipitation(Biome.Precipitation.RAIN)
+			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.depth(0.125F)
+			.scale(0.05F)
+			.temperature(0.8F)
+			.downfall(0.4F)
+			.specialEffects(
+				new BiomeSpecialEffects.Builder()
+					.waterColor(4159204)
+					.waterFogColor(329011)
+					.fogColor(12638463)
+					.skyColor(calculateSkyColor(0.8F))
+					.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+					.build()
+			)
+			.mobSpawnSettings(mobSpawnSettings)
+			.generationSettings(builder.build())
+			.build();
+	}
 }

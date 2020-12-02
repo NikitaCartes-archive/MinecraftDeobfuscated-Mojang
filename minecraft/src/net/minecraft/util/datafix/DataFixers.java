@@ -187,6 +187,7 @@ import net.minecraft.util.datafix.schemas.V2519;
 import net.minecraft.util.datafix.schemas.V2522;
 import net.minecraft.util.datafix.schemas.V2551;
 import net.minecraft.util.datafix.schemas.V2568;
+import net.minecraft.util.datafix.schemas.V2684;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -667,6 +668,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(
 			BlockRenameFixWithJigsaw.create(schema127, "Renamed grass path block to dirt path", createRenamer("minecraft:grass_path", "minecraft:dirt_path"))
 		);
+		Schema schema128 = dataFixerBuilder.addSchema(2684, V2684::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema128, "Added Sculk Sensor", References.BLOCK_ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

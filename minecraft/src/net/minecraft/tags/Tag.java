@@ -5,14 +5,17 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
@@ -68,25 +71,29 @@ public interface Tag<T> {
 			return this.add(new Tag.TagEntry(resourceLocation), string);
 		}
 
-		public <T> Optional<Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
+		public <T> Either<Collection<Tag.BuilderEntry>, Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
 			ImmutableSet.Builder<T> builder = ImmutableSet.builder();
+			List<Tag.BuilderEntry> list = Lists.<Tag.BuilderEntry>newArrayList();
 
 			for (Tag.BuilderEntry builderEntry : this.entries) {
 				if (!builderEntry.getEntry().build(function, function2, builder::add)) {
-					return Optional.empty();
+					list.add(builderEntry);
 				}
 			}
 
-			return Optional.of(Tag.fromSet(builder.build()));
+			return list.isEmpty() ? Either.right(Tag.fromSet(builder.build())) : Either.left(list);
 		}
 
 		public Stream<Tag.BuilderEntry> getEntries() {
 			return this.entries.stream();
 		}
 
-		public <T> Stream<Tag.BuilderEntry> getUnresolvedEntries(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
-			return this.getEntries().filter(builderEntry -> !builderEntry.getEntry().build(function, function2, object -> {
-				}));
+		public void visitRequiredDependencies(Consumer<ResourceLocation> consumer) {
+			this.entries.forEach(builderEntry -> builderEntry.entry.visitRequiredDependencies(consumer));
+		}
+
+		public void visitOptionalDependencies(Consumer<ResourceLocation> consumer) {
+			this.entries.forEach(builderEntry -> builderEntry.entry.visitOptionalDependencies(consumer));
 		}
 
 		public Tag.Builder addFromJson(JsonObject jsonObject, String string) {
@@ -181,6 +188,11 @@ public interface Tag<T> {
 			jsonArray.add(this.id.toString());
 		}
 
+		@Override
+		public boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2) {
+			return predicate.test(this.id);
+		}
+
 		public String toString() {
 			return this.id.toString();
 		}
@@ -190,6 +202,14 @@ public interface Tag<T> {
 		<T> boolean build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2, Consumer<T> consumer);
 
 		void serializeTo(JsonArray jsonArray);
+
+		default void visitRequiredDependencies(Consumer<ResourceLocation> consumer) {
+		}
+
+		default void visitOptionalDependencies(Consumer<ResourceLocation> consumer) {
+		}
+
+		boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2);
 	}
 
 	public interface Named<T> extends Tag<T> {
@@ -219,6 +239,11 @@ public interface Tag<T> {
 			jsonObject.addProperty("id", this.id.toString());
 			jsonObject.addProperty("required", false);
 			jsonArray.add(jsonObject);
+		}
+
+		@Override
+		public boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2) {
+			return true;
 		}
 
 		public String toString() {
@@ -254,6 +279,16 @@ public interface Tag<T> {
 		public String toString() {
 			return "#" + this.id + "?";
 		}
+
+		@Override
+		public void visitOptionalDependencies(Consumer<ResourceLocation> consumer) {
+			consumer.accept(this.id);
+		}
+
+		@Override
+		public boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2) {
+			return true;
+		}
 	}
 
 	public static class TagEntry implements Tag.Entry {
@@ -281,6 +316,16 @@ public interface Tag<T> {
 
 		public String toString() {
 			return "#" + this.id;
+		}
+
+		@Override
+		public boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2) {
+			return predicate2.test(this.id);
+		}
+
+		@Override
+		public void visitRequiredDependencies(Consumer<ResourceLocation> consumer) {
+			consumer.accept(this.id);
 		}
 	}
 }

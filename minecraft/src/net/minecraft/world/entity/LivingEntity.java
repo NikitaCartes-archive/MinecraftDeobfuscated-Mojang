@@ -102,6 +102,7 @@ import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -974,7 +975,7 @@ public abstract class LivingEntity extends Entity {
 
 			this.noActionTime = 0;
 			float g = f;
-			if ((damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK) && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+			if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
 				this.getItemBySlot(EquipmentSlot.HEAD)
 					.hurtAndBreak((int)(f * 4.0F + this.random.nextFloat() * f * 2.0F), this, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.HEAD));
 				f *= 0.75F;
@@ -1109,6 +1110,7 @@ public abstract class LivingEntity extends Entity {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
 			}
 
+			this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 			return bl3;
 		}
 	}
@@ -2504,8 +2506,14 @@ public abstract class LivingEntity extends Entity {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
 				bl = true;
-				if (!this.level.isClientSide && (this.fallFlyTicks + 1) % 20 == 0) {
-					itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
+				int i = this.fallFlyTicks + 1;
+				if (!this.level.isClientSide && i % 10 == 0) {
+					int j = i / 10;
+					if (j % 2 == 0) {
+						itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
+					}
+
+					this.gameEvent(GameEvent.ELYTRA_FREE_FALL);
 				}
 			} else {
 				bl = false;

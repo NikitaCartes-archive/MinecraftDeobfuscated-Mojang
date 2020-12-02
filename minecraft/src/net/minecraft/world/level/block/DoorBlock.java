@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -195,6 +197,7 @@ public class DoorBlock extends Block {
 			blockState = blockState.cycle(OPEN);
 			level.setBlock(blockPos, blockState, 10);
 			level.levelEvent(player, blockState.getValue(OPEN) ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
+			level.gameEvent(player, this.isOpen(blockState) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
@@ -203,10 +206,11 @@ public class DoorBlock extends Block {
 		return (Boolean)blockState.getValue(OPEN);
 	}
 
-	public void setOpen(Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
+	public void setOpen(@Nullable Entity entity, Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
 		if (blockState.is(this) && (Boolean)blockState.getValue(OPEN) != bl) {
 			level.setBlock(blockPos, blockState.setValue(OPEN, Boolean.valueOf(bl)), 10);
 			this.playSound(level, blockPos, bl);
+			level.gameEvent(entity, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 		}
 	}
 
@@ -217,6 +221,7 @@ public class DoorBlock extends Block {
 		if (!this.defaultBlockState().is(block) && bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2 != (Boolean)blockState.getValue(OPEN)) {
 				this.playSound(level, blockPos, bl2);
+				level.gameEvent(bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 			}
 
 			level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)).setValue(OPEN, Boolean.valueOf(bl2)), 2);

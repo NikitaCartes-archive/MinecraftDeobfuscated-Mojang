@@ -17,7 +17,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -73,12 +72,6 @@ public class ImposterProtoChunk extends ProtoChunk {
 	@Override
 	public LevelChunkSection[] getSections() {
 		return this.wrapped.getSections();
-	}
-
-	@Nullable
-	@Override
-	public LevelLightEngine getLightEngine() {
-		return this.wrapped.getLightEngine();
 	}
 
 	@Override

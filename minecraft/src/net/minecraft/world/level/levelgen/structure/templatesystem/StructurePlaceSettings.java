@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -17,8 +16,6 @@ public class StructurePlaceSettings {
 	private Rotation rotation = Rotation.NONE;
 	private BlockPos rotationPivot = BlockPos.ZERO;
 	private boolean ignoreEntities;
-	@Nullable
-	private ChunkPos chunkPos;
 	@Nullable
 	private BoundingBox boundingBox;
 	private boolean keepLiquids = true;
@@ -36,7 +33,6 @@ public class StructurePlaceSettings {
 		structurePlaceSettings.rotation = this.rotation;
 		structurePlaceSettings.rotationPivot = this.rotationPivot;
 		structurePlaceSettings.ignoreEntities = this.ignoreEntities;
-		structurePlaceSettings.chunkPos = this.chunkPos;
 		structurePlaceSettings.boundingBox = this.boundingBox;
 		structurePlaceSettings.keepLiquids = this.keepLiquids;
 		structurePlaceSettings.random = this.random;
@@ -64,11 +60,6 @@ public class StructurePlaceSettings {
 
 	public StructurePlaceSettings setIgnoreEntities(boolean bl) {
 		this.ignoreEntities = bl;
-		return this;
-	}
-
-	public StructurePlaceSettings setChunkPos(ChunkPos chunkPos) {
-		this.chunkPos = chunkPos;
 		return this;
 	}
 
@@ -128,10 +119,6 @@ public class StructurePlaceSettings {
 
 	@Nullable
 	public BoundingBox getBoundingBox() {
-		if (this.boundingBox == null && this.chunkPos != null) {
-			this.updateBoundingBoxFromChunkPos();
-		}
-
 		return this.boundingBox;
 	}
 
@@ -141,12 +128,6 @@ public class StructurePlaceSettings {
 
 	public List<StructureProcessor> getProcessors() {
 		return this.processors;
-	}
-
-	void updateBoundingBoxFromChunkPos() {
-		if (this.chunkPos != null) {
-			this.boundingBox = this.calculateBoundingBox(this.chunkPos);
-		}
 	}
 
 	public boolean shouldKeepLiquids() {
@@ -159,17 +140,6 @@ public class StructurePlaceSettings {
 			throw new IllegalStateException("No palettes");
 		} else {
 			return (StructureTemplate.Palette)list.get(this.getRandom(blockPos).nextInt(i));
-		}
-	}
-
-	@Nullable
-	private BoundingBox calculateBoundingBox(@Nullable ChunkPos chunkPos) {
-		if (chunkPos == null) {
-			return this.boundingBox;
-		} else {
-			int i = chunkPos.x * 16;
-			int j = chunkPos.z * 16;
-			return new BoundingBox(i, 0, j, i + 16 - 1, 255, j + 16 - 1);
 		}
 	}
 

@@ -28,12 +28,12 @@ public enum EmptyBlockGetter implements BlockGetter {
 	}
 
 	@Override
-	public int getSectionsCount() {
+	public int getMinBuildHeight() {
 		return 0;
 	}
 
 	@Override
-	public int getMinSection() {
+	public int getHeight() {
 		return 0;
 	}
 }

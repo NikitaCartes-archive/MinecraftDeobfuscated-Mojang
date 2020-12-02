@@ -11,6 +11,7 @@ import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HangingEntityItem extends Item {
 	private final EntityType<? extends HangingEntity> type;
@@ -50,6 +51,7 @@ public class HangingEntityItem extends Item {
 			if (hangingEntity.survives()) {
 				if (!level.isClientSide) {
 					hangingEntity.playPlacementSound();
+					level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
 					level.addFreshEntity(hangingEntity);
 				}
 

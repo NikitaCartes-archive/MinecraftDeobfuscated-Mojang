@@ -173,7 +173,7 @@ public class ConduitBlockEntity extends BlockEntity {
 		int m = blockPos.getZ();
 		AABB aABB = new AABB((double)k, (double)l, (double)m, (double)(k + 1), (double)(l + 1), (double)(m + 1))
 			.inflate((double)j)
-			.expandTowards(0.0, (double)level.getMaxBuildHeight(), 0.0);
+			.expandTowards(0.0, (double)level.getHeight(), 0.0);
 		List<Player> list2 = level.getEntitiesOfClass(Player.class, aABB);
 		if (!list2.isEmpty()) {
 			for (Player player : list2) {

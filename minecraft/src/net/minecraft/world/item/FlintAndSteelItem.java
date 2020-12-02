@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class FlintAndSteelItem extends Item {
 	public FlintAndSteelItem(Item.Properties properties) {
@@ -31,6 +32,7 @@ public class FlintAndSteelItem extends Item {
 			BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
 			if (BaseFireBlock.canBePlacedAt(level, blockPos2, useOnContext.getHorizontalDirection())) {
 				level.playSound(player, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+				level.gameEvent(player, GameEvent.FLINT_AND_STEEL_USE, blockPos);
 				BlockState blockState2 = BaseFireBlock.getState(level, blockPos2);
 				level.setBlock(blockPos2, blockState2, 11);
 				ItemStack itemStack = useOnContext.getItemInHand();
@@ -45,6 +47,7 @@ public class FlintAndSteelItem extends Item {
 			}
 		} else {
 			level.playSound(player, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+			level.gameEvent(player, GameEvent.FLINT_AND_STEEL_USE, blockPos);
 			level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
 			if (player != null) {
 				useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));

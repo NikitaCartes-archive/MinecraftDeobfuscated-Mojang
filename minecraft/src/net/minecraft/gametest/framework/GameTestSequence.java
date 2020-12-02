@@ -11,14 +11,14 @@ public class GameTestSequence {
 	public void tickAndContinue(long l) {
 		try {
 			this.tick(l);
-		} catch (Exception var4) {
+		} catch (GameTestAssertException var4) {
 		}
 	}
 
 	public void tickAndFailIfNotComplete(long l) {
 		try {
 			this.tick(l);
-		} catch (Exception var4) {
+		} catch (GameTestAssertException var4) {
 			this.parent.fail(var4);
 		}
 	}

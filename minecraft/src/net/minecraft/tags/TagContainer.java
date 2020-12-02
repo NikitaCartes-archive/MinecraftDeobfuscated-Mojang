@@ -6,10 +6,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
 public interface TagContainer {
-	TagContainer EMPTY = of(TagCollection.empty(), TagCollection.empty(), TagCollection.empty(), TagCollection.empty());
+	TagContainer EMPTY = of(TagCollection.empty(), TagCollection.empty(), TagCollection.empty(), TagCollection.empty(), TagCollection.empty());
 
 	TagCollection<Block> getBlocks();
 
@@ -18,6 +19,8 @@ public interface TagContainer {
 	TagCollection<Fluid> getFluids();
 
 	TagCollection<EntityType<?>> getEntityTypes();
+
+	TagCollection<GameEvent> getGameEvents();
 
 	default void bindToGlobal() {
 		StaticTags.resetAll(this);
@@ -29,6 +32,7 @@ public interface TagContainer {
 		this.getItems().serializeToNetwork(friendlyByteBuf, Registry.ITEM);
 		this.getFluids().serializeToNetwork(friendlyByteBuf, Registry.FLUID);
 		this.getEntityTypes().serializeToNetwork(friendlyByteBuf, Registry.ENTITY_TYPE);
+		this.getGameEvents().serializeToNetwork(friendlyByteBuf, Registry.GAME_EVENT);
 	}
 
 	static TagContainer deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
@@ -36,11 +40,16 @@ public interface TagContainer {
 		TagCollection<Item> tagCollection2 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.ITEM);
 		TagCollection<Fluid> tagCollection3 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.FLUID);
 		TagCollection<EntityType<?>> tagCollection4 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.ENTITY_TYPE);
-		return of(tagCollection, tagCollection2, tagCollection3, tagCollection4);
+		TagCollection<GameEvent> tagCollection5 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.GAME_EVENT);
+		return of(tagCollection, tagCollection2, tagCollection3, tagCollection4, tagCollection5);
 	}
 
 	static TagContainer of(
-		TagCollection<Block> tagCollection, TagCollection<Item> tagCollection2, TagCollection<Fluid> tagCollection3, TagCollection<EntityType<?>> tagCollection4
+		TagCollection<Block> tagCollection,
+		TagCollection<Item> tagCollection2,
+		TagCollection<Fluid> tagCollection3,
+		TagCollection<EntityType<?>> tagCollection4,
+		TagCollection<GameEvent> tagCollection5
 	) {
 		return new TagContainer() {
 			@Override
@@ -61,6 +70,11 @@ public interface TagContainer {
 			@Override
 			public TagCollection<EntityType<?>> getEntityTypes() {
 				return tagCollection4;
+			}
+
+			@Override
+			public TagCollection<GameEvent> getGameEvents() {
+				return tagCollection5;
 			}
 		};
 	}

@@ -4,9 +4,11 @@ import com.google.common.hash.Hashing;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
 
 public class BiomeManager {
+	private static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
 	private final BiomeManager.NoiseBiomeSource noiseBiomeSource;
 	private final long biomeZoomSeed;
 	private final BiomeZoomer zoomer;
@@ -31,17 +33,17 @@ public class BiomeManager {
 
 	@Environment(EnvType.CLIENT)
 	public Biome getNoiseBiomeAtPosition(double d, double e, double f) {
-		int i = Mth.floor(d) >> 2;
-		int j = Mth.floor(e) >> 2;
-		int k = Mth.floor(f) >> 2;
+		int i = QuartPos.fromBlock(Mth.floor(d));
+		int j = QuartPos.fromBlock(Mth.floor(e));
+		int k = QuartPos.fromBlock(Mth.floor(f));
 		return this.getNoiseBiomeAtQuart(i, j, k);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public Biome getNoiseBiomeAtPosition(BlockPos blockPos) {
-		int i = blockPos.getX() >> 2;
-		int j = blockPos.getY() >> 2;
-		int k = blockPos.getZ() >> 2;
+		int i = QuartPos.fromBlock(blockPos.getX());
+		int j = QuartPos.fromBlock(blockPos.getY());
+		int k = QuartPos.fromBlock(blockPos.getZ());
 		return this.getNoiseBiomeAtQuart(i, j, k);
 	}
 
@@ -58,7 +60,7 @@ public class BiomeManager {
 		Biome getNoiseBiome(int i, int j, int k);
 
 		default Biome getPrimaryBiome(int i, int j) {
-			return this.getNoiseBiome((i << 2) + 2, 0, (j << 2) + 2);
+			return this.getNoiseBiome(QuartPos.fromSection(i) + BiomeManager.CHUNK_CENTER_QUART, 0, QuartPos.fromSection(j) + BiomeManager.CHUNK_CENTER_QUART);
 		}
 	}
 }

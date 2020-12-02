@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -176,12 +177,16 @@ public class TripWireHookBlock extends Block {
 	private void playSound(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		if (bl2 && !bl4) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_ON, SoundSource.BLOCKS, 0.4F, 0.6F);
+			level.gameEvent(GameEvent.BLOCK_PRESS, blockPos);
 		} else if (!bl2 && bl4) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_CLICK_OFF, SoundSource.BLOCKS, 0.4F, 0.5F);
+			level.gameEvent(GameEvent.BLOCK_UNPRESS, blockPos);
 		} else if (bl && !bl3) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_ATTACH, SoundSource.BLOCKS, 0.4F, 0.7F);
+			level.gameEvent(GameEvent.BLOCK_ATTACH, blockPos);
 		} else if (!bl && bl3) {
 			level.playSound(null, blockPos, SoundEvents.TRIPWIRE_DETACH, SoundSource.BLOCKS, 0.4F, 1.2F / (level.random.nextFloat() * 0.2F + 0.9F));
+			level.gameEvent(GameEvent.BLOCK_DETACH, blockPos);
 		}
 	}
 

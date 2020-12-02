@@ -13,6 +13,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
 public class TagManager implements PreparableReloadListener {
@@ -20,6 +21,7 @@ public class TagManager implements PreparableReloadListener {
 	private final TagLoader<Item> items = new TagLoader<>(Registry.ITEM::getOptional, "tags/items", "item");
 	private final TagLoader<Fluid> fluids = new TagLoader<>(Registry.FLUID::getOptional, "tags/fluids", "fluid");
 	private final TagLoader<EntityType<?>> entityTypes = new TagLoader<>(Registry.ENTITY_TYPE::getOptional, "tags/entity_types", "entity_type");
+	private final TagLoader<GameEvent> gameEvents = new TagLoader<>(Registry.GAME_EVENT::getOptional, "tags/game_events", "game_event");
 	private TagContainer tags = TagContainer.EMPTY;
 
 	public TagContainer getTags() {
@@ -39,6 +41,7 @@ public class TagManager implements PreparableReloadListener {
 		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture2 = this.items.prepare(resourceManager, executor);
 		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture3 = this.fluids.prepare(resourceManager, executor);
 		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture5 = this.gameEvents.prepare(resourceManager, executor);
 		return CompletableFuture.allOf(completableFuture, completableFuture2, completableFuture3, completableFuture4)
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(
@@ -47,7 +50,8 @@ public class TagManager implements PreparableReloadListener {
 					TagCollection<Item> tagCollection2 = this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
 					TagCollection<Fluid> tagCollection3 = this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
 					TagCollection<EntityType<?>> tagCollection4 = this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
-					TagContainer tagContainer = TagContainer.of(tagCollection, tagCollection2, tagCollection3, tagCollection4);
+					TagCollection<GameEvent> tagCollection5 = this.gameEvents.load((Map<ResourceLocation, Tag.Builder>)completableFuture5.join());
+					TagContainer tagContainer = TagContainer.of(tagCollection, tagCollection2, tagCollection3, tagCollection4, tagCollection5);
 					Multimap<ResourceLocation, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
 					if (!multimap.isEmpty()) {
 						throw new IllegalStateException(

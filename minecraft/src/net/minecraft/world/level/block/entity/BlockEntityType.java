@@ -202,6 +202,9 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
 		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE)
 	);
+	public static final BlockEntityType<SculkSensorBlockEntity> SCULK_SENSOR = register(
+		"sculk_sensor", BlockEntityType.Builder.of(SculkSensorBlockEntity::new, Blocks.SCULK_SENSOR)
+	);
 	private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
 	private final Set<Block> validBlocks;
 	private final Type<?> dataType;

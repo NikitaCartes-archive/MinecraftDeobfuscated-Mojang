@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
@@ -21,7 +20,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,13 +42,12 @@ public abstract class TagsProvider<T> implements DataProvider {
 	public void run(HashCache hashCache) {
 		this.builders.clear();
 		this.addTags();
-		Tag<T> tag = SetTag.empty();
-		Function<ResourceLocation, Tag<T>> function = resourceLocation -> this.builders.containsKey(resourceLocation) ? tag : null;
-		Function<ResourceLocation, T> function2 = resourceLocation -> this.registry.getOptional(resourceLocation).orElse(null);
 		this.builders
 			.forEach(
 				(resourceLocation, builder) -> {
-					List<Tag.BuilderEntry> list = (List<Tag.BuilderEntry>)builder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+					List<Tag.BuilderEntry> list = (List<Tag.BuilderEntry>)builder.getEntries()
+						.filter(builderEntry -> !builderEntry.getEntry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey))
+						.collect(Collectors.toList());
 					if (!list.isEmpty()) {
 						throw new IllegalArgumentException(
 							String.format(
@@ -69,20 +66,20 @@ public abstract class TagsProvider<T> implements DataProvider {
 							if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
 								Files.createDirectories(path.getParent());
 								BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-								Throwable var12 = null;
+								Throwable var10 = null;
 
 								try {
 									bufferedWriter.write(string);
-								} catch (Throwable var22) {
-									var12 = var22;
-									throw var22;
+								} catch (Throwable var20) {
+									var10 = var20;
+									throw var20;
 								} finally {
 									if (bufferedWriter != null) {
-										if (var12 != null) {
+										if (var10 != null) {
 											try {
 												bufferedWriter.close();
-											} catch (Throwable var21) {
-												var12.addSuppressed(var21);
+											} catch (Throwable var19) {
+												var10.addSuppressed(var19);
 											}
 										} else {
 											bufferedWriter.close();
@@ -92,8 +89,8 @@ public abstract class TagsProvider<T> implements DataProvider {
 							}
 
 							hashCache.putNew(path, string2);
-						} catch (IOException var24) {
-							LOGGER.error("Couldn't save tags to {}", path, var24);
+						} catch (IOException var22) {
+							LOGGER.error("Couldn't save tags to {}", path, var22);
 						}
 					}
 				}

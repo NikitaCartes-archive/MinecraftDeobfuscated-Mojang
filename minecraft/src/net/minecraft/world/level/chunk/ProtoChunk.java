@@ -174,8 +174,7 @@ public class ProtoChunk implements ChunkAccess {
 							|| blockState.useShapeForLightOcclusion()
 							|| blockState2.useShapeForLightOcclusion()
 					)) {
-					LevelLightEngine levelLightEngine = this.getLightEngine();
-					levelLightEngine.checkBlock(blockPos);
+					this.lightEngine.checkBlock(blockPos);
 				}
 
 				EnumSet<Heightmap.Types> enumSet = this.getStatus().heightmapsAfter();
@@ -287,11 +286,6 @@ public class ProtoChunk implements ChunkAccess {
 	@Override
 	public LevelChunkSection[] getSections() {
 		return this.sections;
-	}
-
-	@Nullable
-	public LevelLightEngine getLightEngine() {
-		return this.lightEngine;
 	}
 
 	@Override
@@ -485,12 +479,12 @@ public class ProtoChunk implements ChunkAccess {
 	}
 
 	@Override
-	public int getSectionsCount() {
-		return this.levelHeightAccessor.getSectionsCount();
+	public int getMinBuildHeight() {
+		return this.levelHeightAccessor.getMinBuildHeight();
 	}
 
 	@Override
-	public int getMinSection() {
-		return this.levelHeightAccessor.getMinSection();
+	public int getHeight() {
+		return this.levelHeightAccessor.getHeight();
 	}
 }

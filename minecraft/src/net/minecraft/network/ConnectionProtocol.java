@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
@@ -176,6 +177,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundAddMobPacket.class, ClientboundAddMobPacket::new)
 					.addPacket(ClientboundAddPaintingPacket.class, ClientboundAddPaintingPacket::new)
 					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
+					.addPacket(ClientboundAddVibrationSignalPacket.class, ClientboundAddVibrationSignalPacket::new)
 					.addPacket(ClientboundAnimatePacket.class, ClientboundAnimatePacket::new)
 					.addPacket(ClientboundAwardStatsPacket.class, ClientboundAwardStatsPacket::new)
 					.addPacket(ClientboundBlockBreakAckPacket.class, ClientboundBlockBreakAckPacket::new)

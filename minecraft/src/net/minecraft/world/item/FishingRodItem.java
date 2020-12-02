@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class FishingRodItem extends Item implements Vanishable {
 	public FishingRodItem(Item.Properties properties) {
@@ -34,6 +35,7 @@ public class FishingRodItem extends Item implements Vanishable {
 				1.0F,
 				0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 			);
+			level.gameEvent(player, GameEvent.FISHING_ROD_CAST, player);
 		} else {
 			level.playSound(
 				null,
@@ -45,6 +47,7 @@ public class FishingRodItem extends Item implements Vanishable {
 				0.5F,
 				0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 			);
+			level.gameEvent(player, GameEvent.FISHING_ROD_REEL_IN, player);
 			if (!level.isClientSide) {
 				int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);
 				int j = EnchantmentHelper.getFishingLuckBonus(itemStack);

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -58,7 +60,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		int i = this.getSignalForState(blockState);
 		if (i > 0) {
-			this.checkPressed(serverLevel, blockPos, blockState, i);
+			this.checkPressed(null, serverLevel, blockPos, blockState, i);
 		}
 	}
 
@@ -67,12 +69,12 @@ public abstract class BasePressurePlateBlock extends Block {
 		if (!level.isClientSide) {
 			int i = this.getSignalForState(blockState);
 			if (i == 0) {
-				this.checkPressed(level, blockPos, blockState, i);
+				this.checkPressed(entity, level, blockPos, blockState, i);
 			}
 		}
 	}
 
-	protected void checkPressed(Level level, BlockPos blockPos, BlockState blockState, int i) {
+	protected void checkPressed(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
 		int j = this.getSignalStrength(level, blockPos);
 		boolean bl = i > 0;
 		boolean bl2 = j > 0;
@@ -85,8 +87,10 @@ public abstract class BasePressurePlateBlock extends Block {
 
 		if (!bl2 && bl) {
 			this.playOffSound(level, blockPos);
+			level.gameEvent(entity, GameEvent.BLOCK_UNPRESS, blockPos);
 		} else if (bl2 && !bl) {
 			this.playOnSound(level, blockPos);
+			level.gameEvent(entity, GameEvent.BLOCK_PRESS, blockPos);
 		}
 
 		if (bl2) {

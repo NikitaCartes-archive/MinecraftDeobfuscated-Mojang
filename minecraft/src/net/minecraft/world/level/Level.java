@@ -55,6 +55,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetter;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -265,7 +266,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
-			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
+			boolean bl2 = this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
+			if (bl2) {
+				this.gameEvent(entity, GameEvent.BLOCK_DESTROY, blockPos);
+			}
+
+			return bl2;
 		}
 	}
 
@@ -893,15 +899,25 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return this.isDebug;
 	}
 
-	@Override
-	public int getSectionsCount() {
-		return 16;
-	}
-
-	@Override
-	public int getMinSection() {
-		return 0;
-	}
-
 	protected abstract LevelEntityGetter<Entity> getEntities();
+
+	protected void postGameEventInRadius(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos, int i) {
+		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
+		int k = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
+		int l = SectionPos.blockToSectionCoord(blockPos.getX() + i);
+		int m = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
+		int n = SectionPos.blockToSectionCoord(blockPos.getY() - i);
+		int o = SectionPos.blockToSectionCoord(blockPos.getY() + i);
+
+		for (int p = j; p <= l; p++) {
+			for (int q = k; q <= m; q++) {
+				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
+				if (chunkAccess != null) {
+					for (int r = n; r <= o; r++) {
+						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, blockPos);
+					}
+				}
+			}
+		}
+	}
 }

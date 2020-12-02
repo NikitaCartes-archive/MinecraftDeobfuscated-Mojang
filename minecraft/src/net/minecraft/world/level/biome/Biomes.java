@@ -84,6 +84,7 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> CRIMSON_FOREST = register("crimson_forest");
 	public static final ResourceKey<Biome> WARPED_FOREST = register("warped_forest");
 	public static final ResourceKey<Biome> BASALT_DELTAS = register("basalt_deltas");
+	public static final ResourceKey<Biome> DRIPSTONE_CAVES = register("dripstone_caves");
 
 	private static ResourceKey<Biome> register(String string) {
 		return ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(string));

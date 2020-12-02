@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,7 +28,7 @@ public class ChorusFruitItem extends Item {
 				double h = Mth.clamp(
 					livingEntity.getY() + (double)(livingEntity.getRandom().nextInt(16) - 8),
 					(double)level.getMinBuildHeight(),
-					(double)(level.getMinBuildHeight() + level.getLogicalHeight() - 1)
+					(double)(level.getMinBuildHeight() + ((ServerLevel)level).getLogicalHeight() - 1)
 				);
 				double j = livingEntity.getZ() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
 				if (livingEntity.isPassenger()) {

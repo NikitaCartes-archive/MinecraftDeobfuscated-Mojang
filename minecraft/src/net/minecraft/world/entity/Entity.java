@@ -92,6 +92,8 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -308,7 +310,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	@Environment(EnvType.CLIENT)
 	protected void resetPos() {
 		if (this.level != null) {
-			for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMinBuildHeight(); d++) {
+			for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMaxBuildHeight(); d++) {
 				this.setPos(this.getX(), d, this.getZ());
 				if (this.level.noCollision(this)) {
 					break;
@@ -579,11 +581,14 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 						}
 
 						this.playSwimSound(h);
+						this.gameEvent(GameEvent.SWIM);
 					} else {
 						this.playStepSound(blockPos, blockState);
+						this.gameEvent(GameEvent.STEP);
 					}
 				} else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState.isAir()) {
 					this.nextFlap = this.playFlySound(this.moveDist);
+					this.gameEvent(GameEvent.FLAP);
 				}
 			}
 
@@ -861,6 +866,14 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	protected void onInsideBlock(BlockState blockState) {
 	}
 
+	protected void gameEvent(@Nullable Entity entity, GameEvent gameEvent) {
+		this.level.gameEvent(entity, gameEvent, this.blockPosition);
+	}
+
+	protected void gameEvent(GameEvent gameEvent) {
+		this.level.gameEvent(this, gameEvent, this.blockPosition);
+	}
+
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		if (!blockState.getMaterial().isLiquid()) {
 			if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
@@ -920,6 +933,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level, blockPos, this, this.fallDistance);
+				this.gameEvent(GameEvent.HIT_GROUND);
 			}
 
 			this.fallDistance = 0.0F;
@@ -1058,6 +1072,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
 			this.level.addParticle(ParticleTypes.SPLASH, this.getX() + d, (double)(h + 1.0F), this.getZ() + e, vec3.x, vec3.y, vec3.z);
 		}
+
+		this.gameEvent(GameEvent.SPLASH);
 	}
 
 	protected BlockState getBlockStateOn() {
@@ -1244,6 +1260,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
+			this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 			this.markHurt();
 			return false;
 		}
@@ -1929,6 +1946,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			Team team = this.getTeam();
 			return team != null && player != null && player.getTeam() == team && team.canSeeFriendlyInvisibles() ? false : this.isInvisible();
 		}
+	}
+
+	@Nullable
+	public GameEventListenerRegistrar getGameEventListenerRegistrar() {
+		return null;
 	}
 
 	@Nullable
@@ -2867,6 +2889,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			}
 
 			this.levelCallback.onMove();
+			GameEventListenerRegistrar gameEventListenerRegistrar = this.getGameEventListenerRegistrar();
+			if (gameEventListenerRegistrar != null) {
+				gameEventListenerRegistrar.onListenerMove(this.level);
+			}
 		}
 	}
 

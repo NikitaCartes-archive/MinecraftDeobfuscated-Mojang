@@ -59,7 +59,7 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 		if (blockState.is(BlockTags.WOODEN_DOORS)) {
 			DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
 			if (!doorBlock.isOpen(blockState)) {
-				doorBlock.setOpen(serverLevel, blockState, blockPos, true);
+				doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
 			}
 
 			this.rememberDoorToClose(serverLevel, livingEntity, blockPos);
@@ -70,7 +70,7 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 		if (blockState2.is(BlockTags.WOODEN_DOORS)) {
 			DoorBlock doorBlock2 = (DoorBlock)blockState2.getBlock();
 			if (!doorBlock2.isOpen(blockState2)) {
-				doorBlock2.setOpen(serverLevel, blockState2, blockPos2, true);
+				doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
 				this.rememberDoorToClose(serverLevel, livingEntity, blockPos2);
 			}
 		}
@@ -100,7 +100,7 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 							} else if (areOtherMobsComingThroughDoor(serverLevel, livingEntity, blockPos)) {
 								iterator.remove();
 							} else {
-								doorBlock.setOpen(serverLevel, blockState, blockPos, false);
+								doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, false);
 								iterator.remove();
 							}
 						}

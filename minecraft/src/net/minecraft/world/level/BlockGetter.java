@@ -36,8 +36,27 @@ public interface BlockGetter extends LevelHeightAccessor {
 		return BlockPos.betweenClosedStream(aABB).map(this::getBlockState);
 	}
 
+	default BlockHitResult isBlockInLine(ClipBlockStateContext clipBlockStateContext) {
+		return traverseBlocks(
+			clipBlockStateContext.getFrom(),
+			clipBlockStateContext.getTo(),
+			clipBlockStateContext,
+			(clipBlockStateContextx, blockPos) -> {
+				BlockState blockState = this.getBlockState(blockPos);
+				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
+				return clipBlockStateContextx.isTargetBlock().test(blockState)
+					? new BlockHitResult(clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContextx.getTo()), false)
+					: null;
+			},
+			clipBlockStateContextx -> {
+				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
+				return BlockHitResult.miss(clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContextx.getTo()));
+			}
+		);
+	}
+
 	default BlockHitResult clip(ClipContext clipContext) {
-		return traverseBlocks(clipContext, (clipContextx, blockPos) -> {
+		return traverseBlocks(clipContext.getFrom(), clipContext.getTo(), clipContext, (clipContextx, blockPos) -> {
 			BlockState blockState = this.getBlockState(blockPos);
 			FluidState fluidState = this.getFluidState(blockPos);
 			Vec3 vec3 = clipContextx.getFrom();
@@ -84,11 +103,9 @@ public interface BlockGetter extends LevelHeightAccessor {
 		});
 	}
 
-	static <T> T traverseBlocks(ClipContext clipContext, BiFunction<ClipContext, BlockPos, T> biFunction, Function<ClipContext, T> function) {
-		Vec3 vec3 = clipContext.getFrom();
-		Vec3 vec32 = clipContext.getTo();
+	static <T, C> T traverseBlocks(Vec3 vec3, Vec3 vec32, C object, BiFunction<C, BlockPos, T> biFunction, Function<C, T> function) {
 		if (vec3.equals(vec32)) {
-			return (T)function.apply(clipContext);
+			return (T)function.apply(object);
 		} else {
 			double d = Mth.lerp(-1.0E-7, vec32.x, vec3.x);
 			double e = Mth.lerp(-1.0E-7, vec32.y, vec3.y);
@@ -100,9 +117,9 @@ public interface BlockGetter extends LevelHeightAccessor {
 			int k = Mth.floor(h);
 			int l = Mth.floor(i);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(j, k, l);
-			T object = (T)biFunction.apply(clipContext, mutableBlockPos);
-			if (object != null) {
-				return object;
+			T object2 = (T)biFunction.apply(object, mutableBlockPos);
+			if (object2 != null) {
+				return object2;
 			} else {
 				double m = d - g;
 				double n = e - h;
@@ -134,13 +151,13 @@ public interface BlockGetter extends LevelHeightAccessor {
 						x += u;
 					}
 
-					T object2 = (T)biFunction.apply(clipContext, mutableBlockPos.set(j, k, l));
-					if (object2 != null) {
-						return object2;
+					T object3 = (T)biFunction.apply(object, mutableBlockPos.set(j, k, l));
+					if (object3 != null) {
+						return object3;
 					}
 				}
 
-				return (T)function.apply(clipContext);
+				return (T)function.apply(object);
 			}
 		}
 	}

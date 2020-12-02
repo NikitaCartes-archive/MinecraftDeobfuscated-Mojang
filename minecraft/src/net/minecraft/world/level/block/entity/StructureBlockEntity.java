@@ -431,14 +431,13 @@ public class StructureBlockEntity extends BlockEntity {
 			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
 				.setMirror(this.mirror)
 				.setRotation(this.rotation)
-				.setIgnoreEntities(this.ignoreEntities)
-				.setChunkPos(null);
+				.setIgnoreEntities(this.ignoreEntities);
 			if (this.integrity < 1.0F) {
 				structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0F, 1.0F))).setRandom(createRandom(this.seed));
 			}
 
 			BlockPos blockPos3 = blockPos.offset(this.structurePos);
-			structureTemplate.placeInWorldChunk(serverLevel, blockPos3, structurePlaceSettings, createRandom(this.seed));
+			structureTemplate.placeInWorld(serverLevel, blockPos3, blockPos3, structurePlaceSettings, createRandom(this.seed), 2);
 			return true;
 		}
 	}

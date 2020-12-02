@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.StructureSettings;
@@ -38,7 +41,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.<FlatLevelGeneratorSettings>create(
+	public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biomes),
 						StructureSettings.CODEC.fieldOf("structures").forGetter(FlatLevelGeneratorSettings::structureSettings),
@@ -49,6 +52,7 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 					)
 					.apply(instance, FlatLevelGeneratorSettings::new)
 		)
+		.<FlatLevelGeneratorSettings>comapFlatMap(FlatLevelGeneratorSettings::validateHeight, Function.identity())
 		.stable();
 	private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(
 		Maps.<StructureFeature<?>, ConfiguredStructureFeature<?, ?>>newHashMap(), hashMap -> {
@@ -79,7 +83,14 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 	private boolean decoration;
 	private boolean addLakes;
 
-	public FlatLevelGeneratorSettings(
+	private static DataResult<FlatLevelGeneratorSettings> validateHeight(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+		int i = flatLevelGeneratorSettings.layersInfo.stream().mapToInt(FlatLayerInfo::getHeight).sum();
+		return i > DimensionType.Y_SIZE
+			? DataResult.error("Sum of layer heights is > " + DimensionType.Y_SIZE, flatLevelGeneratorSettings)
+			: DataResult.success(flatLevelGeneratorSettings);
+	}
+
+	private FlatLevelGeneratorSettings(
 		Registry<Biome> registry, StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Optional<Supplier<Biome>> optional
 	) {
 		this(structureSettings, registry);
@@ -256,12 +267,12 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 	}
 
 	@Override
-	public int getSectionsCount() {
-		return 16;
+	public int getMinBuildHeight() {
+		return 0;
 	}
 
 	@Override
-	public int getMinSection() {
-		return 0;
+	public int getHeight() {
+		return 256;
 	}
 }

@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-import javax.annotation.Nonnull;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
@@ -8,7 +7,6 @@ import net.minecraft.world.phys.Vec3;
 public class CubicSampler {
 	private static final double[] GAUSSIAN_SAMPLE_KERNEL = new double[]{0.0, 1.0, 4.0, 6.0, 4.0, 1.0, 0.0};
 
-	@Nonnull
 	@Environment(EnvType.CLIENT)
 	public static Vec3 gaussianSampleVec3(Vec3 vec3, CubicSampler.Vec3Fetcher vec3Fetcher) {
 		int i = Mth.floor(vec3.x());

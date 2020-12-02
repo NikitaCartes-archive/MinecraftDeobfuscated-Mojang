@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
@@ -109,6 +110,8 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 			int i = this.material == Material.METAL ? 1036 : 1013;
 			level.levelEvent(player, i, blockPos, 0);
 		}
+
+		level.gameEvent(player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 	}
 
 	@Override

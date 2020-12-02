@@ -3,6 +3,7 @@ package net.minecraft.server.players;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import java.io.File;
+import java.util.Objects;
 
 public class UserBanList extends StoredUserList<GameProfile, UserBanListEntry> {
 	public UserBanList(File file) {
@@ -20,14 +21,7 @@ public class UserBanList extends StoredUserList<GameProfile, UserBanListEntry> {
 
 	@Override
 	public String[] getUserList() {
-		String[] strings = new String[this.getEntries().size()];
-		int i = 0;
-
-		for (StoredUserEntry<GameProfile> storedUserEntry : this.getEntries()) {
-			strings[i++] = storedUserEntry.getUser().getName();
-		}
-
-		return strings;
+		return (String[])this.getEntries().stream().map(StoredUserEntry::getUser).filter(Objects::nonNull).map(GameProfile::getName).toArray(String[]::new);
 	}
 
 	protected String getKeyForUser(GameProfile gameProfile) {

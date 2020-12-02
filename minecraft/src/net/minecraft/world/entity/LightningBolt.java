@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 
 public class LightningBolt extends Entity {
@@ -75,6 +76,7 @@ public class LightningBolt extends Entity {
 				);
 			this.level
 				.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
+			this.gameEvent(GameEvent.LIGHTNING_STRIKE);
 		}
 
 		this.life--;

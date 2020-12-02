@@ -1,21 +1,29 @@
 package net.minecraft.world.phys;
 
 import com.mojang.math.Vector3f;
+import com.mojang.serialization.Codec;
 import java.util.EnumSet;
+import java.util.stream.DoubleStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 
 public class Vec3 implements Position {
+	public static final Codec<Vec3> CODEC = ExtraCodecs.DOUBLE_STREAM
+		.<Vec3>comapFlatMap(
+			doubleStream -> Util.fixedSize(doubleStream, 3).map(ds -> new Vec3(ds[0], ds[1], ds[2])), vec3 -> DoubleStream.of(new double[]{vec3.x, vec3.y, vec3.z})
+		)
+		.stable();
 	public static final Vec3 ZERO = new Vec3(0.0, 0.0, 0.0);
 	public final double x;
 	public final double y;
 	public final double z;
 
-	@Environment(EnvType.CLIENT)
 	public static Vec3 fromRGB24(int i) {
 		double d = (double)(i >> 16 & 0xFF) / 255.0;
 		double e = (double)(i >> 8 & 0xFF) / 255.0;
@@ -158,6 +166,11 @@ public class Vec3 implements Position {
 
 	public String toString() {
 		return "(" + this.x + ", " + this.y + ", " + this.z + ")";
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Vec3 lerp(Vec3 vec3, double d) {
+		return new Vec3(Mth.lerp(d, this.x, vec3.x), Mth.lerp(d, this.y, vec3.y), Mth.lerp(d, this.z, vec3.z));
 	}
 
 	public Vec3 xRot(float f) {

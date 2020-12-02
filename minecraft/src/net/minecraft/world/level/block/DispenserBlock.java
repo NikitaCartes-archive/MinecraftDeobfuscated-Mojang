@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class DispenserBlock extends BaseEntityBlock {
@@ -79,6 +80,7 @@ public class DispenserBlock extends BaseEntityBlock {
 		int i = dispenserBlockEntity.getRandomSlot();
 		if (i < 0) {
 			serverLevel.levelEvent(1001, blockPos, 0);
+			serverLevel.gameEvent(GameEvent.DISPENSE_FAIL, blockPos);
 		} else {
 			ItemStack itemStack = dispenserBlockEntity.getItem(i);
 			DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);

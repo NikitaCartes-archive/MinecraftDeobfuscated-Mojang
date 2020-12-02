@@ -630,6 +630,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.CRYSTAL_SOUND_BLOCKS).add(Blocks.AMETHYST_BLOCK, Blocks.BUDDING_AMETHYST);
 		this.tag(BlockTags.CAULDRONS).add(Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
 		this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add(Blocks.SNOW, Blocks.POWDER_SNOW);
+		this.tag(BlockTags.DRIPSTONE_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.DIRT);
+		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
 	}
 
 	@Override

@@ -20,7 +20,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NaturalSpawner;
@@ -252,29 +251,31 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		double ah = noiseSettings.randomDensityOffset() ? this.getRandomDensity(i, j) : 0.0;
 		double ai = noiseSettings.densityFactor();
 		double aj = noiseSettings.densityOffset();
+		int ak = Mth.intFloorDiv(noiseSettings.minY(), this.chunkHeight);
 
-		for (int ak = 0; ak <= this.chunkCountY; ak++) {
-			double al = this.sampleAndClampNoise(i, ak, j, z, aa, ab, ac);
-			double am = 1.0 - (double)ak * 2.0 / (double)this.chunkCountY + ah;
-			double an = am * ai + aj;
-			double ao = (an + d) * e;
-			if (ao > 0.0) {
-				al += ao * 4.0;
+		for (int al = 0; al <= this.chunkCountY; al++) {
+			int am = al + ak;
+			double an = this.sampleAndClampNoise(i, am, j, z, aa, ab, ac);
+			double ao = 1.0 - (double)am * 2.0 / (double)this.chunkCountY + ah;
+			double ap = ao * ai + aj;
+			double aq = (ap + d) * e;
+			if (aq > 0.0) {
+				an += aq * 4.0;
 			} else {
-				al += ao;
+				an += aq;
 			}
 
 			if (y > 0.0) {
-				double ap = ((double)(this.chunkCountY - ak) - ad) / y;
-				al = Mth.clampedLerp(x, al, ap);
+				double ar = ((double)(this.chunkCountY - al) - ad) / y;
+				an = Mth.clampedLerp(x, an, ar);
 			}
 
 			if (af > 0.0) {
-				double ap = ((double)ak - ag) / af;
-				al = Mth.clampedLerp(ae, al, ap);
+				double ar = ((double)al - ag) / af;
+				an = Mth.clampedLerp(ae, an, ar);
 			}
 
-			ds[ak] = al;
+			ds[al] = an;
 		}
 	}
 
@@ -297,10 +298,10 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	@Override
-	public BlockGetter getBaseColumn(int i, int j) {
+	public NoiseColumn getBaseColumn(int i, int j) {
 		BlockState[] blockStates = new BlockState[this.chunkCountY * this.chunkHeight];
 		this.iterateNoiseColumn(i, j, blockStates, null);
-		return new NoiseColumn(blockStates);
+		return new NoiseColumn(((NoiseGeneratorSettings)this.settings.get()).noiseSettings().minY(), blockStates);
 	}
 
 	private int iterateNoiseColumn(int i, int j, @Nullable BlockState[] blockStates, @Nullable Predicate<BlockState> predicate) {
@@ -328,13 +329,14 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				double v = (double)u / (double)this.chunkHeight;
 				double w = Mth.lerp3(v, d, e, f, q, h, s, g, r, p, t);
 				int x = o * this.chunkHeight + u;
-				BlockState blockState = this.generateBaseState(w, x);
+				int y = x + ((NoiseGeneratorSettings)this.settings.get()).noiseSettings().minY();
+				BlockState blockState = this.generateBaseState(w, y);
 				if (blockStates != null) {
 					blockStates[x] = blockState;
 				}
 
 				if (predicate != null && predicate.test(blockState)) {
-					return x + 1;
+					return y + 1;
 				}
 			}
 		}
@@ -390,8 +392,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		int k = noiseGeneratorSettings.getBedrockFloorPosition();
 		int l = this.height - 1 - noiseGeneratorSettings.getBedrockRoofPosition();
 		int m = 5;
-		boolean bl = l + 5 - 1 >= 0 && l < this.height;
-		boolean bl2 = k + 5 - 1 >= 0 && k < this.height;
+		boolean bl = l + 5 - 1 >= chunkAccess.getMinBuildHeight() && l < chunkAccess.getMaxBuildHeight();
+		boolean bl2 = k + 5 - 1 >= chunkAccess.getMinBuildHeight() && k < chunkAccess.getMaxBuildHeight();
 		if (bl || bl2) {
 			for (BlockPos blockPos : BlockPos.betweenClosed(i, 0, j, i + 15, 0, j + 15)) {
 				if (bl) {
@@ -484,7 +486,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 					double s = ds[1][o + 1][p + 1];
 
 					for (int t = this.chunkHeight - 1; t >= 0; t--) {
-						int u = p * this.chunkHeight + t;
+						int u = p * this.chunkHeight + t + ((NoiseGeneratorSettings)this.settings.get()).noiseSettings().minY();
 						int v = u & 15;
 						int w = protoChunk.getSectionIndex(u);
 						if (protoChunk.getSectionIndex(levelChunkSection.bottomBlockY()) != w) {

@@ -12,7 +12,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -96,8 +95,8 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public BlockGetter getBaseColumn(int i, int j) {
-		return new NoiseColumn(new BlockState[0]);
+	public NoiseColumn getBaseColumn(int i, int j) {
+		return new NoiseColumn(0, new BlockState[0]);
 	}
 
 	public static BlockState getBlockStateFor(int i, int j) {

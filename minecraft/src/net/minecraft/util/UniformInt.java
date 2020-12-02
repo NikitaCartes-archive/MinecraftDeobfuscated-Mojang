@@ -57,6 +57,14 @@ public class UniformInt {
 		return this.spread == 0 ? this.baseValue : this.baseValue + random.nextInt(this.spread + 1);
 	}
 
+	public int getBaseValue() {
+		return this.baseValue;
+	}
+
+	public int getMaxValue() {
+		return this.baseValue + this.spread;
+	}
+
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;

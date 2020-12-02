@@ -136,12 +136,14 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this;
 	}
 
-	@Environment(EnvType.CLIENT)
+	public long[] readLongArray() {
+		return this.readLongArray(null);
+	}
+
 	public long[] readLongArray(@Nullable long[] ls) {
 		return this.readLongArray(ls, this.readableBytes() / 8);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long[] readLongArray(@Nullable long[] ls, int i) {
 		int j = this.readVarInt();
 		if (ls == null || ls.length != j) {

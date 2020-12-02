@@ -3,11 +3,12 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class LayerConfiguration implements FeatureConfiguration {
 	public static final Codec<LayerConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.intRange(0, 255).fieldOf("height").forGetter(layerConfiguration -> layerConfiguration.height),
+					Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("height").forGetter(layerConfiguration -> layerConfiguration.height),
 					BlockState.CODEC.fieldOf("state").forGetter(layerConfiguration -> layerConfiguration.state)
 				)
 				.apply(instance, LayerConfiguration::new)

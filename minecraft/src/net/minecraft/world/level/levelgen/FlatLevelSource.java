@@ -6,7 +6,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -64,7 +63,7 @@ public class FlatLevelSource extends ChunkGenerator {
 			}
 		}
 
-		return blockStates.length;
+		return this.settings.getMinBuildHeight() + blockStates.length;
 	}
 
 	@Override
@@ -105,8 +104,9 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public BlockGetter getBaseColumn(int i, int j) {
+	public NoiseColumn getBaseColumn(int i, int j) {
 		return new NoiseColumn(
+			0,
 			(BlockState[])Arrays.stream(this.settings.getLayers())
 				.map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState)
 				.toArray(BlockState[]::new)

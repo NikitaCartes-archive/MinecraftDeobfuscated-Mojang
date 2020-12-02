@@ -315,6 +315,15 @@ public class SoundType {
 	public static final SoundType COPPER = new SoundType(
 		1.0F, 1.0F, SoundEvents.COPPER_BREAK, SoundEvents.COPPER_STEP, SoundEvents.COPPER_PLACE, SoundEvents.COPPER_HIT, SoundEvents.COPPER_FALL
 	);
+	public static final SoundType SCULK_SENSOR = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SCULK_SENSOR_BREAK,
+		SoundEvents.SCULK_SENSOR_STEP,
+		SoundEvents.SCULK_SENSOR_PLACE,
+		SoundEvents.SCULK_SENSOR_HIT,
+		SoundEvents.SCULK_SENSOR_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

@@ -534,6 +534,10 @@ public class Mth {
 		return f * f;
 	}
 
+	public static double clampedMap(double d, double e, double f, double g, double h) {
+		return clampedLerp(g, h, inverseLerp(d, e, f));
+	}
+
 	public static int roundToward(int i, int j) {
 		return (i + j - 1) / j * j;
 	}
@@ -542,9 +546,12 @@ public class Mth {
 		return random.nextInt(j - i + 1) + i;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static float randomBetween(Random random, float f, float g) {
 		return random.nextFloat() * (g - f) + f;
+	}
+
+	public static float normal(Random random, float f, float g) {
+		return f + (float)random.nextGaussian() * g;
 	}
 
 	static {

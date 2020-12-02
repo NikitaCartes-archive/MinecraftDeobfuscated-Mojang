@@ -28,7 +28,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Map<String, FallbackResourceManager> namespacedPacks = Maps.<String, FallbackResourceManager>newHashMap();
 	private final List<PreparableReloadListener> listeners = Lists.<PreparableReloadListener>newArrayList();
-	private final List<PreparableReloadListener> recentlyRegistered = Lists.<PreparableReloadListener>newArrayList();
 	private final Set<String> namespaces = Sets.<String>newLinkedHashSet();
 	private final List<PackResources> packs = Lists.<PackResources>newArrayList();
 	private final PackType type;
@@ -113,25 +112,12 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 	@Override
 	public void registerReloadListener(PreparableReloadListener preparableReloadListener) {
 		this.listeners.add(preparableReloadListener);
-		this.recentlyRegistered.add(preparableReloadListener);
-	}
-
-	protected ReloadInstance createReload(Executor executor, Executor executor2, List<PreparableReloadListener> list, CompletableFuture<Unit> completableFuture) {
-		ReloadInstance reloadInstance;
-		if (LOGGER.isDebugEnabled()) {
-			reloadInstance = new ProfiledReloadInstance(this, Lists.<PreparableReloadListener>newArrayList(list), executor, executor2, completableFuture);
-		} else {
-			reloadInstance = SimpleReloadInstance.of(this, Lists.<PreparableReloadListener>newArrayList(list), executor, executor2, completableFuture);
-		}
-
-		this.recentlyRegistered.clear();
-		return reloadInstance;
 	}
 
 	@Override
-	public ReloadInstance createFullReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
-		this.clear();
+	public ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
 		LOGGER.info("Reloading ResourceManager: {}", () -> (String)list.stream().map(PackResources::getName).collect(Collectors.joining(", ")));
+		this.clear();
 
 		for (PackResources packResources : list) {
 			try {
@@ -142,7 +128,9 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 			}
 		}
 
-		return this.createReload(executor, executor2, this.listeners, completableFuture);
+		return (ReloadInstance)(LOGGER.isDebugEnabled()
+			? new ProfiledReloadInstance(this, Lists.<PreparableReloadListener>newArrayList(this.listeners), executor, executor2, completableFuture)
+			: SimpleReloadInstance.of(this, Lists.<PreparableReloadListener>newArrayList(this.listeners), executor, executor2, completableFuture));
 	}
 
 	@Environment(EnvType.CLIENT)

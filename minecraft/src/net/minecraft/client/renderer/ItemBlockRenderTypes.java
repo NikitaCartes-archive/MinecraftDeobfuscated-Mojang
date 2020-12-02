@@ -229,6 +229,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.LARGE_AMETHYST_BUD, renderType3);
 		hashMap.put(Blocks.AMETHYST_CLUSTER, renderType3);
 		hashMap.put(Blocks.LIGHTNING_ROD, renderType3);
+		hashMap.put(Blocks.SCULK_SENSOR, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType4);

@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -53,7 +54,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	@Override
 	default Biome getNoiseBiome(int i, int j, int k) {
-		ChunkAccess chunkAccess = this.getChunk(i >> 2, k >> 2, ChunkStatus.BIOMES, false);
+		ChunkAccess chunkAccess = this.getChunk(QuartPos.toSection(i), QuartPos.toSection(k), ChunkStatus.BIOMES, false);
 		return chunkAccess != null && chunkAccess.getBiomes() != null ? chunkAccess.getBiomes().getNoiseBiome(i, j, k) : this.getUncachedNoiseBiome(i, j, k);
 	}
 
@@ -65,6 +66,16 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 	int getSeaLevel();
 
 	DimensionType dimensionType();
+
+	@Override
+	default int getMinBuildHeight() {
+		return this.dimensionType().minY();
+	}
+
+	@Override
+	default int getHeight() {
+		return this.dimensionType().height();
+	}
 
 	default BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
 		return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());

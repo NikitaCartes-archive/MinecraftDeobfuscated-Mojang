@@ -106,6 +106,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.DRIPPING_WATER, DripParticle.WaterHangProvider::new);
 		this.register(ParticleTypes.FALLING_WATER, DripParticle.WaterFallProvider::new);
 		this.register(ParticleTypes.DUST, DustParticle.Provider::new);
+		this.register(ParticleTypes.DUST_COLOR_TRANSITION, DustColorTransitionParticle.Provider::new);
 		this.register(ParticleTypes.EFFECT, SpellParticle.Provider::new);
 		this.register(ParticleTypes.ELDER_GUARDIAN, new MobAppearanceParticle.Provider());
 		this.register(ParticleTypes.ENCHANTED_HIT, CritParticle.MagicProvider::new);
@@ -162,6 +163,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.FALLING_DRIPSTONE_WATER, DripParticle.DripstoneWaterFallProvider::new);
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaHangProvider::new);
 		this.register(ParticleTypes.FALLING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaFallProvider::new);
+		this.register(ParticleTypes.VIBRATION, VibrationSignalParticle.Provider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

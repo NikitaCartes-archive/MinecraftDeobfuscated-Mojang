@@ -4,88 +4,40 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Locale;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
-public class DustParticleOptions implements ParticleOptions {
-	public static final DustParticleOptions REDSTONE = new DustParticleOptions(1.0F, 0.0F, 0.0F, 1.0F);
+public class DustParticleOptions extends DustParticleOptionsBase {
+	public static final Vec3 REDSTONE_PARTICLE_COLOR = Vec3.fromRGB24(16711680);
+	public static final DustParticleOptions REDSTONE = new DustParticleOptions(REDSTONE_PARTICLE_COLOR, 1.0F);
 	public static final Codec<DustParticleOptions> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.FLOAT.fieldOf("r").forGetter(dustParticleOptions -> dustParticleOptions.r),
-					Codec.FLOAT.fieldOf("g").forGetter(dustParticleOptions -> dustParticleOptions.g),
-					Codec.FLOAT.fieldOf("b").forGetter(dustParticleOptions -> dustParticleOptions.b),
+					Vec3.CODEC.fieldOf("color").forGetter(dustParticleOptions -> dustParticleOptions.color),
 					Codec.FLOAT.fieldOf("scale").forGetter(dustParticleOptions -> dustParticleOptions.scale)
 				)
 				.apply(instance, DustParticleOptions::new)
 	);
 	public static final ParticleOptions.Deserializer<DustParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustParticleOptions>() {
 		public DustParticleOptions fromCommand(ParticleType<DustParticleOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
+			Vec3 vec3 = DustParticleOptionsBase.readVec3(stringReader);
 			stringReader.expect(' ');
 			float f = (float)stringReader.readDouble();
-			stringReader.expect(' ');
-			float g = (float)stringReader.readDouble();
-			stringReader.expect(' ');
-			float h = (float)stringReader.readDouble();
-			stringReader.expect(' ');
-			float i = (float)stringReader.readDouble();
-			return new DustParticleOptions(f, g, h, i);
+			return new DustParticleOptions(vec3, f);
 		}
 
 		public DustParticleOptions fromNetwork(ParticleType<DustParticleOptions> particleType, FriendlyByteBuf friendlyByteBuf) {
-			return new DustParticleOptions(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
+			return new DustParticleOptions(
+				new Vec3((double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat()), friendlyByteBuf.readFloat()
+			);
 		}
 	};
-	private final float r;
-	private final float g;
-	private final float b;
-	private final float scale;
 
-	public DustParticleOptions(float f, float g, float h, float i) {
-		this.r = f;
-		this.g = g;
-		this.b = h;
-		this.scale = Mth.clamp(i, 0.01F, 4.0F);
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeFloat(this.r);
-		friendlyByteBuf.writeFloat(this.g);
-		friendlyByteBuf.writeFloat(this.b);
-		friendlyByteBuf.writeFloat(this.scale);
-	}
-
-	@Override
-	public String writeToString() {
-		return String.format(Locale.ROOT, "%s %.2f %.2f %.2f %.2f", Registry.PARTICLE_TYPE.getKey(this.getType()), this.r, this.g, this.b, this.scale);
+	public DustParticleOptions(Vec3 vec3, float f) {
+		super(vec3, f);
 	}
 
 	@Override
 	public ParticleType<DustParticleOptions> getType() {
 		return ParticleTypes.DUST;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public float getR() {
-		return this.r;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public float getG() {
-		return this.g;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public float getB() {
-		return this.b;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public float getScale() {
-		return this.scale;
 	}
 }

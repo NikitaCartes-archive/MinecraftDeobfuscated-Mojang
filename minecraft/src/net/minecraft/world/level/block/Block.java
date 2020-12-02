@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
@@ -372,6 +373,8 @@ public class Block extends BlockBehaviour implements ItemLike {
 		if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
 			PiglinAi.angerNearbyPiglins(player, false);
 		}
+
+		level.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
 	}
 
 	public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {

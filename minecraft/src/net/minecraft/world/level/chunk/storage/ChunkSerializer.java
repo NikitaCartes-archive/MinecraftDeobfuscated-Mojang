@@ -67,6 +67,7 @@ public class ChunkSerializer {
 
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
 			serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
+			serverLevel,
 			chunkPos,
 			biomeSource,
 			compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null

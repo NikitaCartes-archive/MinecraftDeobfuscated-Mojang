@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
@@ -51,6 +52,7 @@ public class AnimationMetadataSectionSerializer implements MetadataSectionSerial
 		return new AnimationMetadataSection(list, k, jx, i, bl);
 	}
 
+	@Nullable
 	private AnimationFrame getFrame(int i, JsonElement jsonElement) {
 		if (jsonElement.isJsonPrimitive()) {
 			return new AnimationFrame(GsonHelper.convertToInt(jsonElement, "frames[" + i + "]"));

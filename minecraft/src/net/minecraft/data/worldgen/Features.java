@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.UniformFloat;
 import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HugeMushroomBlock;
@@ -30,10 +31,12 @@ import net.minecraft.world.level.levelgen.feature.configurations.CountConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -46,6 +49,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockCon
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -776,6 +780,41 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> ORE_COPPER = register(
 		"ore_copper",
 		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10)).range(64).squared().count(10)
+	);
+	public static final ConfiguredFeature<?, ?> DRIPSTONE_CLUSTER_FEATURE = register(
+		"dripstone_cluster",
+		Feature.DRIPSTONE_CLUSTER
+			.configured(
+				new DripstoneClusterConfiguration(
+					12, UniformInt.of(3, 3), UniformInt.of(2, 6), 1, 3, UniformInt.of(2, 2), UniformFloat.of(0.3F, 0.4F), UniformFloat.of(0.1F, 0.9F), 0.1F, 0.3F, 0.1F, 3, 8
+				)
+			)
+			.range(60)
+			.squared()
+			.count(UniformInt.of(5, 10))
+	);
+	public static final ConfiguredFeature<?, ?> LARGE_DRIPSTONE_FEATURE = register(
+		"large_dripstone",
+		Feature.LARGE_DRIPSTONE
+			.configured(
+				new LargeDripstoneConfiguration(
+					30,
+					UniformInt.of(3, 16),
+					UniformFloat.of(0.4F, 1.6F),
+					0.33F,
+					UniformFloat.of(0.3F, 0.6F),
+					UniformFloat.of(0.4F, 0.6F),
+					UniformFloat.of(0.0F, 0.2F),
+					5,
+					0.7F
+				)
+			)
+			.range(60)
+			.squared()
+			.count(UniformInt.of(1, 4))
+	);
+	public static final ConfiguredFeature<?, ?> SMALL_DRIPSTONE_FEATURE = register(
+		"small_dripstone", Feature.SMALL_DRIPSTONE.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F)).range(60).squared().count(UniformInt.of(20, 40))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
 		"crimson_fungi",

@@ -46,6 +46,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -492,6 +493,16 @@ public class Util {
 			return is.length >= i ? DataResult.error(string, Arrays.copyOf(is, i)) : DataResult.error(string);
 		} else {
 			return DataResult.success(is);
+		}
+	}
+
+	public static DataResult<double[]> fixedSize(DoubleStream doubleStream, int i) {
+		double[] ds = doubleStream.limit((long)(i + 1)).toArray();
+		if (ds.length != i) {
+			String string = "Input is not a list of " + i + " doubles";
+			return ds.length >= i ? DataResult.error(string, Arrays.copyOf(ds, i)) : DataResult.error(string);
+		} else {
+			return DataResult.success(ds);
 		}
 	}
 

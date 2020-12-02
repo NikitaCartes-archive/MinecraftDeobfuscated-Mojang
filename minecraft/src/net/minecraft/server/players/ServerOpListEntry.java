@@ -3,6 +3,7 @@ package net.minecraft.server.players;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 public class ServerOpListEntry extends StoredUserEntry<GameProfile> {
 	private final int level;
@@ -38,6 +39,7 @@ public class ServerOpListEntry extends StoredUserEntry<GameProfile> {
 		}
 	}
 
+	@Nullable
 	private static GameProfile createGameProfile(JsonObject jsonObject) {
 		if (jsonObject.has("uuid") && jsonObject.has("name")) {
 			String string = jsonObject.get("uuid").getAsString();

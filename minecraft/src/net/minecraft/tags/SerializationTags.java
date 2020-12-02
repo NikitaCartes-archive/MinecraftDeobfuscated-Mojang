@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
 public class SerializationTags {
@@ -15,7 +16,8 @@ public class SerializationTags {
 		TagCollection.of((Map<ResourceLocation, Tag<Fluid>>)FluidTags.getWrappers().stream().collect(Collectors.toMap(Tag.Named::getName, named -> named))),
 		TagCollection.of(
 			(Map<ResourceLocation, Tag<EntityType<?>>>)EntityTypeTags.getWrappers().stream().collect(Collectors.toMap(Tag.Named::getName, named -> named))
-		)
+		),
+		TagCollection.of((Map<ResourceLocation, Tag<GameEvent>>)GameEventTags.getWrappers().stream().collect(Collectors.toMap(Tag.Named::getName, named -> named)))
 	);
 
 	public static TagContainer getInstance() {

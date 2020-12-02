@@ -32,7 +32,8 @@ public class HoeItem extends DiggerItem {
 		Blocks.SPRUCE_LEAVES,
 		Blocks.DARK_OAK_LEAVES,
 		Blocks.ACACIA_LEAVES,
-		Blocks.BIRCH_LEAVES
+		Blocks.BIRCH_LEAVES,
+		Blocks.SCULK_SENSOR
 	);
 	protected static final Map<Block, BlockState> TILLABLES = Maps.<Block, BlockState>newHashMap(
 		ImmutableMap.of(

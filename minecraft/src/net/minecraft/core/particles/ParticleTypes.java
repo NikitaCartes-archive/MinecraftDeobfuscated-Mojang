@@ -20,6 +20,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType DRIPPING_WATER = register("dripping_water", false);
 	public static final SimpleParticleType FALLING_WATER = register("falling_water", false);
 	public static final ParticleType<DustParticleOptions> DUST = register("dust", DustParticleOptions.DESERIALIZER, particleType -> DustParticleOptions.CODEC);
+	public static final ParticleType<DustColorTransitionOptions> DUST_COLOR_TRANSITION = register(
+		"dust_color_transition", DustColorTransitionOptions.DESERIALIZER, particleType -> DustColorTransitionOptions.CODEC
+	);
 	public static final SimpleParticleType EFFECT = register("effect", false);
 	public static final SimpleParticleType ELDER_GUARDIAN = register("elder_guardian", true);
 	public static final SimpleParticleType ENCHANTED_HIT = register("enchanted_hit", false);
@@ -40,6 +43,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType HEART = register("heart", false);
 	public static final SimpleParticleType INSTANT_EFFECT = register("instant_effect", false);
 	public static final ParticleType<ItemParticleOption> ITEM = register("item", ItemParticleOption.DESERIALIZER, ItemParticleOption::codec);
+	public static final ParticleType<VibrationParticleOption> VIBRATION = register(
+		"vibration", VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC
+	);
 	public static final SimpleParticleType ITEM_SLIME = register("item_slime", false);
 	public static final SimpleParticleType ITEM_SNOWBALL = register("item_snowball", false);
 	public static final SimpleParticleType LARGE_SMOKE = register("large_smoke", false);
