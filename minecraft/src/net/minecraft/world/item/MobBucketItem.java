@@ -11,24 +11,26 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.material.Fluid;
 
-public class FishBucketItem extends BucketItem {
+public class MobBucketItem extends BucketItem {
 	private final EntityType<?> type;
+	private final SoundEvent emptySound;
 
-	public FishBucketItem(EntityType<?> entityType, Fluid fluid, Item.Properties properties) {
+	public MobBucketItem(EntityType<?> entityType, Fluid fluid, SoundEvent soundEvent, Item.Properties properties) {
 		super(fluid, properties);
 		this.type = entityType;
+		this.emptySound = soundEvent;
 	}
 
 	@Override
@@ -40,13 +42,13 @@ public class FishBucketItem extends BucketItem {
 
 	@Override
 	protected void playEmptySound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos) {
-		levelAccessor.playSound(player, blockPos, SoundEvents.BUCKET_EMPTY_FISH, SoundSource.NEUTRAL, 1.0F, 1.0F);
+		levelAccessor.playSound(player, blockPos, this.emptySound, SoundSource.NEUTRAL, 1.0F, 1.0F);
 	}
 
 	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
 		Entity entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
-		if (entity != null) {
-			((AbstractFish)entity).setFromBucket(true);
+		if (entity instanceof Bucketable) {
+			((Bucketable)entity).setFromBucket(true);
 		}
 	}
 

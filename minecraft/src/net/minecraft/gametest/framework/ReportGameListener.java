@@ -42,6 +42,25 @@ class ReportGameListener implements GameTestListener {
 	}
 
 	@Override
+	public void testPassed(GameTestInfo gameTestInfo) {
+		this.successes++;
+		if (!gameTestInfo.isFlaky()) {
+			reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed!");
+		} else {
+			if (this.successes >= gameTestInfo.requiredSuccesses()) {
+				reportPassed(gameTestInfo, gameTestInfo + " passed " + this.successes + " times of " + this.attempts + " attempts.");
+			} else {
+				say(
+					this.originalTestInfo.getLevel(),
+					ChatFormatting.GREEN,
+					"Flaky test " + this.originalTestInfo + " succeeded, attempt: " + this.attempts + " successes: " + this.successes
+				);
+				this.rerunTest();
+			}
+		}
+	}
+
+	@Override
 	public void testFailed(GameTestInfo gameTestInfo) {
 		if (!gameTestInfo.isFlaky()) {
 			reportFailure(gameTestInfo, gameTestInfo.getError());
@@ -59,6 +78,16 @@ class ReportGameListener implements GameTestListener {
 				reportFailure(gameTestInfo, new ExhaustedAttemptsException(this.attempts, this.successes, gameTestInfo));
 			}
 		}
+	}
+
+	public static void reportPassed(GameTestInfo gameTestInfo, String string) {
+		spawnBeacon(gameTestInfo, Blocks.LIME_STAINED_GLASS);
+		visualizePassedTest(gameTestInfo, string);
+	}
+
+	private static void visualizePassedTest(GameTestInfo gameTestInfo, String string) {
+		say(gameTestInfo.getLevel(), ChatFormatting.GREEN, string);
+		GlobalTestReporter.onTestSuccess(gameTestInfo);
 	}
 
 	protected static void reportFailure(GameTestInfo gameTestInfo, Throwable throwable) {

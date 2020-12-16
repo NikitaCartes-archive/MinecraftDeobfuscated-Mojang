@@ -48,7 +48,6 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 				GameEvent.PISTON_EXTEND,
 				GameEvent.PISTON_CONTRACT,
 				GameEvent.FLINT_AND_STEEL_USE,
-				GameEvent.EATING_START,
 				GameEvent.EATING_FINISH,
 				GameEvent.LIGHTNING_STRIKE
 			);

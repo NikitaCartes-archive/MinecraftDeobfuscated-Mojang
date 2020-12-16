@@ -1,11 +1,10 @@
 package net.minecraft.tags;
 
-import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 
 public final class BlockTags {
-	protected static final StaticTagHelper<Block> HELPER = StaticTags.create(new ResourceLocation("block"), TagContainer::getBlocks);
+	protected static final StaticTagHelper<Block> HELPER = StaticTags.create(Registry.BLOCK_REGISTRY, "tags/blocks");
 	public static final Tag.Named<Block> WOOL = bind("wool");
 	public static final Tag.Named<Block> PLANKS = bind("planks");
 	public static final Tag.Named<Block> STONE_BRICKS = bind("stone_bricks");
@@ -106,9 +105,5 @@ public final class BlockTags {
 
 	public static TagCollection<Block> getAllTags() {
 		return HELPER.getAllTags();
-	}
-
-	public static List<? extends Tag.Named<Block>> getWrappers() {
-		return HELPER.getWrappers();
 	}
 }

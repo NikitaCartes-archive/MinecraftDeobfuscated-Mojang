@@ -335,7 +335,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ChunkGenerator chunkGenerator;
 		DimensionType dimensionType;
 		if (levelStem == null) {
-			dimensionType = this.registryHolder.dimensionTypes().getOrThrow(DimensionType.OVERWORLD_LOCATION);
+			dimensionType = this.registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionType.OVERWORLD_LOCATION);
 			chunkGenerator = WorldGenSettings.makeDefaultOverworld(
 				this.registryHolder.registryOrThrow(Registry.BIOME_REGISTRY),
 				this.registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
@@ -1291,6 +1291,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			.thenCompose(
 				immutableList -> ServerResources.loadResources(
 						immutableList,
+						this.registryHolder,
 						this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
 						this.getFunctionCompilationLevel(),
 						this.executor,

@@ -31,6 +31,8 @@ public class EntityTypeTagsProvider extends TagsProvider<EntityType<?>> {
 				EntityType.WITHER_SKULL
 			);
 		this.tag(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS).add(EntityType.RABBIT, EntityType.ENDERMITE, EntityType.SILVERFISH);
+		this.tag(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES).add(EntityType.TROPICAL_FISH, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.COD, EntityType.SQUID);
+		this.tag(EntityTypeTags.AXOLOTL_TEMPTED_HOSTILES).add(EntityType.DROWNED, EntityType.GUARDIAN);
 	}
 
 	@Override

@@ -80,7 +80,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.sidedSuccess(this.getEmptySuccessItem(itemStack, player), level.isClientSide());
+					return InteractionResultHolder.sidedSuccess(getEmptySuccessItem(itemStack, player), level.isClientSide());
 				} else {
 					return InteractionResultHolder.fail(itemStack);
 				}
@@ -88,7 +88,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 		}
 	}
 
-	protected ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
+	public static ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
 		return !player.getAbilities().instabuild ? new ItemStack(Items.BUCKET) : itemStack;
 	}
 

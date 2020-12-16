@@ -6,7 +6,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.scores.Team;
@@ -60,7 +59,7 @@ public abstract class TargetGoal extends Goal {
 						}
 					}
 
-					if (livingEntity instanceof Player && ((Player)livingEntity).getAbilities().invulnerable) {
+					if (!livingEntity.canBeTargeted()) {
 						return false;
 					} else {
 						this.mob.setTarget(livingEntity);

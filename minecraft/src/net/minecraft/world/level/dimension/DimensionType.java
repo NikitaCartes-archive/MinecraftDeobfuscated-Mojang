@@ -317,7 +317,7 @@ public class DimensionType {
 	}
 
 	public static RegistryAccess.RegistryHolder registerBuiltin(RegistryAccess.RegistryHolder registryHolder) {
-		WritableRegistry<DimensionType> writableRegistry = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+		WritableRegistry<DimensionType> writableRegistry = registryHolder.ownedRegistryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 		writableRegistry.register(OVERWORLD_LOCATION, DEFAULT_OVERWORLD, Lifecycle.stable());
 		writableRegistry.register(OVERWORLD_CAVES_LOCATION, DEFAULT_OVERWORLD_CAVES, Lifecycle.stable());
 		writableRegistry.register(NETHER_LOCATION, DEFAULT_NETHER, Lifecycle.stable());

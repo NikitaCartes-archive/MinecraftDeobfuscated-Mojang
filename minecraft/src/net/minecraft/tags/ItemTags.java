@@ -1,11 +1,10 @@
 package net.minecraft.tags;
 
-import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 import net.minecraft.world.item.Item;
 
 public final class ItemTags {
-	protected static final StaticTagHelper<Item> HELPER = StaticTags.create(new ResourceLocation("item"), TagContainer::getItems);
+	protected static final StaticTagHelper<Item> HELPER = StaticTags.create(Registry.ITEM_REGISTRY, "tags/items");
 	public static final Tag.Named<Item> WOOL = bind("wool");
 	public static final Tag.Named<Item> PLANKS = bind("planks");
 	public static final Tag.Named<Item> STONE_BRICKS = bind("stone_bricks");
@@ -64,6 +63,8 @@ public final class ItemTags {
 	public static final Tag.Named<Item> STONE_TOOL_MATERIALS = bind("stone_tool_materials");
 	public static final Tag.Named<Item> STONE_CRAFTING_MATERIALS = bind("stone_crafting_materials");
 	public static final Tag.Named<Item> FREEZE_IMMUNE_WEARABLES = bind("freeze_immune_wearables");
+	public static final Tag.Named<Item> AXOLOTL_TEMPT_ITEMS = bind("axolotl_tempt_items");
+	public static final Tag.Named<Item> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
 
 	private static Tag.Named<Item> bind(String string) {
 		return HELPER.bind(string);
@@ -71,9 +72,5 @@ public final class ItemTags {
 
 	public static TagCollection<Item> getAllTags() {
 		return HELPER.getAllTags();
-	}
-
-	public static List<? extends Tag.Named<Item>> getWrappers() {
-		return HELPER.getWrappers();
 	}
 }

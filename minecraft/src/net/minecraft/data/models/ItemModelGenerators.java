@@ -253,6 +253,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.TRIDENT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.TROPICAL_FISH, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.TROPICAL_FISH_BUCKET, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.AXOLOTL_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.TURTLE_HELMET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WATER_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WHEAT, ModelTemplates.FLAT_ITEM);

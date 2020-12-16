@@ -129,10 +129,8 @@ public class ItemPredicate {
 				Tag<Item> tag = null;
 				if (jsonObject.has("tag")) {
 					ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-					tag = SerializationTags.getInstance().getItems().getTag(resourceLocation2);
-					if (tag == null) {
-						throw new JsonSyntaxException("Unknown item tag '" + resourceLocation2 + "'");
-					}
+					tag = SerializationTags.getInstance()
+						.getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
 				}
 
 				Potion potion = null;
@@ -160,7 +158,9 @@ public class ItemPredicate {
 			}
 
 			if (this.tag != null) {
-				jsonObject.addProperty("tag", SerializationTags.getInstance().getItems().getIdOrThrow(this.tag).toString());
+				jsonObject.addProperty(
+					"tag", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, this.tag, () -> new IllegalStateException("Unknown item tag")).toString()
+				);
 			}
 
 			jsonObject.add("count", this.count.serializeToJson());

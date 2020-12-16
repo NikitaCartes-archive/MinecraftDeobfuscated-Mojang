@@ -6,4 +6,8 @@ public class GlobalTestReporter {
 	public static void onTestFailed(GameTestInfo gameTestInfo) {
 		DELEGATE.onTestFailed(gameTestInfo);
 	}
+
+	public static void onTestSuccess(GameTestInfo gameTestInfo) {
+		DELEGATE.onTestSuccess(gameTestInfo);
+	}
 }

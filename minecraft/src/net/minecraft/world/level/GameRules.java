@@ -140,6 +140,9 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_UNIVERSAL_ANGER = register(
 		"universalAnger", GameRules.Category.MOBS, GameRules.BooleanValue.create(false)
 	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_PLAYERS_SLEEPING_PERCENTAGE = register(
+		"playersSleepingPercentage", GameRules.Category.PLAYER, GameRules.IntegerValue.create(100)
+	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 
 	private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String string, GameRules.Category category, GameRules.Type<T> type) {

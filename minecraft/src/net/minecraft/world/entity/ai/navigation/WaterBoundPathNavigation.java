@@ -5,8 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.Dolphin;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathFinder;
@@ -23,7 +23,7 @@ public class WaterBoundPathNavigation extends PathNavigation {
 
 	@Override
 	protected PathFinder createPathFinder(int i) {
-		this.allowBreaching = this.mob instanceof Dolphin;
+		this.allowBreaching = this.mob.getType() == EntityType.DOLPHIN || this.mob.getType() == EntityType.AXOLOTL;
 		this.nodeEvaluator = new SwimNodeEvaluator(this.allowBreaching);
 		return new PathFinder(this.nodeEvaluator, i);
 	}

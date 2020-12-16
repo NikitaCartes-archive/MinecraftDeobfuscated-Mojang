@@ -360,6 +360,7 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.COD_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.PUFFERFISH_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.TROPICAL_FISH_BUCKET, dispenseItemBehavior);
+		DispenserBlock.registerBehavior(Items.AXOLOTL_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.BUCKET, new DefaultDispenseItemBehavior() {
 			private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
 

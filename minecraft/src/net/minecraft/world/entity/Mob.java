@@ -42,6 +42,7 @@ import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensing;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -1283,9 +1284,17 @@ public abstract class Mob extends LivingEntity {
 		return this.isLeftHanded() ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
 	}
 
+	public double getMeleeAttackRangeSqr(LivingEntity livingEntity) {
+		return (double)(this.getBbWidth() * 2.0F * this.getBbWidth() * 2.0F + livingEntity.getBbWidth());
+	}
+
 	@Override
 	public boolean canAttack(LivingEntity livingEntity) {
-		return livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).getAbilities().invulnerable ? false : super.canAttack(livingEntity);
+		if (livingEntity.getType() == EntityType.PLAYER && ((Player)livingEntity).getAbilities().invulnerable) {
+			return false;
+		} else {
+			return livingEntity.getType() == EntityType.AXOLOTL && ((Axolotl)livingEntity).isPlayingDead() ? false : super.canAttack(livingEntity);
+		}
 	}
 
 	@Override

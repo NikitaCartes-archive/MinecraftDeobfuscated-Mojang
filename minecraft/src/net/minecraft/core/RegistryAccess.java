@@ -57,14 +57,19 @@ public abstract class RegistryAccess {
 		}
 	);
 
-	public abstract <E> Optional<WritableRegistry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey);
+	public abstract <E> Optional<WritableRegistry<E>> ownedRegistry(ResourceKey<? extends Registry<? extends E>> resourceKey);
 
-	public <E> WritableRegistry<E> registryOrThrow(ResourceKey<? extends Registry<E>> resourceKey) {
-		return (WritableRegistry<E>)this.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
+	public <E> WritableRegistry<E> ownedRegistryOrThrow(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+		return (WritableRegistry<E>)this.ownedRegistry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
 	}
 
-	public Registry<DimensionType> dimensionTypes() {
-		return this.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+	public <E> Optional<? extends Registry<E>> registry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+		Optional<? extends Registry<E>> optional = this.ownedRegistry(resourceKey);
+		return optional.isPresent() ? optional : Registry.REGISTRY.getOptional(resourceKey.location());
+	}
+
+	public <E> Registry<E> registryOrThrow(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+		return (Registry<E>)this.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
 	}
 
 	private static <E> void put(
@@ -100,31 +105,27 @@ public abstract class RegistryAccess {
 		ResourceKey<? extends Registry<E>> resourceKey = registryData.key();
 		boolean bl = !resourceKey.equals(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY) && !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY);
 		Registry<E> registry = BUILTIN.registryOrThrow(resourceKey);
-		WritableRegistry<E> writableRegistry = registryHolder.registryOrThrow(resourceKey);
+		WritableRegistry<E> writableRegistry = registryHolder.ownedRegistryOrThrow(resourceKey);
 
 		for (Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
+			ResourceKey<E> resourceKey2 = (ResourceKey<E>)entry.getKey();
 			E object = (E)entry.getValue();
 			if (bl) {
-				memoryMap.add(BUILTIN, (ResourceKey<E>)entry.getKey(), registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
+				memoryMap.add(BUILTIN, resourceKey2, registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
 			} else {
-				writableRegistry.registerMapping(registry.getId(object), (ResourceKey<E>)entry.getKey(), object, registry.lifecycle(object));
+				writableRegistry.registerMapping(registry.getId(object), resourceKey2, object, registry.lifecycle(object));
 			}
 		}
 	}
 
 	private static <R extends Registry<?>> void copyBuiltin(RegistryAccess.RegistryHolder registryHolder, ResourceKey<R> resourceKey) {
 		Registry<R> registry = (Registry<R>)BuiltinRegistries.REGISTRY;
-		Registry<?> registry2 = registry.get(resourceKey);
-		if (registry2 == null) {
-			throw new IllegalStateException("Missing builtin registry: " + resourceKey);
-		} else {
-			copy(registryHolder, registry2);
-		}
+		Registry<?> registry2 = registry.getOrThrow(resourceKey);
+		copy(registryHolder, registry2);
 	}
 
 	private static <E> void copy(RegistryAccess.RegistryHolder registryHolder, Registry<E> registry) {
-		WritableRegistry<E> writableRegistry = (WritableRegistry<E>)registryHolder.registry(registry.key())
-			.orElseThrow(() -> new IllegalStateException("Missing registry: " + registry.key()));
+		WritableRegistry<E> writableRegistry = registryHolder.ownedRegistryOrThrow(registry.key());
 
 		for (Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
 			E object = (E)entry.getValue();
@@ -232,7 +233,7 @@ public abstract class RegistryAccess {
 		}
 
 		@Override
-		public <E> Optional<WritableRegistry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey) {
+		public <E> Optional<WritableRegistry<E>> ownedRegistry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
 			return Optional.ofNullable(this.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry);
 		}
 	}

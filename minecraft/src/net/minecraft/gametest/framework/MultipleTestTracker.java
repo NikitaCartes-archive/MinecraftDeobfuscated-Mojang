@@ -34,6 +34,10 @@ public class MultipleTestTracker {
 			}
 
 			@Override
+			public void testPassed(GameTestInfo gameTestInfo) {
+			}
+
+			@Override
 			public void testFailed(GameTestInfo gameTestInfo) {
 				consumer.accept(gameTestInfo);
 			}

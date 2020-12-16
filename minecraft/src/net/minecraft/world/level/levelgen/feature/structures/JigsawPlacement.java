@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.JigsawBlock;
@@ -48,7 +47,7 @@ public class JigsawPlacement {
 		boolean bl2
 	) {
 		StructureFeature.bootstrap();
-		WritableRegistry<StructureTemplatePool> writableRegistry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
 		Rotation rotation = Rotation.getRandom(random);
 		StructureTemplatePool structureTemplatePool = (StructureTemplatePool)jigsawConfiguration.startPool().get();
 		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
@@ -77,7 +76,7 @@ public class JigsawPlacement {
 			int m = 80;
 			AABB aABB = new AABB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
 			JigsawPlacement.Placer placer = new JigsawPlacement.Placer(
-				writableRegistry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random
+				registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random
 			);
 			placer.placing
 				.addLast(
@@ -103,8 +102,8 @@ public class JigsawPlacement {
 		List<? super PoolElementStructurePiece> list,
 		Random random
 	) {
-		WritableRegistry<StructureTemplatePool> writableRegistry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(writableRegistry, i, pieceFactory, chunkGenerator, structureManager, list, random);
+		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, pieceFactory, chunkGenerator, structureManager, list, random);
 		placer.placing.addLast(new JigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(Shapes.INFINITY), 0, 0));
 
 		while (!placer.placing.isEmpty()) {

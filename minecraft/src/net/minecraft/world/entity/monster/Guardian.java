@@ -38,6 +38,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.Squid;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -434,7 +435,8 @@ public class Guardian extends Monster {
 		}
 
 		public boolean test(@Nullable LivingEntity livingEntity) {
-			return (livingEntity instanceof Player || livingEntity instanceof Squid) && livingEntity.distanceToSqr(this.guardian) > 9.0;
+			return (livingEntity instanceof Player || livingEntity instanceof Squid || livingEntity != null && Axolotl.NOT_PLAYING_DEAD_SELECTOR.test(livingEntity))
+				&& livingEntity.distanceToSqr(this.guardian) > 9.0;
 		}
 	}
 

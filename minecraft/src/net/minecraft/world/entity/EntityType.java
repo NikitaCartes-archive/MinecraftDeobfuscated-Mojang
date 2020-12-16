@@ -51,6 +51,7 @@ import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -161,6 +162,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	);
 	public static final EntityType<Arrow> ARROW = register(
 		"arrow", EntityType.Builder.<Arrow>of(Arrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
+	);
+	public static final EntityType<Axolotl> AXOLOTL = register(
+		"axolotl", EntityType.Builder.of(Axolotl::new, MobCategory.WATER_CREATURE).sized(0.75F, 0.42F).clientTrackingRange(10)
 	);
 	public static final EntityType<Bat> BAT = register("bat", EntityType.Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).clientTrackingRange(5));
 	public static final EntityType<Bee> BEE = register("bee", EntityType.Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7F, 0.6F).clientTrackingRange(8));

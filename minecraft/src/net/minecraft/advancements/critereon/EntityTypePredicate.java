@@ -36,7 +36,12 @@ public abstract class EntityTypePredicate {
 			String string = GsonHelper.convertToString(jsonElement, "type");
 			if (string.startsWith("#")) {
 				ResourceLocation resourceLocation = new ResourceLocation(string.substring(1));
-				return new EntityTypePredicate.TagPredicate(SerializationTags.getInstance().getEntityTypes().getTagOrEmpty(resourceLocation));
+				return new EntityTypePredicate.TagPredicate(
+					SerializationTags.getInstance()
+						.getTagOrThrow(
+							Registry.ENTITY_TYPE_REGISTRY, resourceLocation, resourceLocationx -> new JsonSyntaxException("Unknown entity tag '" + resourceLocationx + "'")
+						)
+				);
 			} else {
 				ResourceLocation resourceLocation = new ResourceLocation(string);
 				EntityType<?> entityType = (EntityType<?>)Registry.ENTITY_TYPE
@@ -73,7 +78,9 @@ public abstract class EntityTypePredicate {
 
 		@Override
 		public JsonElement serializeToJson() {
-			return new JsonPrimitive("#" + SerializationTags.getInstance().getEntityTypes().getIdOrThrow(this.tag));
+			return new JsonPrimitive(
+				"#" + SerializationTags.getInstance().getIdOrThrow(Registry.ENTITY_TYPE_REGISTRY, this.tag, () -> new IllegalStateException("Unknown entity type tag"))
+			);
 		}
 	}
 

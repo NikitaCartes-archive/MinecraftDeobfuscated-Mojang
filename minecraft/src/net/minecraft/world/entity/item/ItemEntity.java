@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -64,6 +65,11 @@ public class ItemEntity extends Entity {
 		this.copyPosition(itemEntity);
 		this.age = itemEntity.age;
 		this.bobOffs = itemEntity.bobOffs;
+	}
+
+	@Override
+	public boolean occludesVibrations() {
+		return ItemTags.OCCLUDES_VIBRATION_SIGNALS.contains(this.getItem().getItem());
 	}
 
 	@Override
@@ -244,6 +250,7 @@ public class ItemEntity extends Entity {
 			this.markHurt();
 			this.health = (int)((float)this.health - f);
 			if (this.health <= 0) {
+				this.getItem().onDestroyed(this);
 				this.discard();
 			}
 

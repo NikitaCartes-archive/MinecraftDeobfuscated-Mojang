@@ -1,81 +1,138 @@
 package net.minecraft.tags;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public interface TagContainer {
-	TagContainer EMPTY = of(TagCollection.empty(), TagCollection.empty(), TagCollection.empty(), TagCollection.empty(), TagCollection.empty());
+public class TagContainer {
+	private static final Logger LOGGER = LogManager.getLogger();
+	public static final TagContainer EMPTY = new TagContainer(ImmutableMap.of());
+	private final Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> collections;
 
-	TagCollection<Block> getBlocks();
+	private TagContainer(Map<ResourceKey<? extends Registry<?>>, TagCollection<?>> map) {
+		this.collections = map;
+	}
 
-	TagCollection<Item> getItems();
+	@Nullable
+	private <T> TagCollection<T> get(ResourceKey<? extends Registry<T>> resourceKey) {
+		return (TagCollection<T>)this.collections.get(resourceKey);
+	}
 
-	TagCollection<Fluid> getFluids();
+	public <T> TagCollection<T> getOrEmpty(ResourceKey<? extends Registry<T>> resourceKey) {
+		return (TagCollection<T>)this.collections.getOrDefault(resourceKey, TagCollection.empty());
+	}
 
-	TagCollection<EntityType<?>> getEntityTypes();
+	public <T, E extends Exception> Tag<T> getTagOrThrow(
+		ResourceKey<? extends Registry<T>> resourceKey, ResourceLocation resourceLocation, Function<ResourceLocation, E> function
+	) throws E {
+		TagCollection<T> tagCollection = this.get(resourceKey);
+		if (tagCollection == null) {
+			throw (Exception)function.apply(resourceLocation);
+		} else {
+			Tag<T> tag = tagCollection.getTag(resourceLocation);
+			if (tag == null) {
+				throw (Exception)function.apply(resourceLocation);
+			} else {
+				return tag;
+			}
+		}
+	}
 
-	TagCollection<GameEvent> getGameEvents();
+	public <T, E extends Exception> ResourceLocation getIdOrThrow(ResourceKey<? extends Registry<T>> resourceKey, Tag<T> tag, Supplier<E> supplier) throws E {
+		TagCollection<T> tagCollection = this.get(resourceKey);
+		if (tagCollection == null) {
+			throw (Exception)supplier.get();
+		} else {
+			ResourceLocation resourceLocation = tagCollection.getId(tag);
+			if (resourceLocation == null) {
+				throw (Exception)supplier.get();
+			} else {
+				return resourceLocation;
+			}
+		}
+	}
 
-	default void bindToGlobal() {
+	public void getAll(TagContainer.CollectionConsumer collectionConsumer) {
+		this.collections.forEach((resourceKey, tagCollection) -> acceptCap(collectionConsumer, resourceKey, tagCollection));
+	}
+
+	private static <T> void acceptCap(
+		TagContainer.CollectionConsumer collectionConsumer, ResourceKey<? extends Registry<?>> resourceKey, TagCollection<?> tagCollection
+	) {
+		collectionConsumer.accept(resourceKey, tagCollection);
+	}
+
+	public void bindToGlobal() {
 		StaticTags.resetAll(this);
 		Blocks.rebuildCache();
 	}
 
-	default void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		this.getBlocks().serializeToNetwork(friendlyByteBuf, Registry.BLOCK);
-		this.getItems().serializeToNetwork(friendlyByteBuf, Registry.ITEM);
-		this.getFluids().serializeToNetwork(friendlyByteBuf, Registry.FLUID);
-		this.getEntityTypes().serializeToNetwork(friendlyByteBuf, Registry.ENTITY_TYPE);
-		this.getGameEvents().serializeToNetwork(friendlyByteBuf, Registry.GAME_EVENT);
+	public Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> serializeToNetwork(RegistryAccess registryAccess) {
+		final Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> map = Maps.<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload>newHashMap();
+		this.getAll(new TagContainer.CollectionConsumer() {
+			@Override
+			public <T> void accept(ResourceKey<? extends Registry<T>> resourceKey, TagCollection<T> tagCollection) {
+				Optional<? extends Registry<T>> optional = registryAccess.registry(resourceKey);
+				if (optional.isPresent()) {
+					map.put(resourceKey, tagCollection.serializeToNetwork((Registry<T>)optional.get()));
+				} else {
+					TagContainer.LOGGER.error("Unknown registry {}", resourceKey);
+				}
+			}
+		});
+		return map;
 	}
 
-	static TagContainer deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		TagCollection<Block> tagCollection = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.BLOCK);
-		TagCollection<Item> tagCollection2 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.ITEM);
-		TagCollection<Fluid> tagCollection3 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.FLUID);
-		TagCollection<EntityType<?>> tagCollection4 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.ENTITY_TYPE);
-		TagCollection<GameEvent> tagCollection5 = TagCollection.loadFromNetwork(friendlyByteBuf, Registry.GAME_EVENT);
-		return of(tagCollection, tagCollection2, tagCollection3, tagCollection4, tagCollection5);
+	@Environment(EnvType.CLIENT)
+	public static TagContainer deserializeFromNetwork(RegistryAccess registryAccess, Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> map) {
+		TagContainer.Builder builder = new TagContainer.Builder();
+		map.forEach((resourceKey, networkPayload) -> addTagsFromPayload(registryAccess, builder, resourceKey, networkPayload));
+		return builder.build();
 	}
 
-	static TagContainer of(
-		TagCollection<Block> tagCollection,
-		TagCollection<Item> tagCollection2,
-		TagCollection<Fluid> tagCollection3,
-		TagCollection<EntityType<?>> tagCollection4,
-		TagCollection<GameEvent> tagCollection5
+	@Environment(EnvType.CLIENT)
+	private static <T> void addTagsFromPayload(
+		RegistryAccess registryAccess,
+		TagContainer.Builder builder,
+		ResourceKey<? extends Registry<? extends T>> resourceKey,
+		TagCollection.NetworkPayload networkPayload
 	) {
-		return new TagContainer() {
-			@Override
-			public TagCollection<Block> getBlocks() {
-				return tagCollection;
-			}
+		Optional<? extends Registry<? extends T>> optional = registryAccess.registry(resourceKey);
+		if (optional.isPresent()) {
+			builder.add(resourceKey, TagCollection.createFromNetwork(networkPayload, (Registry<? extends T>)optional.get()));
+		} else {
+			LOGGER.error("Unknown registry {}", resourceKey);
+		}
+	}
 
-			@Override
-			public TagCollection<Item> getItems() {
-				return tagCollection2;
-			}
+	public static class Builder {
+		private final ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, TagCollection<?>> result = ImmutableMap.builder();
 
-			@Override
-			public TagCollection<Fluid> getFluids() {
-				return tagCollection3;
-			}
+		public <T> TagContainer.Builder add(ResourceKey<? extends Registry<? extends T>> resourceKey, TagCollection<T> tagCollection) {
+			this.result.put(resourceKey, tagCollection);
+			return this;
+		}
 
-			@Override
-			public TagCollection<EntityType<?>> getEntityTypes() {
-				return tagCollection4;
-			}
+		public TagContainer build() {
+			return new TagContainer(this.result.build());
+		}
+	}
 
-			@Override
-			public TagCollection<GameEvent> getGameEvents() {
-				return tagCollection5;
-			}
-		};
+	@FunctionalInterface
+	interface CollectionConsumer {
+		<T> void accept(ResourceKey<? extends Registry<T>> resourceKey, TagCollection<T> tagCollection);
 	}
 }

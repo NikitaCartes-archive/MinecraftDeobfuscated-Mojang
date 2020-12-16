@@ -881,16 +881,23 @@ public class Items {
 		"milk_bucket", new MilkBucketItem(new Item.Properties().craftRemainder(BUCKET).stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item PUFFERFISH_BUCKET = registerItem(
-		"pufferfish_bucket", new FishBucketItem(EntityType.PUFFERFISH, Fluids.WATER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"pufferfish_bucket",
+		new MobBucketItem(EntityType.PUFFERFISH, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item SALMON_BUCKET = registerItem(
-		"salmon_bucket", new FishBucketItem(EntityType.SALMON, Fluids.WATER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"salmon_bucket",
+		new MobBucketItem(EntityType.SALMON, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item COD_BUCKET = registerItem(
-		"cod_bucket", new FishBucketItem(EntityType.COD, Fluids.WATER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"cod_bucket", new MobBucketItem(EntityType.COD, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item TROPICAL_FISH_BUCKET = registerItem(
-		"tropical_fish_bucket", new FishBucketItem(EntityType.TROPICAL_FISH, Fluids.WATER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"tropical_fish_bucket",
+		new MobBucketItem(EntityType.TROPICAL_FISH, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+	);
+	public static final Item AXOLOTL_BUCKET = registerItem(
+		"axolotl_bucket",
+		new MobBucketItem(EntityType.AXOLOTL, Fluids.WATER, SoundEvents.BUCKET_EMPTY_AXOLOTL, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item BRICK = registerItem("brick", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item CLAY_BALL = registerItem("clay_ball", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
@@ -1000,6 +1007,9 @@ public class Items {
 	public static final Item CAULDRON = registerBlock(Blocks.CAULDRON, CreativeModeTab.TAB_BREWING);
 	public static final Item ENDER_EYE = registerItem("ender_eye", new EnderEyeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item GLISTERING_MELON_SLICE = registerItem("glistering_melon_slice", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
+	public static final Item AXOLOTL_SPAWN_EGG = registerItem(
+		"axolotl_spawn_egg", new SpawnEggItem(EntityType.AXOLOTL, 16499171, 10890612, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item BAT_SPAWN_EGG = registerItem(
 		"bat_spawn_egg", new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);

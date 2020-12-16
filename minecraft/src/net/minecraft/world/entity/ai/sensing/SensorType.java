@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.sensing;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 
 public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<DummySensor> DUMMY = register("dummy", DummySensor::new);
@@ -21,6 +22,8 @@ public class SensorType<U extends Sensor<?>> {
 	);
 	public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = register("hoglin_specific_sensor", HoglinSpecificSensor::new);
 	public static final SensorType<AdultSensor> NEAREST_ADULT = register("nearest_adult", AdultSensor::new);
+	public static final SensorType<AxolotlHostileSensor> AXOLOTL_HOSTILES = register("axolotl_hostiles", AxolotlHostileSensor::new);
+	public static final SensorType<TemptingSensor> AXOLOTL_TEMPTATIONS = register("axolotl_temptations", () -> new TemptingSensor(AxolotlAi.getTemptations()));
 	private final Supplier<U> factory;
 
 	private SensorType(Supplier<U> supplier) {

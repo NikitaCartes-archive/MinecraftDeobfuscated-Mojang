@@ -57,6 +57,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 
 	public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
 		this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
+		this.add(EntityType.AXOLOTL, LootTable.lootTable());
 		this.add(EntityType.BAT, LootTable.lootTable());
 		this.add(EntityType.BEE, LootTable.lootTable());
 		this.add(

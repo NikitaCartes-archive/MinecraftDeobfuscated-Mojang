@@ -81,6 +81,10 @@ public abstract class GuiComponent {
 	}
 
 	protected void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		fillGradient(poseStack, i, j, k, l, m, n, this.blitOffset);
+	}
+
+	protected static void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o) {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.disableAlphaTest();
@@ -89,7 +93,7 @@ public abstract class GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, this.blitOffset, m, n);
+		fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, o, m, n);
 		tesselator.end();
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();

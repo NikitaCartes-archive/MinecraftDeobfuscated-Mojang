@@ -37,7 +37,6 @@ public class GameEvent {
 	public static final GameEvent PISTON_EXTEND = register("piston_extend");
 	public static final GameEvent PISTON_CONTRACT = register("piston_contract");
 	public static final GameEvent FLINT_AND_STEEL_USE = register("flint_and_steel_use");
-	public static final GameEvent EATING_START = register("eating_start");
 	public static final GameEvent EATING_FINISH = register("eating_finish");
 	public static final GameEvent LIGHTNING_STRIKE = register("lightning_strike");
 	private final String name;

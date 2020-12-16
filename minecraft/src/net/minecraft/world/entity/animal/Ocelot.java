@@ -171,7 +171,7 @@ public class Ocelot extends Animal {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if ((this.temptGoal == null || this.temptGoal.isRunning()) && !this.isTrusting() && this.isFood(itemStack) && player.distanceToSqr(this) < 9.0) {
-			this.usePlayerItem(player, itemStack);
+			this.usePlayerItem(player, interactionHand, itemStack);
 			if (!this.level.isClientSide) {
 				if (this.random.nextInt(3) == 0) {
 					this.setTrusting(true);

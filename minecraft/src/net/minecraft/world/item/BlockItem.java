@@ -9,12 +9,14 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
@@ -209,5 +211,16 @@ public class BlockItem extends Item {
 	@Override
 	public boolean canFitInsideContainerItems() {
 		return !(this.block instanceof ShulkerBoxBlock);
+	}
+
+	@Override
+	public void onDestroyed(ItemEntity itemEntity) {
+		if (this.block instanceof ShulkerBoxBlock) {
+			CompoundTag compoundTag = itemEntity.getItem().getTag();
+			if (compoundTag != null) {
+				ListTag listTag = compoundTag.getCompound("BlockEntityTag").getList("Items", 10);
+				ItemUtils.onContainerDestroyed(itemEntity, listTag.stream().map(CompoundTag.class::cast).map(ItemStack::of));
+			}
+		}
 	}
 }

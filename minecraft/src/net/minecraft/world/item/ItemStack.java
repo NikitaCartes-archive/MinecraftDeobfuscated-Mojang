@@ -57,6 +57,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -988,6 +989,10 @@ public final class ItemStack {
 
 	public void onUseTick(Level level, LivingEntity livingEntity, int i) {
 		this.getItem().onUseTick(level, livingEntity, this, i);
+	}
+
+	public void onDestroyed(ItemEntity itemEntity) {
+		this.getItem().onDestroyed(itemEntity);
 	}
 
 	public boolean isEdible() {

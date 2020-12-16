@@ -71,7 +71,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 	}
 
 	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
-		Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
+		Optional<WritableRegistry<E>> optional = this.registryHolder.ownedRegistry(resourceKey);
 		if (!optional.isPresent()) {
 			return DataResult.error("Unknown registry: " + resourceKey);
 		} else {
@@ -153,7 +153,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 
 	protected <E> DataResult<Registry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey) {
 		return (DataResult<Registry<E>>)this.registryHolder
-			.registry(resourceKey)
+			.ownedRegistry(resourceKey)
 			.map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle()))
 			.orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
 	}

@@ -40,8 +40,8 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.DolphinLookControl;
-import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreathAirGoal;
 import net.minecraft.world.entity.ai.goal.DolphinJumpGoal;
@@ -83,8 +83,8 @@ public class Dolphin extends WaterAnimal {
 
 	public Dolphin(EntityType<? extends Dolphin> entityType, Level level) {
 		super(entityType, level);
-		this.moveControl = new Dolphin.DolphinMoveControl(this);
-		this.lookControl = new DolphinLookControl(this, 10);
+		this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02F, 0.1F, true);
+		this.lookControl = new SmoothSwimmingLookControl(this, 10);
 		this.setCanPickUpLoot(true);
 	}
 
@@ -395,55 +395,6 @@ public class Dolphin extends WaterAnimal {
 	@Override
 	public boolean canBeLeashed(Player player) {
 		return true;
-	}
-
-	static class DolphinMoveControl extends MoveControl {
-		private final Dolphin dolphin;
-
-		public DolphinMoveControl(Dolphin dolphin) {
-			super(dolphin);
-			this.dolphin = dolphin;
-		}
-
-		@Override
-		public void tick() {
-			if (this.dolphin.isInWater()) {
-				this.dolphin.setDeltaMovement(this.dolphin.getDeltaMovement().add(0.0, 0.005, 0.0));
-			}
-
-			if (this.operation == MoveControl.Operation.MOVE_TO && !this.dolphin.getNavigation().isDone()) {
-				double d = this.wantedX - this.dolphin.getX();
-				double e = this.wantedY - this.dolphin.getY();
-				double f = this.wantedZ - this.dolphin.getZ();
-				double g = d * d + e * e + f * f;
-				if (g < 2.5000003E-7F) {
-					this.mob.setZza(0.0F);
-				} else {
-					float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-					this.dolphin.yRot = this.rotlerp(this.dolphin.yRot, h, 10.0F);
-					this.dolphin.yBodyRot = this.dolphin.yRot;
-					this.dolphin.yHeadRot = this.dolphin.yRot;
-					float i = (float)(this.speedModifier * this.dolphin.getAttributeValue(Attributes.MOVEMENT_SPEED));
-					if (this.dolphin.isInWater()) {
-						this.dolphin.setSpeed(i * 0.02F);
-						float j = -((float)(Mth.atan2(e, (double)Mth.sqrt(d * d + f * f)) * 180.0F / (float)Math.PI));
-						j = Mth.clamp(Mth.wrapDegrees(j), -85.0F, 85.0F);
-						this.dolphin.xRot = this.rotlerp(this.dolphin.xRot, j, 5.0F);
-						float k = Mth.cos(this.dolphin.xRot * (float) (Math.PI / 180.0));
-						float l = Mth.sin(this.dolphin.xRot * (float) (Math.PI / 180.0));
-						this.dolphin.zza = k * i;
-						this.dolphin.yya = -l * i;
-					} else {
-						this.dolphin.setSpeed(i * 0.1F);
-					}
-				}
-			} else {
-				this.dolphin.setSpeed(0.0F);
-				this.dolphin.setXxa(0.0F);
-				this.dolphin.setYya(0.0F);
-				this.dolphin.setZza(0.0F);
-			}
-		}
 	}
 
 	static class DolphinSwimToTreasureGoal extends Goal {

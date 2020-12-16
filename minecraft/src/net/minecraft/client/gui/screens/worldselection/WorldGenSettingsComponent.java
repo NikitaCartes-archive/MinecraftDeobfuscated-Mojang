@@ -159,7 +159,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 						try {
 							MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
 							CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(
-								packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft
+								packRepository.openAllSelected(), registryHolder, Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft
 							);
 							minecraft.managedBlock(completableFuture::isDone);
 							serverResources = (ServerResources)completableFuture.get();

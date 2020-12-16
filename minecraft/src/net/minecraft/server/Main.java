@@ -124,6 +124,7 @@ public class Main {
 			);
 			CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(
 				packRepository.openAllSelected(),
+				registryHolder,
 				Commands.CommandSelection.DEDICATED,
 				dedicatedServerSettings.getProperties().functionPermissionLevel,
 				Util.backgroundExecutor(),

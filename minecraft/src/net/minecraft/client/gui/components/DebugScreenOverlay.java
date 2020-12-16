@@ -444,7 +444,11 @@ public class DebugScreenOverlay extends GuiComponent {
 					list.add(this.getPropertyValueString(entry));
 				}
 
-				for (ResourceLocation resourceLocation : this.minecraft.getConnection().getTags().getBlocks().getMatchingTags(blockState.getBlock())) {
+				for (ResourceLocation resourceLocation : this.minecraft
+					.getConnection()
+					.getTags()
+					.getOrEmpty(Registry.BLOCK_REGISTRY)
+					.getMatchingTags(blockState.getBlock())) {
 					list.add("#" + resourceLocation);
 				}
 			}
@@ -460,7 +464,7 @@ public class DebugScreenOverlay extends GuiComponent {
 					list.add(this.getPropertyValueString(entry));
 				}
 
-				for (ResourceLocation resourceLocation : this.minecraft.getConnection().getTags().getFluids().getMatchingTags(fluidState.getType())) {
+				for (ResourceLocation resourceLocation : this.minecraft.getConnection().getTags().getOrEmpty(Registry.FLUID_REGISTRY).getMatchingTags(fluidState.getType())) {
 					list.add("#" + resourceLocation);
 				}
 			}

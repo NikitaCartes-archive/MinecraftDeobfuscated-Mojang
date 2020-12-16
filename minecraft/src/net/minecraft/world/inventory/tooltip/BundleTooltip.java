@@ -8,18 +8,18 @@ import net.minecraft.world.item.ItemStack;
 @Environment(EnvType.CLIENT)
 public class BundleTooltip implements TooltipComponent {
 	private final NonNullList<ItemStack> items;
-	private final boolean showEmptySlot;
+	private final int weight;
 
-	public BundleTooltip(NonNullList<ItemStack> nonNullList, boolean bl) {
+	public BundleTooltip(NonNullList<ItemStack> nonNullList, int i) {
 		this.items = nonNullList;
-		this.showEmptySlot = bl;
+		this.weight = i;
 	}
 
 	public NonNullList<ItemStack> getItems() {
 		return this.items;
 	}
 
-	public boolean showEmptySlot() {
-		return this.showEmptySlot;
+	public int getWeight() {
+		return this.weight;
 	}
 }

@@ -15,6 +15,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation ARMOR_STAND = register("armor_stand");
 	public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = registerInnerArmor("armor_stand");
 	public static final ModelLayerLocation ARMOR_STAND_OUTER_ARMOR = registerOuterArmor("armor_stand");
+	public static final ModelLayerLocation AXOLOTL = register("axolotl");
 	public static final ModelLayerLocation BANNER = register("banner");
 	public static final ModelLayerLocation BAT = register("bat");
 	public static final ModelLayerLocation BED_FOOT = register("bed_foot");

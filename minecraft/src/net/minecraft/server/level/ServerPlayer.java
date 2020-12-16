@@ -784,6 +784,10 @@ public class ServerPlayer extends Player implements ContainerListener {
 					this.awardStat(Stats.SLEEP_IN_BED);
 					CriteriaTriggers.SLEPT_IN_BED.trigger(this);
 				});
+				if (!this.getLevel().canSleepThroughNights()) {
+					this.displayClientMessage(new TranslatableComponent("sleep.not_possible"), true);
+				}
+
 				((ServerLevel)this.level).updateSleepingPlayerList();
 				return either;
 			}

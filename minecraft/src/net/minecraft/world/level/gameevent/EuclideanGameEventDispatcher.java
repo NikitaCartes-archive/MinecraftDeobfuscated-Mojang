@@ -35,8 +35,14 @@ public class EuclideanGameEventDispatcher implements GameEventDispatcher {
 
 	@Override
 	public void post(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
-		boolean bl = this.listeners.stream().filter(gameEventListener -> this.postToListener(this.level, gameEvent, entity, blockPos, gameEventListener)).count()
-			> 0L;
+		boolean bl = false;
+
+		for (GameEventListener gameEventListener : this.listeners) {
+			if (this.postToListener(this.level, gameEvent, entity, blockPos, gameEventListener)) {
+				bl = true;
+			}
+		}
+
 		if (bl) {
 			DebugPackets.sendGameEventInfo(this.level, gameEvent, blockPos);
 		}

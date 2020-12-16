@@ -584,7 +584,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 						this.gameEvent(GameEvent.SWIM);
 					} else {
 						this.playStepSound(blockPos, blockState);
-						this.gameEvent(GameEvent.STEP);
+						if (!blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+							this.gameEvent(GameEvent.STEP);
+						}
 					}
 				} else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState.isAir()) {
 					this.nextFlap = this.playFlySound(this.moveDist);
@@ -929,11 +931,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return true;
 	}
 
+	public boolean occludesVibrations() {
+		return false;
+	}
+
 	protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level, blockPos, this, this.fallDistance);
-				this.gameEvent(GameEvent.HIT_GROUND);
+				if (!blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+					this.gameEvent(GameEvent.HIT_GROUND);
+				}
 			}
 
 			this.fallDistance = 0.0F;
@@ -1032,7 +1040,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
 		FluidState fluidState = this.level.getFluidState(blockPos);
 
-		for (Tag<Fluid> tag : FluidTags.getWrappers()) {
+		for (Tag<Fluid> tag : FluidTags.getStaticTags()) {
 			if (fluidState.is(tag)) {
 				double e = (double)((float)blockPos.getY() + fluidState.getHeight(this.level, blockPos));
 				if (e > d) {

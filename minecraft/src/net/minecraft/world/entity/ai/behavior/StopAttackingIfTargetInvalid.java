@@ -23,7 +23,10 @@ public class StopAttackingIfTargetInvalid<E extends Mob> extends Behavior<E> {
 	}
 
 	protected void start(ServerLevel serverLevel, E mob, long l) {
-		if (isTiredOfTryingToReachTarget(mob)) {
+		LivingEntity livingEntity = this.getAttackTarget(mob);
+		if (!livingEntity.canBeTargeted()) {
+			this.clearAttackTarget(mob);
+		} else if (isTiredOfTryingToReachTarget(mob)) {
 			this.clearAttackTarget(mob);
 		} else if (this.isCurrentTargetDeadOrRemoved(mob)) {
 			this.clearAttackTarget(mob);

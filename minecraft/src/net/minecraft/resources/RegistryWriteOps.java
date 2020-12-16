@@ -21,7 +21,7 @@ public class RegistryWriteOps<T> extends DelegatingOps<T> {
 	}
 
 	protected <E> DataResult<T> encode(E object, T object2, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
-		Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
+		Optional<WritableRegistry<E>> optional = this.registryHolder.ownedRegistry(resourceKey);
 		if (optional.isPresent()) {
 			WritableRegistry<E> writableRegistry = (WritableRegistry<E>)optional.get();
 			Optional<ResourceKey<E>> optional2 = writableRegistry.getResourceKey(object);
