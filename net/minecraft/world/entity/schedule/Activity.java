@@ -21,6 +21,7 @@ public class Activity {
     public static final Activity ADMIRE_ITEM = Activity.register("admire_item");
     public static final Activity AVOID = Activity.register("avoid");
     public static final Activity RIDE = Activity.register("ride");
+    public static final Activity PLAY_DEAD = Activity.register("play_dead");
     private final String name;
     private final int hashCode;
 

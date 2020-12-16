@@ -30,7 +30,7 @@ extends DelegatingOps<T> {
     protected <E> DataResult<T> encode(E object, T object2, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
         WritableRegistry writableRegistry;
         Optional<ResourceKey<E>> optional2;
-        Optional optional = this.registryHolder.registry(resourceKey);
+        Optional optional = this.registryHolder.ownedRegistry(resourceKey);
         if (optional.isPresent() && (optional2 = (writableRegistry = optional.get()).getResourceKey(object)).isPresent()) {
             ResourceKey<E> resourceKey2 = optional2.get();
             return ResourceLocation.CODEC.encode(resourceKey2.location(), this.delegate, object2);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.ServerFunctionLibrary;
 import net.minecraft.server.packs.PackResources;
@@ -28,14 +29,15 @@ implements AutoCloseable {
     private final ReloadableResourceManager resources = new SimpleReloadableResourceManager(PackType.SERVER_DATA);
     private final Commands commands;
     private final RecipeManager recipes = new RecipeManager();
-    private final TagManager tagManager = new TagManager();
+    private final TagManager tagManager;
     private final PredicateManager predicateManager = new PredicateManager();
     private final LootTables lootTables = new LootTables(this.predicateManager);
     private final ItemModifierManager itemModifierManager = new ItemModifierManager(this.predicateManager, this.lootTables);
     private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
     private final ServerFunctionLibrary functionLibrary;
 
-    public ServerResources(Commands.CommandSelection commandSelection, int i) {
+    public ServerResources(RegistryAccess registryAccess, Commands.CommandSelection commandSelection, int i) {
+        this.tagManager = new TagManager(registryAccess);
         this.commands = new Commands(commandSelection);
         this.functionLibrary = new ServerFunctionLibrary(i, this.commands.getDispatcher());
         this.resources.registerReloadListener(this.tagManager);
@@ -83,8 +85,8 @@ implements AutoCloseable {
         return this.resources;
     }
 
-    public static CompletableFuture<ServerResources> loadResources(List<PackResources> list, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2) {
-        ServerResources serverResources = new ServerResources(commandSelection, i);
+    public static CompletableFuture<ServerResources> loadResources(List<PackResources> list, RegistryAccess registryAccess, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2) {
+        ServerResources serverResources = new ServerResources(registryAccess, commandSelection, i);
         CompletableFuture<Unit> completableFuture = serverResources.resources.reload(executor, executor2, list, DATA_RELOAD_INITIAL_TASK);
         return ((CompletableFuture)completableFuture.whenComplete((unit, throwable) -> {
             if (throwable != null) {

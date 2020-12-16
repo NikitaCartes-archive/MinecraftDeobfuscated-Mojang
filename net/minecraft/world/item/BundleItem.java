@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -26,6 +27,7 @@ import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -89,7 +91,7 @@ extends Item {
     @Override
     @Environment(value=EnvType.CLIENT)
     public int getBarWidth(ItemStack itemStack) {
-        return Math.min(13 * BundleItem.getContentWeight(itemStack) / 64, 13);
+        return Math.min(1 + 12 * BundleItem.getContentWeight(itemStack) / 64, 13);
     }
 
     @Override
@@ -196,13 +198,18 @@ extends Item {
     public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
         NonNullList<ItemStack> nonNullList = NonNullList.create();
         BundleItem.getContents(itemStack).forEach(nonNullList::add);
-        return Optional.of(new BundleTooltip(nonNullList, BundleItem.getContentWeight(itemStack) < 64));
+        return Optional.of(new BundleTooltip(nonNullList, BundleItem.getContentWeight(itemStack)));
     }
 
     @Override
     @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, Level level, List<Component> list, TooltipFlag tooltipFlag) {
         list.add(new TranslatableComponent("item.minecraft.bundle.fullness", BundleItem.getContentWeight(itemStack), 64).withStyle(ChatFormatting.GRAY));
+    }
+
+    @Override
+    public void onDestroyed(ItemEntity itemEntity) {
+        ItemUtils.onContainerDestroyed(itemEntity, BundleItem.getContents(itemEntity.getItem()));
     }
 }
 

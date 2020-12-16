@@ -115,13 +115,9 @@ implements MenuAccess<T> {
             }
             if (!this.isHovering(slot, i, j) || !slot.isActive()) continue;
             this.hoveredSlot = slot;
-            RenderSystem.disableDepthTest();
             p = slot.x;
             q = slot.y;
-            RenderSystem.colorMask(true, true, true, false);
-            this.fillGradient(poseStack, p, q, p + 16, q + 16, -2130706433, -2130706433);
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.enableDepthTest();
+            AbstractContainerScreen.renderSlotHighlight(poseStack, p, q, this.getBlitOffset());
         }
         this.renderLabels(poseStack, i, j);
         Inventory inventory = this.minecraft.player.getInventory();
@@ -155,6 +151,14 @@ implements MenuAccess<T> {
             this.renderFloatingItem(this.snapbackItem, s, t, null);
         }
         RenderSystem.popMatrix();
+        RenderSystem.enableDepthTest();
+    }
+
+    public static void renderSlotHighlight(PoseStack poseStack, int i, int j, int k) {
+        RenderSystem.disableDepthTest();
+        RenderSystem.colorMask(true, true, true, false);
+        AbstractContainerScreen.fillGradient(poseStack, i, j, i + 16, j + 16, -2130706433, -2130706433, k);
+        RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
     }
 

@@ -63,7 +63,7 @@ extends DelegatingOps<T> {
     }
 
     protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
-        Optional optional = this.registryHolder.registry(resourceKey);
+        Optional optional = this.registryHolder.ownedRegistry(resourceKey);
         if (!optional.isPresent()) {
             return DataResult.error("Unknown registry: " + resourceKey);
         }
@@ -132,7 +132,7 @@ extends DelegatingOps<T> {
     }
 
     protected <E> DataResult<Registry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey) {
-        return this.registryHolder.registry(resourceKey).map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
+        return this.registryHolder.ownedRegistry(resourceKey).map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
     }
 
     public static interface ResourceAccess {

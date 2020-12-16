@@ -16,17 +16,21 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class BehaviorUtils {
     public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
@@ -98,10 +102,9 @@ public class BehaviorUtils {
         return BehaviorUtils.isWithinMeleeAttackRange(mob, livingEntity);
     }
 
-    public static boolean isWithinMeleeAttackRange(LivingEntity livingEntity, LivingEntity livingEntity2) {
-        double e;
-        double d = livingEntity.distanceToSqr(livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ());
-        return d <= (e = (double)(livingEntity.getBbWidth() * 2.0f * (livingEntity.getBbWidth() * 2.0f) + livingEntity2.getBbWidth()));
+    public static boolean isWithinMeleeAttackRange(Mob mob, LivingEntity livingEntity) {
+        double d = mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+        return d <= mob.getMeleeAttackRangeSqr(livingEntity);
     }
 
     public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity livingEntity, LivingEntity livingEntity2, double d) {
@@ -142,6 +145,16 @@ public class BehaviorUtils {
 
     public static Stream<Villager> getNearbyVillagersWithCondition(Villager villager, Predicate<Villager> predicate) {
         return villager.getBrain().getMemory(MemoryModuleType.LIVING_ENTITIES).map(list -> list.stream().filter(livingEntity -> livingEntity instanceof Villager && livingEntity != villager).map(livingEntity -> (Villager)livingEntity).filter(LivingEntity::isAlive).filter(predicate)).orElseGet(Stream::empty);
+    }
+
+    @Nullable
+    public static Vec3 getRandomSwimmablePos(PathfinderMob pathfinderMob, int i, int j) {
+        Vec3 vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
+        int k = 0;
+        while (vec3 != null && !pathfinderMob.level.getBlockState(new BlockPos(vec3)).isPathfindable(pathfinderMob.level, new BlockPos(vec3), PathComputationType.WATER) && k++ < 10) {
+            vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
+        }
+        return vec3;
     }
 }
 

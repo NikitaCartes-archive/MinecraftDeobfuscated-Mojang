@@ -87,14 +87,14 @@ implements DispensibleContainerItem {
                     CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos3, itemStack);
                 }
                 player.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.sidedSuccess(this.getEmptySuccessItem(itemStack, player), level.isClientSide());
+                return InteractionResultHolder.sidedSuccess(BucketItem.getEmptySuccessItem(itemStack, player), level.isClientSide());
             }
             return InteractionResultHolder.fail(itemStack);
         }
         return InteractionResultHolder.pass(itemStack);
     }
 
-    protected ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
+    public static ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
         if (!player.getAbilities().instabuild) {
             return new ItemStack(Items.BUCKET);
         }

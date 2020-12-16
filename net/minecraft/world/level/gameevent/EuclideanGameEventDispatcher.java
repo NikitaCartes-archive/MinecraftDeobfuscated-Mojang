@@ -42,8 +42,11 @@ implements GameEventDispatcher {
 
     @Override
     public void post(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
-        boolean bl;
-        boolean bl2 = bl = this.listeners.stream().filter(gameEventListener -> this.postToListener(this.level, gameEvent, entity, blockPos, (GameEventListener)gameEventListener)).count() > 0L;
+        boolean bl = false;
+        for (GameEventListener gameEventListener : this.listeners) {
+            if (!this.postToListener(this.level, gameEvent, entity, blockPos, gameEventListener)) continue;
+            bl = true;
+        }
         if (bl) {
             DebugPackets.sendGameEventInfo(this.level, gameEvent, blockPos);
         }

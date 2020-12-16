@@ -16,7 +16,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.JigsawBlock;
@@ -46,7 +45,7 @@ public class JigsawPlacement {
 
     public static void addPieces(RegistryAccess registryAccess, JigsawConfiguration jigsawConfiguration, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<? super PoolElementStructurePiece> list, Random random, boolean bl, boolean bl2) {
         StructureFeature.bootstrap();
-        WritableRegistry<StructureTemplatePool> writableRegistry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+        Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
         Rotation rotation = Rotation.getRandom(random);
         StructureTemplatePool structureTemplatePool = jigsawConfiguration.startPool().get();
         StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
@@ -63,7 +62,7 @@ public class JigsawPlacement {
         }
         int m = 80;
         AABB aABB = new AABB(i - 80, k - 80, j - 80, i + 80 + 1, k + 80 + 1, j + 80 + 1);
-        Placer placer = new Placer(writableRegistry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random);
+        Placer placer = new Placer(registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random);
         placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), k + 80, 0));
         while (!placer.placing.isEmpty()) {
             PieceState pieceState = (PieceState)placer.placing.removeFirst();
@@ -72,8 +71,8 @@ public class JigsawPlacement {
     }
 
     public static void addPieces(RegistryAccess registryAccess, PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
-        WritableRegistry<StructureTemplatePool> writableRegistry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-        Placer placer = new Placer(writableRegistry, i, pieceFactory, chunkGenerator, structureManager, list, random);
+        Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+        Placer placer = new Placer(registry, i, pieceFactory, chunkGenerator, structureManager, list, random);
         placer.placing.addLast(new PieceState(poolElementStructurePiece, new MutableObject<VoxelShape>(Shapes.INFINITY), 0, 0));
         while (!placer.placing.isEmpty()) {
             PieceState pieceState = (PieceState)placer.placing.removeFirst();

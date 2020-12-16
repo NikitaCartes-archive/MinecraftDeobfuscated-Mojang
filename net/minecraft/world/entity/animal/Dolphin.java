@@ -42,8 +42,8 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.DolphinLookControl;
-import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreathAirGoal;
 import net.minecraft.world.entity.ai.goal.DolphinJumpGoal;
@@ -85,8 +85,8 @@ extends WaterAnimal {
 
     public Dolphin(EntityType<? extends Dolphin> entityType, Level level) {
         super((EntityType<? extends WaterAnimal>)entityType, level);
-        this.moveControl = new DolphinMoveControl(this);
-        this.lookControl = new DolphinLookControl(this, 10);
+        this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02f, 0.1f, true);
+        this.lookControl = new SmoothSwimmingLookControl(this, 10);
         this.setCanPickUpLoot(true);
     }
 
@@ -578,54 +578,6 @@ extends WaterAnimal {
             float h = 0.02f * Dolphin.this.random.nextFloat();
             itemEntity.setDeltaMovement(0.3f * -Mth.sin(Dolphin.this.yRot * ((float)Math.PI / 180)) * Mth.cos(Dolphin.this.xRot * ((float)Math.PI / 180)) + Mth.cos(g) * h, 0.3f * Mth.sin(Dolphin.this.xRot * ((float)Math.PI / 180)) * 1.5f, 0.3f * Mth.cos(Dolphin.this.yRot * ((float)Math.PI / 180)) * Mth.cos(Dolphin.this.xRot * ((float)Math.PI / 180)) + Mth.sin(g) * h);
             Dolphin.this.level.addFreshEntity(itemEntity);
-        }
-    }
-
-    static class DolphinMoveControl
-    extends MoveControl {
-        private final Dolphin dolphin;
-
-        public DolphinMoveControl(Dolphin dolphin) {
-            super(dolphin);
-            this.dolphin = dolphin;
-        }
-
-        @Override
-        public void tick() {
-            double f;
-            double e;
-            if (this.dolphin.isInWater()) {
-                this.dolphin.setDeltaMovement(this.dolphin.getDeltaMovement().add(0.0, 0.005, 0.0));
-            }
-            if (this.operation != MoveControl.Operation.MOVE_TO || this.dolphin.getNavigation().isDone()) {
-                this.dolphin.setSpeed(0.0f);
-                this.dolphin.setXxa(0.0f);
-                this.dolphin.setYya(0.0f);
-                this.dolphin.setZza(0.0f);
-                return;
-            }
-            double d = this.wantedX - this.dolphin.getX();
-            double g = d * d + (e = this.wantedY - this.dolphin.getY()) * e + (f = this.wantedZ - this.dolphin.getZ()) * f;
-            if (g < 2.500000277905201E-7) {
-                this.mob.setZza(0.0f);
-                return;
-            }
-            float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-            this.dolphin.yBodyRot = this.dolphin.yRot = this.rotlerp(this.dolphin.yRot, h, 10.0f);
-            this.dolphin.yHeadRot = this.dolphin.yRot;
-            float i = (float)(this.speedModifier * this.dolphin.getAttributeValue(Attributes.MOVEMENT_SPEED));
-            if (this.dolphin.isInWater()) {
-                this.dolphin.setSpeed(i * 0.02f);
-                float j = -((float)(Mth.atan2(e, Mth.sqrt(d * d + f * f)) * 57.2957763671875));
-                j = Mth.clamp(Mth.wrapDegrees(j), -85.0f, 85.0f);
-                this.dolphin.xRot = this.rotlerp(this.dolphin.xRot, j, 5.0f);
-                float k = Mth.cos(this.dolphin.xRot * ((float)Math.PI / 180));
-                float l = Mth.sin(this.dolphin.xRot * ((float)Math.PI / 180));
-                this.dolphin.zza = k * i;
-                this.dolphin.yya = -l * i;
-            } else {
-                this.dolphin.setSpeed(i * 0.1f);
-            }
         }
     }
 }

@@ -21,5 +21,9 @@ implements TestReporter {
             LOGGER.warn("(optional) {} failed. {}", (Object)gameTestInfo.getTestName(), (Object)Util.describeError(gameTestInfo.getError()));
         }
     }
+
+    @Override
+    public void onTestSuccess(GameTestInfo gameTestInfo) {
+    }
 }
 

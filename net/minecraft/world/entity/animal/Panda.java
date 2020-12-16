@@ -558,10 +558,10 @@ extends Animal {
                 this.gotBamboo = true;
             }
             if (this.isBaby()) {
-                this.usePlayerItem(player, itemStack);
+                this.usePlayerItem(player, interactionHand, itemStack);
                 this.ageUp((int)((float)(-this.getAge() / 20) * 0.1f), true);
             } else if (!this.level.isClientSide && this.getAge() == 0 && this.canFallInLove()) {
-                this.usePlayerItem(player, itemStack);
+                this.usePlayerItem(player, interactionHand, itemStack);
                 this.setInLove(player);
             } else if (!(this.level.isClientSide || this.isSitting() || this.isInWater())) {
                 this.tryToSit();
@@ -571,7 +571,7 @@ extends Animal {
                     this.spawnAtLocation(itemStack2);
                 }
                 this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(itemStack.getItem(), 1));
-                this.usePlayerItem(player, itemStack);
+                this.usePlayerItem(player, interactionHand, itemStack);
             } else {
                 return InteractionResult.PASS;
             }

@@ -53,7 +53,10 @@ extends Block {
         Block block;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
-        if (!level.isClientSide && itemStack.is(ItemTags.CANDLES) && blockState.getValue(BITES) == 0 && (block = Block.byItem(item)) instanceof CandleBlock) {
+        if (itemStack.is(ItemTags.CANDLES) && blockState.getValue(BITES) == 0 && (block = Block.byItem(item)) instanceof CandleBlock) {
+            if (!player.isCreative()) {
+                itemStack.shrink(1);
+            }
             level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0f, 1.0f);
             level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
             return InteractionResult.SUCCESS;

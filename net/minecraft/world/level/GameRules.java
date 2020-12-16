@@ -75,6 +75,7 @@ public class GameRules {
     public static final Key<BooleanValue> RULE_DO_TRADER_SPAWNING = GameRules.register("doTraderSpawning", Category.SPAWNING, BooleanValue.method_20755(true));
     public static final Key<BooleanValue> RULE_FORGIVE_DEAD_PLAYERS = GameRules.register("forgiveDeadPlayers", Category.MOBS, BooleanValue.method_20755(true));
     public static final Key<BooleanValue> RULE_UNIVERSAL_ANGER = GameRules.register("universalAnger", Category.MOBS, BooleanValue.method_20755(false));
+    public static final Key<IntegerValue> RULE_PLAYERS_SLEEPING_PERCENTAGE = GameRules.register("playersSleepingPercentage", Category.PLAYER, IntegerValue.method_20764(100));
     private final Map<Key<?>, Value<?>> rules;
 
     private static <T extends Value<T>> Key<T> register(String string, Category category, Type<T> type) {

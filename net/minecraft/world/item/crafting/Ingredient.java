@@ -156,16 +156,13 @@ implements Predicate<ItemStack> {
             throw new JsonParseException("An ingredient entry is either a tag or an item, not both");
         }
         if (jsonObject.has("item")) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-            Item item = Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation + "'"));
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
+            Item item = Registry.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation2 + "'"));
             return new ItemValue(new ItemStack(item));
         }
         if (jsonObject.has("tag")) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            Tag<Item> tag = SerializationTags.getInstance().getItems().getTag(resourceLocation);
-            if (tag == null) {
-                throw new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'");
-            }
+            ResourceLocation resourceLocation3 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
+            Tag<Item> tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation3, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
             return new TagValue(tag);
         }
         throw new JsonParseException("An ingredient entry needs either a tag or an item");
@@ -196,7 +193,7 @@ implements Predicate<ItemStack> {
         @Override
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getItems().getIdOrThrow(this.tag).toString());
+            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, this.tag, () -> new IllegalStateException("Unknown item tag")).toString());
             return jsonObject;
         }
     }

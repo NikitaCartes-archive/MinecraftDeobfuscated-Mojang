@@ -257,11 +257,11 @@ extends TamableAnimal {
     }
 
     @Override
-    protected void usePlayerItem(Player player, ItemStack itemStack) {
+    protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {
         if (this.isFood(itemStack)) {
             this.playSound(SoundEvents.CAT_EAT, 1.0f, 1.0f);
         }
-        super.usePlayerItem(player, itemStack);
+        super.usePlayerItem(player, interactionHand, itemStack);
     }
 
     private float getAttackDamage() {
@@ -404,7 +404,7 @@ extends TamableAnimal {
                     }
                 } else {
                     if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-                        this.usePlayerItem(player, itemStack);
+                        this.usePlayerItem(player, interactionHand, itemStack);
                         this.heal(item.getFoodProperties().getNutrition());
                         return InteractionResult.CONSUME;
                     }
@@ -416,7 +416,7 @@ extends TamableAnimal {
                 }
             }
         } else if (this.isFood(itemStack)) {
-            this.usePlayerItem(player, itemStack);
+            this.usePlayerItem(player, interactionHand, itemStack);
             if (this.random.nextInt(3) == 0) {
                 this.tame(player);
                 this.setOrderedToSit(true);

@@ -64,7 +64,7 @@ extends Behavior<E> {
         return "(" + this.getClass().getSimpleName() + "): " + set;
     }
 
-    static enum RunningPolicy {
+    public static enum RunningPolicy {
         RUN_ONE{
 
             @Override
@@ -85,7 +85,7 @@ extends Behavior<E> {
         public abstract <E extends LivingEntity> void apply(WeightedList<Behavior<? super E>> var1, ServerLevel var2, E var3, long var4);
     }
 
-    static enum OrderPolicy {
+    public static enum OrderPolicy {
         ORDERED(weightedList -> {}),
         SHUFFLED(WeightedList::shuffle);
 

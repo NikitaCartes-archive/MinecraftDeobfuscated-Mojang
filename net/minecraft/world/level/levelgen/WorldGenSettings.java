@@ -28,7 +28,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
@@ -86,10 +85,10 @@ public class WorldGenSettings {
     }
 
     public static WorldGenSettings demoSettings(RegistryAccess registryAccess) {
-        WritableRegistry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
         int i = "North Carolina".hashCode();
-        WritableRegistry<DimensionType> registry2 = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-        WritableRegistry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        Registry<DimensionType> registry2 = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         return new WorldGenSettings(i, true, true, WorldGenSettings.withOverworld(registry2, DimensionType.defaultDimensions(registry2, registry, registry3, i), (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry, registry3, i)));
     }
 
@@ -196,9 +195,9 @@ public class WorldGenSettings {
                 l = string22.hashCode();
             }
         }
-        WritableRegistry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-        WritableRegistry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-        WritableRegistry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        Registry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registry, registry2, registry3, l);
         switch (string5) {
             case "flat": {

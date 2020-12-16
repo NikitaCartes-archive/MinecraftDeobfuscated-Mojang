@@ -62,6 +62,17 @@ public class GameTestInfo {
         if (this.isDone()) {
             return;
         }
+        this.tickInternal();
+        if (this.isDone()) {
+            if (this.error != null) {
+                this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this));
+            } else {
+                this.listeners.forEach(gameTestListener -> gameTestListener.testPassed(this));
+            }
+        }
+    }
+
+    private void tickInternal() {
         this.tickCount = this.level.getGameTime() - this.startTick;
         if (this.tickCount < 0L) {
             return;
@@ -142,9 +153,8 @@ public class GameTestInfo {
     }
 
     public void fail(Throwable throwable) {
-        this.finish();
         this.error = throwable;
-        this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this));
+        this.finish();
     }
 
     @Nullable

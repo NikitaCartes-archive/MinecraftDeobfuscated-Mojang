@@ -7,11 +7,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.LookControl;
 
-public class DolphinLookControl
+public class SmoothSwimmingLookControl
 extends LookControl {
     private final int maxYRotFromCenter;
 
-    public DolphinLookControl(Mob mob, int i) {
+    public SmoothSwimmingLookControl(Mob mob, int i) {
         super(mob);
         this.maxYRotFromCenter = i;
     }

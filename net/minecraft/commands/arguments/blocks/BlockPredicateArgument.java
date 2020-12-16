@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -50,10 +51,7 @@ implements ArgumentType<Result> {
         }
         ResourceLocation resourceLocation = blockStateParser.getTag();
         return tagContainer -> {
-            Tag<Block> tag = tagContainer.getBlocks().getTag(resourceLocation);
-            if (tag == null) {
-                throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());
-            }
+            Tag<Block> tag = tagContainer.getTagOrThrow(Registry.BLOCK_REGISTRY, resourceLocation, resourceLocation -> ERROR_UNKNOWN_TAG.create(resourceLocation.toString()));
             return new TagPredicate(tag, blockStateParser.getVagueProperties(), blockStateParser.getNbt());
         };
     }

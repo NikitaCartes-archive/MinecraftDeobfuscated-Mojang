@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
@@ -20,12 +22,14 @@ import net.minecraft.tags.TagContainer;
 import org.jetbrains.annotations.Nullable;
 
 public class StaticTagHelper<T> {
+    private final ResourceKey<? extends Registry<T>> key;
+    private final String directory;
     private TagCollection<T> source = TagCollection.empty();
     private final List<Wrapper<T>> wrappers = Lists.newArrayList();
-    private final Function<TagContainer, TagCollection<T>> collectionGetter;
 
-    public StaticTagHelper(Function<TagContainer, TagCollection<T>> function) {
-        this.collectionGetter = function;
+    public StaticTagHelper(ResourceKey<? extends Registry<T>> resourceKey, String string) {
+        this.key = resourceKey;
+        this.directory = string;
     }
 
     public Tag.Named<T> bind(String string) {
@@ -42,7 +46,7 @@ public class StaticTagHelper<T> {
     }
 
     public void reset(TagContainer tagContainer) {
-        TagCollection tagCollection = this.collectionGetter.apply(tagContainer);
+        TagCollection tagCollection = tagContainer.getOrEmpty(this.key);
         this.source = tagCollection;
         this.wrappers.forEach(wrapper -> wrapper.rebind(tagCollection::getTag));
     }
@@ -51,15 +55,23 @@ public class StaticTagHelper<T> {
         return this.source;
     }
 
-    public List<? extends Tag.Named<T>> getWrappers() {
-        return this.wrappers;
-    }
-
     public Set<ResourceLocation> getMissingTags(TagContainer tagContainer) {
-        TagCollection<T> tagCollection = this.collectionGetter.apply(tagContainer);
+        TagCollection tagCollection = tagContainer.getOrEmpty(this.key);
         Set set = this.wrappers.stream().map(Wrapper::getName).collect(Collectors.toSet());
         ImmutableSet<ResourceLocation> immutableSet = ImmutableSet.copyOf(tagCollection.getAvailableTags());
         return Sets.difference(set, immutableSet);
+    }
+
+    public ResourceKey<? extends Registry<T>> getKey() {
+        return this.key;
+    }
+
+    public String getDirectory() {
+        return this.directory;
+    }
+
+    protected void addToCollection(TagContainer.Builder builder) {
+        builder.add(this.key, TagCollection.of(this.wrappers.stream().collect(Collectors.toMap(Tag.Named::getName, wrapper -> wrapper))));
     }
 
     static class Wrapper<T>

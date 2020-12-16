@@ -41,7 +41,7 @@ implements PreparableReloadListener {
     private static final int PATH_PREFIX_LENGTH = "functions/".length();
     private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
     private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
-    private final TagLoader<CommandFunction> tagsLoader = new TagLoader(this::getFunction, "tags/functions", "function");
+    private final TagLoader<CommandFunction> tagsLoader = new TagLoader(this::getFunction, "tags/functions");
     private volatile TagCollection<CommandFunction> tags = TagCollection.empty();
     private final int functionCompilationLevel;
     private final CommandDispatcher<CommandSourceStack> dispatcher;
@@ -69,7 +69,7 @@ implements PreparableReloadListener {
 
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.tagsLoader.prepare(resourceManager, executor);
+        CompletableFuture<Map> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
         CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", string -> string.endsWith(".mcfunction")), executor).thenCompose(collection -> {
             HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map = Maps.newHashMap();
             CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null);
@@ -96,7 +96,7 @@ implements PreparableReloadListener {
                 return null;
             })).join());
             this.functions = builder.build();
-            this.tags = this.tagsLoader.load((Map)pair.getFirst());
+            this.tags = this.tagsLoader.build((Map)pair.getFirst());
         }, executor2);
     }
 

@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.function.Consumer;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
@@ -77,17 +78,14 @@ extends LootPoolSingletonContainer {
         @Override
         public void serializeCustom(JsonObject jsonObject, TagEntry tagEntry, JsonSerializationContext jsonSerializationContext) {
             super.serializeCustom(jsonObject, tagEntry, jsonSerializationContext);
-            jsonObject.addProperty("name", SerializationTags.getInstance().getItems().getIdOrThrow(tagEntry.tag).toString());
+            jsonObject.addProperty("name", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, tagEntry.tag, () -> new IllegalStateException("Unknown item tag")).toString());
             jsonObject.addProperty("expand", tagEntry.expand);
         }
 
         @Override
         protected TagEntry deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-            Tag<Item> tag = SerializationTags.getInstance().getItems().getTag(resourceLocation);
-            if (tag == null) {
-                throw new JsonParseException("Can't find tag: " + resourceLocation);
-            }
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
+            Tag<Item> tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonParseException("Can't find tag: " + resourceLocation));
             boolean bl = GsonHelper.getAsBoolean(jsonObject, "expand");
             return new TagEntry(tag, bl, i, j, lootItemConditions, lootItemFunctions);
         }

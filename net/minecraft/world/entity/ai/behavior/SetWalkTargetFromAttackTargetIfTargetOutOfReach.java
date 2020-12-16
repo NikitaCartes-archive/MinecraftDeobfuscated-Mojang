@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -17,11 +18,15 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class SetWalkTargetFromAttackTargetIfTargetOutOfReach
 extends Behavior<Mob> {
-    private final float speedModifier;
+    private final Function<LivingEntity, Float> speedModifier;
 
     public SetWalkTargetFromAttackTargetIfTargetOutOfReach(float f) {
+        this((LivingEntity livingEntity) -> Float.valueOf(f));
+    }
+
+    public SetWalkTargetFromAttackTargetIfTargetOutOfReach(Function<LivingEntity, Float> function) {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.REGISTERED));
-        this.speedModifier = f;
+        this.speedModifier = function;
     }
 
     @Override
@@ -37,7 +42,7 @@ extends Behavior<Mob> {
     private void setWalkAndLookTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {
         Brain<?> brain = livingEntity.getBrain();
         brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity2, true));
-        WalkTarget walkTarget = new WalkTarget(new EntityTracker(livingEntity2, false), this.speedModifier, 0);
+        WalkTarget walkTarget = new WalkTarget(new EntityTracker(livingEntity2, false), this.speedModifier.apply(livingEntity).floatValue(), 0);
         brain.setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 

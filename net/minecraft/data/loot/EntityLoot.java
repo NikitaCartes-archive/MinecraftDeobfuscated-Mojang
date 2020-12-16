@@ -61,6 +61,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
     @Override
     public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
         this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
+        this.add(EntityType.AXOLOTL, LootTable.lootTable());
         this.add(EntityType.BAT, LootTable.lootTable());
         this.add(EntityType.BEE, LootTable.lootTable());
         this.add(EntityType.BLAZE, LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.BLAZE_ROD).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0f, 1.0f)))).apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0f, 1.0f)))).when(LootItemKilledByPlayerCondition.killedByPlayer())));

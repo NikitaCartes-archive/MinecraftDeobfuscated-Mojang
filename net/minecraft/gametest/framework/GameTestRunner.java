@@ -3,12 +3,12 @@
  */
 package net.minecraft.gametest.framework;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
@@ -47,19 +47,15 @@ public class GameTestRunner {
     }
 
     public static Collection<GameTestBatch> groupTestsIntoBatches(Collection<TestFunction> collection) {
-        HashMap map = Maps.newHashMap();
-        collection.forEach(testFunction -> {
-            String string2 = testFunction.getBatchName();
-            Collection collection = map.computeIfAbsent(string2, string -> Lists.newArrayList());
-            collection.add(testFunction);
-        });
-        return map.keySet().stream().flatMap(string -> {
-            Collection collection = (Collection)map.get(string);
+        Map<String, List<TestFunction>> map = collection.stream().collect(Collectors.groupingBy(TestFunction::getBatchName));
+        return map.entrySet().stream().flatMap(entry -> {
+            String string = (String)entry.getKey();
             Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(string);
             Consumer<ServerLevel> consumer2 = GameTestRegistry.getAfterBatchFunction(string);
             MutableInt mutableInt = new MutableInt();
-            return Streams.stream(Iterables.partition(collection, 100)).map(list -> new GameTestBatch(string + ":" + mutableInt.incrementAndGet(), (Collection<TestFunction>)list, consumer, consumer2));
-        }).collect(Collectors.toList());
+            Collection collection = (Collection)entry.getValue();
+            return Streams.stream(Iterables.partition(collection, 100)).map(list -> new GameTestBatch(string + ":" + mutableInt.incrementAndGet(), ImmutableList.copyOf(list), consumer, consumer2));
+        }).collect(ImmutableList.toImmutableList());
     }
 
     public static void clearAllTests(ServerLevel serverLevel, BlockPos blockPos2, GameTestTicker gameTestTicker, int i) {

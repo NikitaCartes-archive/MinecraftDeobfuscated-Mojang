@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -44,10 +45,7 @@ implements ArgumentType<Result> {
         }
         ResourceLocation resourceLocation = itemParser.getTag();
         return commandContext -> {
-            Tag<Item> tag = ((CommandSourceStack)commandContext.getSource()).getServer().getTags().getItems().getTag(resourceLocation);
-            if (tag == null) {
-                throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());
-            }
+            Tag<Item> tag = ((CommandSourceStack)commandContext.getSource()).getServer().getTags().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation, resourceLocation -> ERROR_UNKNOWN_TAG.create(resourceLocation.toString()));
             return new TagPredicate(tag, itemParser.getNbt());
         };
     }

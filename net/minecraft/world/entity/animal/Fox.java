@@ -35,6 +35,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -290,11 +291,11 @@ extends Animal {
     }
 
     @Override
-    protected void usePlayerItem(Player player, ItemStack itemStack) {
+    protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {
         if (this.isFood(itemStack)) {
             this.playSound(this.getEatingSound(itemStack), 1.0f, 1.0f);
         }
-        super.usePlayerItem(player, itemStack);
+        super.usePlayerItem(player, interactionHand, itemStack);
     }
 
     @Override

@@ -13,12 +13,13 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class RandomStroll
 extends Behavior<PathfinderMob> {
     private final float speedModifier;
-    private final int maxHorizontalDistance;
-    private final int maxVerticalDistance;
+    protected final int maxHorizontalDistance;
+    protected final int maxVerticalDistance;
 
     public RandomStroll(float f) {
         this(f, 10, 7);
@@ -33,8 +34,13 @@ extends Behavior<PathfinderMob> {
 
     @Override
     protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-        Optional<Vec3> optional = Optional.ofNullable(LandRandomPos.getPos(pathfinderMob, this.maxHorizontalDistance, this.maxVerticalDistance));
+        Optional<Vec3> optional = Optional.ofNullable(this.getTargetPos(pathfinderMob));
         pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget((Vec3)vec3, this.speedModifier, 0)));
+    }
+
+    @Nullable
+    protected Vec3 getTargetPos(PathfinderMob pathfinderMob) {
+        return LandRandomPos.getPos(pathfinderMob, this.maxHorizontalDistance, this.maxVerticalDistance);
     }
 }
 

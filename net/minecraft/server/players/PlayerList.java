@@ -165,7 +165,7 @@ public abstract class PlayerList {
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
         serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
         serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
-        serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(this.server.getTags()));
+        serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(this.server.getTags().serializeToNetwork(this.registryHolder)));
         this.sendPlayerPermissionLevel(serverPlayer);
         serverPlayer.getStats().markAllDirty();
         serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -696,7 +696,7 @@ public abstract class PlayerList {
         for (PlayerAdvancements playerAdvancements : this.advancements.values()) {
             playerAdvancements.reload(this.server.getAdvancements());
         }
-        this.broadcastAll(new ClientboundUpdateTagsPacket(this.server.getTags()));
+        this.broadcastAll(new ClientboundUpdateTagsPacket(this.server.getTags().serializeToNetwork(this.registryHolder)));
         ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes());
         for (ServerPlayer serverPlayer : this.players) {
             serverPlayer.connection.send(clientboundUpdateRecipesPacket);

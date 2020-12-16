@@ -32,6 +32,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -50,7 +51,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
@@ -104,6 +104,9 @@ implements ItemLike {
     public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int i) {
     }
 
+    public void onDestroyed(ItemEntity itemEntity) {
+    }
+
     public boolean verifyTagAfterLoad(CompoundTag compoundTag) {
         return false;
     }
@@ -129,7 +132,6 @@ implements ItemLike {
         if (this.isEdible()) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
             if (player.canEat(this.getFoodProperties().canAlwaysEat())) {
-                level.gameEvent((Entity)player, GameEvent.EATING_START, player);
                 player.startUsingItem(interactionHand);
                 return InteractionResultHolder.consume(itemStack);
             }
@@ -140,7 +142,6 @@ implements ItemLike {
 
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
         if (this.isEdible()) {
-            level.gameEvent((Entity)livingEntity, GameEvent.EATING_FINISH, livingEntity);
             return livingEntity.eat(level, itemStack);
         }
         return itemStack;

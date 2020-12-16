@@ -71,6 +71,13 @@ public class SoundEvents {
     public static final SoundEvent ARROW_HIT_PLAYER = SoundEvents.register("entity.arrow.hit_player");
     public static final SoundEvent ARROW_SHOOT = SoundEvents.register("entity.arrow.shoot");
     public static final SoundEvent AXE_STRIP = SoundEvents.register("item.axe.strip");
+    public static final SoundEvent AXOLOTL_ATTACK = SoundEvents.register("entity.axolotl.attack");
+    public static final SoundEvent AXOLOTL_DEATH = SoundEvents.register("entity.axolotl.death");
+    public static final SoundEvent AXOLOTL_HURT = SoundEvents.register("entity.axolotl.hurt");
+    public static final SoundEvent AXOLOTL_IDLE_AIR = SoundEvents.register("entity.axolotl.idle_air");
+    public static final SoundEvent AXOLOTL_IDLE_WATER = SoundEvents.register("entity.axolotl.idle_water");
+    public static final SoundEvent AXOLOTL_SPLASH = SoundEvents.register("entity.axolotl.splash");
+    public static final SoundEvent AXOLOTL_SWIM = SoundEvents.register("entity.axolotl.swim");
     public static final SoundEvent BAMBOO_BREAK = SoundEvents.register("block.bamboo.break");
     public static final SoundEvent BAMBOO_FALL = SoundEvents.register("block.bamboo.fall");
     public static final SoundEvent BAMBOO_HIT = SoundEvents.register("block.bamboo.hit");
@@ -133,10 +140,12 @@ public class SoundEvents {
     public static final SoundEvent BUBBLE_COLUMN_WHIRLPOOL_AMBIENT = SoundEvents.register("block.bubble_column.whirlpool_ambient");
     public static final SoundEvent BUBBLE_COLUMN_WHIRLPOOL_INSIDE = SoundEvents.register("block.bubble_column.whirlpool_inside");
     public static final SoundEvent BUCKET_EMPTY = SoundEvents.register("item.bucket.empty");
+    public static final SoundEvent BUCKET_EMPTY_AXOLOTL = SoundEvents.register("item.bucket.empty_axolotl");
     public static final SoundEvent BUCKET_EMPTY_FISH = SoundEvents.register("item.bucket.empty_fish");
     public static final SoundEvent BUCKET_EMPTY_LAVA = SoundEvents.register("item.bucket.empty_lava");
     public static final SoundEvent BUCKET_EMPTY_POWDER_SNOW = SoundEvents.register("item.bucket.empty_powder_snow");
     public static final SoundEvent BUCKET_FILL = SoundEvents.register("item.bucket.fill");
+    public static final SoundEvent BUCKET_FILL_AXOLOTL = SoundEvents.register("item.bucket.fill_axolotl");
     public static final SoundEvent BUCKET_FILL_FISH = SoundEvents.register("item.bucket.fill_fish");
     public static final SoundEvent BUCKET_FILL_LAVA = SoundEvents.register("item.bucket.fill_lava");
     public static final SoundEvent BUCKET_FILL_POWDER_SNOW = SoundEvents.register("item.bucket.fill_powder_snow");

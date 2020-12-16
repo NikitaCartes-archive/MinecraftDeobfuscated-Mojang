@@ -121,16 +121,13 @@ public class ItemPredicate {
         NbtPredicate nbtPredicate = NbtPredicate.fromJson(jsonObject.get("nbt"));
         Item item = null;
         if (jsonObject.has("item")) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-            item = Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'"));
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
+            item = Registry.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation2 + "'"));
         }
         Tag<Item> tag = null;
         if (jsonObject.has("tag")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            tag = SerializationTags.getInstance().getItems().getTag(resourceLocation2);
-            if (tag == null) {
-                throw new JsonSyntaxException("Unknown item tag '" + resourceLocation2 + "'");
-            }
+            tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
         }
         Potion potion = null;
         if (jsonObject.has("potion")) {
@@ -152,7 +149,7 @@ public class ItemPredicate {
             jsonObject.addProperty("item", Registry.ITEM.getKey(this.item).toString());
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getItems().getIdOrThrow(this.tag).toString());
+            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.ITEM_REGISTRY, this.tag, () -> new IllegalStateException("Unknown item tag")).toString());
         }
         jsonObject.add("count", this.count.serializeToJson());
         jsonObject.add("durability", this.durability.serializeToJson());

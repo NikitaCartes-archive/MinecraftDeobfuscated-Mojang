@@ -58,16 +58,13 @@ public class FluidPredicate {
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "fluid");
         Fluid fluid = null;
         if (jsonObject.has("fluid")) {
-            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "fluid"));
-            fluid = Registry.FLUID.get(resourceLocation);
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "fluid"));
+            fluid = Registry.FLUID.get(resourceLocation2);
         }
         Tag<Fluid> tag = null;
         if (jsonObject.has("tag")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            tag = SerializationTags.getInstance().getFluids().getTag(resourceLocation2);
-            if (tag == null) {
-                throw new JsonSyntaxException("Unknown fluid tag '" + resourceLocation2 + "'");
-            }
+            tag = SerializationTags.getInstance().getTagOrThrow(Registry.FLUID_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown fluid tag '" + resourceLocation + "'"));
         }
         StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
         return new FluidPredicate(tag, fluid, statePropertiesPredicate);
@@ -82,7 +79,7 @@ public class FluidPredicate {
             jsonObject.addProperty("fluid", Registry.FLUID.getKey(this.fluid).toString());
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", SerializationTags.getInstance().getFluids().getIdOrThrow(this.tag).toString());
+            jsonObject.addProperty("tag", SerializationTags.getInstance().getIdOrThrow(Registry.FLUID_REGISTRY, this.tag, () -> new IllegalStateException("Unknown fluid tag")).toString());
         }
         jsonObject.add("state", this.properties.serializeToJson());
         return jsonObject;

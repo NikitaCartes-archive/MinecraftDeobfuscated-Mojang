@@ -83,8 +83,13 @@ implements GameEventListener {
         if (!GameEventTags.VIBRATIONS.contains(gameEvent)) {
             return false;
         }
-        if (entity != null && GameEventTags.IGNORE_VIBRATIONS_STEPPING_CAREFULLY.contains(gameEvent) && entity.isSteppingCarefully()) {
-            return false;
+        if (entity != null) {
+            if (GameEventTags.IGNORE_VIBRATIONS_STEPPING_CAREFULLY.contains(gameEvent) && entity.isSteppingCarefully()) {
+                return false;
+            }
+            if (entity.occludesVibrations()) {
+                return false;
+            }
         }
         return entity == null || !entity.isSpectator();
     }

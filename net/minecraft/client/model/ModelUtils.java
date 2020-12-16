@@ -5,6 +5,7 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelPart;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelUtils {
@@ -16,6 +17,12 @@ public class ModelUtils {
             i -= (float)Math.PI * 2;
         }
         return f + h * i;
+    }
+
+    public static void setRotation(ModelPart modelPart, float f, float g, float h) {
+        modelPart.xRot = f;
+        modelPart.yRot = g;
+        modelPart.zRot = h;
     }
 }
 

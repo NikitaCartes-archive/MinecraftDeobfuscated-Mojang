@@ -88,6 +88,10 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Boolean> ATE_RECENTLY = MemoryModuleType.register("ate_recently");
     public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = MemoryModuleType.register("nearest_repellent");
     public static final MemoryModuleType<Boolean> PACIFIED = MemoryModuleType.register("pacified");
+    public static final MemoryModuleType<Integer> PLAY_DEAD_TICKS = MemoryModuleType.register("play_dead_ticks", Codec.INT);
+    public static final MemoryModuleType<Player> TEMPTING_PLAYER = MemoryModuleType.register("tempting_player");
+    public static final MemoryModuleType<Integer> TEMPTATION_COOLDOWN_TICKS = MemoryModuleType.register("temptation_cooldown_ticks", Codec.INT);
+    public static final MemoryModuleType<Boolean> IS_TEMPTED = MemoryModuleType.register("is_tempted", Codec.BOOL);
     private final Optional<Codec<ExpirableValue<U>>> codec;
 
     private MemoryModuleType(Optional<Codec<U>> optional) {

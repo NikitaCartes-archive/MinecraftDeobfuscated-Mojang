@@ -21,10 +21,15 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class TurtleNodeEvaluator
+public class AmphibiousNodeEvaluator
 extends WalkNodeEvaluator {
+    private final boolean prefersShallowSwimming;
     private float oldWalkableCost;
     private float oldWaterBorderCost;
+
+    public AmphibiousNodeEvaluator(boolean bl) {
+        this.prefersShallowSwimming = bl;
+    }
 
     @Override
     public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
@@ -130,7 +135,7 @@ extends WalkNodeEvaluator {
             node.costMalus = Math.max(node.costMalus, f);
         }
         if (blockPathTypes == BlockPathTypes.WATER || blockPathTypes == BlockPathTypes.WALKABLE) {
-            if (j < this.mob.level.getSeaLevel() - 10 && node != null) {
+            if (this.prefersShallowSwimming && j < this.mob.level.getSeaLevel() - 10 && node != null) {
                 node.costMalus += 1.0f;
             }
             return node;
@@ -194,10 +199,10 @@ extends WalkNodeEvaluator {
     @Override
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        BlockPathTypes blockPathTypes = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
+        BlockPathTypes blockPathTypes = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
         if (blockPathTypes == BlockPathTypes.WATER) {
             for (Direction direction : Direction.values()) {
-                BlockPathTypes blockPathTypes2 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k).move(direction));
+                BlockPathTypes blockPathTypes2 = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k).move(direction));
                 if (blockPathTypes2 != BlockPathTypes.BLOCKED) continue;
                 return BlockPathTypes.WATER_BORDER;
             }
@@ -205,7 +210,7 @@ extends WalkNodeEvaluator {
         }
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             BlockState blockState = blockGetter.getBlockState(new BlockPos(i, j - 1, k));
-            BlockPathTypes blockPathTypes3 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
+            BlockPathTypes blockPathTypes3 = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
             blockPathTypes = blockPathTypes3 == BlockPathTypes.WALKABLE || blockPathTypes3 == BlockPathTypes.OPEN || blockPathTypes3 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockState.is(BlockTags.CAMPFIRES)) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
@@ -218,7 +223,7 @@ extends WalkNodeEvaluator {
             }
         }
         if (blockPathTypes == BlockPathTypes.WALKABLE) {
-            blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
+            blockPathTypes = AmphibiousNodeEvaluator.checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
         }
         return blockPathTypes;
     }

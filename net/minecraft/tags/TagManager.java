@@ -3,36 +3,39 @@
  */
 package net.minecraft.tags;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.StaticTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class TagManager
 implements PreparableReloadListener {
-    private final TagLoader<Block> blocks = new TagLoader(Registry.BLOCK::getOptional, "tags/blocks", "block");
-    private final TagLoader<Item> items = new TagLoader(Registry.ITEM::getOptional, "tags/items", "item");
-    private final TagLoader<Fluid> fluids = new TagLoader(Registry.FLUID::getOptional, "tags/fluids", "fluid");
-    private final TagLoader<EntityType<?>> entityTypes = new TagLoader(Registry.ENTITY_TYPE::getOptional, "tags/entity_types", "entity_type");
-    private final TagLoader<GameEvent> gameEvents = new TagLoader(Registry.GAME_EVENT::getOptional, "tags/game_events", "game_event");
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final RegistryAccess registryAccess;
     private TagContainer tags = TagContainer.EMPTY;
+
+    public TagManager(RegistryAccess registryAccess) {
+        this.registryAccess = registryAccess;
+    }
 
     public TagContainer getTags() {
         return this.tags;
@@ -40,25 +43,51 @@ implements PreparableReloadListener {
 
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.blocks.prepare(resourceManager, executor);
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture2 = this.items.prepare(resourceManager, executor);
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture3 = this.fluids.prepare(resourceManager, executor);
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture5 = this.gameEvents.prepare(resourceManager, executor);
-        return ((CompletableFuture)CompletableFuture.allOf(completableFuture, completableFuture2, completableFuture3, completableFuture4).thenCompose(preparationBarrier::wait)).thenAcceptAsync(void_ -> {
-            TagCollection<GameEvent> tagCollection5;
-            TagCollection<EntityType<?>> tagCollection4;
-            TagCollection<Fluid> tagCollection3;
-            TagCollection<Item> tagCollection2;
-            TagCollection<Block> tagCollection = this.blocks.load((Map)completableFuture.join());
-            TagContainer tagContainer = TagContainer.of(tagCollection, tagCollection2 = this.items.load((Map)completableFuture2.join()), tagCollection3 = this.fluids.load((Map)completableFuture3.join()), tagCollection4 = this.entityTypes.load((Map)completableFuture4.join()), tagCollection5 = this.gameEvents.load((Map)completableFuture5.join()));
-            Multimap<ResourceLocation, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
+        ArrayList list = Lists.newArrayList();
+        StaticTags.visitHelpers(staticTagHelper -> {
+            LoaderInfo loaderInfo = this.createLoader(resourceManager, executor, (StaticTagHelper)staticTagHelper);
+            if (loaderInfo != null) {
+                list.add(loaderInfo);
+            }
+        });
+        return ((CompletableFuture)CompletableFuture.allOf((CompletableFuture[])list.stream().map(loaderInfo -> ((LoaderInfo)loaderInfo).pendingLoad).toArray(CompletableFuture[]::new)).thenCompose(preparationBarrier::wait)).thenAcceptAsync(void_ -> {
+            TagContainer.Builder builder = new TagContainer.Builder();
+            list.forEach(loaderInfo -> loaderInfo.addToBuilder(builder));
+            TagContainer tagContainer = builder.build();
+            Multimap<ResourceKey<Registry<?>>, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
             if (!multimap.isEmpty()) {
                 throw new IllegalStateException("Missing required tags: " + multimap.entries().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).sorted().collect(Collectors.joining(",")));
             }
             SerializationTags.bind(tagContainer);
             this.tags = tagContainer;
         }, executor2);
+    }
+
+    @Nullable
+    private <T> LoaderInfo<T> createLoader(ResourceManager resourceManager, Executor executor, StaticTagHelper<T> staticTagHelper) {
+        Optional<Registry<T>> optional = this.registryAccess.registry(staticTagHelper.getKey());
+        if (optional.isPresent()) {
+            Registry<T> registry = optional.get();
+            TagLoader tagLoader = new TagLoader(registry::getOptional, staticTagHelper.getDirectory());
+            CompletableFuture<TagCollection> completableFuture = CompletableFuture.supplyAsync(() -> tagLoader.loadAndBuild(resourceManager), executor);
+            return new LoaderInfo(staticTagHelper, completableFuture);
+        }
+        LOGGER.warn("Can't find registry for {}", (Object)staticTagHelper.getKey());
+        return null;
+    }
+
+    static class LoaderInfo<T> {
+        private final StaticTagHelper<T> helper;
+        private final CompletableFuture<? extends TagCollection<T>> pendingLoad;
+
+        private LoaderInfo(StaticTagHelper<T> staticTagHelper, CompletableFuture<? extends TagCollection<T>> completableFuture) {
+            this.helper = staticTagHelper;
+            this.pendingLoad = completableFuture;
+        }
+
+        public void addToBuilder(TagContainer.Builder builder) {
+            builder.add(this.helper.getKey(), this.pendingLoad.join());
+        }
     }
 }
 

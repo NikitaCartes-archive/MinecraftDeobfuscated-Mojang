@@ -40,7 +40,6 @@ public class GameEvent {
     public static final GameEvent PISTON_EXTEND = GameEvent.register("piston_extend");
     public static final GameEvent PISTON_CONTRACT = GameEvent.register("piston_contract");
     public static final GameEvent FLINT_AND_STEEL_USE = GameEvent.register("flint_and_steel_use");
-    public static final GameEvent EATING_START = GameEvent.register("eating_start");
     public static final GameEvent EATING_FINISH = GameEvent.register("eating_finish");
     public static final GameEvent LIGHTNING_STRIKE = GameEvent.register("lightning_strike");
     private final String name;

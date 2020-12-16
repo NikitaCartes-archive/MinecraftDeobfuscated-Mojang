@@ -135,12 +135,12 @@ extends AgeableMob {
         if (this.isFood(itemStack)) {
             int i = this.getAge();
             if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
-                this.usePlayerItem(player, itemStack);
+                this.usePlayerItem(player, interactionHand, itemStack);
                 this.setInLove(player);
                 return InteractionResult.SUCCESS;
             }
             if (this.isBaby()) {
-                this.usePlayerItem(player, itemStack);
+                this.usePlayerItem(player, interactionHand, itemStack);
                 this.ageUp((int)((float)(-i / 20) * 0.1f), true);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
@@ -151,7 +151,7 @@ extends AgeableMob {
         return super.mobInteract(player, interactionHand);
     }
 
-    protected void usePlayerItem(Player player, ItemStack itemStack) {
+    protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }

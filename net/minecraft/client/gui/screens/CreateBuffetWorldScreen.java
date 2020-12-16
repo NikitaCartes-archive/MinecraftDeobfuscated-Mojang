@@ -16,7 +16,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -33,7 +32,7 @@ extends Screen {
     private static final Component BIOME_SELECT_INFO = new TranslatableComponent("createWorld.customize.buffet.biome");
     private final Screen parent;
     private final Consumer<Biome> applySettings;
-    private final WritableRegistry<Biome> biomes;
+    private final Registry<Biome> biomes;
     private BiomeList list;
     private Biome biome;
     private Button doneButton;

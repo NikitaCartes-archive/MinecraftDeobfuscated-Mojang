@@ -168,7 +168,7 @@ implements WorldGenLevel {
     private final EntityTickList entityTickList = new EntityTickList();
     private final PersistentEntitySectionManager<Entity> entityManager;
     public boolean noSave;
-    private boolean allPlayersSleeping;
+    private float percentageSleepingPlayers;
     private int emptyTime;
     private final PortalForcer portalForcer;
     private final ServerTickList<Block> blockTicks = new ServerTickList<Block>(this, block -> block == null || block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock);
@@ -226,6 +226,7 @@ implements WorldGenLevel {
 
     public void tick(BooleanSupplier booleanSupplier) {
         boolean bl4;
+        int i;
         ProfilerFiller profilerFiller = this.getProfiler();
         this.handlingTick = true;
         profilerFiller.push("world border");
@@ -234,7 +235,7 @@ implements WorldGenLevel {
         boolean bl = this.isRaining();
         if (this.dimensionType().hasSkyLight()) {
             if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
-                int i = this.serverLevelData.getClearWeatherTime();
+                i = this.serverLevelData.getClearWeatherTime();
                 int j = this.serverLevelData.getThunderTime();
                 int k = this.serverLevelData.getRainTime();
                 boolean bl2 = this.levelData.isThundering();
@@ -289,8 +290,8 @@ implements WorldGenLevel {
             this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel));
             this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel));
         }
-        if (this.allPlayersSleeping && this.players.stream().noneMatch(serverPlayer -> !serverPlayer.isSpectator() && !serverPlayer.isSleepingLongEnough())) {
-            this.allPlayersSleeping = false;
+        i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+        if (this.percentageSleepingPlayers > 0.0f && this.percentageSleepingPlayers >= (float)i && this.getPercentSleepingPlayers(true) >= (float)i) {
             if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
                 long l = this.levelData.getDayTime() + 24000L;
                 this.setDayTime(l - l % 24000L);
@@ -387,6 +388,7 @@ implements WorldGenLevel {
     }
 
     private void wakeUpAllPlayers() {
+        this.percentageSleepingPlayers = 0.0f;
         this.players.stream().filter(LivingEntity::isSleeping).collect(Collectors.toList()).forEach(serverPlayer -> serverPlayer.stopSleepInBed(false, false));
     }
 
@@ -491,21 +493,58 @@ implements WorldGenLevel {
         return this.handlingTick;
     }
 
-    public void updateSleepingPlayerList() {
-        this.allPlayersSleeping = false;
-        if (!this.players.isEmpty()) {
-            int i = 0;
+    public boolean canSleepThroughNights() {
+        return this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE) <= 100;
+    }
+
+    private void announceSleepStatus() {
+        TranslatableComponent component;
+        if (!this.canSleepThroughNights()) {
+            return;
+        }
+        int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+        if (this.percentageSleepingPlayers >= (float)i) {
+            component = new TranslatableComponent("sleep.skipping_night");
+        } else {
             int j = 0;
+            int k = 0;
             for (ServerPlayer serverPlayer : this.players) {
-                if (serverPlayer.isSpectator()) {
-                    ++i;
-                    continue;
-                }
+                if (serverPlayer.isSpectator()) continue;
+                ++k;
                 if (!serverPlayer.isSleeping()) continue;
                 ++j;
             }
-            this.allPlayersSleeping = j > 0 && j >= this.players.size() - i;
+            k = Math.max(k * i / 100, 1);
+            component = new TranslatableComponent("sleep.players_sleeping", j, k);
         }
+        for (ServerPlayer serverPlayer2 : this.players) {
+            serverPlayer2.displayClientMessage(component, true);
+        }
+    }
+
+    public void updateSleepingPlayerList() {
+        if (!this.players.isEmpty()) {
+            float f = this.percentageSleepingPlayers;
+            this.percentageSleepingPlayers = this.getPercentSleepingPlayers(false);
+            if (f != this.percentageSleepingPlayers) {
+                this.announceSleepStatus();
+            }
+        }
+    }
+
+    private float getPercentSleepingPlayers(boolean bl) {
+        int i = 0;
+        int j = 0;
+        for (ServerPlayer serverPlayer : this.players) {
+            if (serverPlayer.isSpectator()) continue;
+            ++i;
+            if (!(bl ? serverPlayer.isSleepingLongEnough() : serverPlayer.isSleeping())) continue;
+            ++j;
+        }
+        if (i == 0) {
+            return 0.0f;
+        }
+        return 100.0f * (float)j / (float)i;
     }
 
     @Override

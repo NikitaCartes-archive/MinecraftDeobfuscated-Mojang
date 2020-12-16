@@ -19,6 +19,7 @@ public class ModelLayers {
     public static final ModelLayerLocation ARMOR_STAND = ModelLayers.register("armor_stand");
     public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = ModelLayers.registerInnerArmor("armor_stand");
     public static final ModelLayerLocation ARMOR_STAND_OUTER_ARMOR = ModelLayers.registerOuterArmor("armor_stand");
+    public static final ModelLayerLocation AXOLOTL = ModelLayers.register("axolotl");
     public static final ModelLayerLocation BANNER = ModelLayers.register("banner");
     public static final ModelLayerLocation BAT = ModelLayers.register("bat");
     public static final ModelLayerLocation BED_FOOT = ModelLayers.register("bed_foot");

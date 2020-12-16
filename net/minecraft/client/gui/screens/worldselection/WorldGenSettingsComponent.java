@@ -141,7 +141,7 @@ Widget {
             PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(createWorldScreen.getTempDataPackDir().toFile(), PackSource.WORLD));
             try {
                 MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
-                CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft);
+                CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), registryHolder, Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft);
                 minecraft.managedBlock(completableFuture::isDone);
                 serverResources = completableFuture.get();
             } catch (InterruptedException | ExecutionException exception) {

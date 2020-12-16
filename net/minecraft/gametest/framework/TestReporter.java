@@ -7,5 +7,7 @@ import net.minecraft.gametest.framework.GameTestInfo;
 
 public interface TestReporter {
     public void onTestFailed(GameTestInfo var1);
+
+    public void onTestSuccess(GameTestInfo var1);
 }
 

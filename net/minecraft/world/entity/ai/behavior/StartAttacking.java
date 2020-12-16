@@ -35,7 +35,11 @@ extends Behavior<E> {
             return false;
         }
         Optional<? extends LivingEntity> optional = this.targetFinderFunction.apply(mob);
-        return optional.isPresent() && optional.get().isAlive();
+        if (optional.isPresent()) {
+            LivingEntity livingEntity = optional.get();
+            return livingEntity.isAlive() && livingEntity.canBeTargeted();
+        }
+        return false;
     }
 
     @Override

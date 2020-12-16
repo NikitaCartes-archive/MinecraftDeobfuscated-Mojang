@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
@@ -62,7 +61,7 @@ public class McRegionUpgrader {
         RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, ResourceManager.Empty.INSTANCE, registryHolder);
         WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, DataPackConfig.DEFAULT);
         long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
-        WritableRegistry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
         BiomeSource biomeSource = worldData != null && worldData.worldGenSettings().isFlatWorld() ? new FixedBiomeSource(registry.getOrThrow(Biomes.PLAINS)) : new OverworldBiomeSource(l, false, false, registry);
         McRegionUpgrader.convertRegions(registryHolder, new File(file, "region"), list, biomeSource, 0, i, progressListener);
         McRegionUpgrader.convertRegions(registryHolder, new File(file2, "region"), list2, new FixedBiomeSource(registry.getOrThrow(Biomes.NETHER_WASTES)), list.size(), i, progressListener);

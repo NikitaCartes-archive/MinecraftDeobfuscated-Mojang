@@ -68,8 +68,11 @@ extends AbstractCandleBlock {
             return InteractionResult.PASS;
         }
         if (!(CandleCakeBlock.candleHit(blockHitResult) && player.getItemInHand(interactionHand).isEmpty() && blockState.getValue(LIT).booleanValue())) {
-            CandleCakeBlock.dropResources(blockState, level, blockPos);
-            return CakeBlock.eat(level, blockPos, Blocks.CAKE.defaultBlockState(), player);
+            InteractionResult interactionResult = CakeBlock.eat(level, blockPos, Blocks.CAKE.defaultBlockState(), player);
+            if (interactionResult.consumesAction()) {
+                CandleCakeBlock.dropResources(blockState, level, blockPos);
+            }
+            return interactionResult;
         }
         CandleCakeBlock.extinguish(blockState, level, blockPos);
         return InteractionResult.sidedSuccess(level.isClientSide);

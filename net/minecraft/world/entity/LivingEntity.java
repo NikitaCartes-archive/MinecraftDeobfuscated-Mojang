@@ -738,6 +738,10 @@ extends Entity {
         return targetingConditions.test(this, livingEntity);
     }
 
+    public boolean canBeTargeted() {
+        return true;
+    }
+
     public static boolean areAllEffectsAmbient(Collection<MobEffectInstance> collection) {
         for (MobEffectInstance mobEffectInstance : collection) {
             if (mobEffectInstance.isAmbient()) continue;
@@ -2787,6 +2791,7 @@ extends Entity {
             if (!(this instanceof Player) || !((Player)this).getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
+            this.gameEvent(GameEvent.EATING_FINISH);
         }
         return itemStack;
     }

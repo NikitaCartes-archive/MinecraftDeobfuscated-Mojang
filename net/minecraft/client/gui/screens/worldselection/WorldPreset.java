@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.biome.Biome;
@@ -74,9 +73,9 @@ public abstract class WorldPreset {
 
         @Override
         public WorldGenSettings create(RegistryAccess.RegistryHolder registryHolder, long l, boolean bl, boolean bl2) {
-            WritableRegistry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
-            WritableRegistry<DimensionType> registry2 = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-            WritableRegistry<NoiseGeneratorSettings> registry3 = registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+            Registry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
+            Registry<DimensionType> registry2 = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            Registry<NoiseGeneratorSettings> registry3 = registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
             return new WorldGenSettings(l, bl, bl2, WorldGenSettings.withOverworld(DimensionType.defaultDimensions(registry2, registry, registry3, l), () -> registry2.getOrThrow(DimensionType.OVERWORLD_CAVES_LOCATION), this.generator(registry, registry3, l)));
         }
 
@@ -112,8 +111,8 @@ public abstract class WorldPreset {
 
     private static WorldGenSettings fromBuffetSettings(RegistryAccess registryAccess, WorldGenSettings worldGenSettings, WorldPreset worldPreset, Biome biome) {
         FixedBiomeSource biomeSource = new FixedBiomeSource(biome);
-        WritableRegistry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-        WritableRegistry<NoiseGeneratorSettings> registry2 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        Registry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        Registry<NoiseGeneratorSettings> registry2 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         Supplier<NoiseGeneratorSettings> supplier = worldPreset == SINGLE_BIOME_CAVES ? () -> registry2.getOrThrow(NoiseGeneratorSettings.CAVES) : (worldPreset == SINGLE_BIOME_FLOATING_ISLANDS ? () -> registry2.getOrThrow(NoiseGeneratorSettings.FLOATING_ISLANDS) : () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
         return new WorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateFeatures(), worldGenSettings.generateBonusChest(), WorldGenSettings.withOverworld(registry, worldGenSettings.dimensions(), (ChunkGenerator)new NoiseBasedChunkGenerator(biomeSource, worldGenSettings.seed(), supplier)));
     }
@@ -138,9 +137,9 @@ public abstract class WorldPreset {
     }
 
     public WorldGenSettings create(RegistryAccess.RegistryHolder registryHolder, long l, boolean bl, boolean bl2) {
-        WritableRegistry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
-        WritableRegistry<DimensionType> registry2 = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-        WritableRegistry<NoiseGeneratorSettings> registry3 = registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        Registry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<DimensionType> registry2 = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        Registry<NoiseGeneratorSettings> registry3 = registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
         return new WorldGenSettings(l, bl, bl2, WorldGenSettings.withOverworld(registry2, DimensionType.defaultDimensions(registry2, registry, registry3, l), this.generator(registry, registry3, l)));
     }
 

@@ -3,10 +3,9 @@
  */
 package net.minecraft.gametest.framework;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +32,8 @@ public class GameTestBatchRunner {
     private final ServerLevel level;
     private final GameTestTicker testTicker;
     private final int testsPerRow;
-    private final List<GameTestInfo> allTestInfos = Lists.newArrayList();
-    private final List<Pair<GameTestBatch, Collection<GameTestInfo>>> batches = Lists.newArrayList();
+    private final List<GameTestInfo> allTestInfos;
+    private final List<Pair<GameTestBatch, Collection<GameTestInfo>>> batches;
     private final BlockPos.MutableBlockPos nextTestNorthWestCorner;
 
     public GameTestBatchRunner(Collection<GameTestBatch> collection, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, GameTestTicker gameTestTicker, int i) {
@@ -43,16 +42,11 @@ public class GameTestBatchRunner {
         this.level = serverLevel;
         this.testTicker = gameTestTicker;
         this.testsPerRow = i;
-        collection.forEach(gameTestBatch -> {
-            ArrayList<GameTestInfo> collection = Lists.newArrayList();
-            Collection<TestFunction> collection2 = gameTestBatch.getTestFunctions();
-            for (TestFunction testFunction : collection2) {
-                GameTestInfo gameTestInfo = new GameTestInfo(testFunction, rotation, serverLevel);
-                collection.add(gameTestInfo);
-                this.allTestInfos.add(gameTestInfo);
-            }
-            this.batches.add(Pair.of(gameTestBatch, collection));
-        });
+        this.batches = collection.stream().map(gameTestBatch -> {
+            Collection collection = gameTestBatch.getTestFunctions().stream().map(testFunction -> new GameTestInfo((TestFunction)testFunction, rotation, serverLevel)).collect(ImmutableList.toImmutableList());
+            return Pair.of(gameTestBatch, collection);
+        }).collect(ImmutableList.toImmutableList());
+        this.allTestInfos = this.batches.stream().flatMap(pair -> ((Collection)pair.getSecond()).stream()).collect(ImmutableList.toImmutableList());
     }
 
     public List<GameTestInfo> getTestInfos() {
@@ -87,6 +81,11 @@ public class GameTestBatchRunner {
 
             @Override
             public void testStructureLoaded(GameTestInfo gameTestInfo) {
+            }
+
+            @Override
+            public void testPassed(GameTestInfo gameTestInfo) {
+                this.testCompleted();
             }
 
             @Override
