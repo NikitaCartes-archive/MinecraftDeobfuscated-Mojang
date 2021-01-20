@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
-import net.minecraft.client.model.ModelUtils;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -109,16 +108,16 @@ extends AgeableListModel<T> {
         this.body.x = 0.0f;
         this.head.y = 0.0f;
         this.body.y = 20.0f;
-        ModelUtils.setRotation(this.body, g * ((float)Math.PI / 180), f * ((float)Math.PI / 180), 0.0f);
-        ModelUtils.setRotation(this.head, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.leftHindLeg, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.rightHindLeg, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.leftFrontLeg, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.rightFrontLeg, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.leftGills, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.rightGills, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.topGills, 0.0f, 0.0f, 0.0f);
-        ModelUtils.setRotation(this.tail, 0.0f, 0.0f, 0.0f);
+        this.body.setRotation(g * ((float)Math.PI / 180), f * ((float)Math.PI / 180), 0.0f);
+        this.head.setRotation(0.0f, 0.0f, 0.0f);
+        this.leftHindLeg.setRotation(0.0f, 0.0f, 0.0f);
+        this.rightHindLeg.setRotation(0.0f, 0.0f, 0.0f);
+        this.leftFrontLeg.setRotation(0.0f, 0.0f, 0.0f);
+        this.rightFrontLeg.setRotation(0.0f, 0.0f, 0.0f);
+        this.leftGills.setRotation(0.0f, 0.0f, 0.0f);
+        this.rightGills.setRotation(0.0f, 0.0f, 0.0f);
+        this.topGills.setRotation(0.0f, 0.0f, 0.0f);
+        this.tail.setRotation(0.0f, 0.0f, 0.0f);
     }
 
     private void setupLayStillOnGroundAnimation(float f) {
@@ -133,8 +132,8 @@ extends AgeableListModel<T> {
         this.topGills.xRot = 0.6f + 0.05f * k;
         this.leftGills.yRot = -this.topGills.xRot;
         this.rightGills.yRot = -this.leftGills.yRot;
-        ModelUtils.setRotation(this.leftHindLeg, 1.1f, 1.0f, 0.0f);
-        ModelUtils.setRotation(this.leftFrontLeg, 0.8f, 2.3f, -0.5f);
+        this.leftHindLeg.setRotation(1.1f, 1.0f, 0.0f);
+        this.leftFrontLeg.setRotation(0.8f, 2.3f, -0.5f);
         this.applyMirrorLegRotations();
     }
 
@@ -147,11 +146,10 @@ extends AgeableListModel<T> {
         this.topGills.xRot = 0.6f - 0.08f * (h * h + 2.0f * Mth.sin(g));
         this.leftGills.yRot = -this.topGills.xRot;
         this.rightGills.yRot = -this.leftGills.yRot;
-        ModelUtils.setRotation(this.leftHindLeg, 0.9424779f, 1.5f - i, -0.1f);
-        this.leftFrontLeg.xRot = 1.0995574f;
-        ModelUtils.setRotation(this.leftFrontLeg, 1.0995574f, 1.5707964f - j, 0.0f);
-        ModelUtils.setRotation(this.rightHindLeg, this.leftHindLeg.xRot, -1.0f - i, 0.0f);
-        ModelUtils.setRotation(this.rightFrontLeg, this.leftFrontLeg.xRot, -1.5707964f - j, 0.0f);
+        this.leftHindLeg.setRotation(0.9424779f, 1.5f - i, -0.1f);
+        this.leftFrontLeg.setRotation(1.0995574f, 1.5707964f - j, 0.0f);
+        this.rightHindLeg.setRotation(this.leftHindLeg.xRot, -1.0f - i, 0.0f);
+        this.rightFrontLeg.setRotation(this.leftFrontLeg.xRot, -1.5707964f - j, 0.0f);
     }
 
     private void setupWaterHoveringAnimation(float f) {
@@ -164,8 +162,8 @@ extends AgeableListModel<T> {
         this.topGills.xRot = 0.2f * h;
         this.leftGills.yRot = -0.3f * h - 0.19f;
         this.rightGills.yRot = -this.leftGills.yRot;
-        ModelUtils.setRotation(this.leftHindLeg, 2.3561945f - h * 0.11f, 0.47123894f, 1.7278761f);
-        ModelUtils.setRotation(this.leftFrontLeg, 0.7853982f - h * 0.2f, 2.042035f, 0.0f);
+        this.leftHindLeg.setRotation(2.3561945f - h * 0.11f, 0.47123894f, 1.7278761f);
+        this.leftFrontLeg.setRotation(0.7853982f - h * 0.2f, 2.042035f, 0.0f);
         this.applyMirrorLegRotations();
         this.tail.yRot = 0.5f * h;
     }
@@ -182,22 +180,22 @@ extends AgeableListModel<T> {
         this.leftGills.yRot = 0.3f * i + 0.9f;
         this.rightGills.yRot = -this.leftGills.yRot;
         this.tail.yRot = 0.3f * Mth.cos(h * 0.9f);
-        ModelUtils.setRotation(this.leftHindLeg, 1.8849558f, -0.4f * i, 1.5707964f);
-        ModelUtils.setRotation(this.leftFrontLeg, 1.8849558f, -0.2f * j - 0.1f, 1.5707964f);
+        this.leftHindLeg.setRotation(1.8849558f, -0.4f * i, 1.5707964f);
+        this.leftFrontLeg.setRotation(1.8849558f, -0.2f * j - 0.1f, 1.5707964f);
         this.applyMirrorLegRotations();
     }
 
     private void setupPlayDeadAnimation() {
-        ModelUtils.setRotation(this.leftHindLeg, 1.4137167f, 1.0995574f, 0.7853982f);
-        ModelUtils.setRotation(this.leftFrontLeg, 0.7853982f, 2.042035f, 0.0f);
+        this.leftHindLeg.setRotation(1.4137167f, 1.0995574f, 0.7853982f);
+        this.leftFrontLeg.setRotation(0.7853982f, 2.042035f, 0.0f);
         this.body.xRot = -0.15f;
         this.body.zRot = 0.35f;
         this.applyMirrorLegRotations();
     }
 
     private void applyMirrorLegRotations() {
-        ModelUtils.setRotation(this.rightHindLeg, this.leftHindLeg.xRot, -this.leftHindLeg.yRot, -this.leftHindLeg.zRot);
-        ModelUtils.setRotation(this.rightFrontLeg, this.leftFrontLeg.xRot, -this.leftFrontLeg.yRot, -this.leftFrontLeg.zRot);
+        this.rightHindLeg.setRotation(this.leftHindLeg.xRot, -this.leftHindLeg.yRot, -this.leftHindLeg.zRot);
+        this.rightFrontLeg.setRotation(this.leftFrontLeg.xRot, -this.leftFrontLeg.yRot, -this.leftFrontLeg.zRot);
     }
 }
 

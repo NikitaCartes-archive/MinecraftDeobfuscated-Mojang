@@ -4,39 +4,51 @@
 package net.minecraft.util;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class WeighedRandom {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     public static int getTotalWeight(List<? extends WeighedRandomItem> list) {
-        int i = 0;
-        int k = list.size();
-        for (int j = 0; j < k; ++j) {
-            WeighedRandomItem weighedRandomItem = list.get(j);
-            i += weighedRandomItem.weight;
+        long l = 0L;
+        int j = list.size();
+        for (int i = 0; i < j; ++i) {
+            WeighedRandomItem weighedRandomItem = list.get(i);
+            l += (long)weighedRandomItem.weight;
         }
-        return i;
+        if (l > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Sum of weights must be <= 2147483647");
+        }
+        return (int)l;
     }
 
-    public static <T extends WeighedRandomItem> T getRandomItem(Random random, List<T> list, int i) {
-        if (i <= 0) {
-            throw Util.pauseInIde(new IllegalArgumentException());
+    public static <T extends WeighedRandomItem> Optional<T> getRandomItem(Random random, List<T> list, int i) {
+        if (i < 0) {
+            throw Util.pauseInIde(new IllegalArgumentException("Negative total weight in getRandomItem"));
+        }
+        if (i == 0) {
+            return Optional.empty();
         }
         int j = random.nextInt(i);
         return WeighedRandom.getWeightedItem(list, j);
     }
 
-    public static <T extends WeighedRandomItem> T getWeightedItem(List<T> list, int i) {
+    public static <T extends WeighedRandomItem> Optional<T> getWeightedItem(List<T> list, int i) {
         int k = list.size();
         for (int j = 0; j < k; ++j) {
             WeighedRandomItem weighedRandomItem = (WeighedRandomItem)list.get(j);
             if ((i -= weighedRandomItem.weight) >= 0) continue;
-            return (T)weighedRandomItem;
+            return Optional.of(weighedRandomItem);
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static <T extends WeighedRandomItem> T getRandomItem(Random random, List<T> list) {
+    public static <T extends WeighedRandomItem> Optional<T> getRandomItem(Random random, List<T> list) {
         return WeighedRandom.getRandomItem(random, list, WeighedRandom.getTotalWeight(list));
     }
 
@@ -44,6 +56,12 @@ public class WeighedRandom {
         protected final int weight;
 
         public WeighedRandomItem(int i) {
+            if (i < 0) {
+                throw Util.pauseInIde(new IllegalArgumentException("Weight should be >= 0"));
+            }
+            if (i == 0 && SharedConstants.IS_RUNNING_IN_IDE) {
+                LOGGER.warn("Found 0 weight, make sure this is intentional!");
+            }
             this.weight = i;
         }
     }

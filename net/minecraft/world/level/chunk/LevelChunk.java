@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -453,7 +454,7 @@ implements ChunkAccess {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public void replaceWithPacketData(@Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int i) {
+    public void replaceWithPacketData(@Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet) {
         boolean bl;
         boolean bl2 = bl = chunkBiomeContainer != null;
         if (bl) {
@@ -461,22 +462,23 @@ implements ChunkAccess {
             this.blockEntities.clear();
         } else {
             this.blockEntities.values().removeIf(blockEntity -> {
-                if (this.isPositionInSection(i, blockEntity.getBlockPos())) {
+                int i = this.getSectionIndex(blockEntity.getBlockPos().getY());
+                if (bitSet.get(i)) {
                     blockEntity.setRemoved();
                     return true;
                 }
                 return false;
             });
         }
-        for (int j = 0; j < this.sections.length; ++j) {
-            LevelChunkSection levelChunkSection = this.sections[j];
-            if ((i & 1 << j) == 0) {
+        for (int i = 0; i < this.sections.length; ++i) {
+            LevelChunkSection levelChunkSection = this.sections[i];
+            if (!bitSet.get(i)) {
                 if (!bl || levelChunkSection == EMPTY_SECTION) continue;
-                this.sections[j] = EMPTY_SECTION;
+                this.sections[i] = EMPTY_SECTION;
                 continue;
             }
             if (levelChunkSection == EMPTY_SECTION) {
-                this.sections[j] = levelChunkSection = new LevelChunkSection(this.getSectionYFromSectionIndex(j));
+                this.sections[i] = levelChunkSection = new LevelChunkSection(this.getSectionYFromSectionIndex(i));
             }
             levelChunkSection.read(friendlyByteBuf);
         }
@@ -493,11 +495,6 @@ implements ChunkAccess {
     private void onBlockEntityRemove(BlockEntity blockEntity) {
         blockEntity.setRemoved();
         this.tickersInLevel.remove(blockEntity.getBlockPos());
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    private boolean isPositionInSection(int i, BlockPos blockPos) {
-        return (i & 1 << this.getSectionIndex(blockPos.getY())) != 0;
     }
 
     @Override

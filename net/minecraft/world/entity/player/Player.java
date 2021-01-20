@@ -405,7 +405,7 @@ extends LivingEntity {
 
     @Override
     public void rideTick() {
-        if (this.wantsToStopRiding() && this.isPassenger()) {
+        if (!this.level.isClientSide && this.wantsToStopRiding() && this.isPassenger()) {
             this.stopRiding();
             this.setShiftKeyDown(false);
             return;
@@ -715,7 +715,7 @@ extends LivingEntity {
         if (damageSource == DamageSource.DROWN) {
             return !this.level.getGameRules().getBoolean(GameRules.RULE_DROWNING_DAMAGE);
         }
-        if (damageSource == DamageSource.FALL) {
+        if (damageSource.isFall()) {
             return !this.level.getGameRules().getBoolean(GameRules.RULE_FALL_DAMAGE);
         }
         if (damageSource.isFire()) {
@@ -1366,14 +1366,14 @@ extends LivingEntity {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         if (this.abilities.mayfly) {
             return false;
         }
         if (f >= 2.0f) {
             this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
         }
-        return super.causeFallDamage(f, g);
+        return super.causeFallDamage(f, g, damageSource);
     }
 
     public boolean tryToStartFallFlying() {

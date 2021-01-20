@@ -40,6 +40,7 @@ import net.minecraft.world.level.levelgen.feature.EndIslandFeature;
 import net.minecraft.world.level.levelgen.feature.FillLayerFeature;
 import net.minecraft.world.level.levelgen.feature.FossilFeature;
 import net.minecraft.world.level.levelgen.feature.GeodeFeature;
+import net.minecraft.world.level.levelgen.feature.GlowLichenFeature;
 import net.minecraft.world.level.levelgen.feature.GlowstoneFeature;
 import net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
@@ -85,6 +86,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.DripstoneCluste
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
@@ -122,6 +124,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<NoneFeatureConfiguration> GLOWSTONE_BLOB = Feature.register("glowstone_blob", new GlowstoneFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> FREEZE_TOP_LAYER = Feature.register("freeze_top_layer", new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> VINES = Feature.register("vines", new VinesFeature(NoneFeatureConfiguration.CODEC));
+    public static final Feature<GlowLichenConfiguration> GLOW_LICHEN = Feature.register("glow_lichen", new GlowLichenFeature(GlowLichenConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> MONSTER_ROOM = Feature.register("monster_room", new MonsterRoomFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> BLUE_ICE = Feature.register("blue_ice", new BlueIceFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<BlockStateConfiguration> ICEBERG = Feature.register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));

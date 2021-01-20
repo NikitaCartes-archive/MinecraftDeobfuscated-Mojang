@@ -47,7 +47,7 @@ extends Enchantment {
         if (this.type == Type.FIRE && damageSource.isFire()) {
             return i * 2;
         }
-        if (this.type == Type.FALL && damageSource == DamageSource.FALL) {
+        if (this.type == Type.FALL && damageSource.isFall()) {
             return i * 3;
         }
         if (this.type == Type.EXPLOSION && damageSource.isExplosion()) {

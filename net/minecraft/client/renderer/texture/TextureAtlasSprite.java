@@ -3,12 +3,17 @@
  */
 package net.minecraft.client.renderer.texture;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -17,83 +22,48 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.renderer.SpriteCoordinateExpander;
 import net.minecraft.client.renderer.texture.MipmapGenerator;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.metadata.animation.AnimationFrame;
+import net.minecraft.client.renderer.texture.Tickable;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureAtlasSprite
 implements AutoCloseable {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final TextureAtlas atlas;
-    private final Info info;
-    private final AnimationMetadataSection metadata;
+    private final ResourceLocation name;
+    private final int width;
+    private final int height;
     protected final NativeImage[] mainImage;
-    private final int[] framesX;
-    private final int[] framesY;
     @Nullable
-    private final InterpolationData interpolationData;
+    private final AnimatedTexture animatedTexture;
     private final int x;
     private final int y;
     private final float u0;
     private final float u1;
     private final float v0;
     private final float v1;
-    private int frame;
-    private int subFrame;
 
     protected TextureAtlasSprite(TextureAtlas textureAtlas, Info info, int i, int j, int k, int l, int m, NativeImage nativeImage) {
-        CrashReport crashReport;
         this.atlas = textureAtlas;
-        AnimationMetadataSection animationMetadataSection = info.metadata;
-        int n = info.width;
-        int o = info.height;
+        this.width = info.width;
+        this.height = info.height;
+        this.name = info.name;
         this.x = l;
         this.y = m;
         this.u0 = (float)l / (float)j;
-        this.u1 = (float)(l + n) / (float)j;
+        this.u1 = (float)(l + this.width) / (float)j;
         this.v0 = (float)m / (float)k;
-        this.v1 = (float)(m + o) / (float)k;
-        int p = nativeImage.getWidth() / animationMetadataSection.getFrameWidth(n);
-        int q = nativeImage.getHeight() / animationMetadataSection.getFrameHeight(o);
-        if (animationMetadataSection.getFrameCount() > 0) {
-            int r = (Integer)animationMetadataSection.getUniqueFrameIndices().stream().max(Integer::compareTo).get() + 1;
-            this.framesX = new int[r];
-            this.framesY = new int[r];
-            Arrays.fill(this.framesX, -1);
-            Arrays.fill(this.framesY, -1);
-            for (int s : animationMetadataSection.getUniqueFrameIndices()) {
-                int u;
-                if (s >= p * q) {
-                    throw new RuntimeException("invalid frameindex " + s);
-                }
-                int t = s / p;
-                this.framesX[s] = u = s % p;
-                this.framesY[s] = t;
-            }
-        } else {
-            ArrayList<AnimationFrame> list = Lists.newArrayList();
-            int v = p * q;
-            this.framesX = new int[v];
-            this.framesY = new int[v];
-            for (int s = 0; s < q; ++s) {
-                int t = 0;
-                while (t < p) {
-                    int u = s * p + t;
-                    this.framesX[u] = t++;
-                    this.framesY[u] = s;
-                    list.add(new AnimationFrame(u, -1));
-                }
-            }
-            animationMetadataSection = new AnimationMetadataSection(list, n, o, animationMetadataSection.getDefaultFrameTime(), animationMetadataSection.isInterpolatedFrames());
-        }
-        this.info = new Info(info.name, n, o, animationMetadataSection);
-        this.metadata = animationMetadataSection;
+        this.v1 = (float)(m + this.height) / (float)k;
+        this.animatedTexture = this.createTicker(info, nativeImage.getWidth(), nativeImage.getHeight(), i);
         try {
             try {
                 this.mainImage = MipmapGenerator.generateMipLevels(nativeImage, i);
             } catch (Throwable throwable) {
-                crashReport = CrashReport.forThrowable(throwable, "Generating mipmaps for frame");
+                CrashReport crashReport = CrashReport.forThrowable(throwable, "Generating mipmaps for frame");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Frame being iterated");
                 crashReportCategory.setDetail("First frame", () -> {
                     StringBuilder stringBuilder = new StringBuilder();
@@ -106,35 +76,79 @@ implements AutoCloseable {
                 throw new ReportedException(crashReport);
             }
         } catch (Throwable throwable) {
-            crashReport = CrashReport.forThrowable(throwable, "Applying mipmap");
+            CrashReport crashReport = CrashReport.forThrowable(throwable, "Applying mipmap");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Sprite being mipmapped");
-            crashReportCategory.setDetail("Sprite name", () -> this.getName().toString());
-            crashReportCategory.setDetail("Sprite size", () -> this.getWidth() + " x " + this.getHeight());
+            crashReportCategory.setDetail("Sprite name", this.name::toString);
+            crashReportCategory.setDetail("Sprite size", () -> this.width + " x " + this.height);
             crashReportCategory.setDetail("Sprite frames", () -> this.getFrameCount() + " frames");
             crashReportCategory.setDetail("Mipmap levels", i);
             throw new ReportedException(crashReport);
         }
-        this.interpolationData = animationMetadataSection.isInterpolatedFrames() ? new InterpolationData(info, i) : null;
     }
 
-    private void upload(int i) {
-        int j = this.framesX[i] * this.info.width;
-        int k = this.framesY[i] * this.info.height;
-        this.upload(j, k, this.mainImage);
+    private int getFrameCount() {
+        return this.animatedTexture != null ? this.animatedTexture.frames.size() : 1;
+    }
+
+    @Nullable
+    private AnimatedTexture createTicker(Info info, int i2, int j2, int k) {
+        int o;
+        AnimationMetadataSection animationMetadataSection = info.metadata;
+        int l = i2 / animationMetadataSection.getFrameWidth(info.width);
+        int m = j2 / animationMetadataSection.getFrameHeight(info.height);
+        int n = l * m;
+        ArrayList<FrameInfo> list = Lists.newArrayList();
+        animationMetadataSection.forEachFrame((i, j) -> list.add(new FrameInfo(i, j)));
+        if (list.isEmpty()) {
+            for (o = 0; o < n; ++o) {
+                list.add(new FrameInfo(o, animationMetadataSection.getDefaultFrameTime()));
+            }
+        } else {
+            o = 0;
+            IntOpenHashSet intSet = new IntOpenHashSet();
+            Iterator iterator = list.iterator();
+            while (iterator.hasNext()) {
+                FrameInfo frameInfo = (FrameInfo)iterator.next();
+                boolean bl = true;
+                if (frameInfo.time <= 0) {
+                    LOGGER.warn("Invalid frame duration on sprite {} frame {}: {}", (Object)this.name, (Object)o, (Object)frameInfo.time);
+                    bl = false;
+                }
+                if (frameInfo.index < 0 || frameInfo.index >= n) {
+                    LOGGER.warn("Invalid frame index on sprite {} frame {}: {}", (Object)this.name, (Object)o, (Object)frameInfo.index);
+                    bl = false;
+                }
+                if (bl) {
+                    intSet.add(frameInfo.index);
+                } else {
+                    iterator.remove();
+                }
+                ++o;
+            }
+            int[] is = IntStream.range(0, n).filter(i -> !intSet.contains(i)).toArray();
+            if (is.length > 0) {
+                LOGGER.warn("Unused frames in sprite {}: {}", (Object)this.name, (Object)Arrays.toString(is));
+            }
+        }
+        if (list.size() <= 1) {
+            return null;
+        }
+        InterpolationData interpolationData = animationMetadataSection.isInterpolatedFrames() ? new InterpolationData(info, k) : null;
+        return new AnimatedTexture(ImmutableList.copyOf(list), l, interpolationData);
     }
 
     private void upload(int i, int j, NativeImage[] nativeImages) {
         for (int k = 0; k < this.mainImage.length; ++k) {
-            nativeImages[k].upload(k, this.x >> k, this.y >> k, i >> k, j >> k, this.info.width >> k, this.info.height >> k, this.mainImage.length > 1, false);
+            nativeImages[k].upload(k, this.x >> k, this.y >> k, i >> k, j >> k, this.width >> k, this.height >> k, this.mainImage.length > 1, false);
         }
     }
 
     public int getWidth() {
-        return this.info.width;
+        return this.width;
     }
 
     public int getHeight() {
-        return this.info.height;
+        return this.height;
     }
 
     public float getU0() {
@@ -164,15 +178,15 @@ implements AutoCloseable {
     }
 
     public ResourceLocation getName() {
-        return this.info.name;
+        return this.name;
     }
 
     public TextureAtlas atlas() {
         return this.atlas;
     }
 
-    public int getFrameCount() {
-        return this.framesX.length;
+    public IntStream getUniqueFrames() {
+        return this.animatedTexture != null ? this.animatedTexture.getUniqueFrames() : IntStream.of(1);
     }
 
     @Override
@@ -181,27 +195,36 @@ implements AutoCloseable {
             if (nativeImage == null) continue;
             nativeImage.close();
         }
-        if (this.interpolationData != null) {
-            this.interpolationData.close();
+        if (this.animatedTexture != null) {
+            this.animatedTexture.close();
         }
     }
 
     public String toString() {
-        int i = this.framesX.length;
-        return "TextureAtlasSprite{name='" + this.info.name + '\'' + ", frameCount=" + i + ", x=" + this.x + ", y=" + this.y + ", height=" + this.info.height + ", width=" + this.info.width + ", u0=" + this.u0 + ", u1=" + this.u1 + ", v0=" + this.v0 + ", v1=" + this.v1 + '}';
+        return "TextureAtlasSprite{name='" + this.name + '\'' + ", frameCount=" + this.getFrameCount() + ", x=" + this.x + ", y=" + this.y + ", height=" + this.height + ", width=" + this.width + ", u0=" + this.u0 + ", u1=" + this.u1 + ", v0=" + this.v0 + ", v1=" + this.v1 + '}';
     }
 
     public boolean isTransparent(int i, int j, int k) {
-        return (this.mainImage[0].getPixelRGBA(j + this.framesX[i] * this.info.width, k + this.framesY[i] * this.info.height) >> 24 & 0xFF) == 0;
+        int l = j;
+        int m = k;
+        if (this.animatedTexture != null) {
+            l += this.animatedTexture.getFrameX(i) * this.width;
+            m += this.animatedTexture.getFrameY(i) * this.height;
+        }
+        return (this.mainImage[0].getPixelRGBA(l, m) >> 24 & 0xFF) == 0;
     }
 
     public void uploadFirstFrame() {
-        this.upload(0);
+        if (this.animatedTexture != null) {
+            this.animatedTexture.uploadFirstFrame();
+        } else {
+            this.upload(0, 0, this.mainImage);
+        }
     }
 
     private float atlasSize() {
-        float f = (float)this.info.width / (this.u1 - this.u0);
-        float g = (float)this.info.height / (this.v1 - this.v0);
+        float f = (float)this.width / (this.u1 - this.u0);
+        float g = (float)this.height / (this.v1 - this.v0);
         return Math.max(g, f);
     }
 
@@ -209,32 +232,92 @@ implements AutoCloseable {
         return 4.0f / this.atlasSize();
     }
 
-    public void cycleFrames() {
-        ++this.subFrame;
-        if (this.subFrame >= this.metadata.getFrameTime(this.frame)) {
-            int i = this.metadata.getFrameIndex(this.frame);
-            int j = this.metadata.getFrameCount() == 0 ? this.getFrameCount() : this.metadata.getFrameCount();
-            this.frame = (this.frame + 1) % j;
-            this.subFrame = 0;
-            int k = this.metadata.getFrameIndex(this.frame);
-            if (i != k && k >= 0 && k < this.getFrameCount()) {
-                this.upload(k);
-            }
-        } else if (this.interpolationData != null) {
-            if (!RenderSystem.isOnRenderThread()) {
-                RenderSystem.recordRenderCall(() -> this.interpolationData.uploadInterpolatedFrame());
-            } else {
-                this.interpolationData.uploadInterpolatedFrame();
-            }
-        }
-    }
-
-    public boolean isAnimation() {
-        return this.metadata.getFrameCount() > 1;
+    @Nullable
+    public Tickable getAnimationTicker() {
+        return this.animatedTexture;
     }
 
     public VertexConsumer wrap(VertexConsumer vertexConsumer) {
         return new SpriteCoordinateExpander(vertexConsumer, this);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    class AnimatedTexture
+    implements Tickable,
+    AutoCloseable {
+        private int frame;
+        private int subFrame;
+        private final List<FrameInfo> frames;
+        private final int frameRowSize;
+        @Nullable
+        private final InterpolationData interpolationData;
+
+        private AnimatedTexture(List<FrameInfo> list, @Nullable int i, InterpolationData interpolationData) {
+            this.frames = list;
+            this.frameRowSize = i;
+            this.interpolationData = interpolationData;
+        }
+
+        private int getFrameX(int i) {
+            return i % this.frameRowSize;
+        }
+
+        private int getFrameY(int i) {
+            return i / this.frameRowSize;
+        }
+
+        private void uploadFrame(int i) {
+            int j = this.getFrameX(i) * TextureAtlasSprite.this.width;
+            int k = this.getFrameY(i) * TextureAtlasSprite.this.height;
+            TextureAtlasSprite.this.upload(j, k, TextureAtlasSprite.this.mainImage);
+        }
+
+        @Override
+        public void close() {
+            if (this.interpolationData != null) {
+                this.interpolationData.close();
+            }
+        }
+
+        @Override
+        public void tick() {
+            ++this.subFrame;
+            FrameInfo frameInfo = this.frames.get(this.frame);
+            if (this.subFrame >= frameInfo.time) {
+                int i = frameInfo.index;
+                this.frame = (this.frame + 1) % this.frames.size();
+                this.subFrame = 0;
+                int j = this.frames.get(this.frame).index;
+                if (i != j) {
+                    this.uploadFrame(j);
+                }
+            } else if (this.interpolationData != null) {
+                if (!RenderSystem.isOnRenderThread()) {
+                    RenderSystem.recordRenderCall(() -> this.interpolationData.uploadInterpolatedFrame(this));
+                } else {
+                    this.interpolationData.uploadInterpolatedFrame(this);
+                }
+            }
+        }
+
+        public void uploadFirstFrame() {
+            this.uploadFrame(this.frames.get(0).index);
+        }
+
+        public IntStream getUniqueFrames() {
+            return this.frames.stream().mapToInt(frameInfo -> ((FrameInfo)frameInfo).index).distinct();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class FrameInfo {
+        private final int index;
+        private final int time;
+
+        private FrameInfo(int i, int j) {
+            this.index = i;
+            this.time = j;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -252,23 +335,23 @@ implements AutoCloseable {
             }
         }
 
-        private void uploadInterpolatedFrame() {
-            double d = 1.0 - (double)TextureAtlasSprite.this.subFrame / (double)TextureAtlasSprite.this.metadata.getFrameTime(TextureAtlasSprite.this.frame);
-            int i = TextureAtlasSprite.this.metadata.getFrameIndex(TextureAtlasSprite.this.frame);
-            int j = TextureAtlasSprite.this.metadata.getFrameCount() == 0 ? TextureAtlasSprite.this.getFrameCount() : TextureAtlasSprite.this.metadata.getFrameCount();
-            int k = TextureAtlasSprite.this.metadata.getFrameIndex((TextureAtlasSprite.this.frame + 1) % j);
-            if (i != k && k >= 0 && k < TextureAtlasSprite.this.getFrameCount()) {
-                for (int l = 0; l < this.activeFrame.length; ++l) {
-                    int m = TextureAtlasSprite.this.info.width >> l;
-                    int n = TextureAtlasSprite.this.info.height >> l;
-                    for (int o = 0; o < n; ++o) {
-                        for (int p = 0; p < m; ++p) {
-                            int q = this.getPixel(i, l, p, o);
-                            int r = this.getPixel(k, l, p, o);
-                            int s = this.mix(d, q >> 16 & 0xFF, r >> 16 & 0xFF);
-                            int t = this.mix(d, q >> 8 & 0xFF, r >> 8 & 0xFF);
-                            int u = this.mix(d, q & 0xFF, r & 0xFF);
-                            this.activeFrame[l].setPixelRGBA(p, o, q & 0xFF000000 | s << 16 | t << 8 | u);
+        private void uploadInterpolatedFrame(AnimatedTexture animatedTexture) {
+            int j;
+            FrameInfo frameInfo = (FrameInfo)animatedTexture.frames.get(animatedTexture.frame);
+            double d = 1.0 - (double)animatedTexture.subFrame / (double)frameInfo.time;
+            int i = frameInfo.index;
+            if (i != (j = ((FrameInfo)animatedTexture.frames.get((animatedTexture.frame + 1) % animatedTexture.frames.size())).index)) {
+                for (int k = 0; k < this.activeFrame.length; ++k) {
+                    int l = TextureAtlasSprite.this.width >> k;
+                    int m = TextureAtlasSprite.this.height >> k;
+                    for (int n = 0; n < m; ++n) {
+                        for (int o = 0; o < l; ++o) {
+                            int p = this.getPixel(animatedTexture, i, k, o, n);
+                            int q = this.getPixel(animatedTexture, j, k, o, n);
+                            int r = this.mix(d, p >> 16 & 0xFF, q >> 16 & 0xFF);
+                            int s = this.mix(d, p >> 8 & 0xFF, q >> 8 & 0xFF);
+                            int t = this.mix(d, p & 0xFF, q & 0xFF);
+                            this.activeFrame[k].setPixelRGBA(o, n, p & 0xFF000000 | r << 16 | s << 8 | t);
                         }
                     }
                 }
@@ -276,8 +359,8 @@ implements AutoCloseable {
             }
         }
 
-        private int getPixel(int i, int j, int k, int l) {
-            return TextureAtlasSprite.this.mainImage[j].getPixelRGBA(k + (TextureAtlasSprite.this.framesX[i] * TextureAtlasSprite.this.info.width >> j), l + (TextureAtlasSprite.this.framesY[i] * TextureAtlasSprite.this.info.height >> j));
+        private int getPixel(AnimatedTexture animatedTexture, int i, int j, int k, int l) {
+            return TextureAtlasSprite.this.mainImage[j].getPixelRGBA(k + (animatedTexture.getFrameX(i) * TextureAtlasSprite.this.width >> j), l + (animatedTexture.getFrameY(i) * TextureAtlasSprite.this.height >> j));
         }
 
         private int mix(double d, int i, int j) {

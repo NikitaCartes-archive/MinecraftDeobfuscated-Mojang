@@ -6,6 +6,7 @@ package net.minecraft.world.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HangingEntityItem;
 import net.minecraft.world.item.Item;
@@ -13,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemFrameItem
 extends HangingEntityItem {
-    public ItemFrameItem(Item.Properties properties) {
-        super(EntityType.ITEM_FRAME, properties);
+    public ItemFrameItem(EntityType<? extends HangingEntity> entityType, Item.Properties properties) {
+        super(entityType, properties);
     }
 
     @Override

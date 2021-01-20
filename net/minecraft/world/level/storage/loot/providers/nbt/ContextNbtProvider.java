@@ -98,8 +98,8 @@ implements NbtProvider {
         return new ContextNbtProvider(ContextNbtProvider.forEntity(entityTarget));
     }
 
-    public static class DefaultSerializer
-    implements GsonAdapterFactory.DefaultSerializer<ContextNbtProvider> {
+    public static class InlineSerializer
+    implements GsonAdapterFactory.InlineSerializer<ContextNbtProvider> {
         @Override
         public JsonElement serialize(ContextNbtProvider contextNbtProvider, JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(contextNbtProvider.getter.getId());

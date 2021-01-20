@@ -15,6 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -77,6 +78,7 @@ extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (BundleItem.dropContents(itemStack, player)) {
+            player.awardStat(Stats.ITEM_USED.get(this));
             return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
         return InteractionResultHolder.fail(itemStack);
@@ -164,6 +166,9 @@ extends Item {
         CompoundTag compoundTag2 = listTag.getCompound(0);
         ItemStack itemStack2 = ItemStack.of(compoundTag2);
         listTag.remove(0);
+        if (listTag.isEmpty()) {
+            itemStack.removeTagKey("Items");
+        }
         return Optional.of(itemStack2);
     }
 

@@ -105,7 +105,7 @@ extends RealmsScreen {
     private static final Component SERVER_INFO_TOOLTIP = new TranslatableComponent("mco.selectServer.info");
     private static final Component NEWS_TOOLTIP = new TranslatableComponent("mco.news");
     private static List<ResourceLocation> teaserImages = ImmutableList.of();
-    private static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher();
+    private static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher(Minecraft.getInstance(), RealmsClient.create());
     private static boolean overrideConfigure;
     private static int lastScrollYPosition;
     private static volatile boolean hasParentalConsent;

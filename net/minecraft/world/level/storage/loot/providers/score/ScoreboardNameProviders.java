@@ -21,7 +21,7 @@ public class ScoreboardNameProviders {
     }
 
     public static Object createGsonAdapter() {
-        return GsonAdapterFactory.builder(Registry.LOOT_SCORE_PROVIDER_TYPE, "provider", "type", ScoreboardNameProvider::getType).withDefaultSerializer(CONTEXT, new ContextScoreboardNameProvider.DefaultSerializer()).build();
+        return GsonAdapterFactory.builder(Registry.LOOT_SCORE_PROVIDER_TYPE, "provider", "type", ScoreboardNameProvider::getType).withInlineSerializer(CONTEXT, new ContextScoreboardNameProvider.InlineSerializer()).build();
     }
 }
 

@@ -34,7 +34,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -253,7 +252,7 @@ extends Animal {
         this.goalSelector.addGoal(2, new PandaPanicGoal(this, 2.0));
         this.goalSelector.addGoal(2, new PandaBreedGoal(this, 1.0));
         this.goalSelector.addGoal(3, new PandaAttackGoal(this, (double)1.2f, true));
-        this.goalSelector.addGoal(4, new TemptGoal((PathfinderMob)this, 1.0, Ingredient.of(Blocks.BAMBOO.asItem()), false));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.0, Ingredient.of(Blocks.BAMBOO.asItem()), false));
         this.goalSelector.addGoal(6, new PandaAvoidGoal<Player>(this, Player.class, 8.0f, 2.0, 2.0));
         this.goalSelector.addGoal(6, new PandaAvoidGoal<Monster>(this, Monster.class, 4.0f, 2.0, 2.0));
         this.goalSelector.addGoal(7, new PandaSitGoal());

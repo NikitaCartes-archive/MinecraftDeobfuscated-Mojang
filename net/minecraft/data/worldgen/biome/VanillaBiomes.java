@@ -852,25 +852,26 @@ public class VanillaBiomes {
     }
 
     public static Biome dripstoneCaves() {
-        MobSpawnSettings mobSpawnSettings = new MobSpawnSettings.Builder().build();
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
-        BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder);
-        builder.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
-        BiomeDefaultFeatures.addDefaultCarvers(builder);
-        BiomeDefaultFeatures.addDefaultLakes(builder);
-        BiomeDefaultFeatures.addDefaultCrystalFormations(builder);
-        BiomeDefaultFeatures.addDefaultMonsterRoom(builder);
-        BiomeDefaultFeatures.addPlainGrass(builder);
-        BiomeDefaultFeatures.addDefaultUndergroundVariety(builder);
-        BiomeDefaultFeatures.addDefaultOres(builder);
-        BiomeDefaultFeatures.addDefaultSoftDisks(builder);
-        BiomeDefaultFeatures.addPlainVegetation(builder);
-        BiomeDefaultFeatures.addDefaultMushrooms(builder);
-        BiomeDefaultFeatures.addDefaultExtraVegetation(builder);
-        BiomeDefaultFeatures.addDefaultSprings(builder);
-        BiomeDefaultFeatures.addSurfaceFreezing(builder);
-        BiomeDefaultFeatures.addDripstone(builder);
-        return new Biome.BiomeBuilder().precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.PLAINS).depth(0.125f).scale(0.05f).temperature(0.8f).downfall(0.4f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).skyColor(VanillaBiomes.calculateSkyColor(0.8f)).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).mobSpawnSettings(mobSpawnSettings).generationSettings(builder.build()).build();
+        MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
+        BiomeDefaultFeatures.commonSpawns(builder);
+        BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
+        BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
+        builder2.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
+        BiomeDefaultFeatures.addDefaultCarvers(builder2);
+        BiomeDefaultFeatures.addDefaultLakes(builder2);
+        BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
+        BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
+        BiomeDefaultFeatures.addPlainGrass(builder2);
+        BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
+        BiomeDefaultFeatures.addDefaultOres(builder2);
+        BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
+        BiomeDefaultFeatures.addPlainVegetation(builder2);
+        BiomeDefaultFeatures.addDefaultMushrooms(builder2);
+        BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
+        BiomeDefaultFeatures.addDefaultSprings(builder2);
+        BiomeDefaultFeatures.addSurfaceFreezing(builder2);
+        BiomeDefaultFeatures.addDripstone(builder2);
+        return new Biome.BiomeBuilder().precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.PLAINS).depth(0.125f).scale(0.05f).temperature(0.8f).downfall(0.4f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).skyColor(VanillaBiomes.calculateSkyColor(0.8f)).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).mobSpawnSettings(builder.build()).generationSettings(builder2.build()).build();
     }
 }
 

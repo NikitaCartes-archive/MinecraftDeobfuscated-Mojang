@@ -51,8 +51,8 @@ implements NumberProvider {
         return this.value != 0.0f ? Float.floatToIntBits(this.value) : 0;
     }
 
-    public static class DefaultSerializer
-    implements GsonAdapterFactory.DefaultSerializer<ConstantValue> {
+    public static class InlineSerializer
+    implements GsonAdapterFactory.InlineSerializer<ConstantValue> {
         @Override
         public JsonElement serialize(ConstantValue constantValue, JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(Float.valueOf(constantValue.value));

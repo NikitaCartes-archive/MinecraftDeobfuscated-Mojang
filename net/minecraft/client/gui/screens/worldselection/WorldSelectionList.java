@@ -248,9 +248,15 @@ extends ObjectSelectionList<WorldListEntry> {
             if (this.summary.isLocked()) {
                 return;
             }
-            if (this.summary.shouldBackup()) {
-                TranslatableComponent component = new TranslatableComponent("selectWorld.backupQuestion");
-                TranslatableComponent component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
+            LevelSummary.BackupStatus backupStatus = this.summary.backupStatus();
+            if (backupStatus.shouldBackup()) {
+                String string = "selectWorld.backupQuestion." + backupStatus.getTranslationKey();
+                String string2 = "selectWorld.backupWarning." + backupStatus.getTranslationKey();
+                TranslatableComponent mutableComponent = new TranslatableComponent(string);
+                if (backupStatus.isSevere()) {
+                    mutableComponent.withStyle(ChatFormatting.BOLD, ChatFormatting.RED);
+                }
+                TranslatableComponent component = new TranslatableComponent(string2, this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
                     if (bl) {
                         String string = this.summary.getLevelId();
@@ -262,7 +268,7 @@ extends ObjectSelectionList<WorldListEntry> {
                         }
                     }
                     this.loadWorld();
-                }, component, component2, false));
+                }, mutableComponent, component, false));
             } else if (this.summary.askToOpenWorld()) {
                 this.minecraft.setScreen(new ConfirmScreen(bl -> {
                     if (bl) {

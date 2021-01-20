@@ -3,10 +3,7 @@
  */
 package net.minecraft.world.entity.animal;
 
-import com.google.common.collect.Sets;
-import java.util.EnumSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -43,15 +40,15 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -75,6 +72,7 @@ extends Animal {
     private static final EntityDataAccessor<BlockPos> TRAVEL_POS = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Boolean> GOING_HOME = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> TRAVELLING = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
+    public static final Ingredient FOOD_ITEMS = Ingredient.of(Blocks.SEAGRASS.asItem());
     private int layEggCounter;
     public static final Predicate<LivingEntity> BABY_ON_LAND_SELECTOR = livingEntity -> livingEntity.isBaby() && !livingEntity.isInWater();
 
@@ -188,7 +186,7 @@ extends Animal {
         this.goalSelector.addGoal(0, new TurtlePanicGoal(this, 1.2));
         this.goalSelector.addGoal(1, new TurtleBreedGoal(this, 1.0));
         this.goalSelector.addGoal(1, new TurtleLayEggGoal(this, 1.0));
-        this.goalSelector.addGoal(2, new TurtleTemptGoal(this, 1.1, Blocks.SEAGRASS.asItem()));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 1.1, FOOD_ITEMS, false));
         this.goalSelector.addGoal(3, new TurtleGoToWaterGoal(this, 1.0));
         this.goalSelector.addGoal(4, new TurtleGoHomeGoal(this, 1.0));
         this.goalSelector.addGoal(7, new TurtleTravelGoal(this, 1.0));
@@ -552,62 +550,6 @@ extends Animal {
             Random random = this.animal.getRandom();
             if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
                 this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
-            }
-        }
-    }
-
-    static class TurtleTemptGoal
-    extends Goal {
-        private static final TargetingConditions TEMPT_TARGETING = new TargetingConditions().range(10.0).allowSameTeam().allowInvulnerable();
-        private final Turtle turtle;
-        private final double speedModifier;
-        private Player player;
-        private int calmDown;
-        private final Set<Item> items;
-
-        TurtleTemptGoal(Turtle turtle, double d, Item item) {
-            this.turtle = turtle;
-            this.speedModifier = d;
-            this.items = Sets.newHashSet(item);
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-        }
-
-        @Override
-        public boolean canUse() {
-            if (this.calmDown > 0) {
-                --this.calmDown;
-                return false;
-            }
-            this.player = this.turtle.level.getNearestPlayer(TEMPT_TARGETING, this.turtle);
-            if (this.player == null) {
-                return false;
-            }
-            return this.shouldFollowItem(this.player.getMainHandItem()) || this.shouldFollowItem(this.player.getOffhandItem());
-        }
-
-        private boolean shouldFollowItem(ItemStack itemStack) {
-            return this.items.contains(itemStack.getItem());
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return this.canUse();
-        }
-
-        @Override
-        public void stop() {
-            this.player = null;
-            this.turtle.getNavigation().stop();
-            this.calmDown = 100;
-        }
-
-        @Override
-        public void tick() {
-            this.turtle.getLookControl().setLookAt(this.player, this.turtle.getMaxHeadYRot() + 20, this.turtle.getMaxHeadXRot());
-            if (this.turtle.distanceToSqr(this.player) < 6.25) {
-                this.turtle.getNavigation().stop();
-            } else {
-                this.turtle.getNavigation().moveTo(this.player, this.speedModifier);
             }
         }
     }

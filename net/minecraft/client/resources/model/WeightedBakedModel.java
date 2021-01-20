@@ -4,6 +4,7 @@
 package net.minecraft.client.resources.model;
 
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -33,7 +34,7 @@ implements BakedModel {
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, Random random) {
-        return WeighedRandom.getWeightedItem(this.list, (int)(Math.abs((int)((int)random.nextLong())) % this.totalWeight)).model.getQuads(blockState, direction, random);
+        return WeighedRandom.getWeightedItem(this.list, Math.abs((int)random.nextLong()) % this.totalWeight).map(weightedModel -> weightedModel.model.getQuads(blockState, direction, random)).orElse(Collections.emptyList());
     }
 
     @Override

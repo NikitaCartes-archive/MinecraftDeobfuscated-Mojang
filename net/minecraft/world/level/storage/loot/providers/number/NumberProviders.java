@@ -25,7 +25,7 @@ public class NumberProviders {
     }
 
     public static Object createGsonAdapter() {
-        return GsonAdapterFactory.builder(Registry.LOOT_NUMBER_PROVIDER_TYPE, "provider", "type", NumberProvider::getType).withDefaultSerializer(CONSTANT, new ConstantValue.DefaultSerializer()).build();
+        return GsonAdapterFactory.builder(Registry.LOOT_NUMBER_PROVIDER_TYPE, "provider", "type", NumberProvider::getType).withInlineSerializer(CONSTANT, new ConstantValue.InlineSerializer()).withDefaultType(UNIFORM).build();
     }
 }
 

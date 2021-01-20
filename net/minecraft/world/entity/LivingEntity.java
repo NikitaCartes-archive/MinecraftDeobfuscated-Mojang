@@ -1251,13 +1251,13 @@ extends Entity {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
-        boolean bl = super.causeFallDamage(f, g);
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
+        boolean bl = super.causeFallDamage(f, g, damageSource);
         int i = this.calculateFallDamage(f, g);
         if (i > 0) {
             this.playSound(this.getFallDamageSound(i), 1.0f, 1.0f);
             this.playBlockFallSound();
-            this.hurt(DamageSource.FALL, i);
+            this.hurt(damageSource, i);
             return true;
         }
         return bl;

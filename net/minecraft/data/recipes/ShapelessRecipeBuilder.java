@@ -15,6 +15,7 @@ import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
@@ -25,7 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class ShapelessRecipeBuilder {
+public class ShapelessRecipeBuilder
+implements RecipeBuilder {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Item result;
     private final int count;
@@ -72,16 +74,19 @@ public class ShapelessRecipeBuilder {
         return this;
     }
 
+    @Override
     public ShapelessRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
         this.advancement.addCriterion(string, criterionTriggerInstance);
         return this;
     }
 
+    @Override
     public ShapelessRecipeBuilder group(String string) {
         this.group = string;
         return this;
     }
 
+    @Override
     public void save(Consumer<FinishedRecipe> consumer) {
         this.save(consumer, Registry.ITEM.getKey(this.result));
     }
@@ -104,6 +109,16 @@ public class ShapelessRecipeBuilder {
         if (this.advancement.getCriteria().isEmpty()) {
             throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
         }
+    }
+
+    @Override
+    public /* synthetic */ RecipeBuilder group(String string) {
+        return this.group(string);
+    }
+
+    @Override
+    public /* synthetic */ RecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
+        return this.unlockedBy(string, criterionTriggerInstance);
     }
 
     public static class Result

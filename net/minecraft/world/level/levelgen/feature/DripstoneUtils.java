@@ -31,7 +31,7 @@ public class DripstoneUtils {
     }
 
     protected static boolean isCircleMostlyEmbeddedInStone(WorldGenLevel worldGenLevel, BlockPos blockPos, int i) {
-        if (DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
+        if (DripstoneUtils.isEmptyOrWaterOrLava(worldGenLevel, blockPos)) {
             return false;
         }
         float f = 6.0f;
@@ -39,7 +39,7 @@ public class DripstoneUtils {
         for (float h = 0.0f; h < (float)Math.PI * 2; h += g) {
             int k;
             int j = (int)(Mth.cos(h) * (float)i);
-            if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos.offset(j, 0, k = (int)(Mth.sin(h) * (float)i)))) continue;
+            if (!DripstoneUtils.isEmptyOrWaterOrLava(worldGenLevel, blockPos.offset(j, 0, k = (int)(Mth.sin(h) * (float)i)))) continue;
             return false;
         }
         return true;
@@ -47,6 +47,10 @@ public class DripstoneUtils {
 
     protected static boolean isEmptyOrWater(LevelAccessor levelAccessor, BlockPos blockPos) {
         return levelAccessor.isStateAtPosition(blockPos, DripstoneUtils::isEmptyOrWater);
+    }
+
+    protected static boolean isEmptyOrWaterOrLava(LevelAccessor levelAccessor, BlockPos blockPos) {
+        return levelAccessor.isStateAtPosition(blockPos, DripstoneUtils::isEmptyOrWaterOrLava);
     }
 
     protected static void buildBaseToTipColumn(Direction direction, int i, boolean bl, Consumer<BlockState> consumer) {
@@ -88,12 +92,20 @@ public class DripstoneUtils {
         return (BlockState)((BlockState)Blocks.POINTED_DRIPSTONE.defaultBlockState().setValue(PointedDripstoneBlock.TIP_DIRECTION, direction)).setValue(PointedDripstoneBlock.THICKNESS, dripstoneThickness);
     }
 
+    public static boolean isDripstoneBaseOrLava(BlockState blockState) {
+        return DripstoneUtils.isDripstoneBase(blockState) || blockState.is(Blocks.LAVA);
+    }
+
     public static boolean isDripstoneBase(BlockState blockState) {
         return blockState.is(Blocks.DRIPSTONE_BLOCK) || blockState.is(BlockTags.DRIPSTONE_REPLACEABLE);
     }
 
     public static boolean isEmptyOrWater(BlockState blockState) {
         return blockState.isAir() || blockState.is(Blocks.WATER);
+    }
+
+    public static boolean isEmptyOrWaterOrLava(BlockState blockState) {
+        return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA);
     }
 }
 

@@ -30,7 +30,7 @@ public class DamageSource {
     public static final DamageSource DROWN = new DamageSource("drown").bypassArmor();
     public static final DamageSource STARVE = new DamageSource("starve").bypassArmor().bypassMagic();
     public static final DamageSource CACTUS = new DamageSource("cactus");
-    public static final DamageSource FALL = new DamageSource("fall").bypassArmor();
+    public static final DamageSource FALL = new DamageSource("fall").bypassArmor().setIsFall();
     public static final DamageSource FLY_INTO_WALL = new DamageSource("flyIntoWall").bypassArmor();
     public static final DamageSource OUT_OF_WORLD = new DamageSource("outOfWorld").bypassArmor().bypassInvul();
     public static final DamageSource GENERIC = new DamageSource("generic").bypassArmor();
@@ -43,6 +43,7 @@ public class DamageSource {
     public static final DamageSource SWEET_BERRY_BUSH = new DamageSource("sweetBerryBush");
     public static final DamageSource FREEZE = new DamageSource("freeze").bypassArmor();
     public static final DamageSource FALLING_STALACTITE = new DamageSource("fallingStalactite").damageHelmet();
+    public static final DamageSource STALAGMITE = new DamageSource("stalagmite").bypassArmor().setIsFall();
     private boolean damageHelmet;
     private boolean bypassArmor;
     private boolean bypassInvul;
@@ -53,6 +54,7 @@ public class DamageSource {
     private boolean scalesWithDifficulty;
     private boolean isMagic;
     private boolean isExplosion;
+    private boolean isFall;
     public final String msgId;
 
     public static DamageSource sting(LivingEntity livingEntity) {
@@ -237,6 +239,15 @@ public class DamageSource {
 
     public DamageSource setMagic() {
         this.isMagic = true;
+        return this;
+    }
+
+    public boolean isFall() {
+        return this.isFall;
+    }
+
+    public DamageSource setIsFall() {
+        this.isFall = true;
         return this;
     }
 

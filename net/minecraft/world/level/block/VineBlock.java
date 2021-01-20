@@ -154,7 +154,7 @@ extends Block {
         BlockState blockState4;
         BlockPos blockPos3;
         BlockState blockState2;
-        if (serverLevel.random.nextInt(4) != 0) {
+        if (random.nextInt(4) != 0) {
             return;
         }
         Direction direction = Direction.getRandom(random);
@@ -182,7 +182,7 @@ extends Block {
                         serverLevel.setBlock(blockPos4, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
                     } else if (bl2 && serverLevel.isEmptyBlock(blockPos5) && VineBlock.isAcceptableNeighbour(serverLevel, blockPos.relative(direction3), direction4)) {
                         serverLevel.setBlock(blockPos5, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
-                    } else if ((double)serverLevel.random.nextFloat() < 0.05 && VineBlock.isAcceptableNeighbour(serverLevel, blockPos32.above(), Direction.UP)) {
+                    } else if ((double)random.nextFloat() < 0.05 && VineBlock.isAcceptableNeighbour(serverLevel, blockPos32.above(), Direction.UP)) {
                         serverLevel.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(UP, true), 2);
                     }
                 }

@@ -3,12 +3,12 @@
  */
 package net.minecraft.client.resources.metadata.animation;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
@@ -24,7 +24,7 @@ implements MetadataSectionSerializer<AnimationMetadataSection> {
     @Override
     public AnimationMetadataSection fromJson(JsonObject jsonObject) {
         int j;
-        ArrayList<AnimationFrame> list = Lists.newArrayList();
+        ImmutableList.Builder builder = ImmutableList.builder();
         int i = GsonHelper.getAsInt(jsonObject, "frametime", 1);
         if (i != 1) {
             Validate.inclusiveBetween(1L, Integer.MAX_VALUE, i, "Invalid default frame time");
@@ -36,7 +36,7 @@ implements MetadataSectionSerializer<AnimationMetadataSection> {
                     JsonElement jsonElement = jsonArray.get(j);
                     AnimationFrame animationFrame = this.getFrame(j, jsonElement);
                     if (animationFrame == null) continue;
-                    list.add(animationFrame);
+                    builder.add(animationFrame);
                 }
             } catch (ClassCastException classCastException) {
                 throw new JsonParseException("Invalid animation->frames: expected array, was " + jsonObject.get("frames"), classCastException);
@@ -51,7 +51,7 @@ implements MetadataSectionSerializer<AnimationMetadataSection> {
             Validate.inclusiveBetween(1L, Integer.MAX_VALUE, j, "Invalid height");
         }
         boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpolate", false);
-        return new AnimationMetadataSection(list, k, j, i, bl);
+        return new AnimationMetadataSection((List<AnimationFrame>)((Object)builder.build()), k, j, i, bl);
     }
 
     @Nullable

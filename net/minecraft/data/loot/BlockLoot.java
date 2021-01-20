@@ -908,6 +908,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.NETHER_SPROUTS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
+        this.add(Blocks.GLOW_LICHEN, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createDoublePlantShearsDrop(Blocks.SEAGRASS));
         this.add(Blocks.LARGE_FERN, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.FERN));
         this.add(Blocks.TALL_GRASS, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.GRASS));

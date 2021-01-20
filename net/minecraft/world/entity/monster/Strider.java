@@ -34,7 +34,6 @@ import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -156,7 +155,7 @@ Saddleable {
         this.panicGoal = new PanicGoal(this, 1.65);
         this.goalSelector.addGoal(1, this.panicGoal);
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-        this.temptGoal = new TemptGoal((PathfinderMob)this, 1.4, false, TEMPT_ITEMS);
+        this.temptGoal = new TemptGoal(this, 1.4, TEMPT_ITEMS, false);
         this.goalSelector.addGoal(3, this.temptGoal);
         this.goalSelector.addGoal(4, new StriderGoToLavaGoal(this, 1.5));
         this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1));

@@ -8,7 +8,6 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -16,23 +15,23 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Squid;
 
 @Environment(value=EnvType.CLIENT)
-public class SquidRenderer
-extends MobRenderer<Squid, SquidModel<Squid>> {
-    private static final ResourceLocation SQUID_LOCATION = new ResourceLocation("textures/entity/squid.png");
+public class SquidRenderer<T extends Squid>
+extends MobRenderer<T, SquidModel<T>> {
+    private static final ResourceLocation SQUID_LOCATION = new ResourceLocation("textures/entity/squid/squid.png");
 
-    public SquidRenderer(EntityRendererProvider.Context context) {
-        super(context, new SquidModel(context.bakeLayer(ModelLayers.SQUID)), 0.7f);
+    public SquidRenderer(EntityRendererProvider.Context context, SquidModel<T> squidModel) {
+        super(context, squidModel, 0.7f);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(Squid squid) {
+    public ResourceLocation getTextureLocation(T squid) {
         return SQUID_LOCATION;
     }
 
     @Override
-    protected void setupRotations(Squid squid, PoseStack poseStack, float f, float g, float h) {
-        float i = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
-        float j = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
+    protected void setupRotations(T squid, PoseStack poseStack, float f, float g, float h) {
+        float i = Mth.lerp(h, ((Squid)squid).xBodyRotO, ((Squid)squid).xBodyRot);
+        float j = Mth.lerp(h, ((Squid)squid).zBodyRotO, ((Squid)squid).zBodyRot);
         poseStack.translate(0.0, 0.5, 0.0);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
@@ -41,8 +40,8 @@ extends MobRenderer<Squid, SquidModel<Squid>> {
     }
 
     @Override
-    protected float getBob(Squid squid, float f) {
-        return Mth.lerp(f, squid.oldTentacleAngle, squid.tentacleAngle);
+    protected float getBob(T squid, float f) {
+        return Mth.lerp(f, ((Squid)squid).oldTentacleAngle, ((Squid)squid).tentacleAngle);
     }
 }
 

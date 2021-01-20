@@ -149,7 +149,7 @@ FlyingAnimal {
         this.goalSelector.addGoal(0, new BeeAttackGoal(this, 1.4f, true));
         this.goalSelector.addGoal(1, new BeeEnterHiveGoal());
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-        this.goalSelector.addGoal(3, new TemptGoal((PathfinderMob)this, 1.25, Ingredient.of(ItemTags.FLOWERS), false));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, Ingredient.of(ItemTags.FLOWERS), false));
         this.beePollinateGoal = new BeePollinateGoal();
         this.goalSelector.addGoal(4, this.beePollinateGoal);
         this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.25));
@@ -544,7 +544,7 @@ FlyingAnimal {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         return false;
     }
 

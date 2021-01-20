@@ -138,7 +138,7 @@ public class ItemModelGenerator {
         int i = textureAtlasSprite.getWidth();
         int j = textureAtlasSprite.getHeight();
         ArrayList<Span> list = Lists.newArrayList();
-        for (int k = 0; k < textureAtlasSprite.getFrameCount(); ++k) {
+        textureAtlasSprite.getUniqueFrames().forEach(k -> {
             for (int l = 0; l < j; ++l) {
                 for (int m = 0; m < i; ++m) {
                     boolean bl = !this.isTransparent(textureAtlasSprite, k, m, l, i, j);
@@ -148,7 +148,7 @@ public class ItemModelGenerator {
                     this.checkTransition(SpanFacing.RIGHT, list, textureAtlasSprite, k, m, l, i, j, bl);
                 }
             }
-        }
+        });
         return list;
     }
 

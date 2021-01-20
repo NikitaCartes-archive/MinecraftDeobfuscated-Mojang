@@ -53,7 +53,7 @@ implements Tickable {
     public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
     @Deprecated
     public static final ResourceLocation LOCATION_PARTICLES = new ResourceLocation("textures/atlas/particles.png");
-    private final List<TextureAtlasSprite> animatedTextures = Lists.newArrayList();
+    private final List<Tickable> animatedTextures = Lists.newArrayList();
     private final Set<ResourceLocation> sprites = Sets.newHashSet();
     private final Map<ResourceLocation, TextureAtlasSprite> texturesByName = Maps.newHashMap();
     private final ResourceLocation location;
@@ -85,8 +85,9 @@ implements Tickable {
                 crashReportCategory.setDetail("Sprite", textureAtlasSprite);
                 throw new ReportedException(crashReport);
             }
-            if (!textureAtlasSprite.isAnimation()) continue;
-            this.animatedTextures.add(textureAtlasSprite);
+            Tickable tickable = textureAtlasSprite.getAnimationTicker();
+            if (tickable == null) continue;
+            this.animatedTextures.add(tickable);
         }
     }
 
@@ -215,8 +216,8 @@ implements Tickable {
 
     public void cycleAnimationFrames() {
         this.bind();
-        for (TextureAtlasSprite textureAtlasSprite : this.animatedTextures) {
-            textureAtlasSprite.cycleFrames();
+        for (Tickable tickable : this.animatedTextures) {
+            tickable.tick();
         }
     }
 

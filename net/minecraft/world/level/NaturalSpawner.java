@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -127,8 +128,9 @@ public final class NaturalSpawner {
                 Player player = serverLevel.getNearestPlayer(d, (double)i, e, -1.0, false);
                 if (player == null || !NaturalSpawner.isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, f = player.distanceToSqr(d, i, e))) continue;
                 if (spawnerData == null) {
-                    spawnerData = NaturalSpawner.getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
-                    if (spawnerData == null) continue block0;
+                    Optional<MobSpawnSettings.SpawnerData> optional = NaturalSpawner.getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
+                    if (!optional.isPresent()) continue block0;
+                    spawnerData = optional.get();
                     o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
                 if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, f) || !spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) continue;
@@ -205,15 +207,14 @@ public final class NaturalSpawner {
         return mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
     }
 
-    @Nullable
-    private static MobSpawnSettings.SpawnerData getRandomSpawnMobAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos) {
+    private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos) {
         Biome biome = serverLevel.getBiome(blockPos);
         if (mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98f) {
-            return null;
+            return Optional.empty();
         }
         List<MobSpawnSettings.SpawnerData> list = NaturalSpawner.mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
         if (list.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         return WeighedRandom.getRandomItem(random, list);
     }
@@ -289,7 +290,9 @@ public final class NaturalSpawner {
         int k = SectionPos.sectionToBlockCoord(i);
         int l = SectionPos.sectionToBlockCoord(j);
         while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
-            MobSpawnSettings.SpawnerData spawnerData = WeighedRandom.getRandomItem(random, list);
+            Optional<MobSpawnSettings.SpawnerData> optional = WeighedRandom.getRandomItem(random, list);
+            if (!optional.isPresent()) continue;
+            MobSpawnSettings.SpawnerData spawnerData = optional.get();
             int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
             SpawnGroupData spawnGroupData = null;
             int n = k + random.nextInt(16);

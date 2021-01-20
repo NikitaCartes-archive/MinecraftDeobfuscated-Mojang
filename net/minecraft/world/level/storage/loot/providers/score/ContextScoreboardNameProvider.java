@@ -45,8 +45,8 @@ implements ScoreboardNameProvider {
         return ImmutableSet.of(this.target.getParam());
     }
 
-    public static class DefaultSerializer
-    implements GsonAdapterFactory.DefaultSerializer<ContextScoreboardNameProvider> {
+    public static class InlineSerializer
+    implements GsonAdapterFactory.InlineSerializer<ContextScoreboardNameProvider> {
         @Override
         public JsonElement serialize(ContextScoreboardNameProvider contextScoreboardNameProvider, JsonSerializationContext jsonSerializationContext) {
             return jsonSerializationContext.serialize((Object)contextScoreboardNameProvider.target);

@@ -25,7 +25,7 @@ extends TagsProvider<EntityType<?>> {
         this.tag(EntityTypeTags.ARROWS).add(EntityType.ARROW, EntityType.SPECTRAL_ARROW);
         this.tag(EntityTypeTags.IMPACT_PROJECTILES).addTag(EntityTypeTags.ARROWS).add(EntityType.SNOWBALL, EntityType.FIREBALL, EntityType.SMALL_FIREBALL, EntityType.EGG, EntityType.TRIDENT, EntityType.DRAGON_FIREBALL, EntityType.WITHER_SKULL);
         this.tag(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS).add(EntityType.RABBIT, EntityType.ENDERMITE, EntityType.SILVERFISH);
-        this.tag(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES).add(EntityType.TROPICAL_FISH, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.COD, EntityType.SQUID);
+        this.tag(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES).add(EntityType.TROPICAL_FISH, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.COD, EntityType.SQUID, EntityType.GLOW_SQUID);
         this.tag(EntityTypeTags.AXOLOTL_TEMPTED_HOSTILES).add(EntityType.DROWNED, EntityType.GUARDIAN);
     }
 

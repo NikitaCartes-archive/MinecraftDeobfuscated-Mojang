@@ -237,7 +237,7 @@ Saddleable {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         int i;
         if (f > 1.0f) {
             this.playSound(SoundEvents.HORSE_LAND, 0.4f, 1.0f);
@@ -245,10 +245,10 @@ Saddleable {
         if ((i = this.calculateFallDamage(f, g)) <= 0) {
             return false;
         }
-        this.hurt(DamageSource.FALL, i);
+        this.hurt(damageSource, i);
         if (this.isVehicle()) {
             for (Entity entity : this.getIndirectPassengers()) {
-                entity.hurt(DamageSource.FALL, i);
+                entity.hurt(damageSource, i);
             }
         }
         this.playBlockFallSound();
@@ -984,6 +984,10 @@ Saddleable {
         }
         this.randomizeAttributes();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    public boolean hasInventoryChanged(Container container) {
+        return this.inventory != container;
     }
 }
 

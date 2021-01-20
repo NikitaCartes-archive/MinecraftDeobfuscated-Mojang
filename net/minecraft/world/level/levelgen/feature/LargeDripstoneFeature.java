@@ -33,7 +33,7 @@ extends Feature<LargeDripstoneConfiguration> {
         if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
             return false;
         }
-        Optional<Column> optional = Column.scan(worldGenLevel, blockPos, largeDripstoneConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBase);
+        Optional<Column> optional = Column.scan(worldGenLevel, blockPos, largeDripstoneConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBaseOrLava);
         if (!optional.isPresent() || !(optional.get() instanceof Column.Range)) {
             return false;
         }
@@ -69,7 +69,9 @@ extends Feature<LargeDripstoneConfiguration> {
 
         private WindOffsetter(int i, Random random, UniformFloat uniformFloat) {
             this.originY = i;
-            this.windSpeed = new Vec3(uniformFloat.sample(random), 0.0, uniformFloat.sample(random));
+            float f = uniformFloat.sample(random);
+            float g = Mth.randomBetween(random, 0.0f, (float)Math.PI);
+            this.windSpeed = new Vec3(Mth.cos(g) * f, 0.0, Mth.sin(g) * f);
         }
 
         private WindOffsetter() {
@@ -129,6 +131,9 @@ extends Feature<LargeDripstoneConfiguration> {
                 BlockPos.MutableBlockPos mutableBlockPos = this.root.mutable();
                 int i = Math.min(10, this.getHeight());
                 for (int j = 0; j < i; ++j) {
+                    if (worldGenLevel.getBlockState(mutableBlockPos).is(Blocks.LAVA)) {
+                        return false;
+                    }
                     if (DripstoneUtils.isCircleMostlyEmbeddedInStone(worldGenLevel, windOffsetter.offset(mutableBlockPos), this.radius)) {
                         this.root = mutableBlockPos;
                         return true;
@@ -157,7 +162,7 @@ extends Feature<LargeDripstoneConfiguration> {
                     boolean bl = false;
                     for (int l = 0; l < k; ++l) {
                         BlockPos blockPos = windOffsetter.offset(mutableBlockPos);
-                        if (DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
+                        if (DripstoneUtils.isEmptyOrWaterOrLava(worldGenLevel, blockPos)) {
                             bl = true;
                             Block block = Blocks.DRIPSTONE_BLOCK;
                             worldGenLevel.setBlock(blockPos, block.defaultBlockState(), 2);

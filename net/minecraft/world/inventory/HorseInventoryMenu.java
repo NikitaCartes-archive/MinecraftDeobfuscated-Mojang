@@ -60,7 +60,7 @@ extends AbstractContainerMenu {
                 return 1;
             }
         });
-        if (abstractHorse instanceof AbstractChestedHorse && ((AbstractChestedHorse)abstractHorse).hasChest()) {
+        if (this.hasChest(abstractHorse)) {
             for (l = 0; l < 3; ++l) {
                 for (m = 0; m < ((AbstractChestedHorse)abstractHorse).getInventoryColumns(); ++m) {
                     this.addSlot(new Slot(container, 2 + m + l * ((AbstractChestedHorse)abstractHorse).getInventoryColumns(), 80 + m * 18, 18 + l * 18));
@@ -79,7 +79,11 @@ extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return this.horseContainer.stillValid(player) && this.horse.isAlive() && this.horse.distanceTo(player) < 8.0f;
+        return !this.horse.hasInventoryChanged(this.horseContainer) && this.horseContainer.stillValid(player) && this.horse.isAlive() && this.horse.distanceTo(player) < 8.0f;
+    }
+
+    private boolean hasChest(AbstractHorse abstractHorse) {
+        return abstractHorse instanceof AbstractChestedHorse && ((AbstractChestedHorse)abstractHorse).hasChest();
     }
 
     @Override

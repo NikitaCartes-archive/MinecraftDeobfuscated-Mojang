@@ -44,6 +44,8 @@ extends Item {
             hangingEntity = new Painting(level, blockPos2, direction);
         } else if (this.type == EntityType.ITEM_FRAME) {
             hangingEntity = new ItemFrame(level, blockPos2, direction);
+        } else if (this.type == EntityType.GLOW_ITEM_FRAME) {
+            hangingEntity = new ItemFrame(EntityType.GLOW_ITEM_FRAME, level, blockPos2, direction);
         } else {
             return InteractionResult.sidedSuccess(level.isClientSide);
         }

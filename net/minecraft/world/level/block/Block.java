@@ -25,6 +25,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
@@ -329,7 +330,7 @@ implements ItemLike {
     }
 
     public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
-        entity.causeFallDamage(f, 1.0f);
+        entity.causeFallDamage(f, 1.0f, DamageSource.FALL);
     }
 
     public void updateEntityAfterFallOn(BlockGetter blockGetter, Entity entity) {

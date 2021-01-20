@@ -67,6 +67,7 @@ public class ModelLayers {
     public static final ModelLayerLocation GIANT = ModelLayers.register("giant");
     public static final ModelLayerLocation GIANT_INNER_ARMOR = ModelLayers.registerInnerArmor("giant");
     public static final ModelLayerLocation GIANT_OUTER_ARMOR = ModelLayers.registerOuterArmor("giant");
+    public static final ModelLayerLocation GLOW_SQUID = ModelLayers.register("glow_squid");
     public static final ModelLayerLocation GUARDIAN = ModelLayers.register("guardian");
     public static final ModelLayerLocation HOGLIN = ModelLayers.register("hoglin");
     public static final ModelLayerLocation HOPPER_MINECART = ModelLayers.register("hopper_minecart");

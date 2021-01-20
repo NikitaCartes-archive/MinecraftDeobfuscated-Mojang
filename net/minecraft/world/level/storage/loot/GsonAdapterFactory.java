@@ -25,7 +25,7 @@ public class GsonAdapterFactory {
         return new Builder(registry, string, string2, function);
     }
 
-    public static interface DefaultSerializer<T> {
+    public static interface InlineSerializer<T> {
         public JsonElement serialize(T var1, JsonSerializationContext var2);
 
         public T deserialize(JsonElement var1, JsonDeserializationContext var2);
@@ -39,38 +39,47 @@ public class GsonAdapterFactory {
         private final String typeKey;
         private final Function<E, T> typeGetter;
         @Nullable
-        private final Pair<T, DefaultSerializer<? extends E>> defaultType;
+        private final T defaultType;
+        @Nullable
+        private final Pair<T, InlineSerializer<? extends E>> inlineType;
 
-        private JsonAdapter(Registry<T> registry, String string, String string2, Function<E, T> function, @Nullable Pair<T, DefaultSerializer<? extends E>> pair) {
+        private JsonAdapter(Registry<T> registry, String string, String string2, Function<E, T> function, @Nullable T serializerType, @Nullable Pair<T, InlineSerializer<? extends E>> pair) {
             this.registry = registry;
             this.elementName = string;
             this.typeKey = string2;
             this.typeGetter = function;
-            this.defaultType = pair;
+            this.defaultType = serializerType;
+            this.inlineType = pair;
         }
 
         @Override
         public E deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (jsonElement.isJsonObject()) {
+                Object serializerType;
                 JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, this.elementName);
-                ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, this.typeKey));
-                SerializerType serializerType = (SerializerType)this.registry.get(resourceLocation);
-                if (serializerType == null) {
-                    throw new JsonSyntaxException("Unknown type '" + resourceLocation + "'");
+                String string = GsonHelper.getAsString(jsonObject, this.typeKey, "");
+                if (string.isEmpty()) {
+                    serializerType = this.defaultType;
+                } else {
+                    ResourceLocation resourceLocation = new ResourceLocation(string);
+                    serializerType = (SerializerType)this.registry.get(resourceLocation);
                 }
-                return (E)serializerType.getSerializer().deserialize(jsonObject, jsonDeserializationContext);
+                if (serializerType == null) {
+                    throw new JsonSyntaxException("Unknown type '" + string + "'");
+                }
+                return (E)((SerializerType)serializerType).getSerializer().deserialize(jsonObject, jsonDeserializationContext);
             }
-            if (this.defaultType == null) {
+            if (this.inlineType == null) {
                 throw new UnsupportedOperationException("Object " + jsonElement + " can't be deserialized");
             }
-            return this.defaultType.getSecond().deserialize(jsonElement, jsonDeserializationContext);
+            return this.inlineType.getSecond().deserialize(jsonElement, jsonDeserializationContext);
         }
 
         @Override
         public JsonElement serialize(E object, Type type, JsonSerializationContext jsonSerializationContext) {
             SerializerType serializerType = (SerializerType)this.typeGetter.apply(object);
-            if (this.defaultType != null && this.defaultType.getFirst() == serializerType) {
-                return this.defaultType.getSecond().serialize(object, jsonSerializationContext);
+            if (this.inlineType != null && this.inlineType.getFirst() == serializerType) {
+                return this.inlineType.getSecond().serialize(object, jsonSerializationContext);
             }
             if (serializerType == null) {
                 throw new JsonSyntaxException("Unknown type: " + object);
@@ -80,6 +89,10 @@ public class GsonAdapterFactory {
             serializerType.getSerializer().serialize(jsonObject, object, jsonSerializationContext);
             return jsonObject;
         }
+
+        /* synthetic */ JsonAdapter(Registry registry, String string, String string2, Function function, SerializerType serializerType, Pair pair, _1 arg) {
+            this(registry, string, string2, function, serializerType, pair);
+        }
     }
 
     public static class Builder<E, T extends SerializerType<E>> {
@@ -88,7 +101,9 @@ public class GsonAdapterFactory {
         private final String typeKey;
         private final Function<E, T> typeGetter;
         @Nullable
-        private Pair<T, DefaultSerializer<? extends E>> defaultType;
+        private Pair<T, InlineSerializer<? extends E>> inlineType;
+        @Nullable
+        private T defaultType;
 
         private Builder(Registry<T> registry, String string, String string2, Function<E, T> function) {
             this.registry = registry;
@@ -97,13 +112,18 @@ public class GsonAdapterFactory {
             this.typeGetter = function;
         }
 
-        public Builder<E, T> withDefaultSerializer(T serializerType, DefaultSerializer<? extends E> defaultSerializer) {
-            this.defaultType = Pair.of(serializerType, defaultSerializer);
+        public Builder<E, T> withInlineSerializer(T serializerType, InlineSerializer<? extends E> inlineSerializer) {
+            this.inlineType = Pair.of(serializerType, inlineSerializer);
+            return this;
+        }
+
+        public Builder<E, T> withDefaultType(T serializerType) {
+            this.defaultType = serializerType;
             return this;
         }
 
         public Object build() {
-            return new JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, this.defaultType);
+            return new JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, (SerializerType)this.defaultType, this.inlineType, null);
         }
     }
 }

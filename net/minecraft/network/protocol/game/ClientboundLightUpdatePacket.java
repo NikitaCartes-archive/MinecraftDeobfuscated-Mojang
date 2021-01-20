@@ -65,10 +65,10 @@ implements Packet<ClientGamePacketListener> {
         this.x = friendlyByteBuf.readVarInt();
         this.z = friendlyByteBuf.readVarInt();
         this.trustEdges = friendlyByteBuf.readBoolean();
-        this.skyYMask = BitSet.valueOf(friendlyByteBuf.readLongArray());
-        this.blockYMask = BitSet.valueOf(friendlyByteBuf.readLongArray());
-        this.emptySkyYMask = BitSet.valueOf(friendlyByteBuf.readLongArray());
-        this.emptyBlockYMask = BitSet.valueOf(friendlyByteBuf.readLongArray());
+        this.skyYMask = friendlyByteBuf.readBitSet();
+        this.blockYMask = friendlyByteBuf.readBitSet();
+        this.emptySkyYMask = friendlyByteBuf.readBitSet();
+        this.emptyBlockYMask = friendlyByteBuf.readBitSet();
         int i = friendlyByteBuf.readVarInt();
         for (j = 0; j < i; ++j) {
             this.skyUpdates.add(friendlyByteBuf.readByteArray(2048));
@@ -84,10 +84,10 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeVarInt(this.x);
         friendlyByteBuf.writeVarInt(this.z);
         friendlyByteBuf.writeBoolean(this.trustEdges);
-        friendlyByteBuf.writeLongArray(this.skyYMask.toLongArray());
-        friendlyByteBuf.writeLongArray(this.blockYMask.toLongArray());
-        friendlyByteBuf.writeLongArray(this.emptySkyYMask.toLongArray());
-        friendlyByteBuf.writeLongArray(this.emptyBlockYMask.toLongArray());
+        friendlyByteBuf.writeBitSet(this.skyYMask);
+        friendlyByteBuf.writeBitSet(this.blockYMask);
+        friendlyByteBuf.writeBitSet(this.emptySkyYMask);
+        friendlyByteBuf.writeBitSet(this.emptyBlockYMask);
         friendlyByteBuf.writeVarInt(this.skyUpdates.size());
         for (byte[] bs : this.skyUpdates) {
             friendlyByteBuf.writeByteArray(bs);

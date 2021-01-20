@@ -95,6 +95,7 @@ import net.minecraft.world.level.block.FungusBlock;
 import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.GlazedTerracottaBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.GravelBlock;
 import net.minecraft.world.level.block.GrindstoneBlock;
@@ -1079,6 +1080,7 @@ public class Blocks {
     public static final Block LIGHTNING_ROD = Blocks.register("lightning_rod", new LightningRodBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(3.0f, 6.0f).sound(SoundType.COPPER).noOcclusion()));
     public static final Block POINTED_DRIPSTONE = Blocks.register("pointed_dripstone", new PointedDripstoneBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN).noOcclusion().sound(SoundType.POINTED_DRIPSTONE).randomTicks().strength(1.5f, 3.0f)));
     public static final Block DRIPSTONE_BLOCK = Blocks.register("dripstone_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN).sound(SoundType.DRIPSTONE_BLOCK).requiresCorrectToolForDrops().strength(1.5f, 1.0f)));
+    public static final Block GLOW_LICHEN = Blocks.register("glow_lichen", new GlowLichenBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT).noCollission().strength(0.2f).sound(SoundType.GLOW_LICHEN).lightLevel(blockState -> 7)));
 
     private static ToIntFunction<BlockState> litBlockEmission(int i) {
         return blockState -> blockState.getValue(BlockStateProperties.LIT) != false ? i : 0;

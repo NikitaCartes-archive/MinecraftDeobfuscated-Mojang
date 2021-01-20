@@ -290,11 +290,13 @@ public class EnchantmentHelper {
         float f = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.15f;
         List<EnchantmentInstance> list2 = EnchantmentHelper.getAvailableEnchantmentResults(i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE), itemStack, bl);
         if (!list2.isEmpty()) {
-            list.add(WeighedRandom.getRandomItem(random, list2));
+            WeighedRandom.getRandomItem(random, list2).ifPresent(list::add);
             while (random.nextInt(50) <= i) {
-                EnchantmentHelper.filterCompatibleEnchantments(list2, Util.lastOf(list));
+                if (!list.isEmpty()) {
+                    EnchantmentHelper.filterCompatibleEnchantments(list2, Util.lastOf(list));
+                }
                 if (list2.isEmpty()) break;
-                list.add(WeighedRandom.getRandomItem(random, list2));
+                WeighedRandom.getRandomItem(random, list2).ifPresent(list::add);
                 i /= 2;
             }
         }

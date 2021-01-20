@@ -169,9 +169,7 @@ extends Level {
     }
 
     public void tickNonPassenger(Entity entity) {
-        entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
-        entity.yRotO = entity.yRot;
-        entity.xRotO = entity.xRot;
+        entity.setOldPosAndRot();
         ++entity.tickCount;
         this.getProfiler().push(() -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString());
         entity.tick();
@@ -189,9 +187,7 @@ extends Level {
         if (!(entity2 instanceof Player) && !this.tickingEntities.contains(entity2)) {
             return;
         }
-        entity2.setPosAndOldPos(entity2.getX(), entity2.getY(), entity2.getZ());
-        entity2.yRotO = entity2.yRot;
-        entity2.xRotO = entity2.xRot;
+        entity2.setOldPosAndRot();
         ++entity2.tickCount;
         entity2.rideTick();
         for (Entity entity3 : entity2.getPassengers()) {

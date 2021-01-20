@@ -21,9 +21,9 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -52,6 +52,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -97,15 +98,8 @@ extends BaseEntityBlock {
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof ShulkerBoxBlockEntity) {
-            boolean bl;
             ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockEntity;
-            if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
-                Direction direction = blockState.getValue(FACING);
-                bl = level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction));
-            } else {
-                bl = true;
-            }
-            if (bl) {
+            if (ShulkerBoxBlock.canOpen(blockState, level, blockPos, shulkerBoxBlockEntity)) {
                 player.openMenu(shulkerBoxBlockEntity);
                 player.awardStat(Stats.OPEN_SHULKER_BOX);
                 PiglinAi.angerNearbyPiglins(player, true);
@@ -113,6 +107,14 @@ extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
+    }
+
+    private static boolean canOpen(BlockState blockState, Level level, BlockPos blockPos, ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
+        if (shulkerBoxBlockEntity.getAnimationStatus() != ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
+            return true;
+        }
+        AABB aABB = Shulker.getProgressDeltaAabb(blockState.getValue(FACING), 0.0f, 0.5f).move(blockPos).deflate(1.0E-6);
+        return level.noCollision(aABB);
     }
 
     @Override

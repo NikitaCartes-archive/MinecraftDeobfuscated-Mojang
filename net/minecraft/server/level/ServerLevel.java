@@ -578,9 +578,7 @@ implements WorldGenLevel {
     }
 
     public void tickNonPassenger(Entity entity) {
-        entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
-        entity.yRotO = entity.yRot;
-        entity.xRotO = entity.xRot;
+        entity.setOldPosAndRot();
         ProfilerFiller profilerFiller = this.getProfiler();
         ++entity.tickCount;
         this.getProfiler().push(() -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString());
@@ -600,9 +598,7 @@ implements WorldGenLevel {
         if (!(entity2 instanceof Player) && !this.entityTickList.contains(entity2)) {
             return;
         }
-        entity2.setPosAndOldPos(entity2.getX(), entity2.getY(), entity2.getZ());
-        entity2.yRotO = entity2.yRot;
-        entity2.xRotO = entity2.xRot;
+        entity2.setOldPosAndRot();
         ++entity2.tickCount;
         ProfilerFiller profilerFiller = this.getProfiler();
         profilerFiller.push(() -> Registry.ENTITY_TYPE.getKey(entity2.getType()).toString());

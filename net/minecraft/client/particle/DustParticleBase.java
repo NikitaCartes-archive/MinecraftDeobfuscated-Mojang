@@ -24,9 +24,9 @@ extends TextureSheetParticle {
         this.yd *= (double)0.1f;
         this.zd *= (double)0.1f;
         float j = this.random.nextFloat() * 0.4f + 0.6f;
-        this.rCol = this.randomizeColor((float)((DustParticleOptionsBase)dustParticleOptionsBase).getColor().x, j);
-        this.gCol = this.randomizeColor((float)((DustParticleOptionsBase)dustParticleOptionsBase).getColor().y, j);
-        this.bCol = this.randomizeColor((float)((DustParticleOptionsBase)dustParticleOptionsBase).getColor().z, j);
+        this.rCol = this.randomizeColor(((DustParticleOptionsBase)dustParticleOptionsBase).getColor().x(), j);
+        this.gCol = this.randomizeColor(((DustParticleOptionsBase)dustParticleOptionsBase).getColor().y(), j);
+        this.bCol = this.randomizeColor(((DustParticleOptionsBase)dustParticleOptionsBase).getColor().z(), j);
         this.quadSize *= 0.75f * ((DustParticleOptionsBase)dustParticleOptionsBase).getScale();
         int k = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
         this.lifetime = (int)Math.max((float)k * ((DustParticleOptionsBase)dustParticleOptionsBase).getScale(), 1.0f);

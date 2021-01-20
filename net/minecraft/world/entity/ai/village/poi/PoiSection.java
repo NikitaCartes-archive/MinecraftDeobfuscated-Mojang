@@ -71,7 +71,7 @@ public class PoiSection {
             if (poiType2.equals(poiRecord2.getPoiType())) {
                 return false;
             }
-            throw Util.pauseInIde(new IllegalStateException("POI data mismatch: already registered at " + blockPos));
+            Util.logAndPauseIfInIde("POI data mismatch: already registered at " + blockPos);
         }
         this.records.put(s, poiRecord);
         this.byType.computeIfAbsent(poiType2, poiType -> Sets.newHashSet()).add(poiRecord);

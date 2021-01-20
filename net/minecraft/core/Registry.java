@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.MappedRegistry;
@@ -240,10 +240,7 @@ IdMap<T> {
     public static <T extends WritableRegistry<?>> void checkRegistry(WritableRegistry<T> writableRegistry) {
         writableRegistry.forEach(writableRegistry2 -> {
             if (writableRegistry2.keySet().isEmpty()) {
-                LOGGER.error("Registry '{}' was empty after loading", (Object)writableRegistry.getKey((WritableRegistry)writableRegistry2));
-                if (SharedConstants.IS_RUNNING_IN_IDE) {
-                    throw new IllegalStateException("Registry: '" + writableRegistry.getKey((WritableRegistry)writableRegistry2) + "' is empty, not allowed, fix me!");
-                }
+                Util.logAndPauseIfInIde("Registry '" + writableRegistry.getKey((WritableRegistry)writableRegistry2) + "' was empty after loading");
             }
             if (writableRegistry2 instanceof DefaultedRegistry) {
                 ResourceLocation resourceLocation = ((DefaultedRegistry)writableRegistry2).getDefaultKey();

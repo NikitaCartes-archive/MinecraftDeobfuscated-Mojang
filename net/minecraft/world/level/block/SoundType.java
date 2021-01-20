@@ -69,6 +69,7 @@ public class SoundType {
     public static final SoundType POINTED_DRIPSTONE = new SoundType(1.0f, 1.0f, SoundEvents.POINTED_DRIPSTONE_BREAK, SoundEvents.POINTED_DRIPSTONE_STEP, SoundEvents.POINTED_DRIPSTONE_PLACE, SoundEvents.POINTED_DRIPSTONE_HIT, SoundEvents.POINTED_DRIPSTONE_FALL);
     public static final SoundType COPPER = new SoundType(1.0f, 1.0f, SoundEvents.COPPER_BREAK, SoundEvents.COPPER_STEP, SoundEvents.COPPER_PLACE, SoundEvents.COPPER_HIT, SoundEvents.COPPER_FALL);
     public static final SoundType SCULK_SENSOR = new SoundType(1.0f, 1.0f, SoundEvents.SCULK_SENSOR_BREAK, SoundEvents.SCULK_SENSOR_STEP, SoundEvents.SCULK_SENSOR_PLACE, SoundEvents.SCULK_SENSOR_HIT, SoundEvents.SCULK_SENSOR_FALL);
+    public static final SoundType GLOW_LICHEN = new SoundType(1.0f, 1.0f, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL);
     public final float volume;
     public final float pitch;
     private final SoundEvent breakSound;

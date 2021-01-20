@@ -91,7 +91,8 @@ implements BlockEntityRenderer<SignBlockEntity> {
             });
             if (formattedCharSequence == null) continue;
             float s = -this.font.width(formattedCharSequence) / 2;
-            this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+            int t = blockState.getValue(SignBlock.LIT) != false ? 0xF000F0 : i;
+            this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, t);
         }
         poseStack.popPose();
     }

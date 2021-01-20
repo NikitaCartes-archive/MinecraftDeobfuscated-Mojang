@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.entity.vehicle;
 
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -618,18 +620,21 @@ extends Entity {
         BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e = this.getZ() + vec3.z);
         BlockPos blockPos2 = blockPos.below();
         if (!this.level.isWaterAt(blockPos2)) {
-            double f = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos);
-            double g = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos2);
+            double g;
+            ArrayList<Vec3> list = Lists.newArrayList();
+            double f = this.level.getBlockFloorHeight(blockPos);
+            if (DismountHelper.isBlockFloorValid(f)) {
+                list.add(new Vec3(d, (double)blockPos.getY() + f, e));
+            }
+            if (DismountHelper.isBlockFloorValid(g = this.level.getBlockFloorHeight(blockPos2))) {
+                list.add(new Vec3(d, (double)blockPos2.getY() + g, e));
+            }
             for (Pose pose : livingEntity.getDismountPoses()) {
-                Vec3 vec32 = DismountHelper.findDismountLocation(this.level, d, f, e, livingEntity, pose);
-                if (vec32 != null) {
+                for (Vec3 vec32 : list) {
+                    if (!DismountHelper.canDismountTo(this.level, vec32, livingEntity, pose)) continue;
                     livingEntity.setPose(pose);
                     return vec32;
                 }
-                Vec3 vec33 = DismountHelper.findDismountLocation(this.level, d, g, e, livingEntity, pose);
-                if (vec33 == null) continue;
-                livingEntity.setPose(pose);
-                return vec33;
             }
         }
         return super.getDismountLocationForPassenger(livingEntity);
@@ -688,7 +693,7 @@ extends Entity {
                     this.fallDistance = 0.0f;
                     return;
                 }
-                this.causeFallDamage(this.fallDistance, 1.0f);
+                this.causeFallDamage(this.fallDistance, 1.0f, DamageSource.FALL);
                 if (!this.level.isClientSide && !this.isRemoved()) {
                     this.kill();
                     if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

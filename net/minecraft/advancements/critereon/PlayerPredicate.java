@@ -75,7 +75,7 @@ public class PlayerPredicate {
         if (!this.level.matches(serverPlayer.experienceLevel)) {
             return false;
         }
-        if (this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
+        if (this.gameType != null && this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
             return false;
         }
         ServerStatsCounter statsCounter = serverPlayer.getStats();

@@ -252,7 +252,7 @@ extends TamableAnimal {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         return false;
     }
 
@@ -578,7 +578,7 @@ extends TamableAnimal {
         private final Cat cat;
 
         public CatTemptGoal(Cat cat, double d, Ingredient ingredient, boolean bl) {
-            super((PathfinderMob)cat, d, ingredient, bl);
+            super(cat, d, ingredient, bl);
             this.cat = cat;
         }
 

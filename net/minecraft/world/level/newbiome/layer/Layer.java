@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.biome.Biomes;
@@ -30,10 +29,7 @@ public class Layer {
         }
         Biome biome = registry.get(resourceKey);
         if (biome == null) {
-            if (SharedConstants.IS_RUNNING_IN_IDE) {
-                throw Util.pauseInIde(new IllegalStateException("Unknown biome id: " + k));
-            }
-            LOGGER.warn("Unknown biome id: {}", (Object)k);
+            Util.logAndPauseIfInIde("Unknown biome id: " + k);
             return registry.get(Biomes.byId(0));
         }
         return biome;

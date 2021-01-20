@@ -150,7 +150,7 @@ public abstract class BaseSpawner {
     private void delay(Level level, BlockPos blockPos) {
         this.spawnDelay = this.maxSpawnDelay <= this.minSpawnDelay ? this.minSpawnDelay : this.minSpawnDelay + this.random.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
         if (!this.spawnPotentials.isEmpty()) {
-            this.setNextSpawnData(level, blockPos, WeighedRandom.getRandomItem(this.random, this.spawnPotentials));
+            WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
         }
         this.broadcastEvent(level, blockPos, 1);
     }
@@ -167,7 +167,7 @@ public abstract class BaseSpawner {
         if (compoundTag.contains("SpawnData", 10)) {
             this.setNextSpawnData(level, blockPos, new SpawnData(1, compoundTag.getCompound("SpawnData")));
         } else if (!this.spawnPotentials.isEmpty()) {
-            this.setNextSpawnData(level, blockPos, WeighedRandom.getRandomItem(this.random, this.spawnPotentials));
+            WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
         }
         if (compoundTag.contains("MinSpawnDelay", 99)) {
             this.minSpawnDelay = compoundTag.getShort("MinSpawnDelay");

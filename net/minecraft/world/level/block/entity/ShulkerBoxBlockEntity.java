@@ -20,6 +20,7 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -36,7 +37,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.Nullable;
 
 public class ShulkerBoxBlockEntity
@@ -62,38 +62,36 @@ implements WorldlyContainer {
     }
 
     public static void tick(Level level, BlockPos blockPos, BlockState blockState, ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
-        ShulkerBoxBlockEntity.updateAnimation(level, blockPos, blockState, shulkerBoxBlockEntity);
-        if (shulkerBoxBlockEntity.animationStatus == AnimationStatus.OPENING || shulkerBoxBlockEntity.animationStatus == AnimationStatus.CLOSING) {
-            ShulkerBoxBlockEntity.moveCollidedEntities(level, blockPos, blockState, shulkerBoxBlockEntity.getProgress(1.0f));
-        }
+        shulkerBoxBlockEntity.updateAnimation(level, blockPos, blockState);
     }
 
-    private static void updateAnimation(Level level, BlockPos blockPos, BlockState blockState, ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
-        shulkerBoxBlockEntity.progressOld = shulkerBoxBlockEntity.progress;
-        switch (shulkerBoxBlockEntity.animationStatus) {
+    private void updateAnimation(Level level, BlockPos blockPos, BlockState blockState) {
+        this.progressOld = this.progress;
+        switch (this.animationStatus) {
             case CLOSED: {
-                shulkerBoxBlockEntity.progress = 0.0f;
+                this.progress = 0.0f;
                 break;
             }
             case OPENING: {
-                shulkerBoxBlockEntity.progress += 0.1f;
-                if (!(shulkerBoxBlockEntity.progress >= 1.0f)) break;
-                ShulkerBoxBlockEntity.moveCollidedEntities(level, blockPos, blockState, shulkerBoxBlockEntity.getProgress(1.0f));
-                shulkerBoxBlockEntity.animationStatus = AnimationStatus.OPENED;
-                shulkerBoxBlockEntity.progress = 1.0f;
-                ShulkerBoxBlockEntity.doNeighborUpdates(level, blockPos, blockState);
+                this.progress += 0.1f;
+                if (this.progress >= 1.0f) {
+                    this.animationStatus = AnimationStatus.OPENED;
+                    this.progress = 1.0f;
+                    ShulkerBoxBlockEntity.doNeighborUpdates(level, blockPos, blockState);
+                }
+                this.moveCollidedEntities(level, blockPos, blockState);
                 break;
             }
             case CLOSING: {
-                shulkerBoxBlockEntity.progress -= 0.1f;
-                if (!(shulkerBoxBlockEntity.progress <= 0.0f)) break;
-                shulkerBoxBlockEntity.animationStatus = AnimationStatus.CLOSED;
-                shulkerBoxBlockEntity.progress = 0.0f;
+                this.progress -= 0.1f;
+                if (!(this.progress <= 0.0f)) break;
+                this.animationStatus = AnimationStatus.CLOSED;
+                this.progress = 0.0f;
                 ShulkerBoxBlockEntity.doNeighborUpdates(level, blockPos, blockState);
                 break;
             }
             case OPENED: {
-                shulkerBoxBlockEntity.progress = 1.0f;
+                this.progress = 1.0f;
             }
         }
     }
@@ -103,24 +101,15 @@ implements WorldlyContainer {
     }
 
     public AABB getBoundingBox(BlockState blockState) {
-        return ShulkerBoxBlockEntity.getBoundingBox(blockState.getValue(ShulkerBoxBlock.FACING), this.getProgress(1.0f));
+        return Shulker.getProgressAabb(blockState.getValue(ShulkerBoxBlock.FACING), 0.5f * this.getProgress(1.0f));
     }
 
-    public static AABB getBoundingBox(Direction direction, float f) {
-        return Shapes.block().bounds().expandTowards(0.5f * f * (float)direction.getStepX(), 0.5f * f * (float)direction.getStepY(), 0.5f * f * (float)direction.getStepZ());
-    }
-
-    private static AABB getTopBoundingBox(Direction direction, float f) {
-        Direction direction2 = direction.getOpposite();
-        return ShulkerBoxBlockEntity.getBoundingBox(direction, f).contract(direction2.getStepX(), direction2.getStepY(), direction2.getStepZ());
-    }
-
-    private static void moveCollidedEntities(Level level, BlockPos blockPos, BlockState blockState, float f) {
+    private void moveCollidedEntities(Level level, BlockPos blockPos, BlockState blockState) {
         if (!(blockState.getBlock() instanceof ShulkerBoxBlock)) {
             return;
         }
         Direction direction = blockState.getValue(ShulkerBoxBlock.FACING);
-        AABB aABB = ShulkerBoxBlockEntity.getTopBoundingBox(direction, f).move(blockPos);
+        AABB aABB = Shulker.getProgressDeltaAabb(direction, this.progressOld, this.progress).move(blockPos);
         List<Entity> list = level.getEntities(null, aABB);
         if (list.isEmpty()) {
             return;
@@ -130,7 +119,7 @@ implements WorldlyContainer {
             if (entity.getPistonPushReaction() == PushReaction.IGNORE) continue;
             double d = 0.0;
             double e = 0.0;
-            double g = 0.0;
+            double f = 0.0;
             AABB aABB2 = entity.getBoundingBox();
             switch (direction.getAxis()) {
                 case X: {
@@ -144,11 +133,11 @@ implements WorldlyContainer {
                     break;
                 }
                 case Z: {
-                    g = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? aABB.maxZ - aABB2.minZ : aABB2.maxZ - aABB.minZ;
-                    g += 0.01;
+                    f = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? aABB.maxZ - aABB2.minZ : aABB2.maxZ - aABB.minZ;
+                    f += 0.01;
                 }
             }
-            entity.move(MoverType.SHULKER_BOX, new Vec3(d * (double)direction.getStepX(), e * (double)direction.getStepY(), g * (double)direction.getStepZ()));
+            entity.move(MoverType.SHULKER_BOX, new Vec3(d * (double)direction.getStepX(), e * (double)direction.getStepY(), f * (double)direction.getStepZ()));
         }
     }
 

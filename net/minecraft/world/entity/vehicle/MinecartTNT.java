@@ -99,12 +99,12 @@ extends AbstractMinecart {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         if (f >= 3.0f) {
             float h = f / 10.0f;
             this.explode(h * h);
         }
-        return super.causeFallDamage(f, g);
+        return super.causeFallDamage(f, g, damageSource);
     }
 
     @Override

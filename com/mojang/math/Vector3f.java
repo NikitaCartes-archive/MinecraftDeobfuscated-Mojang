@@ -5,13 +5,18 @@ package com.mojang.math;
 
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
+import java.util.stream.DoubleStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class Vector3f {
+    public static final Codec<Vector3f> CODEC = ExtraCodecs.DOUBLE_STREAM.comapFlatMap(doubleStream -> Util.fixedSize(doubleStream, 3).map((? super R ds) -> new Vector3f((float)ds[0], (float)ds[1], (float)ds[2])), vector3f -> DoubleStream.of(vector3f.x, vector3f.y, vector3f.z)).stable();
     public static Vector3f XN = new Vector3f(-1.0f, 0.0f, 0.0f);
     public static Vector3f XP = new Vector3f(1.0f, 0.0f, 0.0f);
     public static Vector3f YN = new Vector3f(0.0f, -1.0f, 0.0f);

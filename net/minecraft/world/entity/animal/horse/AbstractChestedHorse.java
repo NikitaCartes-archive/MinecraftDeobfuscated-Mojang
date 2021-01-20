@@ -100,9 +100,9 @@ extends AbstractHorse {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setChest(compoundTag.getBoolean("ChestedHorse"));
+        this.createInventory();
         if (this.hasChest()) {
             ListTag listTag = compoundTag.getList("Items", 10);
-            this.createInventory();
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag2 = listTag.getCompound(i);
                 int j = compoundTag2.getByte("Slot") & 0xFF;

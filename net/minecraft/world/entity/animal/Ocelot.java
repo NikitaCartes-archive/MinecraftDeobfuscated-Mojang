@@ -141,7 +141,7 @@ extends Animal {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
         return false;
     }
 
@@ -284,7 +284,7 @@ extends Animal {
         private final Ocelot ocelot;
 
         public OcelotTemptGoal(Ocelot ocelot, double d, Ingredient ingredient, boolean bl) {
-            super((PathfinderMob)ocelot, d, ingredient, bl);
+            super(ocelot, d, ingredient, bl);
             this.ocelot = ocelot;
         }
 

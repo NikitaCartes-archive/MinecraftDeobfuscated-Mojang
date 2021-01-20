@@ -21,7 +21,7 @@ public class NbtProviders {
     }
 
     public static Object createGsonAdapter() {
-        return GsonAdapterFactory.builder(Registry.LOOT_NBT_PROVIDER_TYPE, "provider", "type", NbtProvider::getType).withDefaultSerializer(CONTEXT, new ContextNbtProvider.DefaultSerializer()).build();
+        return GsonAdapterFactory.builder(Registry.LOOT_NBT_PROVIDER_TYPE, "provider", "type", NbtProvider::getType).withInlineSerializer(CONTEXT, new ContextNbtProvider.InlineSerializer()).build();
     }
 }
 

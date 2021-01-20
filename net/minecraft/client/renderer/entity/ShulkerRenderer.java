@@ -13,8 +13,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -32,18 +32,7 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
 
     @Override
     public Vec3 getRenderOffset(Shulker shulker, float f) {
-        int i = shulker.getClientSideTeleportInterpolation();
-        if (i > 0 && shulker.hasValidInterpolationPositions()) {
-            BlockPos blockPos = shulker.getAttachPosition();
-            BlockPos blockPos2 = shulker.getOldAttachPosition();
-            double d = (double)((float)i - f) / 6.0;
-            d *= d;
-            double e = (double)(blockPos.getX() - blockPos2.getX()) * d;
-            double g = (double)(blockPos.getY() - blockPos2.getY()) * d;
-            double h = (double)(blockPos.getZ() - blockPos2.getZ()) * d;
-            return new Vec3(-e, -g, -h);
-        }
-        return super.getRenderOffset(shulker, f);
+        return shulker.getRenderPosition(f).orElse(super.getRenderOffset(shulker, f));
     }
 
     @Override
@@ -51,14 +40,13 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
         if (super.shouldRender(shulker, frustum, d, e, f)) {
             return true;
         }
-        if (shulker.getClientSideTeleportInterpolation() > 0 && shulker.hasValidInterpolationPositions()) {
-            Vec3 vec3 = Vec3.atLowerCornerOf(shulker.getAttachPosition());
-            Vec3 vec32 = Vec3.atLowerCornerOf(shulker.getOldAttachPosition());
-            if (frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
-                return true;
-            }
-        }
-        return false;
+        return shulker.getRenderPosition(0.0f).filter(vec3 -> {
+            EntityType<?> entityType = shulker.getType();
+            float f = entityType.getHeight() / 2.0f;
+            float g = entityType.getWidth() / 2.0f;
+            Vec3 vec32 = Vec3.atBottomCenterOf(shulker.blockPosition());
+            return frustum.isVisible(new AABB(vec3.x, vec3.y + (double)f, vec3.z, vec32.x, vec32.y + (double)f, vec32.z).inflate(g, f, g));
+        }).isPresent();
     }
 
     @Override
