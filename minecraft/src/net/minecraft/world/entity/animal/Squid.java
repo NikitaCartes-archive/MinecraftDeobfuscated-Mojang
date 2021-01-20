@@ -4,6 +4,7 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -78,6 +79,10 @@ public class Squid extends WaterAnimal {
 	@Override
 	protected SoundEvent getDeathSound() {
 		return SoundEvents.SQUID_DEATH;
+	}
+
+	protected SoundEvent getSquirtSound() {
+		return SoundEvents.SQUID_SQUIRT;
 	}
 
 	@Override
@@ -170,14 +175,18 @@ public class Squid extends WaterAnimal {
 	}
 
 	private void spawnInk() {
-		this.playSound(SoundEvents.SQUID_SQUIRT, this.getSoundVolume(), this.getVoicePitch());
+		this.playSound(this.getSquirtSound(), this.getSoundVolume(), this.getVoicePitch());
 		Vec3 vec3 = this.rotateVector(new Vec3(0.0, -1.0, 0.0)).add(this.getX(), this.getY(), this.getZ());
 
 		for (int i = 0; i < 30; i++) {
 			Vec3 vec32 = this.rotateVector(new Vec3((double)this.random.nextFloat() * 0.6 - 0.3, -1.0, (double)this.random.nextFloat() * 0.6 - 0.3));
 			Vec3 vec33 = vec32.scale(0.3 + (double)(this.random.nextFloat() * 2.0F));
-			((ServerLevel)this.level).sendParticles(ParticleTypes.SQUID_INK, vec3.x, vec3.y + 0.5, vec3.z, 0, vec33.x, vec33.y, vec33.z, 0.1F);
+			((ServerLevel)this.level).sendParticles(this.getInkParticle(), vec3.x, vec3.y + 0.5, vec3.z, 0, vec33.x, vec33.y, vec33.z, 0.1F);
 		}
+	}
+
+	protected ParticleOptions getInkParticle() {
+		return ParticleTypes.SQUID_INK;
 	}
 
 	@Override

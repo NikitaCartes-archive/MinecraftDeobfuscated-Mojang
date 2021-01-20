@@ -17,12 +17,8 @@ public class AnimationFrame {
 		this.time = j;
 	}
 
-	public boolean isTimeUnknown() {
-		return this.time == -1;
-	}
-
-	public int getTime() {
-		return this.time;
+	public int getTime(int i) {
+		return this.time == -1 ? i : this.time;
 	}
 
 	public int getIndex() {

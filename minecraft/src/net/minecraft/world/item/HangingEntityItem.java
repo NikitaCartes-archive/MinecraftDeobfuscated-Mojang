@@ -35,12 +35,14 @@ public class HangingEntityItem extends Item {
 			HangingEntity hangingEntity;
 			if (this.type == EntityType.PAINTING) {
 				hangingEntity = new Painting(level, blockPos2, direction);
+			} else if (this.type == EntityType.ITEM_FRAME) {
+				hangingEntity = new ItemFrame(level, blockPos2, direction);
 			} else {
-				if (this.type != EntityType.ITEM_FRAME) {
+				if (this.type != EntityType.GLOW_ITEM_FRAME) {
 					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 
-				hangingEntity = new ItemFrame(level, blockPos2, direction);
+				hangingEntity = new ItemFrame(EntityType.GLOW_ITEM_FRAME, level, blockPos2, direction);
 			}
 
 			CompoundTag compoundTag = itemStack.getTag();

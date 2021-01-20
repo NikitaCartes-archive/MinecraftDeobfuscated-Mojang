@@ -426,16 +426,16 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		int i = this.calculateFallDamage(f, g);
 		if (i <= 0) {
 			return false;
 		} else {
 			if (f >= 6.0F) {
-				this.hurt(DamageSource.FALL, (float)i);
+				this.hurt(damageSource, (float)i);
 				if (this.isVehicle()) {
 					for (Entity entity : this.getIndirectPassengers()) {
-						entity.hurt(DamageSource.FALL, (float)i);
+						entity.hurt(damageSource, (float)i);
 					}
 				}
 			}

@@ -1423,6 +1423,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.NETHER_SPROUTS, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
+		this.add(Blocks.GLOW_LICHEN, BlockLoot::createShearsOnlyDrop);
 		this.add(Blocks.TALL_SEAGRASS, createDoublePlantShearsDrop(Blocks.SEAGRASS));
 		this.add(Blocks.LARGE_FERN, blockx -> createDoublePlantWithSeedDrops(blockx, Blocks.FERN));
 		this.add(Blocks.TALL_GRASS, blockx -> createDoublePlantWithSeedDrops(blockx, Blocks.GRASS));

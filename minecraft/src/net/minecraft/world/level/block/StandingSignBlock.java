@@ -20,7 +20,9 @@ public class StandingSignBlock extends SignBlock {
 
 	public StandingSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
 		super(properties, woodType);
-		this.registerDefaultState(this.stateDefinition.any().setValue(ROTATION, Integer.valueOf(0)).setValue(WATERLOGGED, Boolean.valueOf(false)));
+		this.registerDefaultState(
+			this.stateDefinition.any().setValue(ROTATION, Integer.valueOf(0)).setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(LIT, Boolean.valueOf(false))
+		);
 	}
 
 	@Override
@@ -57,6 +59,6 @@ public class StandingSignBlock extends SignBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(ROTATION, WATERLOGGED);
+		builder.add(ROTATION, WATERLOGGED, LIT);
 	}
 }

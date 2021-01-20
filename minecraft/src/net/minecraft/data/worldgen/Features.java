@@ -35,6 +35,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.DripstoneCluste
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
@@ -804,9 +805,9 @@ public class Features {
 					0.33F,
 					UniformFloat.of(0.3F, 0.6F),
 					UniformFloat.of(0.4F, 0.6F),
-					UniformFloat.of(0.0F, 0.2F),
-					5,
-					0.7F
+					UniformFloat.of(0.0F, 0.3F),
+					4,
+					0.6F
 				)
 			)
 			.range(60)
@@ -815,6 +816,31 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> SMALL_DRIPSTONE_FEATURE = register(
 		"small_dripstone", Feature.SMALL_DRIPSTONE.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F)).range(60).squared().count(UniformInt.of(20, 40))
+	);
+	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
+		"glow_lichen",
+		Feature.GLOW_LICHEN
+			.configured(
+				new GlowLichenConfiguration(
+					10,
+					false,
+					true,
+					true,
+					0.5F,
+					ImmutableList.of(
+						Blocks.STONE.defaultBlockState(),
+						Blocks.ANDESITE.defaultBlockState(),
+						Blocks.DIORITE.defaultBlockState(),
+						Blocks.GRANITE.defaultBlockState(),
+						Blocks.DRIPSTONE_BLOCK.defaultBlockState(),
+						Blocks.CALCITE.defaultBlockState(),
+						Blocks.TUFF.defaultBlockState()
+					)
+				)
+			)
+			.squared()
+			.range(55)
+			.count(UniformInt.of(5, 5))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
 		"crimson_fungi",

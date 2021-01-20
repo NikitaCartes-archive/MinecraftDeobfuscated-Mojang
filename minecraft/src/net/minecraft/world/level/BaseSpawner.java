@@ -189,7 +189,7 @@ public abstract class BaseSpawner {
 		}
 
 		if (!this.spawnPotentials.isEmpty()) {
-			this.setNextSpawnData(level, blockPos, WeighedRandom.getRandomItem(this.random, this.spawnPotentials));
+			WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, spawnData));
 		}
 
 		this.broadcastEvent(level, blockPos, 1);
@@ -209,7 +209,7 @@ public abstract class BaseSpawner {
 		if (compoundTag.contains("SpawnData", 10)) {
 			this.setNextSpawnData(level, blockPos, new SpawnData(1, compoundTag.getCompound("SpawnData")));
 		} else if (!this.spawnPotentials.isEmpty()) {
-			this.setNextSpawnData(level, blockPos, WeighedRandom.getRandomItem(this.random, this.spawnPotentials));
+			WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, spawnData));
 		}
 
 		if (compoundTag.contains("MinSpawnDelay", 99)) {

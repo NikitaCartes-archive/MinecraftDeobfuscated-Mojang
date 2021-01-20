@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.BuiltinRegistries;
@@ -255,10 +255,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static <T extends WritableRegistry<?>> void checkRegistry(WritableRegistry<T> writableRegistry) {
 		writableRegistry.forEach(writableRegistry2 -> {
 			if (writableRegistry2.keySet().isEmpty()) {
-				LOGGER.error("Registry '{}' was empty after loading", writableRegistry.getKey((T)writableRegistry2));
-				if (SharedConstants.IS_RUNNING_IN_IDE) {
-					throw new IllegalStateException("Registry: '" + writableRegistry.getKey((T)writableRegistry2) + "' is empty, not allowed, fix me!");
-				}
+				Util.logAndPauseIfInIde("Registry '" + writableRegistry.getKey((T)writableRegistry2) + "' was empty after loading");
 			}
 
 			if (writableRegistry2 instanceof DefaultedRegistry) {

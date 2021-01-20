@@ -142,7 +142,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			}
 
 			if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-				this.renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
+				renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
 			}
 
 			poseStack.popPose();
@@ -159,36 +159,44 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		}
 	}
 
-	private void renderHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f) {
-		float g = entity.getBbWidth() / 2.0F;
-		this.renderBox(poseStack, vertexConsumer, entity, 1.0F, 1.0F, 1.0F);
+	private static void renderHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f) {
+		AABB aABB = entity.getBoundingBox().move(-entity.getX(), -entity.getY(), -entity.getZ());
+		LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB, 1.0F, 1.0F, 1.0F, 1.0F);
 		if (entity instanceof EnderDragon) {
 			double d = -Mth.lerp((double)f, entity.xOld, entity.getX());
 			double e = -Mth.lerp((double)f, entity.yOld, entity.getY());
-			double h = -Mth.lerp((double)f, entity.zOld, entity.getZ());
+			double g = -Mth.lerp((double)f, entity.zOld, entity.getZ());
 
 			for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
 				poseStack.pushPose();
-				double i = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());
-				double j = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.getY());
-				double k = h + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.getZ());
-				poseStack.translate(i, j, k);
-				this.renderBox(poseStack, vertexConsumer, enderDragonPart, 0.25F, 1.0F, 0.0F);
+				double h = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());
+				double i = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.getY());
+				double j = g + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.getZ());
+				poseStack.translate(h, i, j);
+				LevelRenderer.renderLineBox(
+					poseStack,
+					vertexConsumer,
+					enderDragonPart.getBoundingBox().move(-enderDragonPart.getX(), -enderDragonPart.getY(), -enderDragonPart.getZ()),
+					0.25F,
+					1.0F,
+					0.0F,
+					1.0F
+				);
 				poseStack.popPose();
 			}
 		}
 
 		if (entity instanceof LivingEntity) {
-			float l = 0.01F;
+			float k = 0.01F;
 			LevelRenderer.renderLineBox(
 				poseStack,
 				vertexConsumer,
-				(double)(-g),
+				aABB.minX,
 				(double)(entity.getEyeHeight() - 0.01F),
-				(double)(-g),
-				(double)g,
+				aABB.minZ,
+				aABB.maxX,
 				(double)(entity.getEyeHeight() + 0.01F),
-				(double)g,
+				aABB.maxZ,
 				1.0F,
 				0.0F,
 				0.0F,
@@ -202,11 +210,6 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		vertexConsumer.vertex(matrix4f, (float)(vec3.x * 2.0), (float)((double)entity.getEyeHeight() + vec3.y * 2.0), (float)(vec3.z * 2.0))
 			.color(0, 0, 255, 255)
 			.endVertex();
-	}
-
-	private void renderBox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f, float g, float h) {
-		AABB aABB = entity.getBoundingBox().move(-entity.getX(), -entity.getY(), -entity.getZ());
-		LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB, f, g, h, 1.0F);
 	}
 
 	private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {

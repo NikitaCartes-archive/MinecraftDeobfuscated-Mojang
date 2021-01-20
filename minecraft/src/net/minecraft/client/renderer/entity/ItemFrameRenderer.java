@@ -13,9 +13,11 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,9 +26,11 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
-public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
+public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 	private static final ModelResourceLocation FRAME_LOCATION = new ModelResourceLocation("item_frame", "map=false");
 	private static final ModelResourceLocation MAP_FRAME_LOCATION = new ModelResourceLocation("item_frame", "map=true");
+	private static final ModelResourceLocation GLOW_FRAME_LOCATION = new ModelResourceLocation("glow_item_frame", "map=false");
+	private static final ModelResourceLocation GLOW_MAP_FRAME_LOCATION = new ModelResourceLocation("glow_item_frame", "map=true");
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private final ItemRenderer itemRenderer;
 
@@ -35,7 +39,11 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		this.itemRenderer = context.getItemRenderer();
 	}
 
-	public void render(ItemFrame itemFrame, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected int getBlockLightLevel(T itemFrame, BlockPos blockPos) {
+		return itemFrame.isGlowFrame() ? 5 : super.getBlockLightLevel(itemFrame, blockPos);
+	}
+
+	public void render(T itemFrame, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		super.render(itemFrame, f, g, poseStack, multiBufferSource, i);
 		poseStack.pushPose();
 		Direction direction = itemFrame.getDirection();
@@ -50,7 +58,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		if (!bl) {
 			BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
 			ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
-			ModelResourceLocation modelResourceLocation = itemStack.is(Items.FILLED_MAP) ? MAP_FRAME_LOCATION : FRAME_LOCATION;
+			ModelResourceLocation modelResourceLocation = this.getFrameModelResourceLoc(itemFrame, itemStack);
 			poseStack.pushPose();
 			poseStack.translate(-0.5, -0.5, -0.5);
 			blockRenderDispatcher.getModelRenderer()
@@ -87,27 +95,42 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 				MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, itemFrame.level);
 				poseStack.translate(0.0, 0.0, -1.0);
 				if (mapItemSavedData != null) {
-					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, true, i);
+					int k = this.getLightVal(itemFrame, 15728850, i);
+					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, true, k);
 				}
 			} else {
+				int l = this.getLightVal(itemFrame, 15728880, i);
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 				this.itemRenderer
-					.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.getId());
+					.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.getId());
 			}
 		}
 
 		poseStack.popPose();
 	}
 
-	public Vec3 getRenderOffset(ItemFrame itemFrame, float f) {
+	private int getLightVal(T itemFrame, int i, int j) {
+		return itemFrame.getType() == EntityType.GLOW_ITEM_FRAME ? i : j;
+	}
+
+	private ModelResourceLocation getFrameModelResourceLoc(T itemFrame, ItemStack itemStack) {
+		boolean bl = itemFrame.isGlowFrame();
+		if (itemStack.is(Items.FILLED_MAP)) {
+			return bl ? GLOW_MAP_FRAME_LOCATION : MAP_FRAME_LOCATION;
+		} else {
+			return bl ? GLOW_FRAME_LOCATION : FRAME_LOCATION;
+		}
+	}
+
+	public Vec3 getRenderOffset(T itemFrame, float f) {
 		return new Vec3((double)((float)itemFrame.getDirection().getStepX() * 0.3F), -0.25, (double)((float)itemFrame.getDirection().getStepZ() * 0.3F));
 	}
 
-	public ResourceLocation getTextureLocation(ItemFrame itemFrame) {
+	public ResourceLocation getTextureLocation(T itemFrame) {
 		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
-	protected boolean shouldShowName(ItemFrame itemFrame) {
+	protected boolean shouldShowName(T itemFrame) {
 		if (Minecraft.renderNames()
 			&& !itemFrame.getItem().isEmpty()
 			&& itemFrame.getItem().hasCustomHoverName()
@@ -120,7 +143,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		}
 	}
 
-	protected void renderNameTag(ItemFrame itemFrame, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected void renderNameTag(T itemFrame, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName(), poseStack, multiBufferSource, i);
 	}
 }

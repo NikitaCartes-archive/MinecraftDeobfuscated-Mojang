@@ -65,7 +65,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 		this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
 		this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
 		this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, Ingredient.of(Items.CARROT_ON_A_STICK), false));
-		this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, false, FOOD_ITEMS));
+		this.goalSelector.addGoal(4, new TemptGoal(this, 1.2, FOOD_ITEMS, false));
 		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));

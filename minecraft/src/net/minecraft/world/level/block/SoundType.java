@@ -324,6 +324,9 @@ public class SoundType {
 		SoundEvents.SCULK_SENSOR_HIT,
 		SoundEvents.SCULK_SENSOR_FALL
 	);
+	public static final SoundType GLOW_LICHEN = new SoundType(
+		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

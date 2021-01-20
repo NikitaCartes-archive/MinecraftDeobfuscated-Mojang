@@ -2,6 +2,8 @@ package net.minecraft.world.item;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +25,7 @@ public class DyeItem extends Item {
 		if (livingEntity instanceof Sheep) {
 			Sheep sheep = (Sheep)livingEntity;
 			if (sheep.isAlive() && !sheep.isSheared() && sheep.getColor() != this.dyeColor) {
+				sheep.level.playSound(player, sheep, SoundEvents.DYE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
 				if (!player.level.isClientSide) {
 					sheep.setColor(this.dyeColor);
 					itemStack.shrink(1);

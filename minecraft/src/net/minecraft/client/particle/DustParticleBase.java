@@ -17,9 +17,9 @@ public class DustParticleBase<T extends DustParticleOptionsBase> extends Texture
 		this.yd *= 0.1F;
 		this.zd *= 0.1F;
 		float j = this.random.nextFloat() * 0.4F + 0.6F;
-		this.rCol = this.randomizeColor((float)dustParticleOptionsBase.getColor().x, j);
-		this.gCol = this.randomizeColor((float)dustParticleOptionsBase.getColor().y, j);
-		this.bCol = this.randomizeColor((float)dustParticleOptionsBase.getColor().z, j);
+		this.rCol = this.randomizeColor(dustParticleOptionsBase.getColor().x(), j);
+		this.gCol = this.randomizeColor(dustParticleOptionsBase.getColor().y(), j);
+		this.bCol = this.randomizeColor(dustParticleOptionsBase.getColor().z(), j);
 		this.quadSize = this.quadSize * 0.75F * dustParticleOptionsBase.getScale();
 		int k = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
 		this.lifetime = (int)Math.max((float)k * dustParticleOptionsBase.getScale(), 1.0F);

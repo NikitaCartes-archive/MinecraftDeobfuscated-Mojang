@@ -1,17 +1,17 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustColorTransitionOptions;
-import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class DustColorTransitionParticle extends DustParticleBase<DustColorTransitionOptions> {
-	private final Vec3 fromColor;
-	private final Vec3 toColor;
+	private final Vector3f fromColor;
+	private final Vector3f toColor;
 
 	protected DustColorTransitionParticle(
 		ClientLevel clientLevel,
@@ -30,16 +30,17 @@ public class DustColorTransitionParticle extends DustParticleBase<DustColorTrans
 		this.toColor = this.randomizeColor(dustColorTransitionOptions.getToColor(), j);
 	}
 
-	private Vec3 randomizeColor(Vec3 vec3, float f) {
-		return new Vec3((double)this.randomizeColor((float)vec3.x, f), (double)this.randomizeColor((float)vec3.y, f), (double)this.randomizeColor((float)vec3.z, f));
+	private Vector3f randomizeColor(Vector3f vector3f, float f) {
+		return new Vector3f(this.randomizeColor(vector3f.x(), f), this.randomizeColor(vector3f.y(), f), this.randomizeColor(vector3f.z(), f));
 	}
 
 	private void lerpColors(float f) {
 		float g = ((float)this.age + f) / ((float)this.lifetime + 1.0F);
-		Vec3 vec3 = this.fromColor.lerp(this.toColor, (double)g);
-		this.rCol = (float)vec3.x;
-		this.gCol = (float)vec3.y;
-		this.bCol = (float)vec3.z;
+		Vector3f vector3f = this.fromColor.copy();
+		vector3f.lerp(this.toColor, g);
+		this.rCol = vector3f.x();
+		this.gCol = vector3f.y();
+		this.bCol = vector3f.z();
 	}
 
 	@Override

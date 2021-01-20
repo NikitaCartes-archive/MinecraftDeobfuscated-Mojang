@@ -200,7 +200,7 @@ public class FallingBlockEntity extends Entity {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		if (!this.hurtEntities) {
 			return false;
 		} else {
@@ -209,18 +209,18 @@ public class FallingBlockEntity extends Entity {
 				return false;
 			} else {
 				Predicate<Entity> predicate;
-				DamageSource damageSource;
+				DamageSource damageSource2;
 				if (this.blockState.getBlock() instanceof Fallable) {
 					Fallable fallable = (Fallable)this.blockState.getBlock();
 					predicate = fallable.getHurtsEntitySelector();
-					damageSource = fallable.getFallDamageSource();
+					damageSource2 = fallable.getFallDamageSource();
 				} else {
 					predicate = EntitySelector.NO_SPECTATORS;
-					damageSource = DamageSource.FALLING_BLOCK;
+					damageSource2 = DamageSource.FALLING_BLOCK;
 				}
 
 				float h = (float)Math.min(Mth.floor((float)i * this.fallDamagePerDistance), this.fallDamageMax);
-				this.level.getEntities(this, this.getBoundingBox(), predicate).forEach(entity -> entity.hurt(damageSource, h));
+				this.level.getEntities(this, this.getBoundingBox(), predicate).forEach(entity -> entity.hurt(damageSource2, h));
 				boolean bl = this.blockState.is(BlockTags.ANVIL);
 				if (bl && (double)this.random.nextFloat() < 0.05F + (double)i * 0.05) {
 					BlockState blockState = AnvilBlock.damage(this.blockState);

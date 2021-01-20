@@ -69,6 +69,12 @@ public final class ModelPart {
 		this.z = h;
 	}
 
+	public void setRotation(float f, float g, float h) {
+		this.xRot = f;
+		this.yRot = g;
+		this.zRot = h;
+	}
+
 	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
 		this.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 	}

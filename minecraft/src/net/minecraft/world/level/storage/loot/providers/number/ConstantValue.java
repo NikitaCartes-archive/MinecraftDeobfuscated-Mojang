@@ -42,7 +42,7 @@ public final class ConstantValue implements NumberProvider {
 		return this.value != 0.0F ? Float.floatToIntBits(this.value) : 0;
 	}
 
-	public static class DefaultSerializer implements GsonAdapterFactory.DefaultSerializer<ConstantValue> {
+	public static class InlineSerializer implements GsonAdapterFactory.InlineSerializer<ConstantValue> {
 		public JsonElement serialize(ConstantValue constantValue, JsonSerializationContext jsonSerializationContext) {
 			return new JsonPrimitive(constantValue.value);
 		}

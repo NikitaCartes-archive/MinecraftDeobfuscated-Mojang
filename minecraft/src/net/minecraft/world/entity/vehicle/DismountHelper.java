@@ -42,16 +42,8 @@ public class DismountHelper {
 		return collisionGetter.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty);
 	}
 
-	@Nullable
-	public static Vec3 findDismountLocation(CollisionGetter collisionGetter, double d, double e, double f, LivingEntity livingEntity, Pose pose) {
-		if (isBlockFloorValid(e)) {
-			Vec3 vec3 = new Vec3(d, e, f);
-			if (canDismountTo(collisionGetter, livingEntity, livingEntity.getLocalBoundsForPose(pose).move(vec3))) {
-				return vec3;
-			}
-		}
-
-		return null;
+	public static boolean canDismountTo(CollisionGetter collisionGetter, Vec3 vec3, LivingEntity livingEntity, Pose pose) {
+		return canDismountTo(collisionGetter, livingEntity, livingEntity.getLocalBoundsForPose(pose).move(vec3));
 	}
 
 	public static VoxelShape nonClimbableShape(BlockGetter blockGetter, BlockPos blockPos) {

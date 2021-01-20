@@ -26,7 +26,7 @@ import net.minecraft.world.level.ItemLike;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ShapedRecipeBuilder {
+public class ShapedRecipeBuilder implements RecipeBuilder {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Item result;
 	private final int count;
@@ -86,6 +86,7 @@ public class ShapedRecipeBuilder {
 		return this;
 	}
 
+	@Override
 	public void save(Consumer<FinishedRecipe> consumer) {
 		this.save(consumer, Registry.ITEM.getKey(this.result));
 	}

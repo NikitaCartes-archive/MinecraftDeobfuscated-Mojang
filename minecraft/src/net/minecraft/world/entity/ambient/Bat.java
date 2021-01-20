@@ -169,7 +169,7 @@ public class Bat extends AmbientCreature {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		return false;
 	}
 

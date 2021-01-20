@@ -36,6 +36,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -112,7 +113,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
 		BlockState blockState = level.getBlockState(blockPos);
 		if (blockState.getValue(TIP_DIRECTION) == Direction.UP && blockState.getValue(THICKNESS) == DripstoneThickness.TIP) {
-			entity.causeFallDamage(f + 2.0F, 2.0F);
+			entity.causeFallDamage(f + 2.0F, 2.0F, DamageSource.STALAGMITE);
 		} else {
 			super.fallOn(level, blockPos, entity, f);
 		}
@@ -353,11 +354,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 			DripstoneThickness dripstoneThickness = blockState.getValue(THICKNESS);
 			if (dripstoneThickness != DripstoneThickness.TIP && dripstoneThickness != DripstoneThickness.TIP_MERGE) {
 				BlockState blockState2 = levelReader.getBlockState(blockPos.relative(direction2));
-				if (dripstoneThickness != DripstoneThickness.FRUSTUM && dripstoneThickness != DripstoneThickness.MIDDLE) {
-					return null;
-				} else {
-					return isPointedDripstoneWithDirection(blockState2, direction) ? DripstoneThickness.MIDDLE : DripstoneThickness.BASE;
-				}
+				return !isPointedDripstoneWithDirection(blockState2, direction) ? DripstoneThickness.BASE : DripstoneThickness.MIDDLE;
 			} else {
 				return DripstoneThickness.FRUSTUM;
 			}
@@ -395,6 +392,11 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	private static boolean isStalactiteStartPos(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return isStalactite(blockState) && !levelReader.getBlockState(blockPos.above()).is(Blocks.POINTED_DRIPSTONE);
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return false;
 	}
 
 	private static boolean isPointedDripstoneWithDirection(BlockState blockState, Direction direction) {

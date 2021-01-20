@@ -168,11 +168,6 @@ public class Vec3 implements Position {
 		return "(" + this.x + ", " + this.y + ", " + this.z + ")";
 	}
 
-	@Environment(EnvType.CLIENT)
-	public Vec3 lerp(Vec3 vec3, double d) {
-		return new Vec3(Mth.lerp(d, this.x, vec3.x), Mth.lerp(d, this.y, vec3.y), Mth.lerp(d, this.z, vec3.z));
-	}
-
 	public Vec3 xRot(float f) {
 		float g = Mth.cos(f);
 		float h = Mth.sin(f);

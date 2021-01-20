@@ -50,7 +50,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return 1;
 			}
 		});
-		if (abstractHorse instanceof AbstractChestedHorse && ((AbstractChestedHorse)abstractHorse).hasChest()) {
+		if (this.hasChest(abstractHorse)) {
 			for (int l = 0; l < 3; l++) {
 				for (int m = 0; m < ((AbstractChestedHorse)abstractHorse).getInventoryColumns(); m++) {
 					this.addSlot(new Slot(container, 2 + m + l * ((AbstractChestedHorse)abstractHorse).getInventoryColumns(), 80 + m * 18, 18 + l * 18));
@@ -71,7 +71,14 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.horseContainer.stillValid(player) && this.horse.isAlive() && this.horse.distanceTo(player) < 8.0F;
+		return !this.horse.hasInventoryChanged(this.horseContainer)
+			&& this.horseContainer.stillValid(player)
+			&& this.horse.isAlive()
+			&& this.horse.distanceTo(player) < 8.0F;
+	}
+
+	private boolean hasChest(AbstractHorse abstractHorse) {
+		return abstractHorse instanceof AbstractChestedHorse && ((AbstractChestedHorse)abstractHorse).hasChest();
 	}
 
 	@Override

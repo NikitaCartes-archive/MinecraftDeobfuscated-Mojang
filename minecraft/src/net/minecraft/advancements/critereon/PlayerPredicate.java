@@ -76,7 +76,7 @@ public class PlayerPredicate {
 			ServerPlayer serverPlayer = (ServerPlayer)entity;
 			if (!this.level.matches(serverPlayer.experienceLevel)) {
 				return false;
-			} else if (this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
+			} else if (this.gameType != null && this.gameType != serverPlayer.gameMode.getGameModeForPlayer()) {
 				return false;
 			} else {
 				StatsCounter statsCounter = serverPlayer.getStats();

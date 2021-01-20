@@ -49,7 +49,11 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	public ItemFrame(Level level, BlockPos blockPos, Direction direction) {
-		super(EntityType.ITEM_FRAME, level, blockPos);
+		this(EntityType.ITEM_FRAME, level, blockPos, direction);
+	}
+
+	public ItemFrame(EntityType<? extends ItemFrame> entityType, Level level, BlockPos blockPos, Direction direction) {
+		super(entityType, level, blockPos);
 		this.setDirection(direction);
 	}
 
@@ -215,7 +219,7 @@ public class ItemFrame extends HangingEntity {
 				}
 
 				if (bl) {
-					this.spawnAtLocation(Items.ITEM_FRAME);
+					this.spawnAtLocation(this.getFrameItemStack());
 				}
 
 				if (!itemStack.isEmpty()) {
@@ -394,6 +398,14 @@ public class ItemFrame extends HangingEntity {
 	@Override
 	public ItemStack getPickResult() {
 		ItemStack itemStack = this.getItem();
-		return itemStack.isEmpty() ? new ItemStack(Items.ITEM_FRAME) : itemStack.copy();
+		return itemStack.isEmpty() ? this.getFrameItemStack() : itemStack.copy();
+	}
+
+	private ItemStack getFrameItemStack() {
+		return this.isGlowFrame() ? new ItemStack(Items.GLOW_ITEM_FRAME) : new ItemStack(Items.ITEM_FRAME);
+	}
+
+	public boolean isGlowFrame() {
+		return this.getType() == EntityType.GLOW_ITEM_FRAME;
 	}
 }

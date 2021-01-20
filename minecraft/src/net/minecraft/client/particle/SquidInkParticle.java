@@ -5,14 +5,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.FastColor;
 
 @Environment(EnvType.CLIENT)
 public class SquidInkParticle extends SimpleAnimatedParticle {
-	private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+	private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, spriteSet, 0.0F);
 		this.quadSize = 0.5F;
 		this.setAlpha(1.0F);
-		this.setColor(0.0F, 0.0F, 0.0F);
+		this.setColor((float)FastColor.ARGB32.red(j), (float)FastColor.ARGB32.green(j), (float)FastColor.ARGB32.blue(j));
 		this.lifetime = (int)((double)(this.quadSize * 12.0F) / (Math.random() * 0.8F + 0.2F));
 		this.setSpriteFromAge(spriteSet);
 		this.hasPhysics = false;
@@ -51,6 +52,19 @@ public class SquidInkParticle extends SimpleAnimatedParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class GlowInkProvider implements ParticleProvider<SimpleParticleType> {
+		private final SpriteSet sprites;
+
+		public GlowInkProvider(SpriteSet spriteSet) {
+			this.sprites = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new SquidInkParticle(clientLevel, d, e, f, g, h, i, FastColor.ARGB32.color(255, 204, 31, 102), this.sprites);
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class Provider implements ParticleProvider<SimpleParticleType> {
 		private final SpriteSet sprites;
 
@@ -59,7 +73,7 @@ public class SquidInkParticle extends SimpleAnimatedParticle {
 		}
 
 		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-			return new SquidInkParticle(clientLevel, d, e, f, g, h, i, this.sprites);
+			return new SquidInkParticle(clientLevel, d, e, f, g, h, i, FastColor.ARGB32.color(255, 255, 255, 255), this.sprites);
 		}
 	}
 }

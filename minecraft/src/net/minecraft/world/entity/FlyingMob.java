@@ -1,6 +1,7 @@
 package net.minecraft.world.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -11,7 +12,7 @@ public abstract class FlyingMob extends Mob {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		return false;
 	}
 

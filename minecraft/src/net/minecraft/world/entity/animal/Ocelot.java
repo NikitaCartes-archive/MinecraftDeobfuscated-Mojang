@@ -133,7 +133,7 @@ public class Ocelot extends Animal {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		return false;
 	}
 

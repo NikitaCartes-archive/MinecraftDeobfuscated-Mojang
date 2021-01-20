@@ -42,7 +42,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 	public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
 	@Deprecated
 	public static final ResourceLocation LOCATION_PARTICLES = new ResourceLocation("textures/atlas/particles.png");
-	private final List<TextureAtlasSprite> animatedTextures = Lists.<TextureAtlasSprite>newArrayList();
+	private final List<Tickable> animatedTextures = Lists.<Tickable>newArrayList();
 	private final Set<ResourceLocation> sprites = Sets.<ResourceLocation>newHashSet();
 	private final Map<ResourceLocation, TextureAtlasSprite> texturesByName = Maps.<ResourceLocation, TextureAtlasSprite>newHashMap();
 	private final ResourceLocation location;
@@ -77,8 +77,9 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 				throw new ReportedException(crashReport);
 			}
 
-			if (textureAtlasSprite.isAnimation()) {
-				this.animatedTextures.add(textureAtlasSprite);
+			Tickable tickable = textureAtlasSprite.getAnimationTicker();
+			if (tickable != null) {
+				this.animatedTextures.add(tickable);
 			}
 		}
 	}
@@ -262,8 +263,8 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 	public void cycleAnimationFrames() {
 		this.bind();
 
-		for (TextureAtlasSprite textureAtlasSprite : this.animatedTextures) {
-			textureAtlasSprite.cycleFrames();
+		for (Tickable tickable : this.animatedTextures) {
+			tickable.tick();
 		}
 	}
 

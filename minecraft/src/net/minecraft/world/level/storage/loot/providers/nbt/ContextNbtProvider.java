@@ -90,7 +90,16 @@ public class ContextNbtProvider implements NbtProvider {
 		}
 	}
 
-	public static class DefaultSerializer implements GsonAdapterFactory.DefaultSerializer<ContextNbtProvider> {
+	interface Getter {
+		@Nullable
+		Tag get(LootContext lootContext);
+
+		String getId();
+
+		Set<LootContextParam<?>> getReferencedContextParams();
+	}
+
+	public static class InlineSerializer implements GsonAdapterFactory.InlineSerializer<ContextNbtProvider> {
 		public JsonElement serialize(ContextNbtProvider contextNbtProvider, JsonSerializationContext jsonSerializationContext) {
 			return new JsonPrimitive(contextNbtProvider.getter.getId());
 		}
@@ -99,15 +108,6 @@ public class ContextNbtProvider implements NbtProvider {
 			String string = jsonElement.getAsString();
 			return ContextNbtProvider.createFromContext(string);
 		}
-	}
-
-	interface Getter {
-		@Nullable
-		Tag get(LootContext lootContext);
-
-		String getId();
-
-		Set<LootContextParam<?>> getReferencedContextParams();
 	}
 
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<ContextNbtProvider> {

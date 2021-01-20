@@ -101,13 +101,13 @@ public class MinecartTNT extends AbstractMinecart {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		if (f >= 3.0F) {
 			float h = f / 10.0F;
 			this.explode((double)(h * h));
 		}
 
-		return super.causeFallDamage(f, g);
+		return super.causeFallDamage(f, g, damageSource);
 	}
 
 	@Override

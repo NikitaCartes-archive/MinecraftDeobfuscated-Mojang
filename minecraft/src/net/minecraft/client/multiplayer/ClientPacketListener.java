@@ -473,9 +473,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		int i = clientboundAddPlayerPacket.getEntityId();
 		RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId()).getProfile());
 		remotePlayer.setId(i);
-		remotePlayer.setPosAndOldPos(d, e, f);
 		remotePlayer.setPacketCoordinates(d, e, f);
 		remotePlayer.absMoveTo(d, e, f, g, h);
+		remotePlayer.setOldPosAndRot();
 		this.level.addPlayer(i, remotePlayer);
 	}
 

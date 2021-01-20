@@ -245,7 +245,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		if (f > 1.0F) {
 			this.playSound(SoundEvents.HORSE_LAND, 0.4F, 1.0F);
 		}
@@ -254,10 +254,10 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		if (i <= 0) {
 			return false;
 		} else {
-			this.hurt(DamageSource.FALL, (float)i);
+			this.hurt(damageSource, (float)i);
 			if (this.isVehicle()) {
 				for (Entity entity : this.getIndirectPassengers()) {
-					entity.hurt(DamageSource.FALL, (float)i);
+					entity.hurt(damageSource, (float)i);
 				}
 			}
 
@@ -1075,5 +1075,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 		this.randomizeAttributes();
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+	}
+
+	public boolean hasInventoryChanged(Container container) {
+		return this.inventory != container;
 	}
 }

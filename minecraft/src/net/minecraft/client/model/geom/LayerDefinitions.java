@@ -169,6 +169,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.GIANT, layerDefinition);
 		builder.put(ModelLayers.GIANT_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.GIANT_OUTER_ARMOR, layerDefinition2);
+		builder.put(ModelLayers.GLOW_SQUID, SquidModel.createBodyLayer());
 		builder.put(ModelLayers.GUARDIAN, GuardianModel.createBodyLayer());
 		builder.put(ModelLayers.HOGLIN, layerDefinition15);
 		builder.put(ModelLayers.HOPPER_MINECART, layerDefinition5);

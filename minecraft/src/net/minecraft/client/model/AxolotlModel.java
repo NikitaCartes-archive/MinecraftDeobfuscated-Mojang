@@ -109,16 +109,16 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 		this.body.x = 0.0F;
 		this.head.y = 0.0F;
 		this.body.y = 20.0F;
-		ModelUtils.setRotation(this.body, g * (float) (Math.PI / 180.0), f * (float) (Math.PI / 180.0), 0.0F);
-		ModelUtils.setRotation(this.head, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.leftHindLeg, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.rightHindLeg, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.leftFrontLeg, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.rightFrontLeg, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.leftGills, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.rightGills, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.topGills, 0.0F, 0.0F, 0.0F);
-		ModelUtils.setRotation(this.tail, 0.0F, 0.0F, 0.0F);
+		this.body.setRotation(g * (float) (Math.PI / 180.0), f * (float) (Math.PI / 180.0), 0.0F);
+		this.head.setRotation(0.0F, 0.0F, 0.0F);
+		this.leftHindLeg.setRotation(0.0F, 0.0F, 0.0F);
+		this.rightHindLeg.setRotation(0.0F, 0.0F, 0.0F);
+		this.leftFrontLeg.setRotation(0.0F, 0.0F, 0.0F);
+		this.rightFrontLeg.setRotation(0.0F, 0.0F, 0.0F);
+		this.leftGills.setRotation(0.0F, 0.0F, 0.0F);
+		this.rightGills.setRotation(0.0F, 0.0F, 0.0F);
+		this.topGills.setRotation(0.0F, 0.0F, 0.0F);
+		this.tail.setRotation(0.0F, 0.0F, 0.0F);
 	}
 
 	private void setupLayStillOnGroundAnimation(float f) {
@@ -133,8 +133,8 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 		this.topGills.xRot = 0.6F + 0.05F * k;
 		this.leftGills.yRot = -this.topGills.xRot;
 		this.rightGills.yRot = -this.leftGills.yRot;
-		ModelUtils.setRotation(this.leftHindLeg, 1.1F, 1.0F, 0.0F);
-		ModelUtils.setRotation(this.leftFrontLeg, 0.8F, 2.3F, -0.5F);
+		this.leftHindLeg.setRotation(1.1F, 1.0F, 0.0F);
+		this.leftFrontLeg.setRotation(0.8F, 2.3F, -0.5F);
 		this.applyMirrorLegRotations();
 	}
 
@@ -148,10 +148,10 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 		this.topGills.xRot = 0.6F - 0.08F * (h * h + 2.0F * Mth.sin(g));
 		this.leftGills.yRot = -this.topGills.xRot;
 		this.rightGills.yRot = -this.leftGills.yRot;
-		ModelUtils.setRotation(this.leftHindLeg, 0.9424779F, 1.5F - i, -0.1F);
-		ModelUtils.setRotation(this.leftFrontLeg, this.leftFrontLeg.xRot = 1.0995574F, (float) (Math.PI / 2) - j, 0.0F);
-		ModelUtils.setRotation(this.rightHindLeg, this.leftHindLeg.xRot, -1.0F - i, 0.0F);
-		ModelUtils.setRotation(this.rightFrontLeg, this.leftFrontLeg.xRot, (float) (-Math.PI / 2) - j, 0.0F);
+		this.leftHindLeg.setRotation(0.9424779F, 1.5F - i, -0.1F);
+		this.leftFrontLeg.setRotation(1.0995574F, (float) (Math.PI / 2) - j, 0.0F);
+		this.rightHindLeg.setRotation(this.leftHindLeg.xRot, -1.0F - i, 0.0F);
+		this.rightFrontLeg.setRotation(this.leftFrontLeg.xRot, (float) (-Math.PI / 2) - j, 0.0F);
 	}
 
 	private void setupWaterHoveringAnimation(float f) {
@@ -164,8 +164,8 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 		this.topGills.xRot = 0.2F * h;
 		this.leftGills.yRot = -0.3F * h - 0.19F;
 		this.rightGills.yRot = -this.leftGills.yRot;
-		ModelUtils.setRotation(this.leftHindLeg, (float) (Math.PI * 3.0 / 4.0) - h * 0.11F, 0.47123894F, 1.7278761F);
-		ModelUtils.setRotation(this.leftFrontLeg, (float) (Math.PI / 4) - h * 0.2F, 2.042035F, 0.0F);
+		this.leftHindLeg.setRotation((float) (Math.PI * 3.0 / 4.0) - h * 0.11F, 0.47123894F, 1.7278761F);
+		this.leftFrontLeg.setRotation((float) (Math.PI / 4) - h * 0.2F, 2.042035F, 0.0F);
 		this.applyMirrorLegRotations();
 		this.tail.yRot = 0.5F * h;
 	}
@@ -182,21 +182,21 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 		this.leftGills.yRot = 0.3F * i + 0.9F;
 		this.rightGills.yRot = -this.leftGills.yRot;
 		this.tail.yRot = 0.3F * Mth.cos(h * 0.9F);
-		ModelUtils.setRotation(this.leftHindLeg, 1.8849558F, -0.4F * i, (float) (Math.PI / 2));
-		ModelUtils.setRotation(this.leftFrontLeg, 1.8849558F, -0.2F * j - 0.1F, (float) (Math.PI / 2));
+		this.leftHindLeg.setRotation(1.8849558F, -0.4F * i, (float) (Math.PI / 2));
+		this.leftFrontLeg.setRotation(1.8849558F, -0.2F * j - 0.1F, (float) (Math.PI / 2));
 		this.applyMirrorLegRotations();
 	}
 
 	private void setupPlayDeadAnimation() {
-		ModelUtils.setRotation(this.leftHindLeg, 1.4137167F, 1.0995574F, (float) (Math.PI / 4));
-		ModelUtils.setRotation(this.leftFrontLeg, (float) (Math.PI / 4), 2.042035F, 0.0F);
+		this.leftHindLeg.setRotation(1.4137167F, 1.0995574F, (float) (Math.PI / 4));
+		this.leftFrontLeg.setRotation((float) (Math.PI / 4), 2.042035F, 0.0F);
 		this.body.xRot = -0.15F;
 		this.body.zRot = 0.35F;
 		this.applyMirrorLegRotations();
 	}
 
 	private void applyMirrorLegRotations() {
-		ModelUtils.setRotation(this.rightHindLeg, this.leftHindLeg.xRot, -this.leftHindLeg.yRot, -this.leftHindLeg.zRot);
-		ModelUtils.setRotation(this.rightFrontLeg, this.leftFrontLeg.xRot, -this.leftFrontLeg.yRot, -this.leftFrontLeg.zRot);
+		this.rightHindLeg.setRotation(this.leftHindLeg.xRot, -this.leftHindLeg.yRot, -this.leftHindLeg.zRot);
+		this.rightFrontLeg.setRotation(this.leftFrontLeg.xRot, -this.leftFrontLeg.yRot, -this.leftFrontLeg.zRot);
 	}
 }

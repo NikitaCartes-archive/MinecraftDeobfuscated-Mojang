@@ -12,6 +12,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -71,7 +72,12 @@ public class BundleItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		return dropContents(itemStack, player) ? InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide()) : InteractionResultHolder.fail(itemStack);
+		if (dropContents(itemStack, player)) {
+			player.awardStat(Stats.ITEM_USED.get(this));
+			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+		} else {
+			return InteractionResultHolder.fail(itemStack);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -160,6 +166,10 @@ public class BundleItem extends Item {
 				CompoundTag compoundTag2 = listTag.getCompound(0);
 				ItemStack itemStack2 = ItemStack.of(compoundTag2);
 				listTag.remove(0);
+				if (listTag.isEmpty()) {
+					itemStack.removeTagKey("Items");
+				}
+
 				return Optional.of(itemStack2);
 			}
 		}

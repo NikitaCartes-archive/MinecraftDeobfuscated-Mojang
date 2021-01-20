@@ -53,6 +53,7 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_GRANITE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_DIORITE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_ANDESITE);
+		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.GLOW_LICHEN);
 	}
 
 	public static void addDripstone(BiomeGenerationSettings.Builder builder) {

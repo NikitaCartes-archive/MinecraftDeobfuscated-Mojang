@@ -36,15 +36,15 @@ import net.minecraft.world.phys.Vec3;
 
 public class SpawnEggItem extends Item {
 	private static final Map<EntityType<? extends Mob>, SpawnEggItem> BY_ID = Maps.<EntityType<? extends Mob>, SpawnEggItem>newIdentityHashMap();
-	private final int color1;
-	private final int color2;
+	private final int backgroundColor;
+	private final int highlightColor;
 	private final EntityType<?> defaultType;
 
 	public SpawnEggItem(EntityType<? extends Mob> entityType, int i, int j, Item.Properties properties) {
 		super(properties);
 		this.defaultType = entityType;
-		this.color1 = i;
-		this.color2 = j;
+		this.backgroundColor = i;
+		this.highlightColor = j;
 		BY_ID.put(entityType, this);
 	}
 
@@ -133,7 +133,7 @@ public class SpawnEggItem extends Item {
 
 	@Environment(EnvType.CLIENT)
 	public int getColor(int i) {
-		return i == 0 ? this.color1 : this.color2;
+		return i == 0 ? this.backgroundColor : this.highlightColor;
 	}
 
 	@Nullable

@@ -173,7 +173,7 @@ public class VineBlock extends Block {
 
 	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (serverLevel.random.nextInt(4) == 0) {
+		if (random.nextInt(4) == 0) {
 			Direction direction = Direction.getRandom(random);
 			BlockPos blockPos2 = blockPos.above();
 			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
@@ -197,7 +197,7 @@ public class VineBlock extends Block {
 								serverLevel.setBlock(blockPos4, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
 							} else if (bl2 && serverLevel.isEmptyBlock(blockPos5) && isAcceptableNeighbour(serverLevel, blockPos.relative(direction3), direction4)) {
 								serverLevel.setBlock(blockPos5, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
-							} else if ((double)serverLevel.random.nextFloat() < 0.05 && isAcceptableNeighbour(serverLevel, blockPos3.above(), Direction.UP)) {
+							} else if ((double)random.nextFloat() < 0.05 && isAcceptableNeighbour(serverLevel, blockPos3.above(), Direction.UP)) {
 								serverLevel.setBlock(blockPos3, this.defaultBlockState().setValue(UP, Boolean.valueOf(true)), 2);
 							}
 						}

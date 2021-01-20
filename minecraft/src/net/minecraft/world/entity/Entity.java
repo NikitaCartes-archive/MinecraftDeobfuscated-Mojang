@@ -206,7 +206,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.position = Vec3.ZERO;
 		this.blockPosition = BlockPos.ZERO;
 		this.packetCoordinates = Vec3.ZERO;
-		this.setPos(0.0, 0.0, 0.0);
 		this.entityData = new SynchedEntityData(this);
 		this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
 		this.entityData.define(DATA_AIR_SUPPLY_ID, this.getMaxAirSupply());
@@ -217,6 +216,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.entityData.define(DATA_POSE, Pose.STANDING);
 		this.entityData.define(DATA_TICKS_FROZEN, 0);
 		this.defineSynchedData();
+		this.setPos(0.0, 0.0, 0.0);
 		this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
 	}
 
@@ -348,7 +348,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setPos(double d, double e, double f) {
 		this.setPosRaw(d, e, f);
-		this.setBoundingBox(this.dimensions.makeBoundingBox(d, e, f));
+		this.setBoundingBox(this.makeBoundingBox());
+	}
+
+	protected AABB makeBoundingBox() {
+		return this.dimensions.makeBoundingBox(this.position);
 	}
 
 	protected void reapplyPosition() {
@@ -509,8 +513,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void move(MoverType moverType, Vec3 vec3) {
 		if (this.noPhysics) {
-			this.setBoundingBox(this.getBoundingBox().move(vec3));
-			this.setLocationFromBoundingbox();
+			this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
 		} else {
 			if (moverType == MoverType.PISTON) {
 				vec3 = this.limitPistonMovement(vec3);
@@ -529,8 +532,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			vec3 = this.maybeBackOffFromEdge(vec3, moverType);
 			Vec3 vec32 = this.collide(vec3);
 			if (vec32.lengthSqr() > 1.0E-7) {
-				this.setBoundingBox(this.getBoundingBox().move(vec32));
-				this.setLocationFromBoundingbox();
+				this.setPos(this.getX() + vec32.x, this.getY() + vec32.y, this.getZ() + vec32.z);
 			}
 
 			this.level.getProfiler().pop();
@@ -821,11 +823,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return (float)((int)this.moveDist + 1);
 	}
 
-	public void setLocationFromBoundingbox() {
-		AABB aABB = this.getBoundingBox();
-		this.setPosRaw((aABB.minX + aABB.maxX) / 2.0, aABB.minY, (aABB.minZ + aABB.maxZ) / 2.0);
-	}
-
 	protected SoundEvent getSwimSound() {
 		return SoundEvents.GENERIC_SWIM;
 	}
@@ -954,10 +951,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.getType().fireImmune();
 	}
 
-	public boolean causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
 		if (this.isVehicle()) {
 			for (Entity entity : this.getPassengers()) {
-				entity.causeFallDamage(f, g);
+				entity.causeFallDamage(f, g, damageSource);
 			}
 		}
 
@@ -1178,20 +1175,25 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public void moveTo(double d, double e, double f, float g, float h) {
-		this.setPosAndOldPos(d, e, f);
+		this.setPosRaw(d, e, f);
 		this.yRot = g;
 		this.xRot = h;
+		this.setOldPosAndRot();
 		this.reapplyPosition();
 	}
 
-	public void setPosAndOldPos(double d, double e, double f) {
-		this.setPosRaw(d, e, f);
+	public final void setOldPosAndRot() {
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
 		this.xOld = d;
 		this.yOld = e;
 		this.zOld = f;
+		this.yRotO = this.yRot;
+		this.xRotO = this.xRot;
 	}
 
 	public float distanceTo(Entity entity) {
@@ -1476,11 +1478,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			double e = listTag2.getDouble(1);
 			double f = listTag2.getDouble(2);
 			this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-			this.setPosAndOldPos(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
+			this.setPosRaw(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
 			this.yRot = listTag3.getFloat(0);
 			this.xRot = listTag3.getFloat(1);
-			this.yRotO = this.yRot;
-			this.xRotO = this.xRot;
+			this.setOldPosAndRot();
 			this.setYHeadRot(this.yRot);
 			this.setYBodyRot(this.yRot);
 			this.fallDistance = compoundTag.getFloat("FallDistance");
@@ -2154,7 +2155,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return this.invulnerable && damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer();
+		return this.isRemoved() || this.invulnerable && damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer();
 	}
 
 	public boolean isInvulnerable() {
@@ -2419,27 +2420,14 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		EntityDimensions entityDimensions2 = this.getDimensions(pose);
 		this.dimensions = entityDimensions2;
 		this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
-		if (entityDimensions2.width < entityDimensions.width) {
-			double d = (double)entityDimensions2.width / 2.0;
-			this.setBoundingBox(
-				new AABB(this.getX() - d, this.getY(), this.getZ() - d, this.getX() + d, this.getY() + (double)entityDimensions2.height, this.getZ() + d)
-			);
-		} else {
-			AABB aABB = this.getBoundingBox();
-			this.setBoundingBox(
-				new AABB(
-					aABB.minX,
-					aABB.minY,
-					aABB.minZ,
-					aABB.minX + (double)entityDimensions2.width,
-					aABB.minY + (double)entityDimensions2.height,
-					aABB.minZ + (double)entityDimensions2.width
-				)
-			);
-			if (entityDimensions2.width > entityDimensions.width && !this.firstTick && !this.level.isClientSide) {
-				float f = entityDimensions.width - entityDimensions2.width;
-				this.move(MoverType.SELF, new Vec3((double)f, 0.0, (double)f));
-			}
+		this.reapplyPosition();
+		if (!this.level.isClientSide
+			&& !this.firstTick
+			&& entityDimensions2.width > entityDimensions.width
+			&& this.level.noBlockCollision(this, this.getBoundingBox(), (blockState, blockPos) -> true)) {
+			float f = entityDimensions.width - entityDimensions2.width;
+			this.setPos(this.getX() - (double)f / 2.0, this.getY(), this.getZ() - (double)f / 2.0);
+			this.move(MoverType.SELF, new Vec3((double)f, 0.0, (double)f));
 		}
 	}
 
@@ -2460,7 +2448,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public final AABB getBoundingBox() {
 		return this.bb;
 	}
 
@@ -2477,7 +2465,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return new AABB(vec3, vec32);
 	}
 
-	public void setBoundingBox(AABB aABB) {
+	public final void setBoundingBox(AABB aABB) {
 		this.bb = aABB;
 	}
 
@@ -2886,7 +2874,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.getZ((2.0 * this.random.nextDouble() - 1.0) * d);
 	}
 
-	public void setPosRaw(double d, double e, double f) {
+	public final void setPosRaw(double d, double e, double f) {
 		if (this.position.x != d || this.position.y != e || this.position.z != f) {
 			this.position = new Vec3(d, e, f);
 			int i = Mth.floor(d);

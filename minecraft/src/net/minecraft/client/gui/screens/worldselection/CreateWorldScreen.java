@@ -178,7 +178,7 @@ public class CreateWorldScreen extends Screen {
 		int j = this.width / 2 + 5;
 		this.modeButton = this.addButton(
 			CycleButton.<CreateWorldScreen.SelectedGameMode>builder(CreateWorldScreen.SelectedGameMode::getDisplayName)
-				.withValues(CreateWorldScreen.SelectedGameMode.SURVIVAL, CreateWorldScreen.SelectedGameMode.CREATIVE, CreateWorldScreen.SelectedGameMode.HARDCORE)
+				.withValues(CreateWorldScreen.SelectedGameMode.SURVIVAL, CreateWorldScreen.SelectedGameMode.HARDCORE, CreateWorldScreen.SelectedGameMode.CREATIVE)
 				.withInitialValue(this.gameMode)
 				.withCustomNarration(
 					cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage())

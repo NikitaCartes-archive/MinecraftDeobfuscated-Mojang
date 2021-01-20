@@ -4,11 +4,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -27,6 +30,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 	private final WoodType type;
 
@@ -66,24 +70,45 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = itemStack.getItem() instanceof DyeItem && player.getAbilities().mayBuild;
-		if (level.isClientSide) {
-			return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof SignBlockEntity) {
-				SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
-				if (bl) {
-					boolean bl2 = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor());
-					if (bl2 && !player.isCreative()) {
-						itemStack.shrink(1);
-					}
-				}
-
-				return signBlockEntity.executeClickCommands(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		boolean bl = itemStack.getItem() instanceof DyeItem;
+		boolean bl2 = itemStack.is(Items.GLOW_INK_SAC);
+		boolean bl3 = itemStack.is(Items.INK_SAC);
+		boolean bl4 = (bl2 || bl || bl3) && player.getAbilities().mayBuild;
+		boolean bl5 = (Boolean)blockState.getValue(LIT);
+		if ((!bl2 || !bl5) && (!bl3 || bl5)) {
+			if (level.isClientSide) {
+				return bl4 ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
 			} else {
-				return InteractionResult.PASS;
+				BlockEntity blockEntity = level.getBlockEntity(blockPos);
+				if (blockEntity instanceof SignBlockEntity) {
+					SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
+					if (bl4) {
+						boolean bl6;
+						if (bl2) {
+							level.playSound(null, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+							level.setBlockAndUpdate(blockPos, blockState.setValue(LIT, Boolean.valueOf(true)));
+							bl6 = true;
+						} else if (bl3) {
+							level.playSound(null, blockPos, SoundEvents.INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+							level.setBlockAndUpdate(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)));
+							bl6 = true;
+						} else {
+							level.playSound(null, blockPos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+							bl6 = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor());
+						}
+
+						if (bl6 && !player.isCreative()) {
+							itemStack.shrink(1);
+						}
+					}
+
+					return signBlockEntity.executeClickCommands(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+				} else {
+					return InteractionResult.PASS;
+				}
 			}
+		} else {
+			return InteractionResult.PASS;
 		}
 	}
 

@@ -43,6 +43,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -277,25 +278,30 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 
 		public void joinWorld() {
 			if (!this.summary.isLocked()) {
-				if (this.summary.shouldBackup()) {
-					Component component = new TranslatableComponent("selectWorld.backupQuestion");
-					Component component2 = new TranslatableComponent(
-						"selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName()
-					);
+				LevelSummary.BackupStatus backupStatus = this.summary.backupStatus();
+				if (backupStatus.shouldBackup()) {
+					String string = "selectWorld.backupQuestion." + backupStatus.getTranslationKey();
+					String string2 = "selectWorld.backupWarning." + backupStatus.getTranslationKey();
+					MutableComponent mutableComponent = new TranslatableComponent(string);
+					if (backupStatus.isSevere()) {
+						mutableComponent.withStyle(ChatFormatting.BOLD, ChatFormatting.RED);
+					}
+
+					Component component = new TranslatableComponent(string2, this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
 					this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
 						if (bl) {
-							String string = this.summary.getLevelId();
+							String stringx = this.summary.getLevelId();
 
-							try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(string)) {
+							try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(stringx)) {
 								EditWorldScreen.makeBackupAndShowToast(levelStorageAccess);
 							} catch (IOException var17) {
-								SystemToast.onWorldAccessFailure(this.minecraft, string);
-								WorldSelectionList.LOGGER.error("Failed to backup level {}", string, var17);
+								SystemToast.onWorldAccessFailure(this.minecraft, stringx);
+								WorldSelectionList.LOGGER.error("Failed to backup level {}", stringx, var17);
 							}
 						}
 
 						this.loadWorld();
-					}, component, component2, false));
+					}, mutableComponent, component, false));
 				} else if (this.summary.askToOpenWorld()) {
 					this.minecraft
 						.setScreen(
@@ -304,8 +310,8 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 									if (bl) {
 										try {
 											this.loadWorld();
-										} catch (Exception var3) {
-											WorldSelectionList.LOGGER.error("Failure to open 'future world'", (Throwable)var3);
+										} catch (Exception var3x) {
+											WorldSelectionList.LOGGER.error("Failure to open 'future world'", (Throwable)var3x);
 											this.minecraft
 												.setScreen(
 													new AlertScreen(

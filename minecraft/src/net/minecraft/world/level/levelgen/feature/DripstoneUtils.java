@@ -29,7 +29,7 @@ public class DripstoneUtils {
 	}
 
 	protected static boolean isCircleMostlyEmbeddedInStone(WorldGenLevel worldGenLevel, BlockPos blockPos, int i) {
-		if (isEmptyOrWater(worldGenLevel, blockPos)) {
+		if (isEmptyOrWaterOrLava(worldGenLevel, blockPos)) {
 			return false;
 		} else {
 			float f = 6.0F;
@@ -38,7 +38,7 @@ public class DripstoneUtils {
 			for (float h = 0.0F; h < (float) (Math.PI * 2); h += g) {
 				int j = (int)(Mth.cos(h) * (float)i);
 				int k = (int)(Mth.sin(h) * (float)i);
-				if (isEmptyOrWater(worldGenLevel, blockPos.offset(j, 0, k))) {
+				if (isEmptyOrWaterOrLava(worldGenLevel, blockPos.offset(j, 0, k))) {
 					return false;
 				}
 			}
@@ -49,6 +49,10 @@ public class DripstoneUtils {
 
 	protected static boolean isEmptyOrWater(LevelAccessor levelAccessor, BlockPos blockPos) {
 		return levelAccessor.isStateAtPosition(blockPos, DripstoneUtils::isEmptyOrWater);
+	}
+
+	protected static boolean isEmptyOrWaterOrLava(LevelAccessor levelAccessor, BlockPos blockPos) {
+		return levelAccessor.isStateAtPosition(blockPos, DripstoneUtils::isEmptyOrWaterOrLava);
 	}
 
 	protected static void buildBaseToTipColumn(Direction direction, int i, boolean bl, Consumer<BlockState> consumer) {
@@ -98,11 +102,19 @@ public class DripstoneUtils {
 			.setValue(PointedDripstoneBlock.THICKNESS, dripstoneThickness);
 	}
 
+	public static boolean isDripstoneBaseOrLava(BlockState blockState) {
+		return isDripstoneBase(blockState) || blockState.is(Blocks.LAVA);
+	}
+
 	public static boolean isDripstoneBase(BlockState blockState) {
 		return blockState.is(Blocks.DRIPSTONE_BLOCK) || blockState.is(BlockTags.DRIPSTONE_REPLACEABLE);
 	}
 
 	public static boolean isEmptyOrWater(BlockState blockState) {
 		return blockState.isAir() || blockState.is(Blocks.WATER);
+	}
+
+	public static boolean isEmptyOrWaterOrLava(BlockState blockState) {
+		return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA);
 	}
 }

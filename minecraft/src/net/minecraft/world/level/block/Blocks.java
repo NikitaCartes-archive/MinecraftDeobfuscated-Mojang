@@ -3280,6 +3280,12 @@ public class Blocks {
 				.strength(1.5F, 1.0F)
 		)
 	);
+	public static final Block GLOW_LICHEN = register(
+		"glow_lichen",
+		new GlowLichenBlock(
+			BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT).noCollission().strength(0.2F).sound(SoundType.GLOW_LICHEN).lightLevel(blockStatex -> 7)
+		)
+	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;

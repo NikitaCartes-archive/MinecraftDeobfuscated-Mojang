@@ -108,7 +108,7 @@ public class ItemEntity extends Entity {
 			if (this.level.isClientSide) {
 				this.noPhysics = false;
 			} else {
-				this.noPhysics = !this.level.noCollision(this);
+				this.noPhysics = !this.level.noCollision(this, this.getBoundingBox().deflate(1.0E-7), entity -> true);
 				if (this.noPhysics) {
 					this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 				}

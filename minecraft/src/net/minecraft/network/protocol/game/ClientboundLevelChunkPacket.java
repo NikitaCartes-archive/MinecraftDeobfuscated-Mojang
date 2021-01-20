@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListener> {
 	private int x;
 	private int z;
-	private int availableSections;
+	private BitSet availableSections;
 	private CompoundTag heightmaps;
 	@Nullable
 	private int[] biomes;
@@ -62,7 +63,7 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.x = friendlyByteBuf.readInt();
 		this.z = friendlyByteBuf.readInt();
-		this.availableSections = friendlyByteBuf.readVarInt();
+		this.availableSections = friendlyByteBuf.readBitSet();
 		this.heightmaps = friendlyByteBuf.readNbt();
 		this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.MAX_SIZE);
 		int i = friendlyByteBuf.readVarInt();
@@ -84,7 +85,7 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeInt(this.x);
 		friendlyByteBuf.writeInt(this.z);
-		friendlyByteBuf.writeVarInt(this.availableSections);
+		friendlyByteBuf.writeBitSet(this.availableSections);
 		friendlyByteBuf.writeNbt(this.heightmaps);
 		if (this.biomes != null) {
 			friendlyByteBuf.writeVarIntArray(this.biomes);
@@ -114,20 +115,20 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		return byteBuf;
 	}
 
-	public int extractChunkData(FriendlyByteBuf friendlyByteBuf, LevelChunk levelChunk) {
-		int i = 0;
+	public BitSet extractChunkData(FriendlyByteBuf friendlyByteBuf, LevelChunk levelChunk) {
+		BitSet bitSet = new BitSet();
 		LevelChunkSection[] levelChunkSections = levelChunk.getSections();
-		int j = 0;
+		int i = 0;
 
-		for (int k = levelChunkSections.length; j < k; j++) {
-			LevelChunkSection levelChunkSection = levelChunkSections[j];
+		for (int j = levelChunkSections.length; i < j; i++) {
+			LevelChunkSection levelChunkSection = levelChunkSections[i];
 			if (levelChunkSection != LevelChunk.EMPTY_SECTION && !levelChunkSection.isEmpty()) {
-				i |= 1 << j;
+				bitSet.set(i);
 				levelChunkSection.write(friendlyByteBuf);
 			}
 		}
 
-		return i;
+		return bitSet;
 	}
 
 	protected int calculateChunkSize(LevelChunk levelChunk) {
@@ -156,7 +157,7 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	}
 
 	@Environment(EnvType.CLIENT)
-	public int getAvailableSections() {
+	public BitSet getAvailableSections() {
 		return this.availableSections;
 	}
 

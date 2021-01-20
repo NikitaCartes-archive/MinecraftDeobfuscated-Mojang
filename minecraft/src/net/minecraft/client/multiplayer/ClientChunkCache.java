@@ -1,5 +1,6 @@
 package net.minecraft.client.multiplayer;
 
+import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
@@ -81,14 +82,14 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Nullable
 	public LevelChunk replaceWithPacketData(
-		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k
+		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet
 	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
 			return null;
 		} else {
-			int l = this.storage.getIndex(i, j);
-			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
+			int k = this.storage.getIndex(i, j);
+			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(k);
 			ChunkPos chunkPos = new ChunkPos(i, j);
 			if (!isValidChunk(levelChunk, i, j)) {
 				if (chunkBiomeContainer == null) {
@@ -97,20 +98,20 @@ public class ClientChunkCache extends ChunkSource {
 				}
 
 				levelChunk = new LevelChunk(this.level, chunkPos, chunkBiomeContainer);
-				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
-				this.storage.replace(l, levelChunk);
+				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, bitSet);
+				this.storage.replace(k, levelChunk);
 			} else {
-				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
+				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, bitSet);
 			}
 
 			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
 			LevelLightEngine levelLightEngine = this.getLightEngine();
 			levelLightEngine.enableLightSources(chunkPos, true);
 
-			for (int m = 0; m < levelChunkSections.length; m++) {
-				LevelChunkSection levelChunkSection = levelChunkSections[m];
-				int n = this.level.getSectionYFromSectionIndex(m);
-				levelLightEngine.updateSectionStatus(SectionPos.of(i, n, j), LevelChunkSection.isEmpty(levelChunkSection));
+			for (int l = 0; l < levelChunkSections.length; l++) {
+				LevelChunkSection levelChunkSection = levelChunkSections[l];
+				int m = this.level.getSectionYFromSectionIndex(l);
+				levelLightEngine.updateSectionStatus(SectionPos.of(i, m, j), LevelChunkSection.isEmpty(levelChunkSection));
 			}
 
 			this.level.onChunkLoaded(chunkPos);

@@ -152,7 +152,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		this.panicGoal = new PanicGoal(this, 1.65);
 		this.goalSelector.addGoal(1, this.panicGoal);
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.temptGoal = new TemptGoal(this, 1.4, false, TEMPT_ITEMS);
+		this.temptGoal = new TemptGoal(this, 1.4, TEMPT_ITEMS, false);
 		this.goalSelector.addGoal(3, this.temptGoal);
 		this.goalSelector.addGoal(4, new Strider.StriderGoToLavaGoal(this, 1.5));
 		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1));

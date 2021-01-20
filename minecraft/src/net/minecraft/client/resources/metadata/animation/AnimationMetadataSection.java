@@ -1,10 +1,8 @@
 package net.minecraft.client.resources.metadata.animation;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
-import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -65,10 +63,6 @@ public class AnimationMetadataSection {
 		return this.frameWidth == -1 ? i : this.frameWidth;
 	}
 
-	public int getFrameCount() {
-		return this.frames.size();
-	}
-
 	public int getDefaultFrameTime() {
 		return this.defaultFrameTime;
 	}
@@ -77,26 +71,15 @@ public class AnimationMetadataSection {
 		return this.interpolatedFrames;
 	}
 
-	private AnimationFrame getFrame(int i) {
-		return (AnimationFrame)this.frames.get(i);
-	}
-
-	public int getFrameTime(int i) {
-		AnimationFrame animationFrame = this.getFrame(i);
-		return animationFrame.isTimeUnknown() ? this.defaultFrameTime : animationFrame.getTime();
-	}
-
-	public int getFrameIndex(int i) {
-		return ((AnimationFrame)this.frames.get(i)).getIndex();
-	}
-
-	public Set<Integer> getUniqueFrameIndices() {
-		Set<Integer> set = Sets.<Integer>newHashSet();
-
+	public void forEachFrame(AnimationMetadataSection.FrameOutput frameOutput) {
 		for (AnimationFrame animationFrame : this.frames) {
-			set.add(animationFrame.getIndex());
+			frameOutput.accept(animationFrame.getIndex(), animationFrame.getTime(this.defaultFrameTime));
 		}
+	}
 
-		return set;
+	@FunctionalInterface
+	@Environment(EnvType.CLIENT)
+	public interface FrameOutput {
+		void accept(int i, int j);
 	}
 }

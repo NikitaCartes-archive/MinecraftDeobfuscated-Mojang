@@ -184,7 +184,14 @@ public abstract class BaseFireBlock extends Block {
 				}
 			}
 
-			return bl && PortalShape.findEmptyPortalShape(level, blockPos, direction.getCounterClockWise().getAxis()).isPresent();
+			if (!bl) {
+				return false;
+			} else {
+				Direction.Axis axis = direction.getAxis().isHorizontal()
+					? direction.getCounterClockWise().getAxis()
+					: Direction.Plane.HORIZONTAL.getRandomAxis(level.random);
+				return PortalShape.findEmptyPortalShape(level, blockPos, axis).isPresent();
+			}
 		}
 	}
 }

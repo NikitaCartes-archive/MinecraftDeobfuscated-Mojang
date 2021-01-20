@@ -113,6 +113,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.PUMPKIN_STEM, renderType3);
 		hashMap.put(Blocks.MELON_STEM, renderType3);
 		hashMap.put(Blocks.VINE, renderType3);
+		hashMap.put(Blocks.GLOW_LICHEN, renderType3);
 		hashMap.put(Blocks.LILY_PAD, renderType3);
 		hashMap.put(Blocks.NETHER_WART, renderType3);
 		hashMap.put(Blocks.BREWING_STAND, renderType3);

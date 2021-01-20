@@ -8,6 +8,7 @@ import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.realms.RealmsScreen;
@@ -18,7 +19,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	private static final ResourceLocation INVITE_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/invite_icon.png");
 	private static final ResourceLocation TRIAL_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/trial_icon.png");
 	private static final ResourceLocation NEWS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/news_notification_mainscreen.png");
-	private static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher();
+	private static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher(Minecraft.getInstance(), RealmsClient.create());
 	private volatile int numberOfPendingInvites;
 	private static boolean checkedMcoAvailability;
 	private static boolean trialAvailable;

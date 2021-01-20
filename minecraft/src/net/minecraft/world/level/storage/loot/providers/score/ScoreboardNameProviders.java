@@ -17,7 +17,7 @@ public class ScoreboardNameProviders {
 		return GsonAdapterFactory.<ScoreboardNameProvider, LootScoreProviderType>builder(
 				Registry.LOOT_SCORE_PROVIDER_TYPE, "provider", "type", ScoreboardNameProvider::getType
 			)
-			.withDefaultSerializer(CONTEXT, new ContextScoreboardNameProvider.DefaultSerializer())
+			.withInlineSerializer(CONTEXT, new ContextScoreboardNameProvider.InlineSerializer())
 			.build();
 	}
 }

@@ -29,7 +29,9 @@ public class GsonAdapterFactory {
 		private final String typeKey;
 		private final Function<E, T> typeGetter;
 		@Nullable
-		private Pair<T, GsonAdapterFactory.DefaultSerializer<? extends E>> defaultType;
+		private Pair<T, GsonAdapterFactory.InlineSerializer<? extends E>> inlineType;
+		@Nullable
+		private T defaultType;
 
 		private Builder(Registry<T> registry, String string, String string2, Function<E, T> function) {
 			this.registry = registry;
@@ -38,17 +40,22 @@ public class GsonAdapterFactory {
 			this.typeGetter = function;
 		}
 
-		public GsonAdapterFactory.Builder<E, T> withDefaultSerializer(T serializerType, GsonAdapterFactory.DefaultSerializer<? extends E> defaultSerializer) {
-			this.defaultType = Pair.of(serializerType, defaultSerializer);
+		public GsonAdapterFactory.Builder<E, T> withInlineSerializer(T serializerType, GsonAdapterFactory.InlineSerializer<? extends E> inlineSerializer) {
+			this.inlineType = Pair.of(serializerType, inlineSerializer);
+			return this;
+		}
+
+		public GsonAdapterFactory.Builder<E, T> withDefaultType(T serializerType) {
+			this.defaultType = serializerType;
 			return this;
 		}
 
 		public Object build() {
-			return new GsonAdapterFactory.JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, this.defaultType);
+			return new GsonAdapterFactory.JsonAdapter(this.registry, this.elementName, this.typeKey, this.typeGetter, this.defaultType, this.inlineType);
 		}
 	}
 
-	public interface DefaultSerializer<T> {
+	public interface InlineSerializer<T> {
 		JsonElement serialize(T object, JsonSerializationContext jsonSerializationContext);
 
 		T deserialize(JsonElement jsonElement, JsonDeserializationContext jsonDeserializationContext);
@@ -60,41 +67,56 @@ public class GsonAdapterFactory {
 		private final String typeKey;
 		private final Function<E, T> typeGetter;
 		@Nullable
-		private final Pair<T, GsonAdapterFactory.DefaultSerializer<? extends E>> defaultType;
+		private final T defaultType;
+		@Nullable
+		private final Pair<T, GsonAdapterFactory.InlineSerializer<? extends E>> inlineType;
 
 		private JsonAdapter(
-			Registry<T> registry, String string, String string2, Function<E, T> function, @Nullable Pair<T, GsonAdapterFactory.DefaultSerializer<? extends E>> pair
+			Registry<T> registry,
+			String string,
+			String string2,
+			Function<E, T> function,
+			@Nullable T serializerType,
+			@Nullable Pair<T, GsonAdapterFactory.InlineSerializer<? extends E>> pair
 		) {
 			this.registry = registry;
 			this.elementName = string;
 			this.typeKey = string2;
 			this.typeGetter = function;
-			this.defaultType = pair;
+			this.defaultType = serializerType;
+			this.inlineType = pair;
 		}
 
 		@Override
 		public E deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			if (jsonElement.isJsonObject()) {
 				JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, this.elementName);
-				ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, this.typeKey));
-				T serializerType = this.registry.get(resourceLocation);
+				String string = GsonHelper.getAsString(jsonObject, this.typeKey, "");
+				T serializerType;
+				if (string.isEmpty()) {
+					serializerType = this.defaultType;
+				} else {
+					ResourceLocation resourceLocation = new ResourceLocation(string);
+					serializerType = this.registry.get(resourceLocation);
+				}
+
 				if (serializerType == null) {
-					throw new JsonSyntaxException("Unknown type '" + resourceLocation + "'");
+					throw new JsonSyntaxException("Unknown type '" + string + "'");
 				} else {
 					return (E)serializerType.getSerializer().deserialize(jsonObject, jsonDeserializationContext);
 				}
-			} else if (this.defaultType == null) {
+			} else if (this.inlineType == null) {
 				throw new UnsupportedOperationException("Object " + jsonElement + " can't be deserialized");
 			} else {
-				return (E)this.defaultType.getSecond().deserialize(jsonElement, jsonDeserializationContext);
+				return (E)this.inlineType.getSecond().deserialize(jsonElement, jsonDeserializationContext);
 			}
 		}
 
 		@Override
 		public JsonElement serialize(E object, Type type, JsonSerializationContext jsonSerializationContext) {
 			T serializerType = (T)this.typeGetter.apply(object);
-			if (this.defaultType != null && this.defaultType.getFirst() == serializerType) {
-				return this.defaultType.getSecond().serialize(object, jsonSerializationContext);
+			if (this.inlineType != null && this.inlineType.getFirst() == serializerType) {
+				return this.inlineType.getSecond().serialize(object, jsonSerializationContext);
 			} else if (serializerType == null) {
 				throw new JsonSyntaxException("Unknown type: " + object);
 			} else {

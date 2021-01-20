@@ -29,7 +29,7 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 			return false;
 		} else {
 			Optional<Column> optional = Column.scan(
-				worldGenLevel, blockPos, largeDripstoneConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBase
+				worldGenLevel, blockPos, largeDripstoneConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBaseOrLava
 			);
 			if (optional.isPresent() && optional.get() instanceof Column.Range) {
 				Column.Range range = (Column.Range)optional.get();
@@ -109,6 +109,10 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 				int i = Math.min(10, this.getHeight());
 
 				for (int j = 0; j < i; j++) {
+					if (worldGenLevel.getBlockState(mutableBlockPos).is(Blocks.LAVA)) {
+						return false;
+					}
+
 					if (DripstoneUtils.isCircleMostlyEmbeddedInStone(worldGenLevel, windOffsetter.offset(mutableBlockPos), this.radius)) {
 						this.root = mutableBlockPos;
 						return true;
@@ -143,7 +147,7 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 
 							for (int l = 0; l < k; l++) {
 								BlockPos blockPos = windOffsetter.offset(mutableBlockPos);
-								if (DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
+								if (DripstoneUtils.isEmptyOrWaterOrLava(worldGenLevel, blockPos)) {
 									bl = true;
 									Block block = Blocks.DRIPSTONE_BLOCK;
 									worldGenLevel.setBlock(blockPos, block.defaultBlockState(), 2);
@@ -171,7 +175,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 
 		private WindOffsetter(int i, Random random, UniformFloat uniformFloat) {
 			this.originY = i;
-			this.windSpeed = new Vec3((double)uniformFloat.sample(random), 0.0, (double)uniformFloat.sample(random));
+			float f = uniformFloat.sample(random);
+			float g = Mth.randomBetween(random, 0.0F, (float) Math.PI);
+			this.windSpeed = new Vec3((double)(Mth.cos(g) * f), 0.0, (double)(Mth.sin(g) * f));
 		}
 
 		private WindOffsetter() {

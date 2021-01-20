@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -18,15 +17,18 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.ShulkerSharedHelper;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -42,9 +44,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.piston.PistonBaseBlock;
-import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -55,14 +56,12 @@ public class Shulker extends AbstractGolem implements Enemy {
 		COVERED_ARMOR_MODIFIER_UUID, "Covered armor bonus", 20.0, AttributeModifier.Operation.ADDITION
 	);
 	protected static final EntityDataAccessor<Direction> DATA_ATTACH_FACE_ID = SynchedEntityData.defineId(Shulker.class, EntityDataSerializers.DIRECTION);
-	protected static final EntityDataAccessor<Optional<BlockPos>> DATA_ATTACH_POS_ID = SynchedEntityData.defineId(
-		Shulker.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
-	);
 	protected static final EntityDataAccessor<Byte> DATA_PEEK_ID = SynchedEntityData.defineId(Shulker.class, EntityDataSerializers.BYTE);
 	protected static final EntityDataAccessor<Byte> DATA_COLOR_ID = SynchedEntityData.defineId(Shulker.class, EntityDataSerializers.BYTE);
 	private float currentPeekAmountO;
 	private float currentPeekAmount;
-	private BlockPos oldAttachPosition = null;
+	@Nullable
+	private BlockPos clientOldAttachPosition;
 	private int clientSideTeleportInterpolation;
 
 	public Shulker(EntityType<? extends Shulker> entityType, Level level) {
@@ -117,7 +116,6 @@ public class Shulker extends AbstractGolem implements Enemy {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_ATTACH_FACE_ID, Direction.DOWN);
-		this.entityData.define(DATA_ATTACH_POS_ID, Optional.empty());
 		this.entityData.define(DATA_PEEK_ID, (byte)0);
 		this.entityData.define(DATA_COLOR_ID, (byte)16);
 	}
@@ -136,14 +134,8 @@ public class Shulker extends AbstractGolem implements Enemy {
 		super.readAdditionalSaveData(compoundTag);
 		this.entityData.set(DATA_ATTACH_FACE_ID, Direction.from3DDataValue(compoundTag.getByte("AttachFace")));
 		this.entityData.set(DATA_PEEK_ID, compoundTag.getByte("Peek"));
-		this.entityData.set(DATA_COLOR_ID, compoundTag.getByte("Color"));
-		if (compoundTag.contains("APX")) {
-			int i = compoundTag.getInt("APX");
-			int j = compoundTag.getInt("APY");
-			int k = compoundTag.getInt("APZ");
-			this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(new BlockPos(i, j, k)));
-		} else {
-			this.entityData.set(DATA_ATTACH_POS_ID, Optional.empty());
+		if (compoundTag.contains("Color", 99)) {
+			this.entityData.set(DATA_COLOR_ID, compoundTag.getByte("Color"));
 		}
 	}
 
@@ -153,102 +145,140 @@ public class Shulker extends AbstractGolem implements Enemy {
 		compoundTag.putByte("AttachFace", (byte)this.entityData.get(DATA_ATTACH_FACE_ID).get3DDataValue());
 		compoundTag.putByte("Peek", this.entityData.get(DATA_PEEK_ID));
 		compoundTag.putByte("Color", this.entityData.get(DATA_COLOR_ID));
-		BlockPos blockPos = this.getAttachPosition();
-		if (blockPos != null) {
-			compoundTag.putInt("APX", blockPos.getX());
-			compoundTag.putInt("APY", blockPos.getY());
-			compoundTag.putInt("APZ", blockPos.getZ());
-		}
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		BlockPos blockPos = (BlockPos)this.entityData.get(DATA_ATTACH_POS_ID).orElse(null);
-		if (blockPos == null && !this.level.isClientSide) {
-			blockPos = this.blockPosition();
-			this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos));
+		if (!this.level.isClientSide && !this.isPassenger() && !this.canStayAt(this.blockPosition(), this.getAttachFace())) {
+			this.findNewAttachment();
 		}
 
-		if (this.isPassenger()) {
-			blockPos = null;
-			float f = this.getVehicle().yRot;
-			this.yRot = f;
-			this.yBodyRot = f;
-			this.yBodyRotO = f;
-			this.clientSideTeleportInterpolation = 0;
-		} else if (!this.level.isClientSide) {
-			BlockState blockState = this.level.getBlockState(blockPos);
-			if (!blockState.isAir()) {
-				if (blockState.is(Blocks.MOVING_PISTON)) {
-					Direction direction = blockState.getValue(PistonBaseBlock.FACING);
-					if (this.level.isEmptyBlock(blockPos.relative(direction))) {
-						blockPos = blockPos.relative(direction);
-						this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos));
-					} else {
-						this.teleportSomewhere();
-					}
-				} else if (blockState.is(Blocks.PISTON_HEAD)) {
-					Direction direction = blockState.getValue(PistonHeadBlock.FACING);
-					if (this.level.isEmptyBlock(blockPos.relative(direction))) {
-						blockPos = blockPos.relative(direction);
-						this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos));
-					} else {
-						this.teleportSomewhere();
-					}
-				} else {
-					this.teleportSomewhere();
-				}
-			}
-
-			Direction direction = this.getAttachFace();
-			if (!this.canAttachOnBlockFace(blockPos, direction)) {
-				Direction direction2 = this.findAttachableFace(blockPos);
-				if (direction2 != null) {
-					this.entityData.set(DATA_ATTACH_FACE_ID, direction2);
-				} else {
-					this.teleportSomewhere();
-				}
-			}
+		if (this.updatePeekAmount()) {
+			this.onPeekAmountChange();
 		}
 
-		float f = (float)this.getRawPeekAmount() * 0.01F;
+		if (this.level.isClientSide) {
+			if (this.clientSideTeleportInterpolation > 0) {
+				this.clientSideTeleportInterpolation--;
+			} else {
+				this.clientOldAttachPosition = null;
+			}
+		}
+	}
+
+	private void findNewAttachment() {
+		Direction direction = this.findAttachableSurface(this.blockPosition());
+		if (direction != null) {
+			this.entityData.set(DATA_ATTACH_FACE_ID, direction);
+		} else {
+			this.teleportSomewhere();
+		}
+	}
+
+	@Override
+	protected AABB makeBoundingBox() {
+		float f = getPhysicalPeek(this.currentPeekAmount);
+		Direction direction = this.getAttachFace().getOpposite();
+		float g = this.getType().getWidth() / 2.0F;
+		return getProgressAabb(direction, f).move(this.getX() - (double)g, this.getY(), this.getZ() - (double)g);
+	}
+
+	private static float getPhysicalPeek(float f) {
+		return 0.5F - Mth.sin((0.5F + f) * (float) Math.PI) * 0.5F;
+	}
+
+	private boolean updatePeekAmount() {
 		this.currentPeekAmountO = this.currentPeekAmount;
-		if (this.currentPeekAmount > f) {
-			this.currentPeekAmount = Mth.clamp(this.currentPeekAmount - 0.05F, f, 1.0F);
-		} else if (this.currentPeekAmount < f) {
-			this.currentPeekAmount = Mth.clamp(this.currentPeekAmount + 0.05F, 0.0F, f);
-		}
-
-		if (blockPos != null) {
-			if (this.level.isClientSide) {
-				if (this.clientSideTeleportInterpolation > 0 && this.oldAttachPosition != null) {
-					this.clientSideTeleportInterpolation--;
-				} else {
-					this.oldAttachPosition = blockPos;
-				}
+		float f = (float)this.getRawPeekAmount() * 0.01F;
+		if (this.currentPeekAmount == f) {
+			return false;
+		} else {
+			if (this.currentPeekAmount > f) {
+				this.currentPeekAmount = Mth.clamp(this.currentPeekAmount - 0.05F, f, 1.0F);
+			} else {
+				this.currentPeekAmount = Mth.clamp(this.currentPeekAmount + 0.05F, 0.0F, f);
 			}
 
-			this.setPosAndOldPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
-			double d = 0.5 - (double)Mth.sin((0.5F + this.currentPeekAmount) * (float) Math.PI) * 0.5;
-			double e = 0.5 - (double)Mth.sin((0.5F + this.currentPeekAmountO) * (float) Math.PI) * 0.5;
-			Direction direction3 = this.getAttachFace().getOpposite();
-			this.setBoundingBox(
-				new AABB(this.getX() - 0.5, this.getY(), this.getZ() - 0.5, this.getX() + 0.5, this.getY() + 1.0, this.getZ() + 0.5)
-					.expandTowards((double)direction3.getStepX() * d, (double)direction3.getStepY() * d, (double)direction3.getStepZ() * d)
-			);
-			double g = d - e;
-			if (g > 0.0) {
-				List<Entity> list = this.level.getEntities(this, this.getBoundingBox());
-				if (!list.isEmpty()) {
-					for (Entity entity : list) {
-						if (!(entity instanceof Shulker) && !entity.noPhysics) {
-							entity.move(MoverType.SHULKER, new Vec3(g * (double)direction3.getStepX(), g * (double)direction3.getStepY(), g * (double)direction3.getStepZ()));
-						}
-					}
+			return true;
+		}
+	}
+
+	private void onPeekAmountChange() {
+		this.reapplyPosition();
+		float f = getPhysicalPeek(this.currentPeekAmount);
+		float g = getPhysicalPeek(this.currentPeekAmountO);
+		Direction direction = this.getAttachFace().getOpposite();
+		float h = f - g;
+		if (!(h <= 0.0F)) {
+			for (Entity entity : this.level
+				.getEntities(
+					this,
+					getProgressDeltaAabb(direction, g, f).move(this.getX(), this.getY(), this.getZ()),
+					EntitySelector.NO_SPECTATORS.and(entityx -> !entityx.isPassengerOfSameVehicle(this))
+				)) {
+				if (!(entity instanceof Shulker) && !entity.noPhysics) {
+					entity.move(
+						MoverType.SHULKER,
+						new Vec3((double)(h * (float)direction.getStepX()), (double)(h * (float)direction.getStepY()), (double)(h * (float)direction.getStepZ()))
+					);
 				}
 			}
 		}
+	}
+
+	public static AABB getProgressAabb(Direction direction, float f) {
+		return getProgressDeltaAabb(direction, -1.0F, f);
+	}
+
+	public static AABB getProgressDeltaAabb(Direction direction, float f, float g) {
+		double d = (double)Math.max(f, g);
+		double e = (double)Math.min(f, g);
+		return new AABB(BlockPos.ZERO)
+			.expandTowards((double)direction.getStepX() * d, (double)direction.getStepY() * d, (double)direction.getStepZ() * d)
+			.contract((double)(-direction.getStepX()) * (1.0 + e), (double)(-direction.getStepY()) * (1.0 + e), (double)(-direction.getStepZ()) * (1.0 + e));
+	}
+
+	@Override
+	public double getMyRidingOffset() {
+		return 0.1875 - this.getVehicle().getPassengersRidingOffset();
+	}
+
+	@Override
+	public boolean startRiding(Entity entity, boolean bl) {
+		if (this.level.isClientSide()) {
+			this.clientOldAttachPosition = null;
+			this.clientSideTeleportInterpolation = 0;
+		}
+
+		this.entityData.set(DATA_ATTACH_FACE_ID, Direction.DOWN);
+		return super.startRiding(entity, bl);
+	}
+
+	@Override
+	public void stopRiding() {
+		super.stopRiding();
+		if (this.level.isClientSide) {
+			this.clientOldAttachPosition = this.blockPosition();
+		}
+
+		this.yBodyRotO = 0.0F;
+		this.yBodyRot = 0.0F;
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		ServerLevelAccessor serverLevelAccessor,
+		DifficultyInstance difficultyInstance,
+		MobSpawnType mobSpawnType,
+		@Nullable SpawnGroupData spawnGroupData,
+		@Nullable CompoundTag compoundTag
+	) {
+		this.yRot = 0.0F;
+		this.yHeadRot = this.yRot;
+		this.setOldPosAndRot();
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
@@ -261,23 +291,43 @@ public class Shulker extends AbstractGolem implements Enemy {
 	}
 
 	@Override
+	public Vec3 getDeltaMovement() {
+		return Vec3.ZERO;
+	}
+
+	@Override
+	public void setDeltaMovement(Vec3 vec3) {
+	}
+
+	@Override
 	public void setPos(double d, double e, double f) {
-		super.setPos(d, e, f);
-		if (this.entityData != null && this.tickCount != 0) {
-			Optional<BlockPos> optional = this.entityData.get(DATA_ATTACH_POS_ID);
-			Optional<BlockPos> optional2 = Optional.of(new BlockPos(d, e, f));
-			if (!optional2.equals(optional)) {
-				this.entityData.set(DATA_ATTACH_POS_ID, optional2);
+		BlockPos blockPos = this.blockPosition();
+		if (this.isPassenger()) {
+			super.setPos(d, e, f);
+		} else {
+			super.setPos((double)Mth.floor(d) + 0.5, (double)Mth.floor(e + 0.5), (double)Mth.floor(f) + 0.5);
+		}
+
+		if (this.tickCount != 0) {
+			BlockPos blockPos2 = this.blockPosition();
+			if (!blockPos2.equals(blockPos)) {
 				this.entityData.set(DATA_PEEK_ID, (byte)0);
 				this.hasImpulse = true;
+				if (this.level.isClientSide && !this.isPassenger() && !blockPos2.equals(this.clientOldAttachPosition)) {
+					this.clientOldAttachPosition = blockPos;
+					this.clientSideTeleportInterpolation = 6;
+					this.xOld = this.getX();
+					this.yOld = this.getY();
+					this.zOld = this.getZ();
+				}
 			}
 		}
 	}
 
 	@Nullable
-	protected Direction findAttachableFace(BlockPos blockPos) {
+	protected Direction findAttachableSurface(BlockPos blockPos) {
 		for (Direction direction : Direction.values()) {
-			if (this.canAttachOnBlockFace(blockPos, direction)) {
+			if (this.canStayAt(blockPos, direction)) {
 				return direction;
 			}
 		}
@@ -285,9 +335,28 @@ public class Shulker extends AbstractGolem implements Enemy {
 		return null;
 	}
 
-	private boolean canAttachOnBlockFace(BlockPos blockPos, Direction direction) {
-		return this.level.loadedAndEntityCanStandOnFace(blockPos.relative(direction), this, direction.getOpposite())
-			&& this.level.noCollision(this, ShulkerSharedHelper.openBoundingBox(blockPos, direction.getOpposite()));
+	private boolean canStayAt(BlockPos blockPos, Direction direction) {
+		if (this.isPositionBlocked(blockPos)) {
+			return false;
+		} else {
+			Direction direction2 = direction.getOpposite();
+			if (!this.level.loadedAndEntityCanStandOnFace(blockPos.relative(direction), this, direction2)) {
+				return false;
+			} else {
+				AABB aABB = getProgressAabb(direction2, 1.0F).move(blockPos).deflate(1.0E-6);
+				return this.level.noCollision(this, aABB);
+			}
+		}
+	}
+
+	private boolean isPositionBlocked(BlockPos blockPos) {
+		BlockState blockState = this.level.getBlockState(blockPos);
+		if (blockState.isAir()) {
+			return false;
+		} else {
+			boolean bl = blockState.is(Blocks.MOVING_PISTON) && blockPos.equals(this.blockPosition());
+			return !bl;
+		}
 	}
 
 	protected boolean teleportSomewhere() {
@@ -295,17 +364,19 @@ public class Shulker extends AbstractGolem implements Enemy {
 			BlockPos blockPos = this.blockPosition();
 
 			for (int i = 0; i < 5; i++) {
-				BlockPos blockPos2 = blockPos.offset(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));
+				BlockPos blockPos2 = blockPos.offset(
+					Mth.randomBetweenInclusive(this.random, -8, 8), Mth.randomBetweenInclusive(this.random, -8, 8), Mth.randomBetweenInclusive(this.random, -8, 8)
+				);
 				if (blockPos2.getY() > this.level.getMinBuildHeight()
 					&& this.level.isEmptyBlock(blockPos2)
 					&& this.level.getWorldBorder().isWithinBounds(blockPos2)
-					&& this.level.noCollision(this, new AABB(blockPos2))) {
-					Direction direction = this.findAttachableFace(blockPos2);
+					&& this.level.noCollision(this, new AABB(blockPos2).deflate(1.0E-6))) {
+					Direction direction = this.findAttachableSurface(blockPos2);
 					if (direction != null) {
 						this.unRide();
 						this.entityData.set(DATA_ATTACH_FACE_ID, direction);
 						this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
-						this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos2));
+						this.setPos((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5);
 						this.entityData.set(DATA_PEEK_ID, (byte)0);
 						this.setTarget(null);
 						return true;
@@ -319,38 +390,12 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 	}
 
-	@Override
-	public void aiStep() {
-		super.aiStep();
-		this.setDeltaMovement(Vec3.ZERO);
-		if (!this.isNoAi()) {
-			this.yBodyRotO = 0.0F;
-			this.yBodyRot = 0.0F;
-		}
-	}
-
-	@Override
-	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
-		if (DATA_ATTACH_POS_ID.equals(entityDataAccessor) && this.level.isClientSide && !this.isPassenger()) {
-			BlockPos blockPos = this.getAttachPosition();
-			if (blockPos != null) {
-				if (this.oldAttachPosition == null) {
-					this.oldAttachPosition = blockPos;
-				} else {
-					this.clientSideTeleportInterpolation = 6;
-				}
-
-				this.setPosAndOldPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
-			}
-		}
-
-		super.onSyncedDataUpdated(entityDataAccessor);
-	}
-
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
 		this.lerpSteps = 0;
+		this.setPos(d, e, f);
+		this.setRot(g, h);
 	}
 
 	@Override
@@ -410,20 +455,11 @@ public class Shulker extends AbstractGolem implements Enemy {
 		return this.entityData.get(DATA_ATTACH_FACE_ID);
 	}
 
-	@Nullable
-	public BlockPos getAttachPosition() {
-		return (BlockPos)this.entityData.get(DATA_ATTACH_POS_ID).orElse(null);
-	}
-
-	public void setAttachPosition(@Nullable BlockPos blockPos) {
-		this.entityData.set(DATA_ATTACH_POS_ID, Optional.ofNullable(blockPos));
-	}
-
-	public int getRawPeekAmount() {
+	private int getRawPeekAmount() {
 		return this.entityData.get(DATA_PEEK_ID);
 	}
 
-	public void setRawPeekAmount(int i) {
+	private void setRawPeekAmount(int i) {
 		if (!this.level.isClientSide) {
 			this.getAttribute(Attributes.ARMOR).removeModifier(COVERED_ARMOR_MODIFIER);
 			if (i == 0) {
@@ -440,16 +476,6 @@ public class Shulker extends AbstractGolem implements Enemy {
 	@Environment(EnvType.CLIENT)
 	public float getClientPeekAmount(float f) {
 		return Mth.lerp(f, this.currentPeekAmountO, this.currentPeekAmount);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public int getClientSideTeleportInterpolation() {
-		return this.clientSideTeleportInterpolation;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public BlockPos getOldAttachPosition() {
-		return this.oldAttachPosition;
 	}
 
 	@Override
@@ -477,11 +503,21 @@ public class Shulker extends AbstractGolem implements Enemy {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public boolean hasValidInterpolationPositions() {
-		return this.oldAttachPosition != null && this.getAttachPosition() != null;
+	public Optional<Vec3> getRenderPosition(float f) {
+		if (this.clientOldAttachPosition != null && this.clientSideTeleportInterpolation > 0) {
+			double d = (double)((float)this.clientSideTeleportInterpolation - f) / 6.0;
+			d *= d;
+			BlockPos blockPos = this.blockPosition();
+			double e = (double)(blockPos.getX() - this.clientOldAttachPosition.getX()) * d;
+			double g = (double)(blockPos.getY() - this.clientOldAttachPosition.getY()) * d;
+			double h = (double)(blockPos.getZ() - this.clientOldAttachPosition.getZ()) * d;
+			return Optional.of(new Vec3(-e, -g, -h));
+		} else {
+			return Optional.empty();
+		}
 	}
 
-	public void setColor(DyeColor dyeColor) {
+	private void setColor(DyeColor dyeColor) {
 		this.entityData.set(DATA_COLOR_ID, (byte)dyeColor.getId());
 	}
 
@@ -537,7 +573,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 	}
 
-	class ShulkerBodyRotationControl extends BodyRotationControl {
+	static class ShulkerBodyRotationControl extends BodyRotationControl {
 		public ShulkerBodyRotationControl(Mob mob) {
 			super(mob);
 		}
@@ -597,7 +633,9 @@ public class Shulker extends AbstractGolem implements Enemy {
 
 		@Override
 		public boolean canUse() {
-			return Shulker.this.getTarget() == null && Shulker.this.random.nextInt(40) == 0;
+			return Shulker.this.getTarget() == null
+				&& Shulker.this.random.nextInt(40) == 0
+				&& Shulker.this.canStayAt(Shulker.this.blockPosition(), Shulker.this.getAttachFace());
 		}
 
 		@Override

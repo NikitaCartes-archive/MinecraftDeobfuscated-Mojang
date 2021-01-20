@@ -324,20 +324,30 @@ public class Util {
 		return runnable;
 	}
 
+	public static final void logAndPauseIfInIde(String string) {
+		LOGGER.error(string);
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			doPause();
+		}
+	}
+
 	public static <T extends Throwable> T pauseInIde(T throwable) {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			LOGGER.error("Trying to throw a fatal exception, pausing in IDE", throwable);
+			doPause();
+		}
 
-			while (true) {
-				try {
-					Thread.sleep(1000L);
-					LOGGER.error("paused");
-				} catch (InterruptedException var2) {
-					return throwable;
-				}
+		return throwable;
+	}
+
+	private static void doPause() {
+		while (true) {
+			try {
+				Thread.sleep(1000L);
+				LOGGER.error("paused");
+			} catch (InterruptedException var1) {
+				return;
 			}
-		} else {
-			return throwable;
 		}
 	}
 

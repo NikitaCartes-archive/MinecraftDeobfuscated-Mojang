@@ -17,7 +17,8 @@ public class NumberProviders {
 
 	public static Object createGsonAdapter() {
 		return GsonAdapterFactory.<NumberProvider, LootNumberProviderType>builder(Registry.LOOT_NUMBER_PROVIDER_TYPE, "provider", "type", NumberProvider::getType)
-			.withDefaultSerializer(CONSTANT, new ConstantValue.DefaultSerializer())
+			.withInlineSerializer(CONSTANT, new ConstantValue.InlineSerializer())
+			.withDefaultType(UNIFORM)
 			.build();
 	}
 }

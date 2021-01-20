@@ -269,6 +269,7 @@ public class SoundEvents {
 	public static final SoundEvent DROWNED_SHOOT = register("entity.drowned.shoot");
 	public static final SoundEvent DROWNED_STEP = register("entity.drowned.step");
 	public static final SoundEvent DROWNED_SWIM = register("entity.drowned.swim");
+	public static final SoundEvent DYE_USE = register("item.dye.use");
 	public static final SoundEvent EGG_THROW = register("entity.egg.throw");
 	public static final SoundEvent ELDER_GUARDIAN_AMBIENT = register("entity.elder_guardian.ambient");
 	public static final SoundEvent ELDER_GUARDIAN_AMBIENT_LAND = register("entity.elder_guardian.ambient_land");
@@ -378,6 +379,11 @@ public class SoundEvents {
 	public static final SoundEvent GLASS_HIT = register("block.glass.hit");
 	public static final SoundEvent GLASS_PLACE = register("block.glass.place");
 	public static final SoundEvent GLASS_STEP = register("block.glass.step");
+	public static final SoundEvent GLOW_INK_SAC_USE = register("item.glow_ink_sac.use");
+	public static final SoundEvent GLOW_SQUID_AMBIENT = register("entity.glow_squid.ambient");
+	public static final SoundEvent GLOW_SQUID_DEATH = register("entity.glow_squid.death");
+	public static final SoundEvent GLOW_SQUID_HURT = register("entity.glow_squid.hurt");
+	public static final SoundEvent GLOW_SQUID_SQUIRT = register("entity.glow_squid.squirt");
 	public static final SoundEvent GRASS_BREAK = register("block.grass.break");
 	public static final SoundEvent GRASS_FALL = register("block.grass.fall");
 	public static final SoundEvent GRASS_HIT = register("block.grass.hit");
@@ -444,6 +450,7 @@ public class SoundEvents {
 	public static final SoundEvent ILLUSIONER_MIRROR_MOVE = register("entity.illusioner.mirror_move");
 	public static final SoundEvent ILLUSIONER_PREPARE_BLINDNESS = register("entity.illusioner.prepare_blindness");
 	public static final SoundEvent ILLUSIONER_PREPARE_MIRROR = register("entity.illusioner.prepare_mirror");
+	public static final SoundEvent INK_SAC_USE = register("item.ink_sac.use");
 	public static final SoundEvent IRON_DOOR_CLOSE = register("block.iron_door.close");
 	public static final SoundEvent IRON_DOOR_OPEN = register("block.iron_door.open");
 	public static final SoundEvent IRON_GOLEM_ATTACK = register("entity.iron_golem.attack");

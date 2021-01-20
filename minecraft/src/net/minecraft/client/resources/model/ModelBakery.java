@@ -137,7 +137,7 @@ public class ModelBakery {
 		.create(Block::defaultBlockState, BlockState::new);
 	private static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 	private static final Map<ResourceLocation, StateDefinition<Block, BlockState>> STATIC_DEFINITIONS = ImmutableMap.of(
-		new ResourceLocation("item_frame"), ITEM_FRAME_FAKE_DEFINITION
+		new ResourceLocation("item_frame"), ITEM_FRAME_FAKE_DEFINITION, new ResourceLocation("glow_item_frame"), ITEM_FRAME_FAKE_DEFINITION
 	);
 	private final ResourceManager resourceManager;
 	@Nullable

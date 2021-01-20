@@ -2,9 +2,10 @@ package net.minecraft.world.entity.ai.attributes;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.GlowSquid;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -95,6 +96,7 @@ public class DefaultAttributes {
 		.put(EntityType.FOX, Fox.createAttributes().build())
 		.put(EntityType.GHAST, Ghast.createAttributes().build())
 		.put(EntityType.GIANT, Giant.createAttributes().build())
+		.put(EntityType.GLOW_SQUID, GlowSquid.createAttributes().build())
 		.put(EntityType.GUARDIAN, Guardian.createAttributes().build())
 		.put(EntityType.HOGLIN, Hoglin.createAttributes().build())
 		.put(EntityType.HORSE, AbstractHorse.createBaseHorseAttributes().build())
@@ -162,12 +164,6 @@ public class DefaultAttributes {
 			.filter(entityType -> entityType.getCategory() != MobCategory.MISC)
 			.filter(entityType -> !hasSupplier(entityType))
 			.map(Registry.ENTITY_TYPE::getKey)
-			.forEach(resourceLocation -> {
-				if (SharedConstants.IS_RUNNING_IN_IDE) {
-					throw new IllegalStateException("Entity " + resourceLocation + " has no attributes");
-				} else {
-					LOGGER.error("Entity {} has no attributes", resourceLocation);
-				}
-			});
+			.forEach(resourceLocation -> Util.logAndPauseIfInIde("Entity " + resourceLocation + " has no attributes"));
 	}
 }

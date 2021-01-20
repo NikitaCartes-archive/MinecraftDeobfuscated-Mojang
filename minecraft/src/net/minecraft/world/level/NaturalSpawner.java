@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -155,11 +156,14 @@ public final class NaturalSpawner {
 						double f = player.distanceToSqr(d, (double)i, e);
 						if (isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, f)) {
 							if (spawnerData == null) {
-								spawnerData = getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
-								if (spawnerData == null) {
+								Optional<MobSpawnSettings.SpawnerData> optional = getRandomSpawnMobAt(
+									serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos
+								);
+								if (!optional.isPresent()) {
 									break;
 								}
 
+								spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
 								o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 							}
 
@@ -258,8 +262,7 @@ public final class NaturalSpawner {
 			: mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
 	}
 
-	@Nullable
-	private static MobSpawnSettings.SpawnerData getRandomSpawnMobAt(
+	private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
 		ServerLevel serverLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -269,10 +272,10 @@ public final class NaturalSpawner {
 	) {
 		Biome biome = serverLevel.getBiome(blockPos);
 		if (mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98F) {
-			return null;
+			return Optional.empty();
 		} else {
 			List<MobSpawnSettings.SpawnerData> list = mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
-			return list.isEmpty() ? null : WeighedRandom.getRandomItem(random, list);
+			return list.isEmpty() ? Optional.empty() : WeighedRandom.getRandomItem(random, list);
 		}
 	}
 
@@ -361,56 +364,59 @@ public final class NaturalSpawner {
 			int l = SectionPos.sectionToBlockCoord(j);
 
 			while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
-				MobSpawnSettings.SpawnerData spawnerData = WeighedRandom.getRandomItem(random, list);
-				int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
-				SpawnGroupData spawnGroupData = null;
-				int n = k + random.nextInt(16);
-				int o = l + random.nextInt(16);
-				int p = n;
-				int q = o;
+				Optional<MobSpawnSettings.SpawnerData> optional = WeighedRandom.getRandomItem(random, list);
+				if (optional.isPresent()) {
+					MobSpawnSettings.SpawnerData spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
+					int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+					SpawnGroupData spawnGroupData = null;
+					int n = k + random.nextInt(16);
+					int o = l + random.nextInt(16);
+					int p = n;
+					int q = o;
 
-				for (int r = 0; r < m; r++) {
-					boolean bl = false;
+					for (int r = 0; r < m; r++) {
+						boolean bl = false;
 
-					for (int s = 0; !bl && s < 4; s++) {
-						BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, n, o);
-						if (spawnerData.type.canSummon()
-							&& isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
-							float f = spawnerData.type.getWidth();
-							double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
-							double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
-							if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
-								|| !SpawnPlacements.checkSpawnRules(
-									spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom()
-								)) {
-								continue;
-							}
+						for (int s = 0; !bl && s < 4; s++) {
+							BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, n, o);
+							if (spawnerData.type.canSummon()
+								&& isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
+								float f = spawnerData.type.getWidth();
+								double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
+								double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
+								if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
+									|| !SpawnPlacements.checkSpawnRules(
+										spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom()
+									)) {
+									continue;
+								}
 
-							Entity entity;
-							try {
-								entity = spawnerData.type.create(serverLevelAccessor.getLevel());
-							} catch (Exception var27) {
-								LOGGER.warn("Failed to create mob", (Throwable)var27);
-								continue;
-							}
+								Entity entity;
+								try {
+									entity = spawnerData.type.create(serverLevelAccessor.getLevel());
+								} catch (Exception var28) {
+									LOGGER.warn("Failed to create mob", (Throwable)var28);
+									continue;
+								}
 
-							entity.moveTo(d, (double)blockPos.getY(), e, random.nextFloat() * 360.0F, 0.0F);
-							if (entity instanceof Mob) {
-								Mob mob = (Mob)entity;
-								if (mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
-									spawnGroupData = mob.finalizeSpawn(
-										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
-									);
-									serverLevelAccessor.addFreshEntityWithPassengers(mob);
-									bl = true;
+								entity.moveTo(d, (double)blockPos.getY(), e, random.nextFloat() * 360.0F, 0.0F);
+								if (entity instanceof Mob) {
+									Mob mob = (Mob)entity;
+									if (mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
+										spawnGroupData = mob.finalizeSpawn(
+											serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
+										);
+										serverLevelAccessor.addFreshEntityWithPassengers(mob);
+										bl = true;
+									}
 								}
 							}
-						}
 
-						n += random.nextInt(5) - random.nextInt(5);
+							n += random.nextInt(5) - random.nextInt(5);
 
-						for (o += random.nextInt(5) - random.nextInt(5); n < k || n >= k + 16 || o < l || o >= l + 16; o = q + random.nextInt(5) - random.nextInt(5)) {
-							n = p + random.nextInt(5) - random.nextInt(5);
+							for (o += random.nextInt(5) - random.nextInt(5); n < k || n >= k + 16 || o < l || o >= l + 16; o = q + random.nextInt(5) - random.nextInt(5)) {
+								n = p + random.nextInt(5) - random.nextInt(5);
+							}
 						}
 					}
 				}

@@ -1409,13 +1409,13 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	@Override
-	public boolean causeFallDamage(float f, float g) {
-		boolean bl = super.causeFallDamage(f, g);
+	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
+		boolean bl = super.causeFallDamage(f, g, damageSource);
 		int i = this.calculateFallDamage(f, g);
 		if (i > 0) {
 			this.playSound(this.getFallDamageSound(i), 1.0F, 1.0F);
 			this.playBlockFallSound();
-			this.hurt(DamageSource.FALL, (float)i);
+			this.hurt(damageSource, (float)i);
 			return true;
 		} else {
 			return bl;

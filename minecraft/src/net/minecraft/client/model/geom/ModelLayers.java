@@ -63,6 +63,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation GIANT = register("giant");
 	public static final ModelLayerLocation GIANT_INNER_ARMOR = registerInnerArmor("giant");
 	public static final ModelLayerLocation GIANT_OUTER_ARMOR = registerOuterArmor("giant");
+	public static final ModelLayerLocation GLOW_SQUID = register("glow_squid");
 	public static final ModelLayerLocation GUARDIAN = register("guardian");
 	public static final ModelLayerLocation HOGLIN = register("hoglin");
 	public static final ModelLayerLocation HOPPER_MINECART = register("hopper_minecart");

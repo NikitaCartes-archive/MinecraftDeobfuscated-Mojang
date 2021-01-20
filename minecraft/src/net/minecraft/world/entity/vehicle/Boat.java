@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.vehicle;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -682,20 +683,23 @@ public class Boat extends Entity {
 		BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e);
 		BlockPos blockPos2 = blockPos.below();
 		if (!this.level.isWaterAt(blockPos2)) {
-			double f = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos);
-			double g = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos2);
+			List<Vec3> list = Lists.<Vec3>newArrayList();
+			double f = this.level.getBlockFloorHeight(blockPos);
+			if (DismountHelper.isBlockFloorValid(f)) {
+				list.add(new Vec3(d, (double)blockPos.getY() + f, e));
+			}
+
+			double g = this.level.getBlockFloorHeight(blockPos2);
+			if (DismountHelper.isBlockFloorValid(g)) {
+				list.add(new Vec3(d, (double)blockPos2.getY() + g, e));
+			}
 
 			for (Pose pose : livingEntity.getDismountPoses()) {
-				Vec3 vec32 = DismountHelper.findDismountLocation(this.level, d, f, e, livingEntity, pose);
-				if (vec32 != null) {
-					livingEntity.setPose(pose);
-					return vec32;
-				}
-
-				Vec3 vec33 = DismountHelper.findDismountLocation(this.level, d, g, e, livingEntity, pose);
-				if (vec33 != null) {
-					livingEntity.setPose(pose);
-					return vec33;
+				for (Vec3 vec32 : list) {
+					if (DismountHelper.canDismountTo(this.level, vec32, livingEntity, pose)) {
+						livingEntity.setPose(pose);
+						return vec32;
+					}
 				}
 			}
 		}
@@ -756,7 +760,7 @@ public class Boat extends Entity {
 						return;
 					}
 
-					this.causeFallDamage(this.fallDistance, 1.0F);
+					this.causeFallDamage(this.fallDistance, 1.0F, DamageSource.FALL);
 					if (!this.level.isClientSide && !this.isRemoved()) {
 						this.kill();
 						if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

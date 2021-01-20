@@ -10,6 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -65,7 +66,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		DripstoneClusterConfiguration dripstoneClusterConfiguration
 	) {
 		Optional<Column> optional = Column.scan(
-			worldGenLevel, blockPos, dripstoneClusterConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBase
+			worldGenLevel, blockPos, dripstoneClusterConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isDripstoneBaseOrLava
 		);
 		if (optional.isPresent()) {
 			OptionalInt optionalInt = ((Column)optional.get()).getCeiling();
@@ -84,7 +85,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 				OptionalInt optionalInt3 = column.getFloor();
 				boolean bl2 = random.nextDouble() < d;
 				int o;
-				if (optionalInt.isPresent() && bl2) {
+				if (optionalInt.isPresent() && bl2 && !this.isLava(worldGenLevel, blockPos.atY(optionalInt.getAsInt()))) {
 					int m = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(random);
 					this.replaceBlocksWithDripstoneBlocks(worldGenLevel, blockPos.atY(optionalInt.getAsInt()), m, Direction.UP);
 					int n;
@@ -101,7 +102,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 
 				boolean bl3 = random.nextDouble() < d;
 				int m;
-				if (optionalInt3.isPresent() && bl3) {
+				if (optionalInt3.isPresent() && bl3 && !this.isLava(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()))) {
 					int p = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(random);
 					this.replaceBlocksWithDripstoneBlocks(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()), p, Direction.DOWN);
 					m = Math.max(
@@ -131,7 +132,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 					w = m;
 				}
 
-				boolean bl4 = random.nextBoolean();
+				boolean bl4 = random.nextBoolean() && p > 0 && w > 0 && column.getHeight().isPresent() && p + w == column.getHeight().getAsInt();
 				if (optionalInt.isPresent()) {
 					DripstoneUtils.growPointedDripstone(worldGenLevel, blockPos.atY(optionalInt.getAsInt() - 1), Direction.DOWN, p, bl4);
 				}
@@ -141,6 +142,10 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 				}
 			}
 		}
+	}
+
+	private boolean isLava(LevelReader levelReader, BlockPos blockPos) {
+		return levelReader.getBlockState(blockPos).is(Blocks.LAVA);
 	}
 
 	private int getDripstoneHeight(Random random, int i, int j, float f, int k, DripstoneClusterConfiguration dripstoneClusterConfiguration) {

@@ -15,7 +15,7 @@ public class NbtProviders {
 
 	public static Object createGsonAdapter() {
 		return GsonAdapterFactory.<NbtProvider, LootNbtProviderType>builder(Registry.LOOT_NBT_PROVIDER_TYPE, "provider", "type", NbtProvider::getType)
-			.withDefaultSerializer(CONTEXT, new ContextNbtProvider.DefaultSerializer())
+			.withInlineSerializer(CONTEXT, new ContextNbtProvider.InlineSerializer())
 			.build();
 	}
 }

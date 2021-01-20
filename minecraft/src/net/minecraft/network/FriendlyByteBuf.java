@@ -20,6 +20,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -401,6 +402,14 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeFloat((float)(vec3.y - (double)blockPos.getY()));
 		this.writeFloat((float)(vec3.z - (double)blockPos.getZ()));
 		this.writeBoolean(blockHitResult.isInside());
+	}
+
+	public BitSet readBitSet() {
+		return BitSet.valueOf(this.readLongArray());
+	}
+
+	public void writeBitSet(BitSet bitSet) {
+		this.writeLongArray(bitSet.toLongArray());
 	}
 
 	@Override

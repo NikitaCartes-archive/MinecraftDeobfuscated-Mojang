@@ -74,14 +74,14 @@ public class PoiSection {
 		if (poiRecord2 != null) {
 			if (poiType.equals(poiRecord2.getPoiType())) {
 				return false;
-			} else {
-				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("POI data mismatch: already registered at " + blockPos));
 			}
-		} else {
-			this.records.put(s, poiRecord);
-			((Set)this.byType.computeIfAbsent(poiType, poiTypex -> Sets.newHashSet())).add(poiRecord);
-			return true;
+
+			Util.logAndPauseIfInIde("POI data mismatch: already registered at " + blockPos);
 		}
+
+		this.records.put(s, poiRecord);
+		((Set)this.byType.computeIfAbsent(poiType, poiTypex -> Sets.newHashSet())).add(poiRecord);
+		return true;
 	}
 
 	public void remove(BlockPos blockPos) {

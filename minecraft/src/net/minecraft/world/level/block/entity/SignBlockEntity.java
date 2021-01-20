@@ -56,7 +56,7 @@ public class SignBlockEntity extends BlockEntity {
 
 		for (int i = 0; i < 4; i++) {
 			String string = compoundTag.getString("Text" + (i + 1));
-			Component component = Component.Serializer.fromJson(string.isEmpty() ? "\"\"" : string);
+			Component component = this.deserializeTextSafe(string);
 			if (this.level instanceof ServerLevel) {
 				try {
 					this.messages[i] = ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
@@ -69,6 +69,18 @@ public class SignBlockEntity extends BlockEntity {
 
 			this.renderMessages[i] = null;
 		}
+	}
+
+	private Component deserializeTextSafe(String string) {
+		try {
+			Component component = Component.Serializer.fromJson(string);
+			if (component != null) {
+				return component;
+			}
+		} catch (Exception var3) {
+		}
+
+		return TextComponent.EMPTY;
 	}
 
 	@Environment(EnvType.CLIENT)

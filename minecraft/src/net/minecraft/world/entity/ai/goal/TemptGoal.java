@@ -1,12 +1,10 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class TemptGoal extends Goal {
@@ -16,6 +14,7 @@ public class TemptGoal extends Goal {
 		.allowSameTeam()
 		.allowNonAttackable()
 		.allowUnseeable();
+	private final TargetingConditions targetingConditions;
 	protected final PathfinderMob mob;
 	private final double speedModifier;
 	private double px;
@@ -30,18 +29,12 @@ public class TemptGoal extends Goal {
 	private final boolean canScare;
 
 	public TemptGoal(PathfinderMob pathfinderMob, double d, Ingredient ingredient, boolean bl) {
-		this(pathfinderMob, d, bl, ingredient);
-	}
-
-	public TemptGoal(PathfinderMob pathfinderMob, double d, boolean bl, Ingredient ingredient) {
 		this.mob = pathfinderMob;
 		this.speedModifier = d;
 		this.items = ingredient;
 		this.canScare = bl;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-		if (!(pathfinderMob.getNavigation() instanceof GroundPathNavigation) && !(pathfinderMob.getNavigation() instanceof FlyingPathNavigation)) {
-			throw new IllegalArgumentException("Unsupported mob type for TemptGoal");
-		}
+		this.targetingConditions = TEMP_TARGETING.copy().selector(this::shouldFollow);
 	}
 
 	@Override
@@ -50,13 +43,13 @@ public class TemptGoal extends Goal {
 			this.calmDown--;
 			return false;
 		} else {
-			this.player = this.mob.level.getNearestPlayer(TEMP_TARGETING, this.mob);
-			return this.player == null ? false : this.shouldFollowItem(this.player.getMainHandItem()) || this.shouldFollowItem(this.player.getOffhandItem());
+			this.player = this.mob.level.getNearestPlayer(this.targetingConditions, this.mob);
+			return this.player != null;
 		}
 	}
 
-	protected boolean shouldFollowItem(ItemStack itemStack) {
-		return this.items.test(itemStack);
+	private boolean shouldFollow(LivingEntity livingEntity) {
+		return this.items.test(livingEntity.getMainHandItem()) || this.items.test(livingEntity.getOffhandItem());
 	}
 
 	@Override

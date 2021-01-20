@@ -189,6 +189,7 @@ import net.minecraft.util.datafix.schemas.V2551;
 import net.minecraft.util.datafix.schemas.V2568;
 import net.minecraft.util.datafix.schemas.V2684;
 import net.minecraft.util.datafix.schemas.V2686;
+import net.minecraft.util.datafix.schemas.V2688;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -673,6 +674,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema128, "Added Sculk Sensor", References.BLOCK_ENTITY));
 		Schema schema129 = dataFixerBuilder.addSchema(2686, V2686::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema129, "Added Axolotl", References.ENTITY));
+		Schema schema130 = dataFixerBuilder.addSchema(2688, V2688::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema130, "Added Glow Squid", References.ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema130, "Added Glow Item Frame", References.ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

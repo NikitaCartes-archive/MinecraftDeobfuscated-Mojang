@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.gson.Gson;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -12,6 +13,7 @@ public class GuardedSerializer {
 		return this.gson.toJson(reflectionBasedSerialization);
 	}
 
+	@Nullable
 	public <T extends ReflectionBasedSerialization> T fromJson(String string, Class<T> class_) {
 		return this.gson.fromJson(string, class_);
 	}

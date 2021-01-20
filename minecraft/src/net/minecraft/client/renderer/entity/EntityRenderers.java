@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.SquidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -106,6 +107,8 @@ public class EntityRenderers {
 		register(EntityType.FURNACE_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.FURNACE_MINECART));
 		register(EntityType.GHAST, GhastRenderer::new);
 		register(EntityType.GIANT, context -> new GiantMobRenderer(context, 6.0F));
+		register(EntityType.GLOW_ITEM_FRAME, ItemFrameRenderer::new);
+		register(EntityType.GLOW_SQUID, context -> new GlowSquidRenderer(context, new SquidModel<>(context.bakeLayer(ModelLayers.GLOW_SQUID))));
 		register(EntityType.GUARDIAN, GuardianRenderer::new);
 		register(EntityType.HOGLIN, HoglinRenderer::new);
 		register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.HOPPER_MINECART));
@@ -154,7 +157,7 @@ public class EntityRenderers {
 		register(EntityType.SPAWNER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.SPAWNER_MINECART));
 		register(EntityType.SPECTRAL_ARROW, SpectralArrowRenderer::new);
 		register(EntityType.SPIDER, SpiderRenderer::new);
-		register(EntityType.SQUID, SquidRenderer::new);
+		register(EntityType.SQUID, context -> new SquidRenderer<>(context, new SquidModel<>(context.bakeLayer(ModelLayers.SQUID))));
 		register(EntityType.STRAY, StrayRenderer::new);
 		register(EntityType.STRIDER, StriderRenderer::new);
 		register(EntityType.TNT, TntRenderer::new);
