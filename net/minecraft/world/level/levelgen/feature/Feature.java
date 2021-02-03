@@ -5,17 +5,14 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.BambooFeature;
 import net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature;
@@ -37,6 +34,7 @@ import net.minecraft.world.level.levelgen.feature.DiskReplaceFeature;
 import net.minecraft.world.level.levelgen.feature.DripstoneClusterFeature;
 import net.minecraft.world.level.levelgen.feature.EndGatewayFeature;
 import net.minecraft.world.level.levelgen.feature.EndIslandFeature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.FillLayerFeature;
 import net.minecraft.world.level.levelgen.feature.FossilFeature;
 import net.minecraft.world.level.levelgen.feature.GeodeFeature;
@@ -185,7 +183,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
         levelWriter.setBlock(blockPos, blockState, 3);
     }
 
-    public abstract boolean place(WorldGenLevel var1, ChunkGenerator var2, Random var3, BlockPos var4, FC var5);
+    public abstract boolean place(FeaturePlaceContext<FC> var1);
 
     protected static boolean isStone(BlockState blockState) {
         return blockState.is(BlockTags.BASE_STONE_OVERWORLD);

@@ -48,11 +48,11 @@ extends SectionStorage<PoiSection> {
     }
 
     public void add(BlockPos blockPos, PoiType poiType) {
-        ((PoiSection)this.getOrCreate(SectionPos.of(blockPos).asLong())).add(blockPos, poiType);
+        ((PoiSection)this.getOrCreate(SectionPos.asLong(blockPos))).add(blockPos, poiType);
     }
 
     public void remove(BlockPos blockPos) {
-        ((PoiSection)this.getOrCreate(SectionPos.of(blockPos).asLong())).remove(blockPos);
+        this.getOrLoad(SectionPos.asLong(blockPos)).ifPresent(poiSection -> poiSection.remove(blockPos));
     }
 
     public long getCountInRange(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
@@ -60,8 +60,7 @@ extends SectionStorage<PoiSection> {
     }
 
     public boolean existsAtPosition(PoiType poiType, BlockPos blockPos) {
-        Optional<PoiType> optional = ((PoiSection)this.getOrCreate(SectionPos.of(blockPos).asLong())).getType(blockPos);
-        return optional.isPresent() && optional.get().equals(poiType);
+        return this.exists(blockPos, poiType::equals);
     }
 
     public Stream<PoiRecord> getInSquare(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
@@ -111,16 +110,15 @@ extends SectionStorage<PoiSection> {
     }
 
     public boolean release(BlockPos blockPos) {
-        return ((PoiSection)this.getOrCreate(SectionPos.of(blockPos).asLong())).release(blockPos);
+        return this.getOrLoad(SectionPos.asLong(blockPos)).map(poiSection -> poiSection.release(blockPos)).orElseThrow(() -> Util.pauseInIde(new IllegalStateException("POI never registered at " + blockPos)));
     }
 
     public boolean exists(BlockPos blockPos, Predicate<PoiType> predicate) {
-        return this.getOrLoad(SectionPos.of(blockPos).asLong()).map(poiSection -> poiSection.exists(blockPos, predicate)).orElse(false);
+        return this.getOrLoad(SectionPos.asLong(blockPos)).map(poiSection -> poiSection.exists(blockPos, predicate)).orElse(false);
     }
 
     public Optional<PoiType> getType(BlockPos blockPos) {
-        PoiSection poiSection = (PoiSection)this.getOrCreate(SectionPos.of(blockPos).asLong());
-        return poiSection.getType(blockPos);
+        return this.getOrLoad(SectionPos.asLong(blockPos)).flatMap(poiSection -> poiSection.getType(blockPos));
     }
 
     public int sectionsToVillage(SectionPos sectionPos) {

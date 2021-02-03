@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Vex
 extends Monster {
+    public static final int TICKS_PER_FLAP = Mth.ceil(3.9269907f);
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
     private Mob owner;
     @Nullable
@@ -55,6 +56,11 @@ extends Monster {
         super((EntityType<? extends Monster>)entityType, level);
         this.moveControl = new VexMoveControl(this);
         this.xpReward = 3;
+    }
+
+    @Override
+    public boolean isFlapping() {
+        return this.tickCount % TICKS_PER_FLAP == 0;
     }
 
     @Override
@@ -273,7 +279,7 @@ extends Monster {
         @Override
         public void start() {
             LivingEntity livingEntity = Vex.this.getTarget();
-            Vec3 vec3 = livingEntity.getEyePosition(1.0f);
+            Vec3 vec3 = livingEntity.getEyePosition();
             Vex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0);
             Vex.this.setIsCharging(true);
             Vex.this.playSound(SoundEvents.VEX_CHARGE, 1.0f, 1.0f);
@@ -293,7 +299,7 @@ extends Monster {
             } else {
                 double d = Vex.this.distanceToSqr(livingEntity);
                 if (d < 9.0) {
-                    Vec3 vec3 = livingEntity.getEyePosition(1.0f);
+                    Vec3 vec3 = livingEntity.getEyePosition();
                     Vex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0);
                 }
             }

@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class FireChargeItem
 extends Item {
@@ -33,10 +35,12 @@ extends Item {
         if (CampfireBlock.canLight(blockState) || CandleBlock.canLight(blockState) || CandleCakeBlock.canLight(blockState)) {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true));
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos);
             bl = true;
         } else if (BaseFireBlock.canBePlacedAt(level, blockPos = blockPos.relative(useOnContext.getClickedFace()), useOnContext.getHorizontalDirection())) {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos);
             bl = true;
         }
         if (bl) {

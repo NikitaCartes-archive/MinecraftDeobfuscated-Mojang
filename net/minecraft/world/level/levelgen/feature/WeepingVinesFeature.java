@@ -13,8 +13,8 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class WeepingVinesFeature
@@ -26,7 +26,10 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        Random random = featurePlaceContext.random();
         if (!worldGenLevel.isEmptyBlock(blockPos)) {
             return false;
         }

@@ -339,6 +339,7 @@ implements NeutralMob {
                     itemStack.shrink(1);
                 }
                 this.heal(item.getFoodProperties().getNutrition());
+                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
                 return InteractionResult.SUCCESS;
             }
             if (item instanceof DyeItem) {

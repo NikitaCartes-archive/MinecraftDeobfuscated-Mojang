@@ -21,6 +21,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -181,8 +182,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
                     int q = k + j * o;
                     int r = m + j * p;
                     ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-                    boolean bl42 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos.x, chunkPos.z).getGenerationSettings().isValidStart(this);
-                    if (bl42 && (structureStart = structureFeatureManager.getStartForFeature(SectionPos.of((chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS)).getPos(), 0), this, chunkAccess)) != null && structureStart.isValid()) {
+                    boolean bl42 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos).getGenerationSettings().isValidStart(this);
+                    if (bl42 && (structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS)), this, chunkAccess)) != null && structureStart.isValid()) {
                         if (bl && structureStart.canBeReferenced()) {
                             structureStart.addReference();
                             return structureStart.getLocatePos();
@@ -221,7 +222,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         return new ChunkPos(n * k + p, o * k + q);
     }
 
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, C featureConfiguration) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         return true;
     }
 
@@ -229,11 +230,11 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         return this.getStartFactory().create(this, i, j, boundingBox, k, l);
     }
 
-    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, WorldgenRandom worldgenRandom, StructureFeatureConfiguration structureFeatureConfiguration, C featureConfiguration) {
+    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, WorldgenRandom worldgenRandom, StructureFeatureConfiguration structureFeatureConfiguration, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, chunkPos.x, chunkPos.z);
-        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration)) {
+        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
             StructureStart<C> structureStart = this.createStart(chunkPos.x, chunkPos.z, BoundingBox.getUnknownBox(), i, l);
-            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration);
+            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration, levelHeightAccessor);
             if (structureStart.isValid()) {
                 return structureStart;
             }

@@ -46,6 +46,7 @@ public class Foods {
     public static final FoodProperties SPIDER_EYE = new FoodProperties.Builder().nutrition(2).saturationMod(0.8f).effect(new MobEffectInstance(MobEffects.POISON, 100, 0), 1.0f).build();
     public static final FoodProperties SUSPICIOUS_STEW = Foods.stew(6);
     public static final FoodProperties SWEET_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1f).build();
+    public static final FoodProperties GLOW_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1f).build();
     public static final FoodProperties TROPICAL_FISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).build();
 
     private static FoodProperties stew(int i) {

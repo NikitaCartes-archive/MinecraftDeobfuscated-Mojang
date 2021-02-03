@@ -12,8 +12,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -24,16 +24,19 @@ extends Feature<BlockStateConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
+    public boolean place(FeaturePlaceContext<BlockStateConfiguration> featurePlaceContext) {
         boolean bl3;
         int s;
         int r;
         int q;
         int p;
         int l;
-        blockPos = new BlockPos(blockPos.getX(), chunkGenerator.getSeaLevel(), blockPos.getZ());
+        BlockPos blockPos = featurePlaceContext.origin();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        blockPos = new BlockPos(blockPos.getX(), featurePlaceContext.chunkGenerator().getSeaLevel(), blockPos.getZ());
+        Random random = featurePlaceContext.random();
         boolean bl = random.nextDouble() > 0.7;
-        BlockState blockState = blockStateConfiguration.state;
+        BlockState blockState = featurePlaceContext.config().state;
         double d = random.nextDouble() * 2.0 * Math.PI;
         int i = 11 - random.nextInt(5);
         int j = 3 + random.nextInt(3);

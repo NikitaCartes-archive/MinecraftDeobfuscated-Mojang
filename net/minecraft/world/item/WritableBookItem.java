@@ -32,7 +32,7 @@ extends Item {
         Level level = useOnContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
         if (blockState.is(Blocks.LECTERN)) {
-            return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+            return LecternBlock.tryPlaceBook(useOnContext.getPlayer(), level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
         }
         return InteractionResult.PASS;
     }

@@ -11,6 +11,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -59,6 +61,7 @@ extends Block {
             }
             level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0f, 1.0f);
             level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
+            level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
             return InteractionResult.SUCCESS;
         }
         if (level.isClientSide) {
@@ -79,10 +82,12 @@ extends Block {
         player.awardStat(Stats.EAT_CAKE_SLICE);
         player.getFoodData().eat(2, 0.1f);
         int i = blockState.getValue(BITES);
+        levelAccessor.gameEvent((Entity)player, GameEvent.EAT, blockPos);
         if (i < 6) {
             levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BITES, i + 1), 3);
         } else {
             levelAccessor.removeBlock(blockPos, false);
+            levelAccessor.gameEvent((Entity)player, GameEvent.BLOCK_DESTROY, blockPos);
         }
         return InteractionResult.SUCCESS;
     }

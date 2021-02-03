@@ -4,56 +4,81 @@
 package net.minecraft.client.renderer.block.model;
 
 import com.google.common.collect.Lists;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ItemOverrides {
     public static final ItemOverrides EMPTY = new ItemOverrides();
-    private final List<ItemOverride> overrides = Lists.newArrayList();
-    private final List<BakedModel> overrideModels;
+    private final BakedOverride[] overrides;
+    private final ResourceLocation[] properties;
 
     private ItemOverrides() {
-        this.overrideModels = Collections.emptyList();
+        this.overrides = new BakedOverride[0];
+        this.properties = new ResourceLocation[0];
     }
 
     public ItemOverrides(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, UnbakedModel> function, List<ItemOverride> list) {
-        this.overrideModels = list.stream().map(itemOverride -> {
-            UnbakedModel unbakedModel = (UnbakedModel)function.apply(itemOverride.getModel());
-            if (Objects.equals(unbakedModel, blockModel)) {
-                return null;
-            }
-            return modelBakery.bake(itemOverride.getModel(), BlockModelRotation.X0_Y0);
-        }).collect(Collectors.toList());
-        Collections.reverse(this.overrideModels);
-        for (int i = list.size() - 1; i >= 0; --i) {
-            this.overrides.add(list.get(i));
+        this.properties = (ResourceLocation[])list.stream().flatMap(ItemOverride::getPredicates).map(ItemOverride.Predicate::getProperty).distinct().toArray(ResourceLocation[]::new);
+        Object2IntOpenHashMap<ResourceLocation> object2IntMap = new Object2IntOpenHashMap<ResourceLocation>();
+        for (int i = 0; i < this.properties.length; ++i) {
+            object2IntMap.put(this.properties[i], i);
         }
+        ArrayList<BakedOverride> list2 = Lists.newArrayList();
+        for (int j = list.size() - 1; j >= 0; --j) {
+            ItemOverride itemOverride = list.get(j);
+            BakedModel bakedModel = this.bakeModel(modelBakery, blockModel, function, itemOverride);
+            PropertyMatcher[] propertyMatchers = (PropertyMatcher[])itemOverride.getPredicates().map(predicate -> {
+                int i = object2IntMap.getInt(predicate.getProperty());
+                return new PropertyMatcher(i, predicate.getValue());
+            }).toArray(PropertyMatcher[]::new);
+            list2.add(new BakedOverride(propertyMatchers, bakedModel));
+        }
+        this.overrides = list2.toArray(new BakedOverride[0]);
+    }
+
+    @Nullable
+    private BakedModel bakeModel(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, UnbakedModel> function, ItemOverride itemOverride) {
+        UnbakedModel unbakedModel = function.apply(itemOverride.getModel());
+        if (Objects.equals(unbakedModel, blockModel)) {
+            return null;
+        }
+        return modelBakery.bake(itemOverride.getModel(), BlockModelRotation.X0_Y0);
     }
 
     @Nullable
     public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
-        if (!this.overrides.isEmpty()) {
-            for (int j = 0; j < this.overrides.size(); ++j) {
-                ItemOverride itemOverride = this.overrides.get(j);
-                if (!itemOverride.test(itemStack, clientLevel, livingEntity, i)) continue;
-                BakedModel bakedModel2 = this.overrideModels.get(j);
+        if (this.overrides.length != 0) {
+            Item item = itemStack.getItem();
+            int j = this.properties.length;
+            float[] fs = new float[j];
+            for (int k = 0; k < j; ++k) {
+                ResourceLocation resourceLocation = this.properties[k];
+                ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, resourceLocation);
+                fs[k] = itemPropertyFunction != null ? itemPropertyFunction.call(itemStack, clientLevel, livingEntity, i) : Float.NEGATIVE_INFINITY;
+            }
+            for (BakedOverride bakedOverride : this.overrides) {
+                if (!bakedOverride.test(fs)) continue;
+                BakedModel bakedModel2 = bakedOverride.model;
                 if (bakedModel2 == null) {
                     return bakedModel;
                 }
@@ -61,6 +86,38 @@ public class ItemOverrides {
             }
         }
         return bakedModel;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class BakedOverride {
+        private final PropertyMatcher[] matchers;
+        @Nullable
+        private final BakedModel model;
+
+        private BakedOverride(PropertyMatcher[] propertyMatchers, @Nullable BakedModel bakedModel) {
+            this.matchers = propertyMatchers;
+            this.model = bakedModel;
+        }
+
+        private boolean test(float[] fs) {
+            for (PropertyMatcher propertyMatcher : this.matchers) {
+                float f = fs[propertyMatcher.index];
+                if (!(f < propertyMatcher.value)) continue;
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class PropertyMatcher {
+        public final int index;
+        public final float value;
+
+        private PropertyMatcher(int i, float f) {
+            this.index = i;
+            this.value = f;
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 
@@ -19,7 +20,12 @@ extends Feature<RandomFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, RandomFeatureConfiguration randomFeatureConfiguration) {
+    public boolean place(FeaturePlaceContext<RandomFeatureConfiguration> featurePlaceContext) {
+        RandomFeatureConfiguration randomFeatureConfiguration = featurePlaceContext.config();
+        Random random = featurePlaceContext.random();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+        BlockPos blockPos = featurePlaceContext.origin();
         for (WeightedConfiguredFeature weightedConfiguredFeature : randomFeatureConfiguration.features) {
             if (!(random.nextFloat() < weightedConfiguredFeature.chance)) continue;
             return weightedConfiguredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);

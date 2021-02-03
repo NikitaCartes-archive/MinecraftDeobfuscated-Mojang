@@ -133,7 +133,7 @@ extends BlockEntity {
         structureTemplate.fillFromWorld(serverLevel, blockPos, new BlockPos(1, 1, 1), false, null);
         SinglePoolElement structurePoolElement = new SinglePoolElement(structureTemplate);
         PoolElementStructurePiece poolElementStructurePiece = new PoolElementStructurePiece(structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos));
-        JigsawPlacement.addPieces(serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random);
+        JigsawPlacement.addPieces(serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random, serverLevel);
         for (PoolElementStructurePiece poolElementStructurePiece2 : list) {
             poolElementStructurePiece2.place(serverLevel, structureFeatureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, bl);
         }

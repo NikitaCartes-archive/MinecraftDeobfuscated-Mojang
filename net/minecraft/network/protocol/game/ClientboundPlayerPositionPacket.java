@@ -21,11 +21,12 @@ implements Packet<ClientGamePacketListener> {
     private float xRot;
     private Set<RelativeArgument> relativeArguments;
     private int id;
+    private boolean dismountVehicle;
 
     public ClientboundPlayerPositionPacket() {
     }
 
-    public ClientboundPlayerPositionPacket(double d, double e, double f, float g, float h, Set<RelativeArgument> set, int i) {
+    public ClientboundPlayerPositionPacket(double d, double e, double f, float g, float h, Set<RelativeArgument> set, int i, boolean bl) {
         this.x = d;
         this.y = e;
         this.z = f;
@@ -33,6 +34,7 @@ implements Packet<ClientGamePacketListener> {
         this.xRot = h;
         this.relativeArguments = set;
         this.id = i;
+        this.dismountVehicle = bl;
     }
 
     @Override
@@ -44,6 +46,7 @@ implements Packet<ClientGamePacketListener> {
         this.xRot = friendlyByteBuf.readFloat();
         this.relativeArguments = RelativeArgument.unpack(friendlyByteBuf.readUnsignedByte());
         this.id = friendlyByteBuf.readVarInt();
+        this.dismountVehicle = friendlyByteBuf.readBoolean();
     }
 
     @Override
@@ -55,6 +58,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeFloat(this.xRot);
         friendlyByteBuf.writeByte(RelativeArgument.pack(this.relativeArguments));
         friendlyByteBuf.writeVarInt(this.id);
+        friendlyByteBuf.writeBoolean(this.dismountVehicle);
     }
 
     @Override
@@ -90,6 +94,11 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public int getId() {
         return this.id;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean requestDismountVehicle() {
+        return this.dismountVehicle;
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -68,15 +68,14 @@ implements AutoCloseable {
     }
 
     protected Optional<R> getOrLoad(long l) {
-        SectionPos sectionPos = SectionPos.of(l);
-        if (this.outsideStoredRange(sectionPos)) {
+        if (this.outsideStoredRange(l)) {
             return Optional.empty();
         }
         Optional<R> optional = this.get(l);
         if (optional != null) {
             return optional;
         }
-        this.readColumn(sectionPos.chunk());
+        this.readColumn(SectionPos.of(l).chunk());
         optional = this.get(l);
         if (optional == null) {
             throw Util.pauseInIde(new IllegalStateException());
@@ -84,12 +83,15 @@ implements AutoCloseable {
         return optional;
     }
 
-    protected boolean outsideStoredRange(SectionPos sectionPos) {
-        int i = SectionPos.sectionToBlockCoord(sectionPos.y());
+    protected boolean outsideStoredRange(long l) {
+        int i = SectionPos.sectionToBlockCoord(SectionPos.y(l));
         return this.levelHeightAccessor.isOutsideBuildHeight(i);
     }
 
     protected R getOrCreate(long l) {
+        if (this.outsideStoredRange(l)) {
+            throw Util.pauseInIde(new IllegalArgumentException("sectionPos out of bounds"));
+        }
         Optional<R> optional = this.getOrLoad(l);
         if (optional.isPresent()) {
             return optional.get();
@@ -116,7 +118,7 @@ implements AutoCloseable {
     private <T> void readColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, @Nullable T object2) {
         if (object2 == null) {
             for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); ++i) {
-                this.storage.put(SectionPos.of(chunkPos, i).asLong(), (Optional<R>)Optional.empty());
+                this.storage.put(SectionStorage.getKey(chunkPos, i), (Optional<R>)Optional.empty());
             }
         } else {
             int k;
@@ -126,7 +128,7 @@ implements AutoCloseable {
             Dynamic<T> dynamic22 = this.fixerUpper.update(this.type.getType(), dynamic2, j, k);
             OptionalDynamic<T> optionalDynamic = dynamic22.get("Sections");
             for (int l = this.levelHeightAccessor.getMinSection(); l < this.levelHeightAccessor.getMaxSection(); ++l) {
-                long m = SectionPos.of(chunkPos, l).asLong();
+                long m = SectionStorage.getKey(chunkPos, l);
                 Optional optional = optionalDynamic.get(Integer.toString(l)).result().flatMap(dynamic -> this.codec.apply(() -> this.setDirty(m)).parse(dynamic).resultOrPartial(LOGGER::error));
                 this.storage.put(m, (Optional<R>)optional);
                 optional.ifPresent(object -> {
@@ -152,7 +154,7 @@ implements AutoCloseable {
     private <T> Dynamic<T> writeColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps) {
         HashMap map = Maps.newHashMap();
         for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); ++i) {
-            long l = SectionPos.of(chunkPos, i).asLong();
+            long l = SectionStorage.getKey(chunkPos, i);
             this.dirty.remove(l);
             Optional optional = (Optional)this.storage.get(l);
             if (optional == null || !optional.isPresent()) continue;
@@ -161,6 +163,10 @@ implements AutoCloseable {
             dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
         }
         return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("Sections"), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
+    }
+
+    private static long getKey(ChunkPos chunkPos, int i) {
+        return SectionPos.asLong(chunkPos.x, i, chunkPos.z);
     }
 
     protected void onSectionLoad(long l) {
@@ -182,7 +188,7 @@ implements AutoCloseable {
     public void flush(ChunkPos chunkPos) {
         if (!this.dirty.isEmpty()) {
             for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); ++i) {
-                long l = SectionPos.of(chunkPos, i).asLong();
+                long l = SectionStorage.getKey(chunkPos, i);
                 if (!this.dirty.contains(l)) continue;
                 this.writeColumn(chunkPos);
                 return;

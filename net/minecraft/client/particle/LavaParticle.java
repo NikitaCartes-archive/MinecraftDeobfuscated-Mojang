@@ -19,6 +19,8 @@ public class LavaParticle
 extends TextureSheetParticle {
     private LavaParticle(ClientLevel clientLevel, double d, double e, double f) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
+        this.gravity = 0.75f;
+        this.friction = 0.999f;
         this.xd *= (double)0.8f;
         this.yd *= (double)0.8f;
         this.zd *= (double)0.8f;
@@ -48,25 +50,12 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        float f = (float)this.age / (float)this.lifetime;
-        if (this.random.nextFloat() > f) {
-            this.level.addParticle(ParticleTypes.SMOKE, this.x, this.y, this.z, this.xd, this.yd, this.zd);
-        }
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
-        this.yd -= 0.03;
-        this.move(this.xd, this.yd, this.zd);
-        this.xd *= (double)0.999f;
-        this.yd *= (double)0.999f;
-        this.zd *= (double)0.999f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
+        super.tick();
+        if (!this.removed) {
+            float f = (float)this.age / (float)this.lifetime;
+            if (this.random.nextFloat() > f) {
+                this.level.addParticle(ParticleTypes.SMOKE, this.x, this.y, this.z, this.xd, this.yd, this.zd);
+            }
         }
     }
 

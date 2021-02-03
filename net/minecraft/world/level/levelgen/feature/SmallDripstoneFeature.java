@@ -10,9 +10,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.DripstoneUtils;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
 
 public class SmallDripstoneFeature
@@ -22,7 +22,11 @@ extends Feature<SmallDripstoneConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SmallDripstoneConfiguration smallDripstoneConfiguration) {
+    public boolean place(FeaturePlaceContext<SmallDripstoneConfiguration> featurePlaceContext) {
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        Random random = featurePlaceContext.random();
+        SmallDripstoneConfiguration smallDripstoneConfiguration = featurePlaceContext.config();
         if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
             return false;
         }

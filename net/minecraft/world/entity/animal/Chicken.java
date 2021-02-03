@@ -45,6 +45,7 @@ extends Animal {
     public float oFlapSpeed;
     public float oFlap;
     public float flapping = 1.0f;
+    private float nextFlap = 1.0f;
     public int eggTime = this.random.nextInt(6000) + 6000;
     public boolean isChickenJockey;
 
@@ -95,6 +96,16 @@ extends Animal {
             this.spawnAtLocation(Items.EGG);
             this.eggTime = this.random.nextInt(6000) + 6000;
         }
+    }
+
+    @Override
+    protected boolean isFlapping() {
+        return this.flyDist > this.nextFlap;
+    }
+
+    @Override
+    protected void onFlap() {
+        this.nextFlap = this.flyDist + this.flapSpeed / 2.0f;
     }
 
     @Override

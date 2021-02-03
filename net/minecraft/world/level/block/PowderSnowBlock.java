@@ -16,6 +16,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -58,7 +59,12 @@ implements BucketPickup {
         if (!(entity instanceof LivingEntity) || ((LivingEntity)entity).getFeetBlockState().is(Blocks.POWDER_SNOW)) {
             entity.makeStuckInBlock(blockState, new Vec3(0.9f, 0.99f, 0.9f));
         }
-        entity.setBodyIsInPowderSnow(true);
+        entity.setIsInPowderSnow(true);
+        if (level.isClientSide) {
+            entity.clearFire();
+        } else {
+            entity.setSharedFlagOnFire(false);
+        }
         if (!entity.isSpectator() && (entity.xOld != entity.getX() || entity.zOld != entity.getZ()) && level.random.nextBoolean()) {
             PowderSnowBlock.spawnPowderSnowParticles(level, new Vec3(entity.getX(), blockPos.getY(), entity.getZ()));
         }
@@ -66,10 +72,14 @@ implements BucketPickup {
 
     @Override
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        EntityCollisionContext entityCollisionContext;
-        Optional<Entity> optional;
-        if (collisionContext instanceof EntityCollisionContext && (optional = (entityCollisionContext = (EntityCollisionContext)collisionContext).getEntity()).isPresent() && PowderSnowBlock.canEntityWalkOnPowderSnow(optional.get()) && collisionContext.isAbove(Shapes.block(), blockPos, false) && !collisionContext.isDescending()) {
-            return super.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
+        if (collisionContext instanceof EntityCollisionContext) {
+            boolean bl;
+            EntityCollisionContext entityCollisionContext = (EntityCollisionContext)collisionContext;
+            Optional<Entity> optional = entityCollisionContext.getEntity();
+            boolean bl2 = bl = optional.isPresent() && optional.get() instanceof FallingBlockEntity;
+            if (bl || optional.isPresent() && PowderSnowBlock.canEntityWalkOnPowderSnow(optional.get()) && collisionContext.isAbove(Shapes.block(), blockPos, false) && !collisionContext.isDescending()) {
+                return super.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
+            }
         }
         return Shapes.empty();
     }

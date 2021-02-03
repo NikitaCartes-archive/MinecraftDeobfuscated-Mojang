@@ -5,6 +5,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -42,7 +44,7 @@ extends Item {
         double d = 5.0;
         List<Entity> list = level.getEntities(player, player.getBoundingBox().expandTowards(vec3.scale(5.0)).inflate(1.0), ENTITY_PREDICATE);
         if (!list.isEmpty()) {
-            Vec3 vec32 = player.getEyePosition(1.0f);
+            Vec3 vec32 = player.getEyePosition();
             for (Entity entity : list) {
                 AABB aABB = entity.getBoundingBox().inflate(entity.getPickRadius());
                 if (!aABB.contains(vec32)) continue;
@@ -58,6 +60,7 @@ extends Item {
             }
             if (!level.isClientSide) {
                 level.addFreshEntity(boat);
+                level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, new BlockPos(hitResult.getLocation()));
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }

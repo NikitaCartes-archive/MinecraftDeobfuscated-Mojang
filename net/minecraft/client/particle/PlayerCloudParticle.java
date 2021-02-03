@@ -23,6 +23,7 @@ extends TextureSheetParticle {
     private PlayerCloudParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float k;
+        this.friction = 0.96f;
         this.sprites = spriteSet;
         float j = 2.5f;
         this.xd *= (double)0.1f;
@@ -53,28 +54,16 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        double d;
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
-        this.setSpriteFromAge(this.sprites);
-        this.move(this.xd, this.yd, this.zd);
-        this.xd *= (double)0.96f;
-        this.yd *= (double)0.96f;
-        this.zd *= (double)0.96f;
-        Player player = this.level.getNearestPlayer(this.x, this.y, this.z, 2.0, false);
-        if (player != null && this.y > (d = player.getY())) {
-            this.y += (d - this.y) * 0.2;
-            this.yd += (player.getDeltaMovement().y - this.yd) * 0.2;
-            this.setPos(this.x, this.y, this.z);
-        }
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
+        super.tick();
+        if (!this.removed) {
+            double d;
+            this.setSpriteFromAge(this.sprites);
+            Player player = this.level.getNearestPlayer(this.x, this.y, this.z, 2.0, false);
+            if (player != null && this.y > (d = player.getY())) {
+                this.y += (d - this.y) * 0.2;
+                this.yd += (player.getDeltaMovement().y - this.yd) * 0.2;
+                this.setPos(this.x, this.y, this.z);
+            }
         }
     }
 

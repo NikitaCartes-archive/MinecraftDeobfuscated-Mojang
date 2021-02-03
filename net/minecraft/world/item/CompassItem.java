@@ -56,12 +56,13 @@ implements Vanishable {
             return;
         }
         if (CompassItem.isLodestoneCompass(itemStack)) {
+            BlockPos blockPos;
             CompoundTag compoundTag = itemStack.getOrCreateTag();
             if (compoundTag.contains("LodestoneTracked") && !compoundTag.getBoolean("LodestoneTracked")) {
                 return;
             }
             Optional<ResourceKey<Level>> optional = CompassItem.getLodestoneDimension(compoundTag);
-            if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos") && !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos")))) {
+            if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos") && (!level.isInWorldBounds(blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"))) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, blockPos))) {
                 compoundTag.remove("LodestonePos");
             }
         }

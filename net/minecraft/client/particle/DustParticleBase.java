@@ -19,6 +19,8 @@ extends TextureSheetParticle {
 
     protected DustParticleBase(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, T dustParticleOptionsBase, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, g, h, i);
+        this.friction = 0.96f;
+        this.speedUpWhenYMotionIsBlocked = true;
         this.sprites = spriteSet;
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;
@@ -49,26 +51,8 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
+        super.tick();
         this.setSpriteFromAge(this.sprites);
-        this.move(this.xd, this.yd, this.zd);
-        if (this.y == this.yo) {
-            this.xd *= 1.1;
-            this.zd *= 1.1;
-        }
-        this.xd *= (double)0.96f;
-        this.yd *= (double)0.96f;
-        this.zd *= (double)0.96f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 }
 

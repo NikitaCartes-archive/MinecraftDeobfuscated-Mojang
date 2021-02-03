@@ -51,6 +51,8 @@ public abstract class Particle {
     protected float alpha = 1.0f;
     protected float roll;
     protected float oRoll;
+    protected float friction = 0.98f;
+    protected boolean speedUpWhenYMotionIsBlocked = false;
 
     protected Particle(ClientLevel clientLevel, double d, double e, double f) {
         this.level = clientLevel;
@@ -114,9 +116,13 @@ public abstract class Particle {
         }
         this.yd -= 0.04 * (double)this.gravity;
         this.move(this.xd, this.yd, this.zd);
-        this.xd *= (double)0.98f;
-        this.yd *= (double)0.98f;
-        this.zd *= (double)0.98f;
+        if (this.speedUpWhenYMotionIsBlocked && this.y == this.yo) {
+            this.xd *= 1.1;
+            this.zd *= 1.1;
+        }
+        this.xd *= (double)this.friction;
+        this.yd *= (double)this.friction;
+        this.zd *= (double)this.friction;
         if (this.onGround) {
             this.xd *= (double)0.7f;
             this.zd *= (double)0.7f;

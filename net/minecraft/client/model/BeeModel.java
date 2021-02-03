@@ -91,7 +91,7 @@ extends AgeableListModel<T> {
             this.midLeg.xRot = 0.0f;
             this.backLeg.xRot = 0.0f;
         } else {
-            k = h * 2.1f;
+            k = h * 120.32113f * ((float)Math.PI / 180);
             this.rightWing.yRot = 0.0f;
             this.rightWing.zRot = Mth.cos(k) * (float)Math.PI * 0.15f;
             this.leftWing.xRot = this.rightWing.xRot;

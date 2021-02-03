@@ -102,6 +102,7 @@ public class ModelTemplates {
     public static final ModelTemplate CAULDRON_LEVEL1 = ModelTemplates.create("template_cauldron_level1", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
     public static final ModelTemplate CAULDRON_LEVEL2 = ModelTemplates.create("template_cauldron_level2", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
     public static final ModelTemplate CAULDRON_FULL = ModelTemplates.create("template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
+    public static final ModelTemplate AZALEA = ModelTemplates.create("template_azalea", TextureSlot.TOP, TextureSlot.SIDE);
     public static final ModelTemplate FLAT_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ITEM = ModelTemplates.createItem("handheld", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = ModelTemplates.createItem("handheld_rod", TextureSlot.LAYER0);

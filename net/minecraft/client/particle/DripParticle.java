@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.particle;
 
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -149,6 +150,28 @@ extends TextureSheetParticle {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class SporeBlossomFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+        private final Random random;
+
+        public SporeBlossomFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+            this.random = new Random();
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            int j = (int)(64.0f / Mth.randomBetween(this.random, 0.1f, 0.9f));
+            FallingParticle dripParticle = new FallingParticle(clientLevel, d, e, f, Fluids.EMPTY, j);
+            dripParticle.gravity = 0.005f;
+            dripParticle.setColor(0.32f, 0.5f, 0.22f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class NectarFallProvider
     implements ParticleProvider<SimpleParticleType> {
         protected final SpriteSet sprite;
@@ -179,7 +202,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, (Fluid)Fluids.LAVA, ParticleTypes.LANDING_LAVA);
             dripParticle.setColor(1.0f, 0.2857143f, 0.083333336f);
             dripParticle.pickSprite(this.sprite);
             return dripParticle;
@@ -214,7 +237,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+            DripstoneFallAndLandParticle dripParticle = new DripstoneFallAndLandParticle(clientLevel, d, e, f, (Fluid)Fluids.WATER, ParticleTypes.SPLASH);
             dripParticle.setColor(0.2f, 0.3f, 1.0f);
             dripParticle.pickSprite(this.sprite);
             return dripParticle;
@@ -326,7 +349,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            FallAndLandParticle dripParticle = new FallAndLandParticle(clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+            FallAndLandParticle dripParticle = new FallAndLandParticle(clientLevel, d, e, f, (Fluid)Fluids.LAVA, ParticleTypes.LANDING_LAVA);
             dripParticle.setColor(1.0f, 0.2857143f, 0.083333336f);
             dripParticle.pickSprite(this.sprite);
             return dripParticle;
@@ -361,7 +384,7 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            FallAndLandParticle dripParticle = new FallAndLandParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+            FallAndLandParticle dripParticle = new FallAndLandParticle(clientLevel, d, e, f, (Fluid)Fluids.WATER, ParticleTypes.SPLASH);
             dripParticle.setColor(0.2f, 0.3f, 1.0f);
             dripParticle.pickSprite(this.sprite);
             return dripParticle;
@@ -399,8 +422,12 @@ extends TextureSheetParticle {
     static class FallingParticle
     extends DripParticle {
         private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+            this(clientLevel, d, e, f, fluid, (int)(64.0 / (Math.random() * 0.8 + 0.2)));
+        }
+
+        private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, int i) {
             super(clientLevel, d, e, f, fluid);
-            this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
+            this.lifetime = i;
         }
 
         @Override

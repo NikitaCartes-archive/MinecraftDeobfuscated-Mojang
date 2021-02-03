@@ -55,6 +55,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -186,7 +187,6 @@ implements RangedAttackMob {
 
     @Override
     protected boolean handleEating(Player player, ItemStack itemStack) {
-        SoundEvent soundEvent;
         int i = 0;
         int j = 0;
         float f = 0.0f;
@@ -221,8 +221,12 @@ implements RangedAttackMob {
                 this.modifyTemper(j);
             }
         }
-        if (bl && !this.isSilent() && (soundEvent = this.getEatingSound()) != null) {
-            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(), this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+        if (bl) {
+            SoundEvent soundEvent;
+            this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
+            if (!this.isSilent() && (soundEvent = this.getEatingSound()) != null) {
+                this.level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(), this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+            }
         }
         return bl;
     }

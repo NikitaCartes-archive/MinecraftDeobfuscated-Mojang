@@ -17,7 +17,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 public class WhiteAshParticle
 extends BaseAshSmokeParticle {
     protected WhiteAshParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
-        super(clientLevel, d, e, f, 0.1f, -0.1f, 0.1f, g, h, i, j, spriteSet, 0.0f, 20, -5.0E-4, false);
+        super(clientLevel, d, e, f, 0.1f, -0.1f, 0.1f, g, h, i, j, spriteSet, 0.0f, 20, 0.0125f, false);
         this.rCol = 0.7294118f;
         this.gCol = 0.69411767f;
         this.bCol = 0.7607843f;

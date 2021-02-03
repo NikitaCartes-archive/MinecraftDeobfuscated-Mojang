@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CarrotBlock;
+import net.minecraft.world.level.block.CaveVinesBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.CropBlock;
@@ -180,6 +181,10 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 
     private static LootTable.Builder createBeeHiveDrop(Block block) {
         return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add(((LootPoolEntryContainer.Builder)((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).when(HAS_SILK_TOUCH)).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Bees", "BlockEntityTag.Bees"))).apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))).otherwise(LootItem.lootTableItem(block))));
+    }
+
+    private static LootTable.Builder createCaveVinesDrop(Block block) {
+        return LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.GLOW_BERRIES)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CaveVinesBlock.BERRIES, true))));
     }
 
     private static LootTable.Builder createOreDrop(Block block, Item item) {
@@ -649,30 +654,37 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.TINTED_GLASS);
         this.dropSelf(Blocks.SCULK_SENSOR);
         this.dropSelf(Blocks.COPPER_BLOCK);
-        this.dropSelf(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK);
-        this.dropSelf(Blocks.SEMI_WEATHERED_COPPER_BLOCK);
+        this.dropSelf(Blocks.EXPOSED_COPPER_BLOCK);
         this.dropSelf(Blocks.WEATHERED_COPPER_BLOCK);
+        this.dropSelf(Blocks.OXIDIZED_COPPER_BLOCK);
         this.dropSelf(Blocks.COPPER_ORE);
         this.dropSelf(Blocks.CUT_COPPER);
-        this.dropSelf(Blocks.LIGHTLY_WEATHERED_CUT_COPPER);
-        this.dropSelf(Blocks.SEMI_WEATHERED_CUT_COPPER);
+        this.dropSelf(Blocks.EXPOSED_CUT_COPPER);
         this.dropSelf(Blocks.WEATHERED_CUT_COPPER);
+        this.dropSelf(Blocks.OXIDIZED_CUT_COPPER);
         this.dropSelf(Blocks.WAXED_COPPER);
-        this.dropSelf(Blocks.WAXED_SEMI_WEATHERED_COPPER);
-        this.dropSelf(Blocks.WAXED_LIGHTLY_WEATHERED_COPPER);
+        this.dropSelf(Blocks.WAXED_WEATHERED_COPPER);
+        this.dropSelf(Blocks.WAXED_EXPOSED_COPPER);
         this.dropSelf(Blocks.WAXED_CUT_COPPER);
-        this.dropSelf(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER);
-        this.dropSelf(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER);
+        this.dropSelf(Blocks.WAXED_WEATHERED_CUT_COPPER);
+        this.dropSelf(Blocks.WAXED_EXPOSED_CUT_COPPER);
         this.dropSelf(Blocks.WAXED_CUT_COPPER_STAIRS);
-        this.dropSelf(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS);
-        this.dropSelf(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS);
+        this.dropSelf(Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS);
+        this.dropSelf(Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS);
         this.dropSelf(Blocks.CUT_COPPER_STAIRS);
-        this.dropSelf(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS);
-        this.dropSelf(Blocks.SEMI_WEATHERED_CUT_COPPER_STAIRS);
+        this.dropSelf(Blocks.EXPOSED_CUT_COPPER_STAIRS);
         this.dropSelf(Blocks.WEATHERED_CUT_COPPER_STAIRS);
+        this.dropSelf(Blocks.OXIDIZED_CUT_COPPER_STAIRS);
         this.dropSelf(Blocks.LIGHTNING_ROD);
         this.dropSelf(Blocks.POINTED_DRIPSTONE);
         this.dropSelf(Blocks.DRIPSTONE_BLOCK);
+        this.dropSelf(Blocks.SPORE_BLOSSOM);
+        this.dropSelf(Blocks.FLOWERING_AZALEA);
+        this.dropSelf(Blocks.AZALEA);
+        this.dropSelf(Blocks.MOSS_CARPET);
+        this.dropSelf(Blocks.BIG_DRIPLEAF);
+        this.dropSelf(Blocks.MOSS_BLOCK);
+        this.dropSelf(Blocks.ROOTED_DIRT);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);
@@ -766,12 +778,12 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.BLACKSTONE_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.POLISHED_BLACKSTONE_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.OXIDIZED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.EXPOSED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.WAXED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.ACACIA_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.BIRCH_DOOR, BlockLoot::createDoorTable);
@@ -806,6 +818,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.COCOA, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.COCOA_BEANS).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(3.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CocoaBlock.AGE, 2))))))));
         this.add(Blocks.SEA_PICKLE, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(Blocks.SEA_PICKLE, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(2.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 2))))).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(3.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 3))))).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(4.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 4))))))));
         this.add(Blocks.COMPOSTER, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.COMPOSTER)))).withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.BONE_MEAL)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(ComposterBlock.LEVEL, 8)))));
+        this.add(Blocks.CAVE_VINES_HEAD, BlockLoot::createCaveVinesDrop);
+        this.add(Blocks.CAVE_VINES_BODY, BlockLoot::createCaveVinesDrop);
         this.add(Blocks.CANDLE, BlockLoot::createCandleDrops);
         this.add(Blocks.WHITE_CANDLE, BlockLoot::createCandleDrops);
         this.add(Blocks.ORANGE_CANDLE, BlockLoot::createCandleDrops);
@@ -886,6 +900,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.SPRUCE_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.SPRUCE_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.OAK_LEAVES, (Block block) -> BlockLoot.createOakLeavesDrops(block, Blocks.OAK_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.DARK_OAK_LEAVES, (Block block) -> BlockLoot.createOakLeavesDrops(block, Blocks.DARK_OAK_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
+        this.add(Blocks.AZALEA_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.AZALEA, NORMAL_LEAVES_SAPLING_CHANCES));
+        this.add(Blocks.AZALEA_LEAVES_FLOWERS, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.FLOWERING_AZALEA, NORMAL_LEAVES_SAPLING_CHANCES));
         LootItemBlockStatePropertyCondition.Builder builder = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.BEETROOTS).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(BeetrootBlock.AGE, 3));
         this.add(Blocks.BEETROOTS, BlockLoot.createCropDrops(Blocks.BEETROOTS, Items.BEETROOT, Items.BEETROOT_SEEDS, builder));
         LootItemBlockStatePropertyCondition.Builder builder2 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.WHEAT).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CropBlock.AGE, 7));
@@ -909,6 +925,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.GLOW_LICHEN, BlockLoot::createShearsOnlyDrop);
+        this.add(Blocks.HANGING_ROOTS, BlockLoot::createShearsOnlyDrop);
+        this.add(Blocks.SMALL_DRIPLEAF, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createDoublePlantShearsDrop(Blocks.SEAGRASS));
         this.add(Blocks.LARGE_FERN, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.FERN));
         this.add(Blocks.TALL_GRASS, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.GRASS));
@@ -1025,6 +1043,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.NETHER_PORTAL, BlockLoot.noDrop());
         this.add(Blocks.BUDDING_AMETHYST, BlockLoot.noDrop());
         this.add(Blocks.POWDER_SNOW, BlockLoot.noDrop());
+        this.add(Blocks.BIG_DRIPLEAF_STEM, BlockLoot.noDrop());
         HashSet<ResourceLocation> set = Sets.newHashSet();
         for (Block block2 : Registry.BLOCK) {
             ResourceLocation resourceLocation = block2.getLootTable();

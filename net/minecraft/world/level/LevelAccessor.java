@@ -70,6 +70,10 @@ LevelTimeAccess {
         this.gameEvent(null, gameEvent, blockPos);
     }
 
+    default public void gameEvent(GameEvent gameEvent, Entity entity) {
+        this.gameEvent(null, gameEvent, entity.blockPosition());
+    }
+
     default public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Entity entity2) {
         this.gameEvent(entity, gameEvent, entity2.blockPosition());
     }

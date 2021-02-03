@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 
 public class RandomBooleanSelectorFeature
@@ -18,7 +19,12 @@ extends Feature<RandomBooleanFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration) {
+    public boolean place(FeaturePlaceContext<RandomBooleanFeatureConfiguration> featurePlaceContext) {
+        Random random = featurePlaceContext.random();
+        RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration = featurePlaceContext.config();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+        BlockPos blockPos = featurePlaceContext.origin();
         boolean bl = random.nextBoolean();
         if (bl) {
             return randomBooleanFeatureConfiguration.featureTrue.get().place(worldGenLevel, chunkGenerator, random, blockPos);

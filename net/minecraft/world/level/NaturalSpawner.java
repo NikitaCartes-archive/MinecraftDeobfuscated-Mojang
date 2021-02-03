@@ -235,7 +235,7 @@ public final class NaturalSpawner {
         int i = chunkPos.getMinBlockX() + level.random.nextInt(16);
         int j = chunkPos.getMinBlockZ() + level.random.nextInt(16);
         int k = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i, j) + 1;
-        int l = level.random.nextInt(k - level.getMinBuildHeight() + 1) + level.getMinBuildHeight();
+        int l = Mth.randomBetweenInclusive(level.random, level.getMinBuildHeight(), k);
         return new BlockPos(i, l, j);
     }
 
@@ -281,34 +281,34 @@ public final class NaturalSpawner {
         return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState, entityType) && NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2), entityType);
     }
 
-    public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, int i, int j, Random random) {
+    public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, ChunkPos chunkPos, Random random) {
         MobSpawnSettings mobSpawnSettings = biome.getMobSettings();
         List<MobSpawnSettings.SpawnerData> list = mobSpawnSettings.getMobs(MobCategory.CREATURE);
         if (list.isEmpty()) {
             return;
         }
-        int k = SectionPos.sectionToBlockCoord(i);
-        int l = SectionPos.sectionToBlockCoord(j);
+        int i = chunkPos.getMinBlockX();
+        int j = chunkPos.getMinBlockZ();
         while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
             Optional<MobSpawnSettings.SpawnerData> optional = WeighedRandom.getRandomItem(random, list);
             if (!optional.isPresent()) continue;
             MobSpawnSettings.SpawnerData spawnerData = optional.get();
-            int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+            int k = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
             SpawnGroupData spawnGroupData = null;
-            int n = k + random.nextInt(16);
-            int o = l + random.nextInt(16);
-            int p = n;
-            int q = o;
-            for (int r = 0; r < m; ++r) {
+            int l = i + random.nextInt(16);
+            int m = j + random.nextInt(16);
+            int n = l;
+            int o = m;
+            for (int p = 0; p < k; ++p) {
                 boolean bl = false;
-                for (int s = 0; !bl && s < 4; ++s) {
-                    BlockPos blockPos = NaturalSpawner.getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, n, o);
+                for (int q = 0; !bl && q < 4; ++q) {
+                    BlockPos blockPos = NaturalSpawner.getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, l, m);
                     if (spawnerData.type.canSummon() && NaturalSpawner.isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
                         Mob mob;
                         Object entity;
                         float f = spawnerData.type.getWidth();
-                        double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
-                        double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
+                        double d = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
+                        double e = Mth.clamp((double)m, (double)j + (double)f, (double)j + 16.0 - (double)f);
                         if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, blockPos.getY(), e)) || !SpawnPlacements.checkSpawnRules(spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom())) continue;
                         try {
                             entity = spawnerData.type.create(serverLevelAccessor.getLevel());
@@ -323,11 +323,11 @@ public final class NaturalSpawner {
                             bl = true;
                         }
                     }
-                    n += random.nextInt(5) - random.nextInt(5);
-                    o += random.nextInt(5) - random.nextInt(5);
-                    while (n < k || n >= k + 16 || o < l || o >= l + 16) {
-                        n = p + random.nextInt(5) - random.nextInt(5);
-                        o = q + random.nextInt(5) - random.nextInt(5);
+                    l += random.nextInt(5) - random.nextInt(5);
+                    m += random.nextInt(5) - random.nextInt(5);
+                    while (l < i || l >= i + 16 || m < j || m >= j + 16) {
+                        l = n + random.nextInt(5) - random.nextInt(5);
+                        m = o + random.nextInt(5) - random.nextInt(5);
                     }
                 }
             }

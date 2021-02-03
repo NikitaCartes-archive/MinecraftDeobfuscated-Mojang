@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.synth;
 
-import java.util.Random;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.RandomSource;
 
 public class SimplexNoise {
     protected static final int[][] GRADIENT = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1}, {-1, 1, 0}, {0, -1, -1}};
@@ -16,16 +16,16 @@ public class SimplexNoise {
     public final double yo;
     public final double zo;
 
-    public SimplexNoise(Random random) {
+    public SimplexNoise(RandomSource randomSource) {
         int i;
-        this.xo = random.nextDouble() * 256.0;
-        this.yo = random.nextDouble() * 256.0;
-        this.zo = random.nextDouble() * 256.0;
+        this.xo = randomSource.nextDouble() * 256.0;
+        this.yo = randomSource.nextDouble() * 256.0;
+        this.zo = randomSource.nextDouble() * 256.0;
         for (i = 0; i < 256; ++i) {
             this.p[i] = i;
         }
         for (i = 0; i < 256; ++i) {
-            int j = random.nextInt(256 - i);
+            int j = randomSource.nextInt(256 - i);
             int k = this.p[i];
             this.p[i] = this.p[j + i];
             this.p[j + i] = k;

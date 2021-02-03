@@ -4,23 +4,18 @@
 package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ThreadingDetector;
 import net.minecraft.world.level.chunk.HashMapPalette;
 import net.minecraft.world.level.chunk.LinearPalette;
 import net.minecraft.world.level.chunk.Palette;
@@ -40,14 +35,7 @@ implements PaletteResize<T> {
     private final ReentrantLock lock = new ReentrantLock();
 
     public void acquire() {
-        if (this.lock.isLocked() && !this.lock.isHeldByCurrentThread()) {
-            String string = Thread.getAllStackTraces().keySet().stream().filter(Objects::nonNull).map(thread -> thread.getName() + ": \n\tat " + Arrays.stream(thread.getStackTrace()).map(Object::toString).collect(Collectors.joining("\n\tat "))).collect(Collectors.joining("\n"));
-            CrashReport crashReport = new CrashReport("Writing into PalettedContainer from multiple threads", new IllegalStateException());
-            CrashReportCategory crashReportCategory = crashReport.addCategory("Thread dumps");
-            crashReportCategory.setDetail("Thread dumps", string);
-            throw new ReportedException(crashReport);
-        }
-        this.lock.lock();
+        ThreadingDetector.checkAndLock(this.lock, "PalettedContainer");
     }
 
     public void release() {

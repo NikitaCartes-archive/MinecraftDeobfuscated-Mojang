@@ -19,6 +19,8 @@ public class NoteParticle
 extends TextureSheetParticle {
     private NoteParticle(ClientLevel clientLevel, double d, double e, double f, double g) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
+        this.friction = 0.66f;
+        this.speedUpWhenYMotionIsBlocked = true;
         this.xd *= (double)0.01f;
         this.yd *= (double)0.01f;
         this.zd *= (double)0.01f;
@@ -38,29 +40,6 @@ extends TextureSheetParticle {
     @Override
     public float getQuadSize(float f) {
         return this.quadSize * Mth.clamp(((float)this.age + f) / (float)this.lifetime * 32.0f, 0.0f, 1.0f);
-    }
-
-    @Override
-    public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
-        this.move(this.xd, this.yd, this.zd);
-        if (this.y == this.yo) {
-            this.xd *= 1.1;
-            this.zd *= 1.1;
-        }
-        this.xd *= (double)0.66f;
-        this.yd *= (double)0.66f;
-        this.zd *= (double)0.66f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

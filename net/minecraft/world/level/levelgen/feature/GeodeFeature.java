@@ -19,12 +19,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BuddingAmethystBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -37,9 +38,13 @@ extends Feature<GeodeConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, GeodeConfiguration geodeConfiguration) {
+    public boolean place(FeaturePlaceContext<GeodeConfiguration> featurePlaceContext) {
         int n;
         int m;
+        GeodeConfiguration geodeConfiguration = featurePlaceContext.config();
+        Random random = featurePlaceContext.random();
+        BlockPos blockPos = featurePlaceContext.origin();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
         int i = geodeConfiguration.minGenOffset;
         int j = geodeConfiguration.maxGenOffset;
         if (worldGenLevel.getFluidState(blockPos.offset(0, j / 3, 0)).isSource()) {
@@ -48,7 +53,7 @@ extends Feature<GeodeConfiguration> {
         LinkedList<Pair<BlockPos, Integer>> list = Lists.newLinkedList();
         int k = geodeConfiguration.minDistributionPoints + random.nextInt(geodeConfiguration.maxDistributionPoints - geodeConfiguration.minDistributionPoints);
         WorldgenRandom worldgenRandom = new WorldgenRandom(worldGenLevel.getSeed());
-        NormalNoise normalNoise = NormalNoise.create(worldgenRandom, -4, 1.0);
+        NormalNoise normalNoise = NormalNoise.create((RandomSource)worldgenRandom, -4, 1.0);
         LinkedList<BlockPos> list2 = Lists.newLinkedList();
         double d = (double)k / (double)geodeConfiguration.maxOuterWallDistance;
         GeodeLayerSettings geodeLayerSettings = geodeConfiguration.geodeLayerSettings;

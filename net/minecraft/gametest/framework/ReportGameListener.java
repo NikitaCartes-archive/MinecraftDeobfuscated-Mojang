@@ -147,7 +147,7 @@ implements GameTestListener {
         serverLevel.setBlockAndUpdate(blockPos3, Blocks.LECTERN.defaultBlockState().rotate(gameTestInfo.getRotation()));
         BlockState blockState = serverLevel.getBlockState(blockPos3);
         ItemStack itemStack = ReportGameListener.createBook(gameTestInfo.getTestName(), gameTestInfo.isRequired(), string);
-        LecternBlock.tryPlaceBook(serverLevel, blockPos3, blockState, itemStack);
+        LecternBlock.tryPlaceBook(null, serverLevel, blockPos3, blockState, itemStack);
     }
 
     private static ItemStack createBook(String string2, boolean bl, String string22) {

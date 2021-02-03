@@ -108,8 +108,8 @@ extends Entity {
     }
 
     @Override
-    protected boolean isMovementNoisy() {
-        return false;
+    protected Entity.MovementEmission getMovementEmission() {
+        return Entity.MovementEmission.NONE;
     }
 
     @Override
@@ -161,11 +161,11 @@ extends Entity {
         if (this.level.isClientSide || this.isRemoved()) {
             return true;
         }
-        this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
         this.setDamage(this.getDamage() + f * 10.0f);
         this.markHurt();
+        this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
         boolean bl2 = bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
         if (bl || this.getDamage() > 40.0f) {
             if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
@@ -189,7 +189,7 @@ extends Entity {
         if (this.random.nextInt(20) == 0) {
             this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0f, 0.8f + 0.4f * this.random.nextFloat(), false);
         }
-        this.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH);
+        this.gameEvent(GameEvent.SPLASH, this.getControllingPassenger());
     }
 
     @Override
@@ -615,7 +615,7 @@ extends Entity {
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
         double e;
-        Vec3 vec3 = Boat.getCollisionHorizontalEscapeVector(this.getBbWidth() * Mth.SQRT_OF_TWO, livingEntity.getBbWidth(), this.yRot);
+        Vec3 vec3 = Boat.getCollisionHorizontalEscapeVector(this.getBbWidth() * Mth.SQRT_OF_TWO, livingEntity.getBbWidth(), livingEntity.yRot);
         double d = this.getX() + vec3.x;
         BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e = this.getZ() + vec3.z);
         BlockPos blockPos2 = blockPos.below();

@@ -54,7 +54,7 @@ extends DiggerItem {
                 if (!level.isClientSide()) {
                     level.levelEvent(null, 1009, blockPos, 0);
                 }
-                CampfireBlock.dowse(level, blockPos, blockState);
+                CampfireBlock.dowse(useOnContext.getPlayer(), level, blockPos, blockState);
                 blockState3 = (BlockState)blockState.setValue(CampfireBlock.LIT, false);
             }
             if (blockState3 != null) {

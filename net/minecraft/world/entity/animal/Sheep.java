@@ -61,6 +61,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
 
@@ -244,6 +245,7 @@ implements Shearable {
         if (itemStack.is(Items.SHEARS)) {
             if (!this.level.isClientSide && this.readyForShearing()) {
                 this.shear(SoundSource.PLAYERS);
+                this.gameEvent(GameEvent.SHEAR, player2);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
                 return InteractionResult.SUCCESS;
             }

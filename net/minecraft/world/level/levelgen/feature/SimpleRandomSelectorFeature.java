@@ -10,6 +10,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 
 public class SimpleRandomSelectorFeature
@@ -19,7 +20,12 @@ extends Feature<SimpleRandomFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SimpleRandomFeatureConfiguration simpleRandomFeatureConfiguration) {
+    public boolean place(FeaturePlaceContext<SimpleRandomFeatureConfiguration> featurePlaceContext) {
+        Random random = featurePlaceContext.random();
+        SimpleRandomFeatureConfiguration simpleRandomFeatureConfiguration = featurePlaceContext.config();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
         int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
         ConfiguredFeature<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i).get();
         return configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);

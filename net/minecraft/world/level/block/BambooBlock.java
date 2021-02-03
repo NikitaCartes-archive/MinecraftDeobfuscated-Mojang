@@ -97,7 +97,7 @@ implements BonemealableBlock {
                 return (BlockState)this.defaultBlockState().setValue(AGE, i);
             }
             BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().above());
-            if (blockState2.is(Blocks.BAMBOO) || blockState2.is(Blocks.BAMBOO_SAPLING)) {
+            if (blockState2.is(Blocks.BAMBOO)) {
                 return (BlockState)this.defaultBlockState().setValue(AGE, blockState2.getValue(AGE));
             }
             return Blocks.BAMBOO_SAPLING.defaultBlockState();

@@ -50,8 +50,8 @@ extends Entity {
     }
 
     @Override
-    protected boolean isMovementNoisy() {
-        return false;
+    protected Entity.MovementEmission getMovementEmission() {
+        return Entity.MovementEmission.NONE;
     }
 
     @Override
@@ -125,7 +125,7 @@ extends Entity {
     }
 
     private static boolean tryMergeToExisting(ServerLevel serverLevel, Vec3 vec3, int i) {
-        AABB aABB = AABB.ofSize(1.0, 1.0, 1.0).move(vec3);
+        AABB aABB = AABB.ofSize(vec3, 1.0, 1.0, 1.0);
         int j = serverLevel.getRandom().nextInt(40);
         List<ExperienceOrb> list = serverLevel.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), aABB, experienceOrb -> ExperienceOrb.canMerge(experienceOrb, j, i));
         if (!list.isEmpty()) {

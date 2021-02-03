@@ -33,9 +33,7 @@ extends RisingParticle {
     @Override
     public void tick() {
         super.tick();
-        if (!this.removed) {
-            this.setSpriteFromAge(this.sprites);
-        }
+        this.setSpriteFromAge(this.sprites);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -183,8 +183,13 @@ BiomeManager.NoiseBiomeSource {
     }
 
     @Deprecated
+    default public boolean hasChunkAt(int i, int j) {
+        return this.hasChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j));
+    }
+
+    @Deprecated
     default public boolean hasChunkAt(BlockPos blockPos) {
-        return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+        return this.hasChunkAt(blockPos.getX(), blockPos.getZ());
     }
 
     @Deprecated
@@ -197,12 +202,18 @@ BiomeManager.NoiseBiomeSource {
         if (m < this.getMinBuildHeight() || j >= this.getMaxBuildHeight()) {
             return false;
         }
-        k >>= 4;
-        l >>= 4;
-        n >>= 4;
-        for (int o = i >>= 4; o <= l; ++o) {
-            for (int p = k; p <= n; ++p) {
-                if (this.hasChunk(o, p)) continue;
+        return this.hasChunksAt(i, k, l, n);
+    }
+
+    @Deprecated
+    default public boolean hasChunksAt(int i, int j, int k, int l) {
+        int m = SectionPos.blockToSectionCoord(i);
+        int n = SectionPos.blockToSectionCoord(k);
+        int o = SectionPos.blockToSectionCoord(j);
+        int p = SectionPos.blockToSectionCoord(l);
+        for (int q = m; q <= n; ++q) {
+            for (int r = o; r <= p; ++r) {
+                if (this.hasChunk(q, r)) continue;
                 return false;
             }
         }

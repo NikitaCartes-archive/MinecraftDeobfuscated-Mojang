@@ -3,25 +3,55 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Iterator;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public interface ChangeOverTimeBlock {
-    default public int getChangeInterval(Random random) {
-        return 1200000 + random.nextInt(768000);
-    }
-
+public interface ChangeOverTimeBlock<T extends Enum<T>> {
     public BlockState getChangeTo(BlockState var1);
 
-    default public void scheduleChange(Level level, Block block, BlockPos blockPos) {
-        level.getBlockTicks().scheduleTick(blockPos, block, this.getChangeInterval(level.getRandom()));
+    public float getChanceModifier();
+
+    default public void onRandomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        float f = 0.05688889f;
+        if (random.nextFloat() < 0.05688889f) {
+            this.applyChangeOverTime(blockState, serverLevel, blockPos, random);
+        }
     }
 
-    default public void change(Level level, BlockState blockState, BlockPos blockPos) {
-        level.setBlockAndUpdate(blockPos, this.getChangeTo(blockState));
+    public T getAge();
+
+    default public void applyChangeOverTime(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BlockPos blockPos2;
+        int l;
+        int i = ((Enum)this.getAge()).ordinal();
+        int j = 0;
+        int k = 0;
+        Iterator<BlockPos> iterator = BlockPos.withinManhattan(blockPos, 4, 4, 4).iterator();
+        while (iterator.hasNext() && (l = (blockPos2 = iterator.next()).distManhattan(blockPos)) <= 4) {
+            BlockState blockState2;
+            Block block;
+            if (blockPos2.equals(blockPos) || !((block = (blockState2 = serverLevel.getBlockState(blockPos2)).getBlock()) instanceof ChangeOverTimeBlock)) continue;
+            T enum_ = ((ChangeOverTimeBlock)((Object)block)).getAge();
+            if (this.getAge().getClass() != enum_.getClass()) continue;
+            int m = ((Enum)enum_).ordinal();
+            if (m < i) {
+                return;
+            }
+            if (m > i) {
+                ++k;
+                continue;
+            }
+            ++j;
+        }
+        float f = (float)(k + 1) / (float)(k + j + 1);
+        float g = f * f * this.getChanceModifier();
+        if (random.nextFloat() < g) {
+            serverLevel.setBlockAndUpdate(blockPos, this.getChangeTo(blockState));
+        }
     }
 }
 

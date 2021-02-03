@@ -56,7 +56,7 @@ extends Item {
         if (hangingEntity.survives()) {
             if (!level.isClientSide) {
                 hangingEntity.playPlacementSound();
-                level.gameEvent((Entity)player, GameEvent.BLOCK_PLACE, blockPos);
+                level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, blockPos);
                 level.addFreshEntity(hangingEntity);
             }
             itemStack.shrink(1);

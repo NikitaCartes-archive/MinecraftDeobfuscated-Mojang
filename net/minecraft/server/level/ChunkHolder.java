@@ -150,12 +150,12 @@ public class ChunkHolder {
         if (levelChunk == null) {
             return;
         }
-        byte b = (byte)this.levelHeightAccessor.getSectionIndex(blockPos.getY());
-        if (this.changedBlocksPerSection[b] == null) {
+        int i = this.levelHeightAccessor.getSectionIndex(blockPos.getY());
+        if (this.changedBlocksPerSection[i] == null) {
             this.hasChangedSections = true;
-            this.changedBlocksPerSection[b] = new ShortArraySet();
+            this.changedBlocksPerSection[i] = new ShortArraySet();
         }
-        this.changedBlocksPerSection[b].add(SectionPos.sectionRelativePos(blockPos));
+        this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(blockPos));
     }
 
     public void sectionLightChanged(LightLayer lightLayer, int i) {

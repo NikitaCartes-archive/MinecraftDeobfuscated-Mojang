@@ -27,7 +27,7 @@ implements AmbientSoundHandler {
     @Override
     public void tick() {
         Level level = this.player.level;
-        BlockState blockState2 = level.getBlockStatesIfLoaded(this.player.getBoundingBox().inflate(0.0, -0.4f, 0.0).deflate(0.001)).filter(blockState -> blockState.is(Blocks.BUBBLE_COLUMN)).findFirst().orElse(null);
+        BlockState blockState2 = level.getBlockStatesIfLoaded(this.player.getBoundingBox().inflate(0.0, -0.4f, 0.0).deflate(1.0E-6)).filter(blockState -> blockState.is(Blocks.BUBBLE_COLUMN)).findFirst().orElse(null);
         if (blockState2 != null) {
             if (!this.wasInBubbleColumn && !this.firstTick && blockState2.is(Blocks.BUBBLE_COLUMN) && !this.player.isSpectator()) {
                 boolean bl = blockState2.getValue(BubbleColumnBlock.DRAG_DOWN);

@@ -11,7 +11,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public interface DispensibleContainerItem {
-    default public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
+    default public void checkExtraContent(@Nullable Player player, Level level, ItemStack itemStack, BlockPos blockPos) {
     }
 
     public boolean emptyContents(@Nullable Player var1, Level var2, BlockPos var3, @Nullable BlockHitResult var4);

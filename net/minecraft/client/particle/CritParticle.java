@@ -20,6 +20,8 @@ extends TextureSheetParticle {
     private CritParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float j;
+        this.friction = 0.7f;
+        this.gravity = 0.5f;
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;
         this.zd *= (double)0.1f;
@@ -42,24 +44,9 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
-        this.move(this.xd, this.yd, this.zd);
+        super.tick();
         this.gCol = (float)((double)this.gCol * 0.96);
         this.bCol = (float)((double)this.bCol * 0.9);
-        this.xd *= (double)0.7f;
-        this.yd *= (double)0.7f;
-        this.zd *= (double)0.7f;
-        this.yd -= (double)0.02f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 
     @Override

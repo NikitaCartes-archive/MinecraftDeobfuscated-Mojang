@@ -14,6 +14,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class SectionPos
 extends Vec3i {
@@ -39,6 +40,10 @@ extends Vec3i {
 
     public static SectionPos of(long l) {
         return new SectionPos(SectionPos.x(l), SectionPos.y(l), SectionPos.z(l));
+    }
+
+    public static SectionPos bottomOf(ChunkAccess chunkAccess) {
+        return SectionPos.of(chunkAccess.getPos(), chunkAccess.getMinSection());
     }
 
     public static long offset(long l, Direction direction) {
@@ -171,6 +176,10 @@ extends Vec3i {
 
     public ChunkPos chunk() {
         return new ChunkPos(this.x(), this.z());
+    }
+
+    public static long asLong(BlockPos blockPos) {
+        return SectionPos.asLong(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getY()), SectionPos.blockToSectionCoord(blockPos.getZ()));
     }
 
     public static long asLong(int i, int j, int k) {

@@ -208,9 +208,10 @@ extends WalkNodeEvaluator {
             }
             return BlockPathTypes.WATER;
         }
-        if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
-            BlockState blockState = blockGetter.getBlockState(new BlockPos(i, j - 1, k));
-            BlockPathTypes blockPathTypes3 = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
+        if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
+            mutableBlockPos.set(i, j, k).move(Direction.DOWN);
+            BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+            BlockPathTypes blockPathTypes3 = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos);
             blockPathTypes = blockPathTypes3 == BlockPathTypes.WALKABLE || blockPathTypes3 == BlockPathTypes.OPEN || blockPathTypes3 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockState.is(BlockTags.CAMPFIRES)) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;

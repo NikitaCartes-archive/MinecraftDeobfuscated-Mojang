@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,9 +42,10 @@ extends BucketItem {
     }
 
     @Override
-    public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
+    public void checkExtraContent(@Nullable Player player, Level level, ItemStack itemStack, BlockPos blockPos) {
         if (level instanceof ServerLevel) {
             this.spawn((ServerLevel)level, itemStack, blockPos);
+            level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, blockPos);
         }
     }
 

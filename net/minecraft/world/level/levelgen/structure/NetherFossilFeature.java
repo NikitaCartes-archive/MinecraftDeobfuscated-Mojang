@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -39,13 +40,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
             int n;
             ChunkPos chunkPos = new ChunkPos(i, j);
             int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
             int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
             int m = chunkGenerator.getSeaLevel();
-            NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l);
+            NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l, levelHeightAccessor);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l);
             for (n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m); n > m; --n) {
                 BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);

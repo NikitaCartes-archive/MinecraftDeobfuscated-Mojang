@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -65,7 +65,7 @@ extends Block {
     public MultifaceBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(MultifaceBlock.getDefaultMultifaceState(this.stateDefinition));
-        this.shapesCache = MultifaceBlock.getShapes(this.stateDefinition);
+        this.shapesCache = this.getShapeForEachState(MultifaceBlock::calculateMultifaceShape);
         this.canRotate = Direction.Plane.HORIZONTAL.stream().allMatch(this::isFaceSupported);
         this.canMirrorX = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.X).filter(this::isFaceSupported).count() % 2L == 0L;
         this.canMirrorZ = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.Z).filter(this::isFaceSupported).count() % 2L == 0L;
@@ -136,7 +136,7 @@ extends Block {
             }
             blockState2 = blockState;
         } else {
-            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSource() ? (BlockState)this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true) : this.defaultBlockState();
+            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true) : this.defaultBlockState();
         }
         BlockPos blockPos2 = blockPos.relative(direction);
         if (MultifaceBlock.canAttachTo(levelAccessor, direction, blockPos2, levelAccessor.getBlockState(blockPos2))) {
@@ -246,11 +246,6 @@ extends Block {
             blockState = (BlockState)blockState.setValue(booleanProperty, false);
         }
         return blockState;
-    }
-
-    private static ImmutableMap<BlockState, VoxelShape> getShapes(StateDefinition<Block, BlockState> stateDefinition) {
-        Map map = stateDefinition.getPossibleStates().stream().collect(Collectors.toMap(Function.identity(), MultifaceBlock::calculateMultifaceShape));
-        return ImmutableMap.copyOf(map);
     }
 
     private static VoxelShape calculateMultifaceShape(BlockState blockState) {

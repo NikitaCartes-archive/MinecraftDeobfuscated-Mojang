@@ -31,6 +31,10 @@ implements BonemealableBlock {
         super(properties, direction, voxelShape, bl);
     }
 
+    protected BlockState updateHeadAfterConvertedFromBody(BlockState blockState, BlockState blockState2) {
+        return blockState2;
+    }
+
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
@@ -38,7 +42,7 @@ implements BonemealableBlock {
         }
         GrowingPlantHeadBlock growingPlantHeadBlock = this.getHeadBlock();
         if (direction == this.growthDirection && !blockState2.is(this) && !blockState2.is(growingPlantHeadBlock)) {
-            return growingPlantHeadBlock.getStateForPlacement(levelAccessor);
+            return this.updateHeadAfterConvertedFromBody(blockState, growingPlantHeadBlock.getStateForPlacement(levelAccessor));
         }
         if (this.scheduleFluidTicks) {
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));

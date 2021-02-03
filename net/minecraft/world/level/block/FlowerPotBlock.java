@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -74,6 +76,7 @@ extends Block {
                 }
                 level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
             }
+            level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.CONSUME;

@@ -291,18 +291,22 @@ extends ObjectSelectionList<WorldListEntry> {
             this.minecraft.setScreen(new ConfirmScreen(bl -> {
                 if (bl) {
                     this.minecraft.setScreen(new ProgressScreen());
-                    LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
-                    String string = this.summary.getLevelId();
-                    try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);){
-                        levelStorageAccess.deleteLevel();
-                    } catch (IOException iOException) {
-                        SystemToast.onWorldDeleteFailure(this.minecraft, string);
-                        LOGGER.error("Failed to delete world {}", (Object)string, (Object)iOException);
-                    }
-                    WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
+                    this.doDeleteWorld();
                 }
                 this.minecraft.setScreen(this.screen);
             }, new TranslatableComponent("selectWorld.deleteQuestion"), new TranslatableComponent("selectWorld.deleteWarning", this.summary.getLevelName()), new TranslatableComponent("selectWorld.deleteButton"), CommonComponents.GUI_CANCEL));
+        }
+
+        public void doDeleteWorld() {
+            LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
+            String string = this.summary.getLevelId();
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);){
+                levelStorageAccess.deleteLevel();
+            } catch (IOException iOException) {
+                SystemToast.onWorldDeleteFailure(this.minecraft, string);
+                LOGGER.error("Failed to delete world {}", (Object)string, (Object)iOException);
+            }
+            WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
         }
 
         public void editWorld() {

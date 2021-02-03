@@ -11,6 +11,7 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class MinecartItem
 extends Item {
@@ -90,6 +92,7 @@ extends Item {
                 abstractMinecart.setCustomName(itemStack.getHoverName());
             }
             level.addFreshEntity(abstractMinecart);
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
         }
         itemStack.shrink(1);
         return InteractionResult.sidedSuccess(level.isClientSide);

@@ -24,7 +24,7 @@ extends Item {
         if (!level.isClientSide && !blockState.is(BlockTags.FIRE)) {
             itemStack.hurtAndBreak(1, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
         }
-        if (blockState.is(BlockTags.LEAVES) || blockState.is(Blocks.COBWEB) || blockState.is(Blocks.GRASS) || blockState.is(Blocks.FERN) || blockState.is(Blocks.DEAD_BUSH) || blockState.is(Blocks.VINE) || blockState.is(Blocks.TRIPWIRE) || blockState.is(BlockTags.WOOL)) {
+        if (blockState.is(BlockTags.LEAVES) || blockState.is(Blocks.COBWEB) || blockState.is(Blocks.GRASS) || blockState.is(Blocks.FERN) || blockState.is(Blocks.DEAD_BUSH) || blockState.is(Blocks.HANGING_ROOTS) || blockState.is(Blocks.VINE) || blockState.is(Blocks.TRIPWIRE) || blockState.is(BlockTags.WOOL)) {
             return true;
         }
         return super.mineBlock(itemStack, level, blockState, blockPos, livingEntity2);
@@ -42,6 +42,9 @@ extends Item {
         }
         if (blockState.is(BlockTags.WOOL)) {
             return 5.0f;
+        }
+        if (blockState.is(Blocks.VINE) || blockState.is(Blocks.GLOW_LICHEN)) {
+            return 2.0f;
         }
         return super.getDestroySpeed(itemStack, blockState);
     }

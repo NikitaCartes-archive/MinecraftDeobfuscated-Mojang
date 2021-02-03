@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Mirror;
@@ -51,7 +52,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
         return biome.getTemperature(blockPos) < 0.15f;
     }
 
-    private static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox) {
+    private static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor) {
         int m;
         int l;
         int k;
@@ -67,7 +68,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
             k = verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED ? i - j + Mth.randomBetweenInclusive(random, 2, 8) : i;
         }
         ImmutableList<BlockPos> list = ImmutableList.of(new BlockPos(boundingBox.x0, 0, boundingBox.z0), new BlockPos(boundingBox.x1, 0, boundingBox.z0), new BlockPos(boundingBox.x0, 0, boundingBox.z1), new BlockPos(boundingBox.x1, 0, boundingBox.z1));
-        List list2 = list.stream().map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ())).collect(Collectors.toList());
+        List list2 = list.stream().map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ(), levelHeightAccessor)).collect(Collectors.toList());
         Heightmap.Types types = verticalPlacement == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR ? Heightmap.Types.OCEAN_FLOOR_WG : Heightmap.Types.WORLD_SURFACE_WG;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         block0: for (m = k; m > 15; --m) {
@@ -75,7 +76,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
             mutableBlockPos.set(0, m, 0);
             for (NoiseColumn noiseColumn : list2) {
                 BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
-                if (blockState == null || !types.isOpaque().test(blockState) || ++n != 3) continue;
+                if (!types.isOpaque().test(blockState) || ++n != 3) continue;
                 break block0;
             }
         }
@@ -133,7 +134,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration, LevelHeightAccessor levelHeightAccessor) {
             boolean bl;
             RuinedPortalPiece.VerticalPlacement verticalPlacement;
             RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
@@ -180,8 +181,8 @@ extends StructureFeature<RuinedPortalConfiguration> {
             Vec3i vec3i = boundingBox.getCenter();
             int k = vec3i.getX();
             int l = vec3i.getZ();
-            int m = chunkGenerator.getBaseHeight(k, l, RuinedPortalPiece.getHeightMapType(verticalPlacement)) - 1;
-            int n = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, m, boundingBox.getYSpan(), boundingBox);
+            int m = chunkGenerator.getBaseHeight(k, l, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
+            int n = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, m, boundingBox.getYSpan(), boundingBox, levelHeightAccessor);
             BlockPos blockPos3 = new BlockPos(blockPos2.getX(), n, blockPos2.getZ());
             if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN || ruinedPortalConfiguration.portalType == Type.OCEAN || ruinedPortalConfiguration.portalType == Type.STANDARD) {
                 properties.cold = RuinedPortalFeature.isCold(blockPos3, biome);

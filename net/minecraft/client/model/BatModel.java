@@ -80,7 +80,7 @@ extends HierarchicalModel<Bat> {
             this.leftWing.setPos(0.0f, 0.0f, 0.0f);
             this.body.xRot = 0.7853982f + Mth.cos(h * 0.1f) * 0.15f;
             this.body.yRot = 0.0f;
-            this.rightWing.yRot = Mth.cos(h * 1.3f) * (float)Math.PI * 0.25f;
+            this.rightWing.yRot = Mth.cos(h * 74.48451f * ((float)Math.PI / 180)) * (float)Math.PI * 0.25f;
             this.leftWing.yRot = -this.rightWing.yRot;
             this.rightWingTip.yRot = this.rightWing.yRot * 0.5f;
             this.leftWingTip.yRot = -this.rightWing.yRot * 0.5f;

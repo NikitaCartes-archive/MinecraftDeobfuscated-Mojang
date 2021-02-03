@@ -9,7 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -21,10 +23,16 @@ extends Feature<DecoratedFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos2, DecoratedFeatureConfiguration decoratedFeatureConfiguration) {
+    public boolean place(FeaturePlaceContext<DecoratedFeatureConfiguration> featurePlaceContext) {
         MutableBoolean mutableBoolean = new MutableBoolean();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        DecoratedFeatureConfiguration decoratedFeatureConfiguration = featurePlaceContext.config();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+        Random random = featurePlaceContext.random();
+        BlockPos blockPos2 = featurePlaceContext.origin();
+        ConfiguredFeature<?, ?> configuredFeature = decoratedFeatureConfiguration.feature.get();
         decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos2).forEach(blockPos -> {
-            if (decoratedFeatureConfiguration.feature.get().place(worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
+            if (configuredFeature.place(worldGenLevel, chunkGenerator, random, (BlockPos)blockPos)) {
                 mutableBoolean.setTrue();
             }
         });

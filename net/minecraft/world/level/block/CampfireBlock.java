@@ -48,6 +48,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -163,7 +164,7 @@ implements SimpleWaterloggedBlock {
         }
     }
 
-    public static void dowse(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+    public static void dowse(@Nullable Entity entity, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
         BlockEntity blockEntity;
         if (levelAccessor.isClientSide()) {
             for (int i = 0; i < 20; ++i) {
@@ -173,6 +174,7 @@ implements SimpleWaterloggedBlock {
         if ((blockEntity = levelAccessor.getBlockEntity(blockPos)) instanceof CampfireBlockEntity) {
             ((CampfireBlockEntity)blockEntity).dowse();
         }
+        levelAccessor.gameEvent(entity, GameEvent.BLOCK_CHANGE, blockPos);
     }
 
     @Override
@@ -183,7 +185,7 @@ implements SimpleWaterloggedBlock {
                 if (!levelAccessor.isClientSide()) {
                     levelAccessor.playSound(null, blockPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0f, 1.0f);
                 }
-                CampfireBlock.dowse(levelAccessor, blockPos, blockState);
+                CampfireBlock.dowse(null, levelAccessor, blockPos, blockState);
             }
             levelAccessor.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(WATERLOGGED, true)).setValue(LIT, false), 3);
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), fluidState.getType().getTickDelay(levelAccessor));

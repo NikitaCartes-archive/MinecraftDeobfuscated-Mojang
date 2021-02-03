@@ -30,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -67,10 +68,10 @@ extends BiomeSource {
         this.humidityParams = noiseParameters2;
         this.altitudeParams = noiseParameters3;
         this.weirdnessParams = noiseParameters4;
-        this.temperatureNoise = NormalNoise.create(new WorldgenRandom(l), noiseParameters.firstOctave(), noiseParameters.amplitudes());
-        this.humidityNoise = NormalNoise.create(new WorldgenRandom(l + 1L), noiseParameters2.firstOctave(), noiseParameters2.amplitudes());
-        this.altitudeNoise = NormalNoise.create(new WorldgenRandom(l + 2L), noiseParameters3.firstOctave(), noiseParameters3.amplitudes());
-        this.weirdnessNoise = NormalNoise.create(new WorldgenRandom(l + 3L), noiseParameters4.firstOctave(), noiseParameters4.amplitudes());
+        this.temperatureNoise = NormalNoise.create((RandomSource)new WorldgenRandom(l), noiseParameters.firstOctave(), noiseParameters.amplitudes());
+        this.humidityNoise = NormalNoise.create((RandomSource)new WorldgenRandom(l + 1L), noiseParameters2.firstOctave(), noiseParameters2.amplitudes());
+        this.altitudeNoise = NormalNoise.create((RandomSource)new WorldgenRandom(l + 2L), noiseParameters3.firstOctave(), noiseParameters3.amplitudes());
+        this.weirdnessNoise = NormalNoise.create((RandomSource)new WorldgenRandom(l + 3L), noiseParameters4.firstOctave(), noiseParameters4.amplitudes());
         this.parameters = list;
         this.useY = false;
     }

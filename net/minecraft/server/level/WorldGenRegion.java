@@ -60,8 +60,7 @@ public class WorldGenRegion
 implements WorldGenLevel {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<ChunkAccess> cache;
-    private final int x;
-    private final int z;
+    private final ChunkPos center;
     private final int size;
     private final ServerLevel level;
     private final long seed;
@@ -82,8 +81,7 @@ implements WorldGenLevel {
         }
         ChunkPos chunkPos = list.get(list.size() / 2).getPos();
         this.cache = list;
-        this.x = chunkPos.x;
-        this.z = chunkPos.z;
+        this.center = chunkPos;
         this.size = i;
         this.level = serverLevel;
         this.seed = serverLevel.getSeed();
@@ -96,12 +94,8 @@ implements WorldGenLevel {
         this.structureFeatureManager = serverLevel.structureFeatureManager().forWorldGenRegion(this);
     }
 
-    public int getCenterX() {
-        return this.x;
-    }
-
-    public int getCenterZ() {
-        return this.z;
+    public ChunkPos getCenter() {
+        return this.center;
     }
 
     @Override

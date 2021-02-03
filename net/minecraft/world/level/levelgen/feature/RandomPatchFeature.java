@@ -10,9 +10,9 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
 public class RandomPatchFeature
@@ -22,7 +22,11 @@ extends Feature<RandomPatchConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, RandomPatchConfiguration randomPatchConfiguration) {
+    public boolean place(FeaturePlaceContext<RandomPatchConfiguration> featurePlaceContext) {
+        RandomPatchConfiguration randomPatchConfiguration = featurePlaceContext.config();
+        Random random = featurePlaceContext.random();
+        BlockPos blockPos = featurePlaceContext.origin();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockState blockState = randomPatchConfiguration.stateProvider.getState(random, blockPos);
         BlockPos blockPos2 = randomPatchConfiguration.project ? worldGenLevel.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, blockPos) : blockPos;
         int i = 0;

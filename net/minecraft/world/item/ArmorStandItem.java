@@ -57,7 +57,7 @@ extends Item {
             this.randomizePose(armorStand, level.random);
             serverLevel.addFreshEntityWithPassengers(armorStand);
             level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
-            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, armorStand);
+            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, armorStand);
         }
         itemStack.shrink(1);
         return InteractionResult.sidedSuccess(level.isClientSide);

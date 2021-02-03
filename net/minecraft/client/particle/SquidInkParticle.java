@@ -19,6 +19,7 @@ public class SquidInkParticle
 extends SimpleAnimatedParticle {
     private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, spriteSet, 0.0f);
+        this.friction = 0.92f;
         this.quadSize = 0.5f;
         this.setAlpha(1.0f);
         this.setColor(FastColor.ARGB32.red(j), FastColor.ARGB32.green(j), FastColor.ARGB32.blue(j));
@@ -28,32 +29,19 @@ extends SimpleAnimatedParticle {
         this.xd = g;
         this.yd = h;
         this.zd = i;
-        this.setBaseAirFriction(0.0f);
     }
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
-        this.setSpriteFromAge(this.sprites);
-        if (this.age > this.lifetime / 2) {
-            this.setAlpha(1.0f - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
-        }
-        this.move(this.xd, this.yd, this.zd);
-        if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
-            this.yd -= (double)0.008f;
-        }
-        this.xd *= (double)0.92f;
-        this.yd *= (double)0.92f;
-        this.zd *= (double)0.92f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
+        super.tick();
+        if (!this.removed) {
+            this.setSpriteFromAge(this.sprites);
+            if (this.age > this.lifetime / 2) {
+                this.setAlpha(1.0f - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
+            }
+            if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
+                this.yd -= (double)0.0074f;
+            }
         }
     }
 

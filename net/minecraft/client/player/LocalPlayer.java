@@ -65,6 +65,7 @@ import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -183,7 +184,7 @@ extends AbstractClientPlayer {
 
     @Override
     public void tick() {
-        if (!this.level.hasChunkAt(new BlockPos(this.getX(), 0.0, this.getZ()))) {
+        if (!this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
             return;
         }
         super.tick();
@@ -429,7 +430,7 @@ extends AbstractClientPlayer {
     private boolean suffocatesAt(BlockPos blockPos2) {
         AABB aABB = this.getBoundingBox();
         AABB aABB2 = new AABB(blockPos2.getX(), aABB.minY, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, aABB.maxY, (double)blockPos2.getZ() + 1.0).deflate(1.0E-7);
-        return !this.level.noBlockCollision(this, aABB2, (blockState, blockPos) -> blockState.isSuffocating(this.level, (BlockPos)blockPos));
+        return this.level.hasBlockCollision(this, aABB2, (blockState, blockPos) -> blockState.isSuffocating(this.level, (BlockPos)blockPos));
     }
 
     @Override
@@ -607,6 +608,20 @@ extends AbstractClientPlayer {
 
     protected boolean isControlledCamera() {
         return this.minecraft.getCameraEntity() == this;
+    }
+
+    public void resetPos() {
+        this.setPose(Pose.STANDING);
+        if (this.level != null) {
+            for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMaxBuildHeight(); d += 1.0) {
+                this.setPos(this.getX(), d, this.getZ());
+                if (this.level.noCollision(this)) break;
+            }
+            this.setDeltaMovement(Vec3.ZERO);
+            this.xRot = 0.0f;
+        }
+        this.setHealth(this.getMaxHealth());
+        this.deathTime = 0;
     }
 
     @Override
@@ -965,6 +980,11 @@ extends AbstractClientPlayer {
             return vec3.xRot(-h).yRot(-g).add(this.getEyePosition(f));
         }
         return super.getRopeHoldPosition(f);
+    }
+
+    @Override
+    public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
+        this.minecraft.getTutorial().onInventoryAction(itemStack, itemStack2, clickAction);
     }
 }
 

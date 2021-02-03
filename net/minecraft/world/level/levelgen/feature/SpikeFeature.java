@@ -28,9 +28,9 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
 
@@ -49,7 +49,11 @@ extends Feature<SpikeConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
+    public boolean place(FeaturePlaceContext<SpikeConfiguration> featurePlaceContext) {
+        SpikeConfiguration spikeConfiguration = featurePlaceContext.config();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        Random random = featurePlaceContext.random();
+        BlockPos blockPos = featurePlaceContext.origin();
         List<EndSpike> list = spikeConfiguration.getSpikes();
         if (list.isEmpty()) {
             list = SpikeFeature.getSpikesForLevel(worldGenLevel);

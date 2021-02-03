@@ -17,10 +17,10 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Column;
 import net.minecraft.world.level.levelgen.feature.DripstoneUtils;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 
 public class DripstoneClusterFeature
@@ -30,7 +30,11 @@ extends Feature<DripstoneClusterConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DripstoneClusterConfiguration dripstoneClusterConfiguration) {
+    public boolean place(FeaturePlaceContext<DripstoneClusterConfiguration> featurePlaceContext) {
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        DripstoneClusterConfiguration dripstoneClusterConfiguration = featurePlaceContext.config();
+        Random random = featurePlaceContext.random();
         if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
             return false;
         }
@@ -160,7 +164,7 @@ extends Feature<DripstoneClusterConfiguration> {
         int m = i - Math.abs(k);
         int n = j - Math.abs(l);
         int o = Math.min(m, n);
-        return Mth.clampedMap(o, 0.0, dripstoneClusterConfiguration.maxDistanceFromCenterAffectingChanceOfDripstoneColumn, dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0);
+        return Mth.clampedMap(o, 0.0, dripstoneClusterConfiguration.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn, dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0);
     }
 
     private static float randomBetweenBiased(Random random, float f, float g, float h, float i) {

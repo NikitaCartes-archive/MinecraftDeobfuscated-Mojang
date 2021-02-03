@@ -9,6 +9,7 @@ import java.util.List;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -33,7 +34,7 @@ extends JigsawFeature {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, JigsawConfiguration jigsawConfiguration) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, JigsawConfiguration jigsawConfiguration, LevelHeightAccessor levelHeightAccessor) {
         int k = SectionPos.blockToSectionCoord(i);
         int m = SectionPos.blockToSectionCoord(j);
         worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);

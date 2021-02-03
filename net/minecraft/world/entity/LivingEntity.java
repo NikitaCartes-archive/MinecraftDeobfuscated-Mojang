@@ -353,7 +353,7 @@ extends Entity {
                 this.onChangedBlock(blockPos);
             }
         }
-        if (this.isAlive() && (this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow)) {
+        if (this.isAlive() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
             this.clearFire();
         }
         if (this.hurtTime > 0) {
@@ -577,11 +577,12 @@ extends Entity {
         this.noActionTime = i;
     }
 
-    protected void playEquipSound(ItemStack itemStack) {
+    protected void equipEventAndSound(ItemStack itemStack) {
         SoundEvent soundEvent = itemStack.getEquipSound();
         if (itemStack.isEmpty() || soundEvent == null || this.isSpectator()) {
             return;
         }
+        this.gameEvent(GameEvent.EQUIP);
         this.playSound(soundEvent, 1.0f, 1.0f);
     }
 
@@ -998,7 +999,6 @@ extends Entity {
         if (entity2 instanceof ServerPlayer) {
             CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
         }
-        this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
         return bl3;
     }
 
@@ -1353,6 +1353,7 @@ extends Entity {
         this.setHealth(i - f);
         this.getCombatTracker().recordDamage(damageSource, i, f);
         this.setAbsorptionAmount(this.getAbsorptionAmount() - f);
+        this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
     }
 
     public CombatTracker getCombatTracker() {
@@ -1665,7 +1666,7 @@ extends Entity {
 
     private void dismountVehicle(Entity entity) {
         Vec3 vec3 = entity.isRemoved() || this.level.getBlockState(entity.blockPosition()).is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
-        this.teleportTo(vec3.x, vec3.y, vec3.z);
+        this.dismountTo(vec3.x, vec3.y, vec3.z);
     }
 
     @Override
@@ -2178,7 +2179,7 @@ extends Entity {
         this.level.getProfiler().pop();
         this.level.getProfiler().push("freezing");
         int m = this.getTicksFrozen();
-        if (this.bodyIsInPowderSnow && this.canFreeze()) {
+        if (this.isInPowderSnow && this.canFreeze()) {
             this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
         } else {
             this.setTicksFrozen(Math.max(0, m - 2));
@@ -2786,12 +2787,13 @@ extends Entity {
 
     public ItemStack eat(Level level, ItemStack itemStack) {
         if (itemStack.isEdible()) {
+            level.gameEvent((Entity)this, GameEvent.EAT, this.eyeBlockPosition());
             level.playSound(null, this.getX(), this.getY(), this.getZ(), this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0f, 1.0f + (level.random.nextFloat() - level.random.nextFloat()) * 0.4f);
             this.addEatEffect(itemStack, level, this);
             if (!(this instanceof Player) || !((Player)this).getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
-            this.gameEvent(GameEvent.EATING_FINISH);
+            this.gameEvent(GameEvent.EAT);
         }
         return itemStack;
     }
@@ -2911,6 +2913,22 @@ extends Entity {
             return false;
         }
         return !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
+        double d = clientboundAddMobPacket.getX();
+        double e = clientboundAddMobPacket.getY();
+        double f = clientboundAddMobPacket.getZ();
+        float g = (float)(clientboundAddMobPacket.getyRot() * 360) / 256.0f;
+        float h = (float)(clientboundAddMobPacket.getxRot() * 360) / 256.0f;
+        this.setPacketCoordinates(d, e, f);
+        this.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0f;
+        this.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0f;
+        this.setId(clientboundAddMobPacket.getId());
+        this.setUUID(clientboundAddMobPacket.getUUID());
+        this.absMoveTo(d, e, f, g, h);
+        this.setDeltaMovement((float)clientboundAddMobPacket.getXd() / 8000.0f, (float)clientboundAddMobPacket.getYd() / 8000.0f, (float)clientboundAddMobPacket.getZd() / 8000.0f);
     }
 }
 

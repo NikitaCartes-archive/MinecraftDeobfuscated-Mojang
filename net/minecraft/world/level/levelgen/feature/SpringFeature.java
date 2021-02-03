@@ -4,12 +4,11 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 
 public class SpringFeature
@@ -19,8 +18,11 @@ extends Feature<SpringConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpringConfiguration springConfiguration) {
-        if (!springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.above()).getBlock())) {
+    public boolean place(FeaturePlaceContext<SpringConfiguration> featurePlaceContext) {
+        BlockPos blockPos;
+        SpringConfiguration springConfiguration = featurePlaceContext.config();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        if (!springConfiguration.validBlocks.contains(worldGenLevel.getBlockState((blockPos = featurePlaceContext.origin()).above()).getBlock())) {
             return false;
         }
         if (springConfiguration.requiresBlockBelow && !springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.below()).getBlock())) {

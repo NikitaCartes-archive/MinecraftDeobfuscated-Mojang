@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -96,7 +97,7 @@ extends BaseEntityBlock {
         BlockPos blockPos = blockHitResult.getBlockPos();
         boolean bl3 = bl2 = !bl || this.isProperHit(blockState, direction, blockHitResult.getLocation().y - (double)blockPos.getY());
         if (bl2) {
-            boolean bl32 = this.attemptToRing(level, blockPos, direction);
+            boolean bl32 = this.attemptToRing(player, level, blockPos, direction);
             if (bl32 && player != null) {
                 player.awardStat(Stats.BELL_RING);
             }
@@ -127,6 +128,10 @@ extends BaseEntityBlock {
     }
 
     public boolean attemptToRing(Level level, BlockPos blockPos, @Nullable Direction direction) {
+        return this.attemptToRing(null, level, blockPos, direction);
+    }
+
+    public boolean attemptToRing(@Nullable Entity entity, Level level, BlockPos blockPos, @Nullable Direction direction) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (!level.isClientSide && blockEntity instanceof BellBlockEntity) {
             if (direction == null) {
@@ -134,6 +139,7 @@ extends BaseEntityBlock {
             }
             ((BellBlockEntity)blockEntity).onHit(direction);
             level.playSound(null, blockPos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0f, 1.0f);
+            level.gameEvent(entity, GameEvent.RING_BELL, blockPos);
             return true;
         }
         return false;

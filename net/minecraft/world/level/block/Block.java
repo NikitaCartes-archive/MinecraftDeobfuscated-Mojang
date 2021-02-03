@@ -6,9 +6,11 @@ package net.minecraft.world.level.block;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -121,6 +123,9 @@ implements ItemLike {
 
     public static BlockState pushEntitiesUp(BlockState blockState, BlockState blockState2, Level level, BlockPos blockPos) {
         VoxelShape voxelShape = Shapes.joinUnoptimized(blockState.getCollisionShape(level, blockPos), blockState2.getCollisionShape(level, blockPos), BooleanOp.ONLY_SECOND).move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        if (voxelShape.isEmpty()) {
+            return blockState2;
+        }
         List<Entity> list = level.getEntities(null, voxelShape.bounds());
         for (Entity entity : list) {
             double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), Stream.of(voxelShape), -1.0);
@@ -358,8 +363,12 @@ implements ItemLike {
         return this.jumpFactor;
     }
 
-    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+    protected void spawnDestroyParticles(Level level, Player player, BlockPos blockPos, BlockState blockState) {
         level.levelEvent(player, 2001, blockPos, Block.getId(blockState));
+    }
+
+    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+        this.spawnDestroyParticles(level, player, blockPos, blockState);
         if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
             PiglinAi.angerNearbyPiglins(player, false);
         }
@@ -415,6 +424,10 @@ implements ItemLike {
     @Override
     protected Block asBlock() {
         return this;
+    }
+
+    protected ImmutableMap<BlockState, VoxelShape> getShapeForEachState(Function<BlockState, VoxelShape> function) {
+        return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), function));
     }
 
     public static final class BlockStatePairKey {

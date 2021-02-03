@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Bat
 extends AmbientCreature {
+    public static final int TICKS_PER_FLAP = Mth.ceil(2.4166098f);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Bat.class, EntityDataSerializers.BYTE);
     private static final TargetingConditions BAT_RESTING_TARGETING = new TargetingConditions().range(4.0).allowSameTeam();
     private BlockPos targetPosition;
@@ -40,6 +41,11 @@ extends AmbientCreature {
     public Bat(EntityType<? extends Bat> entityType, Level level) {
         super((EntityType<? extends AmbientCreature>)entityType, level);
         this.setResting(true);
+    }
+
+    @Override
+    public boolean isFlapping() {
+        return !this.isResting() && this.tickCount % TICKS_PER_FLAP == 0;
     }
 
     @Override
@@ -165,8 +171,8 @@ extends AmbientCreature {
     }
 
     @Override
-    protected boolean isMovementNoisy() {
-        return false;
+    protected Entity.MovementEmission getMovementEmission() {
+        return Entity.MovementEmission.EVENTS;
     }
 
     @Override

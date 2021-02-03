@@ -11,6 +11,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
@@ -79,7 +80,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     @Override
     public void initNoise(long l) {
         if (this.seed != l || this.decorationNoise == null) {
-            this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), ImmutableList.of(Integer.valueOf(0)));
+            this.decorationNoise = new PerlinNoise((RandomSource)new WorldgenRandom(l), ImmutableList.of(Integer.valueOf(0)));
         }
         this.seed = l;
     }

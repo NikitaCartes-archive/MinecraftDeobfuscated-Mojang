@@ -165,6 +165,7 @@ AutoCloseable {
     }
 
     @Override
+    @Nullable
     public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
         ChunkAccess chunkAccess = this.getChunkSource().getChunk(i, j, chunkStatus, bl);
         if (chunkAccess == null && bl) {

@@ -8,10 +8,9 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
 public class NetherForestVegetationFeature
@@ -21,8 +20,8 @@ extends Feature<BlockPileConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration) {
-        return NetherForestVegetationFeature.place(worldGenLevel, random, blockPos, blockPileConfiguration, 8, 4);
+    public boolean place(FeaturePlaceContext<BlockPileConfiguration> featurePlaceContext) {
+        return NetherForestVegetationFeature.place(featurePlaceContext.level(), featurePlaceContext.random(), featurePlaceContext.origin(), featurePlaceContext.config(), 8, 4);
     }
 
     public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration, int i, int j) {

@@ -3,21 +3,34 @@
  */
 package net.minecraft.util.datafix.schemas;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.Hook;
 import com.mojang.datafixers.types.templates.TypeTemplate;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 import net.minecraft.util.datafix.schemas.V100;
-import net.minecraft.util.datafix.schemas.V705;
+import net.minecraft.util.datafix.schemas.V704;
+import net.minecraft.util.datafix.schemas.V99;
 
 public class V1460
 extends NamespacedSchema {
+    protected static final Map<String, String> ITEM_TO_BLOCKENTITY = ImmutableMap.builder().putAll(V704.ITEM_TO_BLOCKENTITY).put("minecraft:white_bed", "minecraft:bed").put("minecraft:orange_bed", "minecraft:bed").put("minecraft:magenta_bed", "minecraft:bed").put("minecraft:light_blue_bed", "minecraft:bed").put("minecraft:yellow_bed", "minecraft:bed").put("minecraft:lime_bed", "minecraft:bed").put("minecraft:pink_bed", "minecraft:bed").put("minecraft:gray_bed", "minecraft:bed").put("minecraft:silver_bed", "minecraft:bed").put("minecraft:cyan_bed", "minecraft:bed").put("minecraft:purple_bed", "minecraft:bed").put("minecraft:blue_bed", "minecraft:bed").put("minecraft:brown_bed", "minecraft:bed").put("minecraft:green_bed", "minecraft:bed").put("minecraft:red_bed", "minecraft:bed").put("minecraft:black_bed", "minecraft:bed").put("minecraft:oak_sign", "minecraft:sign").put("minecraft:spruce_sign", "minecraft:sign").put("minecraft:birch_sign", "minecraft:sign").put("minecraft:jungle_sign", "minecraft:sign").put("minecraft:acacia_sign", "minecraft:sign").put("minecraft:dark_oak_sign", "minecraft:sign").put("minecraft:crimson_sign", "minecraft:sign").put("minecraft:warped_sign", "minecraft:sign").put("minecraft:skeleton_skull", "minecraft:skull").put("minecraft:wither_skeleton_skull", "minecraft:skull").put("minecraft:zombie_head", "minecraft:skull").put("minecraft:player_head", "minecraft:skull").put("minecraft:creeper_head", "minecraft:skull").put("minecraft:dragon_head", "minecraft:skull").put("minecraft:barrel", "minecraft:barrel").put("minecraft:conduit", "minecraft:conduit").put("minecraft:smoker", "minecraft:smoker").put("minecraft:blast_furnace", "minecraft:blast_furnace").put("minecraft:lectern", "minecraft:lectern").put("minecraft:bell", "minecraft:bell").put("minecraft:jigsaw", "minecraft:jigsaw").put("minecraft:campfire", "minecraft:campfire").put("minecraft:bee_nest", "minecraft:beehive").put("minecraft:beehive", "minecraft:beehive").put("minecraft:sculk_sensor", "minecraft:sculk_sensor").build();
+    protected static final Hook.HookFunction ADD_NAMES = new Hook.HookFunction(){
+
+        @Override
+        public <T> T apply(DynamicOps<T> dynamicOps, T object) {
+            return V99.addNames(new Dynamic<T>(dynamicOps, object), ITEM_TO_BLOCKENTITY, "minecraft:armor_stand");
+        }
+    };
+
     public V1460(int i, Schema schema) {
         super(i, schema);
     }
@@ -158,7 +171,7 @@ extends NamespacedSchema {
         schema.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", V1460.namespacedString(), map2));
         schema.registerType(true, References.ENTITY_TREE, () -> DSL.optionalFields("Passengers", DSL.list(References.ENTITY_TREE.in(schema)), References.ENTITY.in(schema)));
         schema.registerType(true, References.ENTITY, () -> DSL.taggedChoiceLazy("id", V1460.namespacedString(), map));
-        schema.registerType(true, References.ITEM_STACK, () -> DSL.hook(DSL.optionalFields("id", References.ITEM_NAME.in(schema), "tag", DSL.optionalFields("EntityTag", References.ENTITY_TREE.in(schema), "BlockEntityTag", References.BLOCK_ENTITY.in(schema), "CanDestroy", DSL.list(References.BLOCK_NAME.in(schema)), "CanPlaceOn", DSL.list(References.BLOCK_NAME.in(schema)))), V705.ADD_NAMES, Hook.HookFunction.IDENTITY));
+        schema.registerType(true, References.ITEM_STACK, () -> DSL.hook(DSL.optionalFields("id", References.ITEM_NAME.in(schema), "tag", DSL.optionalFields("EntityTag", References.ENTITY_TREE.in(schema), "BlockEntityTag", References.BLOCK_ENTITY.in(schema), "CanDestroy", DSL.list(References.BLOCK_NAME.in(schema)), "CanPlaceOn", DSL.list(References.BLOCK_NAME.in(schema)))), ADD_NAMES, Hook.HookFunction.IDENTITY));
         schema.registerType(false, References.HOTBAR, () -> DSL.compoundList(DSL.list(References.ITEM_STACK.in(schema))));
         schema.registerType(false, References.OPTIONS, DSL::remainder);
         schema.registerType(false, References.STRUCTURE, () -> DSL.optionalFields("entities", DSL.list(DSL.optionalFields("nbt", References.ENTITY_TREE.in(schema))), "blocks", DSL.list(DSL.optionalFields("nbt", References.BLOCK_ENTITY.in(schema))), "palette", DSL.list(References.BLOCK_STATE.in(schema))));

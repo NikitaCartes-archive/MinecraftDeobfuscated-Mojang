@@ -20,12 +20,6 @@ extends ExplodeParticle {
         this.gravity = 0.5f;
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        this.yd -= 0.004 + 0.04 * (double)this.gravity;
-    }
-
     @Environment(value=EnvType.CLIENT)
     public static class Provider
     implements ParticleProvider<SimpleParticleType> {

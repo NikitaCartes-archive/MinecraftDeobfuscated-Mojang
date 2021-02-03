@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
@@ -73,7 +74,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         if (this.seed != l || this.patchNoise == null || this.floorNoises.isEmpty() || this.ceilingNoises.isEmpty()) {
             this.floorNoises = NetherCappedSurfaceBuilder.initPerlinNoises(this.getFloorBlockStates(), l);
             this.ceilingNoises = NetherCappedSurfaceBuilder.initPerlinNoises(this.getCeilingBlockStates(), l + (long)this.floorNoises.size());
-            this.patchNoise = new PerlinNoise(new WorldgenRandom(l + (long)this.floorNoises.size() + (long)this.ceilingNoises.size()), ImmutableList.of(Integer.valueOf(0)));
+            this.patchNoise = new PerlinNoise((RandomSource)new WorldgenRandom(l + (long)this.floorNoises.size() + (long)this.ceilingNoises.size()), ImmutableList.of(Integer.valueOf(0)));
         }
         this.seed = l;
     }
@@ -81,7 +82,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     private static ImmutableMap<BlockState, PerlinNoise> initPerlinNoises(ImmutableList<BlockState> immutableList, long l) {
         ImmutableMap.Builder<BlockState, PerlinNoise> builder = new ImmutableMap.Builder<BlockState, PerlinNoise>();
         for (BlockState blockState : immutableList) {
-            builder.put(blockState, new PerlinNoise(new WorldgenRandom(l), ImmutableList.of(Integer.valueOf(-4))));
+            builder.put(blockState, new PerlinNoise((RandomSource)new WorldgenRandom(l), ImmutableList.of(Integer.valueOf(-4))));
             ++l;
         }
         return builder.build();

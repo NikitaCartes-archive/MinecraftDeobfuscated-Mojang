@@ -15,6 +15,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Decoratable;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -54,7 +55,7 @@ implements Decoratable<ConfiguredFeature<?, ?>> {
     }
 
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-        return ((Feature)this.feature).place(worldGenLevel, chunkGenerator, random, blockPos, this.config);
+        return ((Feature)this.feature).place(new FeaturePlaceContext<FC>(worldGenLevel, chunkGenerator, random, blockPos, this.config));
     }
 
     public Stream<ConfiguredFeature<?, ?>> getFeatures() {

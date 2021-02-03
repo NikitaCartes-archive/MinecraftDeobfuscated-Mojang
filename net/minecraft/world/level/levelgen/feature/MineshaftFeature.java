@@ -11,6 +11,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -30,7 +31,7 @@ extends StructureFeature<MineshaftConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
         worldgenRandom.setLargeFeatureSeed(l, i, j);
         double d = mineshaftConfiguration.probability;
         return worldgenRandom.nextDouble() < d;
@@ -48,7 +49,7 @@ extends StructureFeature<MineshaftConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
             MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2), mineshaftConfiguration.type);
             this.pieces.add(mineShaftRoom);
             mineShaftRoom.addChildren(mineShaftRoom, this.pieces, this.random);

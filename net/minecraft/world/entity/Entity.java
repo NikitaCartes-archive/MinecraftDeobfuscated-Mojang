@@ -163,9 +163,9 @@ CommandSource {
     public float walkDistO;
     public float walkDist;
     public float moveDist;
+    public float flyDist;
     public float fallDistance;
     private float nextStep = 1.0f;
-    private float nextFlap = 1.0f;
     public double xOld;
     public double yOld;
     public double zOld;
@@ -208,7 +208,9 @@ CommandSource {
     private long pistonDeltasGameTime;
     private EntityDimensions dimensions;
     private float eyeHeight;
-    protected boolean bodyIsInPowderSnow;
+    public boolean isInPowderSnow;
+    public boolean wasInPowderSnow;
+    public boolean wasOnFire;
     private float crystalSoundIntensity;
     private int lastCrystalSoundPlayTick;
 
@@ -328,21 +330,11 @@ CommandSource {
         return this.id;
     }
 
-    @Environment(value=EnvType.CLIENT)
-    protected void resetPos() {
-        if (this.level == null) {
-            return;
-        }
-        for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMaxBuildHeight(); d += 1.0) {
-            this.setPos(this.getX(), d, this.getZ());
-            if (this.level.noCollision(this)) break;
-        }
-        this.setDeltaMovement(Vec3.ZERO);
-        this.xRot = 0.0f;
-    }
-
     public void remove(RemovalReason removalReason) {
         this.setRemoved(removalReason);
+        if (removalReason == RemovalReason.KILLED) {
+            this.gameEvent(GameEvent.ENTITY_KILLED);
+        }
     }
 
     public void setPose(Pose pose) {
@@ -363,6 +355,10 @@ CommandSource {
     protected void setRot(float f, float g) {
         this.yRot = f % 360.0f;
         this.xRot = g % 360.0f;
+    }
+
+    public final void setPos(Vec3 vec3) {
+        this.setPos(vec3.x(), vec3.y(), vec3.z());
     }
 
     public void setPos(double d, double e, double f) {
@@ -415,7 +411,8 @@ CommandSource {
         if (this.canSpawnSprintParticle()) {
             this.spawnSprintParticle();
         }
-        this.bodyIsInPowderSnow = false;
+        this.wasInPowderSnow = this.isInPowderSnow;
+        this.isInPowderSnow = false;
         this.updateInWaterStateAndDoFluidPushing();
         this.updateFluidOnEyes();
         this.updateSwimming();
@@ -441,10 +438,14 @@ CommandSource {
         }
         this.checkOutOfWorld();
         if (!this.level.isClientSide) {
-            this.setSharedFlag(0, this.remainingFireTicks > 0);
+            this.setSharedFlagOnFire(this.remainingFireTicks > 0);
         }
         this.firstTick = false;
         this.level.getProfiler().pop();
+    }
+
+    public void setSharedFlagOnFire(boolean bl) {
+        this.setSharedFlag(0, bl);
     }
 
     public void checkOutOfWorld() {
@@ -475,7 +476,9 @@ CommandSource {
         if (this.fireImmune()) {
             return;
         }
-        this.setSecondsOnFire(15);
+        if (!this.isInWaterRainOrBubble() && !this.isInPowderSnow) {
+            this.setSecondsOnFire(15);
+        }
         this.hurt(DamageSource.LAVA, 4.0f);
     }
 
@@ -522,11 +525,13 @@ CommandSource {
     }
 
     public void move(MoverType moverType, Vec3 vec3) {
+        MovementEmission movementEmission;
         Vec3 vec32;
         if (this.noPhysics) {
             this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
             return;
         }
+        this.wasOnFire = this.isOnFire();
         if (moverType == MoverType.PISTON && (vec3 = this.limitPistonMovement(vec3)).equals(Vec3.ZERO)) {
             return;
         }
@@ -561,10 +566,11 @@ CommandSource {
         if (this.onGround && !this.isSteppingCarefully()) {
             block.stepOn(this.level, blockPos, this);
         }
-        if (this.isMovementNoisy() && !this.isPassenger()) {
+        if ((movementEmission = this.getMovementEmission()).emitsAnything() && !this.isPassenger()) {
             double d = vec32.x;
             double e = vec32.y;
             double f = vec32.z;
+            this.flyDist = (float)((double)this.flyDist + vec32.length() * 0.6);
             if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
                 e = 0.0;
             }
@@ -573,24 +579,29 @@ CommandSource {
             if (this.moveDist > this.nextStep && !blockState2.isAir()) {
                 this.nextStep = this.nextStep();
                 if (this.isInWater()) {
-                    Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
-                    float g = entity == this ? 0.35f : 0.4f;
-                    Vec3 vec34 = entity.getDeltaMovement();
-                    float h = Mth.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * g;
-                    if (h > 1.0f) {
-                        h = 1.0f;
+                    if (movementEmission.emitsSounds()) {
+                        Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
+                        float g = entity == this ? 0.35f : 0.4f;
+                        Vec3 vec34 = entity.getDeltaMovement();
+                        float h = Mth.sqrt(vec34.x * vec34.x * (double)0.2f + vec34.y * vec34.y + vec34.z * vec34.z * (double)0.2f) * g;
+                        if (h > 1.0f) {
+                            h = 1.0f;
+                        }
+                        this.playSwimSound(h);
                     }
-                    this.playSwimSound(h);
-                    this.gameEvent(GameEvent.SWIM);
+                    if (movementEmission.emitsEvents()) {
+                        this.gameEvent(GameEvent.SWIM);
+                    }
                 } else {
-                    this.playStepSound(blockPos, blockState2);
-                    if (!blockState2.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
+                    if (movementEmission.emitsSounds()) {
+                        this.playStepSound(blockPos, blockState2);
+                    }
+                    if (movementEmission.emitsEvents() && !blockState2.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
                         this.gameEvent(GameEvent.STEP);
                     }
                 }
-            } else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState2.isAir()) {
-                this.nextFlap = this.playFlySound(this.moveDist);
-                this.gameEvent(GameEvent.FLAP);
+            } else if (blockState2.isAir()) {
+                this.processFlappingMovement();
             }
         }
         try {
@@ -603,14 +614,25 @@ CommandSource {
         }
         float i = this.getBlockSpeedFactor();
         this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
-        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
+        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
-        if ((this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow) && this.isOnFire()) {
-            this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
+        if ((this.isInWaterRainOrBubble() || this.isInPowderSnow) && this.isOnFire()) {
+            if (this.wasOnFire) {
+                this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
+            }
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
         this.level.getProfiler().pop();
+    }
+
+    protected void processFlappingMovement() {
+        if (this.isFlapping()) {
+            this.onFlap();
+            if (this.getMovementEmission().emitsEvents()) {
+                this.gameEvent(GameEvent.FLAP);
+            }
+        }
     }
 
     protected BlockPos getOnPos() {
@@ -792,8 +814,8 @@ CommandSource {
         AABB aABB = this.getBoundingBox();
         BlockPos blockPos = new BlockPos(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
         BlockPos blockPos2 = new BlockPos(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         if (this.level.hasChunksAt(blockPos, blockPos2)) {
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             for (int i = blockPos.getX(); i <= blockPos2.getX(); ++i) {
                 for (int j = blockPos.getY(); j <= blockPos2.getY(); ++j) {
                     for (int k = blockPos.getZ(); k <= blockPos2.getZ(); ++k) {
@@ -818,12 +840,20 @@ CommandSource {
     protected void onInsideBlock(BlockState blockState) {
     }
 
-    protected void gameEvent(@Nullable Entity entity, GameEvent gameEvent) {
-        this.level.gameEvent(entity, gameEvent, this.blockPosition);
+    public void gameEvent(GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos) {
+        this.level.gameEvent(entity, gameEvent, blockPos);
     }
 
-    protected void gameEvent(GameEvent gameEvent) {
-        this.level.gameEvent(this, gameEvent, this.blockPosition);
+    public void gameEvent(GameEvent gameEvent, @Nullable Entity entity) {
+        this.gameEvent(gameEvent, entity, this.blockPosition);
+    }
+
+    public void gameEvent(GameEvent gameEvent, BlockPos blockPos) {
+        this.gameEvent(gameEvent, this, blockPos);
+    }
+
+    public void gameEvent(GameEvent gameEvent) {
+        this.gameEvent(gameEvent, this.blockPosition);
     }
 
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
@@ -847,11 +877,10 @@ CommandSource {
         this.playSound(this.getSwimSound(), f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
     }
 
-    protected float playFlySound(float f) {
-        return 0.0f;
+    protected void onFlap() {
     }
 
-    protected boolean makeFlySound() {
+    protected boolean isFlapping() {
         return false;
     }
 
@@ -877,8 +906,8 @@ CommandSource {
         this.entityData.set(DATA_NO_GRAVITY, bl);
     }
 
-    protected boolean isMovementNoisy() {
-        return true;
+    protected MovementEmission getMovementEmission() {
+        return MovementEmission.ALL;
     }
 
     public boolean occludesVibrations() {
@@ -1071,10 +1100,8 @@ CommandSource {
     }
 
     public float getBrightness() {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.getX(), 0.0, this.getZ());
-        if (this.level.hasChunkAt(mutableBlockPos)) {
-            mutableBlockPos.setY(Mth.floor(this.getEyeY()));
-            return this.level.getBrightness(mutableBlockPos);
+        if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
+            return this.level.getBrightness(new BlockPos(this.getX(), this.getEyeY(), this.getZ()));
         }
         return 0.0f;
     }
@@ -1204,7 +1231,6 @@ CommandSource {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
         this.markHurt();
         return false;
     }
@@ -1245,10 +1271,11 @@ CommandSource {
         return this.calculateViewVector(f - 90.0f, g);
     }
 
+    public final Vec3 getEyePosition() {
+        return new Vec3(this.getX(), this.getEyeY(), this.getZ());
+    }
+
     public final Vec3 getEyePosition(float f) {
-        if (f == 1.0f) {
-            return new Vec3(this.getX(), this.getEyeY(), this.getZ());
-        }
         double d = Mth.lerp((double)f, this.xo, this.getX());
         double e = Mth.lerp((double)f, this.yo, this.getY()) + (double)this.getEyeHeight();
         double g = Mth.lerp((double)f, this.zo, this.getZ());
@@ -1410,7 +1437,9 @@ CommandSource {
             this.setYBodyRot(this.yRot);
             this.fallDistance = compoundTag.getFloat("FallDistance");
             this.remainingFireTicks = compoundTag.getShort("Fire");
-            this.setAirSupply(compoundTag.getShort("Air"));
+            if (compoundTag.contains("Air")) {
+                this.setAirSupply(compoundTag.getShort("Air"));
+            }
             this.onGround = compoundTag.getBoolean("OnGround");
             this.invulnerable = compoundTag.getBoolean("Invulnerable");
             this.portalCooldown = compoundTag.getInt("PortalCooldown");
@@ -1527,9 +1556,8 @@ CommandSource {
         if (this.noPhysics) {
             return false;
         }
-        float f = 0.1f;
-        float g = this.dimensions.width * 0.8f;
-        AABB aABB = AABB.ofSize(g, 0.1f, g).move(this.getX(), this.getEyeY(), this.getZ());
+        float f = this.dimensions.width * 0.8f;
+        AABB aABB = AABB.ofSize(this.getEyePosition(), f, 1.0E-6, f);
         return this.level.getBlockCollisions(this, aABB, (blockState, blockPos) -> blockState.isSuffocating(this.level, (BlockPos)blockPos)).findAny().isPresent();
     }
 
@@ -2250,11 +2278,14 @@ CommandSource {
         this.teleportTo(d, e, f);
     }
 
+    public void dismountTo(double d, double e, double f) {
+        this.teleportTo(d, e, f);
+    }
+
     public void teleportTo(double d, double e, double f) {
         if (!(this.level instanceof ServerLevel)) {
             return;
         }
-        ServerLevel serverLevel = (ServerLevel)this.level;
         this.moveTo(d, e, f, this.yRot, this.xRot);
         this.getSelfAndPassengers().forEach(entity -> {
             for (Entity entity2 : entity.passengers) {
@@ -2281,10 +2312,12 @@ CommandSource {
         this.dimensions = entityDimensions2 = this.getDimensions(pose);
         this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
         this.reapplyPosition();
-        if (!this.level.isClientSide && !this.firstTick && entityDimensions2.width > entityDimensions.width && this.level.noBlockCollision(this, this.getBoundingBox(), (blockState, blockPos) -> true)) {
-            float f = entityDimensions.width - entityDimensions2.width;
-            this.setPos(this.getX() - (double)f / 2.0, this.getY(), this.getZ() - (double)f / 2.0);
-            this.move(MoverType.SELF, new Vec3(f, 0.0, f));
+        if (!(this.level.isClientSide || this.firstTick || !(entityDimensions2.width > entityDimensions.width) && !(entityDimensions2.height > entityDimensions.height) || this instanceof Player)) {
+            Vec3 vec32 = this.position().add(0.0, (double)entityDimensions.height / 2.0, 0.0);
+            double d = (double)Math.max(0.0f, entityDimensions2.width - entityDimensions.width) + 1.0E-6;
+            double e = (double)Math.max(0.0f, entityDimensions2.height - entityDimensions.height) + 1.0E-6;
+            VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec32, d, e, d));
+            this.level.findFreePosition(this, voxelShape, vec32, entityDimensions2.width, entityDimensions2.height, entityDimensions2.width).ifPresent(vec3 -> this.setPos(vec3.add(0.0, (double)(-entityDimensions.height) / 2.0, 0.0)));
         }
     }
 
@@ -2641,6 +2674,10 @@ CommandSource {
         return this.blockPosition;
     }
 
+    public BlockPos eyeBlockPosition() {
+        return new BlockPos(this.getEyePosition(1.0f));
+    }
+
     public ChunkPos chunkPosition() {
         return new ChunkPos(this.blockPosition);
     }
@@ -2754,8 +2791,8 @@ CommandSource {
         return null;
     }
 
-    public void setBodyIsInPowderSnow(boolean bl) {
-        this.bodyIsInPowderSnow = bl;
+    public void setIsInPowderSnow(boolean bl) {
+        this.isInPowderSnow = bl;
     }
 
     public boolean canFreeze() {
@@ -2821,6 +2858,33 @@ CommandSource {
 
         public boolean shouldSave() {
             return this.save;
+        }
+    }
+
+    public static enum MovementEmission {
+        NONE(false, false),
+        SOUNDS(true, false),
+        EVENTS(false, true),
+        ALL(true, true);
+
+        final boolean sounds;
+        final boolean events;
+
+        private MovementEmission(boolean bl, boolean bl2) {
+            this.sounds = bl;
+            this.events = bl2;
+        }
+
+        public boolean emitsAnything() {
+            return this.events || this.sounds;
+        }
+
+        public boolean emitsEvents() {
+            return this.events;
+        }
+
+        public boolean emitsSounds() {
+            return this.sounds;
         }
     }
 

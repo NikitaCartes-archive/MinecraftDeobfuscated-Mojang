@@ -104,7 +104,7 @@ public class FireworkParticles {
         private boolean hasFade;
 
         private SparkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, SpriteSet spriteSet) {
-            super(clientLevel, d, e, f, spriteSet, -0.004f);
+            super(clientLevel, d, e, f, spriteSet, 0.1f);
             this.xd = g;
             this.yd = h;
             this.zd = i;

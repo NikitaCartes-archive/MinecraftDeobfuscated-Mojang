@@ -34,16 +34,16 @@ implements Vanishable {
                 itemStack.hurtAndBreak(i, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
-            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_CAST, player2);
+            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_REEL_IN, player2);
         } else {
             level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
-            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_REEL_IN, player2);
             if (!level.isClientSide) {
                 int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);
                 int j = EnchantmentHelper.getFishingLuckBonus(itemStack);
                 level.addFreshEntity(new FishingHook(player2, level, j, i));
             }
             player2.awardStat(Stats.ITEM_USED.get(this));
+            level.gameEvent((Entity)player2, GameEvent.FISHING_ROD_CAST, player2);
         }
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }

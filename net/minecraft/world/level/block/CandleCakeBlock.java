@@ -74,7 +74,7 @@ extends AbstractCandleBlock {
             }
             return interactionResult;
         }
-        CandleCakeBlock.extinguish(blockState, level, blockPos);
+        CandleCakeBlock.extinguish(player, blockState, level, blockPos);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 

@@ -497,7 +497,7 @@ extends LivingEntity {
                 this.spawnAtLocation(itemStack2);
             }
             this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
-            this.playEquipSound(itemStack);
+            this.equipEventAndSound(itemStack);
             return true;
         }
         return false;
@@ -1292,7 +1292,7 @@ extends LivingEntity {
             boolean bl;
             float f = this.getBrightness();
             BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
-            boolean bl2 = bl = this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow;
+            boolean bl2 = bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
             if (f > 0.5f && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f && !bl && this.level.canSeeSky(blockPos)) {
                 return true;
             }

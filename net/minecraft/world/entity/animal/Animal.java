@@ -29,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,11 +138,13 @@ extends AgeableMob {
             if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(player, interactionHand, itemStack);
                 this.setInLove(player);
+                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
                 return InteractionResult.SUCCESS;
             }
             if (this.isBaby()) {
                 this.usePlayerItem(player, interactionHand, itemStack);
                 this.ageUp((int)((float)(-i / 20) * 0.1f), true);
+                this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             if (this.level.isClientSide) {

@@ -16,7 +16,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 public class TotemParticle
 extends SimpleAnimatedParticle {
     private TotemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(clientLevel, d, e, f, spriteSet, -0.05f);
+        super(clientLevel, d, e, f, spriteSet, 1.25f);
+        this.friction = 0.6f;
         this.xd = g;
         this.yd = h;
         this.zd = i;
@@ -28,7 +29,6 @@ extends SimpleAnimatedParticle {
         } else {
             this.setColor(0.1f + this.random.nextFloat() * 0.2f, 0.4f + this.random.nextFloat() * 0.3f, this.random.nextFloat() * 0.2f);
         }
-        this.setBaseAirFriction(0.6f);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -15,12 +15,13 @@ import net.minecraft.util.Mth;
 public class BaseAshSmokeParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
-    private final double fallSpeed;
 
-    protected BaseAshSmokeParticle(ClientLevel clientLevel, double d, double e, double f, float g, float h, float i, double j, double k, double l, float m, SpriteSet spriteSet, float n, int o, double p, boolean bl) {
+    protected BaseAshSmokeParticle(ClientLevel clientLevel, double d, double e, double f, float g, float h, float i, double j, double k, double l, float m, SpriteSet spriteSet, float n, int o, float p, boolean bl) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float q;
-        this.fallSpeed = p;
+        this.friction = 0.96f;
+        this.gravity = p;
+        this.speedUpWhenYMotionIsBlocked = true;
         this.sprites = spriteSet;
         this.xd *= (double)g;
         this.yd *= (double)h;
@@ -51,27 +52,8 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
+        super.tick();
         this.setSpriteFromAge(this.sprites);
-        this.yd += this.fallSpeed;
-        this.move(this.xd, this.yd, this.zd);
-        if (this.y == this.yo) {
-            this.xd *= 1.1;
-            this.zd *= 1.1;
-        }
-        this.xd *= (double)0.96f;
-        this.yd *= (double)0.96f;
-        this.zd *= (double)0.96f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 }
 

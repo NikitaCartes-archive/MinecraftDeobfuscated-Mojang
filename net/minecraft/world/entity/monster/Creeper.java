@@ -46,6 +46,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 @EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=PowerableMob.class)})
 public class Creeper
@@ -144,6 +145,7 @@ implements PowerableMob {
             }
             if ((i = this.getSwellDir()) > 0 && this.swell == 0) {
                 this.playSound(SoundEvents.CREEPER_PRIMED, 1.0f, 0.5f);
+                this.gameEvent(GameEvent.PRIME_FUSE);
             }
             this.swell += i;
             if (this.swell < 0) {

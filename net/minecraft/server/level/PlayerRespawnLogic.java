@@ -18,7 +18,7 @@ public class PlayerRespawnLogic {
     @Nullable
     protected static BlockPos getOverworldRespawnPos(ServerLevel serverLevel, int i, int j, boolean bl) {
         int k;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, 0, j);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, serverLevel.getMinBuildHeight(), j);
         Biome biome = serverLevel.getBiome(mutableBlockPos);
         boolean bl2 = serverLevel.dimensionType().hasCeiling();
         BlockState blockState = biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();

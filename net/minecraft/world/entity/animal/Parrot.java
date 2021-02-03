@@ -128,6 +128,7 @@ implements FlyingAnimal {
     public float oFlapSpeed;
     public float oFlap;
     private float flapping = 1.0f;
+    private float nextFlap = 1.0f;
     private boolean partyParrot;
     private BlockPos jukebox;
 
@@ -347,14 +348,14 @@ implements FlyingAnimal {
     }
 
     @Override
-    protected float playFlySound(float f) {
-        this.playSound(SoundEvents.PARROT_FLY, 0.15f, 1.0f);
-        return f + this.flapSpeed / 2.0f;
+    protected boolean isFlapping() {
+        return this.flyDist > this.nextFlap;
     }
 
     @Override
-    protected boolean makeFlySound() {
-        return true;
+    protected void onFlap() {
+        this.playSound(SoundEvents.PARROT_FLY, 0.15f, 1.0f);
+        this.nextFlap = this.flyDist + this.flapSpeed / 2.0f;
     }
 
     @Override

@@ -54,6 +54,7 @@ public final class ItemTags {
     public static final Tag.Named<Item> PIGLIN_LOVED = ItemTags.bind("piglin_loved");
     public static final Tag.Named<Item> IGNORED_BY_PIGLIN_BABIES = ItemTags.bind("ignored_by_piglin_babies");
     public static final Tag.Named<Item> PIGLIN_FOOD = ItemTags.bind("piglin_food");
+    public static final Tag.Named<Item> FOX_FOOD = ItemTags.bind("fox_food");
     public static final Tag.Named<Item> GOLD_ORES = ItemTags.bind("gold_ores");
     public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = ItemTags.bind("non_flammable_wood");
     public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = ItemTags.bind("soul_fire_base_blocks");

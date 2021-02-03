@@ -10,9 +10,9 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 
 public class SeaPickleFeature
@@ -22,9 +22,12 @@ extends Feature<CountConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, CountConfiguration countConfiguration) {
+    public boolean place(FeaturePlaceContext<CountConfiguration> featurePlaceContext) {
         int i = 0;
-        int j = countConfiguration.count().sample(random);
+        Random random = featurePlaceContext.random();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        int j = featurePlaceContext.config().count().sample(random);
         for (int k = 0; k < j; ++k) {
             int l = random.nextInt(8) - random.nextInt(8);
             int m = random.nextInt(8) - random.nextInt(8);

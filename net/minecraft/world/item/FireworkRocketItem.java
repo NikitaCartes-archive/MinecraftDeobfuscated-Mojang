@@ -56,7 +56,8 @@ extends Item {
         if (player.isFallFlying()) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
             if (!level.isClientSide) {
-                level.addFreshEntity(new FireworkRocketEntity(level, itemStack, player));
+                FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, itemStack, player);
+                level.addFreshEntity(fireworkRocketEntity);
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }

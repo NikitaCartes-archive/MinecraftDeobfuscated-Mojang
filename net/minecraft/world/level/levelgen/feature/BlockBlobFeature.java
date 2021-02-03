@@ -8,8 +8,8 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 
 public class BlockBlobFeature
@@ -19,8 +19,12 @@ extends Feature<BlockStateConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
+    public boolean place(FeaturePlaceContext<BlockStateConfiguration> featurePlaceContext) {
         BlockState blockState;
+        BlockPos blockPos = featurePlaceContext.origin();
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        Random random = featurePlaceContext.random();
+        BlockStateConfiguration blockStateConfiguration = featurePlaceContext.config();
         while (blockPos.getY() > worldGenLevel.getMinBuildHeight() + 3 && (worldGenLevel.isEmptyBlock(blockPos.below()) || !BlockBlobFeature.isDirt(blockState = worldGenLevel.getBlockState(blockPos.below())) && !BlockBlobFeature.isStone(blockState))) {
             blockPos = blockPos.below();
         }

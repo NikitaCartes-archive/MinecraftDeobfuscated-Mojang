@@ -20,6 +20,8 @@ public class BubbleColumnUpParticle
 extends TextureSheetParticle {
     private BubbleColumnUpParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
         super(clientLevel, d, e, f);
+        this.gravity = -0.125f;
+        this.friction = 0.85f;
         this.setSize(0.02f, 0.02f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.2f;
         this.xd = g * (double)0.2f + (Math.random() * 2.0 - 1.0) * (double)0.02f;
@@ -30,19 +32,8 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        this.yd += 0.005;
-        if (this.lifetime-- <= 0) {
-            this.remove();
-            return;
-        }
-        this.move(this.xd, this.yd, this.zd);
-        this.xd *= (double)0.85f;
-        this.yd *= (double)0.85f;
-        this.zd *= (double)0.85f;
-        if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
+        super.tick();
+        if (!this.removed && !this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
             this.remove();
         }
     }

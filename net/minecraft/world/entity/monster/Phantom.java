@@ -49,6 +49,7 @@ import org.jetbrains.annotations.Nullable;
 public class Phantom
 extends FlyingMob
 implements Enemy {
+    public static final int TICKS_PER_FLAP = Mth.ceil(24.166098f);
     private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Phantom.class, EntityDataSerializers.INT);
     private Vec3 moveTargetPoint = Vec3.ZERO;
     private BlockPos anchorPoint = BlockPos.ZERO;
@@ -59,6 +60,11 @@ implements Enemy {
         this.xpReward = 5;
         this.moveControl = new PhantomMoveControl(this);
         this.lookControl = new PhantomLookControl(this);
+    }
+
+    @Override
+    public boolean isFlapping() {
+        return (this.getUniqueFlapTickOffset() + this.tickCount) % TICKS_PER_FLAP == 0;
     }
 
     @Override
@@ -106,6 +112,10 @@ implements Enemy {
         super.onSyncedDataUpdated(entityDataAccessor);
     }
 
+    public int getUniqueFlapTickOffset() {
+        return this.getId() * 3;
+    }
+
     @Override
     protected boolean shouldDespawnInPeaceful() {
         return true;
@@ -115,8 +125,8 @@ implements Enemy {
     public void tick() {
         super.tick();
         if (this.level.isClientSide) {
-            float f = Mth.cos((float)(this.getId() * 3 + this.tickCount) * 0.13f + (float)Math.PI);
-            float g = Mth.cos((float)(this.getId() * 3 + this.tickCount + 1) * 0.13f + (float)Math.PI);
+            float f = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount) * 7.448451f + (float)Math.PI);
+            float g = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount + 1) * 7.448451f + (float)Math.PI);
             if (f > 0.0f && g <= 0.0f) {
                 this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.PHANTOM_FLAP, this.getSoundSource(), 0.95f + this.random.nextFloat() * 0.05f, 0.95f + this.random.nextFloat() * 0.05f, false);
             }

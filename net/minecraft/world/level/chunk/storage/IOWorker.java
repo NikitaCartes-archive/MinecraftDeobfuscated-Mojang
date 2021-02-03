@@ -95,10 +95,10 @@ implements AutoCloseable {
     }
 
     private void storePendingChunk() {
-        Iterator<Map.Entry<ChunkPos, PendingStore>> iterator = this.pendingWrites.entrySet().iterator();
-        if (!iterator.hasNext()) {
+        if (this.pendingWrites.isEmpty()) {
             return;
         }
+        Iterator<Map.Entry<ChunkPos, PendingStore>> iterator = this.pendingWrites.entrySet().iterator();
         Map.Entry<ChunkPos, PendingStore> entry = iterator.next();
         iterator.remove();
         this.runStore(entry.getKey(), entry.getValue());

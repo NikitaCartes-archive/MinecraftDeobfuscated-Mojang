@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.WeepingVinesFeature;
 import net.minecraft.world.level.material.Material;
@@ -26,7 +27,12 @@ extends Feature<HugeFungusConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeFungusConfiguration hugeFungusConfiguration) {
+    public boolean place(FeaturePlaceContext<HugeFungusConfiguration> featurePlaceContext) {
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        BlockPos blockPos = featurePlaceContext.origin();
+        Random random = featurePlaceContext.random();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+        HugeFungusConfiguration hugeFungusConfiguration = featurePlaceContext.config();
         Block block = hugeFungusConfiguration.validBaseState.getBlock();
         BlockPos blockPos2 = null;
         BlockState blockState = worldGenLevel.getBlockState(blockPos.below());

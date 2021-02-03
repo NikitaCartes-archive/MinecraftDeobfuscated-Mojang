@@ -15,6 +15,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -135,23 +137,24 @@ extends BaseEntityBlock {
         return new LecternBlockEntity(blockPos, blockState);
     }
 
-    public static boolean tryPlaceBook(Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+    public static boolean tryPlaceBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         if (!blockState.getValue(HAS_BOOK).booleanValue()) {
             if (!level.isClientSide) {
-                LecternBlock.placeBook(level, blockPos, blockState, itemStack);
+                LecternBlock.placeBook(player, level, blockPos, blockState, itemStack);
             }
             return true;
         }
         return false;
     }
 
-    private static void placeBook(Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+    private static void placeBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof LecternBlockEntity) {
             LecternBlockEntity lecternBlockEntity = (LecternBlockEntity)blockEntity;
             lecternBlockEntity.setBook(itemStack.split(1));
             LecternBlock.resetBookState(level, blockPos, blockState, true);
             level.playSound(null, blockPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0f, 1.0f);
+            level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
         }
     }
 

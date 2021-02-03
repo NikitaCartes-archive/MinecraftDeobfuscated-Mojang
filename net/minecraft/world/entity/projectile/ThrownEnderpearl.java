@@ -59,9 +59,10 @@ extends ThrowableItemProjectile {
                         this.level.addFreshEntity(endermite);
                     }
                     if (entity.isPassenger()) {
-                        entity.stopRiding();
+                        serverPlayer.dismountTo(this.getX(), this.getY(), this.getZ());
+                    } else {
+                        entity.teleportTo(this.getX(), this.getY(), this.getZ());
                     }
-                    entity.teleportTo(this.getX(), this.getY(), this.getZ());
                     entity.fallDistance = 0.0f;
                     entity.hurt(DamageSource.FALL, 5.0f);
                 }

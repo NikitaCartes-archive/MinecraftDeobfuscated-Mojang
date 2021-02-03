@@ -406,9 +406,9 @@ WindowEventHandler {
         KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
         this.fixerUpper = DataFixers.getDataFixer();
         this.toast = new ToastComponent(this);
-        this.tutorial = new Tutorial(this);
         this.gameThread = Thread.currentThread();
         this.options = new Options(this, this.gameDirectory);
+        this.tutorial = new Tutorial(this, this.options);
         this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);
         LOGGER.info("Backend library: {}", (Object)RenderSystem.getBackendDescription());
         DisplayData displayData = this.options.overrideHeight > 0 && this.options.overrideWidth > 0 ? new DisplayData(this.options.overrideWidth, this.options.overrideHeight, gameConfig.display.fullscreenWidth, gameConfig.display.fullscreenHeight, gameConfig.display.isFullscreen) : gameConfig.display;

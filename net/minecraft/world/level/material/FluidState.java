@@ -40,6 +40,10 @@ extends StateHolder<Fluid, FluidState> {
         return this.getType().isSource(this);
     }
 
+    public boolean isSourceOfType(Fluid fluid) {
+        return this.owner == fluid && ((Fluid)this.owner).isSource(this);
+    }
+
     public boolean isEmpty() {
         return this.getType().isEmpty();
     }

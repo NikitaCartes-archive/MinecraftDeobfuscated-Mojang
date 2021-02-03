@@ -22,6 +22,7 @@ extends TextureSheetParticle {
 
     private DragonBreathParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f);
+        this.friction = 0.96f;
         this.xd = g;
         this.yd = h;
         this.zd = i;
@@ -58,10 +59,10 @@ extends TextureSheetParticle {
             this.xd *= 1.1;
             this.zd *= 1.1;
         }
-        this.xd *= (double)0.96f;
-        this.zd *= (double)0.96f;
+        this.xd *= (double)this.friction;
+        this.zd *= (double)this.friction;
         if (this.hasHitGround) {
-            this.yd *= (double)0.96f;
+            this.yd *= (double)this.friction;
         }
     }
 

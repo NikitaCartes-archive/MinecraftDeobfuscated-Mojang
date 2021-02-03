@@ -65,7 +65,7 @@ extends HumanoidModel<Vex> {
         this.leftWing.z = 2.0f;
         this.rightWing.y = 1.0f;
         this.leftWing.y = 1.0f;
-        this.rightWing.yRot = 0.47123894f + Mth.cos(h * 0.8f) * (float)Math.PI * 0.05f;
+        this.rightWing.yRot = 0.47123894f + Mth.cos(h * 45.836624f * ((float)Math.PI / 180)) * (float)Math.PI * 0.05f;
         this.leftWing.yRot = -this.rightWing.yRot;
         this.leftWing.zRot = -0.47123894f;
         this.leftWing.xRot = 0.47123894f;

@@ -52,7 +52,9 @@ extends SingleQuadParticle {
     }
 
     public void setSpriteFromAge(SpriteSet spriteSet) {
-        this.setSprite(spriteSet.get(this.age, this.lifetime));
+        if (!this.removed) {
+            this.setSprite(spriteSet.get(this.age, this.lifetime));
+        }
     }
 }
 

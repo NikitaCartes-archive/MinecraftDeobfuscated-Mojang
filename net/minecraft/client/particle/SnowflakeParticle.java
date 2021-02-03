@@ -20,6 +20,8 @@ extends TextureSheetParticle {
 
     protected SnowflakeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(clientLevel, d, e, f);
+        this.gravity = 0.225f;
+        this.friction = 1.0f;
         this.sprites = spriteSet;
         this.xd = g + (Math.random() * 2.0 - 1.0) * (double)0.05f;
         this.yd = h + (Math.random() * 2.0 - 1.0) * (double)0.05f;
@@ -36,23 +38,11 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
+        super.tick();
         this.setSpriteFromAge(this.sprites);
-        this.yd -= 0.009;
-        this.move(this.xd, this.yd, this.zd);
         this.xd *= (double)0.95f;
         this.yd *= (double)0.9f;
         this.zd *= (double)0.95f;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

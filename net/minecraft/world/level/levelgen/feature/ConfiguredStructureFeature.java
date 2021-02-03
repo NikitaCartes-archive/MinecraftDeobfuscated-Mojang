@@ -10,6 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -32,8 +33,8 @@ public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F exten
         this.config = featureConfiguration;
     }
 
-    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, StructureFeatureConfiguration structureFeatureConfiguration) {
-        return ((StructureFeature)this.feature).generate(registryAccess, chunkGenerator, biomeSource, structureManager, l, chunkPos, biome, i, new WorldgenRandom(), structureFeatureConfiguration, this.config);
+    public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, StructureFeatureConfiguration structureFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        return ((StructureFeature)this.feature).generate(registryAccess, chunkGenerator, biomeSource, structureManager, l, chunkPos, biome, i, new WorldgenRandom(), structureFeatureConfiguration, this.config, levelHeightAccessor);
     }
 }
 

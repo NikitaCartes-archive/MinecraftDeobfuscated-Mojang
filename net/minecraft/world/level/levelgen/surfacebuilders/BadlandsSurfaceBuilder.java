@@ -13,6 +13,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
@@ -108,8 +109,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         }
         if (this.seed != l || this.pillarNoise == null || this.pillarRoofNoise == null) {
             WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-            this.pillarNoise = new PerlinSimplexNoise(worldgenRandom, IntStream.rangeClosed(-3, 0));
-            this.pillarRoofNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
+            this.pillarNoise = new PerlinSimplexNoise((RandomSource)worldgenRandom, IntStream.rangeClosed(-3, 0));
+            this.pillarRoofNoise = new PerlinSimplexNoise((RandomSource)worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
         }
         this.seed = l;
     }
@@ -125,7 +126,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         this.clayBands = new BlockState[64];
         Arrays.fill(this.clayBands, TERRACOTTA);
         WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-        this.clayBandsOffsetNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
+        this.clayBandsOffsetNoise = new PerlinSimplexNoise((RandomSource)worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
         for (i = 0; i < 64; ++i) {
             if ((i += worldgenRandom.nextInt(5) + 1) >= 64) continue;
             this.clayBands[i] = ORANGE_TERRACOTTA;

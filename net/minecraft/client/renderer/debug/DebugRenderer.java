@@ -134,7 +134,7 @@ public class DebugRenderer {
         if (entity2 == null) {
             return Optional.empty();
         }
-        Vec3 vec3 = entity2.getEyePosition(1.0f);
+        Vec3 vec3 = entity2.getEyePosition();
         EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity2, vec3, vec33 = vec3.add(vec32 = entity2.getViewVector(1.0f).scale(i)), aABB = entity2.getBoundingBox().expandTowards(vec32).inflate(1.0), predicate = entity -> !entity.isSpectator() && entity.isPickable(), j = i * i);
         if (entityHitResult == null) {
             return Optional.empty();

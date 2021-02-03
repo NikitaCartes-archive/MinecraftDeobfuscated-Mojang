@@ -46,6 +46,7 @@ extends AbstractFish {
 
     public Pufferfish(EntityType<? extends Pufferfish> entityType, Level level) {
         super((EntityType<? extends AbstractFish>)entityType, level);
+        this.refreshDimensions();
     }
 
     @Override

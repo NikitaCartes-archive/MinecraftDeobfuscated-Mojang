@@ -10,6 +10,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.BaseDiskFeature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
 public class IcePatchFeature
@@ -19,14 +20,19 @@ extends BaseDiskFeature {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DiskConfiguration diskConfiguration) {
+    public boolean place(FeaturePlaceContext<DiskConfiguration> featurePlaceContext) {
+        WorldGenLevel worldGenLevel = featurePlaceContext.level();
+        ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+        Random random = featurePlaceContext.random();
+        DiskConfiguration diskConfiguration = featurePlaceContext.config();
+        BlockPos blockPos = featurePlaceContext.origin();
         while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
             blockPos = blockPos.below();
         }
         if (!worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
             return false;
         }
-        return super.place(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration);
+        return super.place(new FeaturePlaceContext<DiskConfiguration>(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration));
     }
 }
 

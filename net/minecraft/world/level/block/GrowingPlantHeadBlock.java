@@ -47,8 +47,16 @@ implements BonemealableBlock {
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BlockPos blockPos2;
         if (blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability && this.canGrowInto(serverLevel.getBlockState(blockPos2 = blockPos.relative(this.growthDirection)))) {
-            serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState.cycle(AGE));
+            serverLevel.setBlockAndUpdate(blockPos2, this.getGrowIntoState(blockState, serverLevel.random));
         }
+    }
+
+    protected BlockState getGrowIntoState(BlockState blockState, Random random) {
+        return (BlockState)blockState.cycle(AGE);
+    }
+
+    protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
+        return blockState2;
     }
 
     @Override
@@ -57,7 +65,7 @@ implements BonemealableBlock {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
         if (direction == this.growthDirection && (blockState2.is(this) || blockState2.is(this.getBodyBlock()))) {
-            return this.getBodyBlock().defaultBlockState();
+            return this.updateBodyAfterConvertedFromHead(blockState, this.getBodyBlock().defaultBlockState());
         }
         if (this.scheduleFluidTicks) {
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));

@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -73,7 +74,7 @@ extends StructureFeature<OceanRuinConfiguration> {
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, OceanRuinConfiguration oceanRuinConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, OceanRuinConfiguration oceanRuinConfiguration, LevelHeightAccessor levelHeightAccessor) {
             int k = SectionPos.sectionToBlockCoord(i);
             int l = SectionPos.sectionToBlockCoord(j);
             BlockPos blockPos = new BlockPos(k, 90, l);

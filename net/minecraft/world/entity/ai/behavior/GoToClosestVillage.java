@@ -38,7 +38,7 @@ extends Behavior<Villager> {
         int i = poiManager.sectionsToVillage(SectionPos.of(villager.blockPosition()));
         Vec3 vec3 = null;
         for (int j = 0; j < 5; ++j) {
-            Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));
+            Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> -poiManager.sectionsToVillage(SectionPos.of(blockPos)));
             if (vec32 == null) continue;
             int k = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(vec32)));
             if (k < i) {

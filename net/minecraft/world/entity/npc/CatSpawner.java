@@ -42,7 +42,8 @@ implements CustomSpawner {
         int i = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
         int j = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
         BlockPos blockPos = player.blockPosition().offset(i, 0, j);
-        if (!serverLevel.hasChunksAt(blockPos.getX() - 10, blockPos.getY() - 10, blockPos.getZ() - 10, blockPos.getX() + 10, blockPos.getY() + 10, blockPos.getZ() + 10)) {
+        int k = 10;
+        if (!serverLevel.hasChunksAt(blockPos.getX() - 10, blockPos.getZ() - 10, blockPos.getX() + 10, blockPos.getZ() + 10)) {
             return 0;
         }
         if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, serverLevel, blockPos, EntityType.CAT)) {

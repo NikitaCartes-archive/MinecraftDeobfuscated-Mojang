@@ -14,8 +14,6 @@ import net.minecraft.client.particle.TextureSheetParticle;
 public class SimpleAnimatedParticle
 extends TextureSheetParticle {
     protected final SpriteSet sprites;
-    private final float baseGravity;
-    private float baseAirFriction = 0.91f;
     private float fadeR;
     private float fadeG;
     private float fadeB;
@@ -23,8 +21,9 @@ extends TextureSheetParticle {
 
     protected SimpleAnimatedParticle(ClientLevel clientLevel, double d, double e, double f, SpriteSet spriteSet, float g) {
         super(clientLevel, d, e, f);
+        this.friction = 0.91f;
+        this.gravity = g;
         this.sprites = spriteSet;
-        this.baseGravity = g;
     }
 
     public void setColor(int i) {
@@ -49,13 +48,7 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-            return;
-        }
+        super.tick();
         this.setSpriteFromAge(this.sprites);
         if (this.age > this.lifetime / 2) {
             this.setAlpha(1.0f - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
@@ -65,24 +58,11 @@ extends TextureSheetParticle {
                 this.bCol += (this.fadeB - this.bCol) * 0.2f;
             }
         }
-        this.yd += (double)this.baseGravity;
-        this.move(this.xd, this.yd, this.zd);
-        this.xd *= (double)this.baseAirFriction;
-        this.yd *= (double)this.baseAirFriction;
-        this.zd *= (double)this.baseAirFriction;
-        if (this.onGround) {
-            this.xd *= (double)0.7f;
-            this.zd *= (double)0.7f;
-        }
     }
 
     @Override
     public int getLightColor(float f) {
         return 0xF000F0;
-    }
-
-    protected void setBaseAirFriction(float f) {
-        this.baseAirFriction = f;
     }
 }
 

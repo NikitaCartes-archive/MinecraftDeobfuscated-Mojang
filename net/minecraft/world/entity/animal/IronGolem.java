@@ -55,6 +55,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -270,6 +271,7 @@ implements NeutralMob {
         }
         float g = 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
         this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0f, g);
+        this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }

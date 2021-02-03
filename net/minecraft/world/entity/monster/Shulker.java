@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -51,6 +52,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -86,8 +88,8 @@ implements Enemy {
     }
 
     @Override
-    protected boolean isMovementNoisy() {
-        return false;
+    protected Entity.MovementEmission getMovementEmission() {
+        return Entity.MovementEmission.NONE;
     }
 
     @Override
@@ -213,7 +215,7 @@ implements Enemy {
         if (h <= 0.0f) {
             return;
         }
-        List<Entity> list = this.level.getEntities(this, Shulker.getProgressDeltaAabb(direction, g, f).move(this.getX(), this.getY(), this.getZ()), EntitySelector.NO_SPECTATORS.and(entity -> !entity.isPassengerOfSameVehicle(this)));
+        List<Entity> list = this.level.getEntities(this, Shulker.getProgressDeltaAabb(direction, g, f).move(this.getX() - 0.5, this.getY(), this.getZ() - 0.5), EntitySelector.NO_SPECTATORS.and(entity -> !entity.isPassengerOfSameVehicle(this)));
         for (Entity entity2 : list) {
             if (entity2 instanceof Shulker || entity2.noPhysics) continue;
             entity2.move(MoverType.SHULKER, new Vec3(h * (float)direction.getStepX(), h * (float)direction.getStepY(), h * (float)direction.getStepZ()));
@@ -424,8 +426,10 @@ implements Enemy {
             if (i == 0) {
                 this.getAttribute(Attributes.ARMOR).addPermanentModifier(COVERED_ARMOR_MODIFIER);
                 this.playSound(SoundEvents.SHULKER_CLOSE, 1.0f, 1.0f);
+                this.gameEvent(GameEvent.SHULKER_CLOSE);
             } else {
                 this.playSound(SoundEvents.SHULKER_OPEN, 1.0f, 1.0f);
+                this.gameEvent(GameEvent.SHULKER_OPEN);
             }
         }
         this.entityData.set(DATA_PEEK_ID, (byte)i);
@@ -439,6 +443,13 @@ implements Enemy {
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
         return 0.5f;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
+        super.recreateFromPacket(clientboundAddMobPacket);
+        this.yBodyRot = 0.0f;
     }
 
     @Override

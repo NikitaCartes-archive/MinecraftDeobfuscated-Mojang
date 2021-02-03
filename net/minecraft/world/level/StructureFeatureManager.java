@@ -34,7 +34,7 @@ public class StructureFeatureManager {
     }
 
     public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2, StructureFeature<?> structureFeature) {
-        return this.level.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(structureFeature).stream().map(long_ -> SectionPos.of(new ChunkPos((long)long_), 0)).map(sectionPos -> this.getStartForFeature((SectionPos)sectionPos, structureFeature, this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS))).filter(structureStart -> structureStart != null && structureStart.isValid());
+        return this.level.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(structureFeature).stream().map(long_ -> SectionPos.of(new ChunkPos((long)long_), this.level.getMinSection())).map(sectionPos -> this.getStartForFeature((SectionPos)sectionPos, structureFeature, this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS))).filter(structureStart -> structureStart != null && structureStart.isValid());
     }
 
     @Nullable

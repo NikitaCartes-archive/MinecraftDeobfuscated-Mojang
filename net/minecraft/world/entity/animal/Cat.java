@@ -460,6 +460,11 @@ extends TamableAnimal {
     }
 
     @Override
+    public boolean isSteppingCarefully() {
+        return this.getPose() == Pose.CROUCHING || super.isSteppingCarefully();
+    }
+
+    @Override
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
