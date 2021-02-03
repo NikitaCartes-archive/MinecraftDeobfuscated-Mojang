@@ -661,6 +661,7 @@ public class VillagerTrades {
 				new VillagerTrades.ItemsForEmeralds(Items.BROWN_MUSHROOM, 1, 1, 12, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.RED_MUSHROOM, 1, 1, 12, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.LILY_PAD, 1, 2, 5, 1),
+				new VillagerTrades.ItemsForEmeralds(Items.SMALL_DRIPLEAF, 1, 2, 5, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.SAND, 1, 8, 8, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.RED_SAND, 1, 4, 6, 1)
 			},

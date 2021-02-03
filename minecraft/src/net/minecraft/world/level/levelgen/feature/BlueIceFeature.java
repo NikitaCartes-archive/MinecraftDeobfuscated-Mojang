@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -16,9 +15,11 @@ public class BlueIceFeature extends Feature<NoneFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+		BlockPos blockPos = featurePlaceContext.origin();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
 		if (blockPos.getY() > worldGenLevel.getSeaLevel() - 1) {
 			return false;
 		} else if (!worldGenLevel.getBlockState(blockPos).is(Blocks.WATER) && !worldGenLevel.getBlockState(blockPos.below()).is(Blocks.WATER)) {

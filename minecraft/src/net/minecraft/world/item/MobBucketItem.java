@@ -21,6 +21,7 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
 public class MobBucketItem extends BucketItem {
@@ -34,9 +35,10 @@ public class MobBucketItem extends BucketItem {
 	}
 
 	@Override
-	public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
+	public void checkExtraContent(@Nullable Player player, Level level, ItemStack itemStack, BlockPos blockPos) {
 		if (level instanceof ServerLevel) {
 			this.spawn((ServerLevel)level, itemStack, blockPos);
+			level.gameEvent(player, GameEvent.ENTITY_PLACE, blockPos);
 		}
 	}
 

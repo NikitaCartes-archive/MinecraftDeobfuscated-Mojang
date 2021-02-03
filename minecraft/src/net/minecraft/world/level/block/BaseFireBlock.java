@@ -159,10 +159,16 @@ public abstract class BaseFireBlock extends Block {
 	}
 
 	@Override
+	protected void spawnDestroyParticles(Level level, Player player, BlockPos blockPos, BlockState blockState) {
+	}
+
+	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide()) {
 			level.levelEvent(null, 1009, blockPos, 0);
 		}
+
+		super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	public static boolean canBePlacedAt(Level level, BlockPos blockPos, Direction direction) {

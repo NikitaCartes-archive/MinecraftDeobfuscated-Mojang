@@ -108,7 +108,7 @@ public class DebugRenderer {
 		if (entity == null) {
 			return Optional.empty();
 		} else {
-			Vec3 vec3 = entity.getEyePosition(1.0F);
+			Vec3 vec3 = entity.getEyePosition();
 			Vec3 vec32 = entity.getViewVector(1.0F).scale((double)i);
 			Vec3 vec33 = vec3.add(vec32);
 			AABB aABB = entity.getBoundingBox().expandTowards(vec32).inflate(1.0);

@@ -112,7 +112,7 @@ public class SoundType {
 		1.0F, 1.0F, SoundEvents.WOOD_BREAK, SoundEvents.WOOD_STEP, SoundEvents.CROP_PLANTED, SoundEvents.WOOD_HIT, SoundEvents.WOOD_FALL
 	);
 	public static final SoundType VINE = new SoundType(
-		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
+		1.0F, 1.0F, SoundEvents.VINE_BREAK, SoundEvents.VINE_STEP, SoundEvents.VINE_PLACE, SoundEvents.VINE_HIT, SoundEvents.VINE_FALL
 	);
 	public static final SoundType NETHER_WART = new SoundType(
 		1.0F, 1.0F, SoundEvents.NETHER_WART_BREAK, SoundEvents.STONE_STEP, SoundEvents.NETHER_WART_PLANTED, SoundEvents.STONE_HIT, SoundEvents.STONE_FALL
@@ -314,6 +314,87 @@ public class SoundType {
 	);
 	public static final SoundType COPPER = new SoundType(
 		1.0F, 1.0F, SoundEvents.COPPER_BREAK, SoundEvents.COPPER_STEP, SoundEvents.COPPER_PLACE, SoundEvents.COPPER_HIT, SoundEvents.COPPER_FALL
+	);
+	public static final SoundType CAVE_VINES = new SoundType(
+		1.0F, 1.0F, SoundEvents.CAVE_VINES_BREAK, SoundEvents.CAVE_VINES_STEP, SoundEvents.CAVE_VINES_PLACE, SoundEvents.CAVE_VINES_HIT, SoundEvents.CAVE_VINES_FALL
+	);
+	public static final SoundType SPORE_BLOSSOM = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SPORE_BLOSSOM_BREAK,
+		SoundEvents.SPORE_BLOSSOM_STEP,
+		SoundEvents.SPORE_BLOSSOM_PLACE,
+		SoundEvents.SPORE_BLOSSOM_HIT,
+		SoundEvents.SPORE_BLOSSOM_FALL
+	);
+	public static final SoundType AZALEA = new SoundType(
+		1.0F, 1.0F, SoundEvents.AZALEA_BREAK, SoundEvents.AZALEA_STEP, SoundEvents.AZALEA_PLACE, SoundEvents.AZALEA_HIT, SoundEvents.AZALEA_FALL
+	);
+	public static final SoundType FLOWERING_AZALEA = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.FLOWERING_AZALEA_BREAK,
+		SoundEvents.FLOWERING_AZALEA_STEP,
+		SoundEvents.FLOWERING_AZALEA_PLACE,
+		SoundEvents.FLOWERING_AZALEA_HIT,
+		SoundEvents.FLOWERING_AZALEA_FALL
+	);
+	public static final SoundType MOSS_CARPET = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.MOSS_CARPET_BREAK,
+		SoundEvents.MOSS_CARPET_STEP,
+		SoundEvents.MOSS_CARPET_PLACE,
+		SoundEvents.MOSS_CARPET_HIT,
+		SoundEvents.MOSS_CARPET_FALL
+	);
+	public static final SoundType MOSS = new SoundType(
+		1.0F, 1.0F, SoundEvents.MOSS_BREAK, SoundEvents.MOSS_STEP, SoundEvents.MOSS_PLACE, SoundEvents.MOSS_HIT, SoundEvents.MOSS_FALL
+	);
+	public static final SoundType BIG_DRIPLEAF = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.BIG_DRIPLEAF_BREAK,
+		SoundEvents.BIG_DRIPLEAF_STEP,
+		SoundEvents.BIG_DRIPLEAF_PLACE,
+		SoundEvents.BIG_DRIPLEAF_HIT,
+		SoundEvents.BIG_DRIPLEAF_FALL
+	);
+	public static final SoundType SMALL_DRIPLEAF = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SMALL_DRIPLEAF_BREAK,
+		SoundEvents.SMALL_DRIPLEAF_STEP,
+		SoundEvents.SMALL_DRIPLEAF_PLACE,
+		SoundEvents.SMALL_DRIPLEAF_HIT,
+		SoundEvents.SMALL_DRIPLEAF_FALL
+	);
+	public static final SoundType ROOTED_DIRT = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.ROOTED_DIRT_BREAK,
+		SoundEvents.ROOTED_DIRT_STEP,
+		SoundEvents.ROOTED_DIRT_PLACE,
+		SoundEvents.ROOTED_DIRT_HIT,
+		SoundEvents.ROOTED_DIRT_FALL
+	);
+	public static final SoundType HANGING_ROOTS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.HANGING_ROOTS_BREAK,
+		SoundEvents.HANGING_ROOTS_STEP,
+		SoundEvents.HANGING_ROOTS_PLACE,
+		SoundEvents.HANGING_ROOTS_HIT,
+		SoundEvents.HANGING_ROOTS_FALL
+	);
+	public static final SoundType AZALEA_LEAVES = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.AZALEA_LEAVES_BREAK,
+		SoundEvents.AZALEA_LEAVES_STEP,
+		SoundEvents.AZALEA_LEAVES_PLACE,
+		SoundEvents.AZALEA_LEAVES_HIT,
+		SoundEvents.AZALEA_LEAVES_FALL
 	);
 	public static final SoundType SCULK_SENSOR = new SoundType(
 		1.0F,

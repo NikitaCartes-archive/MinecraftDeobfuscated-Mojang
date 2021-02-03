@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -35,7 +36,8 @@ public class IglooFeature extends StructureFeature<NoneFeatureConfiguration> {
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			int k = SectionPos.sectionToBlockCoord(i);
 			int l = SectionPos.sectionToBlockCoord(j);

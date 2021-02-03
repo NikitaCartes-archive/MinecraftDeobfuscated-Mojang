@@ -164,29 +164,29 @@ public class BlockFamilies {
 		.stairs(Blocks.WAXED_CUT_COPPER_STAIRS)
 		.dontGenerateModel()
 		.getFamily();
-	public static final BlockFamily LIGHTLY_WEATHERED_CUT_COPPER = familyBuilder(Blocks.LIGHTLY_WEATHERED_CUT_COPPER)
-		.slab(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_SLAB)
-		.stairs(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS)
+	public static final BlockFamily EXPOSED_CUT_COPPER = familyBuilder(Blocks.EXPOSED_CUT_COPPER)
+		.slab(Blocks.EXPOSED_CUT_COPPER_SLAB)
+		.stairs(Blocks.EXPOSED_CUT_COPPER_STAIRS)
 		.dontGenerateModel()
 		.getFamily();
-	public static final BlockFamily WAXED_LIGHTLY_WEATHERED_CUT_COPPER = familyBuilder(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER)
-		.slab(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB)
-		.stairs(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS)
-		.dontGenerateModel()
-		.getFamily();
-	public static final BlockFamily SEMI_WEATHERED_CUT_COPPER = familyBuilder(Blocks.SEMI_WEATHERED_CUT_COPPER)
-		.slab(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB)
-		.stairs(Blocks.SEMI_WEATHERED_CUT_COPPER_STAIRS)
-		.dontGenerateModel()
-		.getFamily();
-	public static final BlockFamily WAXED_SEMI_WEATHERED_CUT_COPPER = familyBuilder(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER)
-		.slab(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB)
-		.stairs(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS)
+	public static final BlockFamily WAXED_EXPOSED_CUT_COPPER = familyBuilder(Blocks.WAXED_EXPOSED_CUT_COPPER)
+		.slab(Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB)
+		.stairs(Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS)
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WEATHERED_CUT_COPPER = familyBuilder(Blocks.WEATHERED_CUT_COPPER)
 		.slab(Blocks.WEATHERED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WEATHERED_CUT_COPPER_STAIRS)
+		.dontGenerateModel()
+		.getFamily();
+	public static final BlockFamily WAXED_WEATHERED_CUT_COPPER = familyBuilder(Blocks.WAXED_WEATHERED_CUT_COPPER)
+		.slab(Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB)
+		.stairs(Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+		.dontGenerateModel()
+		.getFamily();
+	public static final BlockFamily OXIDIZED_CUT_COPPER = familyBuilder(Blocks.OXIDIZED_CUT_COPPER)
+		.slab(Blocks.OXIDIZED_CUT_COPPER_SLAB)
+		.stairs(Blocks.OXIDIZED_CUT_COPPER_STAIRS)
 		.getFamily();
 	public static final BlockFamily COBBLESTONE = familyBuilder(Blocks.COBBLESTONE)
 		.wall(Blocks.COBBLESTONE_WALL)

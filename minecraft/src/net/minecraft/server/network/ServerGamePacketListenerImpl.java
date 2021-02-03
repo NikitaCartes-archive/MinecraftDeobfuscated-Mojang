@@ -928,11 +928,19 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		return stream.anyMatch(voxelShape2 -> !Shapes.joinIsNotEmpty(voxelShape2, voxelShape, BooleanOp.AND));
 	}
 
+	public void dismount(double d, double e, double f, float g, float h) {
+		this.teleport(d, e, f, g, h, Collections.emptySet(), true);
+	}
+
 	public void teleport(double d, double e, double f, float g, float h) {
-		this.teleport(d, e, f, g, h, Collections.emptySet());
+		this.teleport(d, e, f, g, h, Collections.emptySet(), false);
 	}
 
 	public void teleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set) {
+		this.teleport(d, e, f, g, h, set, false);
+	}
+
+	public void teleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, boolean bl) {
 		double i = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.X) ? this.player.getX() : 0.0;
 		double j = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.Y) ? this.player.getY() : 0.0;
 		double k = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.Z) ? this.player.getZ() : 0.0;
@@ -945,7 +953,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 
 		this.awaitingTeleportTime = this.tickCount;
 		this.player.absMoveTo(d, e, f, g, h);
-		this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport));
+		this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport, bl));
 	}
 
 	@Override

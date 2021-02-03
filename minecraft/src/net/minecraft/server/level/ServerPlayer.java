@@ -518,7 +518,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 		this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
 		this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
 		this.clearFire();
-		this.setSharedFlag(0, false);
+		this.setSharedFlagOnFire(false);
 		this.getCombatTracker().recheckStatus();
 	}
 
@@ -847,7 +847,15 @@ public class ServerPlayer extends Player implements ContainerListener {
 		super.stopRiding();
 		Entity entity2 = this.getVehicle();
 		if (entity2 != entity && this.connection != null) {
-			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			this.connection.dismount(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+		}
+	}
+
+	@Override
+	public void dismountTo(double d, double e, double f) {
+		this.removeVehicle();
+		if (this.connection != null) {
+			this.connection.dismount(d, e, f, this.yRot, this.xRot);
 		}
 	}
 

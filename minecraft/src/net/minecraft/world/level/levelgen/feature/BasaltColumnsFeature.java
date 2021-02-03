@@ -11,7 +11,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 
 public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
@@ -32,10 +31,13 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ColumnFeatureConfiguration columnFeatureConfiguration
-	) {
-		int i = chunkGenerator.getSeaLevel();
+	@Override
+	public boolean place(FeaturePlaceContext<ColumnFeatureConfiguration> featurePlaceContext) {
+		int i = featurePlaceContext.chunkGenerator().getSeaLevel();
+		BlockPos blockPos = featurePlaceContext.origin();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		ColumnFeatureConfiguration columnFeatureConfiguration = featurePlaceContext.config();
 		if (!canPlaceAt(worldGenLevel, i, blockPos.mutable())) {
 			return false;
 		} else {

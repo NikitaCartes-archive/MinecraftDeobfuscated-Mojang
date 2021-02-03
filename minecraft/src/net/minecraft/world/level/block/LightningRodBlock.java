@@ -41,14 +41,36 @@ public class LightningRodBlock extends RodBlock {
 		return blockState.getValue(POWERED) ? 15 : 0;
 	}
 
+	@Override
+	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+		return blockState.getValue(POWERED) && blockState.getValue(FACING) == direction ? 15 : 0;
+	}
+
 	public void onLightningStrike(BlockState blockState, Level level, BlockPos blockPos) {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
+		this.updateNeighbours(blockState, level, blockPos);
 		level.getBlockTicks().scheduleTick(blockPos, this, 8);
+	}
+
+	private void updateNeighbours(BlockState blockState, Level level, BlockPos blockPos) {
+		level.updateNeighborsAt(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()), this);
 	}
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 3);
+		this.updateNeighbours(blockState, serverLevel, blockPos);
+	}
+
+	@Override
+	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
+			if ((Boolean)blockState.getValue(POWERED)) {
+				this.updateNeighbours(blockState, level, blockPos);
+			}
+
+			super.onRemove(blockState, level, blockPos, blockState2, bl);
+		}
 	}
 
 	@Override
@@ -57,7 +79,7 @@ public class LightningRodBlock extends RodBlock {
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			if (level.canSeeSky(blockPos)) {
 				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(level);
-				lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
+				lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos.above()));
 				Entity entity = projectile.getOwner();
 				lightningBolt.setCause(entity instanceof ServerPlayer ? (ServerPlayer)entity : null);
 				level.addFreshEntity(lightningBolt);

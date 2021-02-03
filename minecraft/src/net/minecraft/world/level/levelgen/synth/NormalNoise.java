@@ -3,24 +3,24 @@ package net.minecraft.world.level.levelgen.synth;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.RandomSource;
 
 public class NormalNoise {
 	private final double valueFactor;
 	private final PerlinNoise first;
 	private final PerlinNoise second;
 
-	public static NormalNoise create(WorldgenRandom worldgenRandom, int i, double... ds) {
-		return new NormalNoise(worldgenRandom, i, new DoubleArrayList(ds));
+	public static NormalNoise create(RandomSource randomSource, int i, double... ds) {
+		return new NormalNoise(randomSource, i, new DoubleArrayList(ds));
 	}
 
-	public static NormalNoise create(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
-		return new NormalNoise(worldgenRandom, i, doubleList);
+	public static NormalNoise create(RandomSource randomSource, int i, DoubleList doubleList) {
+		return new NormalNoise(randomSource, i, doubleList);
 	}
 
-	private NormalNoise(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
-		this.first = PerlinNoise.create(worldgenRandom, i, doubleList);
-		this.second = PerlinNoise.create(worldgenRandom, i, doubleList);
+	private NormalNoise(RandomSource randomSource, int i, DoubleList doubleList) {
+		this.first = PerlinNoise.create(randomSource, i, doubleList);
+		this.second = PerlinNoise.create(randomSource, i, doubleList);
 		int j = Integer.MAX_VALUE;
 		int k = Integer.MIN_VALUE;
 		DoubleListIterator doubleListIterator = doubleList.iterator();

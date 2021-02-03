@@ -15,12 +15,17 @@ public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DecoratedFeatureConfiguration decoratedFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<DecoratedFeatureConfiguration> featurePlaceContext) {
 		MutableBoolean mutableBoolean = new MutableBoolean();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		DecoratedFeatureConfiguration decoratedFeatureConfiguration = featurePlaceContext.config();
+		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+		Random random = featurePlaceContext.random();
+		BlockPos blockPos = featurePlaceContext.origin();
+		ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)decoratedFeatureConfiguration.feature.get();
 		decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos).forEach(blockPosx -> {
-			if (((ConfiguredFeature)decoratedFeatureConfiguration.feature.get()).place(worldGenLevel, chunkGenerator, random, blockPosx)) {
+			if (configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPosx)) {
 				mutableBoolean.setTrue();
 			}
 		});

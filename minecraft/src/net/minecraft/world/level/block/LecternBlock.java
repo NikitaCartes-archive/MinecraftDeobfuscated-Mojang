@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -147,10 +148,10 @@ public class LecternBlock extends BaseEntityBlock {
 		return new LecternBlockEntity(blockPos, blockState);
 	}
 
-	public static boolean tryPlaceBook(Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	public static boolean tryPlaceBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		if (!(Boolean)blockState.getValue(HAS_BOOK)) {
 			if (!level.isClientSide) {
-				placeBook(level, blockPos, blockState, itemStack);
+				placeBook(player, level, blockPos, blockState, itemStack);
 			}
 
 			return true;
@@ -159,13 +160,14 @@ public class LecternBlock extends BaseEntityBlock {
 		}
 	}
 
-	private static void placeBook(Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	private static void placeBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof LecternBlockEntity) {
 			LecternBlockEntity lecternBlockEntity = (LecternBlockEntity)blockEntity;
 			lecternBlockEntity.setBook(itemStack.split(1));
 			resetBookState(level, blockPos, blockState, true);
 			level.playSound(null, blockPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 		}
 	}
 

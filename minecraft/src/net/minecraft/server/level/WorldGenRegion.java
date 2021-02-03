@@ -54,8 +54,7 @@ import org.apache.logging.log4j.Logger;
 public class WorldGenRegion implements WorldGenLevel {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final List<ChunkAccess> cache;
-	private final int x;
-	private final int z;
+	private final ChunkPos center;
 	private final int size;
 	private final ServerLevel level;
 	private final long seed;
@@ -76,8 +75,7 @@ public class WorldGenRegion implements WorldGenLevel {
 		} else {
 			ChunkPos chunkPos = ((ChunkAccess)list.get(list.size() / 2)).getPos();
 			this.cache = list;
-			this.x = chunkPos.x;
-			this.z = chunkPos.z;
+			this.center = chunkPos;
 			this.size = i;
 			this.level = serverLevel;
 			this.seed = serverLevel.getSeed();
@@ -91,12 +89,8 @@ public class WorldGenRegion implements WorldGenLevel {
 		}
 	}
 
-	public int getCenterX() {
-		return this.x;
-	}
-
-	public int getCenterZ() {
-		return this.z;
+	public ChunkPos getCenter() {
+		return this.center;
 	}
 
 	@Override

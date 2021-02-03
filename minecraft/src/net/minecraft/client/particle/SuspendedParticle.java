@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class SuspendedParticle extends TextureSheetParticle {
@@ -60,6 +61,26 @@ public class SuspendedParticle extends TextureSheetParticle {
 			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f, j, k, l);
 			suspendedParticle.pickSprite(this.sprite);
 			suspendedParticle.setColor(0.9F, 0.4F, 0.5F);
+			return suspendedParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class SporeBlossomAirProvider implements ParticleProvider<SimpleParticleType> {
+		private final SpriteSet sprite;
+		private final Random random;
+
+		public SporeBlossomAirProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+			this.random = new Random();
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f);
+			suspendedParticle.lifetime = Mth.randomBetweenInclusive(this.random, 1000, 2000);
+			suspendedParticle.pickSprite(this.sprite);
+			suspendedParticle.gravity = 0.001F;
+			suspendedParticle.setColor(0.32F, 0.5F, 0.22F);
 			return suspendedParticle;
 		}
 	}

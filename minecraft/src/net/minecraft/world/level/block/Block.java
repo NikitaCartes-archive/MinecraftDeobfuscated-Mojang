@@ -3,9 +3,11 @@ package net.minecraft.world.level.block;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -108,13 +110,16 @@ public class Block extends BlockBehaviour implements ItemLike {
 				blockState.getCollisionShape(level, blockPos), blockState2.getCollisionShape(level, blockPos), BooleanOp.ONLY_SECOND
 			)
 			.move((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+		if (voxelShape.isEmpty()) {
+			return blockState2;
+		} else {
+			for (Entity entity : level.getEntities(null, voxelShape.bounds())) {
+				double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), Stream.of(voxelShape), -1.0);
+				entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
+			}
 
-		for (Entity entity : level.getEntities(null, voxelShape.bounds())) {
-			double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), Stream.of(voxelShape), -1.0);
-			entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
+			return blockState2;
 		}
-
-		return blockState2;
 	}
 
 	public static VoxelShape box(double d, double e, double f, double g, double h, double i) {
@@ -369,8 +374,12 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return this.jumpFactor;
 	}
 
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	protected void spawnDestroyParticles(Level level, Player player, BlockPos blockPos, BlockState blockState) {
 		level.levelEvent(player, 2001, blockPos, getId(blockState));
+	}
+
+	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+		this.spawnDestroyParticles(level, player, blockPos, blockState);
 		if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
 			PiglinAi.angerNearbyPiglins(player, false);
 		}
@@ -428,6 +437,13 @@ public class Block extends BlockBehaviour implements ItemLike {
 	@Override
 	protected Block asBlock() {
 		return this;
+	}
+
+	protected ImmutableMap<BlockState, VoxelShape> getShapeForEachState(Function<BlockState, VoxelShape> function) {
+		return (ImmutableMap<BlockState, VoxelShape>)this.stateDefinition
+			.getPossibleStates()
+			.stream()
+			.collect(ImmutableMap.toImmutableMap(Function.identity(), function));
 	}
 
 	public static final class BlockStatePairKey {

@@ -2,7 +2,9 @@ package net.minecraft.world.level.levelgen;
 
 import java.util.Random;
 
-public class WorldgenRandom extends Random {
+public class WorldgenRandom extends Random implements RandomSource {
+	private int count;
+
 	public WorldgenRandom() {
 	}
 
@@ -10,10 +12,9 @@ public class WorldgenRandom extends Random {
 		super(l);
 	}
 
-	public void consumeCount(int i) {
-		for (int j = 0; j < i; j++) {
-			this.next(1);
-		}
+	public int next(int i) {
+		this.count++;
+		return super.next(i);
 	}
 
 	public long setBaseChunkSeed(int i, int j) {

@@ -46,7 +46,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements VibrationList
 	@Override
 	public boolean shouldListen(Level level, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity) {
 		boolean bl = gameEvent == GameEvent.BLOCK_DESTROY && blockPos.equals(this.getBlockPos());
-		return !bl && SculkSensorBlock.canActivate(this.getBlockState());
+		boolean bl2 = gameEvent == GameEvent.BLOCK_PLACE && blockPos.equals(this.getBlockPos());
+		return !bl && !bl2 && SculkSensorBlock.canActivate(this.getBlockState());
 	}
 
 	@Override

@@ -48,14 +48,8 @@ public class PatrolSpawner implements CustomSpawner {
 							int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
 							int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
 							BlockPos.MutableBlockPos mutableBlockPos = player.blockPosition().mutable().move(j, 0, k);
-							if (!serverLevel.hasChunksAt(
-								mutableBlockPos.getX() - 10,
-								mutableBlockPos.getY() - 10,
-								mutableBlockPos.getZ() - 10,
-								mutableBlockPos.getX() + 10,
-								mutableBlockPos.getY() + 10,
-								mutableBlockPos.getZ() + 10
-							)) {
+							int m = 10;
+							if (!serverLevel.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)) {
 								return 0;
 							} else {
 								Biome biome = serverLevel.getBiome(mutableBlockPos);
@@ -63,13 +57,13 @@ public class PatrolSpawner implements CustomSpawner {
 								if (biomeCategory == Biome.BiomeCategory.MUSHROOM) {
 									return 0;
 								} else {
-									int m = 0;
-									int n = (int)Math.ceil((double)serverLevel.getCurrentDifficultyAt(mutableBlockPos).getEffectiveDifficulty()) + 1;
+									int n = 0;
+									int o = (int)Math.ceil((double)serverLevel.getCurrentDifficultyAt(mutableBlockPos).getEffectiveDifficulty()) + 1;
 
-									for (int o = 0; o < n; o++) {
-										m++;
+									for (int p = 0; p < o; p++) {
+										n++;
 										mutableBlockPos.setY(serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY());
-										if (o == 0) {
+										if (p == 0) {
 											if (!this.spawnPatrolMember(serverLevel, mutableBlockPos, random, true)) {
 												break;
 											}
@@ -81,7 +75,7 @@ public class PatrolSpawner implements CustomSpawner {
 										mutableBlockPos.setZ(mutableBlockPos.getZ() + random.nextInt(5) - random.nextInt(5));
 									}
 
-									return m;
+									return n;
 								}
 							}
 						}

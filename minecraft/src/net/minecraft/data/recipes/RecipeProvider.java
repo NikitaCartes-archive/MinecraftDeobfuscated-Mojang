@@ -202,98 +202,99 @@ public class RecipeProvider implements DataProvider {
 		woodenBoat(consumer, Items.OAK_BOAT, Blocks.OAK_PLANKS);
 		woodenBoat(consumer, Items.SPRUCE_BOAT, Blocks.SPRUCE_PLANKS);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLACK_WOOL, Items.BLACK_DYE);
-		carpetFromWool(consumer, Blocks.BLACK_CARPET, Blocks.BLACK_WOOL);
+		carpet(consumer, Blocks.BLACK_CARPET, Blocks.BLACK_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLACK_CARPET, Items.BLACK_DYE);
 		bedFromPlanksAndWool(consumer, Items.BLACK_BED, Blocks.BLACK_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.BLACK_BED, Items.BLACK_DYE);
 		banner(consumer, Items.BLACK_BANNER, Blocks.BLACK_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLUE_WOOL, Items.BLUE_DYE);
-		carpetFromWool(consumer, Blocks.BLUE_CARPET, Blocks.BLUE_WOOL);
+		carpet(consumer, Blocks.BLUE_CARPET, Blocks.BLUE_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLUE_CARPET, Items.BLUE_DYE);
 		bedFromPlanksAndWool(consumer, Items.BLUE_BED, Blocks.BLUE_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.BLUE_BED, Items.BLUE_DYE);
 		banner(consumer, Items.BLUE_BANNER, Blocks.BLUE_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BROWN_WOOL, Items.BROWN_DYE);
-		carpetFromWool(consumer, Blocks.BROWN_CARPET, Blocks.BROWN_WOOL);
+		carpet(consumer, Blocks.BROWN_CARPET, Blocks.BROWN_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BROWN_CARPET, Items.BROWN_DYE);
 		bedFromPlanksAndWool(consumer, Items.BROWN_BED, Blocks.BROWN_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.BROWN_BED, Items.BROWN_DYE);
 		banner(consumer, Items.BROWN_BANNER, Blocks.BROWN_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.CYAN_WOOL, Items.CYAN_DYE);
-		carpetFromWool(consumer, Blocks.CYAN_CARPET, Blocks.CYAN_WOOL);
+		carpet(consumer, Blocks.CYAN_CARPET, Blocks.CYAN_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.CYAN_CARPET, Items.CYAN_DYE);
 		bedFromPlanksAndWool(consumer, Items.CYAN_BED, Blocks.CYAN_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.CYAN_BED, Items.CYAN_DYE);
 		banner(consumer, Items.CYAN_BANNER, Blocks.CYAN_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GRAY_WOOL, Items.GRAY_DYE);
-		carpetFromWool(consumer, Blocks.GRAY_CARPET, Blocks.GRAY_WOOL);
+		carpet(consumer, Blocks.GRAY_CARPET, Blocks.GRAY_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GRAY_CARPET, Items.GRAY_DYE);
 		bedFromPlanksAndWool(consumer, Items.GRAY_BED, Blocks.GRAY_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.GRAY_BED, Items.GRAY_DYE);
 		banner(consumer, Items.GRAY_BANNER, Blocks.GRAY_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GREEN_WOOL, Items.GREEN_DYE);
-		carpetFromWool(consumer, Blocks.GREEN_CARPET, Blocks.GREEN_WOOL);
+		carpet(consumer, Blocks.GREEN_CARPET, Blocks.GREEN_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GREEN_CARPET, Items.GREEN_DYE);
 		bedFromPlanksAndWool(consumer, Items.GREEN_BED, Blocks.GREEN_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.GREEN_BED, Items.GREEN_DYE);
 		banner(consumer, Items.GREEN_BANNER, Blocks.GREEN_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_BLUE_WOOL, Items.LIGHT_BLUE_DYE);
-		carpetFromWool(consumer, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_BLUE_WOOL);
+		carpet(consumer, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_BLUE_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_BLUE_CARPET, Items.LIGHT_BLUE_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIGHT_BLUE_BED, Blocks.LIGHT_BLUE_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.LIGHT_BLUE_BED, Items.LIGHT_BLUE_DYE);
 		banner(consumer, Items.LIGHT_BLUE_BANNER, Blocks.LIGHT_BLUE_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
-		carpetFromWool(consumer, Blocks.LIGHT_GRAY_CARPET, Blocks.LIGHT_GRAY_WOOL);
+		carpet(consumer, Blocks.LIGHT_GRAY_CARPET, Blocks.LIGHT_GRAY_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_GRAY_CARPET, Items.LIGHT_GRAY_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIGHT_GRAY_BED, Blocks.LIGHT_GRAY_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.LIGHT_GRAY_BED, Items.LIGHT_GRAY_DYE);
 		banner(consumer, Items.LIGHT_GRAY_BANNER, Blocks.LIGHT_GRAY_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIME_WOOL, Items.LIME_DYE);
-		carpetFromWool(consumer, Blocks.LIME_CARPET, Blocks.LIME_WOOL);
+		carpet(consumer, Blocks.LIME_CARPET, Blocks.LIME_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIME_CARPET, Items.LIME_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIME_BED, Blocks.LIME_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.LIME_BED, Items.LIME_DYE);
 		banner(consumer, Items.LIME_BANNER, Blocks.LIME_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.MAGENTA_WOOL, Items.MAGENTA_DYE);
-		carpetFromWool(consumer, Blocks.MAGENTA_CARPET, Blocks.MAGENTA_WOOL);
+		carpet(consumer, Blocks.MAGENTA_CARPET, Blocks.MAGENTA_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.MAGENTA_CARPET, Items.MAGENTA_DYE);
 		bedFromPlanksAndWool(consumer, Items.MAGENTA_BED, Blocks.MAGENTA_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.MAGENTA_BED, Items.MAGENTA_DYE);
 		banner(consumer, Items.MAGENTA_BANNER, Blocks.MAGENTA_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.ORANGE_WOOL, Items.ORANGE_DYE);
-		carpetFromWool(consumer, Blocks.ORANGE_CARPET, Blocks.ORANGE_WOOL);
+		carpet(consumer, Blocks.ORANGE_CARPET, Blocks.ORANGE_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.ORANGE_CARPET, Items.ORANGE_DYE);
 		bedFromPlanksAndWool(consumer, Items.ORANGE_BED, Blocks.ORANGE_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.ORANGE_BED, Items.ORANGE_DYE);
 		banner(consumer, Items.ORANGE_BANNER, Blocks.ORANGE_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PINK_WOOL, Items.PINK_DYE);
-		carpetFromWool(consumer, Blocks.PINK_CARPET, Blocks.PINK_WOOL);
+		carpet(consumer, Blocks.PINK_CARPET, Blocks.PINK_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PINK_CARPET, Items.PINK_DYE);
 		bedFromPlanksAndWool(consumer, Items.PINK_BED, Blocks.PINK_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.PINK_BED, Items.PINK_DYE);
 		banner(consumer, Items.PINK_BANNER, Blocks.PINK_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PURPLE_WOOL, Items.PURPLE_DYE);
-		carpetFromWool(consumer, Blocks.PURPLE_CARPET, Blocks.PURPLE_WOOL);
+		carpet(consumer, Blocks.PURPLE_CARPET, Blocks.PURPLE_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PURPLE_CARPET, Items.PURPLE_DYE);
 		bedFromPlanksAndWool(consumer, Items.PURPLE_BED, Blocks.PURPLE_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.PURPLE_BED, Items.PURPLE_DYE);
 		banner(consumer, Items.PURPLE_BANNER, Blocks.PURPLE_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.RED_WOOL, Items.RED_DYE);
-		carpetFromWool(consumer, Blocks.RED_CARPET, Blocks.RED_WOOL);
+		carpet(consumer, Blocks.RED_CARPET, Blocks.RED_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.RED_CARPET, Items.RED_DYE);
 		bedFromPlanksAndWool(consumer, Items.RED_BED, Blocks.RED_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.RED_BED, Items.RED_DYE);
 		banner(consumer, Items.RED_BANNER, Blocks.RED_WOOL);
-		carpetFromWool(consumer, Blocks.WHITE_CARPET, Blocks.WHITE_WOOL);
+		carpet(consumer, Blocks.WHITE_CARPET, Blocks.WHITE_WOOL);
 		bedFromPlanksAndWool(consumer, Items.WHITE_BED, Blocks.WHITE_WOOL);
 		banner(consumer, Items.WHITE_BANNER, Blocks.WHITE_WOOL);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.YELLOW_WOOL, Items.YELLOW_DYE);
-		carpetFromWool(consumer, Blocks.YELLOW_CARPET, Blocks.YELLOW_WOOL);
+		carpet(consumer, Blocks.YELLOW_CARPET, Blocks.YELLOW_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.YELLOW_CARPET, Items.YELLOW_DYE);
 		bedFromPlanksAndWool(consumer, Items.YELLOW_BED, Blocks.YELLOW_WOOL);
 		bedFromWhiteBedAndDye(consumer, Items.YELLOW_BED, Items.YELLOW_DYE);
 		banner(consumer, Items.YELLOW_BANNER, Blocks.YELLOW_WOOL);
+		carpet(consumer, Blocks.MOSS_CARPET, Blocks.MOSS_BLOCK);
 		stainedGlassFromGlassAndDye(consumer, Blocks.BLACK_STAINED_GLASS, Items.BLACK_DYE);
 		stainedGlassPaneFromStainedGlass(consumer, Blocks.BLACK_STAINED_GLASS_PANE, Blocks.BLACK_STAINED_GLASS);
 		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.BLACK_STAINED_GLASS_PANE, Items.BLACK_DYE);
@@ -712,72 +713,72 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_copper_block", has(Blocks.COPPER_BLOCK))
 			.save(consumer, "copper_ingot_from_copper_block");
 		cut(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
-		cut(consumer, Blocks.LIGHTLY_WEATHERED_CUT_COPPER, Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK);
-		cut(consumer, Blocks.SEMI_WEATHERED_CUT_COPPER, Blocks.SEMI_WEATHERED_COPPER_BLOCK);
+		cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER_BLOCK);
 		cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER_BLOCK);
+		cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER_BLOCK);
 		ShapelessRecipeBuilder.shapeless(Items.WAXED_COPPER)
 			.requires(Items.COPPER_BLOCK)
 			.requires(Items.HONEYCOMB)
 			.unlockedBy("has_copper_block", has(Items.COPPER_BLOCK))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_COPPER)
-			.requires(Items.SEMI_WEATHERED_COPPER_BLOCK)
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_COPPER)
+			.requires(Items.WEATHERED_COPPER_BLOCK)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_semi_weathered_copper_block", has(Items.SEMI_WEATHERED_COPPER_BLOCK))
+			.unlockedBy("has_weathered_copper_block", has(Items.WEATHERED_COPPER_BLOCK))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_COPPER)
-			.requires(Items.LIGHTLY_WEATHERED_COPPER_BLOCK)
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_COPPER)
+			.requires(Items.EXPOSED_COPPER_BLOCK)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_lightly_weathered_copper_block", has(Items.LIGHTLY_WEATHERED_COPPER_BLOCK))
+			.unlockedBy("has_exposed_copper_block", has(Items.EXPOSED_COPPER_BLOCK))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER)
 			.requires(Items.CUT_COPPER)
 			.requires(Items.HONEYCOMB)
 			.unlockedBy("has_cut_copper", has(Items.CUT_COPPER))
 			.save(consumer, "waxed_cut_copper_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER)
-			.requires(Items.SEMI_WEATHERED_CUT_COPPER)
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER)
+			.requires(Items.WEATHERED_CUT_COPPER)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_semi_weathered_cut_copper", has(Items.SEMI_WEATHERED_CUT_COPPER))
-			.save(consumer, "waxed_semi_weathered_cut_copper_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER)
-			.requires(Items.LIGHTLY_WEATHERED_CUT_COPPER)
+			.unlockedBy("has_weathered_cut_copper", has(Items.WEATHERED_CUT_COPPER))
+			.save(consumer, "waxed_weathered_cut_copper_from_honeycomb");
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER)
+			.requires(Items.EXPOSED_CUT_COPPER)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_lightly_weathered_cut_copper", has(Items.LIGHTLY_WEATHERED_CUT_COPPER))
-			.save(consumer, "waxed_lightly_weathered_cut_copper_from_honeycomb");
+			.unlockedBy("has_exposed_cut_copper", has(Items.EXPOSED_CUT_COPPER))
+			.save(consumer, "waxed_exposed_cut_copper_from_honeycomb");
 		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_STAIRS)
 			.requires(Items.CUT_COPPER_STAIRS)
 			.requires(Items.HONEYCOMB)
 			.unlockedBy("has_copper_cut_stairs", has(Items.CUT_COPPER_STAIRS))
 			.save(consumer, "waxed_copper_cut_stairs_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS)
-			.requires(Items.SEMI_WEATHERED_CUT_COPPER_STAIRS)
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+			.requires(Items.WEATHERED_CUT_COPPER_STAIRS)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_semi_weathered_cut_copper_stairs", has(Items.SEMI_WEATHERED_CUT_COPPER_STAIRS))
-			.save(consumer, "waxed_semi_weathered_cut_copper_stairs_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS)
-			.requires(Items.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS)
+			.unlockedBy("has_weathered_cut_copper_stairs", has(Items.WEATHERED_CUT_COPPER_STAIRS))
+			.save(consumer, "waxed_weathered_cut_copper_stairs_from_honeycomb");
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS)
+			.requires(Items.EXPOSED_CUT_COPPER_STAIRS)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_lightly_weathered_cut_copper_stairs", has(Items.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS))
-			.save(consumer, "waxed_lightly_weathered_cut_copper_stairs_from_honeycomb");
+			.unlockedBy("has_exposed_cut_copper_stairs", has(Items.EXPOSED_CUT_COPPER_STAIRS))
+			.save(consumer, "waxed_exposed_cut_copper_stairs_from_honeycomb");
 		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_SLAB)
 			.requires(Items.CUT_COPPER_SLAB)
 			.requires(Items.HONEYCOMB)
 			.unlockedBy("has_copper_cut_slab", has(Items.CUT_COPPER_SLAB))
 			.save(consumer, "waxed_copper_cut_slab_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB)
-			.requires(Items.SEMI_WEATHERED_CUT_COPPER_SLAB)
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_SLAB)
+			.requires(Items.WEATHERED_CUT_COPPER_SLAB)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_semi_weathered_cut_copper_slab", has(Items.SEMI_WEATHERED_CUT_COPPER_SLAB))
-			.save(consumer, "waxed_semi_weathered_cut_copper_slab_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB)
-			.requires(Items.LIGHTLY_WEATHERED_CUT_COPPER_SLAB)
+			.unlockedBy("has_weathered_cut_copper_slab", has(Items.WEATHERED_CUT_COPPER_SLAB))
+			.save(consumer, "waxed_weathered_cut_copper_slab_from_honeycomb");
+		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_SLAB)
+			.requires(Items.EXPOSED_CUT_COPPER_SLAB)
 			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_lightly_weathered_cut_copper_slab", has(Items.LIGHTLY_WEATHERED_CUT_COPPER_SLAB))
-			.save(consumer, "waxed_lightly_weathered_cut_copper_slab_from_honeycomb");
+			.unlockedBy("has_exposed_cut_copper_slab", has(Items.EXPOSED_CUT_COPPER_SLAB))
+			.save(consumer, "waxed_exposed_cut_copper_slab_from_honeycomb");
 		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER);
-		cut(consumer, Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER, Blocks.WAXED_LIGHTLY_WEATHERED_COPPER);
-		cut(consumer, Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER, Blocks.WAXED_SEMI_WEATHERED_COPPER);
+		cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
+		cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
 		ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.GREEN_DYE)
@@ -2966,6 +2967,41 @@ public class RecipeProvider implements DataProvider {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
 			.unlocks("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
 			.save(consumer, "polished_blackstone_brick_wall_from_polished_blackstone_bricks_stonecutting");
+		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_SLAB, Blocks.CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_STAIRS, Blocks.CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_STAIRS, Blocks.COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_SLAB, Blocks.COPPER_BLOCK, 2);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_COPPER_BLOCK, 2);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_COPPER_BLOCK, 2);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_COPPER_BLOCK, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_COPPER, 2);
 		netheriteSmithing(consumer, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE);
 		netheriteSmithing(consumer, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
 		netheriteSmithing(consumer, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET);
@@ -3060,7 +3096,7 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 	}
 
-	private static void carpetFromWool(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+	private static void carpet(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
 		ShapedRecipeBuilder.shaped(itemLike, 3).define('#', itemLike2).pattern("##").group("carpet").unlockedBy(getHasName(itemLike2), has(itemLike2)).save(consumer);
 	}
 
@@ -3202,6 +3238,16 @@ public class RecipeProvider implements DataProvider {
 		return ShapedRecipeBuilder.shaped(itemLike).define('#', ingredient).pattern("#").pattern("#");
 	}
 
+	private static void stonecutterResultFromBase(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		stonecutterResultFromBase(consumer, itemLike, itemLike2, 1);
+	}
+
+	private static void stonecutterResultFromBase(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2, int i) {
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(itemLike2), itemLike, i)
+			.unlocks(getHasName(itemLike2), has(itemLike2))
+			.save(consumer, getFromName(itemLike, itemLike2) + "_stonecutting");
+	}
+
 	private static void cookRecipes(Consumer<FinishedRecipe> consumer, String string, SimpleCookingSerializer<?> simpleCookingSerializer, int i) {
 		SimpleCookingRecipeBuilder.cooking(Ingredient.of(Items.BEEF), Items.COOKED_BEEF, 0.35F, i, simpleCookingSerializer)
 			.unlockedBy("has_beef", has(Items.BEEF))
@@ -3268,7 +3314,15 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	private static String getHasName(ItemLike itemLike) {
-		return "has_" + Registry.ITEM.getKey(itemLike.asItem()).getPath();
+		return "has_" + getBlockName(itemLike);
+	}
+
+	private static String getFromName(ItemLike itemLike, ItemLike itemLike2) {
+		return getBlockName(itemLike) + "_from_" + getBlockName(itemLike2);
+	}
+
+	private static String getBlockName(ItemLike itemLike) {
+		return Registry.ITEM.getKey(itemLike.asItem()).getPath();
 	}
 
 	@Override

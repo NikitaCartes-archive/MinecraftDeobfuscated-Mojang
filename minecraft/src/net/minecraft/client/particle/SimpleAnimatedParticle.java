@@ -7,8 +7,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 @Environment(EnvType.CLIENT)
 public class SimpleAnimatedParticle extends TextureSheetParticle {
 	protected final SpriteSet sprites;
-	private final float baseGravity;
-	private float baseAirFriction = 0.91F;
 	private float fadeR;
 	private float fadeG;
 	private float fadeB;
@@ -16,8 +14,9 @@ public class SimpleAnimatedParticle extends TextureSheetParticle {
 
 	protected SimpleAnimatedParticle(ClientLevel clientLevel, double d, double e, double f, SpriteSet spriteSet, float g) {
 		super(clientLevel, d, e, f);
+		this.friction = 0.91F;
+		this.gravity = g;
 		this.sprites = spriteSet;
-		this.baseGravity = g;
 	}
 
 	public void setColor(int i) {
@@ -42,30 +41,14 @@ public class SimpleAnimatedParticle extends TextureSheetParticle {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		} else {
-			this.setSpriteFromAge(this.sprites);
-			if (this.age > this.lifetime / 2) {
-				this.setAlpha(1.0F - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
-				if (this.hasFade) {
-					this.rCol = this.rCol + (this.fadeR - this.rCol) * 0.2F;
-					this.gCol = this.gCol + (this.fadeG - this.gCol) * 0.2F;
-					this.bCol = this.bCol + (this.fadeB - this.bCol) * 0.2F;
-				}
-			}
-
-			this.yd = this.yd + (double)this.baseGravity;
-			this.move(this.xd, this.yd, this.zd);
-			this.xd = this.xd * (double)this.baseAirFriction;
-			this.yd = this.yd * (double)this.baseAirFriction;
-			this.zd = this.zd * (double)this.baseAirFriction;
-			if (this.onGround) {
-				this.xd *= 0.7F;
-				this.zd *= 0.7F;
+		super.tick();
+		this.setSpriteFromAge(this.sprites);
+		if (this.age > this.lifetime / 2) {
+			this.setAlpha(1.0F - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
+			if (this.hasFade) {
+				this.rCol = this.rCol + (this.fadeR - this.rCol) * 0.2F;
+				this.gCol = this.gCol + (this.fadeG - this.gCol) * 0.2F;
+				this.bCol = this.bCol + (this.fadeB - this.bCol) * 0.2F;
 			}
 		}
 	}
@@ -73,9 +56,5 @@ public class SimpleAnimatedParticle extends TextureSheetParticle {
 	@Override
 	public int getLightColor(float f) {
 		return 15728880;
-	}
-
-	protected void setBaseAirFriction(float f) {
-		this.baseAirFriction = f;
 	}
 }

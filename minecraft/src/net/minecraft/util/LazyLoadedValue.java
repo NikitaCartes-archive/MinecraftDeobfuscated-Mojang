@@ -1,22 +1,17 @@
 package net.minecraft.util;
 
+import com.google.common.base.Suppliers;
 import java.util.function.Supplier;
 
+@Deprecated
 public class LazyLoadedValue<T> {
-	private Supplier<T> factory;
-	private T value;
+	private final Supplier<T> factory;
 
 	public LazyLoadedValue(Supplier<T> supplier) {
-		this.factory = supplier;
+		this.factory = Suppliers.memoize(supplier::get);
 	}
 
 	public T get() {
-		Supplier<T> supplier = this.factory;
-		if (supplier != null) {
-			this.value = (T)supplier.get();
-			this.factory = null;
-		}
-
-		return this.value;
+		return (T)this.factory.get();
 	}
 }

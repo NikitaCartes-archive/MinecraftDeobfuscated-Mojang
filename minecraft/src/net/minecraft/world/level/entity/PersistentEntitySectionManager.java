@@ -74,7 +74,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		if (!this.addEntityUuid(entityAccess)) {
 			return false;
 		} else {
-			long l = EntitySectionStorage.entityPosToSectionKey(entityAccess.blockPosition());
+			long l = SectionPos.asLong(entityAccess.blockPosition());
 			EntitySection<T> entitySection = this.sectionStorage.getOrCreateSection(l);
 			entitySection.add(entityAccess);
 			entityAccess.setLevelCallback(new PersistentEntitySectionManager.Callback(entityAccess, l, entitySection));
@@ -342,7 +342,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		@Override
 		public void onMove() {
 			BlockPos blockPos = this.entity.blockPosition();
-			long l = EntitySectionStorage.entityPosToSectionKey(blockPos);
+			long l = SectionPos.asLong(blockPos);
 			if (l != this.currentSectionKey) {
 				Visibility visibility = this.currentSection.getStatus();
 				if (!this.currentSection.remove(this.entity)) {

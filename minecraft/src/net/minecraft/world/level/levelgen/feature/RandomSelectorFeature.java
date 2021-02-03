@@ -12,9 +12,14 @@ public class RandomSelectorFeature extends Feature<RandomFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, RandomFeatureConfiguration randomFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<RandomFeatureConfiguration> featurePlaceContext) {
+		RandomFeatureConfiguration randomFeatureConfiguration = featurePlaceContext.config();
+		Random random = featurePlaceContext.random();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+		BlockPos blockPos = featurePlaceContext.origin();
+
 		for (WeightedConfiguredFeature weightedConfiguredFeature : randomFeatureConfiguration.features) {
 			if (random.nextFloat() < weightedConfiguredFeature.chance) {
 				return weightedConfiguredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);

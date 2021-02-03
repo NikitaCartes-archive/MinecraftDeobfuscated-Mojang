@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -50,7 +51,8 @@ public class SwamplandHutFeature extends StructureFeature<NoneFeatureConfigurati
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			SwamplandHutPiece swamplandHutPiece = new SwamplandHutPiece(this.random, SectionPos.sectionToBlockCoord(i), SectionPos.sectionToBlockCoord(j));
 			this.pieces.add(swamplandHutPiece);

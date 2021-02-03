@@ -13,6 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -44,7 +45,8 @@ public class JigsawPlacement {
 		List<? super PoolElementStructurePiece> list,
 		Random random,
 		boolean bl,
-		boolean bl2
+		boolean bl2,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		StructureFeature.bootstrap();
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
@@ -64,7 +66,7 @@ public class JigsawPlacement {
 		int j = (boundingBox.z1 + boundingBox.z0) / 2;
 		int k;
 		if (bl2) {
-			k = blockPos.getY() + chunkGenerator.getFirstFreeHeight(i, j, Heightmap.Types.WORLD_SURFACE_WG);
+			k = blockPos.getY() + chunkGenerator.getFirstFreeHeight(i, j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
 		} else {
 			k = blockPos.getY();
 		}
@@ -87,7 +89,7 @@ public class JigsawPlacement {
 
 			while (!placer.placing.isEmpty()) {
 				JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
-				placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl);
+				placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl, levelHeightAccessor);
 			}
 		}
 	}
@@ -100,7 +102,8 @@ public class JigsawPlacement {
 		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
 		List<? super PoolElementStructurePiece> list,
-		Random random
+		Random random,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
 		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, pieceFactory, chunkGenerator, structureManager, list, random);
@@ -108,7 +111,7 @@ public class JigsawPlacement {
 
 		while (!placer.placing.isEmpty()) {
 			JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
-			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, false);
+			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, false, levelHeightAccessor);
 		}
 	}
 
@@ -160,7 +163,14 @@ public class JigsawPlacement {
 			this.random = random;
 		}
 
-		private void tryPlacingChildren(PoolElementStructurePiece poolElementStructurePiece, MutableObject<VoxelShape> mutableObject, int i, int j, boolean bl) {
+		private void tryPlacingChildren(
+			PoolElementStructurePiece poolElementStructurePiece,
+			MutableObject<VoxelShape> mutableObject,
+			int i,
+			int j,
+			boolean bl,
+			LevelHeightAccessor levelHeightAccessor
+		) {
 			StructurePoolElement structurePoolElement = poolElementStructurePiece.getElement();
 			BlockPos blockPos = poolElementStructurePiece.getPosition();
 			Rotation rotation = poolElementStructurePiece.getRotation();
@@ -249,7 +259,7 @@ public class JigsawPlacement {
 											s = k + r;
 										} else {
 											if (m == -1) {
-												m = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG);
+												m = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
 											}
 
 											s = m - q;
@@ -282,7 +292,7 @@ public class JigsawPlacement {
 												w = s + q;
 											} else {
 												if (m == -1) {
-													m = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG);
+													m = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
 												}
 
 												w = m + r / 2;

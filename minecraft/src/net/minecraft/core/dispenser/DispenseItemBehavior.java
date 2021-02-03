@@ -183,6 +183,7 @@ public interface DispenseItemBehavior {
 					blockSource.getLevel(), itemStack, null, blockSource.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false
 				);
 				itemStack.shrink(1);
+				blockSource.getLevel().gameEvent(GameEvent.ENTITY_PLACE, blockSource.getPos());
 				return itemStack;
 			}
 		};
@@ -321,7 +322,8 @@ public interface DispenseItemBehavior {
 				double g = random.nextGaussian() * 0.05 + (double)direction.getStepX();
 				double h = random.nextGaussian() * 0.05 + (double)direction.getStepY();
 				double i = random.nextGaussian() * 0.05 + (double)direction.getStepZ();
-				level.addFreshEntity(Util.make(new SmallFireball(level, d, e, f, g, h, i), smallFireball -> smallFireball.setItem(itemStack)));
+				SmallFireball smallFireball = new SmallFireball(level, d, e, f, g, h, i);
+				level.addFreshEntity(Util.make(smallFireball, smallFireballx -> smallFireballx.setItem(itemStack)));
 				itemStack.shrink(1);
 				return itemStack;
 			}
@@ -346,7 +348,7 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				Level level = blockSource.getLevel();
 				if (dispensibleContainerItem.emptyContents(null, level, blockPos, null)) {
-					dispensibleContainerItem.checkExtraContent(level, itemStack, blockPos);
+					dispensibleContainerItem.checkExtraContent(null, level, itemStack, blockPos);
 					return new ItemStack(Items.BUCKET);
 				} else {
 					return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
@@ -403,8 +405,10 @@ public interface DispenseItemBehavior {
 				BlockState blockState = level.getBlockState(blockPos);
 				if (BaseFireBlock.canBePlacedAt(level, blockPos, direction)) {
 					level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
+					level.gameEvent(null, GameEvent.BLOCK_PLACE, blockPos);
 				} else if (CampfireBlock.canLight(blockState) || CandleBlock.canLight(blockState) || CandleCakeBlock.canLight(blockState)) {
 					level.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
+					level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
 				} else if (blockState.getBlock() instanceof TntBlock) {
 					TntBlock.explode(level, blockPos);
 					level.removeBlock(blockPos, false);
@@ -412,11 +416,8 @@ public interface DispenseItemBehavior {
 					this.setSuccess(false);
 				}
 
-				if (this.isSuccess()) {
-					level.gameEvent(null, GameEvent.FLINT_AND_STEEL_USE, blockPos);
-					if (itemStack.hurt(1, level.random, null)) {
-						itemStack.setCount(0);
-					}
+				if (this.isSuccess() && itemStack.hurt(1, level.random, null)) {
+					itemStack.setCount(0);
 				}
 
 				return itemStack;
@@ -445,6 +446,7 @@ public interface DispenseItemBehavior {
 				PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, null);
 				level.addFreshEntity(primedTnt);
 				level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.gameEvent(null, GameEvent.ENTITY_PLACE, blockPos);
 				itemStack.shrink(1);
 				return itemStack;
 			}
@@ -477,6 +479,7 @@ public interface DispenseItemBehavior {
 								.setValue(SkullBlock.ROTATION, Integer.valueOf(direction.getAxis() == Direction.Axis.Y ? 0 : direction.getOpposite().get2DDataValue() * 4)),
 							3
 						);
+						level.gameEvent(null, GameEvent.BLOCK_PLACE, blockPos);
 						BlockEntity blockEntity = level.getBlockEntity(blockPos);
 						if (blockEntity instanceof SkullBlockEntity) {
 							WitherSkullBlock.checkSpawn(level, blockPos, (SkullBlockEntity)blockEntity);
@@ -501,6 +504,7 @@ public interface DispenseItemBehavior {
 				if (level.isEmptyBlock(blockPos) && carvedPumpkinBlock.canSpawnGolem(level, blockPos)) {
 					if (!level.isClientSide) {
 						level.setBlock(blockPos, carvedPumpkinBlock.defaultBlockState(), 3);
+						level.gameEvent(null, GameEvent.BLOCK_PLACE, blockPos);
 					}
 
 					itemStack.shrink(1);
@@ -526,6 +530,7 @@ public interface DispenseItemBehavior {
 				private ItemStack takeLiquid(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
 					itemStack.shrink(1);
 					if (itemStack.isEmpty()) {
+						blockSource.getLevel().gameEvent(null, GameEvent.FLUID_PICKUP, blockSource.getPos());
 						return itemStack2.copy();
 					} else {
 						if (blockSource.<DispenserBlockEntity>getEntity().addItem(itemStack2.copy()) < 0) {

@@ -184,8 +184,8 @@ public class Guardian extends Monster {
 	}
 
 	@Override
-	protected boolean isMovementNoisy() {
-		return false;
+	protected Entity.MovementEmission getMovementEmission() {
+		return Entity.MovementEmission.EVENTS;
 	}
 
 	@Override

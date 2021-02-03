@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Mirror;
@@ -60,7 +61,14 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	}
 
 	private static int findSuitableY(
-		Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox
+		Random random,
+		ChunkGenerator chunkGenerator,
+		RuinedPortalPiece.VerticalPlacement verticalPlacement,
+		boolean bl,
+		int i,
+		int j,
+		BoundingBox boundingBox,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		int k;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
@@ -90,7 +98,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			new BlockPos(boundingBox.x1, 0, boundingBox.z1)
 		);
 		List<NoiseColumn> list2 = (List<NoiseColumn>)list.stream()
-			.map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ()))
+			.map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ(), levelHeightAccessor))
 			.collect(Collectors.toList());
 		Heightmap.Types types = verticalPlacement == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR
 			? Heightmap.Types.OCEAN_FLOOR_WG
@@ -104,7 +112,7 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 
 			for (NoiseColumn noiseColumn : list2) {
 				BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
-				if (blockState != null && types.isOpaque().test(blockState)) {
+				if (types.isOpaque().test(blockState)) {
 					if (++n == 3) {
 						return m;
 					}
@@ -131,7 +139,8 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			int i,
 			int j,
 			Biome biome,
-			RuinedPortalConfiguration ruinedPortalConfiguration
+			RuinedPortalConfiguration ruinedPortalConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
 			RuinedPortalPiece.VerticalPlacement verticalPlacement;
@@ -189,8 +198,10 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 			Vec3i vec3i = boundingBox.getCenter();
 			int k = vec3i.getX();
 			int l = vec3i.getZ();
-			int m = chunkGenerator.getBaseHeight(k, l, RuinedPortalPiece.getHeightMapType(verticalPlacement)) - 1;
-			int n = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, m, boundingBox.getYSpan(), boundingBox);
+			int m = chunkGenerator.getBaseHeight(k, l, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
+			int n = RuinedPortalFeature.findSuitableY(
+				this.random, chunkGenerator, verticalPlacement, properties.airPocket, m, boundingBox.getYSpan(), boundingBox, levelHeightAccessor
+			);
 			BlockPos blockPos3 = new BlockPos(blockPos2.getX(), n, blockPos2.getZ());
 			if (ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.MOUNTAIN
 				|| ruinedPortalConfiguration.portalType == RuinedPortalFeature.Type.OCEAN

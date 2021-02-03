@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -110,6 +111,23 @@ public class EnderDragon extends Mob implements Enemy {
 	}
 
 	@Override
+	public boolean isFlapping() {
+		float f = Mth.cos(this.flapTime * (float) (Math.PI * 2));
+		float g = Mth.cos(this.oFlapTime * (float) (Math.PI * 2));
+		return g <= -0.3F && f >= -0.3F;
+	}
+
+	@Override
+	public void onFlap() {
+		if (this.level.isClientSide && !this.isSilent()) {
+			this.level
+				.playLocalSound(
+					this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_FLAP, this.getSoundSource(), 5.0F, 0.8F + this.random.nextFloat() * 0.3F, false
+				);
+		}
+	}
+
+	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.getEntityData().define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
@@ -136,45 +154,35 @@ public class EnderDragon extends Mob implements Enemy {
 
 	@Override
 	public void aiStep() {
+		this.processFlappingMovement();
 		if (this.level.isClientSide) {
 			this.setHealth(this.getHealth());
-			if (!this.isSilent()) {
-				float f = Mth.cos(this.flapTime * (float) (Math.PI * 2));
-				float g = Mth.cos(this.oFlapTime * (float) (Math.PI * 2));
-				if (g <= -0.3F && f >= -0.3F) {
-					this.level
-						.playLocalSound(
-							this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_FLAP, this.getSoundSource(), 5.0F, 0.8F + this.random.nextFloat() * 0.3F, false
-						);
-				}
-
-				if (!this.phaseManager.getCurrentPhase().isSitting() && --this.growlTime < 0) {
-					this.level
-						.playLocalSound(
-							this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 2.5F, 0.8F + this.random.nextFloat() * 0.3F, false
-						);
-					this.growlTime = 200 + this.random.nextInt(200);
-				}
+			if (!this.isSilent() && !this.phaseManager.getCurrentPhase().isSitting() && --this.growlTime < 0) {
+				this.level
+					.playLocalSound(
+						this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 2.5F, 0.8F + this.random.nextFloat() * 0.3F, false
+					);
+				this.growlTime = 200 + this.random.nextInt(200);
 			}
 		}
 
 		this.oFlapTime = this.flapTime;
 		if (this.isDeadOrDying()) {
-			float fx = (this.random.nextFloat() - 0.5F) * 8.0F;
-			float gx = (this.random.nextFloat() - 0.5F) * 4.0F;
+			float f = (this.random.nextFloat() - 0.5F) * 8.0F;
+			float g = (this.random.nextFloat() - 0.5F) * 4.0F;
 			float h = (this.random.nextFloat() - 0.5F) * 8.0F;
-			this.level.addParticle(ParticleTypes.EXPLOSION, this.getX() + (double)fx, this.getY() + 2.0 + (double)gx, this.getZ() + (double)h, 0.0, 0.0, 0.0);
+			this.level.addParticle(ParticleTypes.EXPLOSION, this.getX() + (double)f, this.getY() + 2.0 + (double)g, this.getZ() + (double)h, 0.0, 0.0, 0.0);
 		} else {
 			this.checkCrystals();
 			Vec3 vec3 = this.getDeltaMovement();
-			float gx = 0.2F / (Mth.sqrt(getHorizontalDistanceSqr(vec3)) * 10.0F + 1.0F);
-			gx *= (float)Math.pow(2.0, vec3.y);
+			float g = 0.2F / (Mth.sqrt(getHorizontalDistanceSqr(vec3)) * 10.0F + 1.0F);
+			g *= (float)Math.pow(2.0, vec3.y);
 			if (this.phaseManager.getCurrentPhase().isSitting()) {
 				this.flapTime += 0.1F;
 			} else if (this.inWall) {
-				this.flapTime += gx * 0.5F;
+				this.flapTime += g * 0.5F;
 			} else {
-				this.flapTime += gx;
+				this.flapTime += g;
 			}
 
 			this.yRot = Mth.wrapDegrees(this.yRot);
@@ -849,5 +857,16 @@ public class EnderDragon extends Mob implements Enemy {
 	@Override
 	public boolean canChangeDimensions() {
 		return false;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
+		super.recreateFromPacket(clientboundAddMobPacket);
+		EnderDragonPart[] enderDragonParts = this.getSubEntities();
+
+		for (int i = 0; i < enderDragonParts.length; i++) {
+			enderDragonParts[i].setId(i + clientboundAddMobPacket.getId());
+		}
 	}
 }

@@ -59,6 +59,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class Sheep extends Animal implements Shearable {
@@ -225,6 +226,7 @@ public class Sheep extends Animal implements Shearable {
 		if (itemStack.is(Items.SHEARS)) {
 			if (!this.level.isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
+				this.gameEvent(GameEvent.SHEAR, player);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 				return InteractionResult.SUCCESS;
 			} else {

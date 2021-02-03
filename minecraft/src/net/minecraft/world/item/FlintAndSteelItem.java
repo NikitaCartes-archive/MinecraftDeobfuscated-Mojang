@@ -32,9 +32,9 @@ public class FlintAndSteelItem extends Item {
 			BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
 			if (BaseFireBlock.canBePlacedAt(level, blockPos2, useOnContext.getHorizontalDirection())) {
 				level.playSound(player, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
-				level.gameEvent(player, GameEvent.FLINT_AND_STEEL_USE, blockPos);
 				BlockState blockState2 = BaseFireBlock.getState(level, blockPos2);
 				level.setBlock(blockPos2, blockState2, 11);
+				level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
 				ItemStack itemStack = useOnContext.getItemInHand();
 				if (player instanceof ServerPlayer) {
 					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos2, itemStack);
@@ -47,8 +47,8 @@ public class FlintAndSteelItem extends Item {
 			}
 		} else {
 			level.playSound(player, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
-			level.gameEvent(player, GameEvent.FLINT_AND_STEEL_USE, blockPos);
 			level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
+			level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
 			if (player != null) {
 				useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
 			}

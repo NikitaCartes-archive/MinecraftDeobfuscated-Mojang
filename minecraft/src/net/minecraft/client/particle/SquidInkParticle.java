@@ -11,6 +11,7 @@ import net.minecraft.util.FastColor;
 public class SquidInkParticle extends SimpleAnimatedParticle {
 	private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, spriteSet, 0.0F);
+		this.friction = 0.92F;
 		this.quadSize = 0.5F;
 		this.setAlpha(1.0F);
 		this.setColor((float)FastColor.ARGB32.red(j), (float)FastColor.ARGB32.green(j), (float)FastColor.ARGB32.blue(j));
@@ -20,33 +21,19 @@ public class SquidInkParticle extends SimpleAnimatedParticle {
 		this.xd = g;
 		this.yd = h;
 		this.zd = i;
-		this.setBaseAirFriction(0.0F);
 	}
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		} else {
+		super.tick();
+		if (!this.removed) {
 			this.setSpriteFromAge(this.sprites);
 			if (this.age > this.lifetime / 2) {
 				this.setAlpha(1.0F - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
 			}
 
-			this.move(this.xd, this.yd, this.zd);
 			if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
-				this.yd -= 0.008F;
-			}
-
-			this.xd *= 0.92F;
-			this.yd *= 0.92F;
-			this.zd *= 0.92F;
-			if (this.onGround) {
-				this.xd *= 0.7F;
-				this.zd *= 0.7F;
+				this.yd -= 0.0074F;
 			}
 		}
 	}

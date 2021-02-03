@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.BambooBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
@@ -28,10 +27,13 @@ public class BambooFeature extends Feature<ProbabilityFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ProbabilityFeatureConfiguration probabilityFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<ProbabilityFeatureConfiguration> featurePlaceContext) {
 		int i = 0;
+		BlockPos blockPos = featurePlaceContext.origin();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		ProbabilityFeatureConfiguration probabilityFeatureConfiguration = featurePlaceContext.config();
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
 		if (worldGenLevel.isEmptyBlock(mutableBlockPos)) {

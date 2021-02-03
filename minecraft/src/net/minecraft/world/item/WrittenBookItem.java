@@ -85,7 +85,7 @@ public class WrittenBookItem extends Item {
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		if (blockState.is(Blocks.LECTERN)) {
-			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand())
+			return LecternBlock.tryPlaceBook(useOnContext.getPlayer(), level, blockPos, blockState, useOnContext.getItemInHand())
 				? InteractionResult.sidedSuccess(level.isClientSide)
 				: InteractionResult.PASS;
 		} else {

@@ -12,6 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -33,7 +34,8 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 			int i,
 			int j,
 			Biome biome,
-			MineshaftConfiguration mineshaftConfiguration
+			MineshaftConfiguration mineshaftConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 		}
 	};
@@ -56,7 +58,14 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 	}
 
 	public abstract void generatePieces(
-		RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, C featureConfiguration
+		RegistryAccess registryAccess,
+		ChunkGenerator chunkGenerator,
+		StructureManager structureManager,
+		int i,
+		int j,
+		Biome biome,
+		C featureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	);
 
 	public BoundingBox getBoundingBox() {

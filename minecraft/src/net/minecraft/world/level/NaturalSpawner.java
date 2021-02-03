@@ -310,7 +310,7 @@ public final class NaturalSpawner {
 		int i = chunkPos.getMinBlockX() + level.random.nextInt(16);
 		int j = chunkPos.getMinBlockZ() + level.random.nextInt(16);
 		int k = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i, j) + 1;
-		int l = level.random.nextInt(k - level.getMinBuildHeight() + 1) + level.getMinBuildHeight();
+		int l = Mth.randomBetweenInclusive(level.random, level.getMinBuildHeight(), k);
 		return new BlockPos(i, l, j);
 	}
 
@@ -356,34 +356,34 @@ public final class NaturalSpawner {
 		}
 	}
 
-	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, int i, int j, Random random) {
+	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, ChunkPos chunkPos, Random random) {
 		MobSpawnSettings mobSpawnSettings = biome.getMobSettings();
 		List<MobSpawnSettings.SpawnerData> list = mobSpawnSettings.getMobs(MobCategory.CREATURE);
 		if (!list.isEmpty()) {
-			int k = SectionPos.sectionToBlockCoord(i);
-			int l = SectionPos.sectionToBlockCoord(j);
+			int i = chunkPos.getMinBlockX();
+			int j = chunkPos.getMinBlockZ();
 
 			while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
 				Optional<MobSpawnSettings.SpawnerData> optional = WeighedRandom.getRandomItem(random, list);
 				if (optional.isPresent()) {
 					MobSpawnSettings.SpawnerData spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
-					int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+					int k = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 					SpawnGroupData spawnGroupData = null;
-					int n = k + random.nextInt(16);
-					int o = l + random.nextInt(16);
-					int p = n;
-					int q = o;
+					int l = i + random.nextInt(16);
+					int m = j + random.nextInt(16);
+					int n = l;
+					int o = m;
 
-					for (int r = 0; r < m; r++) {
+					for (int p = 0; p < k; p++) {
 						boolean bl = false;
 
-						for (int s = 0; !bl && s < 4; s++) {
-							BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, n, o);
+						for (int q = 0; !bl && q < 4; q++) {
+							BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, l, m);
 							if (spawnerData.type.canSummon()
 								&& isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
 								float f = spawnerData.type.getWidth();
-								double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
-								double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
+								double d = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
+								double e = Mth.clamp((double)m, (double)j + (double)f, (double)j + 16.0 - (double)f);
 								if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
 									|| !SpawnPlacements.checkSpawnRules(
 										spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom()
@@ -394,8 +394,8 @@ public final class NaturalSpawner {
 								Entity entity;
 								try {
 									entity = spawnerData.type.create(serverLevelAccessor.getLevel());
-								} catch (Exception var28) {
-									LOGGER.warn("Failed to create mob", (Throwable)var28);
+								} catch (Exception var27) {
+									LOGGER.warn("Failed to create mob", (Throwable)var27);
 									continue;
 								}
 
@@ -412,10 +412,10 @@ public final class NaturalSpawner {
 								}
 							}
 
-							n += random.nextInt(5) - random.nextInt(5);
+							l += random.nextInt(5) - random.nextInt(5);
 
-							for (o += random.nextInt(5) - random.nextInt(5); n < k || n >= k + 16 || o < l || o >= l + 16; o = q + random.nextInt(5) - random.nextInt(5)) {
-								n = p + random.nextInt(5) - random.nextInt(5);
+							for (m += random.nextInt(5) - random.nextInt(5); l < i || l >= i + 16 || m < j || m >= j + 16; m = o + random.nextInt(5) - random.nextInt(5)) {
+								l = n + random.nextInt(5) - random.nextInt(5);
 							}
 						}
 					}

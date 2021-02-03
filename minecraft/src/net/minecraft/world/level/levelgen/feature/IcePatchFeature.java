@@ -14,11 +14,19 @@ public class IcePatchFeature extends BaseDiskFeature {
 	}
 
 	@Override
-	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DiskConfiguration diskConfiguration) {
+	public boolean place(FeaturePlaceContext<DiskConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+		Random random = featurePlaceContext.random();
+		DiskConfiguration diskConfiguration = featurePlaceContext.config();
+		BlockPos blockPos = featurePlaceContext.origin();
+
 		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
 			blockPos = blockPos.below();
 		}
 
-		return !worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK) ? false : super.place(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration);
+		return !worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)
+			? false
+			: super.place(new FeaturePlaceContext<>(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration));
 	}
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -35,7 +36,8 @@ public class ShipwreckFeature extends StructureFeature<ShipwreckConfiguration> {
 			int i,
 			int j,
 			Biome biome,
-			ShipwreckConfiguration shipwreckConfiguration
+			ShipwreckConfiguration shipwreckConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), 90, SectionPos.sectionToBlockCoord(j));

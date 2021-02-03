@@ -280,6 +280,11 @@ public class Ocelot extends Animal {
 		return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
 	}
 
+	@Override
+	public boolean isSteppingCarefully() {
+		return this.getPose() == Pose.CROUCHING || super.isSteppingCarefully();
+	}
+
 	static class OcelotAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
 		private final Ocelot ocelot;
 

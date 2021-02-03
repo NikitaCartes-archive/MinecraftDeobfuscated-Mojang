@@ -45,6 +45,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	private static final EntityDataAccessor<Boolean> DATA_CONVERTING_ID = SynchedEntityData.defineId(ZombieVillager.class, EntityDataSerializers.BOOLEAN);
@@ -140,6 +141,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 					this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
 				}
 
+				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.CONSUME;

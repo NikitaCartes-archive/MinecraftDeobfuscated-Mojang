@@ -38,6 +38,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
 public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackMob {
@@ -139,6 +140,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
 			this.shear(SoundSource.PLAYERS);
+			this.gameEvent(GameEvent.SHEAR, player);
 			if (!this.level.isClientSide) {
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 			}

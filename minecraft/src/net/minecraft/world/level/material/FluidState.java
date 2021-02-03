@@ -35,6 +35,10 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		return this.getType().isSource(this);
 	}
 
+	public boolean isSourceOfType(Fluid fluid) {
+		return this.owner == fluid && this.owner.isSource(this);
+	}
+
 	public boolean isEmpty() {
 		return this.getType().isEmpty();
 	}

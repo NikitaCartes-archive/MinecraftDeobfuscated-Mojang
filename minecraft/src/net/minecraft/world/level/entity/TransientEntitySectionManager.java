@@ -55,7 +55,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 
 	public void addEntity(T entityAccess) {
 		this.entityStorage.add(entityAccess);
-		long l = EntitySectionStorage.entityPosToSectionKey(entityAccess.blockPosition());
+		long l = SectionPos.asLong(entityAccess.blockPosition());
 		EntitySection<T> entitySection = this.sectionStorage.getOrCreateSection(l);
 		entitySection.add(entityAccess);
 		entityAccess.setLevelCallback(new TransientEntitySectionManager.Callback(entityAccess, l, entitySection));
@@ -95,7 +95,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		@Override
 		public void onMove() {
 			BlockPos blockPos = this.entity.blockPosition();
-			long l = EntitySectionStorage.entityPosToSectionKey(blockPos);
+			long l = SectionPos.asLong(blockPos);
 			if (l != this.currentSectionKey) {
 				Visibility visibility = this.currentSection.getStatus();
 				if (!this.currentSection.remove(this.entity)) {

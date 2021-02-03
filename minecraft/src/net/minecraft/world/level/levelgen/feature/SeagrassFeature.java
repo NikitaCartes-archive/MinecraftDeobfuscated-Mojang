@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
@@ -17,10 +16,13 @@ public class SeagrassFeature extends Feature<ProbabilityFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ProbabilityFeatureConfiguration probabilityFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<ProbabilityFeatureConfiguration> featurePlaceContext) {
 		boolean bl = false;
+		Random random = featurePlaceContext.random();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		BlockPos blockPos = featurePlaceContext.origin();
+		ProbabilityFeatureConfiguration probabilityFeatureConfiguration = featurePlaceContext.config();
 		int i = random.nextInt(8) - random.nextInt(8);
 		int j = random.nextInt(8) - random.nextInt(8);
 		int k = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX() + i, blockPos.getZ() + j);

@@ -35,6 +35,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -151,7 +152,7 @@ public abstract class AbstractArrow extends Projectile {
 			this.shakeTime--;
 		}
 
-		if (this.isInWaterOrRain()) {
+		if (this.isInWaterOrRain() || blockState.is(Blocks.POWDER_SNOW)) {
 			this.clearFire();
 		}
 
@@ -509,8 +510,8 @@ public abstract class AbstractArrow extends Projectile {
 	protected abstract ItemStack getPickupItem();
 
 	@Override
-	protected boolean isMovementNoisy() {
-		return false;
+	protected Entity.MovementEmission getMovementEmission() {
+		return Entity.MovementEmission.NONE;
 	}
 
 	public void setBaseDamage(double d) {

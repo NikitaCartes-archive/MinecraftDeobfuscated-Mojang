@@ -7,6 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -41,7 +42,8 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		NoneFeatureConfiguration noneFeatureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		return worldgenRandom.nextInt(5) < 2;
 	}
@@ -68,7 +70,8 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(
 				this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2)

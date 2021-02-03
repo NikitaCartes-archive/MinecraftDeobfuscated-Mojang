@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -43,7 +44,8 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		NoneFeatureConfiguration noneFeatureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		for (Biome biome2 : biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 32)) {
 			if (!biome2.getGenerationSettings().isValidStart(this)) {
@@ -71,7 +73,8 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int k = 5;
@@ -87,10 +90,10 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 
 			int m = SectionPos.sectionToBlockCoord(i, 7);
 			int n = SectionPos.sectionToBlockCoord(j, 7);
-			int o = chunkGenerator.getFirstOccupiedHeight(m, n, Heightmap.Types.WORLD_SURFACE_WG);
-			int p = chunkGenerator.getFirstOccupiedHeight(m, n + l, Heightmap.Types.WORLD_SURFACE_WG);
-			int q = chunkGenerator.getFirstOccupiedHeight(m + k, n, Heightmap.Types.WORLD_SURFACE_WG);
-			int r = chunkGenerator.getFirstOccupiedHeight(m + k, n + l, Heightmap.Types.WORLD_SURFACE_WG);
+			int o = chunkGenerator.getFirstOccupiedHeight(m, n, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+			int p = chunkGenerator.getFirstOccupiedHeight(m, n + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+			int q = chunkGenerator.getFirstOccupiedHeight(m + k, n, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+			int r = chunkGenerator.getFirstOccupiedHeight(m + k, n + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
 			int s = Math.min(Math.min(o, p), Math.min(q, r));
 			if (s >= 60) {
 				BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 8), s + 1, SectionPos.sectionToBlockCoord(j, 8));

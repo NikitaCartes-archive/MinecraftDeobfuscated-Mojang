@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
@@ -14,9 +13,11 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		BlockPos blockPos = featurePlaceContext.origin();
 		float f = (float)(random.nextInt(3) + 4);
 
 		for (int i = 0; f > 0.5F; i--) {

@@ -368,7 +368,16 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.ICE).add(Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.FROSTED_ICE);
 		this.tag(BlockTags.VALID_SPAWN).add(Blocks.GRASS_BLOCK, Blocks.PODZOL);
 		this.tag(BlockTags.LEAVES)
-			.add(Blocks.JUNGLE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.ACACIA_LEAVES, Blocks.BIRCH_LEAVES);
+			.add(
+				Blocks.JUNGLE_LEAVES,
+				Blocks.OAK_LEAVES,
+				Blocks.SPRUCE_LEAVES,
+				Blocks.DARK_OAK_LEAVES,
+				Blocks.ACACIA_LEAVES,
+				Blocks.BIRCH_LEAVES,
+				Blocks.AZALEA_LEAVES,
+				Blocks.AZALEA_LEAVES_FLOWERS
+			);
 		this.tag(BlockTags.IMPERMEABLE)
 			.add(
 				Blocks.GLASS,
@@ -631,6 +640,29 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.CAULDRONS).add(Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
 		this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add(Blocks.SNOW, Blocks.POWDER_SNOW);
 		this.tag(BlockTags.DRIPSTONE_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.DIRT);
+		this.tag(BlockTags.CAVE_VINES).add(Blocks.CAVE_VINES_BODY).add(Blocks.CAVE_VINES_HEAD);
+		this.tag(BlockTags.LUSH_PLANTS_REPLACEABLE)
+			.addTag(BlockTags.BASE_STONE_OVERWORLD)
+			.addTag(BlockTags.CAVE_VINES)
+			.add(Blocks.DIRT)
+			.add(Blocks.GRAVEL)
+			.add(Blocks.SAND)
+			.add(Blocks.MOSS_BLOCK)
+			.addTag(BlockTags.FLOWERS)
+			.add(Blocks.GRASS)
+			.add(Blocks.TALL_GRASS)
+			.add(Blocks.MOSS_CARPET)
+			.add(Blocks.SMALL_DRIPLEAF)
+			.add(Blocks.BIG_DRIPLEAF)
+			.add(Blocks.BIG_DRIPLEAF_STEM)
+			.add(Blocks.VINE);
+		this.tag(BlockTags.AZALEA_LOG_REPLACEABLE)
+			.addTag(BlockTags.FLOWERS)
+			.addTag(BlockTags.LEAVES)
+			.add(Blocks.GRASS)
+			.add(Blocks.FERN)
+			.add(Blocks.SWEET_BERRY_BUSH)
+			.add(Blocks.SMALL_DRIPLEAF);
 		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
 	}
 

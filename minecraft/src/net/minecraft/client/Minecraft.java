@@ -391,9 +391,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
 		this.fixerUpper = DataFixers.getDataFixer();
 		this.toast = new ToastComponent(this);
-		this.tutorial = new Tutorial(this);
 		this.gameThread = Thread.currentThread();
 		this.options = new Options(this, this.gameDirectory);
+		this.tutorial = new Tutorial(this, this.options);
 		this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);
 		LOGGER.info("Backend library: {}", RenderSystem.getBackendDescription());
 		DisplayData displayData;

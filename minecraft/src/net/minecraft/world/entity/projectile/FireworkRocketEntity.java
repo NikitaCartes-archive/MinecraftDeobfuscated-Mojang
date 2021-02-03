@@ -175,7 +175,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 	private void explode() {
 		this.level.broadcastEntityEvent(this, (byte)17);
-		this.gameEvent(this.getOwner(), GameEvent.EXPLODE);
+		this.gameEvent(GameEvent.EXPLODE, this.getOwner());
 		this.dealExplosionDamage();
 		this.discard();
 	}

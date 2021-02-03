@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public interface CauldronInteraction {
 	Map<Item, CauldronInteraction> EMPTY = newInteractionMap();
@@ -144,6 +145,7 @@ public interface CauldronInteraction {
 					player.awardStat(Stats.USE_CAULDRON);
 					level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
 					level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+					level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 				}
 
 				return InteractionResult.sidedSuccess(level.isClientSide);
@@ -172,6 +174,7 @@ public interface CauldronInteraction {
 				player.awardStat(Stats.USE_CAULDRON);
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 				level.playSound(null, blockPos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
@@ -183,6 +186,7 @@ public interface CauldronInteraction {
 					player.awardStat(Stats.USE_CAULDRON);
 					level.setBlockAndUpdate(blockPos, blockState.cycle(LayeredCauldronBlock.LEVEL));
 					level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+					level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 				}
 
 				return InteractionResult.sidedSuccess(level.isClientSide);
@@ -272,6 +276,7 @@ public interface CauldronInteraction {
 				player.awardStat(Stats.USE_CAULDRON);
 				level.setBlockAndUpdate(blockPos, Blocks.CAULDRON.defaultBlockState());
 				level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
@@ -286,6 +291,7 @@ public interface CauldronInteraction {
 			player.awardStat(Stats.FILL_CAULDRON);
 			level.setBlockAndUpdate(blockPos, blockState);
 			level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 		}
 
 		return InteractionResult.sidedSuccess(level.isClientSide);

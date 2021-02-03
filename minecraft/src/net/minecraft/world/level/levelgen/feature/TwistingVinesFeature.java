@@ -6,11 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class TwistingVinesFeature extends Feature<NoneFeatureConfiguration> {
@@ -18,10 +16,9 @@ public class TwistingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
-	) {
-		return place(worldGenLevel, random, blockPos, 8, 4, 8);
+	@Override
+	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+		return place(featurePlaceContext.level(), featurePlaceContext.random(), featurePlaceContext.origin(), 8, 4, 8);
 	}
 
 	public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, int i, int j, int k) {

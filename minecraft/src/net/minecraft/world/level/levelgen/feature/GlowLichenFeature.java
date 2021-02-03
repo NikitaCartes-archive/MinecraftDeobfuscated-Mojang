@@ -12,7 +12,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 
 public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
@@ -20,9 +19,12 @@ public class GlowLichenFeature extends Feature<GlowLichenConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, GlowLichenConfiguration glowLichenConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<GlowLichenConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		BlockPos blockPos = featurePlaceContext.origin();
+		Random random = featurePlaceContext.random();
+		GlowLichenConfiguration glowLichenConfiguration = featurePlaceContext.config();
 		if (!isAirOrWater(worldGenLevel.getBlockState(blockPos))) {
 			return false;
 		} else {

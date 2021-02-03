@@ -1,17 +1,14 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
@@ -150,7 +147,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		levelWriter.setBlock(blockPos, blockState, 3);
 	}
 
-	public abstract boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, FC featureConfiguration);
+	public abstract boolean place(FeaturePlaceContext<FC> featurePlaceContext);
 
 	protected static boolean isStone(BlockState blockState) {
 		return blockState.is(BlockTags.BASE_STONE_OVERWORLD);

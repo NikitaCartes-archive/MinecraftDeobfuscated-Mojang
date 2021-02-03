@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -38,7 +39,8 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 			int i,
 			int j,
 			Biome biome,
-			OceanRuinConfiguration oceanRuinConfiguration
+			OceanRuinConfiguration oceanRuinConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			int k = SectionPos.sectionToBlockCoord(i);
 			int l = SectionPos.sectionToBlockCoord(j);

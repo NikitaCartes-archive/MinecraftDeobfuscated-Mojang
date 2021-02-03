@@ -28,6 +28,7 @@ public class V704 extends Schema {
 		hashMap.put("minecraft:dropper", "minecraft:dropper");
 		hashMap.put("minecraft:sign", "minecraft:sign");
 		hashMap.put("minecraft:mob_spawner", "minecraft:mob_spawner");
+		hashMap.put("minecraft:spawner", "minecraft:mob_spawner");
 		hashMap.put("minecraft:noteblock", "minecraft:noteblock");
 		hashMap.put("minecraft:brewing_stand", "minecraft:brewing_stand");
 		hashMap.put("minecraft:enhanting_table", "minecraft:enchanting_table");

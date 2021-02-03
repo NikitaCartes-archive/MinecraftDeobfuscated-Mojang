@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BuddingAmethystBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
@@ -28,7 +27,12 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, GeodeConfiguration geodeConfiguration) {
+	@Override
+	public boolean place(FeaturePlaceContext<GeodeConfiguration> featurePlaceContext) {
+		GeodeConfiguration geodeConfiguration = featurePlaceContext.config();
+		Random random = featurePlaceContext.random();
+		BlockPos blockPos = featurePlaceContext.origin();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		int i = geodeConfiguration.minGenOffset;
 		int j = geodeConfiguration.maxGenOffset;
 		if (worldGenLevel.getFluidState(blockPos.offset(0, j / 3, 0)).isSource()) {

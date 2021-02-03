@@ -102,8 +102,8 @@ public class Boat extends Entity {
 	}
 
 	@Override
-	protected boolean isMovementNoisy() {
-		return false;
+	protected Entity.MovementEmission getMovementEmission() {
+		return Entity.MovementEmission.NONE;
 	}
 
 	@Override
@@ -151,11 +151,11 @@ public class Boat extends Entity {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.level.isClientSide && !this.isRemoved()) {
-			this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 			this.setHurtDir(-this.getHurtDir());
 			this.setHurtTime(10);
 			this.setDamage(this.getDamage() + f * 10.0F);
 			this.markHurt();
+			this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
 			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
 			if (bl || this.getDamage() > 40.0F) {
 				if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
@@ -190,7 +190,7 @@ public class Boat extends Entity {
 				.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat(), false);
 		}
 
-		this.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH);
+		this.gameEvent(GameEvent.SPLASH, this.getControllingPassenger());
 	}
 
 	@Override
@@ -677,7 +677,7 @@ public class Boat extends Entity {
 
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-		Vec3 vec3 = getCollisionHorizontalEscapeVector((double)(this.getBbWidth() * Mth.SQRT_OF_TWO), (double)livingEntity.getBbWidth(), this.yRot);
+		Vec3 vec3 = getCollisionHorizontalEscapeVector((double)(this.getBbWidth() * Mth.SQRT_OF_TWO), (double)livingEntity.getBbWidth(), livingEntity.yRot);
 		double d = this.getX() + vec3.x;
 		double e = this.getZ() + vec3.z;
 		BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e);

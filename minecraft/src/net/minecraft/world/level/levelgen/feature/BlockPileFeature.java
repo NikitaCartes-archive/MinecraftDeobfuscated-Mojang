@@ -8,7 +8,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
 public class BlockPileFeature extends Feature<BlockPileConfiguration> {
@@ -16,9 +15,12 @@ public class BlockPileFeature extends Feature<BlockPileConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<BlockPileConfiguration> featurePlaceContext) {
+		BlockPos blockPos = featurePlaceContext.origin();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		BlockPileConfiguration blockPileConfiguration = featurePlaceContext.config();
 		if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 5) {
 			return false;
 		} else {

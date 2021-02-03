@@ -150,6 +150,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.FALLING_HONEY, DripParticle.HoneyFallProvider::new);
 		this.register(ParticleTypes.LANDING_HONEY, DripParticle.HoneyLandProvider::new);
 		this.register(ParticleTypes.FALLING_NECTAR, DripParticle.NectarFallProvider::new);
+		this.register(ParticleTypes.FALLING_SPORE_BLOSSOM, DripParticle.SporeBlossomFallProvider::new);
+		this.register(ParticleTypes.SPORE_BLOSSOM_AIR, SuspendedParticle.SporeBlossomAirProvider::new);
 		this.register(ParticleTypes.ASH, AshParticle.Provider::new);
 		this.register(ParticleTypes.CRIMSON_SPORE, SuspendedParticle.CrimsonSporeProvider::new);
 		this.register(ParticleTypes.WARPED_SPORE, SuspendedParticle.WarpedSporeProvider::new);
@@ -456,9 +458,8 @@ public class ParticleEngine implements PreparableReloadListener {
 								double x = u * l + f;
 								this.add(
 									new TerrainParticle(
-											this.level, (double)blockPos.getX() + v, (double)blockPos.getY() + w, (double)blockPos.getZ() + x, s - 0.5, t - 0.5, u - 0.5, blockState
-										)
-										.init(blockPos)
+										this.level, (double)blockPos.getX() + v, (double)blockPos.getY() + w, (double)blockPos.getZ() + x, s - 0.5, t - 0.5, u - 0.5, blockState, blockPos
+									)
 								);
 							}
 						}
@@ -503,7 +504,7 @@ public class ParticleEngine implements PreparableReloadListener {
 				d = (double)i + aABB.maxX + 0.1F;
 			}
 
-			this.add(new TerrainParticle(this.level, d, e, g, 0.0, 0.0, 0.0, blockState).init(blockPos).setPower(0.2F).scale(0.6F));
+			this.add(new TerrainParticle(this.level, d, e, g, 0.0, 0.0, 0.0, blockState, blockPos).setPower(0.2F).scale(0.6F));
 		}
 	}
 

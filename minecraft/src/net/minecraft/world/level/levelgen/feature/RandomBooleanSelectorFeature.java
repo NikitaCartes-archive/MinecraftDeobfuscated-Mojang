@@ -12,13 +12,13 @@ public class RandomBooleanSelectorFeature extends Feature<RandomBooleanFeatureCo
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<RandomBooleanFeatureConfiguration> featurePlaceContext) {
+		Random random = featurePlaceContext.random();
+		RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration = featurePlaceContext.config();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+		BlockPos blockPos = featurePlaceContext.origin();
 		boolean bl = random.nextBoolean();
 		return bl
 			? ((ConfiguredFeature)randomBooleanFeatureConfiguration.featureTrue.get()).place(worldGenLevel, chunkGenerator, random, blockPos)

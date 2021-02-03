@@ -66,6 +66,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -481,6 +482,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 		if (bl) {
 			this.eating();
+			this.gameEvent(GameEvent.EAT, this.eyeBlockPosition());
 		}
 
 		return bl;

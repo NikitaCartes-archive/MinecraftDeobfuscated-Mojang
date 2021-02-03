@@ -10,7 +10,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 
 public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
@@ -23,10 +22,13 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<DeltaFeatureConfiguration> featurePlaceContext) {
 		boolean bl = false;
+		Random random = featurePlaceContext.random();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		DeltaFeatureConfiguration deltaFeatureConfiguration = featurePlaceContext.config();
+		BlockPos blockPos = featurePlaceContext.origin();
 		boolean bl2 = random.nextDouble() < 0.9;
 		int i = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;
 		int j = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;

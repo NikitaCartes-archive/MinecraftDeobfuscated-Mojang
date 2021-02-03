@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 
 public class BiomeManager {
 	private static final int CHUNK_CENTER_QUART = QuartPos.fromBlock(8);
@@ -52,15 +53,17 @@ public class BiomeManager {
 		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}
 
-	public Biome getPrimaryBiomeAtChunk(int i, int j) {
-		return this.noiseBiomeSource.getPrimaryBiome(i, j);
+	public Biome getPrimaryBiomeAtChunk(ChunkPos chunkPos) {
+		return this.noiseBiomeSource.getPrimaryBiome(chunkPos);
 	}
 
 	public interface NoiseBiomeSource {
 		Biome getNoiseBiome(int i, int j, int k);
 
-		default Biome getPrimaryBiome(int i, int j) {
-			return this.getNoiseBiome(QuartPos.fromSection(i) + BiomeManager.CHUNK_CENTER_QUART, 0, QuartPos.fromSection(j) + BiomeManager.CHUNK_CENTER_QUART);
+		default Biome getPrimaryBiome(ChunkPos chunkPos) {
+			return this.getNoiseBiome(
+				QuartPos.fromSection(chunkPos.x) + BiomeManager.CHUNK_CENTER_QUART, 0, QuartPos.fromSection(chunkPos.z) + BiomeManager.CHUNK_CENTER_QUART
+			);
 		}
 	}
 }

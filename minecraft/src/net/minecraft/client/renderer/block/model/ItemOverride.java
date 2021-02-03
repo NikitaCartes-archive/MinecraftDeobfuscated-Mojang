@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.block.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -7,45 +8,31 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class ItemOverride {
 	private final ResourceLocation model;
-	private final Map<ResourceLocation, Float> predicates;
+	private final List<ItemOverride.Predicate> predicates;
 
-	public ItemOverride(ResourceLocation resourceLocation, Map<ResourceLocation, Float> map) {
+	public ItemOverride(ResourceLocation resourceLocation, List<ItemOverride.Predicate> list) {
 		this.model = resourceLocation;
-		this.predicates = map;
+		this.predicates = ImmutableList.copyOf(list);
 	}
 
 	public ResourceLocation getModel() {
 		return this.model;
 	}
 
-	boolean test(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
-		Item item = itemStack.getItem();
-
-		for (Entry<ResourceLocation, Float> entry : this.predicates.entrySet()) {
-			ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, (ResourceLocation)entry.getKey());
-			if (itemPropertyFunction == null || itemPropertyFunction.call(itemStack, clientLevel, livingEntity, i) < (Float)entry.getValue()) {
-				return false;
-			}
-		}
-
-		return true;
+	public Stream<ItemOverride.Predicate> getPredicates() {
+		return this.predicates.stream();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -56,11 +43,11 @@ public class ItemOverride {
 		public ItemOverride deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "model"));
-			Map<ResourceLocation, Float> map = this.getPredicates(jsonObject);
-			return new ItemOverride(resourceLocation, map);
+			List<ItemOverride.Predicate> list = this.getPredicates(jsonObject);
+			return new ItemOverride(resourceLocation, list);
 		}
 
-		protected Map<ResourceLocation, Float> getPredicates(JsonObject jsonObject) {
+		protected List<ItemOverride.Predicate> getPredicates(JsonObject jsonObject) {
 			Map<ResourceLocation, Float> map = Maps.<ResourceLocation, Float>newLinkedHashMap();
 			JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "predicate");
 
@@ -68,7 +55,29 @@ public class ItemOverride {
 				map.put(new ResourceLocation((String)entry.getKey()), GsonHelper.convertToFloat((JsonElement)entry.getValue(), (String)entry.getKey()));
 			}
 
-			return map;
+			return (List<ItemOverride.Predicate>)map.entrySet()
+				.stream()
+				.map(entryx -> new ItemOverride.Predicate((ResourceLocation)entryx.getKey(), (Float)entryx.getValue()))
+				.collect(ImmutableList.toImmutableList());
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class Predicate {
+		private final ResourceLocation property;
+		private final float value;
+
+		public Predicate(ResourceLocation resourceLocation, float f) {
+			this.property = resourceLocation;
+			this.value = f;
+		}
+
+		public ResourceLocation getProperty() {
+			return this.property;
+		}
+
+		public float getValue() {
+			return this.value;
 		}
 	}
 }

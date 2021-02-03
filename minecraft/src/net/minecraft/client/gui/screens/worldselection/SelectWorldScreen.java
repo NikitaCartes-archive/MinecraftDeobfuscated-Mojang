@@ -10,9 +10,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SelectWorldScreen extends Screen {
+	private static final Logger LOGGER = LogManager.getLogger();
 	protected final Screen lastScreen;
 	private List<FormattedCharSequence> toolTip;
 	private Button deleteButton;

@@ -92,6 +92,8 @@ public class Items {
 	public static final Item JUNGLE_LEAVES = registerBlock(Blocks.JUNGLE_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ACACIA_LEAVES = registerBlock(Blocks.ACACIA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DARK_OAK_LEAVES = registerBlock(Blocks.DARK_OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item AZALEA_LEAVES = registerBlock(Blocks.AZALEA_LEAVES, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item AZALEA_LEAVES_FLOWERS = registerBlock(Blocks.AZALEA_LEAVES_FLOWERS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SPONGE = registerBlock(Blocks.SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WET_SPONGE = registerBlock(Blocks.WET_SPONGE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item GLASS = registerBlock(Blocks.GLASS, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -109,6 +111,8 @@ public class Items {
 	public static final Item COBWEB = registerBlock(Blocks.COBWEB, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GRASS = registerBlock(Blocks.GRASS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item FERN = registerBlock(Blocks.FERN, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item AZALEA = registerBlock(Blocks.AZALEA, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item FLOWERING_AZALEA = registerBlock(Blocks.FLOWERING_AZALEA, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DEAD_BUSH = registerBlock(Blocks.DEAD_BUSH, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SEAGRASS = registerBlock(Blocks.SEAGRASS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SEA_PICKLE = registerBlock(Blocks.SEA_PICKLE, CreativeModeTab.TAB_DECORATIONS);
@@ -140,6 +144,7 @@ public class Items {
 	public static final Item PINK_TULIP = registerBlock(Blocks.PINK_TULIP, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item OXEYE_DAISY = registerBlock(Blocks.OXEYE_DAISY, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item CORNFLOWER = registerBlock(Blocks.CORNFLOWER, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item SPORE_BLOSSOM = registerBlock(Blocks.SPORE_BLOSSOM, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item LILY_OF_THE_VALLEY = registerBlock(Blocks.LILY_OF_THE_VALLEY, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item WITHER_ROSE = registerBlock(Blocks.WITHER_ROSE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BROWN_MUSHROOM = registerBlock(Blocks.BROWN_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
@@ -153,6 +158,12 @@ public class Items {
 	public static final Item TWISTING_VINES = registerBlock(Blocks.TWISTING_VINES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SUGAR_CANE = registerBlock(Blocks.SUGAR_CANE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item KELP = registerBlock(Blocks.KELP, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item MOSS_CARPET = registerBlock(Blocks.MOSS_CARPET, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item MOSS_BLOCK = registerBlock(Blocks.MOSS_BLOCK, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item ROOTED_DIRT = registerBlock(Blocks.ROOTED_DIRT, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item HANGING_ROOTS = registerBlock(Blocks.HANGING_ROOTS, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BIG_DRIPLEAF = registerBlock(Blocks.BIG_DRIPLEAF, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item SMALL_DRIPLEAF = registerBlock(Blocks.SMALL_DRIPLEAF, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BAMBOO = registerBlock(Blocks.BAMBOO, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GOLD_BLOCK = registerBlock(Blocks.GOLD_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item IRON_BLOCK = registerBlock(Blocks.IRON_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -276,6 +287,7 @@ public class Items {
 	public static final Item GLASS_PANE = registerBlock(Blocks.GLASS_PANE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MELON = registerBlock(Blocks.MELON, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item VINE = registerBlock(Blocks.VINE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item GLOW_LICHEN = registerBlock(Blocks.GLOW_LICHEN, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item OAK_FENCE_GATE = registerBlock(Blocks.OAK_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item SPRUCE_FENCE_GATE = registerBlock(Blocks.SPRUCE_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
 	public static final Item BIRCH_FENCE_GATE = registerBlock(Blocks.BIRCH_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
@@ -1495,6 +1507,9 @@ public class Items {
 	public static final Item SWEET_BERRIES = registerItem(
 		"sweet_berries", new ItemNameBlockItem(Blocks.SWEET_BERRY_BUSH, new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.SWEET_BERRIES))
 	);
+	public static final Item GLOW_BERRIES = registerItem(
+		"glow_berries", new ItemNameBlockItem(Blocks.CAVE_VINES_HEAD, new Item.Properties().food(Foods.GLOW_BERRIES).tab(CreativeModeTab.TAB_FOOD))
+	);
 	public static final Item CAMPFIRE = registerBlock(Blocks.CAMPFIRE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SOUL_CAMPFIRE = registerBlock(Blocks.SOUL_CAMPFIRE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SHROOMLIGHT = registerBlock(Blocks.SHROOMLIGHT, CreativeModeTab.TAB_DECORATIONS);
@@ -1554,39 +1569,33 @@ public class Items {
 	public static final Item AMETHYST_CLUSTER = registerBlock(Blocks.AMETHYST_CLUSTER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SPYGLASS = registerItem("spyglass", new SpyglassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).stacksTo(1)));
 	public static final Item COPPER_BLOCK = registerBlock(Blocks.COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item LIGHTLY_WEATHERED_COPPER_BLOCK = registerBlock(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item SEMI_WEATHERED_COPPER_BLOCK = registerBlock(Blocks.SEMI_WEATHERED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item EXPOSED_COPPER_BLOCK = registerBlock(Blocks.EXPOSED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WEATHERED_COPPER_BLOCK = registerBlock(Blocks.WEATHERED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item OXIDIZED_COPPER_BLOCK = registerBlock(Blocks.OXIDIZED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CUT_COPPER = registerBlock(Blocks.CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item LIGHTLY_WEATHERED_CUT_COPPER = registerBlock(Blocks.LIGHTLY_WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item SEMI_WEATHERED_CUT_COPPER = registerBlock(Blocks.SEMI_WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item EXPOSED_CUT_COPPER = registerBlock(Blocks.EXPOSED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WEATHERED_CUT_COPPER = registerBlock(Blocks.WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item OXIDIZED_CUT_COPPER = registerBlock(Blocks.OXIDIZED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CUT_COPPER_STAIRS = registerBlock(Blocks.CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item LIGHTLY_WEATHERED_CUT_COPPER_STAIRS = registerBlock(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item SEMI_WEATHERED_CUT_COPPER_STAIRS = registerBlock(Blocks.SEMI_WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item EXPOSED_CUT_COPPER_STAIRS = registerBlock(Blocks.EXPOSED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WEATHERED_CUT_COPPER_STAIRS = registerBlock(Blocks.WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item OXIDIZED_CUT_COPPER_STAIRS = registerBlock(Blocks.OXIDIZED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CUT_COPPER_SLAB = registerBlock(Blocks.CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item LIGHTLY_WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.LIGHTLY_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item SEMI_WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.SEMI_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item EXPOSED_CUT_COPPER_SLAB = registerBlock(Blocks.EXPOSED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item OXIDIZED_CUT_COPPER_SLAB = registerBlock(Blocks.OXIDIZED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WAXED_COPPER = registerBlock(Blocks.WAXED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_LIGHTLY_WEATHERED_COPPER = registerBlock(Blocks.WAXED_LIGHTLY_WEATHERED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_SEMI_WEATHERED_COPPER = registerBlock(Blocks.WAXED_SEMI_WEATHERED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_EXPOSED_COPPER = registerBlock(Blocks.WAXED_EXPOSED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_WEATHERED_COPPER = registerBlock(Blocks.WAXED_WEATHERED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WAXED_CUT_COPPER = registerBlock(Blocks.WAXED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_LIGHTLY_WEATHERED_CUT_COPPER = registerBlock(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_SEMI_WEATHERED_CUT_COPPER = registerBlock(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_EXPOSED_CUT_COPPER = registerBlock(Blocks.WAXED_EXPOSED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_WEATHERED_CUT_COPPER = registerBlock(Blocks.WAXED_WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WAXED_CUT_COPPER_STAIRS = registerBlock(Blocks.WAXED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS = registerBlock(
-		Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS
-	);
-	public static final Item WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS = registerBlock(
-		Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS
-	);
+	public static final Item WAXED_EXPOSED_CUT_COPPER_STAIRS = registerBlock(Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_WEATHERED_CUT_COPPER_STAIRS = registerBlock(Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WAXED_CUT_COPPER_SLAB = registerBlock(Blocks.WAXED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB = registerBlock(
-		Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS
-	);
-	public static final Item WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_EXPOSED_CUT_COPPER_SLAB = registerBlock(Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item WAXED_WEATHERED_CUT_COPPER_SLAB = registerBlock(Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item LIGHTNING_ROD = registerBlock(Blocks.LIGHTNING_ROD, CreativeModeTab.TAB_REDSTONE);
 	public static final Item POWDER_SNOW_BUCKET = registerItem(
 		"powder_snow_bucket",
@@ -1595,7 +1604,6 @@ public class Items {
 	public static final Item POINTED_DRIPSTONE = registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item DRIPSTONE_BLOCK = registerBlock(Blocks.DRIPSTONE_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item SCULK_SENSOR = registerBlock(Blocks.SCULK_SENSOR, CreativeModeTab.TAB_REDSTONE);
-	public static final Item GLOW_LICHEN = registerBlock(Blocks.GLOW_LICHEN, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GLOW_INK_SAC = registerItem("glow_ink_sac", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 
 	private static Item registerBlock(Block block) {

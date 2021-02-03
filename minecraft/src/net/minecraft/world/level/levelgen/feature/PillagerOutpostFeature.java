@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -35,7 +36,8 @@ public class PillagerOutpostFeature extends JigsawFeature {
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		JigsawConfiguration jigsawConfiguration
+		JigsawConfiguration jigsawConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		int k = SectionPos.blockToSectionCoord(i);
 		int m = SectionPos.blockToSectionCoord(j);

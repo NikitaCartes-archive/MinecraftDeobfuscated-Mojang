@@ -18,9 +18,13 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeFungusConfiguration hugeFungusConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<HugeFungusConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		BlockPos blockPos = featurePlaceContext.origin();
+		Random random = featurePlaceContext.random();
+		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
+		HugeFungusConfiguration hugeFungusConfiguration = featurePlaceContext.config();
 		Block block = hugeFungusConfiguration.validBaseState.getBlock();
 		BlockPos blockPos2 = null;
 		BlockState blockState = worldGenLevel.getBlockState(blockPos.below());

@@ -34,7 +34,7 @@ public class StructureFeatureManager {
 			.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES)
 			.getReferencesForFeature(structureFeature)
 			.stream()
-			.map(long_ -> SectionPos.of(new ChunkPos(long_), 0))
+			.map(long_ -> SectionPos.of(new ChunkPos(long_), this.level.getMinSection()))
 			.map(
 				sectionPosx -> this.getStartForFeature(sectionPosx, structureFeature, this.level.getChunk(sectionPosx.x(), sectionPosx.z(), ChunkStatus.STRUCTURE_STARTS))
 			)

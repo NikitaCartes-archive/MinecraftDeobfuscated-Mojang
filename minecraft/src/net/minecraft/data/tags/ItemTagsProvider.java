@@ -132,6 +132,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 			);
 		this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
 		this.tag(ItemTags.PIGLIN_FOOD).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);
+		this.tag(ItemTags.FOX_FOOD).add(Items.SWEET_BERRIES, Items.GLOW_BERRIES);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
 			.add(
 				Items.WARPED_STEM,

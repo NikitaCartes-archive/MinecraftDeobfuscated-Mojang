@@ -39,6 +39,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
@@ -244,6 +245,8 @@ public class Ravager extends Raider {
 				double f = this.random.nextGaussian() * 0.2;
 				this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
 			}
+
+			this.level.gameEvent(this, GameEvent.RAVAGER_ROAR, this.eyeBlockPosition());
 		}
 	}
 

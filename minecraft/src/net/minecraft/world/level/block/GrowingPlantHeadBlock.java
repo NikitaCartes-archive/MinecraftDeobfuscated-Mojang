@@ -40,9 +40,17 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 		if ((Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability) {
 			BlockPos blockPos2 = blockPos.relative(this.growthDirection);
 			if (this.canGrowInto(serverLevel.getBlockState(blockPos2))) {
-				serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
+				serverLevel.setBlockAndUpdate(blockPos2, this.getGrowIntoState(blockState, serverLevel.random));
 			}
 		}
+	}
+
+	protected BlockState getGrowIntoState(BlockState blockState, Random random) {
+		return blockState.cycle(AGE);
+	}
+
+	protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
+		return blockState2;
 	}
 
 	@Override
@@ -60,7 +68,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		} else {
-			return this.getBodyBlock().defaultBlockState();
+			return this.updateBodyAfterConvertedFromHead(blockState, this.getBodyBlock().defaultBlockState());
 		}
 	}
 

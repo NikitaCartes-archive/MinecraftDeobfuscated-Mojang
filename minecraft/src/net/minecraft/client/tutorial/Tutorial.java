@@ -7,12 +7,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.KeybindComponent;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,10 +25,12 @@ public class Tutorial {
 	private final Minecraft minecraft;
 	@Nullable
 	private TutorialStepInstance instance;
-	private List<Tutorial.TimedToast> timedToasts = Lists.<Tutorial.TimedToast>newArrayList();
+	private final List<Tutorial.TimedToast> timedToasts = Lists.<Tutorial.TimedToast>newArrayList();
+	private final BundleTutorial bundleTutorial;
 
-	public Tutorial(Minecraft minecraft) {
+	public Tutorial(Minecraft minecraft, Options options) {
 		this.minecraft = minecraft;
+		this.bundleTutorial = new BundleTutorial(this, options);
 	}
 
 	public void onInput(Input input) {
@@ -122,6 +126,10 @@ public class Tutorial {
 
 	public static Component key(String string) {
 		return new KeybindComponent("key." + string).withStyle(ChatFormatting.BOLD);
+	}
+
+	public void onInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
+		this.bundleTutorial.onInventoryAction(itemStack, itemStack2, clickAction);
 	}
 
 	@Environment(EnvType.CLIENT)

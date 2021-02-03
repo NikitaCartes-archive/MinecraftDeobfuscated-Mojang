@@ -22,7 +22,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
@@ -42,7 +41,12 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		return SPIKE_CACHE.getUnchecked(l);
 	}
 
-	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
+	@Override
+	public boolean place(FeaturePlaceContext<SpikeConfiguration> featurePlaceContext) {
+		SpikeConfiguration spikeConfiguration = featurePlaceContext.config();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		BlockPos blockPos = featurePlaceContext.origin();
 		List<SpikeFeature.EndSpike> list = spikeConfiguration.getSpikes();
 		if (list.isEmpty()) {
 			list = getSpikesForLevel(worldGenLevel);

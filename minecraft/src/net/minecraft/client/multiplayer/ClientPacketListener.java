@@ -217,8 +217,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Guardian;
@@ -552,6 +550,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerPositionPacket, this, this.minecraft);
 		Player player = this.minecraft.player;
+		if (clientboundPlayerPositionPacket.requestDismountVehicle()) {
+			player.removeVehicle();
+		}
+
 		Vec3 vec3 = player.getDeltaMovement();
 		boolean bl = clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.X);
 		boolean bl2 = clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Y);
@@ -590,10 +592,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			h = 0.0;
 			i = clientboundPlayerPositionPacket.getZ();
 			player.zOld = i;
-		}
-
-		if (player.tickCount > 0 && player.getVehicle() != null) {
-			player.removeVehicle();
 		}
 
 		player.setPosRaw(e, g, i);
@@ -792,32 +790,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleAddMob(ClientboundAddMobPacket clientboundAddMobPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAddMobPacket, this, this.minecraft);
-		double d = clientboundAddMobPacket.getX();
-		double e = clientboundAddMobPacket.getY();
-		double f = clientboundAddMobPacket.getZ();
-		float g = (float)(clientboundAddMobPacket.getyRot() * 360) / 256.0F;
-		float h = (float)(clientboundAddMobPacket.getxRot() * 360) / 256.0F;
-		LivingEntity livingEntity = (LivingEntity)EntityType.create(clientboundAddMobPacket.getType(), this.minecraft.level);
+		LivingEntity livingEntity = (LivingEntity)EntityType.create(clientboundAddMobPacket.getType(), this.level);
 		if (livingEntity != null) {
-			livingEntity.setPacketCoordinates(d, e, f);
-			livingEntity.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
-			livingEntity.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
-			if (livingEntity instanceof EnderDragon) {
-				EnderDragonPart[] enderDragonParts = ((EnderDragon)livingEntity).getSubEntities();
-
-				for (int i = 0; i < enderDragonParts.length; i++) {
-					enderDragonParts[i].setId(i + clientboundAddMobPacket.getId());
-				}
-			}
-
-			livingEntity.setId(clientboundAddMobPacket.getId());
-			livingEntity.setUUID(clientboundAddMobPacket.getUUID());
-			livingEntity.absMoveTo(d, e, f, g, h);
-			livingEntity.setDeltaMovement(
-				(double)((float)clientboundAddMobPacket.getXd() / 8000.0F),
-				(double)((float)clientboundAddMobPacket.getYd() / 8000.0F),
-				(double)((float)clientboundAddMobPacket.getZd() / 8000.0F)
-			);
+			livingEntity.recreateFromPacket(clientboundAddMobPacket);
 			this.level.putNonPlayerEntity(clientboundAddMobPacket.getId(), livingEntity);
 			if (livingEntity instanceof Bee) {
 				boolean bl = ((Bee)livingEntity).isAngry();

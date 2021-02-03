@@ -10,7 +10,7 @@ public enum OceanLayer implements AreaTransformer0 {
 	@Override
 	public int applyPixel(Context context, int i, int j) {
 		ImprovedNoise improvedNoise = context.getBiomeNoise();
-		double d = improvedNoise.noise((double)i / 8.0, (double)j / 8.0, 0.0, 0.0, 0.0);
+		double d = improvedNoise.noise((double)i / 8.0, (double)j / 8.0, 0.0);
 		if (d > 0.4) {
 			return 44;
 		} else if (d > 0.2) {

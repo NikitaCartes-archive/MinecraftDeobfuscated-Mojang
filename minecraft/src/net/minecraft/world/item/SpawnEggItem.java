@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -90,6 +91,7 @@ public class SpawnEggItem extends Item {
 				)
 				!= null) {
 				itemStack.shrink(1);
+				level.gameEvent(useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 			}
 
 			return InteractionResult.CONSUME;
@@ -119,6 +121,7 @@ public class SpawnEggItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
+					level.gameEvent(GameEvent.ENTITY_PLACE, player);
 					return InteractionResultHolder.consume(itemStack);
 				}
 			} else {

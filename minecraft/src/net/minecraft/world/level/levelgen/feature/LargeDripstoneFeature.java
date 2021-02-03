@@ -12,7 +12,6 @@ import net.minecraft.util.UniformFloat;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Column;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.phys.Vec3;
@@ -22,9 +21,12 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, LargeDripstoneConfiguration largeDripstoneConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<LargeDripstoneConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		BlockPos blockPos = featurePlaceContext.origin();
+		LargeDripstoneConfiguration largeDripstoneConfiguration = featurePlaceContext.config();
+		Random random = featurePlaceContext.random();
 		if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
 			return false;
 		} else {

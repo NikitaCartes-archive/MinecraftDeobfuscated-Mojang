@@ -8,7 +8,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(EnvType.CLIENT)
 public class AshParticle extends BaseAshSmokeParticle {
 	protected AshParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
-		super(clientLevel, d, e, f, 0.1F, -0.1F, 0.1F, g, h, i, j, spriteSet, 0.5F, 20, -0.004, false);
+		super(clientLevel, d, e, f, 0.1F, -0.1F, 0.1F, g, h, i, j, spriteSet, 0.5F, 20, 0.1F, false);
 	}
 
 	@Environment(EnvType.CLIENT)

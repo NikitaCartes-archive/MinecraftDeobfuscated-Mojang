@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.math.DoubleMath;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -145,6 +146,23 @@ public abstract class VoxelShape {
 					? new BlockHitResult(vec34, Direction.getNearest(vec33.x, vec33.y, vec33.z).getOpposite(), blockPos, true)
 					: AABB.clip(this.toAabbs(), vec3, vec32, blockPos);
 			}
+		}
+	}
+
+	public Optional<Vec3> closestPointTo(Vec3 vec3) {
+		if (this.isEmpty()) {
+			return Optional.empty();
+		} else {
+			Vec3[] vec3s = new Vec3[1];
+			this.forAllBoxes((d, e, f, g, h, i) -> {
+				double j = Mth.clamp(vec3.x(), d, g);
+				double k = Mth.clamp(vec3.y(), e, h);
+				double l = Mth.clamp(vec3.z(), f, i);
+				if (vec3s[0] == null || vec3.distanceToSqr(j, k, l) < vec3.distanceToSqr(vec3s[0])) {
+					vec3s[0] = new Vec3(j, k, l);
+				}
+			});
+			return Optional.of(vec3s[0]);
 		}
 	}
 

@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -37,14 +38,15 @@ public class NetherFossilFeature extends StructureFeature<NoneFeatureConfigurati
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			ChunkPos chunkPos = new ChunkPos(i, j);
 			int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
 			int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
 			int m = chunkGenerator.getSeaLevel();
 			int n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m);
-			NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l);
+			NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l, levelHeightAccessor);
 
 			for (BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l); n > m; n--) {
 				BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);

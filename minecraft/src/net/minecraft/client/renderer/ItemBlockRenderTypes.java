@@ -35,6 +35,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.ACACIA_LEAVES, renderType2);
 		hashMap.put(Blocks.BIRCH_LEAVES, renderType2);
 		hashMap.put(Blocks.DARK_OAK_LEAVES, renderType2);
+		hashMap.put(Blocks.AZALEA_LEAVES, renderType2);
+		hashMap.put(Blocks.AZALEA_LEAVES_FLOWERS, renderType2);
 		RenderType renderType3 = RenderType.cutout();
 		hashMap.put(Blocks.OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.SPRUCE_SAPLING, renderType3);
@@ -230,6 +232,16 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.LARGE_AMETHYST_BUD, renderType3);
 		hashMap.put(Blocks.AMETHYST_CLUSTER, renderType3);
 		hashMap.put(Blocks.LIGHTNING_ROD, renderType3);
+		hashMap.put(Blocks.CAVE_VINES_HEAD, renderType3);
+		hashMap.put(Blocks.CAVE_VINES_BODY, renderType3);
+		hashMap.put(Blocks.SPORE_BLOSSOM, renderType3);
+		hashMap.put(Blocks.FLOWERING_AZALEA, renderType3);
+		hashMap.put(Blocks.AZALEA, renderType3);
+		hashMap.put(Blocks.MOSS_CARPET, renderType3);
+		hashMap.put(Blocks.BIG_DRIPLEAF, renderType3);
+		hashMap.put(Blocks.BIG_DRIPLEAF_STEM, renderType3);
+		hashMap.put(Blocks.SMALL_DRIPLEAF, renderType3);
+		hashMap.put(Blocks.HANGING_ROOTS, renderType3);
 		hashMap.put(Blocks.SCULK_SENSOR, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);

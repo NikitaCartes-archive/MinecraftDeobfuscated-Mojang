@@ -61,6 +61,7 @@ import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -185,7 +186,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public void tick() {
-		if (this.level.hasChunkAt(new BlockPos(this.getX(), 0.0, this.getZ()))) {
+		if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
 			super.tick();
 			if (this.isPassenger()) {
 				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
@@ -446,7 +447,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		AABB aABB = this.getBoundingBox();
 		AABB aABB2 = new AABB((double)blockPos.getX(), aABB.minY, (double)blockPos.getZ(), (double)blockPos.getX() + 1.0, aABB.maxY, (double)blockPos.getZ() + 1.0)
 			.deflate(1.0E-7);
-		return !this.level.noBlockCollision(this, aABB2, (blockState, blockPosx) -> blockState.isSuffocating(this.level, blockPosx));
+		return this.level.hasBlockCollision(this, aABB2, (blockState, blockPosx) -> blockState.isSuffocating(this.level, blockPosx));
 	}
 
 	@Override
@@ -623,6 +624,24 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	protected boolean isControlledCamera() {
 		return this.minecraft.getCameraEntity() == this;
+	}
+
+	public void resetPos() {
+		this.setPose(Pose.STANDING);
+		if (this.level != null) {
+			for (double d = this.getY(); d > (double)this.level.getMinBuildHeight() && d < (double)this.level.getMaxBuildHeight(); d++) {
+				this.setPos(this.getX(), d, this.getZ());
+				if (this.level.noCollision(this)) {
+					break;
+				}
+			}
+
+			this.setDeltaMovement(Vec3.ZERO);
+			this.xRot = 0.0F;
+		}
+
+		this.setHealth(this.getMaxHealth());
+		this.deathTime = 0;
 	}
 
 	@Override
@@ -1039,5 +1058,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		} else {
 			return super.getRopeHoldPosition(f);
 		}
+	}
+
+	@Override
+	public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
+		this.minecraft.getTutorial().onInventoryAction(itemStack, itemStack2, clickAction);
 	}
 }

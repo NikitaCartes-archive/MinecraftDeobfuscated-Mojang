@@ -679,7 +679,7 @@ public class Turtle extends Animal {
 					int i = Mth.floor(vec32.x);
 					int j = Mth.floor(vec32.z);
 					int k = 34;
-					if (!this.turtle.level.hasChunksAt(i - 34, 0, j - 34, i + 34, 0, j + 34)) {
+					if (!this.turtle.level.hasChunksAt(i - 34, j - 34, i + 34, j + 34)) {
 						vec32 = null;
 					}
 				}

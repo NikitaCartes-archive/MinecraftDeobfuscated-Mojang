@@ -344,17 +344,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 						bl -> {
 							if (bl) {
 								this.minecraft.setScreen(new ProgressScreen());
-								LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
-								String string = this.summary.getLevelId();
-
-								try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string)) {
-									levelStorageAccess.deleteLevel();
-								} catch (IOException var17) {
-									SystemToast.onWorldDeleteFailure(this.minecraft, string);
-									WorldSelectionList.LOGGER.error("Failed to delete world {}", string, var17);
-								}
-
-								WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
+								this.doDeleteWorld();
 							}
 
 							this.minecraft.setScreen(this.screen);
@@ -365,6 +355,20 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 						CommonComponents.GUI_CANCEL
 					)
 				);
+		}
+
+		public void doDeleteWorld() {
+			LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
+			String string = this.summary.getLevelId();
+
+			try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string)) {
+				levelStorageAccess.deleteLevel();
+			} catch (IOException var16) {
+				SystemToast.onWorldDeleteFailure(this.minecraft, string);
+				WorldSelectionList.LOGGER.error("Failed to delete world {}", string, var16);
+			}
+
+			WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
 		}
 
 		public void editWorld() {

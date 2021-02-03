@@ -136,7 +136,7 @@ public class JigsawBlockEntity extends BlockEntity {
 			structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos)
 		);
 		JigsawPlacement.addPieces(
-			serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random
+			serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random, serverLevel
 		);
 
 		for (PoolElementStructurePiece poolElementStructurePiece2 : list) {

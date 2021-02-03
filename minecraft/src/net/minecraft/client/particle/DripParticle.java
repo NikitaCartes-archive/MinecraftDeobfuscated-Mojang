@@ -1,5 +1,6 @@
 package net.minecraft.client.particle;
 
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -225,8 +226,12 @@ public class DripParticle extends TextureSheetParticle {
 	@Environment(EnvType.CLIENT)
 	static class FallingParticle extends DripParticle {
 		private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+			this(clientLevel, d, e, f, fluid, (int)(64.0 / (Math.random() * 0.8 + 0.2)));
+		}
+
+		private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, int i) {
 			super(clientLevel, d, e, f, fluid);
-			this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
+			this.lifetime = i;
 		}
 
 		@Override
@@ -423,6 +428,26 @@ public class DripParticle extends TextureSheetParticle {
 			dripParticle.isGlowing = true;
 			dripParticle.lifetime = (int)(28.0 / (Math.random() * 0.8 + 0.2));
 			dripParticle.setColor(0.51171875F, 0.03125F, 0.890625F);
+			dripParticle.pickSprite(this.sprite);
+			return dripParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class SporeBlossomFallProvider implements ParticleProvider<SimpleParticleType> {
+		protected final SpriteSet sprite;
+		private final Random random;
+
+		public SporeBlossomFallProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+			this.random = new Random();
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			int j = (int)(64.0F / Mth.randomBetween(this.random, 0.1F, 0.9F));
+			DripParticle dripParticle = new DripParticle.FallingParticle(clientLevel, d, e, f, Fluids.EMPTY, j);
+			dripParticle.gravity = 0.005F;
+			dripParticle.setColor(0.32F, 0.5F, 0.22F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;
 		}

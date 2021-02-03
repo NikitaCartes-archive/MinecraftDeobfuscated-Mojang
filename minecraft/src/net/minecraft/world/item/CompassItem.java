@@ -50,11 +50,11 @@ public class CompassItem extends Item implements Vanishable {
 				}
 
 				Optional<ResourceKey<Level>> optional = getLodestoneDimension(compoundTag);
-				if (optional.isPresent()
-					&& optional.get() == level.dimension()
-					&& compoundTag.contains("LodestonePos")
-					&& !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos")))) {
-					compoundTag.remove("LodestonePos");
+				if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos")) {
+					BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
+					if (!level.isInWorldBounds(blockPos) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, blockPos)) {
+						compoundTag.remove("LodestonePos");
+					}
 				}
 			}
 		}

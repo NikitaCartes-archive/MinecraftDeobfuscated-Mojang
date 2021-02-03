@@ -8,7 +8,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFeatureConfiguration> {
@@ -74,13 +73,12 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 		}
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<HugeMushroomFeatureConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		BlockPos blockPos = featurePlaceContext.origin();
+		Random random = featurePlaceContext.random();
+		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration = featurePlaceContext.config();
 		int i = this.getTreeHeight(random);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		if (!this.isValidPosition(worldGenLevel, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration)) {

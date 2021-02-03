@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class FireChargeItem extends Item {
 	public FireChargeItem(Item.Properties properties) {
@@ -30,11 +31,13 @@ public class FireChargeItem extends Item {
 			if (BaseFireBlock.canBePlacedAt(level, blockPos, useOnContext.getHorizontalDirection())) {
 				this.playSound(level, blockPos);
 				level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
+				level.gameEvent(useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos);
 				bl = true;
 			}
 		} else {
 			this.playSound(level, blockPos);
 			level.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
+			level.gameEvent(useOnContext.getPlayer(), GameEvent.BLOCK_PLACE, blockPos);
 			bl = true;
 		}
 

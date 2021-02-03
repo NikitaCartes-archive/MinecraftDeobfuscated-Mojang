@@ -122,6 +122,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.GLASS_BOTTLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLISTERING_MELON_SLICE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOBE_BANNER_PATTER, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GLOW_BERRIES, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOWSTONE_DUST, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOW_INK_SAC, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOW_ITEM_FRAME, ModelTemplates.FLAT_ITEM);

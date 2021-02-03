@@ -582,22 +582,16 @@ public class Raid {
 			int n = this.center.getZ() + Mth.floor(Mth.sin(f) * 32.0F * (float)k) + this.level.random.nextInt(5);
 			int o = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, m, n);
 			mutableBlockPos.set(m, o, n);
-			if ((!this.level.isVillage(mutableBlockPos) || i >= 2)
-				&& this.level
-					.hasChunksAt(
-						mutableBlockPos.getX() - 10,
-						mutableBlockPos.getY() - 10,
-						mutableBlockPos.getZ() - 10,
-						mutableBlockPos.getX() + 10,
-						mutableBlockPos.getY() + 10,
-						mutableBlockPos.getZ() + 10
-					)
-				&& this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(mutableBlockPos))
-				&& (
-					NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER)
-						|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
-				)) {
-				return mutableBlockPos;
+			if (!this.level.isVillage(mutableBlockPos) || i >= 2) {
+				int p = 10;
+				if (this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)
+					&& this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(mutableBlockPos))
+					&& (
+						NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER)
+							|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
+					)) {
+					return mutableBlockPos;
+				}
 			}
 		}
 

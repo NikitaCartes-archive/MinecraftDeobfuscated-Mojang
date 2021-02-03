@@ -131,6 +131,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -357,7 +358,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		worldBorder.applySettings(serverLevelData.getWorldBorder());
 		if (!serverLevelData.isInitialized()) {
 			try {
-				setInitialSpawn(serverLevel, serverLevelData, worldGenSettings.generateBonusChest(), bl, true);
+				setInitialSpawn(serverLevel, serverLevelData, worldGenSettings.generateBonusChest(), bl);
 				serverLevelData.setInitialized(true);
 				if (bl) {
 					this.setupDebugLevel(this.worldData);
@@ -408,13 +409,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	private static void setInitialSpawn(ServerLevel serverLevel, ServerLevelData serverLevelData, boolean bl, boolean bl2, boolean bl3) {
-		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
-		if (!bl3) {
-			serverLevelData.setSpawn(BlockPos.ZERO.above(chunkGenerator.getSpawnHeight()), 0.0F);
-		} else if (bl2) {
-			serverLevelData.setSpawn(BlockPos.ZERO.above(), 0.0F);
+	private static void setInitialSpawn(ServerLevel serverLevel, ServerLevelData serverLevelData, boolean bl, boolean bl2) {
+		if (bl2) {
+			serverLevelData.setSpawn(BlockPos.ZERO.above(80), 0.0F);
 		} else {
+			ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 			BiomeSource biomeSource = chunkGenerator.getBiomeSource();
 			Random random = new Random(serverLevel.getSeed());
 			BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random);
@@ -423,39 +422,45 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				LOGGER.warn("Unable to find spawn biome");
 			}
 
-			boolean bl4 = false;
+			boolean bl3 = false;
 
 			for (Block block : BlockTags.VALID_SPAWN.getValues()) {
 				if (biomeSource.getSurfaceBlocks().contains(block.defaultBlockState())) {
-					bl4 = true;
+					bl3 = true;
 					break;
 				}
 			}
 
-			serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, chunkGenerator.getSpawnHeight(), 8), 0.0F);
-			int i = 0;
+			int i = chunkGenerator.getSpawnHeight();
+			if (i < serverLevel.getMinBuildHeight()) {
+				BlockPos blockPos2 = chunkPos.getWorldPosition();
+				i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
+			}
+
+			serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, i, 8), 0.0F);
 			int j = 0;
 			int k = 0;
-			int l = -1;
-			int m = 32;
+			int l = 0;
+			int m = -1;
+			int n = 32;
 
-			for (int n = 0; n < 1024; n++) {
-				if (i > -16 && i <= 16 && j > -16 && j <= 16) {
-					BlockPos blockPos2 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl4);
-					if (blockPos2 != null) {
-						serverLevelData.setSpawn(blockPos2, 0.0F);
+			for (int o = 0; o < 1024; o++) {
+				if (j > -16 && j <= 16 && k > -16 && k <= 16) {
+					BlockPos blockPos3 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k), bl3);
+					if (blockPos3 != null) {
+						serverLevelData.setSpawn(blockPos3, 0.0F);
 						break;
 					}
 				}
 
-				if (i == j || i < 0 && i == -j || i > 0 && i == 1 - j) {
-					int o = k;
-					k = -l;
-					l = o;
+				if (j == k || j < 0 && j == -k || j > 0 && j == 1 - k) {
+					int p = l;
+					l = -m;
+					m = p;
 				}
 
-				i += k;
 				j += l;
+				k += m;
 			}
 
 			if (bl) {

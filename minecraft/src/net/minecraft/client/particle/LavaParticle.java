@@ -10,6 +10,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 public class LavaParticle extends TextureSheetParticle {
 	private LavaParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
+		this.gravity = 0.75F;
+		this.friction = 0.999F;
 		this.xd *= 0.8F;
 		this.yd *= 0.8F;
 		this.zd *= 0.8F;
@@ -39,25 +41,11 @@ public class LavaParticle extends TextureSheetParticle {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		float f = (float)this.age / (float)this.lifetime;
-		if (this.random.nextFloat() > f) {
-			this.level.addParticle(ParticleTypes.SMOKE, this.x, this.y, this.z, this.xd, this.yd, this.zd);
-		}
-
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		} else {
-			this.yd -= 0.03;
-			this.move(this.xd, this.yd, this.zd);
-			this.xd *= 0.999F;
-			this.yd *= 0.999F;
-			this.zd *= 0.999F;
-			if (this.onGround) {
-				this.xd *= 0.7F;
-				this.zd *= 0.7F;
+		super.tick();
+		if (!this.removed) {
+			float f = (float)this.age / (float)this.lifetime;
+			if (this.random.nextFloat() > f) {
+				this.level.addParticle(ParticleTypes.SMOKE, this.x, this.y, this.z, this.xd, this.yd, this.zd);
 			}
 		}
 	}

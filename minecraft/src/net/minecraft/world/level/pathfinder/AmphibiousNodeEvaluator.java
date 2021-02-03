@@ -249,9 +249,10 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 
 			return BlockPathTypes.WATER;
 		} else {
-			if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
-				BlockState blockState = blockGetter.getBlockState(new BlockPos(i, j - 1, k));
-				BlockPathTypes blockPathTypes3 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
+			if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
+				mutableBlockPos.set(i, j, k).move(Direction.DOWN);
+				BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+				BlockPathTypes blockPathTypes3 = getBlockPathTypeRaw(blockGetter, mutableBlockPos);
 				if (blockPathTypes3 != BlockPathTypes.WALKABLE && blockPathTypes3 != BlockPathTypes.OPEN && blockPathTypes3 != BlockPathTypes.LAVA) {
 					blockPathTypes = BlockPathTypes.WALKABLE;
 				} else {

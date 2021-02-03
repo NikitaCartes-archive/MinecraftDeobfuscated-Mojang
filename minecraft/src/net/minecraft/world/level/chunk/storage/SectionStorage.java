@@ -71,15 +71,14 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	protected Optional<R> getOrLoad(long l) {
-		SectionPos sectionPos = SectionPos.of(l);
-		if (this.outsideStoredRange(sectionPos)) {
+		if (this.outsideStoredRange(l)) {
 			return Optional.empty();
 		} else {
 			Optional<R> optional = this.get(l);
 			if (optional != null) {
 				return optional;
 			} else {
-				this.readColumn(sectionPos.chunk());
+				this.readColumn(SectionPos.of(l).chunk());
 				optional = this.get(l);
 				if (optional == null) {
 					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
@@ -90,19 +89,23 @@ public class SectionStorage<R> implements AutoCloseable {
 		}
 	}
 
-	protected boolean outsideStoredRange(SectionPos sectionPos) {
-		int i = SectionPos.sectionToBlockCoord(sectionPos.y());
+	protected boolean outsideStoredRange(long l) {
+		int i = SectionPos.sectionToBlockCoord(SectionPos.y(l));
 		return this.levelHeightAccessor.isOutsideBuildHeight(i);
 	}
 
 	protected R getOrCreate(long l) {
-		Optional<R> optional = this.getOrLoad(l);
-		if (optional.isPresent()) {
-			return (R)optional.get();
+		if (this.outsideStoredRange(l)) {
+			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("sectionPos out of bounds"));
 		} else {
-			R object = (R)this.factory.apply((Runnable)() -> this.setDirty(l));
-			this.storage.put(l, Optional.of(object));
-			return object;
+			Optional<R> optional = this.getOrLoad(l);
+			if (optional.isPresent()) {
+				return (R)optional.get();
+			} else {
+				R object = (R)this.factory.apply((Runnable)() -> this.setDirty(l));
+				this.storage.put(l, Optional.of(object));
+				return object;
+			}
 		}
 	}
 
@@ -123,7 +126,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	private <T> void readColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, @Nullable T object) {
 		if (object == null) {
 			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
-				this.storage.put(SectionPos.of(chunkPos, i).asLong(), Optional.empty());
+				this.storage.put(getKey(chunkPos, i), Optional.empty());
 			}
 		} else {
 			Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
@@ -134,7 +137,7 @@ public class SectionStorage<R> implements AutoCloseable {
 			OptionalDynamic<T> optionalDynamic = dynamic2.get("Sections");
 
 			for (int l = this.levelHeightAccessor.getMinSection(); l < this.levelHeightAccessor.getMaxSection(); l++) {
-				long m = SectionPos.of(chunkPos, l).asLong();
+				long m = getKey(chunkPos, l);
 				Optional<R> optional = optionalDynamic.get(Integer.toString(l))
 					.result()
 					.flatMap(dynamicx -> ((Codec)this.codec.apply((Runnable)() -> this.setDirty(m))).parse(dynamicx).resultOrPartial(LOGGER::error));
@@ -163,7 +166,7 @@ public class SectionStorage<R> implements AutoCloseable {
 		Map<T, T> map = Maps.<T, T>newHashMap();
 
 		for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
-			long l = SectionPos.of(chunkPos, i).asLong();
+			long l = getKey(chunkPos, i);
 			this.dirty.remove(l);
 			Optional<R> optional = this.storage.get(l);
 			if (optional != null && optional.isPresent()) {
@@ -186,6 +189,10 @@ public class SectionStorage<R> implements AutoCloseable {
 		);
 	}
 
+	private static long getKey(ChunkPos chunkPos, int i) {
+		return SectionPos.asLong(chunkPos.x, i, chunkPos.z);
+	}
+
 	protected void onSectionLoad(long l) {
 	}
 
@@ -205,7 +212,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	public void flush(ChunkPos chunkPos) {
 		if (!this.dirty.isEmpty()) {
 			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
-				long l = SectionPos.of(chunkPos, i).asLong();
+				long l = getKey(chunkPos, i);
 				if (this.dirty.contains(l)) {
 					this.writeColumn(chunkPos);
 					return;

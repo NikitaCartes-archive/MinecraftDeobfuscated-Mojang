@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -29,7 +30,8 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		ProbabilityFeatureConfiguration probabilityFeatureConfiguration
+		ProbabilityFeatureConfiguration probabilityFeatureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		worldgenRandom.setLargeFeatureWithSalt(l, i, j, 10387320);
 		return worldgenRandom.nextFloat() < probabilityFeatureConfiguration.probability;
@@ -52,7 +54,8 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 			int i,
 			int j,
 			Biome biome,
-			ProbabilityFeatureConfiguration probabilityFeatureConfiguration
+			ProbabilityFeatureConfiguration probabilityFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 9), 90, SectionPos.sectionToBlockCoord(j, 9));
 			this.pieces.add(new BuriedTreasurePieces.BuriedTreasurePiece(blockPos));

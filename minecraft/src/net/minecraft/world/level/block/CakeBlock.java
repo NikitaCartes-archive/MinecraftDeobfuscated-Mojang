@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -63,6 +64,7 @@ public class CakeBlock extends Block {
 
 				level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
 				level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
+				level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 				return InteractionResult.SUCCESS;
 			}
 		}
@@ -87,10 +89,12 @@ public class CakeBlock extends Block {
 			player.awardStat(Stats.EAT_CAKE_SLICE);
 			player.getFoodData().eat(2, 0.1F);
 			int i = (Integer)blockState.getValue(BITES);
+			levelAccessor.gameEvent(player, GameEvent.EAT, blockPos);
 			if (i < 6) {
 				levelAccessor.setBlock(blockPos, blockState.setValue(BITES, Integer.valueOf(i + 1)), 3);
 			} else {
 				levelAccessor.removeBlock(blockPos, false);
+				levelAccessor.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
 			}
 
 			return InteractionResult.SUCCESS;

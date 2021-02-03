@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class Bat extends AmbientCreature {
+	public static final int TICKS_PER_FLAP = Mth.ceil(2.4166098F);
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Bat.class, EntityDataSerializers.BYTE);
 	private static final TargetingConditions BAT_RESTING_TARGETING = new TargetingConditions().range(4.0).allowSameTeam();
 	private BlockPos targetPosition;
@@ -35,6 +36,11 @@ public class Bat extends AmbientCreature {
 	public Bat(EntityType<? extends Bat> entityType, Level level) {
 		super(entityType, level);
 		this.setResting(true);
+	}
+
+	@Override
+	public boolean isFlapping() {
+		return !this.isResting() && this.tickCount % TICKS_PER_FLAP == 0;
 	}
 
 	@Override
@@ -164,8 +170,8 @@ public class Bat extends AmbientCreature {
 	}
 
 	@Override
-	protected boolean isMovementNoisy() {
-		return false;
+	protected Entity.MovementEmission getMovementEmission() {
+		return Entity.MovementEmission.EVENTS;
 	}
 
 	@Override

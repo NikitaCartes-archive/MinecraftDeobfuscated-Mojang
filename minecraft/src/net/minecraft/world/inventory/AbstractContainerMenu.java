@@ -275,6 +275,7 @@ public abstract class AbstractContainerMenu {
 					itemStack = itemStack2.copy();
 				}
 
+				player.updateTutorialInventoryAction(itemStack6, slot.getItem(), clickAction);
 				if (!itemStack6.overrideStackedOnOther(slot, clickAction, inventory) && !itemStack2.overrideOtherStackedOnMe(itemStack6, slot, clickAction, inventory)) {
 					if (itemStack2.isEmpty()) {
 						if (!itemStack6.isEmpty()) {

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 public class PerlinNoise implements SurfaceNoise {
@@ -19,16 +20,16 @@ public class PerlinNoise implements SurfaceNoise {
 	private final double lowestFreqValueFactor;
 	private final double lowestFreqInputFactor;
 
-	public PerlinNoise(WorldgenRandom worldgenRandom, IntStream intStream) {
-		this(worldgenRandom, (List<Integer>)intStream.boxed().collect(ImmutableList.toImmutableList()));
+	public PerlinNoise(RandomSource randomSource, IntStream intStream) {
+		this(randomSource, (List<Integer>)intStream.boxed().collect(ImmutableList.toImmutableList()));
 	}
 
-	public PerlinNoise(WorldgenRandom worldgenRandom, List<Integer> list) {
-		this(worldgenRandom, new IntRBTreeSet(list));
+	public PerlinNoise(RandomSource randomSource, List<Integer> list) {
+		this(randomSource, new IntRBTreeSet(list));
 	}
 
-	public static PerlinNoise create(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
-		return new PerlinNoise(worldgenRandom, Pair.of(i, doubleList));
+	public static PerlinNoise create(RandomSource randomSource, int i, DoubleList doubleList) {
+		return new PerlinNoise(randomSource, Pair.of(i, doubleList));
 	}
 
 	private static Pair<Integer, DoubleList> makeAmplitudes(IntSortedSet intSortedSet) {
@@ -54,14 +55,14 @@ public class PerlinNoise implements SurfaceNoise {
 		}
 	}
 
-	private PerlinNoise(WorldgenRandom worldgenRandom, IntSortedSet intSortedSet) {
-		this(worldgenRandom, makeAmplitudes(intSortedSet));
+	private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet) {
+		this(randomSource, makeAmplitudes(intSortedSet));
 	}
 
-	private PerlinNoise(WorldgenRandom worldgenRandom, Pair<Integer, DoubleList> pair) {
+	private PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
 		int i = pair.getFirst();
 		this.amplitudes = pair.getSecond();
-		ImprovedNoise improvedNoise = new ImprovedNoise(worldgenRandom);
+		ImprovedNoise improvedNoise = new ImprovedNoise(randomSource);
 		int j = this.amplitudes.size();
 		int k = -i;
 		this.noiseLevels = new ImprovedNoise[j];
@@ -76,29 +77,29 @@ public class PerlinNoise implements SurfaceNoise {
 			if (l < j) {
 				double e = this.amplitudes.getDouble(l);
 				if (e != 0.0) {
-					this.noiseLevels[l] = new ImprovedNoise(worldgenRandom);
+					this.noiseLevels[l] = new ImprovedNoise(randomSource);
 				} else {
-					worldgenRandom.consumeCount(262);
+					randomSource.consumeCount(262);
 				}
 			} else {
-				worldgenRandom.consumeCount(262);
+				randomSource.consumeCount(262);
 			}
 		}
 
 		if (k < j - 1) {
-			long m = (long)(improvedNoise.noise(0.0, 0.0, 0.0, 0.0, 0.0) * 9.223372E18F);
-			WorldgenRandom worldgenRandom2 = new WorldgenRandom(m);
+			long m = (long)(improvedNoise.noise(0.0, 0.0, 0.0) * 9.223372E18F);
+			RandomSource randomSource2 = new WorldgenRandom(m);
 
 			for (int n = k + 1; n < j; n++) {
 				if (n >= 0) {
 					double f = this.amplitudes.getDouble(n);
 					if (f != 0.0) {
-						this.noiseLevels[n] = new ImprovedNoise(worldgenRandom2);
+						this.noiseLevels[n] = new ImprovedNoise(randomSource2);
 					} else {
-						worldgenRandom2.consumeCount(262);
+						randomSource2.consumeCount(262);
 					}
 				} else {
-					worldgenRandom2.consumeCount(262);
+					randomSource2.consumeCount(262);
 				}
 			}
 		}
@@ -111,6 +112,7 @@ public class PerlinNoise implements SurfaceNoise {
 		return this.getValue(d, e, f, 0.0, 0.0, false);
 	}
 
+	@Deprecated
 	public double getValue(double d, double e, double f, double g, double h, boolean bl) {
 		double i = 0.0;
 		double j = this.lowestFreqInputFactor;

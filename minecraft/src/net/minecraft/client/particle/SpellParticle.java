@@ -13,6 +13,9 @@ public class SpellParticle extends TextureSheetParticle {
 
 	private SpellParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, 0.5 - RANDOM.nextDouble(), h, 0.5 - RANDOM.nextDouble());
+		this.friction = 0.96F;
+		this.gravity = -0.1F;
+		this.speedUpWhenYMotionIsBlocked = true;
 		this.sprites = spriteSet;
 		this.yd *= 0.2F;
 		if (g == 0.0 && i == 0.0) {
@@ -33,28 +36,8 @@ public class SpellParticle extends TextureSheetParticle {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		} else {
-			this.setSpriteFromAge(this.sprites);
-			this.yd += 0.004;
-			this.move(this.xd, this.yd, this.zd);
-			if (this.y == this.yo) {
-				this.xd *= 1.1;
-				this.zd *= 1.1;
-			}
-
-			this.xd *= 0.96F;
-			this.yd *= 0.96F;
-			this.zd *= 0.96F;
-			if (this.onGround) {
-				this.xd *= 0.7F;
-				this.zd *= 0.7F;
-			}
-		}
+		super.tick();
+		this.setSpriteFromAge(this.sprites);
 	}
 
 	@Environment(EnvType.CLIENT)

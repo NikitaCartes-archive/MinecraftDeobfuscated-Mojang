@@ -95,7 +95,7 @@ public class ShovelItem extends DiggerItem {
 					level.levelEvent(null, 1009, blockPos, 0);
 				}
 
-				CampfireBlock.dowse(level, blockPos, blockState);
+				CampfireBlock.dowse(useOnContext.getPlayer(), level, blockPos, blockState);
 				blockState3 = blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
 			}
 

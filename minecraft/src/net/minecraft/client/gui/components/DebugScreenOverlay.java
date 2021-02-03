@@ -59,7 +59,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -263,80 +262,59 @@ public class DebugScreenOverlay extends GuiComponent {
 				)
 			);
 			list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, string2, Mth.wrapDegrees(entity.yRot), Mth.wrapDegrees(entity.xRot)));
-			if (this.minecraft.level != null) {
-				if (this.minecraft.level.hasChunkAt(blockPos)) {
-					LevelChunk levelChunk = this.getClientChunk();
-					if (levelChunk.isEmpty()) {
-						list.add("Waiting for chunk...");
-					} else {
-						int i = this.minecraft.level.getChunkSource().getLightEngine().getRawBrightness(blockPos, 0);
-						int j = this.minecraft.level.getBrightness(LightLayer.SKY, blockPos);
-						int k = this.minecraft.level.getBrightness(LightLayer.BLOCK, blockPos);
-						list.add("Client Light: " + i + " (" + j + " sky, " + k + " block)");
-						LevelChunk levelChunk2 = this.getServerChunk();
+			LevelChunk levelChunk = this.getClientChunk();
+			if (levelChunk.isEmpty()) {
+				list.add("Waiting for chunk...");
+			} else {
+				int i = this.minecraft.level.getChunkSource().getLightEngine().getRawBrightness(blockPos, 0);
+				int j = this.minecraft.level.getBrightness(LightLayer.SKY, blockPos);
+				int k = this.minecraft.level.getBrightness(LightLayer.BLOCK, blockPos);
+				list.add("Client Light: " + i + " (" + j + " sky, " + k + " block)");
+				LevelChunk levelChunk2 = this.getServerChunk();
+				StringBuilder stringBuilder = new StringBuilder("CH");
+
+				for (Heightmap.Types types : Heightmap.Types.values()) {
+					if (types.sendToClient()) {
+						stringBuilder.append(" ").append((String)HEIGHTMAP_NAMES.get(types)).append(": ").append(levelChunk.getHeight(types, blockPos.getX(), blockPos.getZ()));
+					}
+				}
+
+				list.add(stringBuilder.toString());
+				stringBuilder.setLength(0);
+				stringBuilder.append("SH");
+
+				for (Heightmap.Types typesx : Heightmap.Types.values()) {
+					if (typesx.keepAfterWorldgen()) {
+						stringBuilder.append(" ").append((String)HEIGHTMAP_NAMES.get(typesx)).append(": ");
 						if (levelChunk2 != null) {
-							LevelLightEngine levelLightEngine = level.getChunkSource().getLightEngine();
-							list.add(
-								"Server Light: ("
-									+ levelLightEngine.getLayerListener(LightLayer.SKY).getLightValue(blockPos)
-									+ " sky, "
-									+ levelLightEngine.getLayerListener(LightLayer.BLOCK).getLightValue(blockPos)
-									+ " block)"
-							);
+							stringBuilder.append(levelChunk2.getHeight(typesx, blockPos.getX(), blockPos.getZ()));
 						} else {
-							list.add("Server Light: (?? sky, ?? block)");
-						}
-
-						StringBuilder stringBuilder = new StringBuilder("CH");
-
-						for (Heightmap.Types types : Heightmap.Types.values()) {
-							if (types.sendToClient()) {
-								stringBuilder.append(" ").append((String)HEIGHTMAP_NAMES.get(types)).append(": ").append(levelChunk.getHeight(types, blockPos.getX(), blockPos.getZ()));
-							}
-						}
-
-						list.add(stringBuilder.toString());
-						stringBuilder.setLength(0);
-						stringBuilder.append("SH");
-
-						for (Heightmap.Types typesx : Heightmap.Types.values()) {
-							if (typesx.keepAfterWorldgen()) {
-								stringBuilder.append(" ").append((String)HEIGHTMAP_NAMES.get(typesx)).append(": ");
-								if (levelChunk2 != null) {
-									stringBuilder.append(levelChunk2.getHeight(typesx, blockPos.getX(), blockPos.getZ()));
-								} else {
-									stringBuilder.append("??");
-								}
-							}
-						}
-
-						list.add(stringBuilder.toString());
-						if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
-							list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
-							long l = 0L;
-							float h = 0.0F;
-							if (levelChunk2 != null) {
-								h = level.getMoonBrightness();
-								l = levelChunk2.getInhabitedTime();
-							}
-
-							DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
-							list.add(
-								String.format(
-									Locale.ROOT,
-									"Local Difficulty: %.2f // %.2f (Day %d)",
-									difficultyInstance.getEffectiveDifficulty(),
-									difficultyInstance.getSpecialMultiplier(),
-									this.minecraft.level.getDayTime() / 24000L
-								)
-							);
+							stringBuilder.append("??");
 						}
 					}
-				} else {
-					list.add("Outside of world...");
 				}
-			} else {
-				list.add("Outside of world...");
+
+				list.add(stringBuilder.toString());
+				if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
+					list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
+					long l = 0L;
+					float h = 0.0F;
+					if (levelChunk2 != null) {
+						h = level.getMoonBrightness();
+						l = levelChunk2.getInhabitedTime();
+					}
+
+					DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
+					list.add(
+						String.format(
+							Locale.ROOT,
+							"Local Difficulty: %.2f // %.2f (Day %d)",
+							difficultyInstance.getEffectiveDifficulty(),
+							difficultyInstance.getSpecialMultiplier(),
+							this.minecraft.level.getDayTime() / 24000L
+						)
+					);
+				}
 			}
 
 			ServerLevel serverLevel = this.getServerLevel();
@@ -344,10 +322,10 @@ public class DebugScreenOverlay extends GuiComponent {
 				NaturalSpawner.SpawnState spawnState = serverLevel.getChunkSource().getLastSpawnState();
 				if (spawnState != null) {
 					Object2IntMap<MobCategory> object2IntMap = spawnState.getMobCategoryCounts();
-					int kx = spawnState.getSpawnableChunkCount();
+					int m = spawnState.getSpawnableChunkCount();
 					list.add(
 						"SC: "
-							+ kx
+							+ m
 							+ ", "
 							+ (String)Stream.of(MobCategory.values())
 								.map(mobCategory -> Character.toUpperCase(mobCategory.getName().charAt(0)) + ": " + object2IntMap.getInt(mobCategory))

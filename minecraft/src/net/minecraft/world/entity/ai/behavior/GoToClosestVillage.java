@@ -32,7 +32,7 @@ public class GoToClosestVillage extends Behavior<Villager> {
 		Vec3 vec3 = null;
 
 		for (int j = 0; j < 5; j++) {
-			Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> (double)(-serverLevel.sectionsToVillage(SectionPos.of(blockPos))));
+			Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> (double)(-poiManager.sectionsToVillage(SectionPos.of(blockPos))));
 			if (vec32 != null) {
 				int k = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(vec32)));
 				if (k < i) {

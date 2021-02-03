@@ -15,6 +15,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -35,6 +36,7 @@ public class BottleItem extends Item {
 			AreaEffectCloud areaEffectCloud = (AreaEffectCloud)list.get(0);
 			areaEffectCloud.setRadius(areaEffectCloud.getRadius() - 0.5F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL_DRAGONBREATH, SoundSource.NEUTRAL, 1.0F, 1.0F);
+			level.gameEvent(player, GameEvent.FLUID_PICKUP, player.blockPosition());
 			return InteractionResultHolder.sidedSuccess(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)), level.isClientSide());
 		} else {
 			HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
@@ -49,6 +51,7 @@ public class BottleItem extends Item {
 
 					if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
 						level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
+						level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
 						return InteractionResultHolder.sidedSuccess(
 							this.turnBottleIntoItem(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)), level.isClientSide()
 						);

@@ -61,7 +61,7 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 		if (itemStack.is(Items.FLINT_AND_STEEL) || itemStack.is(Items.FIRE_CHARGE)) {
 			return InteractionResult.PASS;
 		} else if (candleHit(blockHitResult) && player.getItemInHand(interactionHand).isEmpty() && (Boolean)blockState.getValue(LIT)) {
-			extinguish(blockState, level, blockPos);
+			extinguish(player, blockState, level, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			InteractionResult interactionResult = CakeBlock.eat(level, blockPos, Blocks.CAKE.defaultBlockState(), player);

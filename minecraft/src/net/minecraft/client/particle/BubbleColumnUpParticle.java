@@ -11,6 +11,8 @@ import net.minecraft.tags.FluidTags;
 public class BubbleColumnUpParticle extends TextureSheetParticle {
 	private BubbleColumnUpParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f);
+		this.gravity = -0.125F;
+		this.friction = 0.85F;
 		this.setSize(0.02F, 0.02F);
 		this.quadSize = this.quadSize * (this.random.nextFloat() * 0.6F + 0.2F);
 		this.xd = g * 0.2F + (Math.random() * 2.0 - 1.0) * 0.02F;
@@ -21,20 +23,9 @@ public class BubbleColumnUpParticle extends TextureSheetParticle {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		this.yd += 0.005;
-		if (this.lifetime-- <= 0) {
+		super.tick();
+		if (!this.removed && !this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
 			this.remove();
-		} else {
-			this.move(this.xd, this.yd, this.zd);
-			this.xd *= 0.85F;
-			this.yd *= 0.85F;
-			this.zd *= 0.85F;
-			if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
-				this.remove();
-			}
 		}
 	}
 

@@ -100,7 +100,7 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 			this.midLeg.xRot = 0.0F;
 			this.backLeg.xRot = 0.0F;
 		} else {
-			float k = h * 2.1F;
+			float k = h * 120.32113F * (float) (Math.PI / 180.0);
 			this.rightWing.yRot = 0.0F;
 			this.rightWing.zRot = Mth.cos(k) * (float) Math.PI * 0.15F;
 			this.leftWing.xRot = this.rightWing.xRot;

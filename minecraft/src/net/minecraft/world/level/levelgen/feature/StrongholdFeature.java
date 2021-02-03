@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -35,7 +36,8 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		NoneFeatureConfiguration noneFeatureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		return chunkGenerator.hasStronghold(new ChunkPos(i, j));
 	}
@@ -55,7 +57,8 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 			int i,
 			int j,
 			Biome biome,
-			NoneFeatureConfiguration noneFeatureConfiguration
+			NoneFeatureConfiguration noneFeatureConfiguration,
+			LevelHeightAccessor levelHeightAccessor
 		) {
 			int k = 0;
 

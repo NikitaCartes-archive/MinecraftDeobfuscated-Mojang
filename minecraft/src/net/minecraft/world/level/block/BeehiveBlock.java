@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
@@ -118,6 +119,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 				dropHoneycomb(level, blockPos);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 				bl = true;
+				level.gameEvent(player, GameEvent.SHEAR, blockPos);
 			} else if (itemStack.is(Items.GLASS_BOTTLE)) {
 				itemStack.shrink(1);
 				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
@@ -128,6 +130,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 				}
 
 				bl = true;
+				level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
 			}
 		}
 
@@ -258,22 +261,20 @@ public class BeehiveBlock extends BaseEntityBlock {
 				ItemStack itemStack = new ItemStack(this);
 				int i = (Integer)blockState.getValue(HONEY_LEVEL);
 				boolean bl = !beehiveBlockEntity.isEmpty();
-				if (!bl && i == 0) {
-					return;
-				}
+				if (bl || i > 0) {
+					if (bl) {
+						CompoundTag compoundTag = new CompoundTag();
+						compoundTag.put("Bees", beehiveBlockEntity.writeBees());
+						itemStack.addTagElement("BlockEntityTag", compoundTag);
+					}
 
-				if (bl) {
 					CompoundTag compoundTag = new CompoundTag();
-					compoundTag.put("Bees", beehiveBlockEntity.writeBees());
-					itemStack.addTagElement("BlockEntityTag", compoundTag);
+					compoundTag.putInt("honey_level", i);
+					itemStack.addTagElement("BlockStateTag", compoundTag);
+					ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+					itemEntity.setDefaultPickUpDelay();
+					level.addFreshEntity(itemEntity);
 				}
-
-				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putInt("honey_level", i);
-				itemStack.addTagElement("BlockStateTag", compoundTag);
-				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
-				itemEntity.setDefaultPickUpDelay();
-				level.addFreshEntity(itemEntity);
 			}
 		}
 

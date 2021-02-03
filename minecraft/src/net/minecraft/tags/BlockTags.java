@@ -98,6 +98,9 @@ public final class BlockTags {
 	public static final Tag.Named<Block> INSIDE_STEP_SOUND_BLOCKS = bind("inside_step_sound_blocks");
 	public static final Tag.Named<Block> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
 	public static final Tag.Named<Block> DRIPSTONE_REPLACEABLE = bind("dripstone_replaceable_blocks");
+	public static final Tag.Named<Block> CAVE_VINES = bind("cave_vines");
+	public static final Tag.Named<Block> LUSH_PLANTS_REPLACEABLE = bind("lush_plants_replaceable");
+	public static final Tag.Named<Block> AZALEA_LOG_REPLACEABLE = bind("azalea_log_replaceable");
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

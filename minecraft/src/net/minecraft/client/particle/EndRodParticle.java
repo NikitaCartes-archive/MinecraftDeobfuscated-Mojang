@@ -8,7 +8,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(EnvType.CLIENT)
 public class EndRodParticle extends SimpleAnimatedParticle {
 	private EndRodParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(clientLevel, d, e, f, spriteSet, -5.0E-4F);
+		super(clientLevel, d, e, f, spriteSet, 0.0125F);
 		this.xd = g;
 		this.yd = h;
 		this.zd = i;

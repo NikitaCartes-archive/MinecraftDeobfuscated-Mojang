@@ -88,6 +88,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class Bee extends Animal implements NeutralMob, FlyingAnimal {
+	public static final int TICKS_PER_FLAP = Mth.ceil(1.4959966F);
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Bee.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Bee.class, EntityDataSerializers.INT);
 	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
@@ -567,8 +568,12 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	protected boolean makeFlySound() {
-		return true;
+	public boolean isFlapping() {
+		return this.isFlying() && this.tickCount % TICKS_PER_FLAP == 0;
+	}
+
+	public boolean isFlying() {
+		return !this.onGround;
 	}
 
 	public void dropOffNectar() {

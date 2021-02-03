@@ -17,7 +17,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -100,9 +99,9 @@ public class ServerTickList<T> implements TickList<T> {
 	}
 
 	public List<TickNextTickData<T>> fetchTicksInChunk(ChunkPos chunkPos, boolean bl, boolean bl2) {
-		int i = SectionPos.sectionToBlockCoord(chunkPos.x) - 2;
+		int i = chunkPos.getMinBlockX() - 2;
 		int j = i + 16 + 2;
-		int k = SectionPos.sectionToBlockCoord(chunkPos.z) - 2;
+		int k = chunkPos.getMinBlockZ() - 2;
 		int l = k + 16 + 2;
 		return this.fetchTicksInArea(new BoundingBox(i, this.level.getMinBuildHeight(), k, j, this.level.getMaxBuildHeight(), l), bl, bl2);
 	}

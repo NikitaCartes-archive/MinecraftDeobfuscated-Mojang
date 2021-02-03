@@ -19,6 +19,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class PotionItem extends Item {
 	public PotionItem(Item.Properties properties) {
@@ -64,6 +65,7 @@ public class PotionItem extends Item {
 			}
 		}
 
+		level.gameEvent(livingEntity, GameEvent.DRINKING_FINISH, livingEntity.eyeBlockPosition());
 		return itemStack;
 	}
 

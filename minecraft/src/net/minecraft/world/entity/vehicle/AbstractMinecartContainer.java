@@ -165,7 +165,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		player.openMenu(this);
 		if (!player.level.isClientSide) {
-			this.gameEvent(player, GameEvent.CONTAINER_OPEN);
+			this.gameEvent(GameEvent.CONTAINER_OPEN, player);
 			PiglinAi.angerNearbyPiglins(player, true);
 			return InteractionResult.CONSUME;
 		} else {

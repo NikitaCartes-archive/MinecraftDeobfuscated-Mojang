@@ -61,6 +61,7 @@ import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
+import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.block.state.properties.WallSide;
 
 public class BlockModelGenerators {
@@ -1154,6 +1155,24 @@ public class BlockModelGenerators {
 		this.delegateItemModel(block, resourceLocation2);
 	}
 
+	private void createBigDripLeafBlock() {
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF);
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF, "_partial_tilt");
+		ResourceLocation resourceLocation3 = ModelLocationUtils.getModelLocation(Blocks.BIG_DRIPLEAF, "_full_tilt");
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.BIG_DRIPLEAF)
+					.with(createHorizontalFacingDispatch())
+					.with(
+						PropertyDispatch.property(BlockStateProperties.TILT)
+							.select(Tilt.NONE, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+							.select(Tilt.UNSTABLE, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+							.select(Tilt.PARTIAL, Variant.variant().with(VariantProperties.MODEL, resourceLocation2))
+							.select(Tilt.FULL, Variant.variant().with(VariantProperties.MODEL, resourceLocation3))
+					)
+			);
+	}
+
 	private BlockModelGenerators.WoodProvider woodProvider(Block block) {
 		return new BlockModelGenerators.WoodProvider(TextureMapping.logColumn(block));
 	}
@@ -1260,6 +1279,19 @@ public class BlockModelGenerators {
 		ResourceLocation resourceLocation = this.createSuffixedVariant(Blocks.TALL_SEAGRASS, "_top", ModelTemplates.SEAGRASS, TextureMapping::defaultTexture);
 		ResourceLocation resourceLocation2 = this.createSuffixedVariant(Blocks.TALL_SEAGRASS, "_bottom", ModelTemplates.SEAGRASS, TextureMapping::defaultTexture);
 		this.createDoubleBlock(Blocks.TALL_SEAGRASS, resourceLocation, resourceLocation2);
+	}
+
+	private void createSmallDripleaf() {
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_top");
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_bottom");
+		this.delegateItemModel(Blocks.SMALL_DRIPLEAF, resourceLocation);
+		List<Variant> list = Arrays.asList(createRotatedVariants(resourceLocation));
+		List<Variant> list2 = Arrays.asList(createRotatedVariants(resourceLocation2));
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.SMALL_DRIPLEAF)
+					.with(PropertyDispatch.property(BlockStateProperties.DOUBLE_BLOCK_HALF).select(DoubleBlockHalf.LOWER, list2).select(DoubleBlockHalf.UPPER, list))
+			);
 	}
 
 	private void createDoubleBlock(Block block, ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
@@ -1371,7 +1403,7 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(createSimpleBlock(block, resourceLocation2));
 	}
 
-	private void createWoolBlocks(Block block, Block block2) {
+	private void createFullAndCarpetBlocks(Block block, Block block2) {
 		this.createTrivialBlock(block, TexturedModel.CUBE);
 		ResourceLocation resourceLocation = TexturedModel.CARPET.get(block).create(block2, this.modelOutput);
 		this.blockStateOutput.accept(createSimpleBlock(block2, resourceLocation));
@@ -1716,6 +1748,11 @@ public class BlockModelGenerators {
 						.with(createHorizontalFacingDispatchAlt())
 				);
 		}
+	}
+
+	private void createAzalea(Block block) {
+		ResourceLocation resourceLocation = ModelTemplates.AZALEA.create(block, TextureMapping.cubeTop(block), this.modelOutput);
+		this.blockStateOutput.accept(createSimpleBlock(block, resourceLocation));
 	}
 
 	private void createBookshelf() {
@@ -2954,6 +2991,23 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createCaveVines() {
+		ResourceLocation resourceLocation = this.createSuffixedVariant(Blocks.CAVE_VINES_HEAD, "", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation2 = this.createSuffixedVariant(Blocks.CAVE_VINES_HEAD, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES_HEAD)
+					.with(createBooleanModelDispatch(BlockStateProperties.BERRIES, resourceLocation2, resourceLocation))
+			);
+		ResourceLocation resourceLocation3 = this.createSuffixedVariant(Blocks.CAVE_VINES_BODY, "", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation4 = this.createSuffixedVariant(Blocks.CAVE_VINES_BODY, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES_BODY)
+					.with(createBooleanModelDispatch(BlockStateProperties.BERRIES, resourceLocation4, resourceLocation3))
+			);
+	}
+
 	private void createRedstoneLamp() {
 		ResourceLocation resourceLocation = TexturedModel.CUBE.create(Blocks.REDSTONE_LAMP, this.modelOutput);
 		ResourceLocation resourceLocation2 = this.createSuffixedVariant(Blocks.REDSTONE_LAMP, "_on", ModelTemplates.CUBE_ALL, TextureMapping::cube);
@@ -3542,14 +3596,14 @@ public class BlockModelGenerators {
 			.filter(BlockFamily::shouldGenerateModel)
 			.forEach(blockFamily -> this.family(blockFamily.getBaseBlock()).generateFor(blockFamily));
 		this.family(Blocks.CUT_COPPER).generateFor(BlockFamilies.CUT_COPPER).fullBlockCopies(Blocks.WAXED_CUT_COPPER).generateFor(BlockFamilies.WAXED_CUT_COPPER);
-		this.family(Blocks.LIGHTLY_WEATHERED_CUT_COPPER)
-			.generateFor(BlockFamilies.LIGHTLY_WEATHERED_CUT_COPPER)
-			.fullBlockCopies(Blocks.WAXED_LIGHTLY_WEATHERED_CUT_COPPER)
-			.generateFor(BlockFamilies.WAXED_LIGHTLY_WEATHERED_CUT_COPPER);
-		this.family(Blocks.SEMI_WEATHERED_CUT_COPPER)
-			.generateFor(BlockFamilies.SEMI_WEATHERED_CUT_COPPER)
-			.fullBlockCopies(Blocks.WAXED_SEMI_WEATHERED_CUT_COPPER)
-			.generateFor(BlockFamilies.WAXED_SEMI_WEATHERED_CUT_COPPER);
+		this.family(Blocks.EXPOSED_CUT_COPPER)
+			.generateFor(BlockFamilies.EXPOSED_CUT_COPPER)
+			.fullBlockCopies(Blocks.WAXED_EXPOSED_CUT_COPPER)
+			.generateFor(BlockFamilies.WAXED_EXPOSED_CUT_COPPER);
+		this.family(Blocks.WEATHERED_CUT_COPPER)
+			.generateFor(BlockFamilies.WEATHERED_CUT_COPPER)
+			.fullBlockCopies(Blocks.WAXED_WEATHERED_CUT_COPPER)
+			.generateFor(BlockFamilies.WAXED_WEATHERED_CUT_COPPER);
 		this.createNonTemplateModelBlock(Blocks.AIR);
 		this.createNonTemplateModelBlock(Blocks.CAVE_AIR, Blocks.AIR);
 		this.createNonTemplateModelBlock(Blocks.VOID_AIR, Blocks.AIR);
@@ -3586,6 +3640,11 @@ public class BlockModelGenerators {
 		this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
 		this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
 		this.createNonTemplateModelBlock(Blocks.POWDER_SNOW);
+		this.createNonTemplateModelBlock(Blocks.SPORE_BLOSSOM);
+		this.createAzalea(Blocks.AZALEA);
+		this.createAzalea(Blocks.FLOWERING_AZALEA);
+		this.createCaveVines();
+		this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
 		this.createSimpleFlatItemModel(Items.BARRIER);
 		this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);
@@ -3659,12 +3718,12 @@ public class BlockModelGenerators {
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.COPPER_BLOCK);
-		this.createTrivialCube(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK);
-		this.createTrivialCube(Blocks.SEMI_WEATHERED_COPPER_BLOCK);
+		this.createTrivialCube(Blocks.EXPOSED_COPPER_BLOCK);
 		this.createTrivialCube(Blocks.WEATHERED_COPPER_BLOCK);
+		this.createTrivialCube(Blocks.OXIDIZED_COPPER_BLOCK);
 		this.copyModel(Blocks.COPPER_BLOCK, Blocks.WAXED_COPPER);
-		this.copyModel(Blocks.LIGHTLY_WEATHERED_COPPER_BLOCK, Blocks.WAXED_LIGHTLY_WEATHERED_COPPER);
-		this.copyModel(Blocks.SEMI_WEATHERED_COPPER_BLOCK, Blocks.WAXED_SEMI_WEATHERED_COPPER);
+		this.copyModel(Blocks.EXPOSED_COPPER_BLOCK, Blocks.WAXED_EXPOSED_COPPER);
+		this.copyModel(Blocks.WEATHERED_COPPER_BLOCK, Blocks.WAXED_WEATHERED_COPPER);
 		this.createWeightedPressurePlate(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.GOLD_BLOCK);
 		this.createWeightedPressurePlate(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.IRON_BLOCK);
 		this.createAmethystClusters();
@@ -3719,6 +3778,8 @@ public class BlockModelGenerators {
 		this.createNonTemplateHorizontalBlock(Blocks.LADDER);
 		this.createSimpleFlatItemModel(Blocks.LADDER);
 		this.createNonTemplateHorizontalBlock(Blocks.LECTERN);
+		this.createBigDripLeafBlock();
+		this.createNonTemplateHorizontalBlock(Blocks.BIG_DRIPLEAF_STEM);
 		this.createNormalTorch(Blocks.TORCH, Blocks.WALL_TORCH);
 		this.createNormalTorch(Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH);
 		this.createCraftingTableLike(Blocks.CRAFTING_TABLE, Blocks.OAK_PLANKS, TextureMapping::craftingTable);
@@ -3857,6 +3918,9 @@ public class BlockModelGenerators {
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("chest"), Blocks.OAK_PLANKS).createWithoutBlockItem(Blocks.CHEST, Blocks.TRAPPED_CHEST);
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("ender_chest"), Blocks.OBSIDIAN).createWithoutBlockItem(Blocks.ENDER_CHEST);
 		this.blockEntityModels(Blocks.END_PORTAL, Blocks.OBSIDIAN).create(Blocks.END_PORTAL, Blocks.END_GATEWAY);
+		this.createTrivialCube(Blocks.AZALEA_LEAVES);
+		this.createTrivialCube(Blocks.AZALEA_LEAVES_FLOWERS);
+		this.createTrivialCube(Blocks.ROOTED_DIRT);
 		this.createTrivialCube(Blocks.WHITE_CONCRETE);
 		this.createTrivialCube(Blocks.ORANGE_CONCRETE);
 		this.createTrivialCube(Blocks.MAGENTA_CONCRETE);
@@ -3946,22 +4010,22 @@ public class BlockModelGenerators {
 			Blocks.RED_GLAZED_TERRACOTTA,
 			Blocks.BLACK_GLAZED_TERRACOTTA
 		);
-		this.createWoolBlocks(Blocks.WHITE_WOOL, Blocks.WHITE_CARPET);
-		this.createWoolBlocks(Blocks.ORANGE_WOOL, Blocks.ORANGE_CARPET);
-		this.createWoolBlocks(Blocks.MAGENTA_WOOL, Blocks.MAGENTA_CARPET);
-		this.createWoolBlocks(Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_BLUE_CARPET);
-		this.createWoolBlocks(Blocks.YELLOW_WOOL, Blocks.YELLOW_CARPET);
-		this.createWoolBlocks(Blocks.LIME_WOOL, Blocks.LIME_CARPET);
-		this.createWoolBlocks(Blocks.PINK_WOOL, Blocks.PINK_CARPET);
-		this.createWoolBlocks(Blocks.GRAY_WOOL, Blocks.GRAY_CARPET);
-		this.createWoolBlocks(Blocks.LIGHT_GRAY_WOOL, Blocks.LIGHT_GRAY_CARPET);
-		this.createWoolBlocks(Blocks.CYAN_WOOL, Blocks.CYAN_CARPET);
-		this.createWoolBlocks(Blocks.PURPLE_WOOL, Blocks.PURPLE_CARPET);
-		this.createWoolBlocks(Blocks.BLUE_WOOL, Blocks.BLUE_CARPET);
-		this.createWoolBlocks(Blocks.BROWN_WOOL, Blocks.BROWN_CARPET);
-		this.createWoolBlocks(Blocks.GREEN_WOOL, Blocks.GREEN_CARPET);
-		this.createWoolBlocks(Blocks.RED_WOOL, Blocks.RED_CARPET);
-		this.createWoolBlocks(Blocks.BLACK_WOOL, Blocks.BLACK_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.WHITE_WOOL, Blocks.WHITE_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.ORANGE_WOOL, Blocks.ORANGE_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.MAGENTA_WOOL, Blocks.MAGENTA_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.LIGHT_BLUE_WOOL, Blocks.LIGHT_BLUE_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.YELLOW_WOOL, Blocks.YELLOW_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.LIME_WOOL, Blocks.LIME_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.PINK_WOOL, Blocks.PINK_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.GRAY_WOOL, Blocks.GRAY_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.LIGHT_GRAY_WOOL, Blocks.LIGHT_GRAY_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.CYAN_WOOL, Blocks.CYAN_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.PURPLE_WOOL, Blocks.PURPLE_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.BLUE_WOOL, Blocks.BLUE_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.BROWN_WOOL, Blocks.BROWN_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.GREEN_WOOL, Blocks.GREEN_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.RED_WOOL, Blocks.RED_CARPET);
+		this.createFullAndCarpetBlocks(Blocks.BLACK_WOOL, Blocks.BLACK_CARPET);
 		this.createPlant(Blocks.FERN, Blocks.POTTED_FERN, BlockModelGenerators.TintState.TINTED);
 		this.createPlant(Blocks.DANDELION, Blocks.POTTED_DANDELION, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createPlant(Blocks.POPPY, Blocks.POTTED_POPPY, BlockModelGenerators.TintState.NOT_TINTED);
@@ -3989,6 +4053,9 @@ public class BlockModelGenerators {
 		this.createGrowingPlant(Blocks.KELP, Blocks.KELP_PLANT, BlockModelGenerators.TintState.TINTED);
 		this.createSimpleFlatItemModel(Items.KELP);
 		this.skipAutoItemBlock(Blocks.KELP_PLANT);
+		this.createCrossBlock(Blocks.HANGING_ROOTS, BlockModelGenerators.TintState.NOT_TINTED);
+		this.createSimpleFlatItemModel(Blocks.HANGING_ROOTS);
+		this.skipAutoItemBlock(Blocks.CAVE_VINES_BODY);
 		this.createGrowingPlant(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createGrowingPlant(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createSimpleFlatItemModel(Blocks.WEEPING_VINES, "_plant");
@@ -4007,6 +4074,7 @@ public class BlockModelGenerators {
 		this.createDoublePlant(Blocks.LARGE_FERN, BlockModelGenerators.TintState.TINTED);
 		this.createSunflower();
 		this.createTallSeagrass();
+		this.createSmallDripleaf();
 		this.createCoral(
 			Blocks.TUBE_CORAL,
 			Blocks.DEAD_TUBE_CORAL,

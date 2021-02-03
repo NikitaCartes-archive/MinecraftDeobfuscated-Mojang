@@ -362,7 +362,7 @@ public abstract class LivingEntity extends Entity {
 			}
 		}
 
-		if (this.isAlive() && (this.isInWaterRainOrBubble() || this.bodyIsInPowderSnow)) {
+		if (this.isAlive() && (this.isInWaterRainOrBubble() || this.isInPowderSnow)) {
 			this.clearFire();
 		}
 
@@ -619,9 +619,10 @@ public abstract class LivingEntity extends Entity {
 		this.noActionTime = i;
 	}
 
-	protected void playEquipSound(ItemStack itemStack) {
+	protected void equipEventAndSound(ItemStack itemStack) {
 		SoundEvent soundEvent = itemStack.getEquipSound();
 		if (!itemStack.isEmpty() && soundEvent != null && !this.isSpectator()) {
+			this.gameEvent(GameEvent.EQUIP);
 			this.playSound(soundEvent, 1.0F, 1.0F);
 		}
 	}
@@ -1114,7 +1115,6 @@ public abstract class LivingEntity extends Entity {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
 			}
 
-			this.gameEvent(damageSource.getEntity(), GameEvent.ENTITY_HIT);
 			return bl3;
 		}
 	}
@@ -1517,6 +1517,7 @@ public abstract class LivingEntity extends Entity {
 				this.setHealth(i - var8);
 				this.getCombatTracker().recordDamage(damageSource, i, var8);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
+				this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
 			}
 		}
 	}
@@ -1878,7 +1879,7 @@ public abstract class LivingEntity extends Entity {
 			vec3 = new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ());
 		}
 
-		this.teleportTo(vec3.x, vec3.y, vec3.z);
+		this.dismountTo(vec3.x, vec3.y, vec3.z);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -2474,7 +2475,7 @@ public abstract class LivingEntity extends Entity {
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("freezing");
 		int m = this.getTicksFrozen();
-		if (this.bodyIsInPowderSnow && this.canFreeze()) {
+		if (this.isInPowderSnow && this.canFreeze()) {
 			this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
 		} else {
 			this.setTicksFrozen(Math.max(0, m - 2));
@@ -3116,6 +3117,7 @@ public abstract class LivingEntity extends Entity {
 
 	public ItemStack eat(Level level, ItemStack itemStack) {
 		if (itemStack.isEdible()) {
+			level.gameEvent(this, GameEvent.EAT, this.eyeBlockPosition());
 			level.playSound(
 				null,
 				this.getX(),
@@ -3131,7 +3133,7 @@ public abstract class LivingEntity extends Entity {
 				itemStack.shrink(1);
 			}
 
-			this.gameEvent(GameEvent.EATING_FINISH);
+			this.gameEvent(GameEvent.EAT);
 		}
 
 		return itemStack;
@@ -3238,5 +3240,25 @@ public abstract class LivingEntity extends Entity {
 				&& !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
 				&& !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES)
 				&& !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
+		double d = clientboundAddMobPacket.getX();
+		double e = clientboundAddMobPacket.getY();
+		double f = clientboundAddMobPacket.getZ();
+		float g = (float)(clientboundAddMobPacket.getyRot() * 360) / 256.0F;
+		float h = (float)(clientboundAddMobPacket.getxRot() * 360) / 256.0F;
+		this.setPacketCoordinates(d, e, f);
+		this.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
+		this.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
+		this.setId(clientboundAddMobPacket.getId());
+		this.setUUID(clientboundAddMobPacket.getUUID());
+		this.absMoveTo(d, e, f, g, h);
+		this.setDeltaMovement(
+			(double)((float)clientboundAddMobPacket.getXd() / 8000.0F),
+			(double)((float)clientboundAddMobPacket.getYd() / 8000.0F),
+			(double)((float)clientboundAddMobPacket.getZd() / 8000.0F)
+		);
 	}
 }

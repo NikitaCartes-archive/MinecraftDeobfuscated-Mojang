@@ -64,7 +64,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (player.getItemInHand(interactionHand).isEmpty() && (Boolean)blockState.getValue(LIT)) {
-			extinguish(blockState, level, blockPos);
+			extinguish(player, blockState, level, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
@@ -131,7 +131,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 		if (!(Boolean)blockState.getValue(WATERLOGGED) && fluidState.getType() == Fluids.WATER) {
 			BlockState blockState2 = blockState.setValue(WATERLOGGED, Boolean.valueOf(true));
 			if ((Boolean)blockState.getValue(LIT)) {
-				extinguish(blockState2, levelAccessor, blockPos);
+				extinguish(null, blockState2, levelAccessor, blockPos);
 			} else {
 				levelAccessor.setBlock(blockPos, blockState2, 3);
 			}

@@ -9,7 +9,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 
 public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
@@ -17,14 +16,18 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSphereConfiguration replaceSphereConfiguration
-	) {
+	@Override
+	public boolean place(FeaturePlaceContext<ReplaceSphereConfiguration> featurePlaceContext) {
+		ReplaceSphereConfiguration replaceSphereConfiguration = featurePlaceContext.config();
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
 		Block block = replaceSphereConfiguration.targetState.getBlock();
-		BlockPos blockPos2 = findTarget(
-			worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinBuildHeight() + 1, worldGenLevel.getMaxBuildHeight() - 1), block
+		BlockPos blockPos = findTarget(
+			worldGenLevel,
+			featurePlaceContext.origin().mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinBuildHeight() + 1, worldGenLevel.getMaxBuildHeight() - 1),
+			block
 		);
-		if (blockPos2 == null) {
+		if (blockPos == null) {
 			return false;
 		} else {
 			int i = replaceSphereConfiguration.radius().sample(random);
@@ -33,14 +36,14 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 			int l = Math.max(i, Math.max(j, k));
 			boolean bl = false;
 
-			for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, i, j, k)) {
-				if (blockPos3.distManhattan(blockPos2) > l) {
+			for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, i, j, k)) {
+				if (blockPos2.distManhattan(blockPos) > l) {
 					break;
 				}
 
-				BlockState blockState = worldGenLevel.getBlockState(blockPos3);
+				BlockState blockState = worldGenLevel.getBlockState(blockPos2);
 				if (blockState.is(block)) {
-					this.setBlock(worldGenLevel, blockPos3, replaceSphereConfiguration.replaceState);
+					this.setBlock(worldGenLevel, blockPos2, replaceSphereConfiguration.replaceState);
 					bl = true;
 				}
 			}

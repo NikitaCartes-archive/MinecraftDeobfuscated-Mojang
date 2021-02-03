@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
@@ -105,8 +104,8 @@ public abstract class StructurePiece {
 	}
 
 	public boolean isCloseToChunk(ChunkPos chunkPos, int i) {
-		int j = SectionPos.sectionToBlockCoord(chunkPos.x);
-		int k = SectionPos.sectionToBlockCoord(chunkPos.z);
+		int j = chunkPos.getMinBlockX();
+		int k = chunkPos.getMinBlockZ();
 		return this.boundingBox.intersects(j - i, k - i, j + 15 + i, k + 15 + i);
 	}
 

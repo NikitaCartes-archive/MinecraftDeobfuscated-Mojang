@@ -486,7 +486,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				}
 
 				BlockState blockState = this.getBlockState(blockPos2);
-				Biome.Precipitation precipitation = this.getBiome(blockPos2).getPrecipitation();
+				Biome.Precipitation precipitation = this.getBiome(blockPos).getPrecipitation();
+				if (precipitation == Biome.Precipitation.RAIN && biome.isColdEnoughToSnow(blockPos2)) {
+					precipitation = Biome.Precipitation.SNOW;
+				}
+
 				blockState.getBlock().handlePrecipitation(blockState, this, blockPos2, precipitation);
 			}
 		}

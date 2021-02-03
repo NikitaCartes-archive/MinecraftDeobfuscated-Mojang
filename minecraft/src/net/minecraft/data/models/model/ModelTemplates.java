@@ -111,6 +111,7 @@ public class ModelTemplates {
 	public static final ModelTemplate CAULDRON_FULL = create(
 		"template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
 	);
+	public static final ModelTemplate AZALEA = create("template_azalea", TextureSlot.TOP, TextureSlot.SIDE);
 	public static final ModelTemplate FLAT_ITEM = createItem("generated", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ITEM = createItem("handheld", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = createItem("handheld_rod", TextureSlot.LAYER0);

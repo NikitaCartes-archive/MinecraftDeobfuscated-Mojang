@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
@@ -14,7 +13,12 @@ public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
 		super(codec);
 	}
 
-	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, OreConfiguration oreConfiguration) {
+	@Override
+	public boolean place(FeaturePlaceContext<OreConfiguration> featurePlaceContext) {
+		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		Random random = featurePlaceContext.random();
+		OreConfiguration oreConfiguration = featurePlaceContext.config();
+		BlockPos blockPos = featurePlaceContext.origin();
 		int i = random.nextInt(oreConfiguration.size + 1);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 

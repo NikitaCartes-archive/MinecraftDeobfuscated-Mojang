@@ -52,6 +52,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -437,6 +438,7 @@ public class EnderMan extends Monster implements NeutralMob {
 				blockState3 = Block.updateFromNeighbourShapes(blockState3, this.enderman.level, blockPos);
 				if (this.canPlaceBlock(level, blockPos, blockState3, blockState, blockState2, blockPos2)) {
 					level.setBlock(blockPos, blockState3, 3);
+					level.gameEvent(this.enderman, GameEvent.BLOCK_PLACE, blockPos);
 					this.enderman.setCarriedBlock(null);
 				}
 			}
@@ -562,6 +564,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			boolean bl = blockHitResult.getBlockPos().equals(blockPos);
 			if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
 				level.removeBlock(blockPos, false);
+				level.gameEvent(this.enderman, GameEvent.BLOCK_DESTROY, blockPos);
 				this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
 			}
 		}

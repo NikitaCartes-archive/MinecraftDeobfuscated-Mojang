@@ -2596,6 +2596,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						blockPos, SoundEvents.POINTED_DRIPSTONE_DRIP_WATER_INTO_CAULDRON, SoundSource.BLOCKS, 2.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false
 					);
 				break;
+			case 1048:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.SKELETON_CONVERTED_TO_STRAY, SoundSource.NEUTRAL, 2.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F, false
+					);
+				break;
 			case 1500:
 				ComposterBlock.handleFill(this.level, blockPos, j > 0);
 				break;

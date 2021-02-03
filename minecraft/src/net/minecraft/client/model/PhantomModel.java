@@ -9,10 +9,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Phantom;
 
 @Environment(EnvType.CLIENT)
-public class PhantomModel<T extends Entity> extends HierarchicalModel<T> {
+public class PhantomModel<T extends Phantom> extends HierarchicalModel<T> {
 	private final ModelPart root;
 	private final ModelPart leftWingBase;
 	private final ModelPart leftWingTip;
@@ -77,9 +77,8 @@ public class PhantomModel<T extends Entity> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		float k = ((float)(entity.getId() * 3) + h) * 0.13F;
+	public void setupAnim(T phantom, float f, float g, float h, float i, float j) {
+		float k = ((float)phantom.getUniqueFlapTickOffset() + h) * 7.448451F * (float) (Math.PI / 180.0);
 		float l = 16.0F;
 		this.leftWingBase.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);
 		this.leftWingTip.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);

@@ -170,8 +170,13 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 	}
 
 	@Deprecated
+	default boolean hasChunkAt(int i, int j) {
+		return this.hasChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j));
+	}
+
+	@Deprecated
 	default boolean hasChunkAt(BlockPos blockPos) {
-		return this.hasChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+		return this.hasChunkAt(blockPos.getX(), blockPos.getZ());
 	}
 
 	@Deprecated
@@ -181,23 +186,24 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	@Deprecated
 	default boolean hasChunksAt(int i, int j, int k, int l, int m, int n) {
-		if (m >= this.getMinBuildHeight() && j < this.getMaxBuildHeight()) {
-			i >>= 4;
-			k >>= 4;
-			l >>= 4;
-			n >>= 4;
+		return m >= this.getMinBuildHeight() && j < this.getMaxBuildHeight() ? this.hasChunksAt(i, k, l, n) : false;
+	}
 
-			for (int o = i; o <= l; o++) {
-				for (int p = k; p <= n; p++) {
-					if (!this.hasChunk(o, p)) {
-						return false;
-					}
+	@Deprecated
+	default boolean hasChunksAt(int i, int j, int k, int l) {
+		int m = SectionPos.blockToSectionCoord(i);
+		int n = SectionPos.blockToSectionCoord(k);
+		int o = SectionPos.blockToSectionCoord(j);
+		int p = SectionPos.blockToSectionCoord(l);
+
+		for (int q = m; q <= n; q++) {
+			for (int r = o; r <= p; r++) {
+				if (!this.hasChunk(q, r)) {
+					return false;
 				}
 			}
-
-			return true;
-		} else {
-			return false;
 		}
+
+		return true;
 	}
 }

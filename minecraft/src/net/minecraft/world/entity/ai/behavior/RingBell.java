@@ -30,7 +30,7 @@ public class RingBell extends Behavior<LivingEntity> {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
 			if (blockState.is(Blocks.BELL)) {
 				BellBlock bellBlock = (BellBlock)blockState.getBlock();
-				bellBlock.attemptToRing(serverLevel, blockPos, null);
+				bellBlock.attemptToRing(livingEntity, serverLevel, blockPos, null);
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.FixedBiomeSource;
@@ -90,21 +91,21 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public int getBaseHeight(int i, int j, Heightmap.Types types) {
+	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
 		BlockState[] blockStates = this.settings.getLayers();
 
 		for (int k = blockStates.length - 1; k >= 0; k--) {
 			BlockState blockState = blockStates[k];
 			if (blockState != null && types.isOpaque().test(blockState)) {
-				return this.settings.getMinBuildHeight() + k + 1;
+				return levelHeightAccessor.getMinBuildHeight() + k + 1;
 			}
 		}
 
-		return 0;
+		return levelHeightAccessor.getMinBuildHeight();
 	}
 
 	@Override
-	public NoiseColumn getBaseColumn(int i, int j) {
+	public NoiseColumn getBaseColumn(int i, int j, LevelHeightAccessor levelHeightAccessor) {
 		return new NoiseColumn(
 			0,
 			(BlockState[])Arrays.stream(this.settings.getLayers())

@@ -1,15 +1,20 @@
 package net.minecraft.world.level;
 
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -59,11 +64,27 @@ public interface CollisionGetter extends BlockGetter {
 		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB), false);
 	}
 
-	default boolean noBlockCollision(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
-		return this.getBlockCollisions(entity, aABB, biPredicate).allMatch(VoxelShape::isEmpty);
+	@Environment(EnvType.CLIENT)
+	default boolean hasBlockCollision(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
+		return !this.getBlockCollisions(entity, aABB, biPredicate).allMatch(VoxelShape::isEmpty);
 	}
 
 	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
 		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB, biPredicate), false);
+	}
+
+	default Optional<Vec3> findFreePosition(@Nullable Entity entity, VoxelShape voxelShape, Vec3 vec3, double d, double e, double f) {
+		if (voxelShape.isEmpty()) {
+			return Optional.empty();
+		} else {
+			AABB aABB = AABB.minmax(voxelShape.toAabbs()).inflate(d, e, f);
+			VoxelShape voxelShape2 = (VoxelShape)this.getBlockCollisions(entity, aABB)
+				.flatMap(voxelShapex -> voxelShapex.toAabbs().stream())
+				.map(aABBx -> aABBx.inflate(d / 2.0, e / 2.0, f / 2.0))
+				.map(Shapes::create)
+				.reduce(Shapes.empty(), Shapes::or);
+			VoxelShape voxelShape3 = Shapes.join(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
+			return voxelShape3.closestPointTo(vec3);
+		}
 	}
 }

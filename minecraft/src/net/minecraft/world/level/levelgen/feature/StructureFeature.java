@@ -18,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -215,10 +216,10 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 						int q = k + j * o;
 						int r = m + j * p;
 						ChunkPos chunkPos = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, q, r);
-						boolean bl4 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos.x, chunkPos.z).getGenerationSettings().isValidStart(this);
+						boolean bl4 = levelReader.getBiomeManager().getPrimaryBiomeAtChunk(chunkPos).getGenerationSettings().isValidStart(this);
 						if (bl4) {
 							ChunkAccess chunkAccess = levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
-							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), this, chunkAccess);
+							StructureStart<?> structureStart = structureFeatureManager.getStartForFeature(SectionPos.bottomOf(chunkAccess), this, chunkAccess);
 							if (structureStart != null && structureStart.isValid()) {
 								if (bl && structureStart.canBeReferenced()) {
 									structureStart.addReference();
@@ -280,7 +281,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		int j,
 		Biome biome,
 		ChunkPos chunkPos,
-		C featureConfiguration
+		C featureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		return true;
 	}
@@ -300,14 +302,15 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		int i,
 		WorldgenRandom worldgenRandom,
 		StructureFeatureConfiguration structureFeatureConfiguration,
-		C featureConfiguration
+		C featureConfiguration,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, chunkPos.x, chunkPos.z);
 		if (chunkPos.x == chunkPos2.x
 			&& chunkPos.z == chunkPos2.z
-			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration)) {
+			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
 			StructureStart<C> structureStart = this.createStart(chunkPos.x, chunkPos.z, BoundingBox.getUnknownBox(), i, l);
-			structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration);
+			structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration, levelHeightAccessor);
 			if (structureStart.isValid()) {
 				return structureStart;
 			}

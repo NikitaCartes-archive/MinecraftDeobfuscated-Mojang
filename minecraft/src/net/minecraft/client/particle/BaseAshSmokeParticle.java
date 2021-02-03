@@ -8,7 +8,6 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class BaseAshSmokeParticle extends TextureSheetParticle {
 	private final SpriteSet sprites;
-	private final double fallSpeed;
 
 	protected BaseAshSmokeParticle(
 		ClientLevel clientLevel,
@@ -25,11 +24,13 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 		SpriteSet spriteSet,
 		float n,
 		int o,
-		double p,
+		float p,
 		boolean bl
 	) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
-		this.fallSpeed = p;
+		this.friction = 0.96F;
+		this.gravity = p;
+		this.speedUpWhenYMotionIsBlocked = true;
 		this.sprites = spriteSet;
 		this.xd *= (double)g;
 		this.yd *= (double)h;
@@ -61,27 +62,7 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		} else {
-			this.setSpriteFromAge(this.sprites);
-			this.yd = this.yd + this.fallSpeed;
-			this.move(this.xd, this.yd, this.zd);
-			if (this.y == this.yo) {
-				this.xd *= 1.1;
-				this.zd *= 1.1;
-			}
-
-			this.xd *= 0.96F;
-			this.yd *= 0.96F;
-			this.zd *= 0.96F;
-			if (this.onGround) {
-				this.xd *= 0.7F;
-				this.zd *= 0.7F;
-			}
-		}
+		super.tick();
+		this.setSpriteFromAge(this.sprites);
 	}
 }

@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -55,7 +55,7 @@ public class MultifaceBlock extends Block {
 	public MultifaceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(getDefaultMultifaceState(this.stateDefinition));
-		this.shapesCache = getShapes(this.stateDefinition);
+		this.shapesCache = this.getShapeForEachState(MultifaceBlock::calculateMultifaceShape);
 		this.canRotate = Direction.Plane.HORIZONTAL.stream().allMatch(this::isFaceSupported);
 		this.canMirrorX = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.X).filter(this::isFaceSupported).count() % 2L == 0L;
 		this.canMirrorZ = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.Z).filter(this::isFaceSupported).count() % 2L == 0L;
@@ -136,7 +136,7 @@ public class MultifaceBlock extends Block {
 				}
 
 				blockState2 = blockState;
-			} else if (this.isWaterloggable() && blockState.getFluidState().isSource()) {
+			} else if (this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER)) {
 				blockState2 = this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
 			} else {
 				blockState2 = this.defaultBlockState();
@@ -253,13 +253,6 @@ public class MultifaceBlock extends Block {
 		}
 
 		return blockState;
-	}
-
-	private static ImmutableMap<BlockState, VoxelShape> getShapes(StateDefinition<Block, BlockState> stateDefinition) {
-		Map<BlockState, VoxelShape> map = (Map<BlockState, VoxelShape>)stateDefinition.getPossibleStates()
-			.stream()
-			.collect(Collectors.toMap(Function.identity(), MultifaceBlock::calculateMultifaceShape));
-		return ImmutableMap.copyOf(map);
 	}
 
 	private static VoxelShape calculateMultifaceShape(BlockState blockState) {
