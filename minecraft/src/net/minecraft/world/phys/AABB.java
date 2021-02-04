@@ -198,43 +198,6 @@ public class AABB {
 		return new AABB(d, e, f, g, h, i);
 	}
 
-	public static AABB minmax(Iterable<AABB> iterable) {
-		double d = Double.MAX_VALUE;
-		double e = Double.MAX_VALUE;
-		double f = Double.MAX_VALUE;
-		double g = Double.MIN_VALUE;
-		double h = Double.MIN_VALUE;
-		double i = Double.MIN_VALUE;
-
-		for (AABB aABB : iterable) {
-			if (aABB.minX < d) {
-				d = aABB.minX;
-			}
-
-			if (aABB.minY < e) {
-				e = aABB.minY;
-			}
-
-			if (aABB.minZ < f) {
-				f = aABB.minZ;
-			}
-
-			if (aABB.maxX > g) {
-				g = aABB.maxX;
-			}
-
-			if (aABB.maxY > h) {
-				h = aABB.maxY;
-			}
-
-			if (aABB.maxZ > i) {
-				i = aABB.maxZ;
-			}
-		}
-
-		return new AABB(d, e, f, g, h, i);
-	}
-
 	public AABB move(double d, double e, double f) {
 		return new AABB(this.minX + d, this.minY + e, this.minZ + f, this.maxX + d, this.maxY + e, this.maxZ + f);
 	}

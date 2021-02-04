@@ -77,7 +77,7 @@ public interface CollisionGetter extends BlockGetter {
 		if (voxelShape.isEmpty()) {
 			return Optional.empty();
 		} else {
-			AABB aABB = AABB.minmax(voxelShape.toAabbs()).inflate(d, e, f);
+			AABB aABB = voxelShape.bounds().inflate(d, e, f);
 			VoxelShape voxelShape2 = (VoxelShape)this.getBlockCollisions(entity, aABB)
 				.flatMap(voxelShapex -> voxelShapex.toAabbs().stream())
 				.map(aABBx -> aABBx.inflate(d / 2.0, e / 2.0, f / 2.0))

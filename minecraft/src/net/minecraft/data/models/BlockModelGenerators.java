@@ -3718,12 +3718,12 @@ public class BlockModelGenerators {
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.COPPER_BLOCK);
-		this.createTrivialCube(Blocks.EXPOSED_COPPER_BLOCK);
-		this.createTrivialCube(Blocks.WEATHERED_COPPER_BLOCK);
-		this.createTrivialCube(Blocks.OXIDIZED_COPPER_BLOCK);
-		this.copyModel(Blocks.COPPER_BLOCK, Blocks.WAXED_COPPER);
-		this.copyModel(Blocks.EXPOSED_COPPER_BLOCK, Blocks.WAXED_EXPOSED_COPPER);
-		this.copyModel(Blocks.WEATHERED_COPPER_BLOCK, Blocks.WAXED_WEATHERED_COPPER);
+		this.createTrivialCube(Blocks.EXPOSED_COPPER);
+		this.createTrivialCube(Blocks.WEATHERED_COPPER);
+		this.createTrivialCube(Blocks.OXIDIZED_COPPER);
+		this.copyModel(Blocks.COPPER_BLOCK, Blocks.WAXED_COPPER_BLOCK);
+		this.copyModel(Blocks.EXPOSED_COPPER, Blocks.WAXED_EXPOSED_COPPER);
+		this.copyModel(Blocks.WEATHERED_COPPER, Blocks.WAXED_WEATHERED_COPPER);
 		this.createWeightedPressurePlate(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.GOLD_BLOCK);
 		this.createWeightedPressurePlate(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.IRON_BLOCK);
 		this.createAmethystClusters();

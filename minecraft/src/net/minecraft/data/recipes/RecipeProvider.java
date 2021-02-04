@@ -713,9 +713,9 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_copper_block", has(Blocks.COPPER_BLOCK))
 			.save(consumer, "copper_ingot_from_copper_block");
 		cut(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
-		cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER_BLOCK);
-		cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER_BLOCK);
-		cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER_BLOCK);
+		cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
+		cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
+		cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
 		ShapelessRecipeBuilder.shapeless(Items.WAXED_COPPER)
 			.requires(Items.COPPER_BLOCK)
 			.requires(Items.HONEYCOMB)
@@ -776,7 +776,7 @@ public class RecipeProvider implements DataProvider {
 			.requires(Items.HONEYCOMB)
 			.unlockedBy("has_exposed_cut_copper_slab", has(Items.EXPOSED_CUT_COPPER_SLAB))
 			.save(consumer, "waxed_exposed_cut_copper_slab_from_honeycomb");
-		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER);
+		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
 		cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
 		cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
 		ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2)
@@ -2984,18 +2984,18 @@ public class RecipeProvider implements DataProvider {
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_STAIRS, Blocks.COPPER_BLOCK);
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_SLAB, Blocks.COPPER_BLOCK, 2);
-		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_COPPER_BLOCK, 2);
-		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_COPPER_BLOCK, 2);
-		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_COPPER_BLOCK);
-		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_COPPER_BLOCK, 2);
-		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER);
-		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_COPPER);
-		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_COPPER_BLOCK);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_COPPER_BLOCK, 2);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_COPPER, 2);
