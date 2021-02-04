@@ -1130,9 +1130,9 @@ public class Items {
     public static final Item AMETHYST_CLUSTER = Items.registerBlock(Blocks.AMETHYST_CLUSTER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SPYGLASS = Items.registerItem("spyglass", (Item)new SpyglassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).stacksTo(1)));
     public static final Item COPPER_BLOCK = Items.registerBlock(Blocks.COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-    public static final Item EXPOSED_COPPER_BLOCK = Items.registerBlock(Blocks.EXPOSED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-    public static final Item WEATHERED_COPPER_BLOCK = Items.registerBlock(Blocks.WEATHERED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-    public static final Item OXIDIZED_COPPER_BLOCK = Items.registerBlock(Blocks.OXIDIZED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item EXPOSED_COPPER_BLOCK = Items.registerBlock(Blocks.EXPOSED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WEATHERED_COPPER_BLOCK = Items.registerBlock(Blocks.WEATHERED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item OXIDIZED_COPPER_BLOCK = Items.registerBlock(Blocks.OXIDIZED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item CUT_COPPER = Items.registerBlock(Blocks.CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item EXPOSED_CUT_COPPER = Items.registerBlock(Blocks.EXPOSED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WEATHERED_CUT_COPPER = Items.registerBlock(Blocks.WEATHERED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -1145,7 +1145,7 @@ public class Items {
     public static final Item EXPOSED_CUT_COPPER_SLAB = Items.registerBlock(Blocks.EXPOSED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WEATHERED_CUT_COPPER_SLAB = Items.registerBlock(Blocks.WEATHERED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OXIDIZED_CUT_COPPER_SLAB = Items.registerBlock(Blocks.OXIDIZED_CUT_COPPER_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
-    public static final Item WAXED_COPPER = Items.registerBlock(Blocks.WAXED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WAXED_COPPER = Items.registerBlock(Blocks.WAXED_COPPER_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WAXED_EXPOSED_COPPER = Items.registerBlock(Blocks.WAXED_EXPOSED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WAXED_WEATHERED_COPPER = Items.registerBlock(Blocks.WAXED_WEATHERED_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item WAXED_CUT_COPPER = Items.registerBlock(Blocks.WAXED_CUT_COPPER, CreativeModeTab.TAB_BUILDING_BLOCKS);

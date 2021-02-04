@@ -83,7 +83,7 @@ extends BlockGetter {
         if (voxelShape2.isEmpty()) {
             return Optional.empty();
         }
-        AABB aABB2 = AABB.minmax(voxelShape2.toAabbs()).inflate(d, e, f);
+        AABB aABB2 = voxelShape2.bounds().inflate(d, e, f);
         VoxelShape voxelShape22 = this.getBlockCollisions(entity, aABB2).flatMap(voxelShape -> voxelShape.toAabbs().stream()).map(aABB -> aABB.inflate(d / 2.0, e / 2.0, f / 2.0)).map(Shapes::create).reduce(Shapes.empty(), Shapes::or);
         VoxelShape voxelShape3 = Shapes.join(voxelShape2, voxelShape22, BooleanOp.ONLY_FIRST);
         return voxelShape3.closestPointTo(vec3);
