@@ -5,6 +5,8 @@ public interface RandomSource {
 
 	int nextInt(int i);
 
+	long nextLong();
+
 	double nextDouble();
 
 	default void consumeCount(int i) {

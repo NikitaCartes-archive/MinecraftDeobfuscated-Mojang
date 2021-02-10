@@ -1365,10 +1365,10 @@ public class StrongholdPieces {
 			this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPieces.StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
 			BlockState blockState = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.EAST);
 			BlockState blockState2 = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.WEST);
-			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 1, 2, 1, blockState);
-			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 3, 2, 1, blockState2);
-			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 1, 2, 5, blockState);
-			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 3, 2, 5, blockState2);
+			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 1, 2, 1, blockState, false);
+			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 3, 2, 1, blockState2, false);
+			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 1, 2, 5, blockState, false);
+			this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1F, 3, 2, 5, blockState2, false);
 			if (this.leftChild) {
 				this.generateBox(worldGenLevel, boundingBox, 0, 1, 2, 0, 3, 4, CAVE_AIR, CAVE_AIR, false);
 			}

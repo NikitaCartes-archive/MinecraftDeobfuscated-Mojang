@@ -80,7 +80,7 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 				}
 
 				this.calculateBoundingBox();
-				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), this.random, 10);
+				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
 			} while (this.pieces.isEmpty() || startPiece.portalRoomPiece == null);
 		}
 	}

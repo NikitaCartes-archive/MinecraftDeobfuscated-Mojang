@@ -210,6 +210,20 @@ public class Util {
 		return type;
 	}
 
+	public static Runnable wrapThreadWithTaskName(String string, Runnable runnable) {
+		return SharedConstants.IS_RUNNING_IN_IDE ? () -> {
+			Thread thread = Thread.currentThread();
+			String string2 = thread.getName();
+			thread.setName(string);
+
+			try {
+				runnable.run();
+			} finally {
+				thread.setName(string2);
+			}
+		} : runnable;
+	}
+
 	public static Util.OS getPlatform() {
 		String string = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 		if (string.contains("win")) {
@@ -289,6 +303,25 @@ public class Util {
 	}
 
 	public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<? extends V>> list) {
+		return (CompletableFuture<List<V>>)list.stream()
+			.reduce(
+				CompletableFuture.completedFuture(Lists.newArrayList()),
+				(completableFuture, completableFuture2) -> completableFuture2.thenCombine(completableFuture, (object, listx) -> {
+						List<V> list2 = Lists.<V>newArrayListWithCapacity(listx.size() + 1);
+						list2.addAll(listx);
+						list2.add(object);
+						return list2;
+					}),
+				(completableFuture, completableFuture2) -> completableFuture.thenCombine(completableFuture2, (listx, list2) -> {
+						List<V> list3 = Lists.<V>newArrayListWithCapacity(listx.size() + list2.size());
+						list3.addAll(listx);
+						list3.addAll(list2);
+						return list3;
+					})
+			);
+	}
+
+	public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
 		List<V> list2 = Lists.<V>newArrayListWithCapacity(list.size());
 		CompletableFuture<?>[] completableFutures = new CompletableFuture[list.size()];
 		CompletableFuture<Void> completableFuture = new CompletableFuture();

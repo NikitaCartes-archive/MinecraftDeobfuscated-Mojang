@@ -122,6 +122,15 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		return this.locked;
 	}
 
+	public boolean isPreWorldheight() {
+		return this.levelVersion.minecraftVersion() <= 2692;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isDisabled() {
+		return this.isLocked() || this.isPreWorldheight();
+	}
+
 	@Environment(EnvType.CLIENT)
 	public Component getInfo() {
 		if (this.info == null) {
@@ -135,6 +144,8 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private Component createInfo() {
 		if (this.isLocked()) {
 			return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+		} else if (this.isPreWorldheight()) {
+			return new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
 		} else if (this.isRequiresConversion()) {
 			return new TranslatableComponent("selectWorld.conversion");
 		} else {

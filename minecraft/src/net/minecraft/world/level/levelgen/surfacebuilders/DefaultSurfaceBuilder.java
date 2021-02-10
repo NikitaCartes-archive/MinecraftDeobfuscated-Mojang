@@ -67,7 +67,7 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 		int o = i & 15;
 		int p = j & 15;
 
-		for (int q = k; q >= 0; q--) {
+		for (int q = k; q >= 50; q--) {
 			mutableBlockPos.set(o, q, p);
 			BlockState blockState8 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState8.isAir()) {

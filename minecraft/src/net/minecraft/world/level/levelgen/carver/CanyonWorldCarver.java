@@ -14,7 +14,7 @@ public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfigurati
 	private final float[] rs = new float[1024];
 
 	public CanyonWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
-		super(codec, 256);
+		super(codec, 384);
 	}
 
 	public boolean isStartChunk(Random random, int i, int j, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
@@ -68,7 +68,7 @@ public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfigurati
 		Random random = new Random(l);
 		float q = 1.0F;
 
-		for (int r = 0; r < 256; r++) {
+		for (int r = 0; r < 384; r++) {
 			if (r == 0 || random.nextInt(3) == 0) {
 				q = 1.0F + random.nextFloat() * random.nextFloat();
 			}

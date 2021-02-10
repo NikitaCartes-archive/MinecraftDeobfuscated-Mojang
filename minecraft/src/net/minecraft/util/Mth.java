@@ -534,8 +534,16 @@ public class Mth {
 		return f * f;
 	}
 
+	public static double square(double d) {
+		return d * d;
+	}
+
 	public static double clampedMap(double d, double e, double f, double g, double h) {
 		return clampedLerp(g, h, inverseLerp(d, e, f));
+	}
+
+	public static double map(double d, double e, double f, double g, double h) {
+		return lerp(inverseLerp(d, e, f), g, h);
 	}
 
 	public static int roundToward(int i, int j) {

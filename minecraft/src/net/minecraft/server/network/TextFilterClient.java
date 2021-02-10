@@ -266,7 +266,7 @@ public class TextFilterClient implements AutoCloseable {
 			List<CompletableFuture<Optional<String>>> list2 = (List<CompletableFuture<Optional<String>>>)list.stream()
 				.map(string -> TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor))
 				.collect(ImmutableList.toImmutableList());
-			return Util.sequence(list2)
+			return Util.sequenceFailFast(list2)
 				.thenApply(listx -> Optional.of(listx.stream().map(optional -> (String)optional.orElse("")).collect(ImmutableList.toImmutableList())))
 				.exceptionally(throwable -> Optional.empty());
 		}

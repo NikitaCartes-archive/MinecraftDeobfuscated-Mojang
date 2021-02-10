@@ -119,52 +119,8 @@ public abstract class StructurePiece {
 		return null;
 	}
 
-	protected boolean edgesLiquid(BlockGetter blockGetter, BoundingBox boundingBox) {
-		int i = Math.max(this.boundingBox.x0 - 1, boundingBox.x0);
-		int j = Math.max(this.boundingBox.y0 - 1, boundingBox.y0);
-		int k = Math.max(this.boundingBox.z0 - 1, boundingBox.z0);
-		int l = Math.min(this.boundingBox.x1 + 1, boundingBox.x1);
-		int m = Math.min(this.boundingBox.y1 + 1, boundingBox.y1);
-		int n = Math.min(this.boundingBox.z1 + 1, boundingBox.z1);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-		for (int o = i; o <= l; o++) {
-			for (int p = k; p <= n; p++) {
-				if (blockGetter.getBlockState(mutableBlockPos.set(o, j, p)).getMaterial().isLiquid()) {
-					return true;
-				}
-
-				if (blockGetter.getBlockState(mutableBlockPos.set(o, m, p)).getMaterial().isLiquid()) {
-					return true;
-				}
-			}
-		}
-
-		for (int o = i; o <= l; o++) {
-			for (int p = j; p <= m; p++) {
-				if (blockGetter.getBlockState(mutableBlockPos.set(o, p, k)).getMaterial().isLiquid()) {
-					return true;
-				}
-
-				if (blockGetter.getBlockState(mutableBlockPos.set(o, p, n)).getMaterial().isLiquid()) {
-					return true;
-				}
-			}
-		}
-
-		for (int o = k; o <= n; o++) {
-			for (int p = j; p <= m; p++) {
-				if (blockGetter.getBlockState(mutableBlockPos.set(i, p, o)).getMaterial().isLiquid()) {
-					return true;
-				}
-
-				if (blockGetter.getBlockState(mutableBlockPos.set(l, p, o)).getMaterial().isLiquid()) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+	protected BlockPos getWorldPos(int i, int j, int k) {
+		return new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
 	}
 
 	protected int getWorldX(int i, int j) {
@@ -212,24 +168,30 @@ public abstract class StructurePiece {
 	protected void placeBlock(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
 		BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
 		if (boundingBox.isInside(blockPos)) {
-			if (this.mirror != Mirror.NONE) {
-				blockState = blockState.mirror(this.mirror);
-			}
+			if (this.canBeReplaced(worldGenLevel, i, j, k, boundingBox)) {
+				if (this.mirror != Mirror.NONE) {
+					blockState = blockState.mirror(this.mirror);
+				}
 
-			if (this.rotation != Rotation.NONE) {
-				blockState = blockState.rotate(this.rotation);
-			}
+				if (this.rotation != Rotation.NONE) {
+					blockState = blockState.rotate(this.rotation);
+				}
 
-			worldGenLevel.setBlock(blockPos, blockState, 2);
-			FluidState fluidState = worldGenLevel.getFluidState(blockPos);
-			if (!fluidState.isEmpty()) {
-				worldGenLevel.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), 0);
-			}
+				worldGenLevel.setBlock(blockPos, blockState, 2);
+				FluidState fluidState = worldGenLevel.getFluidState(blockPos);
+				if (!fluidState.isEmpty()) {
+					worldGenLevel.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), 0);
+				}
 
-			if (SHAPE_CHECK_BLOCKS.contains(blockState.getBlock())) {
-				worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);
+				if (SHAPE_CHECK_BLOCKS.contains(blockState.getBlock())) {
+					worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);
+				}
 			}
 		}
+	}
+
+	protected boolean canBeReplaced(LevelReader levelReader, int i, int j, int k, BoundingBox boundingBox) {
+		return true;
 	}
 
 	protected BlockState getBlock(BlockGetter blockGetter, int i, int j, int k, BoundingBox boundingBox) {
@@ -334,9 +296,27 @@ public abstract class StructurePiece {
 		}
 	}
 
-	protected void maybeGenerateBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState) {
+	protected void maybeGenerateBlock(
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState, boolean bl
+	) {
 		if (random.nextFloat() < f) {
-			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+			if (!bl) {
+				this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+				return;
+			}
+
+			Direction[] directions = Direction.values();
+			BlockPos.MutableBlockPos mutableBlockPos = this.getWorldPos(i, j, k).mutable();
+
+			for (Direction direction : directions) {
+				mutableBlockPos.move(direction);
+				if (boundingBox.isInside(mutableBlockPos) && !worldGenLevel.isEmptyBlock(mutableBlockPos)) {
+					this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+					return;
+				}
+
+				mutableBlockPos.move(direction.getOpposite());
+			}
 		}
 	}
 

@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -14,10 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -32,10 +29,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -46,11 +41,10 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	private static final EnumProperty<Tilt> TILT = BlockStateProperties.TILT;
 	private static final Object2IntMap<Tilt> DELAY_UNTIL_NEXT_TILT_STATE = Util.make(new Object2IntArrayMap<>(), object2IntArrayMap -> {
 		object2IntArrayMap.defaultReturnValue(-1);
-		object2IntArrayMap.put(Tilt.UNSTABLE, 20);
+		object2IntArrayMap.put(Tilt.UNSTABLE, 10);
 		object2IntArrayMap.put(Tilt.PARTIAL, 10);
 		object2IntArrayMap.put(Tilt.FULL, 100);
 	});
-	private static final AABB ENTITY_DETECTION_SHAPE = Block.box(0.0, 11.0, 0.0, 16.0, 16.0, 16.0).bounds();
 	private static final Map<Tilt, VoxelShape> LEAF_SHAPES = ImmutableMap.of(
 		Tilt.NONE,
 		Block.box(0.0, 11.0, 0.0, 16.0, 15.0, 16.0),
@@ -81,7 +75,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		this.shapesCache = this.getShapeForEachState(BigDripleafBlock::calculateShape);
 	}
 
-	protected static VoxelShape calculateShape(BlockState blockState) {
+	private static VoxelShape calculateShape(BlockState blockState) {
 		return Shapes.or(getLeafShape(blockState), getStemShape(blockState));
 	}
 
@@ -93,26 +87,47 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		return (VoxelShape)LEAF_SHAPES.get(blockState.getValue(TILT));
 	}
 
-	protected static void place(Level level, Random random, BlockPos blockPos) {
-		int i = level.getMaxBuildHeight() - blockPos.getY();
-		int j = 1 + random.nextInt(5);
-		int k = Math.min(j, i);
+	protected static void placeWithRandomHeight(Level level, Random random, BlockPos blockPos) {
+		int i = 1 + random.nextInt(5);
 		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+		int j = 0;
 
-		for (int l = 0; l < k; l++) {
-			Block block = l == k - 1 ? Blocks.BIG_DRIPLEAF : Blocks.BIG_DRIPLEAF_STEM;
-			BlockState blockState = block.defaultBlockState()
-				.setValue(WATERLOGGED, Boolean.valueOf(level.getFluidState(mutableBlockPos).getType() == Fluids.WATER))
-				.setValue(HorizontalDirectionalBlock.FACING, direction);
-			level.setBlock(mutableBlockPos, blockState, 2);
+		while (j < i && canPlaceAt(level, mutableBlockPos, level.getBlockState(mutableBlockPos))) {
+			j++;
 			mutableBlockPos.move(Direction.UP);
 		}
+
+		int k = blockPos.getY() + j - 1;
+		mutableBlockPos.setY(blockPos.getY());
+
+		while (mutableBlockPos.getY() < k) {
+			BigDripleafStemBlock.place(level, mutableBlockPos, level.getFluidState(mutableBlockPos), direction);
+			mutableBlockPos.move(Direction.UP);
+		}
+
+		place(level, mutableBlockPos, level.getFluidState(mutableBlockPos), direction);
+	}
+
+	private static boolean canReplace(BlockState blockState) {
+		return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.SMALL_DRIPLEAF);
+	}
+
+	private static boolean canPlaceAt(Level level, BlockPos blockPos, BlockState blockState) {
+		return level.isInWorldBounds(blockPos) && canReplace(blockState);
+	}
+
+	protected static boolean place(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState, Direction direction) {
+		BlockState blockState = Blocks.BIG_DRIPLEAF
+			.defaultBlockState()
+			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.isSourceOfType(Fluids.WATER)))
+			.setValue(FACING, direction);
+		return levelAccessor.setBlock(blockPos, blockState, 2);
 	}
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		level.destroyBlock(blockHitResult.getBlockPos(), true, projectile);
+		this.setTiltAndScheduleTick(blockState, level, blockHitResult.getBlockPos(), Tilt.FULL, SoundEvents.BIG_DRIPLEAF_TILT_DOWN);
 	}
 
 	@Override
@@ -131,21 +146,21 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if (!blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.destroyBlock(blockPos, true);
-		}
+		if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
+			return blockState.getValue(WATERLOGGED) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+		} else {
+			if ((Boolean)blockState.getValue(WATERLOGGED)) {
+				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			}
 
-		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		}
-
-		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
 	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
 		BlockState blockState2 = blockGetter.getBlockState(blockPos.above());
-		return blockState2.isAir() || blockState2.getFluidState().is(FluidTags.WATER);
+		return canReplace(blockState2);
 	}
 
 	@Override
@@ -156,35 +171,18 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		BlockPos blockPos2 = blockPos.above();
-		if (serverLevel.isInWorldBounds(blockPos2)) {
-			BlockState blockState2 = serverLevel.getBlockState(blockPos2);
-			Fluid fluid = blockState2.getFluidState().getType();
-			boolean bl;
-			if (!blockState2.isAir() && fluid != Fluids.FLOWING_WATER) {
-				if (fluid != Fluids.WATER) {
-					return;
-				}
-
-				bl = true;
-			} else {
-				bl = false;
-			}
-
-			serverLevel.setBlock(
-				blockPos2, Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(FACING, blockState.getValue(FACING)).setValue(WATERLOGGED, Boolean.valueOf(bl)), 2
-			);
-			serverLevel.setBlock(
-				blockPos,
-				Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(FACING, blockState.getValue(FACING)).setValue(WATERLOGGED, blockState.getValue(WATERLOGGED)),
-				2
-			);
+		BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+		if (canPlaceAt(serverLevel, blockPos2, blockState2)) {
+			Direction direction = blockState.getValue(FACING);
+			BigDripleafStemBlock.place(serverLevel, blockPos, blockState.getFluidState(), direction);
+			place(serverLevel, blockPos2, blockState2.getFluidState(), direction);
 		}
 	}
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide) {
-			if (blockState.getValue(TILT) == Tilt.NONE && canEntityTilt(blockPos, entity, true)) {
+			if (blockState.getValue(TILT) == Tilt.NONE && canEntityTilt(blockPos, entity)) {
 				this.setTiltAndScheduleTick(blockState, level, blockPos, Tilt.UNSTABLE, null);
 			}
 		}
@@ -192,46 +190,40 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		Tilt tilt = blockState.getValue(TILT);
-		if (tilt == Tilt.UNSTABLE) {
-			if (isAnyEntityTouching(serverLevel, blockPos, true)) {
+		if (serverLevel.hasNeighborSignal(blockPos)) {
+			resetTilt(blockState, serverLevel, blockPos);
+		} else {
+			Tilt tilt = blockState.getValue(TILT);
+			if (tilt == Tilt.UNSTABLE) {
 				this.setTiltAndScheduleTick(blockState, serverLevel, blockPos, Tilt.PARTIAL, SoundEvents.BIG_DRIPLEAF_TILT_DOWN);
-			} else {
-				this.resetTilt(blockState, serverLevel, blockPos);
-			}
-		} else if (tilt == Tilt.PARTIAL) {
-			if (isAnyEntityTouching(serverLevel, blockPos, false)) {
+			} else if (tilt == Tilt.PARTIAL) {
 				this.setTiltAndScheduleTick(blockState, serverLevel, blockPos, Tilt.FULL, SoundEvents.BIG_DRIPLEAF_TILT_DOWN);
-			} else {
-				this.setTiltAndScheduleTick(blockState, serverLevel, blockPos, Tilt.UNSTABLE, SoundEvents.BIG_DRIPLEAF_TILT_UP);
+			} else if (tilt == Tilt.FULL) {
+				resetTilt(blockState, serverLevel, blockPos);
 			}
-		} else if (tilt == Tilt.FULL) {
-			this.resetTilt(blockState, serverLevel, blockPos);
 		}
 	}
 
-	private void playTiltSound(Level level, BlockPos blockPos, SoundEvent soundEvent) {
+	@Override
+	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+		if (level.hasNeighborSignal(blockPos)) {
+			resetTilt(blockState, level, blockPos);
+		}
+	}
+
+	private static void playTiltSound(Level level, BlockPos blockPos, SoundEvent soundEvent) {
 		float f = Mth.randomBetween(level.random, 0.8F, 1.2F);
 		level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, f);
 	}
 
-	private static boolean isAnyEntityTouching(Level level, BlockPos blockPos, boolean bl) {
-		Predicate<Entity> predicate = EntitySelector.NO_SPECTATORS.and(entity -> canEntityTilt(blockPos, entity, bl));
-		return !level.getEntities((Entity)null, ENTITY_DETECTION_SHAPE.move(blockPos), predicate).isEmpty();
-	}
-
-	private static boolean canEntityTilt(BlockPos blockPos, Entity entity, boolean bl) {
-		return bl && entity.isSteppingCarefully() ? false : isEntityAbove(blockPos, entity);
-	}
-
-	private static boolean isEntityAbove(BlockPos blockPos, Entity entity) {
+	private static boolean canEntityTilt(BlockPos blockPos, Entity entity) {
 		return entity.position().y > (double)((float)blockPos.getY() + 0.6875F);
 	}
 
 	private void setTiltAndScheduleTick(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt, @Nullable SoundEvent soundEvent) {
-		this.setTilt(blockState, level, blockPos, tilt);
+		setTilt(blockState, level, blockPos, tilt);
 		if (soundEvent != null) {
-			this.playTiltSound(level, blockPos, soundEvent);
+			playTiltSound(level, blockPos, soundEvent);
 		}
 
 		int i = DELAY_UNTIL_NEXT_TILT_STATE.getInt(tilt);
@@ -240,12 +232,12 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		}
 	}
 
-	private void resetTilt(BlockState blockState, Level level, BlockPos blockPos) {
-		this.setTilt(blockState, level, blockPos, Tilt.NONE);
-		this.playTiltSound(level, blockPos, SoundEvents.BIG_DRIPLEAF_TILT_UP);
+	private static void resetTilt(BlockState blockState, Level level, BlockPos blockPos) {
+		setTilt(blockState, level, blockPos, Tilt.NONE);
+		playTiltSound(level, blockPos, SoundEvents.BIG_DRIPLEAF_TILT_UP);
 	}
 
-	private void setTilt(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt) {
+	private static void setTilt(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt) {
 		level.setBlock(blockPos, blockState.setValue(TILT, tilt), 2);
 		if (tilt.causesVibration()) {
 			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos);

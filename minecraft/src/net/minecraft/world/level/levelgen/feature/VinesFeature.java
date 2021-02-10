@@ -23,7 +23,7 @@ public class VinesFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos = featurePlaceContext.origin();
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
-		for (int i = 64; i < 256; i++) {
+		for (int i = 64; i < 384; i++) {
 			mutableBlockPos.set(blockPos);
 			mutableBlockPos.move(random.nextInt(4) - random.nextInt(4), 0, random.nextInt(4) - random.nextInt(4));
 			mutableBlockPos.setY(i);

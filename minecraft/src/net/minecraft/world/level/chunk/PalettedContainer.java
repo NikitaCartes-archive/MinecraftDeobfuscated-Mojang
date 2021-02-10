@@ -1,10 +1,12 @@
 package net.minecraft.world.level.chunk;
 
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
@@ -12,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.BitStorage;
+import net.minecraft.util.DebugBuffer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ThreadingDetector;
 
@@ -25,14 +28,21 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 	protected BitStorage storage;
 	private Palette<T> palette;
 	private int bits;
-	private final ReentrantLock lock = new ReentrantLock();
+	private final Semaphore lock = new Semaphore(1);
+	@Nullable
+	private final DebugBuffer<Pair<Thread, StackTraceElement[]>> traces = null;
 
 	public void acquire() {
-		ThreadingDetector.checkAndLock(this.lock, "PalettedContainer");
+		if (this.traces != null) {
+			Thread thread = Thread.currentThread();
+			this.traces.push(Pair.of(thread, thread.getStackTrace()));
+		}
+
+		ThreadingDetector.checkAndLock(this.lock, this.traces, "PalettedContainer");
 	}
 
 	public void release() {
-		this.lock.unlock();
+		this.lock.release();
 	}
 
 	public PalettedContainer(Palette<T> palette, IdMapper<T> idMapper, Function<CompoundTag, T> function, Function<T, CompoundTag> function2, T object) {
@@ -68,7 +78,6 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 
 	@Override
 	public int onResize(int i, T object) {
-		this.acquire();
 		BitStorage bitStorage = this.storage;
 		Palette<T> palette = this.palette;
 		this.setBits(i);
@@ -80,9 +89,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 			}
 		}
 
-		int jx = this.palette.idFor(object);
-		this.release();
-		return jx;
+		return this.palette.idFor(object);
 	}
 
 	public T getAndSet(int i, int j, int k, T object) {
@@ -96,14 +103,14 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		return this.getAndSet(getIndex(i, j, k), object);
 	}
 
-	protected T getAndSet(int i, T object) {
+	private T getAndSet(int i, T object) {
 		int j = this.palette.idFor(object);
 		int k = this.storage.getAndSet(i, j);
 		T object2 = this.palette.valueFor(k);
 		return object2 == null ? this.defaultValue : object2;
 	}
 
-	protected void set(int i, T object) {
+	private void set(int i, T object) {
 		int j = this.palette.idFor(object);
 		this.storage.set(i, j);
 	}

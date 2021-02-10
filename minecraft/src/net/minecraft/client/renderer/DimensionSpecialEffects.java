@@ -125,7 +125,7 @@ public abstract class DimensionSpecialEffects {
 	@Environment(EnvType.CLIENT)
 	public static class OverworldEffects extends DimensionSpecialEffects {
 		public OverworldEffects() {
-			super(128.0F, true, DimensionSpecialEffects.SkyType.NORMAL, false, false);
+			super(192.0F, true, DimensionSpecialEffects.SkyType.NORMAL, false, false);
 		}
 
 		@Override

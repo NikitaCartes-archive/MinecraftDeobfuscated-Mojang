@@ -47,6 +47,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -108,6 +109,12 @@ public class Main {
 			LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
 			MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
+			LevelSummary levelSummary = levelStorageAccess.getSummary();
+			if (levelSummary != null && levelSummary.isPreWorldheight()) {
+				LOGGER.info("Loading of old worlds is temporarily disabled.");
+				return;
+			}
+
 			DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
 			boolean bl = optionSet.has(optionSpec7);
 			if (bl) {
@@ -134,9 +141,9 @@ public class Main {
 			ServerResources serverResources;
 			try {
 				serverResources = (ServerResources)completableFuture.get();
-			} catch (Exception var41) {
+			} catch (Exception var42) {
 				LOGGER.warn(
-					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var41
+					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var42
 				);
 				packRepository.close();
 				return;
@@ -209,8 +216,8 @@ public class Main {
 			};
 			thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 			Runtime.getRuntime().addShutdownHook(thread);
-		} catch (Exception var42) {
-			LOGGER.fatal("Failed to start the minecraft server", (Throwable)var42);
+		} catch (Exception var43) {
+			LOGGER.fatal("Failed to start the minecraft server", (Throwable)var43);
 		}
 	}
 

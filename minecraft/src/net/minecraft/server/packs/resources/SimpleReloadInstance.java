@@ -85,7 +85,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 			completableFuture2 = completableFuture4;
 		}
 
-		this.allDone = Util.sequence(list2);
+		this.allDone = Util.sequenceFailFast(list2);
 	}
 
 	@Override

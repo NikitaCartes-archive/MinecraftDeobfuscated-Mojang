@@ -23,17 +23,11 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
-	public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 256));
+	public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 384));
 	public static final WorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = register(
 		"nether_cave", new NetherWorldCarver(ProbabilityFeatureConfiguration.CODEC)
 	);
 	public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = register("canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC));
-	public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CANYON = register(
-		"underwater_canyon", new UnderwaterCanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC)
-	);
-	public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CAVE = register(
-		"underwater_cave", new UnderwaterCaveWorldCarver(ProbabilityFeatureConfiguration.CODEC)
-	);
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
@@ -178,7 +172,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			if (!this.canReplaceBlock(blockState, blockState2)) {
 				return false;
 			} else {
-				if (o < 11) {
+				if (o < -53) {
 					chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
 				} else {
 					chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);

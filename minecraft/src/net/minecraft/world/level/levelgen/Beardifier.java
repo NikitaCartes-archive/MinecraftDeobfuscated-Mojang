@@ -34,10 +34,8 @@ public class Beardifier {
 
 	protected Beardifier(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
-		int i = chunkPos.x;
-		int j = chunkPos.z;
-		int k = chunkPos.getMinBlockX();
-		int l = chunkPos.getMinBlockZ();
+		int i = chunkPos.getMinBlockX();
+		int j = chunkPos.getMinBlockZ();
 		this.junctions = new ObjectArrayList<>(32);
 		this.rigids = new ObjectArrayList<>(10);
 
@@ -53,9 +51,9 @@ public class Beardifier {
 							}
 
 							for (JigsawJunction jigsawJunction : poolElementStructurePiece.getJunctions()) {
-								int kx = jigsawJunction.getSourceX();
-								int lx = jigsawJunction.getSourceZ();
-								if (kx > k - 12 && lx > l - 12 && kx < k + 15 + 12 && lx < l + 15 + 12) {
+								int k = jigsawJunction.getSourceX();
+								int l = jigsawJunction.getSourceZ();
+								if (k > i - 12 && l > j - 12 && k < i + 15 + 12 && l < j + 15 + 12) {
 									this.junctions.add(jigsawJunction);
 								}
 							}

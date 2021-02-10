@@ -59,6 +59,15 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	LevelChunkSection[] getSections();
 
+	default LevelChunkSection getOrCreateSection(int i) {
+		LevelChunkSection[] levelChunkSections = this.getSections();
+		if (levelChunkSections[i] == LevelChunk.EMPTY_SECTION) {
+			levelChunkSections[i] = new LevelChunkSection(this.getSectionYFromSectionIndex(i));
+		}
+
+		return levelChunkSections[i];
+	}
+
 	Collection<Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 
 	void setHeightmap(Heightmap.Types types, long[] ls);

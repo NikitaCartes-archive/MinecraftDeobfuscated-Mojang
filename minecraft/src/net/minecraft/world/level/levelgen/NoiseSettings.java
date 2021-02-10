@@ -42,8 +42,8 @@ public class NoiseSettings {
 	private final boolean isAmplified;
 
 	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
-		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y) {
-			return DataResult.error("min_y + height cannot be higher than: " + DimensionType.MAX_Y);
+		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {
+			return DataResult.error("min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
 		} else if (noiseSettings.height() % 16 != 0) {
 			return DataResult.error("height has to be a multiple of 16");
 		} else {

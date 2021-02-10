@@ -11,6 +11,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
@@ -77,22 +80,28 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 					structurePiece.move(0, l, 0);
 				}
 			} else {
-				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), this.random, 10);
+				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
 			}
 		}
 	}
 
 	public static enum Type implements StringRepresentable {
-		NORMAL("normal"),
-		MESA("mesa");
+		NORMAL("normal", Blocks.OAK_WOOD, Blocks.OAK_PLANKS, Blocks.OAK_FENCE),
+		MESA("mesa", Blocks.DARK_OAK_WOOD, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
 
 		public static final Codec<MineshaftFeature.Type> CODEC = StringRepresentable.fromEnum(MineshaftFeature.Type::values, MineshaftFeature.Type::byName);
 		private static final Map<String, MineshaftFeature.Type> BY_NAME = (Map<String, MineshaftFeature.Type>)Arrays.stream(values())
 			.collect(Collectors.toMap(MineshaftFeature.Type::getName, type -> type));
 		private final String name;
+		private final BlockState woodState;
+		private final BlockState planksState;
+		private final BlockState fenceState;
 
-		private Type(String string2) {
+		private Type(String string2, Block block, Block block2, Block block3) {
 			this.name = string2;
+			this.woodState = block.defaultBlockState();
+			this.planksState = block2.defaultBlockState();
+			this.fenceState = block3.defaultBlockState();
 		}
 
 		public String getName() {
@@ -105,6 +114,18 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 
 		public static MineshaftFeature.Type byId(int i) {
 			return i >= 0 && i < values().length ? values()[i] : NORMAL;
+		}
+
+		public BlockState getWoodState() {
+			return this.woodState;
+		}
+
+		public BlockState getPlanksState() {
+			return this.planksState;
+		}
+
+		public BlockState getFenceState() {
+			return this.fenceState;
 		}
 
 		@Override

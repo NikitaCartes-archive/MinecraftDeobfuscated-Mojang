@@ -2,6 +2,8 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
@@ -13,7 +15,6 @@ import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -87,7 +88,8 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void fillFromNoise(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+		return CompletableFuture.completedFuture(chunkAccess);
 	}
 
 	@Override

@@ -36,6 +36,8 @@ public class NoiseSampler {
 	private final double bottomSlideOffset;
 	private final double dimensionDensityFactor;
 	private final double dimensionDensityOffset;
+	@Nullable
+	private final Cavifier cavifier;
 
 	public NoiseSampler(
 		BiomeSource biomeSource,
@@ -45,7 +47,8 @@ public class NoiseSampler {
 		NoiseSettings noiseSettings,
 		BlendedNoise blendedNoise,
 		@Nullable SimplexNoise simplexNoise,
-		PerlinNoise perlinNoise
+		PerlinNoise perlinNoise,
+		@Nullable Cavifier cavifier
 	) {
 		this.cellWidth = i;
 		this.cellHeight = j;
@@ -63,6 +66,7 @@ public class NoiseSampler {
 		this.bottomSlideOffset = (double)noiseSettings.bottomSlideSettings().offset();
 		this.dimensionDensityFactor = noiseSettings.densityFactor();
 		this.dimensionDensityOffset = noiseSettings.densityOffset();
+		this.cavifier = cavifier;
 	}
 
 	public void fillNoiseColumn(double[] ds, int i, int j, NoiseSettings noiseSettings, int k, int l, int m) {
@@ -124,9 +128,14 @@ public class NoiseSampler {
 			int ah = ag + l;
 			double ai = this.blendedNoise.sampleAndClampNoise(i, ah, j, ac, ad, ae, af);
 			double aj = this.computeInitialDensity(ah, d, e, aa) + ai;
+			aj = this.cavify(i * this.cellWidth, ah * this.cellHeight, j * this.cellWidth, ai, aj);
 			aj = this.applySlide(aj, ah);
 			ds[ag] = aj;
 		}
+	}
+
+	private double cavify(int i, int j, int k, double d, double e) {
+		return this.cavifier != null ? this.cavifier.cavify(i, j, k, d, e) : e;
 	}
 
 	private double computeInitialDensity(int i, double d, double e, double f) {

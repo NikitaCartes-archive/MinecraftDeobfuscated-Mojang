@@ -49,7 +49,6 @@ public class LevelVersion {
 		return this.minecraftVersionName;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int minecraftVersion() {
 		return this.minecraftVersion;
 	}

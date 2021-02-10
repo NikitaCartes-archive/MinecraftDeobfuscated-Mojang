@@ -16,12 +16,6 @@ public class Carvers {
 	public static final ConfiguredWorldCarver<ProbabilityFeatureConfiguration> OCEAN_CAVE = register(
 		"ocean_cave", WorldCarver.CAVE.configured(new ProbabilityFeatureConfiguration(0.06666667F))
 	);
-	public static final ConfiguredWorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CANYON = register(
-		"underwater_canyon", WorldCarver.UNDERWATER_CANYON.configured(new ProbabilityFeatureConfiguration(0.02F))
-	);
-	public static final ConfiguredWorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CAVE = register(
-		"underwater_cave", WorldCarver.UNDERWATER_CAVE.configured(new ProbabilityFeatureConfiguration(0.06666667F))
-	);
 	public static final ConfiguredWorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = register(
 		"nether_cave", WorldCarver.NETHER_CAVE.configured(new ProbabilityFeatureConfiguration(0.2F))
 	);

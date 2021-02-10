@@ -135,18 +135,18 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		}
 	}
 
-	protected void moveBelowSeaLevel(int i, Random random, int j) {
-		int k = i - j;
-		int l = this.boundingBox.getYSpan() + 1;
-		if (l < k) {
-			l += random.nextInt(k - l);
+	protected void moveBelowSeaLevel(int i, int j, Random random, int k) {
+		int l = i - k;
+		int m = this.boundingBox.getYSpan() + j + 1;
+		if (m < l) {
+			m += random.nextInt(l - m);
 		}
 
-		int m = l - this.boundingBox.y1;
-		this.boundingBox.move(0, m, 0);
+		int n = m - this.boundingBox.y1;
+		this.boundingBox.move(0, n, 0);
 
 		for (StructurePiece structurePiece : this.pieces) {
-			structurePiece.move(0, m, 0);
+			structurePiece.move(0, n, 0);
 		}
 	}
 

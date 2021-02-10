@@ -520,17 +520,18 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			chunkPos, chunkStatus.getRange(), i -> this.getDependencyStatus(chunkStatus, i)
 		);
 		this.level.getProfiler().incrementCounter((Supplier<String>)(() -> "chunkGenerate " + chunkStatus.getName()));
+		Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
 		return completableFuture.thenComposeAsync(
 			either -> (CompletableFuture)either.map(
 					list -> {
 						try {
 							CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuturex = chunkStatus.generate(
-								this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), list
+								executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), list
 							);
 							this.progressListener.onStatusChange(chunkPos, chunkStatus);
 							return completableFuturex;
-						} catch (Exception var8) {
-							CrashReport crashReport = CrashReport.forThrowable(var8, "Exception generating new chunk");
+						} catch (Exception var9) {
+							CrashReport crashReport = CrashReport.forThrowable(var9, "Exception generating new chunk");
 							CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk to be generated");
 							crashReportCategory.setDetail("Location", String.format("%d,%d", chunkPos.x, chunkPos.z));
 							crashReportCategory.setDetail("Position hash", ChunkPos.asLong(chunkPos.x, chunkPos.z));
@@ -543,7 +544,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 						return CompletableFuture.completedFuture(Either.right(chunkLoadingFailure));
 					}
 				),
-			runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable))
+			executor
 		);
 	}
 
