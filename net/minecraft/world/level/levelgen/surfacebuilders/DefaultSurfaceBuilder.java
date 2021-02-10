@@ -32,7 +32,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         int n = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         int o = i & 0xF;
         int p = j & 0xF;
-        for (int q = k; q >= 0; --q) {
+        for (int q = k; q >= 50; --q) {
             mutableBlockPos.set(o, q, p);
             BlockState blockState8 = chunkAccess.getBlockState(mutableBlockPos);
             if (blockState8.isAir()) {

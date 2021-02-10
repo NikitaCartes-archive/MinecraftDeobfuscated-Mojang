@@ -114,7 +114,7 @@ SimpleWaterloggedBlock {
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
         if (blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER) {
-            BigDripleafBlock.place(serverLevel, random, blockPos);
+            BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos);
         } else {
             BlockPos blockPos2 = blockPos.below();
             this.performBonemeal(serverLevel, random, blockPos2, serverLevel.getBlockState(blockPos2));

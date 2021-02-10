@@ -3,13 +3,18 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
+import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -85,36 +90,48 @@ extends Feature<OreConfiguration> {
                 ds[q * 4 + 3] = -1.0;
             }
         }
-        for (q = 0; q < p; ++q) {
-            double y = ds[q * 4 + 3];
-            if (y < 0.0) continue;
-            double z = ds[q * 4 + 0];
-            double aa = ds[q * 4 + 1];
-            double ab = ds[q * 4 + 2];
-            int ac = Math.max(Mth.floor(z - y), j);
-            int ad = Math.max(Mth.floor(aa - y), k);
-            int ae = Math.max(Mth.floor(ab - y), l);
-            int af = Math.max(Mth.floor(z + y), ac);
-            int ag = Math.max(Mth.floor(aa + y), ad);
-            int ah = Math.max(Mth.floor(ab + y), ae);
-            for (int ai = ac; ai <= af; ++ai) {
-                double aj = ((double)ai + 0.5 - z) / y;
-                if (!(aj * aj < 1.0)) continue;
-                for (int ak = ad; ak <= ag; ++ak) {
-                    double al = ((double)ak + 0.5 - aa) / y;
-                    if (!(aj * aj + al * al < 1.0)) continue;
-                    for (int am = ae; am <= ah; ++am) {
-                        int ao;
-                        double an = ((double)am + 0.5 - ab) / y;
-                        if (!(aj * aj + al * al + an * an < 1.0) || bitSet.get(ao = ai - j + (ak - k) * m + (am - l) * m * n)) continue;
-                        bitSet.set(ao);
-                        mutableBlockPos.set(ai, ak, am);
-                        if (!oreConfiguration.target.test(levelAccessor.getBlockState(mutableBlockPos), random)) continue;
-                        levelAccessor.setBlock(mutableBlockPos, oreConfiguration.state, 2);
+        HashSet<LevelChunkSection> set = Sets.newHashSet();
+        for (int x = 0; x < p; ++x) {
+            s = ds[x * 4 + 3];
+            if (s < 0.0) continue;
+            t = ds[x * 4 + 0];
+            u = ds[x * 4 + 1];
+            v = ds[x * 4 + 2];
+            int y = Math.max(Mth.floor(t - s), j);
+            int z = Math.max(Mth.floor(u - s), k);
+            int aa = Math.max(Mth.floor(v - s), l);
+            int ab = Math.max(Mth.floor(t + s), y);
+            int ac = Math.max(Mth.floor(u + s), z);
+            int ad = Math.max(Mth.floor(v + s), aa);
+            for (int ae = y; ae <= ab; ++ae) {
+                double af = ((double)ae + 0.5 - t) / s;
+                if (!(af * af < 1.0)) continue;
+                for (int ag = z; ag <= ac; ++ag) {
+                    double ah = ((double)ag + 0.5 - u) / s;
+                    if (!(af * af + ah * ah < 1.0)) continue;
+                    for (int ai = aa; ai <= ad; ++ai) {
+                        int an;
+                        int am;
+                        int al;
+                        int ak;
+                        double aj = ((double)ai + 0.5 - v) / s;
+                        if (!(af * af + ah * ah + aj * aj < 1.0) || levelAccessor.isOutsideBuildHeight(ag) || bitSet.get(ak = ae - j + (ag - k) * m + (ai - l) * m * n)) continue;
+                        bitSet.set(ak);
+                        mutableBlockPos.set(ae, ag, ai);
+                        ChunkAccess chunkAccess = levelAccessor.getChunk(SectionPos.blockToSectionCoord(ae), SectionPos.blockToSectionCoord(ai));
+                        LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(chunkAccess.getSectionIndex(ag));
+                        if (set.add(levelChunkSection)) {
+                            levelChunkSection.acquire();
+                        }
+                        if (!oreConfiguration.target.test(levelChunkSection.getBlockState(al = SectionPos.sectionRelative(ae), am = SectionPos.sectionRelative(ag), an = SectionPos.sectionRelative(ai)), random)) continue;
+                        levelChunkSection.setBlockState(al, am, an, oreConfiguration.state, false);
                         ++o;
                     }
                 }
             }
+        }
+        for (LevelChunkSection levelChunkSection2 : set) {
+            levelChunkSection2.release();
         }
         return o > 0;
     }

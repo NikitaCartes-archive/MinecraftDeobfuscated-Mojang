@@ -18,7 +18,7 @@ implements RandomSource {
 
     public void setSeed(long l) {
         if (!this.seed.compareAndSet(this.seed.get(), (l ^ 0x5DEECE66DL) & 0xFFFFFFFFFFFFL)) {
-            throw ThreadingDetector.makeThreadingException("SimpleRandomSource");
+            throw ThreadingDetector.makeThreadingException("SimpleRandomSource", null);
         }
     }
 
@@ -26,7 +26,7 @@ implements RandomSource {
         long m;
         long l = this.seed.get();
         if (!this.seed.compareAndSet(l, m = l * 25214903917L + 11L & 0xFFFFFFFFFFFFL)) {
-            throw ThreadingDetector.makeThreadingException("SimpleRandomSource");
+            throw ThreadingDetector.makeThreadingException("SimpleRandomSource", null);
         }
         return (int)(m >> 48 - i);
     }
@@ -49,6 +49,11 @@ implements RandomSource {
         while ((j = this.next(31)) - (k = j % i) + (i - 1) < 0) {
         }
         return k;
+    }
+
+    @Override
+    public long nextLong() {
+        return ((long)this.nextInt() << 32) + (long)this.nextInt();
     }
 
     @Override

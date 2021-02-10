@@ -28,6 +28,7 @@ import java.security.PrivilegedActionException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -214,6 +215,22 @@ public class Util {
         return type;
     }
 
+    public static Runnable wrapThreadWithTaskName(String string, Runnable runnable) {
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            return () -> {
+                Thread thread = Thread.currentThread();
+                String string2 = thread.getName();
+                thread.setName(string);
+                try {
+                    runnable.run();
+                } finally {
+                    thread.setName(string2);
+                }
+            };
+        }
+        return runnable;
+    }
+
     public static OS getPlatform() {
         String string = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (string.contains("win")) {
@@ -292,6 +309,20 @@ public class Util {
     }
 
     public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<? extends V>> list) {
+        return list.stream().reduce(CompletableFuture.completedFuture(Lists.newArrayList()), (completableFuture, completableFuture2) -> completableFuture2.thenCombine((CompletionStage)completableFuture, (object, list) -> {
+            ArrayList<Object> list2 = Lists.newArrayListWithCapacity(list.size() + 1);
+            list2.addAll((Collection<Object>)list);
+            list2.add(object);
+            return list2;
+        }), (completableFuture, completableFuture2) -> completableFuture.thenCombine((CompletionStage)completableFuture2, (list, list2) -> {
+            ArrayList list3 = Lists.newArrayListWithCapacity(list.size() + list2.size());
+            list3.addAll(list);
+            list3.addAll(list2);
+            return list3;
+        }));
+    }
+
+    public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
         ArrayList list2 = Lists.newArrayListWithCapacity(list.size());
         CompletableFuture[] completableFutures = new CompletableFuture[list.size()];
         CompletableFuture completableFuture = new CompletableFuture();

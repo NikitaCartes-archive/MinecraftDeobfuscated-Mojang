@@ -76,6 +76,7 @@ extends ObjectSelectionList<WorldListEntry> {
     private static final Component SNAPSHOT_TOOLTIP_1 = new TranslatableComponent("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD);
     private static final Component SNAPSHOT_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
     private static final Component WORLD_LOCKED_TOOLTIP = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+    private static final Component WORLD_PRE_WORLDHEIGHT_TOOLTIP = new TranslatableComponent("selectWorld.pre_worldheight").withStyle(ChatFormatting.RED);
     private final SelectWorldScreen screen;
     @Nullable
     private List<LevelSummary> cachedList;
@@ -135,12 +136,12 @@ extends ObjectSelectionList<WorldListEntry> {
             LevelSummary levelSummary = worldListEntry.summary;
             NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", new TranslatableComponent("narrator.select.world", levelSummary.getLevelName(), new Date(levelSummary.getLastPlayed()), levelSummary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + levelSummary.getGameMode().getName()), levelSummary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY, levelSummary.getWorldVersionName())).getString());
         }
-        this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isLocked());
+        this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isDisabled());
     }
 
     @Override
     protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-        this.moveSelection(selectionDirection, worldListEntry -> !((WorldListEntry)worldListEntry).summary.isLocked());
+        this.moveSelection(selectionDirection, worldListEntry -> !((WorldListEntry)worldListEntry).summary.isDisabled());
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {
@@ -206,6 +207,11 @@ extends ObjectSelectionList<WorldListEntry> {
                     if (bl2) {
                         this.screen.setToolTip(this.minecraft.font.split(WORLD_LOCKED_TOOLTIP, 175));
                     }
+                } else if (this.summary.isPreWorldheight()) {
+                    GuiComponent.blit(poseStack, k, j, 96.0f, 32.0f, 32, 32, 256, 256);
+                    if (bl2) {
+                        this.screen.setToolTip(this.minecraft.font.split(WORLD_PRE_WORLDHEIGHT_TOOLTIP, 175));
+                    }
                 } else if (this.summary.markVersionInList()) {
                     GuiComponent.blit(poseStack, k, j, 32.0f, q, 32, 32, 256, 256);
                     if (this.summary.askToOpenWorld()) {
@@ -227,7 +233,7 @@ extends ObjectSelectionList<WorldListEntry> {
 
         @Override
         public boolean mouseClicked(double d, double e, int i) {
-            if (this.summary.isLocked()) {
+            if (this.summary.isDisabled()) {
                 return true;
             }
             WorldSelectionList.this.setSelected(this);
@@ -245,7 +251,7 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         public void joinWorld() {
-            if (this.summary.isLocked()) {
+            if (this.summary.isDisabled()) {
                 return;
             }
             LevelSummary.BackupStatus backupStatus = this.summary.backupStatus();

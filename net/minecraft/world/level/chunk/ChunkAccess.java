@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
@@ -64,6 +65,14 @@ FeatureAccess {
     public Set<BlockPos> getBlockEntitiesPos();
 
     public LevelChunkSection[] getSections();
+
+    default public LevelChunkSection getOrCreateSection(int i) {
+        LevelChunkSection[] levelChunkSections = this.getSections();
+        if (levelChunkSections[i] == LevelChunk.EMPTY_SECTION) {
+            levelChunkSections[i] = new LevelChunkSection(this.getSectionYFromSectionIndex(i));
+        }
+        return levelChunkSections[i];
+    }
 
     public Collection<Map.Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 

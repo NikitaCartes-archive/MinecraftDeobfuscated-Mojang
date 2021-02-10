@@ -476,7 +476,7 @@ extends Entity {
         int m = Mth.floor(aABB.minZ);
         int n = Mth.ceil(aABB.maxZ);
         boolean bl = false;
-        this.waterLevel = Double.MIN_VALUE;
+        this.waterLevel = -1.7976931348623157E308;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int o = i; o < j; ++o) {
             for (int p = k; p < l; ++p) {

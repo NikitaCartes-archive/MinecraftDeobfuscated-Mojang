@@ -30,8 +30,8 @@ public interface Decoratable<R> {
         return this.count(UniformInt.of(0, i));
     }
 
-    default public R range(int i) {
-        return this.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(0, 0, i)));
+    default public R range(int i, int j) {
+        return this.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(i, i, j)));
     }
 
     default public R squared() {

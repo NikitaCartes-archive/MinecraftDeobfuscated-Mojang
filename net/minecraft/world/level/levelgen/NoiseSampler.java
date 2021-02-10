@@ -8,6 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
+import net.minecraft.world.level.levelgen.Cavifier;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
@@ -40,8 +41,10 @@ public class NoiseSampler {
     private final double bottomSlideOffset;
     private final double dimensionDensityFactor;
     private final double dimensionDensityOffset;
+    @Nullable
+    private final Cavifier cavifier;
 
-    public NoiseSampler(BiomeSource biomeSource, int i, int j, int k, NoiseSettings noiseSettings, BlendedNoise blendedNoise, @Nullable SimplexNoise simplexNoise, PerlinNoise perlinNoise) {
+    public NoiseSampler(BiomeSource biomeSource, int i, int j, int k, NoiseSettings noiseSettings, BlendedNoise blendedNoise, @Nullable SimplexNoise simplexNoise, PerlinNoise perlinNoise, @Nullable Cavifier cavifier) {
         this.cellWidth = i;
         this.cellHeight = j;
         this.biomeSource = biomeSource;
@@ -58,6 +61,7 @@ public class NoiseSampler {
         this.bottomSlideOffset = noiseSettings.bottomSlideSettings().offset();
         this.dimensionDensityFactor = noiseSettings.densityFactor();
         this.dimensionDensityOffset = noiseSettings.densityOffset();
+        this.cavifier = cavifier;
     }
 
     public void fillNoiseColumn(double[] ds, int i, int j, NoiseSettings noiseSettings, int k, int l, int m) {
@@ -111,8 +115,16 @@ public class NoiseSampler {
             int ah = ag + l;
             double ai = this.blendedNoise.sampleAndClampNoise(i, ah, j, ac, ad, ae, af);
             double aj = this.computeInitialDensity(ah, d, e, aa) + ai;
+            aj = this.cavify(i * this.cellWidth, ah * this.cellHeight, j * this.cellWidth, ai, aj);
             ds[ag] = aj = this.applySlide(aj, ah);
         }
+    }
+
+    private double cavify(int i, int j, int k, double d, double e) {
+        if (this.cavifier == null) {
+            return e;
+        }
+        return this.cavifier.cavify(i, j, k, d, e);
     }
 
     private double computeInitialDensity(int i, double d, double e, double f) {

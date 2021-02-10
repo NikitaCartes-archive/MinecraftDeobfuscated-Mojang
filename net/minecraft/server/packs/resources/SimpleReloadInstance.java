@@ -75,7 +75,7 @@ implements ReloadInstance {
             list2.add(completableFuture4);
             completableFuture2 = completableFuture4;
         }
-        this.allDone = Util.sequence(list2);
+        this.allDone = Util.sequenceFailFast(list2);
     }
 
     @Override

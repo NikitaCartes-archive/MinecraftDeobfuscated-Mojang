@@ -25,8 +25,6 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.NetherWorldCarver;
-import net.minecraft.world.level.levelgen.carver.UnderwaterCanyonWorldCarver;
-import net.minecraft.world.level.levelgen.carver.UnderwaterCaveWorldCarver;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -34,11 +32,9 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
-    public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 256));
+    public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 384));
     public static final WorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = WorldCarver.register("nether_cave", new NetherWorldCarver(ProbabilityFeatureConfiguration.CODEC));
     public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = WorldCarver.register("canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC));
-    public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CANYON = WorldCarver.register("underwater_canyon", new UnderwaterCanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC));
-    public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CAVE = WorldCarver.register("underwater_cave", new UnderwaterCaveWorldCarver(ProbabilityFeatureConfiguration.CODEC));
     protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
     protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
     protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
@@ -122,7 +118,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         if (!this.canReplaceBlock(blockState, blockState2)) {
             return false;
         }
-        if (o < 11) {
+        if (o < -53) {
             chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
         } else {
             chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);

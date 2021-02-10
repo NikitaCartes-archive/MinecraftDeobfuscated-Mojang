@@ -8,6 +8,8 @@ public interface RandomSource {
 
     public int nextInt(int var1);
 
+    public long nextLong();
+
     public double nextDouble();
 
     default public void consumeCount(int i) {

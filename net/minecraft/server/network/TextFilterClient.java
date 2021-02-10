@@ -200,7 +200,7 @@ implements AutoCloseable {
         @Override
         public CompletableFuture<Optional<List<String>>> processMessageBundle(List<String> list2) {
             List list22 = list2.stream().map(string -> TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor)).collect(ImmutableList.toImmutableList());
-            return ((CompletableFuture)Util.sequence(list22).thenApply(list -> Optional.of(list.stream().map(optional -> optional.orElse("")).collect(ImmutableList.toImmutableList())))).exceptionally(throwable -> Optional.empty());
+            return ((CompletableFuture)Util.sequenceFailFast(list22).thenApply(list -> Optional.of(list.stream().map(optional -> optional.orElse("")).collect(ImmutableList.toImmutableList())))).exceptionally(throwable -> Optional.empty());
         }
 
         @Override

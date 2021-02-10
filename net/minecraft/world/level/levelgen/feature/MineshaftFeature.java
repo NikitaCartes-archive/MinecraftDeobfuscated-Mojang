@@ -14,6 +14,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -62,22 +65,28 @@ extends StructureFeature<MineshaftConfiguration> {
                     structurePiece.move(0, l, 0);
                 }
             } else {
-                this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), this.random, 10);
+                this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
             }
         }
     }
 
     public static enum Type implements StringRepresentable
     {
-        NORMAL("normal"),
-        MESA("mesa");
+        NORMAL("normal", Blocks.OAK_WOOD, Blocks.OAK_PLANKS, Blocks.OAK_FENCE),
+        MESA("mesa", Blocks.DARK_OAK_WOOD, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
 
         public static final Codec<Type> CODEC;
         private static final Map<String, Type> BY_NAME;
         private final String name;
+        private final BlockState woodState;
+        private final BlockState planksState;
+        private final BlockState fenceState;
 
-        private Type(String string2) {
+        private Type(String string2, Block block, Block block2, Block block3) {
             this.name = string2;
+            this.woodState = block.defaultBlockState();
+            this.planksState = block2.defaultBlockState();
+            this.fenceState = block3.defaultBlockState();
         }
 
         public String getName() {
@@ -93,6 +102,18 @@ extends StructureFeature<MineshaftConfiguration> {
                 return NORMAL;
             }
             return Type.values()[i];
+        }
+
+        public BlockState getWoodState() {
+            return this.woodState;
+        }
+
+        public BlockState getPlanksState() {
+            return this.planksState;
+        }
+
+        public BlockState getFenceState() {
+            return this.fenceState;
         }
 
         @Override

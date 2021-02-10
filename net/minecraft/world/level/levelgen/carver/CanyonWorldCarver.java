@@ -19,7 +19,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
     private final float[] rs = new float[1024];
 
     public CanyonWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
-        super(codec, 256);
+        super(codec, 384);
     }
 
     @Override
@@ -46,7 +46,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
     private void genCanyon(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet) {
         Random random = new Random(l);
         float q = 1.0f;
-        for (int r = 0; r < 256; ++r) {
+        for (int r = 0; r < 384; ++r) {
             if (r == 0 || random.nextInt(3) == 0) {
                 q = 1.0f + random.nextFloat() * random.nextFloat();
             }

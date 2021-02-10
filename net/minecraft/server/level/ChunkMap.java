@@ -476,9 +476,10 @@ implements ChunkHolder.PlayerProvider {
         ChunkPos chunkPos = chunkHolder.getPos();
         CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkRangeFuture(chunkPos, chunkStatus.getRange(), i -> this.getDependencyStatus(chunkStatus, i));
         this.level.getProfiler().incrementCounter(() -> "chunkGenerate " + chunkStatus.getName());
+        Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
         return completableFuture.thenComposeAsync(either -> either.map(list -> {
             try {
-                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list);
+                CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(executor, this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list);
                 this.progressListener.onStatusChange(chunkPos, chunkStatus);
                 return completableFuture;
             } catch (Exception exception) {
@@ -492,7 +493,7 @@ implements ChunkHolder.PlayerProvider {
         }, chunkLoadingFailure -> {
             this.releaseLightTicket(chunkPos);
             return CompletableFuture.completedFuture(Either.right(chunkLoadingFailure));
-        }), runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
+        }), executor);
     }
 
     protected void releaseLightTicket(ChunkPos chunkPos) {

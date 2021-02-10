@@ -383,7 +383,7 @@ implements ContainerListener {
 
     public void doTick() {
         try {
-            if (!this.isSpectator() || this.level.hasChunkAt(this.blockPosition())) {
+            if (!this.isSpectator() || !this.touchingUnloadedChunk()) {
                 super.tick();
             }
             for (int i = 0; i < this.getInventory().getContainerSize(); ++i) {
@@ -803,10 +803,10 @@ implements ContainerListener {
     }
 
     public void doCheckFallDamage(double d, boolean bl) {
-        BlockPos blockPos = this.getOnPos();
-        if (!this.level.hasChunkAt(blockPos)) {
+        if (this.touchingUnloadedChunk()) {
             return;
         }
+        BlockPos blockPos = this.getOnPos();
         super.checkFallDamage(d, bl, this.level.getBlockState(blockPos), blockPos);
     }
 

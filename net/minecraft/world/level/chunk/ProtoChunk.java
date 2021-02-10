@@ -184,13 +184,6 @@ implements ChunkAccess {
         return blockState2;
     }
 
-    public LevelChunkSection getOrCreateSection(int i) {
-        if (this.sections[i] == LevelChunk.EMPTY_SECTION) {
-            this.sections[i] = new LevelChunkSection(this.getSectionYFromSectionIndex(i));
-        }
-        return this.sections[i];
-    }
-
     @Override
     public void setBlockEntity(BlockEntity blockEntity) {
         this.blockEntities.put(blockEntity.getBlockPos(), blockEntity);
@@ -436,7 +429,7 @@ implements ChunkAccess {
     }
 
     public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving2) {
-        return this.carvingMasks.computeIfAbsent(carving2, carving -> new BitSet(65536));
+        return this.carvingMasks.computeIfAbsent(carving2, carving -> new BitSet(98304));
     }
 
     public void setCarvingMask(GenerationStep.Carving carving, BitSet bitSet) {
