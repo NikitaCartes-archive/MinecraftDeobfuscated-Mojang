@@ -29,13 +29,16 @@ extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
         block0: for (int i = 64; i < 384; ++i) {
             mutableBlockPos.set(blockPos);
             mutableBlockPos.move(random.nextInt(4) - random.nextInt(4), 0, random.nextInt(4) - random.nextInt(4));
             mutableBlockPos.setY(i);
             if (!worldGenLevel.isEmptyBlock(mutableBlockPos)) continue;
             for (Direction direction : DIRECTIONS) {
-                if (direction == Direction.DOWN || !VineBlock.isAcceptableNeighbour(worldGenLevel, mutableBlockPos, direction)) continue;
+                if (direction == Direction.DOWN) continue;
+                mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+                if (!VineBlock.isAcceptableNeighbour(worldGenLevel, mutableBlockPos2, direction)) continue;
                 worldGenLevel.setBlock(mutableBlockPos, (BlockState)Blocks.VINE.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction), true), 2);
                 continue block0;
             }

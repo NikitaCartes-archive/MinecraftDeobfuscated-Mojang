@@ -48,9 +48,10 @@ implements ServerLoginPacketListener {
     public final Connection connection;
     private State state = State.HELLO;
     private int tick;
+    @Nullable
     private GameProfile gameProfile;
     private final String serverId = "";
-    private SecretKey secretKey;
+    @Nullable
     private ServerPlayer delayedAcceptPlayer;
 
     public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
@@ -65,7 +66,7 @@ implements ServerLoginPacketListener {
             this.handleAcceptedLogin();
         } else if (this.state == State.DELAY_ACCEPT && (serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId())) == null) {
             this.state = State.READY_TO_ACCEPT;
-            this.server.getPlayerList().placeNewPlayer(this.connection, this.delayedAcceptPlayer);
+            this.placeNewPlayer(this.delayedAcceptPlayer);
             this.delayedAcceptPlayer = null;
         }
         if (this.tick++ == 600) {
@@ -106,9 +107,13 @@ implements ServerLoginPacketListener {
                 this.state = State.DELAY_ACCEPT;
                 this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
             } else {
-                this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+                this.placeNewPlayer(this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
             }
         }
+    }
+
+    private void placeNewPlayer(ServerPlayer serverPlayer) {
+        this.server.getPlayerList().placeNewPlayer(this.connection, serverPlayer);
     }
 
     @Override
@@ -144,10 +149,10 @@ implements ServerLoginPacketListener {
             if (!Arrays.equals(this.nonce, serverboundKeyPacket.getNonce(privateKey))) {
                 throw new IllegalStateException("Protocol error");
             }
-            this.secretKey = serverboundKeyPacket.getSecretKey(privateKey);
-            Cipher cipher = Crypt.getCipher(2, this.secretKey);
-            Cipher cipher2 = Crypt.getCipher(1, this.secretKey);
-            string = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), this.secretKey)).toString(16);
+            SecretKey secretKey = serverboundKeyPacket.getSecretKey(privateKey);
+            Cipher cipher = Crypt.getCipher(2, secretKey);
+            Cipher cipher2 = Crypt.getCipher(1, secretKey);
+            string = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), secretKey)).toString(16);
             this.state = State.AUTHENTICATING;
             this.connection.setEncryptionKey(cipher, cipher2);
         } catch (CryptException cryptException) {

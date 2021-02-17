@@ -58,6 +58,10 @@ public class BlockFamilies {
     public static final BlockFamily SMOOTH_RED_SANDSTONE = BlockFamilies.familyBuilder(Blocks.SMOOTH_RED_SANDSTONE).slab(Blocks.SMOOTH_RED_SANDSTONE_SLAB).stairs(Blocks.SMOOTH_RED_SANDSTONE_STAIRS).getFamily();
     public static final BlockFamily STONE = BlockFamilies.familyBuilder(Blocks.STONE).slab(Blocks.STONE_SLAB).pressurePlate(Blocks.STONE_PRESSURE_PLATE).button(Blocks.STONE_BUTTON).stairs(Blocks.STONE_STAIRS).getFamily();
     public static final BlockFamily STONE_BRICK = BlockFamilies.familyBuilder(Blocks.STONE_BRICKS).wall(Blocks.STONE_BRICK_WALL).stairs(Blocks.STONE_BRICK_STAIRS).slab(Blocks.STONE_BRICK_SLAB).chiseled(Blocks.CHISELED_STONE_BRICKS).dontGenerateRecipe().getFamily();
+    public static final BlockFamily GRIMSTONE = BlockFamilies.familyBuilder(Blocks.GRIMSTONE).slab(Blocks.GRIMSTONE_SLAB).stairs(Blocks.GRIMSTONE_STAIRS).chiseled(Blocks.CHISELED_GRIMSTONE).polished(Blocks.POLISHED_GRIMSTONE).wall(Blocks.GRIMSTONE_WALL).getFamily();
+    public static final BlockFamily POLISHED_GRIMSTONE = BlockFamilies.familyBuilder(Blocks.POLISHED_GRIMSTONE).slab(Blocks.POLISHED_GRIMSTONE_SLAB).stairs(Blocks.POLISHED_GRIMSTONE_STAIRS).wall(Blocks.POLISHED_GRIMSTONE_WALL).getFamily();
+    public static final BlockFamily GRIMSTONE_TILES = BlockFamilies.familyBuilder(Blocks.GRIMSTONE_TILES).slab(Blocks.GRIMSTONE_TILE_SLAB).stairs(Blocks.GRIMSTONE_TILE_STAIRS).wall(Blocks.GRIMSTONE_TILE_WALL).getFamily();
+    public static final BlockFamily GRIMSTONE_BRICKS = BlockFamilies.familyBuilder(Blocks.GRIMSTONE_BRICKS).slab(Blocks.GRIMSTONE_BRICK_SLAB).stairs(Blocks.GRIMSTONE_BRICK_STAIRS).wall(Blocks.GRIMSTONE_BRICK_WALL).getFamily();
 
     private static BlockFamily.Builder familyBuilder(Block block) {
         BlockFamily.Builder builder = new BlockFamily.Builder(block);

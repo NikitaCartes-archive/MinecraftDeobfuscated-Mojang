@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public interface BlockEntityRenderer<T extends BlockEntity> {
@@ -15,6 +16,14 @@ public interface BlockEntityRenderer<T extends BlockEntity> {
 
     default public boolean shouldRenderOffScreen(T blockEntity) {
         return false;
+    }
+
+    default public int getViewDistance() {
+        return 64;
+    }
+
+    default public boolean shouldRender(T blockEntity, Vec3 vec3) {
+        return Vec3.atCenterOf(((BlockEntity)blockEntity).getBlockPos()).closerThan(vec3, this.getViewDistance());
     }
 }
 

@@ -86,7 +86,7 @@ implements ServerInterface {
         super(thread, registryHolder, levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
-        this.textFilterClient = null;
+        this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
     }
 
     @Override
@@ -533,12 +533,11 @@ implements ServerInterface {
     }
 
     @Override
-    @Nullable
     public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {
         if (this.textFilterClient != null) {
             return this.textFilterClient.createContext(serverPlayer.getGameProfile());
         }
-        return null;
+        return TextFilter.DUMMY;
     }
 
     @Override

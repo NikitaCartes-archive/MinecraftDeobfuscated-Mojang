@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
@@ -181,6 +182,7 @@ ServerGamePacketListener {
     private double lastGoodX;
     private double lastGoodY;
     private double lastGoodZ;
+    @Nullable
     private Entity lastVehicle;
     private double vehicleFirstGoodX;
     private double vehicleFirstGoodY;
@@ -188,6 +190,7 @@ ServerGamePacketListener {
     private double vehicleLastGoodX;
     private double vehicleLastGoodY;
     private double vehicleLastGoodZ;
+    @Nullable
     private Vec3 awaitingPositionFromClient;
     private int awaitingTeleport;
     private int awaitingTeleportTime;
@@ -204,10 +207,7 @@ ServerGamePacketListener {
         connection.setListener(this);
         this.player = serverPlayer;
         serverPlayer.connection = this;
-        TextFilter textFilter = serverPlayer.getTextFilter();
-        if (textFilter != null) {
-            textFilter.join();
-        }
+        serverPlayer.getTextFilter().join();
     }
 
     public void tick() {
@@ -300,7 +300,7 @@ ServerGamePacketListener {
         this.server.executeBlocking(this.connection::handleDisconnection);
     }
 
-    private <T> void filterTextPacket(T object2, Consumer<T> consumer, BiFunction<TextFilter, T, CompletableFuture<Optional<T>>> biFunction) {
+    private <T, R> void filterTextPacket(T object2, Consumer<R> consumer, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
         MinecraftServer blockableEventLoop = this.player.getLevel().getServer();
         Consumer<Object> consumer2 = object -> {
             if (this.getConnection().isConnected()) {
@@ -309,19 +309,14 @@ ServerGamePacketListener {
                 LOGGER.debug("Ignoring packet due to disconnection");
             }
         };
-        TextFilter textFilter = this.player.getTextFilter();
-        if (textFilter != null) {
-            biFunction.apply(textFilter, (TextFilter)object2).thenAcceptAsync(optional -> optional.ifPresent(consumer2), (Executor)blockableEventLoop);
-        } else {
-            blockableEventLoop.execute(() -> consumer2.accept(object2));
-        }
+        biFunction.apply(this.player.getTextFilter(), (TextFilter)object2).thenAcceptAsync(consumer2, (Executor)blockableEventLoop);
     }
 
-    private void filterTextPacket(String string, Consumer<String> consumer) {
+    private void filterTextPacket(String string, Consumer<TextFilter.FilteredText> consumer) {
         this.filterTextPacket(string, consumer, TextFilter::processStreamMessage);
     }
 
-    private void filterTextPacket(List<String> list, Consumer<List<String>> consumer) {
+    private void filterTextPacket(List<String> list, Consumer<List<TextFilter.FilteredText>> consumer) {
         this.filterTextPacket(list, consumer, TextFilter::processMessageBundle);
     }
 
@@ -674,7 +669,10 @@ ServerGamePacketListener {
 
     @Override
     public void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket) {
-        int i;
+        int i = serverboundEditBookPacket.getSlot();
+        if (!Inventory.isHotbarSlot(i) && i != 40) {
+            return;
+        }
         ItemStack itemStack = serverboundEditBookPacket.getBook();
         if (!itemStack.is(Items.WRITABLE_BOOK)) {
             return;
@@ -689,27 +687,21 @@ ServerGamePacketListener {
             list2.add(compoundTag.getString("title"));
         }
         ListTag listTag = compoundTag.getList("pages", 8);
-        for (i = 0; i < listTag.size(); ++i) {
-            list2.add(listTag.getString(i));
+        for (int j = 0; j < listTag.size(); ++j) {
+            list2.add(listTag.getString(j));
         }
-        i = serverboundEditBookPacket.getSlot();
-        if (!Inventory.isHotbarSlot(i) && i != 40) {
-            return;
-        }
-        this.filterTextPacket(list2, bl ? list -> this.signBook((String)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<String>)list, i));
+        this.filterTextPacket(list2, bl ? list -> this.signBook((TextFilter.FilteredText)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<TextFilter.FilteredText>)list, i));
     }
 
-    private void updateBookContents(List<String> list, int i) {
+    private void updateBookContents(List<TextFilter.FilteredText> list, int i) {
         ItemStack itemStack = this.player.getInventory().getItem(i);
         if (!itemStack.is(Items.WRITABLE_BOOK)) {
             return;
         }
-        ListTag listTag = new ListTag();
-        list.stream().map(StringTag::valueOf).forEach(listTag::add);
-        itemStack.addTagElement("pages", listTag);
+        this.updateBookPages(list, UnaryOperator.identity(), itemStack);
     }
 
-    private void signBook(String string, List<String> list, int i) {
+    private void signBook(TextFilter.FilteredText filteredText, List<TextFilter.FilteredText> list, int i) {
         ItemStack itemStack = this.player.getInventory().getItem(i);
         if (!itemStack.is(Items.WRITABLE_BOOK)) {
             return;
@@ -720,15 +712,36 @@ ServerGamePacketListener {
             itemStack2.setTag(compoundTag.copy());
         }
         itemStack2.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
-        itemStack2.addTagElement("title", StringTag.valueOf(string));
-        ListTag listTag = new ListTag();
-        for (String string2 : list) {
-            TextComponent component = new TextComponent(string2);
-            String string3 = Component.Serializer.toJson(component);
-            listTag.add(StringTag.valueOf(string3));
+        if (this.player.isTextFilteringEnabled()) {
+            itemStack2.addTagElement("title", StringTag.valueOf(filteredText.getFiltered()));
+        } else {
+            itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.getFiltered()));
+            itemStack2.addTagElement("title", StringTag.valueOf(filteredText.getRaw()));
         }
-        itemStack2.addTagElement("pages", listTag);
+        this.updateBookPages(list, string -> Component.Serializer.toJson(new TextComponent((String)string)), itemStack2);
         this.player.getInventory().setItem(i, itemStack2);
+    }
+
+    private void updateBookPages(List<TextFilter.FilteredText> list, UnaryOperator<String> unaryOperator, ItemStack itemStack) {
+        ListTag listTag = new ListTag();
+        if (this.player.isTextFilteringEnabled()) {
+            list.stream().map(filteredText -> StringTag.valueOf((String)unaryOperator.apply(filteredText.getFiltered()))).forEach(listTag::add);
+        } else {
+            CompoundTag compoundTag = new CompoundTag();
+            int j = list.size();
+            for (int i = 0; i < j; ++i) {
+                TextFilter.FilteredText filteredText2 = list.get(i);
+                String string = filteredText2.getRaw();
+                listTag.add(StringTag.valueOf((String)unaryOperator.apply(string)));
+                String string2 = filteredText2.getFiltered();
+                if (string.equals(string2)) continue;
+                compoundTag.putString(String.valueOf(i), (String)unaryOperator.apply(string2));
+            }
+            if (!compoundTag.isEmpty()) {
+                itemStack.addTagElement("filtered_pages", compoundTag);
+            }
+        }
+        itemStack.addTagElement("pages", listTag);
     }
 
     @Override
@@ -957,14 +970,14 @@ ServerGamePacketListener {
                 InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
                 if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
                     MutableComponent component = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
-                    this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO, Util.NIL_UUID));
+                    this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
                 } else if (interactionResult.shouldSwing()) {
                     this.player.swing(interactionHand, true);
                 }
             }
         } else {
             MutableComponent component2 = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
-            this.player.connection.send(new ClientboundChatPacket(component2, ChatType.GAME_INFO, Util.NIL_UUID));
+            this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
         }
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos.relative(direction)));
@@ -1024,10 +1037,7 @@ ServerGamePacketListener {
         this.server.getPlayerList().broadcastMessage(new TranslatableComponent("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
         this.player.disconnect();
         this.server.getPlayerList().remove(this.player);
-        TextFilter textFilter = this.player.getTextFilter();
-        if (textFilter != null) {
-            textFilter.leave();
-        }
+        this.player.getTextFilter().leave();
         if (this.isSingleplayerOwner()) {
             LOGGER.info("Stopping singleplayer server as player logged out");
             this.server.halt(false);
@@ -1040,16 +1050,6 @@ ServerGamePacketListener {
     }
 
     public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
-        if (packet instanceof ClientboundChatPacket) {
-            ClientboundChatPacket clientboundChatPacket = (ClientboundChatPacket)packet;
-            ChatVisiblity chatVisiblity = this.player.getChatVisibility();
-            if (chatVisiblity == ChatVisiblity.HIDDEN && clientboundChatPacket.getType() != ChatType.GAME_INFO) {
-                return;
-            }
-            if (chatVisiblity == ChatVisiblity.SYSTEM && !clientboundChatPacket.isSystem()) {
-                return;
-            }
-        }
         try {
             this.connection.send(packet, genericFutureListener);
         } catch (Throwable throwable) {
@@ -1077,30 +1077,33 @@ ServerGamePacketListener {
     @Override
     public void handleChat(ServerboundChatPacket serverboundChatPacket) {
         String string = StringUtils.normalizeSpace(serverboundChatPacket.getMessage());
-        if (string.startsWith("/")) {
-            PacketUtils.ensureRunningOnSameThread(serverboundChatPacket, this, this.player.getLevel());
-            this.handleChat(string);
-        } else {
-            this.filterTextPacket(string, this::handleChat);
-        }
-    }
-
-    private void handleChat(String string) {
-        if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-            this.send(new ClientboundChatPacket(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
-            return;
-        }
-        this.player.resetLastActionTime();
         for (int i = 0; i < string.length(); ++i) {
             if (SharedConstants.isAllowedChatCharacter(string.charAt(i))) continue;
             this.disconnect(new TranslatableComponent("multiplayer.disconnect.illegal_characters"));
             return;
         }
         if (string.startsWith("/")) {
+            PacketUtils.ensureRunningOnSameThread(serverboundChatPacket, this, this.player.getLevel());
+            this.handleChat(TextFilter.FilteredText.passThrough(string));
+        } else {
+            this.filterTextPacket(string, this::handleChat);
+        }
+    }
+
+    private void handleChat(TextFilter.FilteredText filteredText) {
+        if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+            this.send(new ClientboundChatPacket(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+            return;
+        }
+        this.player.resetLastActionTime();
+        String string = filteredText.getRaw();
+        if (string.startsWith("/")) {
             this.handleCommand(string);
         } else {
-            TranslatableComponent component = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string);
-            this.server.getPlayerList().broadcastMessage(component, ChatType.CHAT, this.player.getUUID());
+            String string2 = filteredText.getFiltered();
+            TranslatableComponent component = string2.isEmpty() ? null : new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string2);
+            TranslatableComponent component2 = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string);
+            this.server.getPlayerList().broadcastMessage(component2, serverPlayer -> this.player.shouldFilterMessageTo((ServerPlayer)serverPlayer) ? component : component2, ChatType.CHAT, this.player.getUUID());
         }
         this.chatSpamTickCount += 20;
         if (this.chatSpamTickCount > 200 && !this.server.getPlayerList().isOp(this.player.getGameProfile())) {
@@ -1345,10 +1348,10 @@ ServerGamePacketListener {
     @Override
     public void handleSignUpdate(ServerboundSignUpdatePacket serverboundSignUpdatePacket) {
         List<String> list2 = Stream.of(serverboundSignUpdatePacket.getLines()).map(ChatFormatting::stripFormatting).collect(Collectors.toList());
-        this.filterTextPacket(list2, (List<String> list) -> this.updateSignText(serverboundSignUpdatePacket, (List<String>)list));
+        this.filterTextPacket(list2, (List<TextFilter.FilteredText> list) -> this.updateSignText(serverboundSignUpdatePacket, (List<TextFilter.FilteredText>)list));
     }
 
-    private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<String> list) {
+    private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<TextFilter.FilteredText> list) {
         this.player.resetLastActionTime();
         ServerLevel serverLevel = this.player.getLevel();
         BlockPos blockPos = serverboundSignUpdatePacket.getPos();
@@ -1364,7 +1367,12 @@ ServerGamePacketListener {
                 return;
             }
             for (int i = 0; i < list.size(); ++i) {
-                signBlockEntity.setMessage(i, new TextComponent(list.get(i)));
+                TextFilter.FilteredText filteredText = list.get(i);
+                if (this.player.isTextFilteringEnabled()) {
+                    signBlockEntity.setMessage(i, new TextComponent(filteredText.getFiltered()));
+                    continue;
+                }
+                signBlockEntity.setMessage(i, new TextComponent(filteredText.getRaw()), new TextComponent(filteredText.getFiltered()));
             }
             signBlockEntity.setChanged();
             serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);

@@ -65,9 +65,9 @@ extends Item {
 
     @Override
     public Component getName(ItemStack itemStack) {
-        CompoundTag compoundTag;
         String string;
-        if (itemStack.hasTag() && !StringUtil.isNullOrEmpty(string = (compoundTag = itemStack.getTag()).getString("title"))) {
+        CompoundTag compoundTag = itemStack.getTag();
+        if (compoundTag != null && !StringUtil.isNullOrEmpty(string = compoundTag.getString("title"))) {
             return new TextComponent(string);
         }
         return super.getName(itemStack);
@@ -116,18 +116,26 @@ extends Item {
         }
         ListTag listTag = compoundTag.getList("pages", 8);
         for (int i = 0; i < listTag.size(); ++i) {
-            MutableComponent component;
-            String string = listTag.getString(i);
-            try {
-                component = Component.Serializer.fromJsonLenient(string);
-                component = ComponentUtils.updateForEntity(commandSourceStack, component, player, 0);
-            } catch (Exception exception) {
-                component = new TextComponent(string);
-            }
-            listTag.set(i, StringTag.valueOf(Component.Serializer.toJson(component)));
+            listTag.set(i, StringTag.valueOf(WrittenBookItem.resolvePage(commandSourceStack, player, listTag.getString(i))));
         }
-        compoundTag.put("pages", listTag);
+        if (compoundTag.contains("filtered_pages", 10)) {
+            CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
+            for (String string : compoundTag2.getAllKeys()) {
+                compoundTag2.putString(string, WrittenBookItem.resolvePage(commandSourceStack, player, compoundTag2.getString(string)));
+            }
+        }
         return true;
+    }
+
+    private static String resolvePage(@Nullable CommandSourceStack commandSourceStack, @Nullable Player player, String string) {
+        MutableComponent component;
+        try {
+            component = Component.Serializer.fromJsonLenient(string);
+            component = ComponentUtils.updateForEntity(commandSourceStack, component, player, 0);
+        } catch (Exception exception) {
+            component = new TextComponent(string);
+        }
+        return Component.Serializer.toJson(component);
     }
 
     @Override

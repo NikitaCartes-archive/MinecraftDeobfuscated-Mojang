@@ -162,7 +162,7 @@ implements ContainerListener {
     private boolean lastFoodSaturationZero = true;
     private int lastSentExp = -99999999;
     private int spawnInvulnerableTime = 60;
-    private ChatVisiblity chatVisibility;
+    private ChatVisiblity chatVisibility = ChatVisiblity.FULL;
     private boolean canChatColor = true;
     private long lastActionTime = Util.getMillis();
     private Entity camera;
@@ -180,8 +180,8 @@ implements ContainerListener {
     private BlockPos respawnPosition;
     private boolean respawnForced;
     private float respawnAngle;
-    @Nullable
     private final TextFilter textFilter;
+    private boolean textFilteringEnabled = true;
     private int containerCounter;
     public boolean ignoreSlotUpdateHack;
     public int latency;
@@ -189,13 +189,13 @@ implements ContainerListener {
 
     public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
         super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
+        this.textFilter = minecraftServer.createTextFilterForPlayer(this);
         this.gameMode = minecraftServer.createGameModeForPlayer(this);
         this.server = minecraftServer;
         this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
         this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
         this.maxUpStep = 1.0f;
         this.fudgeSpawnLocation(serverLevel);
-        this.textFilter = minecraftServer.createTextFilterForPlayer(this);
     }
 
     private void fudgeSpawnLocation(ServerLevel serverLevel) {
@@ -989,7 +989,7 @@ implements ContainerListener {
 
     @Override
     public void displayClientMessage(Component component, boolean bl) {
-        this.connection.send(new ClientboundChatPacket(component, bl ? ChatType.GAME_INFO : ChatType.CHAT, Util.NIL_UUID));
+        this.sendMessage(component, bl ? ChatType.GAME_INFO : ChatType.CHAT, Util.NIL_UUID);
     }
 
     @Override
@@ -1013,6 +1013,7 @@ implements ContainerListener {
     }
 
     public void restoreFrom(ServerPlayer serverPlayer, boolean bl) {
+        this.textFilteringEnabled = serverPlayer.textFilteringEnabled;
         this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
         if (bl) {
             this.getInventory().replaceWith(serverPlayer.getInventory());
@@ -1138,8 +1139,11 @@ implements ContainerListener {
     }
 
     public void sendMessage(Component component, ChatType chatType, UUID uUID) {
+        if (!this.acceptsChat(chatType)) {
+            return;
+        }
         this.connection.send(new ClientboundChatPacket(component, chatType, uUID), future -> {
-            if (!(future.isSuccess() || chatType != ChatType.GAME_INFO && chatType != ChatType.SYSTEM)) {
+            if (!future.isSuccess() && (chatType == ChatType.GAME_INFO || chatType == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
                 int i = 256;
                 String string = component.getString(256);
                 MutableComponent component2 = new TextComponent(string).withStyle(ChatFormatting.YELLOW);
@@ -1158,12 +1162,25 @@ implements ContainerListener {
     public void updateOptions(ServerboundClientInformationPacket serverboundClientInformationPacket) {
         this.chatVisibility = serverboundClientInformationPacket.getChatVisibility();
         this.canChatColor = serverboundClientInformationPacket.getChatColors();
+        this.textFilteringEnabled = serverboundClientInformationPacket.isTextFilteringEnabled();
         this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)serverboundClientInformationPacket.getModelCustomisation());
         this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(serverboundClientInformationPacket.getMainHand() != HumanoidArm.LEFT ? 1 : 0));
     }
 
     public ChatVisiblity getChatVisibility() {
         return this.chatVisibility;
+    }
+
+    private boolean acceptsChat(ChatType chatType) {
+        switch (this.chatVisibility) {
+            case HIDDEN: {
+                return chatType == ChatType.GAME_INFO;
+            }
+            case SYSTEM: {
+                return chatType == ChatType.SYSTEM || chatType == ChatType.GAME_INFO;
+            }
+        }
+        return true;
     }
 
     public void sendTexturePack(String string, String string2, boolean bl) {
@@ -1370,7 +1387,6 @@ implements ContainerListener {
         return itemEntity;
     }
 
-    @Nullable
     public TextFilter getTextFilter() {
         return this.textFilter;
     }
@@ -1403,6 +1419,17 @@ implements ContainerListener {
         if (gameType != null) {
             compoundTag.putInt("previousPlayerGameType", gameType.getId());
         }
+    }
+
+    public boolean isTextFilteringEnabled() {
+        return this.textFilteringEnabled;
+    }
+
+    public boolean shouldFilterMessageTo(ServerPlayer serverPlayer) {
+        if (serverPlayer == this) {
+            return false;
+        }
+        return this.textFilteringEnabled || serverPlayer.textFilteringEnabled;
     }
 }
 

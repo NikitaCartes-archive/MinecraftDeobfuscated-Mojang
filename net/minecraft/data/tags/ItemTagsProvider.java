@@ -84,8 +84,8 @@ extends TagsProvider<Item> {
         this.tag(ItemTags.PIGLIN_FOOD).add((Item[])new Item[]{Items.PORKCHOP, Items.COOKED_PORKCHOP});
         this.tag(ItemTags.FOX_FOOD).add((Item[])new Item[]{Items.SWEET_BERRIES, Items.GLOW_BERRIES});
         this.tag(ItemTags.NON_FLAMMABLE_WOOD).add((Item[])new Item[]{Items.WARPED_STEM, Items.STRIPPED_WARPED_STEM, Items.WARPED_HYPHAE, Items.STRIPPED_WARPED_HYPHAE, Items.CRIMSON_STEM, Items.STRIPPED_CRIMSON_STEM, Items.CRIMSON_HYPHAE, Items.STRIPPED_CRIMSON_HYPHAE, Items.CRIMSON_PLANKS, Items.WARPED_PLANKS, Items.CRIMSON_SLAB, Items.WARPED_SLAB, Items.CRIMSON_PRESSURE_PLATE, Items.WARPED_PRESSURE_PLATE, Items.CRIMSON_FENCE, Items.WARPED_FENCE, Items.CRIMSON_TRAPDOOR, Items.WARPED_TRAPDOOR, Items.CRIMSON_FENCE_GATE, Items.WARPED_FENCE_GATE, Items.CRIMSON_STAIRS, Items.WARPED_STAIRS, Items.CRIMSON_BUTTON, Items.WARPED_BUTTON, Items.CRIMSON_DOOR, Items.WARPED_DOOR, Items.CRIMSON_SIGN, Items.WARPED_SIGN});
-        this.tag(ItemTags.STONE_TOOL_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE});
-        this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE});
+        this.tag(ItemTags.STONE_TOOL_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE});
+        this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE});
         this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES).add((Item[])new Item[]{Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET});
         this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add((Item[])new Item[]{Items.TROPICAL_FISH, Items.TROPICAL_FISH_BUCKET});
     }

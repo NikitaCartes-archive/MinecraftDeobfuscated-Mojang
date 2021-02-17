@@ -20,18 +20,20 @@ implements Packet<ServerGamePacketListener> {
     private boolean chatColors;
     private int modelCustomisation;
     private HumanoidArm mainHand;
+    private boolean textFilteringEnabled;
 
     public ServerboundClientInformationPacket() {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm) {
+    public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm, boolean bl2) {
         this.language = string;
         this.viewDistance = i;
         this.chatVisibility = chatVisiblity;
         this.chatColors = bl;
         this.modelCustomisation = j;
         this.mainHand = humanoidArm;
+        this.textFilteringEnabled = bl2;
     }
 
     @Override
@@ -42,6 +44,7 @@ implements Packet<ServerGamePacketListener> {
         this.chatColors = friendlyByteBuf.readBoolean();
         this.modelCustomisation = friendlyByteBuf.readUnsignedByte();
         this.mainHand = friendlyByteBuf.readEnum(HumanoidArm.class);
+        this.textFilteringEnabled = friendlyByteBuf.readBoolean();
     }
 
     @Override
@@ -52,6 +55,7 @@ implements Packet<ServerGamePacketListener> {
         friendlyByteBuf.writeBoolean(this.chatColors);
         friendlyByteBuf.writeByte(this.modelCustomisation);
         friendlyByteBuf.writeEnum(this.mainHand);
+        friendlyByteBuf.writeBoolean(this.textFilteringEnabled);
     }
 
     @Override
@@ -73,6 +77,10 @@ implements Packet<ServerGamePacketListener> {
 
     public HumanoidArm getMainHand() {
         return this.mainHand;
+    }
+
+    public boolean isTextFilteringEnabled() {
+        return this.textFilteringEnabled;
     }
 }
 

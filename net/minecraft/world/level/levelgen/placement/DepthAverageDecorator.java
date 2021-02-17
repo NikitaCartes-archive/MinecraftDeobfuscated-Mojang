@@ -5,25 +5,20 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.placement.DepthAverageConfigation;
-import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.DecorationContext;
+import net.minecraft.world.level.levelgen.placement.DepthAverageConfiguration;
+import net.minecraft.world.level.levelgen.placement.VerticalDecorator;
 
 public class DepthAverageDecorator
-extends SimpleFeatureDecorator<DepthAverageConfigation> {
-    public DepthAverageDecorator(Codec<DepthAverageConfigation> codec) {
+extends VerticalDecorator<DepthAverageConfiguration> {
+    public DepthAverageDecorator(Codec<DepthAverageConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> place(Random random, DepthAverageConfigation depthAverageConfigation, BlockPos blockPos) {
-        int i = depthAverageConfigation.baseline;
-        int j = depthAverageConfigation.spread;
-        int k = blockPos.getX();
-        int l = blockPos.getZ();
-        int m = random.nextInt(j) + random.nextInt(j) - j + i;
-        return Stream.of(new BlockPos(k, m, l));
+    protected int y(DecorationContext decorationContext, Random random, DepthAverageConfiguration depthAverageConfiguration, int i) {
+        int j = depthAverageConfiguration.spread();
+        return random.nextInt(j) + random.nextInt(j) - j + depthAverageConfiguration.baseline().resolveY(decorationContext);
     }
 }
 

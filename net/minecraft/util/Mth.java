@@ -574,6 +574,10 @@ public class Mth {
         return f + (float)random.nextGaussian() * g;
     }
 
+    public static double length(int i, double d, int j) {
+        return Mth.sqrt((double)(i * i) + d * d + (double)(j * j));
+    }
+
     static {
         for (int i = 0; i < 257; ++i) {
             double d = (double)i / 256.0;

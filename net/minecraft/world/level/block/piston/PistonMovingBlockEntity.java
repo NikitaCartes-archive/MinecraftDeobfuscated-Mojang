@@ -322,11 +322,5 @@ extends BlockEntity {
     public long getLastTicked() {
         return this.lastTicked;
     }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public double getViewDistance() {
-        return 68.0;
-    }
 }
 

@@ -53,10 +53,10 @@ extends Feature<LargeDripstoneConfiguration> {
         WindOffsetter windOffsetter = largeDripstone.isSuitableForWind(largeDripstoneConfiguration) && largeDripstone2.isSuitableForWind(largeDripstoneConfiguration) ? new WindOffsetter(blockPos.getY(), random, largeDripstoneConfiguration.windSpeed) : WindOffsetter.noWind();
         boolean bl = largeDripstone.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
         boolean bl2 = largeDripstone2.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
-        if (bl && largeDripstone.getMinY() > 0) {
+        if (bl) {
             largeDripstone.placeBlocks(worldGenLevel, random, windOffsetter);
         }
-        if (bl2 && largeDripstone2.getMaxY() < 55) {
+        if (bl2) {
             largeDripstone2.placeBlocks(worldGenLevel, random, windOffsetter);
         }
         return true;
@@ -114,20 +114,6 @@ extends Feature<LargeDripstoneConfiguration> {
 
         private int getHeight() {
             return this.getHeightAtRadius(0.0f);
-        }
-
-        private int getMinY() {
-            if (this.pointingUp) {
-                return this.root.getY();
-            }
-            return this.root.getY() - this.getHeight();
-        }
-
-        private int getMaxY() {
-            if (!this.pointingUp) {
-                return this.root.getY();
-            }
-            return this.root.getY() + this.getHeight();
         }
 
         private boolean moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(WorldGenLevel worldGenLevel, WindOffsetter windOffsetter) {

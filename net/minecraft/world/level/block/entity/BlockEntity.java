@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -100,11 +98,6 @@ public abstract class BlockEntity {
         if (!blockState.isAir()) {
             level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public double getViewDistance() {
-        return 64.0;
     }
 
     public BlockPos getBlockPos() {

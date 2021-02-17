@@ -71,7 +71,7 @@ public class BlockModelGenerators {
     private final BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput;
     private final Consumer<Item> skippedAutoModelsOutput;
     private final List<Block> nonOrientableTrapdoor = ImmutableList.of(Blocks.OAK_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.IRON_TRAPDOOR);
-    private final List<Block> mirroredFullBlocks = ImmutableList.of(Blocks.STONE);
+    private final List<Block> mirroredFullBlocks = ImmutableList.of(Blocks.STONE, Blocks.GRIMSTONE);
     private final Map<Block, TexturedModel> texturedModels = ImmutableMap.builder().put(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.SANDSTONE)).put(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.RED_SANDSTONE)).put(Blocks.SMOOTH_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"))).put(Blocks.SMOOTH_RED_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"))).put(Blocks.CUT_SANDSTONE, TexturedModel.COLUMN.get(Blocks.SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_SANDSTONE)))).put(Blocks.CUT_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.RED_SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE)))).put(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.QUARTZ_BLOCK)).put(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).put(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.BLACKSTONE)).build();
     private static final Map<BlockFamily.Variant, BiConsumer<BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, (object, block) -> BlockFamilyProvider.method_33526((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.FENCE, BlockFamilyProvider::fence).put(BlockFamily.Variant.FENCE_GATE, BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, (object, block) -> BlockFamilyProvider.method_33523((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.WALL, BlockFamilyProvider::wall).build();
     public static final Map<BooleanProperty, Function<ResourceLocation, Variant>> MULTIFACE_GENERATOR = Util.make(Maps.newHashMap(), hashMap -> {
@@ -1297,6 +1297,7 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.DRIPSTONE_BLOCK, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.CHISELED_GRIMSTONE, TexturedModel.CUBE);
         this.createPetrifiedOakSlab();
         this.createTrivialCube(Blocks.COPPER_ORE);
         this.createTrivialCube(Blocks.COPPER_BLOCK);

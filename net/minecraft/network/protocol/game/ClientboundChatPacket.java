@@ -52,10 +52,7 @@ implements Packet<ClientGamePacketListener> {
         return this.message;
     }
 
-    public boolean isSystem() {
-        return this.type == ChatType.SYSTEM || this.type == ChatType.GAME_INFO;
-    }
-
+    @Environment(value=EnvType.CLIENT)
     public ChatType getType() {
         return this.type;
     }

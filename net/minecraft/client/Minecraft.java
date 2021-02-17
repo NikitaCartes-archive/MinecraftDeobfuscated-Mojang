@@ -747,10 +747,9 @@ WindowEventHandler {
     }
 
     private void openChatScreen(String string) {
-        if (!this.isLocalServer() && !this.allowsChat()) {
-            if (this.player != null) {
-                this.player.sendMessage(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), Util.NIL_UUID);
-            }
+        ChatStatus chatStatus = this.getChatStatus();
+        if (!chatStatus.isChatAllowed(this.isLocalServer())) {
+            this.gui.setOverlayMessage(chatStatus.getMessage(), false);
         } else {
             this.setScreen(new ChatScreen(string));
         }
@@ -1367,7 +1366,6 @@ WindowEventHandler {
     }
 
     private void handleKeybinds() {
-        boolean bl3;
         while (this.options.keyTogglePerspective.consumeClick()) {
             CameraType cameraType = this.options.getCameraType();
             this.options.setCameraType(this.options.getCameraType().cycle());
@@ -1424,14 +1422,11 @@ WindowEventHandler {
             if (this.player.isSpectator() || !this.player.drop(Screen.hasControlDown())) continue;
             this.player.swing(InteractionHand.MAIN_HAND);
         }
-        boolean bl = bl3 = this.options.chatVisibility != ChatVisiblity.HIDDEN;
-        if (bl3) {
-            while (this.options.keyChat.consumeClick()) {
-                this.openChatScreen("");
-            }
-            if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
-                this.openChatScreen("/");
-            }
+        while (this.options.keyChat.consumeClick()) {
+            this.openChatScreen("");
+        }
+        if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
+            this.openChatScreen("/");
         }
         if (this.player.isUsingItem()) {
             if (!this.options.keyUse.isDown()) {
@@ -1713,14 +1708,23 @@ WindowEventHandler {
     }
 
     public boolean isBlocked(UUID uUID) {
-        if (!this.allowsChat()) {
+        if (!this.getChatStatus().isChatAllowed(false)) {
             return (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
         }
         return this.playerSocialManager.shouldHideMessageFrom(uUID);
     }
 
-    public boolean allowsChat() {
-        return this.allowsChat && this.socialInteractionsService.chatAllowed();
+    public ChatStatus getChatStatus() {
+        if (this.options.chatVisibility == ChatVisiblity.HIDDEN) {
+            return ChatStatus.DISABLED_BY_OPTIONS;
+        }
+        if (!this.allowsChat) {
+            return ChatStatus.DISABLED_BY_LAUNCHER;
+        }
+        if (!this.socialInteractionsService.chatAllowed()) {
+            return ChatStatus.DISABLED_BY_PROFILE;
+        }
+        return ChatStatus.ENABLED;
     }
 
     public final boolean isDemo() {
@@ -2217,6 +2221,10 @@ WindowEventHandler {
         return this.entityModels;
     }
 
+    public boolean isTextFilteringEnabled() {
+        return true;
+    }
+
     static {
         LOGGER = LogManager.getLogger();
         ON_OSX = Util.getPlatform() == Util.OS.OSX;
@@ -2226,6 +2234,53 @@ WindowEventHandler {
         RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
         SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
         reserve = new byte[0xA00000];
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum ChatStatus {
+        ENABLED(TextComponent.EMPTY){
+
+            @Override
+            public boolean isChatAllowed(boolean bl) {
+                return true;
+            }
+        }
+        ,
+        DISABLED_BY_OPTIONS(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED)){
+
+            @Override
+            public boolean isChatAllowed(boolean bl) {
+                return false;
+            }
+        }
+        ,
+        DISABLED_BY_LAUNCHER(new TranslatableComponent("chat.disabled.launcher").withStyle(ChatFormatting.RED)){
+
+            @Override
+            public boolean isChatAllowed(boolean bl) {
+                return bl;
+            }
+        }
+        ,
+        DISABLED_BY_PROFILE(new TranslatableComponent("chat.disabled.profile").withStyle(ChatFormatting.RED)){
+
+            @Override
+            public boolean isChatAllowed(boolean bl) {
+                return bl;
+            }
+        };
+
+        private final Component message;
+
+        private ChatStatus(Component component) {
+            this.message = component;
+        }
+
+        public Component getMessage() {
+            return this.message;
+        }
+
+        public abstract boolean isChatAllowed(boolean var1);
     }
 
     @Environment(value=EnvType.CLIENT)

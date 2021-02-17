@@ -74,12 +74,6 @@ extends TheEndPortalBlockEntity {
         this.exactTeleport = compoundTag.getBoolean("ExactTeleport");
     }
 
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public double getViewDistance() {
-        return 256.0;
-    }
-
     public static void beamAnimationTick(Level level, BlockPos blockPos, BlockState blockState, TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
         ++theEndGatewayBlockEntity.age;
         if (theEndGatewayBlockEntity.isCoolingDown()) {

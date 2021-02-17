@@ -139,5 +139,10 @@ implements BlockEntityRenderer<StructureBlockEntity> {
     public boolean shouldRenderOffScreen(StructureBlockEntity structureBlockEntity) {
         return true;
     }
+
+    @Override
+    public int getViewDistance() {
+        return 96;
+    }
 }
 

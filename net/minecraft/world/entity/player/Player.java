@@ -1881,6 +1881,11 @@ extends LivingEntity {
         return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
     }
 
+    @Override
+    public boolean shouldBeSaved() {
+        return false;
+    }
+
     public static enum BedSleepingProblem {
         NOT_POSSIBLE_HERE,
         NOT_POSSIBLE_NOW(new TranslatableComponent("block.minecraft.bed.no_sleep")),

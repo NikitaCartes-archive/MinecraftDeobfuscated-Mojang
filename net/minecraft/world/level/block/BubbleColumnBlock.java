@@ -64,11 +64,6 @@ implements BucketPickup {
     }
 
     @Override
-    public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        BubbleColumnBlock.growColumn(level, blockPos.above(), BubbleColumnBlock.getDrag(level, blockPos.below()));
-    }
-
-    @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), BubbleColumnBlock.getDrag(serverLevel, blockPos));
     }
@@ -79,8 +74,10 @@ implements BucketPickup {
     }
 
     public static void growColumn(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
-        if (BubbleColumnBlock.canExistIn(levelAccessor, blockPos)) {
-            levelAccessor.setBlock(blockPos, (BlockState)Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, bl), 2);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        while (BubbleColumnBlock.canExistIn(levelAccessor, mutableBlockPos)) {
+            levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, bl), 2);
+            mutableBlockPos.move(Direction.UP);
         }
     }
 

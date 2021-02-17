@@ -45,9 +45,9 @@ extends Screen {
     private TextFieldHelper signField;
     private WoodType woodType;
     private SignRenderer.SignModel signModel;
-    private final String[] messages = (String[])IntStream.range(0, 4).mapToObj(signBlockEntity::getMessage).map(Component::getString).toArray(String[]::new);
+    private final String[] messages = (String[])IntStream.range(0, 4).mapToObj(i -> signBlockEntity.getMessage(i, bl)).map(Component::getString).toArray(String[]::new);
 
-    public SignEditScreen(SignBlockEntity signBlockEntity) {
+    public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
         super(new TranslatableComponent("sign.edit"));
         this.sign = signBlockEntity;
     }

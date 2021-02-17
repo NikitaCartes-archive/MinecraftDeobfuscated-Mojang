@@ -53,7 +53,7 @@ implements DispensibleContainerItem {
 
     @Override
     public boolean emptyContents(@Nullable Player player, Level level, BlockPos blockPos, @Nullable BlockHitResult blockHitResult) {
-        if (level.isEmptyBlock(blockPos)) {
+        if (level.isInWorldBounds(blockPos) && level.isEmptyBlock(blockPos)) {
             if (!level.isClientSide) {
                 level.setBlock(blockPos, this.getBlock().defaultBlockState(), 3);
             }

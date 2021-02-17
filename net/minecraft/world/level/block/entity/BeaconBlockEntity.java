@@ -255,12 +255,6 @@ implements MenuProvider {
         return this.save(new CompoundTag());
     }
 
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public double getViewDistance() {
-        return 256.0;
-    }
-
     @Nullable
     private static MobEffect getValidEffectById(int i) {
         MobEffect mobEffect = MobEffect.byId(i);

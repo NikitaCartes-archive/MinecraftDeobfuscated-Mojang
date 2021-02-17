@@ -5,23 +5,22 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.RepeatingDecorator;
 
 public class ChanceDecorator
-extends SimpleFeatureDecorator<ChanceDecoratorConfiguration> {
+extends RepeatingDecorator<ChanceDecoratorConfiguration> {
     public ChanceDecorator(Codec<ChanceDecoratorConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> place(Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos) {
+    protected int count(Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos) {
         if (random.nextFloat() < 1.0f / (float)chanceDecoratorConfiguration.chance) {
-            return Stream.of(blockPos);
+            return 1;
         }
-        return Stream.empty();
+        return 0;
     }
 }
 

@@ -52,7 +52,7 @@ public class Cavifier {
         double g = this.getSpaghetti3d(i, j, k);
         if (bl) {
             double h = d / 128.0;
-            double l = Mth.clamp(h + 0.2, -1.0, 1.0);
+            double l = Mth.clamp(h + 0.35, -1.0, 1.0);
             double m = this.getLayerizedCaverns(i, j, k);
             double n = this.getSpaghetti2d(i, j, k);
             double o = l + m;
@@ -87,10 +87,10 @@ public class Cavifier {
 
     private double getSpaghetti3d(int i, int j, int k) {
         double d = this.spaghetti3dRarityModulator.getValue(i * 2, j, k * 2);
-        double e = this.getQuantizedSpaghettiRarity(d);
+        double e = QuantizedSpaghettiRarity.getSpaghettiRarity3D(d);
         double f = 0.065;
-        double g = 0.09;
-        double h = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti3dThicknessModulator, i, j, k, 0.065, 0.09);
+        double g = 0.085;
+        double h = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti3dThicknessModulator, i, j, k, 0.065, 0.085);
         double l = Cavifier.sampleWithRarity(this.spaghetti3dNoiseSource1, i, j, k, e);
         double m = Math.abs(e * l) - h;
         double n = Cavifier.sampleWithRarity(this.spaghetti3dNoiseSource2, i, j, k, e);
@@ -100,7 +100,7 @@ public class Cavifier {
 
     private double getSpaghetti2d(int i, int j, int k) {
         double d = this.spaghetti2dRarityModulator.getValue(i * 2, j, k * 2);
-        double e = this.getQuantizedSpaghettiRarity(d);
+        double e = QuantizedSpaghettiRarity.getSphaghettiRarity2D(d);
         double f = 0.6;
         double g = 1.3;
         double h = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti2dThicknessModulator, i * 2, j, k * 2, 0.6, 1.3);
@@ -120,28 +120,43 @@ public class Cavifier {
         return (0.4 - Math.abs(this.spaghettiRoughnessNoise.getValue(i, j, k))) * d;
     }
 
-    private double getQuantizedSpaghettiRarity(double d) {
-        if (d < -0.75) {
-            return 0.5;
-        }
-        if (d < -0.5) {
-            return 0.75;
-        }
-        if (d < 0.5) {
-            return 1.0;
-        }
-        if (d < 0.75) {
-            return 2.0;
-        }
-        return 3.0;
-    }
-
     private static double clampToUnit(double d) {
         return Mth.clamp(d, -1.0, 1.0);
     }
 
     private static double sampleWithRarity(NormalNoise normalNoise, double d, double e, double f, double g) {
         return normalNoise.getValue(d / g, e / g, f / g);
+    }
+
+    static final class QuantizedSpaghettiRarity {
+        private static double getSphaghettiRarity2D(double d) {
+            if (d < -0.75) {
+                return 0.5;
+            }
+            if (d < -0.5) {
+                return 0.75;
+            }
+            if (d < 0.5) {
+                return 1.0;
+            }
+            if (d < 0.75) {
+                return 2.0;
+            }
+            return 3.0;
+        }
+
+        private static double getSpaghettiRarity3D(double d) {
+            if (d < -0.5) {
+                return 0.75;
+            }
+            if (d < 0.0) {
+                return 1.0;
+            }
+            if (d < 0.5) {
+                return 2.0;
+            }
+            return 3.0;
+        }
     }
 }
 

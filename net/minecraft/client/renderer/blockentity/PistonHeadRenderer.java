@@ -72,5 +72,10 @@ implements BlockEntityRenderer<PistonMovingBlockEntity> {
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
         this.blockRenderer.getModelRenderer().tesselateBlock(level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, new Random(), blockState.getSeed(blockPos), i);
     }
+
+    @Override
+    public int getViewDistance() {
+        return 68;
+    }
 }
 

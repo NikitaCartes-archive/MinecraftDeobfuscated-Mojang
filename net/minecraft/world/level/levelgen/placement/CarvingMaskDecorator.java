@@ -24,7 +24,7 @@ extends FeatureDecorator<CarvingMaskDecoratorConfiguration> {
     public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, CarvingMaskDecoratorConfiguration carvingMaskDecoratorConfiguration, BlockPos blockPos) {
         ChunkPos chunkPos = new ChunkPos(blockPos);
         BitSet bitSet = decorationContext.getCarvingMask(chunkPos, carvingMaskDecoratorConfiguration.step);
-        return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < carvingMaskDecoratorConfiguration.probability).mapToObj(i -> {
+        return IntStream.range(0, bitSet.length()).filter(bitSet::get).mapToObj(i -> {
             int j = i & 0xF;
             int k = i >> 4 & 0xF;
             int l = i >> 8;

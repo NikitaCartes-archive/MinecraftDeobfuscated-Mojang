@@ -8,9 +8,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
-public abstract class BeardedStructureStart<C extends FeatureConfiguration>
+public abstract class NoiseAffectingStructureStart<C extends FeatureConfiguration>
 extends StructureStart<C> {
-    public BeardedStructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+    public NoiseAffectingStructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
         super(structureFeature, i, j, boundingBox, k, l);
     }
 

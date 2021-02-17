@@ -61,12 +61,6 @@ extends BlockEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public double getViewDistance() {
-        return 96.0;
-    }
-
-    @Override
     public CompoundTag save(CompoundTag compoundTag) {
         super.save(compoundTag);
         compoundTag.putString("name", this.getStructureName());

@@ -5,22 +5,19 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.VerticalDecorator;
 
 public class Spread32Decorator
-extends FeatureDecorator<NoneDecoratorConfiguration> {
+extends VerticalDecorator<NoneDecoratorConfiguration> {
     public Spread32Decorator(Codec<NoneDecoratorConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, BlockPos blockPos) {
-        int i = random.nextInt(Math.max(blockPos.getY(), 0) + 32);
-        return Stream.of(new BlockPos(blockPos.getX(), i, blockPos.getZ()));
+    protected int y(DecorationContext decorationContext, Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, int i) {
+        return random.nextInt(Math.max(i, 0) + 32);
     }
 }
 

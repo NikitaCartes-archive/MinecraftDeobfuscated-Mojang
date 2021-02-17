@@ -8,20 +8,20 @@ import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.DecorationContext;
+import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class SquareDecorator
-extends SimpleFeatureDecorator<NoneDecoratorConfiguration> {
+extends FeatureDecorator<NoneDecoratorConfiguration> {
     public SquareDecorator(Codec<NoneDecoratorConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> place(Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, BlockPos blockPos) {
         int i = random.nextInt(16) + blockPos.getX();
         int j = random.nextInt(16) + blockPos.getZ();
-        int k = blockPos.getY();
-        return Stream.of(new BlockPos(i, k, j));
+        return Stream.of(new BlockPos(i, blockPos.getY(), j));
     }
 }
 

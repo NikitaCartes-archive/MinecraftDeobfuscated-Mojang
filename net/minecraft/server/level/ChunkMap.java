@@ -483,6 +483,7 @@ implements ChunkHolder.PlayerProvider {
                 this.progressListener.onStatusChange(chunkPos, chunkStatus);
                 return completableFuture;
             } catch (Exception exception) {
+                exception.getStackTrace();
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Exception generating new chunk");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk to be generated");
                 crashReportCategory.setDetail("Location", String.format("%d,%d", chunkPos.x, chunkPos.z));

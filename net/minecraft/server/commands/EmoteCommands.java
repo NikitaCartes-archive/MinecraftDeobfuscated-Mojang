@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.world.entity.Entity;
 
 public class EmoteCommands {
@@ -27,9 +26,14 @@ public class EmoteCommands {
             Entity entity = ((CommandSourceStack)commandContext.getSource()).getEntity();
             MinecraftServer minecraftServer = ((CommandSourceStack)commandContext.getSource()).getServer();
             if (entity != null) {
-                TextFilter textFilter;
-                if (entity instanceof ServerPlayer && (textFilter = ((ServerPlayer)entity).getTextFilter()) != null) {
-                    textFilter.processStreamMessage(string).thenAcceptAsync(optional -> optional.ifPresent(string -> minecraftServer.getPlayerList().broadcastMessage(EmoteCommands.createMessage(commandContext, string), ChatType.CHAT, entity.getUUID())), (Executor)minecraftServer);
+                if (entity instanceof ServerPlayer) {
+                    ServerPlayer serverPlayer = (ServerPlayer)entity;
+                    serverPlayer.getTextFilter().processStreamMessage(string).thenAcceptAsync(filteredText -> {
+                        String string = filteredText.getFiltered();
+                        Component component = string.isEmpty() ? null : EmoteCommands.createMessage(commandContext, string);
+                        Component component2 = EmoteCommands.createMessage(commandContext, filteredText.getRaw());
+                        minecraftServer.getPlayerList().broadcastMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? component : component2, ChatType.CHAT, entity.getUUID());
+                    }, (Executor)minecraftServer);
                     return 1;
                 }
                 minecraftServer.getPlayerList().broadcastMessage(EmoteCommands.createMessage(commandContext, string), ChatType.CHAT, entity.getUUID());

@@ -514,7 +514,7 @@ public class Options {
             for (PlayerModelPart playerModelPart : this.modelParts) {
                 i |= playerModelPart.getMask();
             }
-            this.minecraft.player.connection.send(new ServerboundClientInformationPacket(this.languageCode, this.renderDistance, this.chatVisibility, this.chatColors, i, this.mainHand));
+            this.minecraft.player.connection.send(new ServerboundClientInformationPacket(this.languageCode, this.renderDistance, this.chatVisibility, this.chatColors, i, this.mainHand, this.minecraft.isTextFilteringEnabled()));
         }
     }
 

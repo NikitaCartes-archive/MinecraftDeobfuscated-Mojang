@@ -8,20 +8,14 @@ import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
-import net.minecraft.world.level.levelgen.placement.EdgeDecorator;
+import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class DarkOakTreePlacementDecorator
-extends EdgeDecorator<NoneDecoratorConfiguration> {
+extends FeatureDecorator<NoneDecoratorConfiguration> {
     public DarkOakTreePlacementDecorator(Codec<NoneDecoratorConfiguration> codec) {
         super(codec);
-    }
-
-    @Override
-    protected Heightmap.Types type(NoneDecoratorConfiguration noneDecoratorConfiguration) {
-        return Heightmap.Types.MOTION_BLOCKING;
     }
 
     @Override
@@ -31,8 +25,7 @@ extends EdgeDecorator<NoneDecoratorConfiguration> {
             int k = i % 4;
             int l = j * 4 + 1 + random.nextInt(3) + blockPos.getX();
             int m = k * 4 + 1 + random.nextInt(3) + blockPos.getZ();
-            int n = decorationContext.getHeight(this.type(noneDecoratorConfiguration), l, m);
-            return new BlockPos(l, n, m);
+            return new BlockPos(l, blockPos.getY(), m);
         });
     }
 }

@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BeardedStructureStart;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
+import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class NetherFossilFeature
@@ -34,7 +34,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     public static class FeatureStart
-    extends BeardedStructureStart<NoneFeatureConfiguration> {
+    extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
         public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }

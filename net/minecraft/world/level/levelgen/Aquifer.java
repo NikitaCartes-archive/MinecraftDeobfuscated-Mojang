@@ -179,9 +179,9 @@ public class Aquifer {
             return l;
         }
         int m = 64;
-        int n = -8;
+        int n = -12;
         int o = 40;
-        double d = this.waterLevelNoise.getValue(Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, Math.floorDiv(k, 64)) * 30.0 + -8.0;
+        double d = this.waterLevelNoise.getValue(Math.floorDiv(i, 64), (double)Math.floorDiv(j, 40) / 1.4, Math.floorDiv(k, 64)) * 30.0 + -12.0;
         if (Math.abs(d) > 8.0) {
             d *= 4.0;
         }

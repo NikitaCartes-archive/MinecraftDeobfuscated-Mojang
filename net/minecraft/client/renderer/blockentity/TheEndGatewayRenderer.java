@@ -47,5 +47,10 @@ extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
     protected float getOffset() {
         return 1.0f;
     }
+
+    @Override
+    public int getViewDistance() {
+        return 256;
+    }
 }
 

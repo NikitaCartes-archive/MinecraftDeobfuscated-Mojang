@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -35,7 +36,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -437,14 +437,13 @@ public abstract class PlayerList {
     }
 
     public void broadcastAll(Packet<?> packet) {
-        for (int i = 0; i < this.players.size(); ++i) {
-            this.players.get((int)i).connection.send(packet);
+        for (ServerPlayer serverPlayer : this.players) {
+            serverPlayer.connection.send(packet);
         }
     }
 
     public void broadcastAll(Packet<?> packet, ResourceKey<Level> resourceKey) {
-        for (int i = 0; i < this.players.size(); ++i) {
-            ServerPlayer serverPlayer = this.players.get(i);
+        for (ServerPlayer serverPlayer : this.players) {
             if (serverPlayer.level.dimension() != resourceKey) continue;
             serverPlayer.connection.send(packet);
         }
@@ -637,7 +636,18 @@ public abstract class PlayerList {
 
     public void broadcastMessage(Component component, ChatType chatType, UUID uUID) {
         this.server.sendMessage(component, uUID);
-        this.broadcastAll(new ClientboundChatPacket(component, chatType, uUID));
+        for (ServerPlayer serverPlayer : this.players) {
+            serverPlayer.sendMessage(component, chatType, uUID);
+        }
+    }
+
+    public void broadcastMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType, UUID uUID) {
+        this.server.sendMessage(component, uUID);
+        for (ServerPlayer serverPlayer : this.players) {
+            Component component2 = function.apply(serverPlayer);
+            if (component2 == null) continue;
+            serverPlayer.sendMessage(component2, chatType, uUID);
+        }
     }
 
     public ServerStatsCounter getPlayerStats(Player player) {

@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -74,7 +75,7 @@ public class Beardifier {
         this.junctionIterator = this.junctions.iterator();
     }
 
-    protected double beardify(int i, int j, int k) {
+    protected double beardifyOrBury(int i, int j, int k) {
         int m;
         int l;
         double d = 0.0;
@@ -84,7 +85,13 @@ public class Beardifier {
             l = Math.max(0, Math.max(boundingBox.x0 - i, i - boundingBox.x1));
             m = j - (boundingBox.y0 + (structurePiece instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece).getGroundLevelDelta() : 0));
             int n = Math.max(0, Math.max(boundingBox.z0 - k, k - boundingBox.z1));
-            d += Beardifier.getContribution(l, m, n) * 0.8;
+            NoiseEffect noiseEffect = structurePiece.getNoiseEffect();
+            if (noiseEffect == NoiseEffect.BURY) {
+                d += Beardifier.getBuryContribution(l, m, n);
+                continue;
+            }
+            if (noiseEffect != NoiseEffect.BEARD) continue;
+            d += Beardifier.getBeardContribution(l, m, n) * 0.8;
         }
         this.pieceIterator.back(this.rigids.size());
         while (this.junctionIterator.hasNext()) {
@@ -92,13 +99,18 @@ public class Beardifier {
             int o = i - jigsawJunction.getSourceX();
             l = j - jigsawJunction.getSourceGroundY();
             m = k - jigsawJunction.getSourceZ();
-            d += Beardifier.getContribution(o, l, m) * 0.4;
+            d += Beardifier.getBeardContribution(o, l, m) * 0.4;
         }
         this.junctionIterator.back(this.junctions.size());
         return d;
     }
 
-    private static double getContribution(int i, int j, int k) {
+    private static double getBuryContribution(int i, int j, int k) {
+        double d = Mth.length(i, (double)j / 2.0, k);
+        return Mth.clampedMap(d, 0.0, 6.0, 1.0, 0.0);
+    }
+
+    private static double getBeardContribution(int i, int j, int k) {
         int l = i + 12;
         int m = j + 12;
         int n = k + 12;

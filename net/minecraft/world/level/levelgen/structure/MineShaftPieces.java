@@ -18,7 +18,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
@@ -278,10 +280,10 @@ public class MineShaftPieces {
             this.placeSupportPillar(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z1 - 1, this.boundingBox.y1);
             this.placeSupportPillar(worldGenLevel, boundingBox, this.boundingBox.x1 - 1, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.y1);
             this.placeSupportPillar(worldGenLevel, boundingBox, this.boundingBox.x1 - 1, this.boundingBox.y0, this.boundingBox.z1 - 1, this.boundingBox.y1);
-            for (int i = this.boundingBox.x0; i <= this.boundingBox.x1; ++i) {
-                for (int j = this.boundingBox.z0; j <= this.boundingBox.z1; ++j) {
-                    if (!this.getBlock(worldGenLevel, i, this.boundingBox.y0 - 1, j, boundingBox).isAir() || !this.isInterior(worldGenLevel, i, this.boundingBox.y0 - 1, j, boundingBox)) continue;
-                    this.placeBlock(worldGenLevel, blockState, i, this.boundingBox.y0 - 1, j, boundingBox);
+            int i = this.boundingBox.y0 - 1;
+            for (int j = this.boundingBox.x0; j <= this.boundingBox.x1; ++j) {
+                for (int k = this.boundingBox.z0; k <= this.boundingBox.z1; ++k) {
+                    this.setPlanksBlock(worldGenLevel, boundingBox, blockState, j, i, k);
                 }
             }
             return true;
@@ -461,7 +463,6 @@ public class MineShaftPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            int r;
             int p;
             int o;
             int n;
@@ -500,7 +501,7 @@ public class MineShaftPieces {
                 if (!this.spiderCorridor || this.hasPlacedSpider) continue;
                 p = this.getWorldY(0);
                 int q = o - 1 + random.nextInt(3);
-                r = this.getWorldX(1, q);
+                int r = this.getWorldX(1, q);
                 BlockPos blockPos2 = new BlockPos(r, p, s = this.getWorldZ(1, q));
                 if (!boundingBox.isInside(blockPos2) || !this.isInterior(worldGenLevel, 1, 0, q, boundingBox)) continue;
                 this.hasPlacedSpider = true;
@@ -511,39 +512,35 @@ public class MineShaftPieces {
             }
             for (n = 0; n <= 2; ++n) {
                 for (o = 0; o <= m; ++o) {
-                    p = -1;
-                    BlockState blockState2 = this.getBlock(worldGenLevel, n, -1, o, boundingBox);
-                    if (!blockState2.isAir() || !this.isInterior(worldGenLevel, n, -1, o, boundingBox)) continue;
-                    r = -1;
-                    this.placeBlock(worldGenLevel, blockState, n, -1, o, boundingBox);
+                    this.setPlanksBlock(worldGenLevel, boundingBox, blockState, n, -1, o);
                 }
             }
             n = 2;
-            this.placeDoubleLowerSupport(worldGenLevel, boundingBox, 0, -1, 2);
+            this.placeDoubleLowerOrUpperSupport(worldGenLevel, boundingBox, 0, -1, 2);
             if (this.numSections > 1) {
                 o = m - 2;
-                this.placeDoubleLowerSupport(worldGenLevel, boundingBox, 0, -1, o);
+                this.placeDoubleLowerOrUpperSupport(worldGenLevel, boundingBox, 0, -1, o);
             }
             if (this.hasRails) {
-                BlockState blockState3 = (BlockState)Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, RailShape.NORTH_SOUTH);
+                BlockState blockState2 = (BlockState)Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, RailShape.NORTH_SOUTH);
                 for (p = 0; p <= m; ++p) {
-                    BlockState blockState2 = this.getBlock(worldGenLevel, 1, -1, p, boundingBox);
-                    if (blockState2.isAir() || !blockState2.isSolidRender(worldGenLevel, new BlockPos(this.getWorldX(1, p), this.getWorldY(-1), this.getWorldZ(1, p)))) continue;
+                    BlockState blockState3 = this.getBlock(worldGenLevel, 1, -1, p, boundingBox);
+                    if (blockState3.isAir() || !blockState3.isSolidRender(worldGenLevel, new BlockPos(this.getWorldX(1, p), this.getWorldY(-1), this.getWorldZ(1, p)))) continue;
                     float f = this.isInterior(worldGenLevel, 1, 0, p, boundingBox) ? 0.7f : 0.9f;
-                    this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, 1, 0, p, blockState3, false);
+                    this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, 1, 0, p, blockState2, false);
                 }
             }
             return true;
         }
 
-        private void placeDoubleLowerSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
+        private void placeDoubleLowerOrUpperSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
             BlockState blockState = this.type.getWoodState();
             BlockState blockState2 = this.type.getPlanksState();
             if (this.getBlock(worldGenLevel, i, j, k, boundingBox).is(blockState2.getBlock())) {
-                this.fillColumnDown(worldGenLevel, blockState, i, j - 1, k, boundingBox);
+                this.fillPillarDownOrChainUp(worldGenLevel, blockState, i, j, k, boundingBox);
             }
             if (this.getBlock(worldGenLevel, i + 2, j, k, boundingBox).is(blockState2.getBlock())) {
-                this.fillColumnDown(worldGenLevel, blockState, i + 2, j - 1, k, boundingBox);
+                this.fillPillarDownOrChainUp(worldGenLevel, blockState, i + 2, j, k, boundingBox);
             }
         }
 
@@ -556,7 +553,7 @@ public class MineShaftPieces {
             if (!boundingBox.isInside(mutableBlockPos)) {
                 return;
             }
-            while (this.isEmptyOrWater(worldGenLevel, mutableBlockPos) && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1) {
+            while (this.isReplaceableByStructures(worldGenLevel.getBlockState(mutableBlockPos)) && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1) {
                 mutableBlockPos.move(Direction.DOWN);
             }
             if (!this.canPlaceColumnOnTopOf(worldGenLevel.getBlockState(mutableBlockPos))) {
@@ -568,13 +565,57 @@ public class MineShaftPieces {
             }
         }
 
+        protected void fillPillarDownOrChainUp(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
+            int n;
+            int m;
+            int l = this.getWorldX(i, k);
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k));
+            if (!boundingBox.isInside(mutableBlockPos)) {
+                return;
+            }
+            int o = 1;
+            boolean bl = true;
+            boolean bl2 = true;
+            while (bl || bl2) {
+                boolean bl3;
+                BlockState blockState2;
+                if (bl) {
+                    mutableBlockPos.setY(m - o);
+                    blockState2 = worldGenLevel.getBlockState(mutableBlockPos);
+                    bl3 = this.isReplaceableByStructures(blockState2);
+                    if (!bl3 && this.canPlaceColumnOnTopOf(blockState2)) {
+                        MineShaftCorridor.fillColumnBetween(worldGenLevel, blockState, mutableBlockPos, m - o + 1, m);
+                        return;
+                    }
+                    boolean bl4 = bl = o <= 10 && bl3 && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1;
+                }
+                if (bl2) {
+                    mutableBlockPos.setY(m + o);
+                    blockState2 = worldGenLevel.getBlockState(mutableBlockPos);
+                    bl3 = this.isReplaceableByStructures(blockState2);
+                    if (!bl3 && this.canHangChainBelow(worldGenLevel, mutableBlockPos, blockState2)) {
+                        worldGenLevel.setBlock(mutableBlockPos.setY(m + 1), this.type.getFenceState(), 2);
+                        MineShaftCorridor.fillColumnBetween(worldGenLevel, Blocks.CHAIN.defaultBlockState(), mutableBlockPos, m + 2, m + o);
+                        return;
+                    }
+                    bl2 = o <= 20 && bl3 && mutableBlockPos.getY() < worldGenLevel.getMaxBuildHeight() - 1;
+                }
+                ++o;
+            }
+        }
+
+        private static void fillColumnBetween(WorldGenLevel worldGenLevel, BlockState blockState, BlockPos.MutableBlockPos mutableBlockPos, int i, int j) {
+            for (int k = i; k < j; ++k) {
+                worldGenLevel.setBlock(mutableBlockPos.setY(k), blockState, 2);
+            }
+        }
+
         private boolean canPlaceColumnOnTopOf(BlockState blockState) {
             return !blockState.is(Blocks.RAIL) && !blockState.is(Blocks.LAVA);
         }
 
-        private boolean isEmptyOrWater(LevelReader levelReader, BlockPos blockPos) {
-            BlockState blockState = levelReader.getBlockState(blockPos);
-            return blockState.isAir() || blockState.is(Blocks.WATER);
+        private boolean canHangChainBelow(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+            return Block.canSupportCenter(levelReader, blockPos, Direction.DOWN) && !(blockState.getBlock() instanceof FallingBlock);
         }
 
         private void placeSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, Random random) {
@@ -706,7 +747,7 @@ public class MineShaftPieces {
         @Override
         protected boolean canBeReplaced(LevelReader levelReader, int i, int j, int k, BoundingBox boundingBox) {
             BlockState blockState = this.getBlock(levelReader, i, j, k, boundingBox);
-            return !blockState.is(this.type.getPlanksState().getBlock()) && !blockState.is(this.type.getWoodState().getBlock()) && !blockState.is(this.type.getFenceState().getBlock());
+            return !blockState.is(this.type.getPlanksState().getBlock()) && !blockState.is(this.type.getWoodState().getBlock()) && !blockState.is(this.type.getFenceState().getBlock()) && !blockState.is(Blocks.CHAIN);
         }
 
         @Override
@@ -763,6 +804,17 @@ public class MineShaftPieces {
                 }
             }
             return false;
+        }
+
+        protected void setPlanksBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, BlockState blockState, int i, int j, int k) {
+            if (!this.isInterior(worldGenLevel, i, j, k, boundingBox)) {
+                return;
+            }
+            BlockPos blockPos = this.getWorldPos(i, j, k);
+            BlockState blockState2 = worldGenLevel.getBlockState(blockPos);
+            if (blockState2.isAir() || blockState2.is(Blocks.CHAIN)) {
+                worldGenLevel.setBlock(blockPos, blockState, 2);
+            }
         }
 
         private boolean air(BlockGetter blockGetter, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {

@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public class BeaconRenderer
@@ -110,6 +111,16 @@ implements BlockEntityRenderer<BeaconBlockEntity> {
     @Override
     public boolean shouldRenderOffScreen(BeaconBlockEntity beaconBlockEntity) {
         return true;
+    }
+
+    @Override
+    public int getViewDistance() {
+        return 256;
+    }
+
+    @Override
+    public boolean shouldRender(BeaconBlockEntity beaconBlockEntity, Vec3 vec3) {
+        return Vec3.atCenterOf(beaconBlockEntity.getBlockPos()).multiply(1.0, 0.0, 1.0).closerThan(vec3.multiply(1.0, 0.0, 1.0), this.getViewDistance());
     }
 }
 
