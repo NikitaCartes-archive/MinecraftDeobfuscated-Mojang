@@ -554,7 +554,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public void openTextEdit(SignBlockEntity signBlockEntity) {
-		this.minecraft.setScreen(new SignEditScreen(signBlockEntity));
+		this.minecraft.setScreen(new SignEditScreen(signBlockEntity, this.minecraft.isTextFilteringEnabled()));
 	}
 
 	@Override

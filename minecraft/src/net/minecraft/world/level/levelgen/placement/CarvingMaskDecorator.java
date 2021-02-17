@@ -18,7 +18,7 @@ public class CarvingMaskDecorator extends FeatureDecorator<CarvingMaskDecoratorC
 	) {
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		BitSet bitSet = decorationContext.getCarvingMask(chunkPos, carvingMaskDecoratorConfiguration.step);
-		return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < carvingMaskDecoratorConfiguration.probability).mapToObj(i -> {
+		return IntStream.range(0, bitSet.length()).filter(bitSet::get).mapToObj(i -> {
 			int j = i & 15;
 			int k = i >> 4 & 15;
 			int l = i >> 8;

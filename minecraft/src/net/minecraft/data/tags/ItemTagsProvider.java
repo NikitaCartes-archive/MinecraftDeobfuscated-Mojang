@@ -164,8 +164,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.CRIMSON_SIGN,
 				Items.WARPED_SIGN
 			);
-		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE);
-		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE);
+		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE);
+		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES).add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET);
 		this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add(Items.TROPICAL_FISH, Items.TROPICAL_FISH_BUCKET);
 	}

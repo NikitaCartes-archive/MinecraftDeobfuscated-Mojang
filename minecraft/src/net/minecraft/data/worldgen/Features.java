@@ -18,12 +18,14 @@ import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.blockplacers.ColumnPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.DoublePlantPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.SimpleBlockPlacer;
+import net.minecraft.world.level.levelgen.feature.configurations.BiasedRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
@@ -85,7 +87,6 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlac
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
-import net.minecraft.world.level.levelgen.placement.DepthAverageConfigation;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyWithExtraChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.NoiseCountFactorDecoratorConfiguration;
@@ -101,6 +102,9 @@ public class Features {
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.knownExit(ServerLevel.END_SPAWN_POINT, true))
 			.decorated(FeatureDecorator.END_GATEWAY.configured(DecoratorConfiguration.NONE))
+			.decorated(Features.Decorators.HEIGHTMAP)
+			.squared()
+			.rarity(700)
 	);
 	public static final ConfiguredFeature<?, ?> END_GATEWAY_DELAYED = register(
 		"end_gateway_delayed", Feature.END_GATEWAY.configured(EndGatewayConfiguration.delayedExitSearch())
@@ -110,7 +114,11 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> END_ISLAND = register("end_island", Feature.END_ISLAND.configured(FeatureConfiguration.NONE));
 	public static final ConfiguredFeature<?, ?> END_ISLAND_DECORATED = register(
-		"end_island_decorated", END_ISLAND.decorated(FeatureDecorator.END_ISLAND.configured(DecoratorConfiguration.NONE))
+		"end_island_decorated",
+		END_ISLAND.range(VerticalAnchor.absolute(55), VerticalAnchor.absolute(70))
+			.squared()
+			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(1, 0.25F, 1)))
+			.rarity(14)
 	);
 	public static final ConfiguredFeature<?, ?> DELTA = register(
 		"delta",
@@ -134,7 +142,7 @@ public class Features {
 		"basalt_blobs",
 		Feature.REPLACE_BLOBS
 			.configured(new ReplaceSphereConfiguration(Features.States.NETHERRACK, Features.States.BASALT, UniformInt.of(3, 4)))
-			.range(0, 128)
+			.range(Features.Decorators.FULL_RANGE)
 			.squared()
 			.count(75)
 	);
@@ -142,15 +150,20 @@ public class Features {
 		"blackstone_blobs",
 		Feature.REPLACE_BLOBS
 			.configured(new ReplaceSphereConfiguration(Features.States.NETHERRACK, Features.States.BLACKSTONE, UniformInt.of(3, 4)))
-			.range(0, 128)
+			.range(Features.Decorators.FULL_RANGE)
 			.squared()
 			.count(25)
 	);
 	public static final ConfiguredFeature<?, ?> GLOWSTONE_EXTRA = register(
-		"glowstone_extra", Feature.GLOWSTONE_BLOB.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.GLOWSTONE.configured(new CountConfiguration(10)))
+		"glowstone_extra",
+		Feature.GLOWSTONE_BLOB
+			.configured(FeatureConfiguration.NONE)
+			.range(Features.Decorators.RANGE_4_4)
+			.squared()
+			.decorated(FeatureDecorator.GLOWSTONE.configured(new CountConfiguration(10)))
 	);
 	public static final ConfiguredFeature<?, ?> GLOWSTONE = register(
-		"glowstone", Feature.GLOWSTONE_BLOB.configured(FeatureConfiguration.NONE).range(0, 128).squared().count(10)
+		"glowstone", Feature.GLOWSTONE_BLOB.configured(FeatureConfiguration.NONE).range(Features.Decorators.FULL_RANGE).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FOREST_VEGETATION = register(
 		"crimson_forest_vegetation",
@@ -171,13 +184,13 @@ public class Features {
 			.decorated(FeatureDecorator.COUNT_MULTILAYER.configured(new CountConfiguration(4)))
 	);
 	public static final ConfiguredFeature<?, ?> TWISTING_VINES = register(
-		"twisting_vines", Feature.TWISTING_VINES.configured(FeatureConfiguration.NONE).range(0, 128).squared().count(10)
+		"twisting_vines", Feature.TWISTING_VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.FULL_RANGE).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> WEEPING_VINES = register(
-		"weeping_vines", Feature.WEEPING_VINES.configured(FeatureConfiguration.NONE).range(0, 128).squared().count(10)
+		"weeping_vines", Feature.WEEPING_VINES.configured(FeatureConfiguration.NONE).range(Features.Decorators.FULL_RANGE).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> BASALT_PILLAR = register(
-		"basalt_pillar", Feature.BASALT_PILLAR.configured(FeatureConfiguration.NONE).range(0, 128).squared().count(10)
+		"basalt_pillar", Feature.BASALT_PILLAR.configured(FeatureConfiguration.NONE).range(Features.Decorators.FULL_RANGE).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> SEAGRASS_COLD = register(
 		"seagrass_cold", Feature.SEAGRASS.configured(new ProbabilityFeatureConfiguration(0.3F)).count(32).decorated(Features.Decorators.TOP_SOLID_HEIGHTMAP_SQUARE)
@@ -245,7 +258,8 @@ public class Features {
 					Features.States.SEAGRASS, ImmutableList.of(Features.States.STONE), ImmutableList.of(Features.States.WATER), ImmutableList.of(Features.States.WATER)
 				)
 			)
-			.decorated(FeatureDecorator.CARVING_MASK.configured(new CarvingMaskDecoratorConfiguration(GenerationStep.Carving.LIQUID, 0.1F)))
+			.rarity(10)
+			.decorated(FeatureDecorator.CARVING_MASK.configured(new CarvingMaskDecoratorConfiguration(GenerationStep.Carving.LIQUID)))
 	);
 	public static final ConfiguredFeature<?, ?> ICEBERG_PACKED = register(
 		"iceberg_packed",
@@ -278,12 +292,7 @@ public class Features {
 			.decorated(FeatureDecorator.COUNT_NOISE_BIASED.configured(new NoiseCountFactorDecoratorConfiguration(80, 80.0, 0.0)))
 	);
 	public static final ConfiguredFeature<?, ?> BLUE_ICE = register(
-		"blue_ice",
-		Feature.BLUE_ICE
-			.configured(FeatureConfiguration.NONE)
-			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(30, 32, 64)))
-			.squared()
-			.countRandom(19)
+		"blue_ice", Feature.BLUE_ICE.configured(FeatureConfiguration.NONE).range(VerticalAnchor.absolute(30), VerticalAnchor.absolute(61)).squared().countRandom(19)
 	);
 	public static final ConfiguredFeature<?, ?> BAMBOO_LIGHT = register(
 		"bamboo_light", Feature.BAMBOO.configured(new ProbabilityFeatureConfiguration(0.0F)).decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).count(16)
@@ -298,16 +307,16 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> VINES = register("vines", Feature.VINES.configured(FeatureConfiguration.NONE).squared().count(50));
 	public static final ConfiguredFeature<?, ?> LAKE_WATER = register(
-		"lake_water",
-		Feature.LAKE
-			.configured(new BlockStateConfiguration(Features.States.WATER))
-			.decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)))
+		"lake_water", Feature.LAKE.configured(new BlockStateConfiguration(Features.States.WATER)).range(Features.Decorators.FULL_RANGE).squared().rarity(4)
 	);
 	public static final ConfiguredFeature<?, ?> LAKE_LAVA = register(
 		"lake_lava",
 		Feature.LAKE
 			.configured(new BlockStateConfiguration(Features.States.LAVA))
 			.decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)))
+			.decorated(FeatureDecorator.RANGE_BIASED_TO_BOTTOM.configured(new BiasedRangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.top(), 8)))
+			.squared()
+			.rarity(8)
 	);
 	public static final ConfiguredFeature<?, ?> DISK_CLAY = register(
 		"disk_clay",
@@ -334,7 +343,7 @@ public class Features {
 		"void_start_platform", Feature.VOID_START_PLATFORM.configured(FeatureConfiguration.NONE)
 	);
 	public static final ConfiguredFeature<?, ?> MONSTER_ROOM = register(
-		"monster_room", Feature.MONSTER_ROOM.configured(FeatureConfiguration.NONE).range(-64, 384).squared().count(8)
+		"monster_room", Feature.MONSTER_ROOM.configured(FeatureConfiguration.NONE).range(Features.Decorators.FULL_RANGE).squared().count(8)
 	);
 	public static final ConfiguredFeature<?, ?> WELL = register(
 		"desert_well", Feature.DESERT_WELL.configured(FeatureConfiguration.NONE).decorated(Features.Decorators.HEIGHTMAP_SQUARE).rarity(1000)
@@ -344,7 +353,9 @@ public class Features {
 		"spring_lava_double",
 		Feature.SPRING
 			.configured(Features.Configs.LAVA_SPRING_CONFIG)
-			.decorated(FeatureDecorator.RANGE_VERY_BIASED.configured(new RangeDecoratorConfiguration(8, 16, 384)))
+			.decorated(
+				FeatureDecorator.RANGE_VERY_BIASED_TO_BOTTOM.configured(new BiasedRangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8))
+			)
 			.squared()
 			.count(40)
 	);
@@ -352,7 +363,9 @@ public class Features {
 		"spring_lava",
 		Feature.SPRING
 			.configured(Features.Configs.LAVA_SPRING_CONFIG)
-			.decorated(FeatureDecorator.RANGE_VERY_BIASED.configured(new RangeDecoratorConfiguration(8, 16, 384)))
+			.decorated(
+				FeatureDecorator.RANGE_VERY_BIASED_TO_BOTTOM.configured(new BiasedRangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8))
+			)
 			.squared()
 			.count(20)
 	);
@@ -364,23 +377,21 @@ public class Features {
 					Features.States.LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.NETHERRACK, Blocks.SOUL_SAND, Blocks.GRAVEL, Blocks.MAGMA_BLOCK, Blocks.BLACKSTONE)
 				)
 			)
-			.decorated(Features.Decorators.RANGE_4_8_ROOFED)
+			.range(Features.Decorators.RANGE_4_4)
 			.squared()
 			.count(16)
 	);
 	public static final ConfiguredFeature<?, ?> SPRING_CLOSED = register(
-		"spring_closed",
-		Feature.SPRING.configured(Features.Configs.CLOSED_NETHER_SPRING_CONFIG).decorated(Features.Decorators.RANGE_10_20_ROOFED).squared().count(16)
+		"spring_closed", Feature.SPRING.configured(Features.Configs.CLOSED_NETHER_SPRING_CONFIG).range(Features.Decorators.RANGE_10_10).squared().count(16)
 	);
 	public static final ConfiguredFeature<?, ?> SPRING_CLOSED_DOUBLE = register(
-		"spring_closed_double",
-		Feature.SPRING.configured(Features.Configs.CLOSED_NETHER_SPRING_CONFIG).decorated(Features.Decorators.RANGE_10_20_ROOFED).squared().count(32)
+		"spring_closed_double", Feature.SPRING.configured(Features.Configs.CLOSED_NETHER_SPRING_CONFIG).range(Features.Decorators.RANGE_10_10).squared().count(32)
 	);
 	public static final ConfiguredFeature<?, ?> SPRING_OPEN = register(
 		"spring_open",
 		Feature.SPRING
 			.configured(new SpringConfiguration(Features.States.LAVA_STATE, false, 4, 1, ImmutableSet.of(Blocks.NETHERRACK)))
-			.decorated(Features.Decorators.RANGE_4_8_ROOFED)
+			.range(Features.Decorators.RANGE_4_4)
 			.squared()
 			.count(8)
 	);
@@ -388,7 +399,7 @@ public class Features {
 		"spring_water",
 		Feature.SPRING
 			.configured(new SpringConfiguration(Features.States.WATER_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE)))
-			.decorated(FeatureDecorator.RANGE_BIASED.configured(new RangeDecoratorConfiguration(8, 8, 384)))
+			.decorated(FeatureDecorator.RANGE_BIASED_TO_BOTTOM.configured(new BiasedRangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.top(), 8)))
 			.squared()
 			.count(50)
 	);
@@ -463,7 +474,7 @@ public class Features {
 					.noProjection()
 					.build()
 			)
-			.range(0, 128)
+			.range(Features.Decorators.FULL_RANGE)
 	);
 	public static final ConfiguredFeature<?, ?> PATCH_SUNFLOWER = register(
 		"patch_sunflower",
@@ -625,8 +636,12 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PATCH_SUGAR_CANE = register(
 		"patch_sugar_cane", Feature.RANDOM_PATCH.configured(Features.Configs.SUGAR_CANE_CONFIG).decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).count(10)
 	);
-	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NETHER = register("brown_mushroom_nether", PATCH_BROWN_MUSHROOM.range(0, 128).rarity(2));
-	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_NETHER = register("red_mushroom_nether", PATCH_RED_MUSHROOM.range(0, 128).rarity(2));
+	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NETHER = register(
+		"brown_mushroom_nether", PATCH_BROWN_MUSHROOM.range(Features.Decorators.FULL_RANGE).rarity(2)
+	);
+	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_NETHER = register(
+		"red_mushroom_nether", PATCH_RED_MUSHROOM.range(Features.Decorators.FULL_RANGE).rarity(2)
+	);
 	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_NORMAL = register(
 		"brown_mushroom_normal", PATCH_BROWN_MUSHROOM.decorated(Features.Decorators.HEIGHTMAP_DOUBLE_SQUARE).rarity(4)
 	);
@@ -647,19 +662,23 @@ public class Features {
 		"ore_magma",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.MAGMA_BLOCK, 33))
-			.decorated(FeatureDecorator.MAGMA.configured(NoneDecoratorConfiguration.INSTANCE))
+			.range(VerticalAnchor.absolute(27), VerticalAnchor.absolute(36))
 			.squared()
 			.count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_SOUL_SAND = register(
 		"ore_soul_sand",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.SOUL_SAND, 12)).range(-64, 32).squared().count(12)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.SOUL_SAND, 12))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(31))
+			.squared()
+			.count(12)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD_DELTAS = register(
 		"ore_gold_deltas",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.NETHER_GOLD_ORE, 10))
-			.decorated(Features.Decorators.RANGE_10_20_ROOFED)
+			.range(Features.Decorators.RANGE_10_10)
 			.squared()
 			.count(20)
 	);
@@ -667,7 +686,7 @@ public class Features {
 		"ore_quartz_deltas",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.NETHER_QUARTZ_ORE, 14))
-			.decorated(Features.Decorators.RANGE_10_20_ROOFED)
+			.range(Features.Decorators.RANGE_10_10)
 			.squared()
 			.count(32)
 	);
@@ -675,7 +694,7 @@ public class Features {
 		"ore_gold_nether",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.NETHER_GOLD_ORE, 10))
-			.decorated(Features.Decorators.RANGE_10_20_ROOFED)
+			.range(Features.Decorators.RANGE_10_10)
 			.squared()
 			.count(10)
 	);
@@ -683,7 +702,7 @@ public class Features {
 		"ore_quartz_nether",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.NETHER_QUARTZ_ORE, 14))
-			.decorated(Features.Decorators.RANGE_10_20_ROOFED)
+			.range(Features.Decorators.RANGE_10_10)
 			.squared()
 			.count(16)
 	);
@@ -691,7 +710,7 @@ public class Features {
 		"ore_gravel_nether",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.GRAVEL, 33))
-			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(5, 0, 37)))
+			.range(VerticalAnchor.absolute(5), VerticalAnchor.absolute(41))
 			.squared()
 			.count(2)
 	);
@@ -699,93 +718,173 @@ public class Features {
 		"ore_blackstone",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Features.States.BLACKSTONE, 33))
-			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(5, 10, 37)))
+			.range(VerticalAnchor.absolute(5), VerticalAnchor.absolute(31))
 			.squared()
 			.count(2)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIRT = register(
 		"ore_dirt",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIRT, 33)).range(-64, 384).squared().count(15)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIRT, 33))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.top())
+			.squared()
+			.count(15)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GRAVEL = register(
 		"ore_gravel",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRAVEL, 33)).range(-64, 384).squared().count(12)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRAVEL, 33))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.top())
+			.squared()
+			.count(12)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GRANITE = register(
 		"ore_granite",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRANITE, 33)).range(-64, 80).squared().count(20)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GRANITE, 64))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
+			.squared()
+			.count(2)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIORITE = register(
 		"ore_diorite",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIORITE, 33)).range(-64, 80).squared().count(20)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIORITE, 64))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
+			.squared()
+			.count(2)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_ANDESITE = register(
 		"ore_andesite",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.ANDESITE, 33)).range(-64, 80).squared().count(20)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.ANDESITE, 64))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(79))
+			.squared()
+			.count(4)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_COAL = register(
-		"ore_coal",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17)).range(-64, 128).squared().count(30)
+	public static final ConfiguredFeature<?, ?> ORE_COAL_UPPER = register(
+		"ore_coal_upper",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
+			.range(VerticalAnchor.absolute(136), VerticalAnchor.top())
+			.squared()
+			.count(30)
 	);
-	public static final ConfiguredFeature<?, ?> ORE_IRON = register(
-		"ore_iron",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.IRON_ORE, 9)).range(-64, 64).squared().count(40)
+	public static final ConfiguredFeature<?, ?> ORE_COAL_LOWER = register(
+		"ore_coal_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
+			.depthAverage(VerticalAnchor.absolute(96), 96)
+			.squared()
+			.count(20)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_IRON_LOWER = register(
+		"ore_iron_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.IRON_ORE, 9))
+			.depthAverage(VerticalAnchor.absolute(32), 48)
+			.squared()
+			.count(20)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_IRON_UPPER = register(
+		"ore_iron_upper",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.IRON_ORE, 9))
+			.depthAverage(VerticalAnchor.absolute(256), 128)
+			.squared()
+			.count(40)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD_EXTRA = register(
 		"ore_gold_extra",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GOLD_ORE, 9))
-			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(32, 32, 80)))
+			.range(VerticalAnchor.absolute(32), VerticalAnchor.absolute(79))
 			.squared()
 			.count(20)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD = register(
 		"ore_gold",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GOLD_ORE, 9)).range(-64, 32).squared().count(4)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GOLD_ORE, 9))
+			.depthAverage(VerticalAnchor.absolute(-16), 48)
+			.squared()
+			.count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_REDSTONE = register(
 		"ore_redstone",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.REDSTONE_ORE, 8)).range(-64, 16).squared().count(12)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.REDSTONE_ORE, 8))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(15))
+			.squared()
+			.count(6)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_REDSTONE_LOWER = register(
+		"ore_redstone_lower",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.REDSTONE_ORE, 8))
+			.depthAverage(VerticalAnchor.bottom(), 32)
+			.squared()
+			.count(12)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
 		"ore_diamond",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIAMOND_ORE, 8)).range(-64, 16).squared().count(2)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIAMOND_ORE, 8))
+			.depthAverage(VerticalAnchor.bottom(), 80)
+			.squared()
+			.count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_LAPIS = register(
 		"ore_lapis",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.LAPIS_ORE, 7))
-			.decorated(FeatureDecorator.DEPTH_AVERAGE.configured(new DepthAverageConfigation(16, 16)))
+			.depthAverage(VerticalAnchor.absolute(0), 32)
+			.squared()
+	);
+	public static final ConfiguredFeature<?, ?> ORE_LAPIS_BURIED = register(
+		"ore_lapis_buried",
+		Feature.NO_SURFACE_ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.LAPIS_ORE, 7))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(64))
 			.squared()
 	);
 	public static final ConfiguredFeature<?, ?> ORE_INFESTED = register(
 		"ore_infested",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.INFESTED_STONE, 9)).range(-64, 64).squared().count(14)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.INFESTED_STONE, 9))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(63))
+			.squared()
+			.count(14)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_EMERALD = register(
 		"ore_emerald",
 		Feature.EMERALD_ORE
 			.configured(new ReplaceBlockConfiguration(Features.States.STONE, Features.States.EMERALD_ORE))
-			.decorated(FeatureDecorator.EMERALD_ORE.configured(DecoratorConfiguration.NONE))
-			.count(2)
+			.depthAverage(VerticalAnchor.absolute(256), 224)
+			.squared()
+			.count(UniformInt.of(6, 16))
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DEBRIS_LARGE = register(
 		"ore_debris_large",
 		Feature.NO_SURFACE_ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 3))
-			.decorated(FeatureDecorator.DEPTH_AVERAGE.configured(new DepthAverageConfigation(16, 8)))
+			.depthAverage(VerticalAnchor.absolute(16), 8)
 			.squared()
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DEBRIS_SMALL = register(
 		"ore_debris_small",
 		Feature.NO_SURFACE_ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 2))
-			.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(8, 16, 128)))
+			.range(Features.Decorators.RANGE_8_8)
 			.squared()
 	);
 	public static final ConfiguredFeature<?, ?> ORE_COPPER = register(
 		"ore_copper",
-		Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10)).range(-64, 64).squared().count(20)
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10))
+			.depthAverage(VerticalAnchor.absolute(48), 48)
+			.squared()
+			.count(20)
 	);
 	public static final ConfiguredFeature<?, ?> DRIPSTONE_CLUSTER_FEATURE = register(
 		"dripstone_cluster",
@@ -795,7 +894,7 @@ public class Features {
 					12, UniformInt.of(3, 3), UniformInt.of(2, 6), 1, 3, UniformInt.of(2, 2), UniformFloat.of(0.3F, 0.4F), UniformFloat.of(0.1F, 0.9F), 0.1F, 0.3F, 0.1F, 3, 8
 				)
 			)
-			.range(-64, 60)
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
 			.squared()
 			.count(UniformInt.of(10, 10))
 	);
@@ -815,15 +914,25 @@ public class Features {
 					0.6F
 				)
 			)
-			.range(-64, 60)
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
 			.squared()
 			.count(UniformInt.of(2, 8))
 	);
 	public static final ConfiguredFeature<?, ?> SMALL_DRIPSTONE_FEATURE = register(
-		"small_dripstone", Feature.SMALL_DRIPSTONE.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F)).range(-64, 60).squared().count(UniformInt.of(40, 80))
+		"small_dripstone",
+		Feature.SMALL_DRIPSTONE
+			.configured(new SmallDripstoneConfiguration(5, 10, 2, 0.2F))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
+			.squared()
+			.count(UniformInt.of(40, 80))
 	);
 	public static final ConfiguredFeature<?, ?> UNDERWATER_MAGMA = register(
-		"underwater_magma", Feature.UNDERWATER_MAGMA.configured(new UnderwaterMagmaConfiguration(5, 1, 0.5F)).squared().range(-64, 40).count(UniformInt.of(4, 6))
+		"underwater_magma",
+		Feature.UNDERWATER_MAGMA
+			.configured(new UnderwaterMagmaConfiguration(5, 1, 0.5F))
+			.squared()
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(39))
+			.count(UniformInt.of(4, 6))
 	);
 	public static final ConfiguredFeature<?, ?> GLOW_LICHEN = register(
 		"glow_lichen",
@@ -842,12 +951,13 @@ public class Features {
 						Blocks.GRANITE.defaultBlockState(),
 						Blocks.DRIPSTONE_BLOCK.defaultBlockState(),
 						Blocks.CALCITE.defaultBlockState(),
-						Blocks.TUFF.defaultBlockState()
+						Blocks.TUFF.defaultBlockState(),
+						Blocks.GRIMSTONE.defaultBlockState()
 					)
 				)
 			)
 			.squared()
-			.range(-64, 55)
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(54))
 			.count(UniformInt.of(20, 20))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
@@ -1258,7 +1368,7 @@ public class Features {
 					OAK
 				)
 			)
-			.decorated(FeatureDecorator.DARK_OAK_TREE.configured(DecoratorConfiguration.NONE))
+			.decorated(Features.Decorators.DARK_OAK_DECORATOR)
 	);
 	public static final ConfiguredFeature<?, ?> DARK_FOREST_VEGETATION_RED = register(
 		"dark_forest_vegetation_red",
@@ -1271,7 +1381,7 @@ public class Features {
 					OAK
 				)
 			)
-			.decorated(FeatureDecorator.DARK_OAK_TREE.configured(DecoratorConfiguration.NONE))
+			.decorated(Features.Decorators.DARK_OAK_DECORATOR)
 	);
 	public static final ConfiguredFeature<?, ?> WARM_OCEAN_VEGETATION = register(
 		"warm_ocean_vegetation",
@@ -1448,7 +1558,7 @@ public class Features {
 					0.05
 				)
 			)
-			.range(-58, 47)
+			.range(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(46))
 			.squared()
 			.rarity(30)
 	);
@@ -1530,7 +1640,6 @@ public class Features {
 		public static final BeehiveDecorator BEEHIVE_0002 = new BeehiveDecorator(0.002F);
 		public static final BeehiveDecorator BEEHIVE_002 = new BeehiveDecorator(0.02F);
 		public static final BeehiveDecorator BEEHIVE_005 = new BeehiveDecorator(0.05F);
-		public static final ConfiguredDecorator<CountConfiguration> FIRE = FeatureDecorator.FIRE.configured(new CountConfiguration(10));
 		public static final ConfiguredDecorator<NoneDecoratorConfiguration> HEIGHTMAP = FeatureDecorator.HEIGHTMAP.configured(DecoratorConfiguration.NONE);
 		public static final ConfiguredDecorator<NoneDecoratorConfiguration> TOP_SOLID_HEIGHTMAP = FeatureDecorator.TOP_SOLID_HEIGHTMAP
 			.configured(DecoratorConfiguration.NONE);
@@ -1538,14 +1647,16 @@ public class Features {
 			.configured(DecoratorConfiguration.NONE);
 		public static final ConfiguredDecorator<NoneDecoratorConfiguration> HEIGHTMAP_DOUBLE = FeatureDecorator.HEIGHTMAP_SPREAD_DOUBLE
 			.configured(DecoratorConfiguration.NONE);
-		public static final ConfiguredDecorator<RangeDecoratorConfiguration> RANGE_10_20_ROOFED = FeatureDecorator.RANGE
-			.configured(new RangeDecoratorConfiguration(10, 20, 128));
-		public static final ConfiguredDecorator<RangeDecoratorConfiguration> RANGE_4_8_ROOFED = FeatureDecorator.RANGE
-			.configured(new RangeDecoratorConfiguration(4, 8, 128));
+		public static final RangeDecoratorConfiguration FULL_RANGE = new RangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.top());
+		public static final RangeDecoratorConfiguration RANGE_10_10 = new RangeDecoratorConfiguration(VerticalAnchor.aboveBottom(10), VerticalAnchor.belowTop(10));
+		public static final RangeDecoratorConfiguration RANGE_8_8 = new RangeDecoratorConfiguration(VerticalAnchor.aboveBottom(8), VerticalAnchor.belowTop(8));
+		public static final RangeDecoratorConfiguration RANGE_4_4 = new RangeDecoratorConfiguration(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4));
+		public static final ConfiguredDecorator<?> FIRE = FeatureDecorator.RANGE.configured(RANGE_4_4).squared().countRandom(5);
 		public static final ConfiguredDecorator<?> ADD_32 = FeatureDecorator.SPREAD_32_ABOVE.configured(NoneDecoratorConfiguration.INSTANCE);
 		public static final ConfiguredDecorator<?> HEIGHTMAP_SQUARE = HEIGHTMAP.squared();
 		public static final ConfiguredDecorator<?> HEIGHTMAP_DOUBLE_SQUARE = HEIGHTMAP_DOUBLE.squared();
 		public static final ConfiguredDecorator<?> TOP_SOLID_HEIGHTMAP_SQUARE = TOP_SOLID_HEIGHTMAP.squared();
+		public static final ConfiguredDecorator<?> DARK_OAK_DECORATOR = HEIGHTMAP.decorated(FeatureDecorator.DARK_OAK_TREE.configured(DecoratorConfiguration.NONE));
 	}
 
 	public static final class States {

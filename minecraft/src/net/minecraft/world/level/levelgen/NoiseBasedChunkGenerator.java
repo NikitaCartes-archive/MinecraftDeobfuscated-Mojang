@@ -61,7 +61,6 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	private final int cellCountX;
 	private final int cellCountY;
 	private final int cellCountZ;
-	protected final RandomSource random;
 	private final SurfaceNoise surfaceNoise;
 	private final NormalNoise barrierNoise;
 	private final NormalNoise waterLevelNoise;
@@ -72,6 +71,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	private final int height;
 	private final NoiseSampler sampler;
 	private final boolean aquifersEnabled;
+	private final BaseStoneSource baseStoneSource;
 
 	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
 		this(biomeSource, biomeSource, l, supplier);
@@ -91,29 +91,30 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		this.cellCountX = 16 / this.cellWidth;
 		this.cellCountY = noiseSettings.height() / this.cellHeight;
 		this.cellCountZ = 16 / this.cellWidth;
-		this.random = new WorldgenRandom(l);
-		BlendedNoise blendedNoise = new BlendedNoise(this.random);
+		WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+		BlendedNoise blendedNoise = new BlendedNoise(worldgenRandom);
 		this.surfaceNoise = (SurfaceNoise)(noiseSettings.useSimplexSurfaceNoise()
-			? new PerlinSimplexNoise(this.random, IntStream.rangeClosed(-3, 0))
-			: new PerlinNoise(this.random, IntStream.rangeClosed(-3, 0)));
-		this.random.consumeCount(2620);
-		PerlinNoise perlinNoise = new PerlinNoise(this.random, IntStream.rangeClosed(-15, 0));
+			? new PerlinSimplexNoise(worldgenRandom, IntStream.rangeClosed(-3, 0))
+			: new PerlinNoise(worldgenRandom, IntStream.rangeClosed(-3, 0)));
+		worldgenRandom.consumeCount(2620);
+		PerlinNoise perlinNoise = new PerlinNoise(worldgenRandom, IntStream.rangeClosed(-15, 0));
 		SimplexNoise simplexNoise;
 		if (noiseSettings.islandNoiseOverride()) {
-			WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-			worldgenRandom.consumeCount(17292);
-			simplexNoise = new SimplexNoise(worldgenRandom);
+			WorldgenRandom worldgenRandom2 = new WorldgenRandom(l);
+			worldgenRandom2.consumeCount(17292);
+			simplexNoise = new SimplexNoise(worldgenRandom2);
 		} else {
 			simplexNoise = null;
 		}
 
-		this.barrierNoise = NormalNoise.create(new SimpleRandomSource(this.random.nextLong()), -3, 1.0);
-		this.waterLevelNoise = NormalNoise.create(new SimpleRandomSource(this.random.nextLong()), -3, 1.0, 0.0, 2.0);
-		Cavifier cavifier = noiseGeneratorSettings.isNoiseCavesEnabled() ? new Cavifier(this.random, noiseSettings.minY() / this.cellHeight) : null;
+		this.barrierNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0);
+		this.waterLevelNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0, 0.0, 2.0);
+		Cavifier cavifier = noiseGeneratorSettings.isNoiseCavesEnabled() ? new Cavifier(worldgenRandom, noiseSettings.minY() / this.cellHeight) : null;
 		this.sampler = new NoiseSampler(
 			biomeSource, this.cellWidth, this.cellHeight, this.cellCountY, noiseSettings, blendedNoise, simplexNoise, perlinNoise, cavifier
 		);
 		this.aquifersEnabled = noiseGeneratorSettings.isAquifersEnabled();
+		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.GRIMSTONE.defaultBlockState());
 	}
 
 	@Override
@@ -203,7 +204,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				double aa = Mth.lerp3(z, d, e, f, u, h, w, g, v, t, x);
 				int ab = s * this.cellHeight + y;
 				int ac = ab + k * this.cellHeight;
-				BlockState blockState = this.updateNoiseAndGenerateBaseState(Beardifier.NO_BEARDS, aquifer, i, ac, j, aa);
+				BlockState blockState = this.updateNoiseAndGenerateBaseState(Beardifier.NO_BEARDS, aquifer, this.baseStoneSource, i, ac, j, aa);
 				if (blockStates != null) {
 					blockStates[ab] = blockState;
 				}
@@ -217,10 +218,12 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return OptionalInt.empty();
 	}
 
-	protected BlockState updateNoiseAndGenerateBaseState(Beardifier beardifier, @Nullable Aquifer aquifer, int i, int j, int k, double d) {
+	protected BlockState updateNoiseAndGenerateBaseState(
+		Beardifier beardifier, @Nullable Aquifer aquifer, BaseStoneSource baseStoneSource, int i, int j, int k, double d
+	) {
 		double e = Mth.clamp(d / 200.0, -1.0, 1.0);
 		e = e / 2.0 - e * e * e / 24.0;
-		e += beardifier.beardify(i, j, k);
+		e += beardifier.beardifyOrBury(i, j, k);
 		if (aquifer != null) {
 			aquifer.computeAt(i, j, k);
 			e += aquifer.getLastBarrierDensity();
@@ -228,7 +231,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 		BlockState blockState;
 		if (e > 0.0) {
-			blockState = this.defaultBlock;
+			blockState = baseStoneSource.getBaseStone(i, j, k, (NoiseGeneratorSettings)this.settings.get());
 		} else {
 			int l = aquifer == null ? this.getSeaLevel() : aquifer.getLastWaterLevel();
 			if (j < l) {
@@ -305,25 +308,24 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 		NoiseSettings noiseSettings = ((NoiseGeneratorSettings)this.settings.get()).noiseSettings();
-		int i = noiseSettings.minY();
-		int j = Math.max(i, chunkAccess.getMinBuildHeight());
-		int k = Math.min(i + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
-		int l = Mth.intFloorDiv(j, this.cellHeight);
-		int m = Mth.intFloorDiv(k - j, this.cellHeight);
-		if (m <= 0) {
+		int i = Math.max(noiseSettings.minY(), chunkAccess.getMinBuildHeight());
+		int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
+		int k = Mth.intFloorDiv(i, this.cellHeight);
+		int l = Mth.intFloorDiv(j - i, this.cellHeight);
+		if (l <= 0) {
 			return CompletableFuture.completedFuture(chunkAccess);
 		} else {
-			int n = chunkAccess.getSectionIndex(m * this.cellHeight - 1 + i);
-			int o = chunkAccess.getSectionIndex(i);
+			int m = chunkAccess.getSectionIndex(l * this.cellHeight - 1 + i);
+			int n = chunkAccess.getSectionIndex(i);
 			Set<LevelChunkSection> set = Sets.<LevelChunkSection>newHashSet();
 
-			for (int p = n; p >= o; p--) {
-				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(p);
+			for (int o = m; o >= n; o--) {
+				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(o);
 				levelChunkSection.acquire();
 				set.add(levelChunkSection);
 			}
 
-			return CompletableFuture.supplyAsync(() -> this.doFill(structureFeatureManager, chunkAccess, l, m), Util.backgroundExecutor())
+			return CompletableFuture.supplyAsync(() -> this.doFill(structureFeatureManager, chunkAccess, k, l), Util.backgroundExecutor())
 				.thenApplyAsync(chunkAccessx -> {
 					for (LevelChunkSection levelChunkSectionx : set) {
 						levelChunkSectionx.release();
@@ -409,7 +411,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 								int ao = an & 15;
 								double ap = (double)am / (double)this.cellWidth;
 								double aq = Mth.lerp(ap, ak, al);
-								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, ah, y, an, aq);
+								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, this.baseStoneSource, ah, y, an, aq);
 								if (blockState != AIR) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
 										mutableBlockPos.set(ah, y, an);

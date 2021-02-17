@@ -69,7 +69,7 @@ public class BlockModelGenerators {
 	private final BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput;
 	private final Consumer<Item> skippedAutoModelsOutput;
 	private final List<Block> nonOrientableTrapdoor = ImmutableList.of(Blocks.OAK_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.IRON_TRAPDOOR);
-	private final List<Block> mirroredFullBlocks = ImmutableList.of(Blocks.STONE);
+	private final List<Block> mirroredFullBlocks = ImmutableList.of(Blocks.STONE, Blocks.GRIMSTONE);
 	private final Map<Block, TexturedModel> texturedModels = ImmutableMap.<Block, TexturedModel>builder()
 		.put(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.SANDSTONE))
 		.put(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.RED_SANDSTONE))
@@ -3715,6 +3715,7 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.DRIPSTONE_BLOCK, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.CHISELED_GRIMSTONE, TexturedModel.CUBE);
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.COPPER_BLOCK);

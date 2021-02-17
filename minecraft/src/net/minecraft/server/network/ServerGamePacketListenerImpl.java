@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -171,6 +172,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	private double lastGoodX;
 	private double lastGoodY;
 	private double lastGoodZ;
+	@Nullable
 	private Entity lastVehicle;
 	private double vehicleFirstGoodX;
 	private double vehicleFirstGoodY;
@@ -178,6 +180,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	private double vehicleLastGoodX;
 	private double vehicleLastGoodY;
 	private double vehicleLastGoodZ;
+	@Nullable
 	private Vec3 awaitingPositionFromClient;
 	private int awaitingTeleport;
 	private int awaitingTeleportTime;
@@ -194,10 +197,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		connection.setListener(this);
 		this.player = serverPlayer;
 		serverPlayer.connection = this;
-		TextFilter textFilter = serverPlayer.getTextFilter();
-		if (textFilter != null) {
-			textFilter.join();
-		}
+		serverPlayer.getTextFilter().join();
 	}
 
 	public void tick() {
@@ -297,28 +297,23 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		this.server.executeBlocking(this.connection::handleDisconnection);
 	}
 
-	private <T> void filterTextPacket(T object, Consumer<T> consumer, BiFunction<TextFilter, T, CompletableFuture<Optional<T>>> biFunction) {
+	private <T, R> void filterTextPacket(T object, Consumer<R> consumer, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
 		BlockableEventLoop<?> blockableEventLoop = this.player.getLevel().getServer();
-		Consumer<T> consumer2 = objectx -> {
+		Consumer<R> consumer2 = objectx -> {
 			if (this.getConnection().isConnected()) {
 				consumer.accept(objectx);
 			} else {
 				LOGGER.debug("Ignoring packet due to disconnection");
 			}
 		};
-		TextFilter textFilter = this.player.getTextFilter();
-		if (textFilter != null) {
-			((CompletableFuture)biFunction.apply(textFilter, object)).thenAcceptAsync(optional -> optional.ifPresent(consumer2), blockableEventLoop);
-		} else {
-			blockableEventLoop.execute(() -> consumer2.accept(object));
-		}
+		((CompletableFuture)biFunction.apply(this.player.getTextFilter(), object)).thenAcceptAsync(consumer2, blockableEventLoop);
 	}
 
-	private void filterTextPacket(String string, Consumer<String> consumer) {
+	private void filterTextPacket(String string, Consumer<TextFilter.FilteredText> consumer) {
 		this.filterTextPacket(string, consumer, TextFilter::processStreamMessage);
 	}
 
-	private void filterTextPacket(List<String> list, Consumer<List<String>> consumer) {
+	private void filterTextPacket(List<String> list, Consumer<List<TextFilter.FilteredText>> consumer) {
 		this.filterTextPacket(list, consumer, TextFilter::processMessageBundle);
 	}
 
@@ -709,42 +704,40 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 
 	@Override
 	public void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket) {
-		ItemStack itemStack = serverboundEditBookPacket.getBook();
-		if (itemStack.is(Items.WRITABLE_BOOK)) {
-			CompoundTag compoundTag = itemStack.getTag();
-			if (WritableBookItem.makeSureTagIsValid(compoundTag)) {
-				List<String> list = Lists.<String>newArrayList();
-				boolean bl = serverboundEditBookPacket.isSigning();
-				if (bl) {
-					list.add(compoundTag.getString("title"));
-				}
+		int i = serverboundEditBookPacket.getSlot();
+		if (Inventory.isHotbarSlot(i) || i == 40) {
+			ItemStack itemStack = serverboundEditBookPacket.getBook();
+			if (itemStack.is(Items.WRITABLE_BOOK)) {
+				CompoundTag compoundTag = itemStack.getTag();
+				if (WritableBookItem.makeSureTagIsValid(compoundTag)) {
+					List<String> list = Lists.<String>newArrayList();
+					boolean bl = serverboundEditBookPacket.isSigning();
+					if (bl) {
+						list.add(compoundTag.getString("title"));
+					}
 
-				ListTag listTag = compoundTag.getList("pages", 8);
+					ListTag listTag = compoundTag.getList("pages", 8);
 
-				for (int i = 0; i < listTag.size(); i++) {
-					list.add(listTag.getString(i));
-				}
+					for (int j = 0; j < listTag.size(); j++) {
+						list.add(listTag.getString(j));
+					}
 
-				int i = serverboundEditBookPacket.getSlot();
-				if (Inventory.isHotbarSlot(i) || i == 40) {
 					this.filterTextPacket(
-						list, bl ? listx -> this.signBook((String)listx.get(0), listx.subList(1, listx.size()), i) : listx -> this.updateBookContents(listx, i)
+						list, bl ? listx -> this.signBook((TextFilter.FilteredText)listx.get(0), listx.subList(1, listx.size()), i) : listx -> this.updateBookContents(listx, i)
 					);
 				}
 			}
 		}
 	}
 
-	private void updateBookContents(List<String> list, int i) {
+	private void updateBookContents(List<TextFilter.FilteredText> list, int i) {
 		ItemStack itemStack = this.player.getInventory().getItem(i);
 		if (itemStack.is(Items.WRITABLE_BOOK)) {
-			ListTag listTag = new ListTag();
-			list.stream().map(StringTag::valueOf).forEach(listTag::add);
-			itemStack.addTagElement("pages", listTag);
+			this.updateBookPages(list, UnaryOperator.identity(), itemStack);
 		}
 	}
 
-	private void signBook(String string, List<String> list, int i) {
+	private void signBook(TextFilter.FilteredText filteredText, List<TextFilter.FilteredText> list, int i) {
 		ItemStack itemStack = this.player.getInventory().getItem(i);
 		if (itemStack.is(Items.WRITABLE_BOOK)) {
 			ItemStack itemStack2 = new ItemStack(Items.WRITTEN_BOOK);
@@ -754,18 +747,42 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			}
 
 			itemStack2.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
-			itemStack2.addTagElement("title", StringTag.valueOf(string));
-			ListTag listTag = new ListTag();
-
-			for (String string2 : list) {
-				Component component = new TextComponent(string2);
-				String string3 = Component.Serializer.toJson(component);
-				listTag.add(StringTag.valueOf(string3));
+			if (this.player.isTextFilteringEnabled()) {
+				itemStack2.addTagElement("title", StringTag.valueOf(filteredText.getFiltered()));
+			} else {
+				itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.getFiltered()));
+				itemStack2.addTagElement("title", StringTag.valueOf(filteredText.getRaw()));
 			}
 
-			itemStack2.addTagElement("pages", listTag);
+			this.updateBookPages(list, string -> Component.Serializer.toJson(new TextComponent(string)), itemStack2);
 			this.player.getInventory().setItem(i, itemStack2);
 		}
+	}
+
+	private void updateBookPages(List<TextFilter.FilteredText> list, UnaryOperator<String> unaryOperator, ItemStack itemStack) {
+		ListTag listTag = new ListTag();
+		if (this.player.isTextFilteringEnabled()) {
+			list.stream().map(filteredTextx -> StringTag.valueOf((String)unaryOperator.apply(filteredTextx.getFiltered()))).forEach(listTag::add);
+		} else {
+			CompoundTag compoundTag = new CompoundTag();
+			int i = 0;
+
+			for (int j = list.size(); i < j; i++) {
+				TextFilter.FilteredText filteredText = (TextFilter.FilteredText)list.get(i);
+				String string = filteredText.getRaw();
+				listTag.add(StringTag.valueOf((String)unaryOperator.apply(string)));
+				String string2 = filteredText.getFiltered();
+				if (!string.equals(string2)) {
+					compoundTag.putString(String.valueOf(i), (String)unaryOperator.apply(string2));
+				}
+			}
+
+			if (!compoundTag.isEmpty()) {
+				itemStack.addTagElement("filtered_pages", compoundTag);
+			}
+		}
+
+		itemStack.addTagElement("pages", listTag);
 	}
 
 	@Override
@@ -1024,14 +1041,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
 				if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 					Component component = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
-					this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO, Util.NIL_UUID));
+					this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
 				} else if (interactionResult.shouldSwing()) {
 					this.player.swing(interactionHand, true);
 				}
 			}
 		} else {
 			Component component2 = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
-			this.player.connection.send(new ClientboundChatPacket(component2, ChatType.GAME_INFO, Util.NIL_UUID));
+			this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
 		}
 
 		this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
@@ -1096,11 +1113,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			);
 		this.player.disconnect();
 		this.server.getPlayerList().remove(this.player);
-		TextFilter textFilter = this.player.getTextFilter();
-		if (textFilter != null) {
-			textFilter.leave();
-		}
-
+		this.player.getTextFilter().leave();
 		if (this.isSingleplayerOwner()) {
 			LOGGER.info("Stopping singleplayer server as player logged out");
 			this.server.halt(false);
@@ -1113,18 +1126,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	}
 
 	public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
-		if (packet instanceof ClientboundChatPacket) {
-			ClientboundChatPacket clientboundChatPacket = (ClientboundChatPacket)packet;
-			ChatVisiblity chatVisiblity = this.player.getChatVisibility();
-			if (chatVisiblity == ChatVisiblity.HIDDEN && clientboundChatPacket.getType() != ChatType.GAME_INFO) {
-				return;
-			}
-
-			if (chatVisiblity == ChatVisiblity.SYSTEM && !clientboundChatPacket.isSystem()) {
-				return;
-			}
-		}
-
 		try {
 			this.connection.send(packet, genericFutureListener);
 		} catch (Throwable var6) {
@@ -1153,32 +1154,39 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	@Override
 	public void handleChat(ServerboundChatPacket serverboundChatPacket) {
 		String string = StringUtils.normalizeSpace(serverboundChatPacket.getMessage());
+
+		for (int i = 0; i < string.length(); i++) {
+			if (!SharedConstants.isAllowedChatCharacter(string.charAt(i))) {
+				this.disconnect(new TranslatableComponent("multiplayer.disconnect.illegal_characters"));
+				return;
+			}
+		}
+
 		if (string.startsWith("/")) {
 			PacketUtils.ensureRunningOnSameThread(serverboundChatPacket, this, this.player.getLevel());
-			this.handleChat(string);
+			this.handleChat(TextFilter.FilteredText.passThrough(string));
 		} else {
 			this.filterTextPacket(string, this::handleChat);
 		}
 	}
 
-	private void handleChat(String string) {
+	private void handleChat(TextFilter.FilteredText filteredText) {
 		if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-			this.send(new ClientboundChatPacket(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+			this.send(new ClientboundChatPacket(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
 		} else {
 			this.player.resetLastActionTime();
-
-			for (int i = 0; i < string.length(); i++) {
-				if (!SharedConstants.isAllowedChatCharacter(string.charAt(i))) {
-					this.disconnect(new TranslatableComponent("multiplayer.disconnect.illegal_characters"));
-					return;
-				}
-			}
-
+			String string = filteredText.getRaw();
 			if (string.startsWith("/")) {
 				this.handleCommand(string);
 			} else {
-				Component component = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string);
-				this.server.getPlayerList().broadcastMessage(component, ChatType.CHAT, this.player.getUUID());
+				String string2 = filteredText.getFiltered();
+				Component component = string2.isEmpty() ? null : new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string2);
+				Component component2 = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string);
+				this.server
+					.getPlayerList()
+					.broadcastMessage(
+						component2, serverPlayer -> this.player.shouldFilterMessageTo(serverPlayer) ? component : component2, ChatType.CHAT, this.player.getUUID()
+					);
 			}
 
 			this.chatSpamTickCount += 20;
@@ -1451,7 +1459,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		this.filterTextPacket(list, listx -> this.updateSignText(serverboundSignUpdatePacket, listx));
 	}
 
-	private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<String> list) {
+	private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<TextFilter.FilteredText> list) {
 		this.player.resetLastActionTime();
 		ServerLevel serverLevel = this.player.getLevel();
 		BlockPos blockPos = serverboundSignUpdatePacket.getPos();
@@ -1469,7 +1477,12 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			}
 
 			for (int i = 0; i < list.size(); i++) {
-				signBlockEntity.setMessage(i, new TextComponent((String)list.get(i)));
+				TextFilter.FilteredText filteredText = (TextFilter.FilteredText)list.get(i);
+				if (this.player.isTextFilteringEnabled()) {
+					signBlockEntity.setMessage(i, new TextComponent(filteredText.getFiltered()));
+				} else {
+					signBlockEntity.setMessage(i, new TextComponent(filteredText.getRaw()), new TextComponent(filteredText.getFiltered()));
+				}
 			}
 
 			signBlockEntity.setChanged();

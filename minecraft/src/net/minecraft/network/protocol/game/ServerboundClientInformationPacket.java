@@ -15,18 +15,20 @@ public class ServerboundClientInformationPacket implements Packet<ServerGamePack
 	private boolean chatColors;
 	private int modelCustomisation;
 	private HumanoidArm mainHand;
+	private boolean textFilteringEnabled;
 
 	public ServerboundClientInformationPacket() {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm) {
+	public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm, boolean bl2) {
 		this.language = string;
 		this.viewDistance = i;
 		this.chatVisibility = chatVisiblity;
 		this.chatColors = bl;
 		this.modelCustomisation = j;
 		this.mainHand = humanoidArm;
+		this.textFilteringEnabled = bl2;
 	}
 
 	@Override
@@ -37,6 +39,7 @@ public class ServerboundClientInformationPacket implements Packet<ServerGamePack
 		this.chatColors = friendlyByteBuf.readBoolean();
 		this.modelCustomisation = friendlyByteBuf.readUnsignedByte();
 		this.mainHand = friendlyByteBuf.readEnum(HumanoidArm.class);
+		this.textFilteringEnabled = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
@@ -47,6 +50,7 @@ public class ServerboundClientInformationPacket implements Packet<ServerGamePack
 		friendlyByteBuf.writeBoolean(this.chatColors);
 		friendlyByteBuf.writeByte(this.modelCustomisation);
 		friendlyByteBuf.writeEnum(this.mainHand);
+		friendlyByteBuf.writeBoolean(this.textFilteringEnabled);
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
@@ -67,5 +71,9 @@ public class ServerboundClientInformationPacket implements Packet<ServerGamePack
 
 	public HumanoidArm getMainHand() {
 		return this.mainHand;
+	}
+
+	public boolean isTextFilteringEnabled() {
+		return this.textFilteringEnabled;
 	}
 }

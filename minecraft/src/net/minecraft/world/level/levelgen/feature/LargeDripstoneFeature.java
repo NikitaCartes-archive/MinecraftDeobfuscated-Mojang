@@ -56,11 +56,11 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 
 					boolean bl = largeDripstone.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
 					boolean bl2 = largeDripstone2.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
-					if (bl && largeDripstone.getMinY() > 0) {
+					if (bl) {
 						largeDripstone.placeBlocks(worldGenLevel, random, windOffsetter);
 					}
 
-					if (bl2 && largeDripstone2.getMaxY() < 55) {
+					if (bl2) {
 						largeDripstone2.placeBlocks(worldGenLevel, random, windOffsetter);
 					}
 
@@ -95,14 +95,6 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 
 		private int getHeight() {
 			return this.getHeightAtRadius(0.0F);
-		}
-
-		private int getMinY() {
-			return this.pointingUp ? this.root.getY() : this.root.getY() - this.getHeight();
-		}
-
-		private int getMaxY() {
-			return !this.pointingUp ? this.root.getY() : this.root.getY() + this.getHeight();
 		}
 
 		private boolean moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(WorldGenLevel worldGenLevel, LargeDripstoneFeature.WindOffsetter windOffsetter) {

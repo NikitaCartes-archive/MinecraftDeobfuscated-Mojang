@@ -6,10 +6,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -244,15 +247,28 @@ public class BookViewScreen extends Screen {
 		}
 	}
 
-	public static List<String> convertPages(CompoundTag compoundTag) {
-		ListTag listTag = compoundTag.getList("pages", 8).copy();
+	private static List<String> loadPages(CompoundTag compoundTag) {
 		Builder<String> builder = ImmutableList.builder();
+		loadPages(compoundTag, builder::add);
+		return builder.build();
+	}
 
-		for (int i = 0; i < listTag.size(); i++) {
-			builder.add(listTag.getString(i));
+	public static void loadPages(CompoundTag compoundTag, Consumer<String> consumer) {
+		ListTag listTag = compoundTag.getList("pages", 8).copy();
+		IntFunction<String> intFunction;
+		if (Minecraft.getInstance().isTextFilteringEnabled() && compoundTag.contains("filtered_pages", 10)) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
+			intFunction = ix -> {
+				String string = String.valueOf(ix);
+				return compoundTag2.contains(string) ? compoundTag2.getString(string) : listTag.getString(ix);
+			};
+		} else {
+			intFunction = listTag::getString;
 		}
 
-		return builder.build();
+		for (int i = 0; i < listTag.size(); i++) {
+			consumer.accept(intFunction.apply(i));
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -284,7 +300,7 @@ public class BookViewScreen extends Screen {
 
 		private static List<String> readPages(ItemStack itemStack) {
 			CompoundTag compoundTag = itemStack.getTag();
-			return (List<String>)(compoundTag != null ? BookViewScreen.convertPages(compoundTag) : ImmutableList.of());
+			return (List<String>)(compoundTag != null ? BookViewScreen.loadPages(compoundTag) : ImmutableList.of());
 		}
 
 		@Override
@@ -309,7 +325,7 @@ public class BookViewScreen extends Screen {
 		private static List<String> readPages(ItemStack itemStack) {
 			CompoundTag compoundTag = itemStack.getTag();
 			return (List<String>)(compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)
-				? BookViewScreen.convertPages(compoundTag)
+				? BookViewScreen.loadPages(compoundTag)
 				: ImmutableList.of(Component.Serializer.toJson(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED))));
 		}
 

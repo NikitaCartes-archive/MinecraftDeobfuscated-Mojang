@@ -105,7 +105,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 	public static final StructureFeature<JigsawConfiguration> BASTION_REMNANT = register(
 		"Bastion_Remnant", new BastionFeature(JigsawConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES
 	);
-	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
+	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL, STRONGHOLD);
 	private static final ResourceLocation JIGSAW_RENAME = new ResourceLocation("jigsaw");
 	private static final Map<ResourceLocation, ResourceLocation> RENAMES = ImmutableMap.<ResourceLocation, ResourceLocation>builder()
 		.put(new ResourceLocation("nvi"), JIGSAW_RENAME)

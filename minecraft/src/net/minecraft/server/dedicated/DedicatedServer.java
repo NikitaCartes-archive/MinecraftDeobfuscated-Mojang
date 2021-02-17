@@ -103,7 +103,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		);
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
-		this.textFilterClient = null;
+		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
 	}
 
 	@Override
@@ -577,10 +577,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		return this.settings.getProperties().syncChunkWrites;
 	}
 
-	@Nullable
 	@Override
 	public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {
-		return this.textFilterClient != null ? this.textFilterClient.createContext(serverPlayer.getGameProfile()) : null;
+		return this.textFilterClient != null ? this.textFilterClient.createContext(serverPlayer.getGameProfile()) : TextFilter.DUMMY;
 	}
 
 	@Override

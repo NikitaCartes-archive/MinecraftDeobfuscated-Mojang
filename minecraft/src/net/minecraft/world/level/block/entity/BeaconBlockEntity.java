@@ -259,12 +259,6 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 		return this.save(new CompoundTag());
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public double getViewDistance() {
-		return 256.0;
-	}
-
 	@Nullable
 	private static MobEffect getValidEffectById(int i) {
 		MobEffect mobEffect = MobEffect.byId(i);

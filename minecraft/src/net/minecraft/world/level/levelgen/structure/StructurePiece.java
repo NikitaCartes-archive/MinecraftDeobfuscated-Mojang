@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.material.FluidState;
 
@@ -81,6 +82,10 @@ public abstract class StructurePiece {
 	}
 
 	protected abstract void addAdditionalSaveData(CompoundTag compoundTag);
+
+	public NoiseEffect getNoiseEffect() {
+		return NoiseEffect.BEARD;
+	}
 
 	public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
 	}
@@ -352,15 +357,21 @@ public abstract class StructurePiece {
 		int l = this.getWorldX(i, k);
 		int m = this.getWorldY(j);
 		int n = this.getWorldZ(i, k);
-		if (boundingBox.isInside(new BlockPos(l, m, n))) {
-			while (
-				(worldGenLevel.isEmptyBlock(new BlockPos(l, m, n)) || worldGenLevel.getBlockState(new BlockPos(l, m, n)).getMaterial().isLiquid())
-					&& m > worldGenLevel.getMinBuildHeight() + 1
-			) {
-				worldGenLevel.setBlock(new BlockPos(l, m, n), blockState, 2);
-				m--;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(l, m, n);
+		if (boundingBox.isInside(mutableBlockPos)) {
+			while (this.isReplaceableByStructures(worldGenLevel.getBlockState(mutableBlockPos)) && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1) {
+				worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
+				mutableBlockPos.move(Direction.DOWN);
 			}
 		}
+	}
+
+	protected boolean isReplaceableByStructures(BlockState blockState) {
+		return blockState.isAir()
+			|| blockState.getMaterial().isLiquid()
+			|| blockState.is(Blocks.GLOW_LICHEN)
+			|| blockState.is(Blocks.SEAGRASS)
+			|| blockState.is(Blocks.TALL_SEAGRASS);
 	}
 
 	protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {

@@ -44,9 +44,10 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 	public final Connection connection;
 	private ServerLoginPacketListenerImpl.State state = ServerLoginPacketListenerImpl.State.HELLO;
 	private int tick;
+	@Nullable
 	private GameProfile gameProfile;
 	private final String serverId = "";
-	private SecretKey secretKey;
+	@Nullable
 	private ServerPlayer delayedAcceptPlayer;
 
 	public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
@@ -62,7 +63,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 			ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
 			if (serverPlayer == null) {
 				this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
-				this.server.getPlayerList().placeNewPlayer(this.connection, this.delayedAcceptPlayer);
+				this.placeNewPlayer(this.delayedAcceptPlayer);
 				this.delayedAcceptPlayer = null;
 			}
 		}
@@ -111,9 +112,13 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 				this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
 				this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
 			} else {
-				this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+				this.placeNewPlayer(this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
 			}
 		}
+	}
+
+	private void placeNewPlayer(ServerPlayer serverPlayer) {
+		this.server.getPlayerList().placeNewPlayer(this.connection, serverPlayer);
 	}
 
 	@Override
@@ -148,14 +153,14 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 				throw new IllegalStateException("Protocol error");
 			}
 
-			this.secretKey = serverboundKeyPacket.getSecretKey(privateKey);
-			Cipher cipher = Crypt.getCipher(2, this.secretKey);
-			Cipher cipher2 = Crypt.getCipher(1, this.secretKey);
-			string = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), this.secretKey)).toString(16);
+			SecretKey secretKey = serverboundKeyPacket.getSecretKey(privateKey);
+			Cipher cipher = Crypt.getCipher(2, secretKey);
+			Cipher cipher2 = Crypt.getCipher(1, secretKey);
+			string = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), secretKey)).toString(16);
 			this.state = ServerLoginPacketListenerImpl.State.AUTHENTICATING;
 			this.connection.setEncryptionKey(cipher, cipher2);
-		} catch (CryptException var6) {
-			throw new IllegalStateException("Protocol error", var6);
+		} catch (CryptException var7) {
+			throw new IllegalStateException("Protocol error", var7);
 		}
 
 		Thread thread = new Thread("User Authenticator #" + UNIQUE_THREAD_ID.incrementAndGet()) {

@@ -295,6 +295,28 @@ public class BlockFamilies {
 		.chiseled(Blocks.CHISELED_STONE_BRICKS)
 		.dontGenerateRecipe()
 		.getFamily();
+	public static final BlockFamily GRIMSTONE = familyBuilder(Blocks.GRIMSTONE)
+		.slab(Blocks.GRIMSTONE_SLAB)
+		.stairs(Blocks.GRIMSTONE_STAIRS)
+		.chiseled(Blocks.CHISELED_GRIMSTONE)
+		.polished(Blocks.POLISHED_GRIMSTONE)
+		.wall(Blocks.GRIMSTONE_WALL)
+		.getFamily();
+	public static final BlockFamily POLISHED_GRIMSTONE = familyBuilder(Blocks.POLISHED_GRIMSTONE)
+		.slab(Blocks.POLISHED_GRIMSTONE_SLAB)
+		.stairs(Blocks.POLISHED_GRIMSTONE_STAIRS)
+		.wall(Blocks.POLISHED_GRIMSTONE_WALL)
+		.getFamily();
+	public static final BlockFamily GRIMSTONE_TILES = familyBuilder(Blocks.GRIMSTONE_TILES)
+		.slab(Blocks.GRIMSTONE_TILE_SLAB)
+		.stairs(Blocks.GRIMSTONE_TILE_STAIRS)
+		.wall(Blocks.GRIMSTONE_TILE_WALL)
+		.getFamily();
+	public static final BlockFamily GRIMSTONE_BRICKS = familyBuilder(Blocks.GRIMSTONE_BRICKS)
+		.slab(Blocks.GRIMSTONE_BRICK_SLAB)
+		.stairs(Blocks.GRIMSTONE_BRICK_STAIRS)
+		.wall(Blocks.GRIMSTONE_BRICK_WALL)
+		.getFamily();
 
 	private static BlockFamily.Builder familyBuilder(Block block) {
 		BlockFamily.Builder builder = new BlockFamily.Builder(block);

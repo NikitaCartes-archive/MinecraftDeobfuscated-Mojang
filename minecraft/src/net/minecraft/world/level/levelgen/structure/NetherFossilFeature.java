@@ -26,7 +26,7 @@ public class NetherFossilFeature extends StructureFeature<NoneFeatureConfigurati
 		return NetherFossilFeature.FeatureStart::new;
 	}
 
-	public static class FeatureStart extends BeardedStructureStart<NoneFeatureConfiguration> {
+	public static class FeatureStart extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
 		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 			super(structureFeature, i, j, boundingBox, k, l);
 		}

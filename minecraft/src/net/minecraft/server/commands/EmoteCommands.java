@@ -11,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.world.entity.Entity;
 
 public class EmoteCommands {
@@ -27,17 +26,22 @@ public class EmoteCommands {
 								MinecraftServer minecraftServer = commandContext.getSource().getServer();
 								if (entity != null) {
 									if (entity instanceof ServerPlayer) {
-										TextFilter textFilter = ((ServerPlayer)entity).getTextFilter();
-										if (textFilter != null) {
-											textFilter.processStreamMessage(string)
-												.thenAcceptAsync(
-													optional -> optional.ifPresent(
-															stringx -> minecraftServer.getPlayerList().broadcastMessage(createMessage(commandContext, stringx), ChatType.CHAT, entity.getUUID())
-														),
-													minecraftServer
-												);
-											return 1;
-										}
+										ServerPlayer serverPlayer = (ServerPlayer)entity;
+										serverPlayer.getTextFilter()
+											.processStreamMessage(string)
+											.thenAcceptAsync(
+												filteredText -> {
+													String stringx = filteredText.getFiltered();
+													Component component = stringx.isEmpty() ? null : createMessage(commandContext, stringx);
+													Component component2 = createMessage(commandContext, filteredText.getRaw());
+													minecraftServer.getPlayerList()
+														.broadcastMessage(
+															component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? component : component2, ChatType.CHAT, entity.getUUID()
+														);
+												},
+												minecraftServer
+											);
+										return 1;
 									}
 
 									minecraftServer.getPlayerList().broadcastMessage(createMessage(commandContext, string), ChatType.CHAT, entity.getUUID());

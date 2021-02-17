@@ -12,9 +12,9 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration> {
@@ -42,7 +42,7 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 		return chunkGenerator.hasStronghold(new ChunkPos(i, j));
 	}
 
-	public static class StrongholdStart extends StructureStart<NoneFeatureConfiguration> {
+	public static class StrongholdStart extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
 		private final long seed;
 
 		public StrongholdStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {

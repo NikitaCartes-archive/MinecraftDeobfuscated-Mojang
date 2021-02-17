@@ -61,7 +61,7 @@ public class DamageEnchantment extends Enchantment {
 	public void doPostAttack(LivingEntity livingEntity, Entity entity, int i) {
 		if (entity instanceof LivingEntity) {
 			LivingEntity livingEntity2 = (LivingEntity)entity;
-			if (this.type == 2 && livingEntity2.getMobType() == MobType.ARTHROPOD) {
+			if (this.type == 2 && i > 0 && livingEntity2.getMobType() == MobType.ARTHROPOD) {
 				int j = 20 + livingEntity.getRandom().nextInt(10 * i);
 				livingEntity2.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, j, 3));
 			}

@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
@@ -98,11 +96,6 @@ public abstract class BlockEntity {
 		if (!blockState.isAir()) {
 			level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public double getViewDistance() {
-		return 64.0;
 	}
 
 	public BlockPos getBlockPos() {

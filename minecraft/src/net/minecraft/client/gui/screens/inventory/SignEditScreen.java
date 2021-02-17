@@ -43,9 +43,9 @@ public class SignEditScreen extends Screen {
 	private SignRenderer.SignModel signModel;
 	private final String[] messages;
 
-	public SignEditScreen(SignBlockEntity signBlockEntity) {
+	public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
 		super(new TranslatableComponent("sign.edit"));
-		this.messages = (String[])IntStream.range(0, 4).mapToObj(signBlockEntity::getMessage).map(Component::getString).toArray(String[]::new);
+		this.messages = (String[])IntStream.range(0, 4).mapToObj(i -> signBlockEntity.getMessage(i, bl)).map(Component::getString).toArray(String[]::new);
 		this.sign = signBlockEntity;
 	}
 

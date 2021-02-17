@@ -809,10 +809,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private void openChatScreen(String string) {
-		if (this.isLocalServer() || this.allowsChat()) {
+		Minecraft.ChatStatus chatStatus = this.getChatStatus();
+		if (!chatStatus.isChatAllowed(this.isLocalServer())) {
+			this.gui.setOverlayMessage(chatStatus.getMessage(), false);
+		} else {
 			this.setScreen(new ChatScreen(string));
-		} else if (this.player != null) {
-			this.player.sendMessage(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), Util.NIL_UUID);
 		}
 	}
 
@@ -1567,15 +1568,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 		}
 
-		boolean bl3 = this.options.chatVisibility != ChatVisiblity.HIDDEN;
-		if (bl3) {
-			while (this.options.keyChat.consumeClick()) {
-				this.openChatScreen("");
-			}
+		while (this.options.keyChat.consumeClick()) {
+			this.openChatScreen("");
+		}
 
-			if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
-				this.openChatScreen("/");
-			}
+		if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
+			this.openChatScreen("/");
 		}
 
 		if (this.player.isUsingItem()) {
@@ -1949,13 +1947,19 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean isBlocked(UUID uUID) {
-		return this.allowsChat()
+		return this.getChatStatus().isChatAllowed(false)
 			? this.playerSocialManager.shouldHideMessageFrom(uUID)
 			: (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
 	}
 
-	public boolean allowsChat() {
-		return this.allowsChat && this.socialInteractionsService.chatAllowed();
+	public Minecraft.ChatStatus getChatStatus() {
+		if (this.options.chatVisibility == ChatVisiblity.HIDDEN) {
+			return Minecraft.ChatStatus.DISABLED_BY_OPTIONS;
+		} else if (!this.allowsChat) {
+			return Minecraft.ChatStatus.DISABLED_BY_LAUNCHER;
+		} else {
+			return !this.socialInteractionsService.chatAllowed() ? Minecraft.ChatStatus.DISABLED_BY_PROFILE : Minecraft.ChatStatus.ENABLED;
+		}
 	}
 
 	public final boolean isDemo() {
@@ -2478,6 +2482,50 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public EntityModelSet getEntityModels() {
 		return this.entityModels;
+	}
+
+	public boolean isTextFilteringEnabled() {
+		return true;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum ChatStatus {
+		ENABLED(TextComponent.EMPTY) {
+			@Override
+			public boolean isChatAllowed(boolean bl) {
+				return true;
+			}
+		},
+		DISABLED_BY_OPTIONS(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED)) {
+			@Override
+			public boolean isChatAllowed(boolean bl) {
+				return false;
+			}
+		},
+		DISABLED_BY_LAUNCHER(new TranslatableComponent("chat.disabled.launcher").withStyle(ChatFormatting.RED)) {
+			@Override
+			public boolean isChatAllowed(boolean bl) {
+				return bl;
+			}
+		},
+		DISABLED_BY_PROFILE(new TranslatableComponent("chat.disabled.profile").withStyle(ChatFormatting.RED)) {
+			@Override
+			public boolean isChatAllowed(boolean bl) {
+				return bl;
+			}
+		};
+
+		private final Component message;
+
+		private ChatStatus(Component component) {
+			this.message = component;
+		}
+
+		public Component getMessage() {
+			return this.message;
+		}
+
+		public abstract boolean isChatAllowed(boolean bl);
 	}
 
 	@Environment(EnvType.CLIENT)

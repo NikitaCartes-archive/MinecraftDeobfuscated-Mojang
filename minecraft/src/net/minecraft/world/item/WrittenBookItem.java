@@ -54,8 +54,8 @@ public class WrittenBookItem extends Item {
 
 	@Override
 	public Component getName(ItemStack itemStack) {
-		if (itemStack.hasTag()) {
-			CompoundTag compoundTag = itemStack.getTag();
+		CompoundTag compoundTag = itemStack.getTag();
+		if (compoundTag != null) {
 			String string = compoundTag.getString("title");
 			if (!StringUtil.isNullOrEmpty(string)) {
 				return new TextComponent(string);
@@ -111,25 +111,34 @@ public class WrittenBookItem extends Item {
 				ListTag listTag = compoundTag.getList("pages", 8);
 
 				for (int i = 0; i < listTag.size(); i++) {
-					String string = listTag.getString(i);
-
-					Component component;
-					try {
-						component = Component.Serializer.fromJsonLenient(string);
-						component = ComponentUtils.updateForEntity(commandSourceStack, component, player, 0);
-					} catch (Exception var9) {
-						component = new TextComponent(string);
-					}
-
-					listTag.set(i, (Tag)StringTag.valueOf(Component.Serializer.toJson(component)));
+					listTag.set(i, (Tag)StringTag.valueOf(resolvePage(commandSourceStack, player, listTag.getString(i))));
 				}
 
-				compoundTag.put("pages", listTag);
+				if (compoundTag.contains("filtered_pages", 10)) {
+					CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
+
+					for (String string : compoundTag2.getAllKeys()) {
+						compoundTag2.putString(string, resolvePage(commandSourceStack, player, compoundTag2.getString(string)));
+					}
+				}
+
 				return true;
 			}
 		} else {
 			return false;
 		}
+	}
+
+	private static String resolvePage(@Nullable CommandSourceStack commandSourceStack, @Nullable Player player, String string) {
+		Component component;
+		try {
+			component = Component.Serializer.fromJsonLenient(string);
+			component = ComponentUtils.updateForEntity(commandSourceStack, component, player, 0);
+		} catch (Exception var5) {
+			component = new TextComponent(string);
+		}
+
+		return Component.Serializer.toJson(component);
 	}
 
 	@Override

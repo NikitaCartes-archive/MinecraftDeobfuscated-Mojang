@@ -40,4 +40,9 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlo
 	protected float getOffset() {
 		return 1.0F;
 	}
+
+	@Override
+	public int getViewDistance() {
+		return 256;
+	}
 }

@@ -24,7 +24,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class BlockEntityRenderDispatcher implements ResourceManagerReloadListener {
@@ -58,10 +57,10 @@ public class BlockEntityRenderDispatcher implements ResourceManagerReloadListene
 	}
 
 	public <E extends BlockEntity> void render(E blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-		if (Vec3.atCenterOf(blockEntity.getBlockPos()).closerThan(this.camera.getPosition(), blockEntity.getViewDistance())) {
-			BlockEntityRenderer<E> blockEntityRenderer = this.getRenderer(blockEntity);
-			if (blockEntityRenderer != null) {
-				if (blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState())) {
+		BlockEntityRenderer<E> blockEntityRenderer = this.getRenderer(blockEntity);
+		if (blockEntityRenderer != null) {
+			if (blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState())) {
+				if (blockEntityRenderer.shouldRender(blockEntity, this.camera.getPosition())) {
 					tryRender(blockEntity, () -> setupAndRender(blockEntityRenderer, blockEntity, f, poseStack, multiBufferSource));
 				}
 			}

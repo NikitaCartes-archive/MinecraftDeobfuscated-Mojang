@@ -47,6 +47,16 @@ public class WorldgenRandom extends Random implements RandomSource {
 		return o;
 	}
 
+	public long setBaseStoneSeed(long l, int i, int j, int k) {
+		this.setSeed(l);
+		long m = this.nextLong();
+		long n = this.nextLong();
+		long o = this.nextLong();
+		long p = (long)i * m ^ (long)j * n ^ (long)k * o ^ l;
+		this.setSeed(p);
+		return p;
+	}
+
 	public long setLargeFeatureWithSalt(long l, int i, int j, int k) {
 		long m = (long)i * 341873128712L + (long)j * 132897987541L + l + (long)k;
 		this.setSeed(m);

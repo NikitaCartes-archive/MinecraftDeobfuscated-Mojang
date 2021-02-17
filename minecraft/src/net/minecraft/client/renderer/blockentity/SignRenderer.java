@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -81,17 +82,16 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		int o = (int)((double)NativeImage.getB(l) * 0.4);
 		int p = NativeImage.combine(0, o, n, m);
 		int q = 20;
+		FormattedCharSequence[] formattedCharSequences = signBlockEntity.getRenderMessages(Minecraft.getInstance().isTextFilteringEnabled(), component -> {
+			List<FormattedCharSequence> list = this.font.split(component, 90);
+			return list.isEmpty() ? FormattedCharSequence.EMPTY : (FormattedCharSequence)list.get(0);
+		});
 
 		for (int r = 0; r < 4; r++) {
-			FormattedCharSequence formattedCharSequence = signBlockEntity.getRenderMessage(r, component -> {
-				List<FormattedCharSequence> list = this.font.split(component, 90);
-				return list.isEmpty() ? FormattedCharSequence.EMPTY : (FormattedCharSequence)list.get(0);
-			});
-			if (formattedCharSequence != null) {
-				float s = (float)(-this.font.width(formattedCharSequence) / 2);
-				int t = blockState.getValue(SignBlock.LIT) ? 15728880 : i;
-				this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, t);
-			}
+			FormattedCharSequence formattedCharSequence = formattedCharSequences[r];
+			float s = (float)(-this.font.width(formattedCharSequence) / 2);
+			int t = blockState.getValue(SignBlock.LIT) ? 15728880 : i;
+			this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, t);
 		}
 
 		poseStack.popPose();

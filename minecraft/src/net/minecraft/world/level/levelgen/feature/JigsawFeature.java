@@ -10,8 +10,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
-import net.minecraft.world.level.levelgen.structure.BeardedStructureStart;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
@@ -32,7 +32,7 @@ public class JigsawFeature extends StructureFeature<JigsawConfiguration> {
 		return (structureFeature, i, j, boundingBox, k, l) -> new JigsawFeature.FeatureStart(this, i, j, boundingBox, k, l);
 	}
 
-	public static class FeatureStart extends BeardedStructureStart<JigsawConfiguration> {
+	public static class FeatureStart extends NoiseAffectingStructureStart<JigsawConfiguration> {
 		private final JigsawFeature feature;
 
 		public FeatureStart(JigsawFeature jigsawFeature, int i, int j, BoundingBox boundingBox, int k, long l) {

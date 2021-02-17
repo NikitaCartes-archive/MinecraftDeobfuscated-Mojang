@@ -126,4 +126,9 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 	public boolean shouldRenderOffScreen(StructureBlockEntity structureBlockEntity) {
 		return true;
 	}
+
+	@Override
+	public int getViewDistance() {
+		return 96;
+	}
 }

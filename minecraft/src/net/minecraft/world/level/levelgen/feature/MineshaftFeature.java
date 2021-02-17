@@ -86,8 +86,8 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 	}
 
 	public static enum Type implements StringRepresentable {
-		NORMAL("normal", Blocks.OAK_WOOD, Blocks.OAK_PLANKS, Blocks.OAK_FENCE),
-		MESA("mesa", Blocks.DARK_OAK_WOOD, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
+		NORMAL("normal", Blocks.OAK_LOG, Blocks.OAK_PLANKS, Blocks.OAK_FENCE),
+		MESA("mesa", Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
 
 		public static final Codec<MineshaftFeature.Type> CODEC = StringRepresentable.fromEnum(MineshaftFeature.Type::values, MineshaftFeature.Type::byName);
 		private static final Map<String, MineshaftFeature.Type> BY_NAME = (Map<String, MineshaftFeature.Type>)Arrays.stream(values())

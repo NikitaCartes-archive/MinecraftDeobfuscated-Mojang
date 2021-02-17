@@ -71,4 +71,9 @@ public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlock
 				level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, new Random(), blockState.getSeed(blockPos), i
 			);
 	}
+
+	@Override
+	public int getViewDistance() {
+		return 68;
+	}
 }

@@ -25,10 +25,16 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class SignBlockEntity extends BlockEntity {
+	private static final String[] RAW_TEXT_FIELD_NAMES = new String[]{"Text1", "Text2", "Text3", "Text4"};
+	private static final String[] FILTERED_TEXT_FIELD_NAMES = new String[]{"FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4"};
 	private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
+	private final Component[] filteredMessages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
 	private boolean isEditable = true;
 	private Player playerWhoMayEdit;
-	private final FormattedCharSequence[] renderMessages = new FormattedCharSequence[4];
+	@Nullable
+	private FormattedCharSequence[] renderMessages;
+	@Environment(EnvType.CLIENT)
+	private boolean renderMessagedFiltered;
 	private DyeColor color = DyeColor.BLACK;
 
 	public SignBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -40,8 +46,13 @@ public class SignBlockEntity extends BlockEntity {
 		super.save(compoundTag);
 
 		for (int i = 0; i < 4; i++) {
-			String string = Component.Serializer.toJson(this.messages[i]);
-			compoundTag.putString("Text" + (i + 1), string);
+			Component component = this.messages[i];
+			String string = Component.Serializer.toJson(component);
+			compoundTag.putString(RAW_TEXT_FIELD_NAMES[i], string);
+			Component component2 = this.filteredMessages[i];
+			if (!component2.equals(component)) {
+				compoundTag.putString(FILTERED_TEXT_FIELD_NAMES[i], Component.Serializer.toJson(component2));
+			}
 		}
 
 		compoundTag.putString("Color", this.color.getName());
@@ -55,20 +66,30 @@ public class SignBlockEntity extends BlockEntity {
 		this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
 
 		for (int i = 0; i < 4; i++) {
-			String string = compoundTag.getString("Text" + (i + 1));
-			Component component = this.deserializeTextSafe(string);
-			if (this.level instanceof ServerLevel) {
-				try {
-					this.messages[i] = ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
-				} catch (CommandSyntaxException var6) {
-					this.messages[i] = component;
-				}
+			String string = compoundTag.getString(RAW_TEXT_FIELD_NAMES[i]);
+			Component component = this.loadLine(string);
+			this.messages[i] = component;
+			String string2 = FILTERED_TEXT_FIELD_NAMES[i];
+			if (compoundTag.contains(string2, 8)) {
+				this.filteredMessages[i] = this.loadLine(compoundTag.getString(string2));
 			} else {
-				this.messages[i] = component;
+				this.filteredMessages[i] = component;
 			}
-
-			this.renderMessages[i] = null;
 		}
+
+		this.renderMessages = null;
+	}
+
+	private Component loadLine(String string) {
+		Component component = this.deserializeTextSafe(string);
+		if (this.level instanceof ServerLevel) {
+			try {
+				return ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
+			} catch (CommandSyntaxException var4) {
+			}
+		}
+
+		return component;
 	}
 
 	private Component deserializeTextSafe(String string) {
@@ -84,23 +105,36 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getMessage(int i) {
-		return this.messages[i];
+	public Component getMessage(int i, boolean bl) {
+		return this.getMessages(bl)[i];
 	}
 
 	public void setMessage(int i, Component component) {
-		this.messages[i] = component;
-		this.renderMessages[i] = null;
+		this.setMessage(i, component, component);
 	}
 
-	@Nullable
+	public void setMessage(int i, Component component, Component component2) {
+		this.messages[i] = component;
+		this.filteredMessages[i] = component2;
+		this.renderMessages = null;
+	}
+
 	@Environment(EnvType.CLIENT)
-	public FormattedCharSequence getRenderMessage(int i, Function<Component, FormattedCharSequence> function) {
-		if (this.renderMessages[i] == null && this.messages[i] != null) {
-			this.renderMessages[i] = (FormattedCharSequence)function.apply(this.messages[i]);
+	public FormattedCharSequence[] getRenderMessages(boolean bl, Function<Component, FormattedCharSequence> function) {
+		if (this.renderMessages == null || this.renderMessagedFiltered != bl) {
+			this.renderMessagedFiltered = bl;
+			this.renderMessages = new FormattedCharSequence[4];
+
+			for (int i = 0; i < 4; i++) {
+				this.renderMessages[i] = (FormattedCharSequence)function.apply(this.getMessage(i, bl));
+			}
 		}
 
-		return this.renderMessages[i];
+		return this.renderMessages;
+	}
+
+	private Component[] getMessages(boolean bl) {
+		return bl ? this.filteredMessages : this.messages;
 	}
 
 	@Nullable
@@ -139,14 +173,12 @@ public class SignBlockEntity extends BlockEntity {
 		return this.playerWhoMayEdit;
 	}
 
-	public boolean executeClickCommands(Player player) {
-		for (Component component : this.messages) {
-			Style style = component == null ? null : component.getStyle();
-			if (style != null && style.getClickEvent() != null) {
-				ClickEvent clickEvent = style.getClickEvent();
-				if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-					player.getServer().getCommands().performCommand(this.createCommandSourceStack((ServerPlayer)player), clickEvent.getValue());
-				}
+	public boolean executeClickCommands(ServerPlayer serverPlayer) {
+		for (Component component : this.getMessages(serverPlayer.isTextFilteringEnabled())) {
+			Style style = component.getStyle();
+			ClickEvent clickEvent = style.getClickEvent();
+			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
+				serverPlayer.getServer().getCommands().performCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
 			}
 		}
 
