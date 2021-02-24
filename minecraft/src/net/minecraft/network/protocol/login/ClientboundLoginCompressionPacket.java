@@ -1,28 +1,23 @@
 package net.minecraft.network.protocol.login;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundLoginCompressionPacket implements Packet<ClientLoginPacketListener> {
-	private int compressionThreshold;
-
-	public ClientboundLoginCompressionPacket() {
-	}
+	private final int compressionThreshold;
 
 	public ClientboundLoginCompressionPacket(int i) {
 		this.compressionThreshold = i;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundLoginCompressionPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.compressionThreshold = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.compressionThreshold);
 	}
 

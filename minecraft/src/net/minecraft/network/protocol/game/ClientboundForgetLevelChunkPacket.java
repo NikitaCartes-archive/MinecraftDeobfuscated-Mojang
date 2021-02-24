@@ -1,31 +1,26 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundForgetLevelChunkPacket implements Packet<ClientGamePacketListener> {
-	private int x;
-	private int z;
-
-	public ClientboundForgetLevelChunkPacket() {
-	}
+	private final int x;
+	private final int z;
 
 	public ClientboundForgetLevelChunkPacket(int i, int j) {
 		this.x = i;
 		this.z = j;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundForgetLevelChunkPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.x = friendlyByteBuf.readInt();
 		this.z = friendlyByteBuf.readInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.x);
 		friendlyByteBuf.writeInt(this.z);
 	}

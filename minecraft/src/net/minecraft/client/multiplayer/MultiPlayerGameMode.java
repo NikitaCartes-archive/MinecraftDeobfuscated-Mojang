@@ -324,7 +324,7 @@ public class MultiPlayerGameMode {
 
 	public void attack(Player player, Entity entity) {
 		this.ensureHasSentCarriedItem();
-		this.connection.send(new ServerboundInteractPacket(entity, player.isShiftKeyDown()));
+		this.connection.send(ServerboundInteractPacket.createAttackPacket(entity, player.isShiftKeyDown()));
 		if (this.localPlayerMode != GameType.SPECTATOR) {
 			player.attack(entity);
 			player.resetAttackStrengthTicker();
@@ -333,14 +333,14 @@ public class MultiPlayerGameMode {
 
 	public InteractionResult interact(Player player, Entity entity, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
-		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, player.isShiftKeyDown()));
+		this.connection.send(ServerboundInteractPacket.createInteractionPacket(entity, player.isShiftKeyDown(), interactionHand));
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : player.interactOn(entity, interactionHand);
 	}
 
 	public InteractionResult interactAt(Player player, Entity entity, EntityHitResult entityHitResult, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
 		Vec3 vec3 = entityHitResult.getLocation().subtract(entity.getX(), entity.getY(), entity.getZ());
-		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3, player.isShiftKeyDown()));
+		this.connection.send(ServerboundInteractPacket.createInteractionPacket(entity, player.isShiftKeyDown(), interactionHand, vec3));
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
 	}
 

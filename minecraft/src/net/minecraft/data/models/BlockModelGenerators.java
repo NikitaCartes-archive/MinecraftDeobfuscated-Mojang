@@ -69,7 +69,11 @@ public class BlockModelGenerators {
 	private final BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput;
 	private final Consumer<Item> skippedAutoModelsOutput;
 	private final List<Block> nonOrientableTrapdoor = ImmutableList.of(Blocks.OAK_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.IRON_TRAPDOOR);
-	private final List<Block> mirroredFullBlocks = ImmutableList.of(Blocks.STONE, Blocks.GRIMSTONE);
+	private final Map<Block, BlockModelGenerators.MirroredModelFactory> mirroredModels = ImmutableMap.<Block, BlockModelGenerators.MirroredModelFactory>builder()
+		.put(Blocks.STONE, ModelTemplates.CUBE_MIRRORED_ALL::create)
+		.put(Blocks.COBBLED_DEEPSLATE, ModelTemplates.CUBE_MIRRORED_ALL::create)
+		.put(Blocks.DEEPSLATE, ModelTemplates.CUBE_COLUMN_MIRRORED::create)
+		.build();
 	private final Map<Block, TexturedModel> texturedModels = ImmutableMap.<Block, TexturedModel>builder()
 		.put(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.SANDSTONE))
 		.put(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.RED_SANDSTONE))
@@ -90,6 +94,7 @@ public class BlockModelGenerators {
 		.put(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.QUARTZ_BLOCK))
 		.put(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom")))
 		.put(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.BLACKSTONE))
+		.put(Blocks.DEEPSLATE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.DEEPSLATE))
 		.build();
 	private static final Map<BlockFamily.Variant, BiConsumer<BlockModelGenerators.BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.<BlockFamily.Variant, BiConsumer<BlockModelGenerators.BlockFamilyProvider, Block>>builder()
 		.put(BlockFamily.Variant.BUTTON, BlockModelGenerators.BlockFamilyProvider::button)
@@ -3653,20 +3658,25 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.COAL_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.COAL_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.DIAMOND_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DEEPSLATE_DIAMOND_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.DIAMOND_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.EMERALD_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.EMERALD_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.GOLD_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.NETHER_GOLD_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DEEPSLATE_GOLD_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.GOLD_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.IRON_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DEEPSLATE_IRON_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.IRON_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.ANCIENT_DEBRIS, TexturedModel.COLUMN);
 		this.createTrivialBlock(Blocks.NETHERITE_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.LAPIS_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DEEPSLATE_LAPIS_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.LAPIS_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.NETHER_QUARTZ_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.REDSTONE_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.DEEPSLATE_REDSTONE_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.REDSTONE_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.GILDED_BLACKSTONE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.BLUE_ICE, TexturedModel.CUBE);
@@ -3715,7 +3725,7 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.DRIPSTONE_BLOCK, TexturedModel.CUBE);
-		this.createTrivialBlock(Blocks.CHISELED_GRIMSTONE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.CHISELED_DEEPSLATE, TexturedModel.CUBE);
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.COPPER_BLOCK);
@@ -3794,6 +3804,7 @@ public class BlockModelGenerators {
 		this.createAxisAlignedPillarBlockCustomModel(Blocks.CHAIN, ModelLocationUtils.getModelLocation(Blocks.CHAIN));
 		this.createAxisAlignedPillarBlock(Blocks.BASALT, TexturedModel.COLUMN);
 		this.createAxisAlignedPillarBlock(Blocks.POLISHED_BASALT, TexturedModel.COLUMN);
+		this.createTrivialCube(Blocks.SMOOTH_BASALT);
 		this.createAxisAlignedPillarBlock(Blocks.BONE_BLOCK, TexturedModel.COLUMN);
 		this.createRotatedVariantBlock(Blocks.DIRT);
 		this.createRotatedVariantBlock(Blocks.SAND);
@@ -4267,8 +4278,9 @@ public class BlockModelGenerators {
 
 		public BlockModelGenerators.BlockFamilyProvider fullBlock(Block block, ModelTemplate modelTemplate) {
 			this.fullBlock = modelTemplate.create(block, this.mapping, BlockModelGenerators.this.modelOutput);
-			if (BlockModelGenerators.this.mirroredFullBlocks.contains(block)) {
-				ResourceLocation resourceLocation = ModelTemplates.CUBE_MIRRORED_ALL.create(block, this.mapping, BlockModelGenerators.this.modelOutput);
+			if (BlockModelGenerators.this.mirroredModels.containsKey(block)) {
+				ResourceLocation resourceLocation = ((BlockModelGenerators.MirroredModelFactory)BlockModelGenerators.this.mirroredModels.get(block))
+					.create(block, this.mapping, BlockModelGenerators.this.modelOutput);
 				BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(block, this.fullBlock, resourceLocation));
 			} else {
 				BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, this.fullBlock));
@@ -4402,6 +4414,11 @@ public class BlockModelGenerators {
 				);
 			return this;
 		}
+	}
+
+	@FunctionalInterface
+	interface MirroredModelFactory {
+		ResourceLocation create(Block block, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer);
 	}
 
 	static enum TintState {

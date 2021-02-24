@@ -1,17 +1,13 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundSetBeaconPacket implements Packet<ServerGamePacketListener> {
-	private int primary;
-	private int secondary;
-
-	public ServerboundSetBeaconPacket() {
-	}
+	private final int primary;
+	private final int secondary;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundSetBeaconPacket(int i, int j) {
@@ -19,14 +15,13 @@ public class ServerboundSetBeaconPacket implements Packet<ServerGamePacketListen
 		this.secondary = j;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundSetBeaconPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.primary = friendlyByteBuf.readVarInt();
 		this.secondary = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.primary);
 		friendlyByteBuf.writeVarInt(this.secondary);
 	}

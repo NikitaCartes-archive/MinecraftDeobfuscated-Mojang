@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -23,21 +23,20 @@ public class DesertPyramidFeature extends StructureFeature<NoneFeatureConfigurat
 	}
 
 	public static class FeatureStart extends StructureStart<NoneFeatureConfiguration> {
-		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, SectionPos.sectionToBlockCoord(i), SectionPos.sectionToBlockCoord(j));
+			DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
 			this.pieces.add(desertPyramidPiece);
 			this.calculateBoundingBox();
 		}

@@ -26,29 +26,26 @@ public class PacketDecoder extends ByteToMessageDecoder {
 		if (byteBuf.readableBytes() != 0) {
 			FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf);
 			int i = friendlyByteBuf.readVarInt();
-			Packet<?> packet = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, i);
+			Packet<?> packet = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, i, friendlyByteBuf);
 			if (packet == null) {
 				throw new IOException("Bad packet id " + i);
+			} else if (friendlyByteBuf.readableBytes() > 0) {
+				throw new IOException(
+					"Packet "
+						+ channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId()
+						+ "/"
+						+ i
+						+ " ("
+						+ packet.getClass().getSimpleName()
+						+ ") was larger than I expected, found "
+						+ friendlyByteBuf.readableBytes()
+						+ " bytes extra whilst reading packet "
+						+ i
+				);
 			} else {
-				packet.read(friendlyByteBuf);
-				if (friendlyByteBuf.readableBytes() > 0) {
-					throw new IOException(
-						"Packet "
-							+ channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId()
-							+ "/"
-							+ i
-							+ " ("
-							+ packet.getClass().getSimpleName()
-							+ ") was larger than I expected, found "
-							+ friendlyByteBuf.readableBytes()
-							+ " bytes extra whilst reading packet "
-							+ i
-					);
-				} else {
-					list.add(packet);
-					if (LOGGER.isDebugEnabled()) {
-						LOGGER.debug(MARKER, " IN: [{}:{}] {}", channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get(), i, packet.getClass().getName());
-					}
+				list.add(packet);
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug(MARKER, " IN: [{}:{}] {}", channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get(), i, packet.getClass().getName());
 				}
 			}
 		}

@@ -27,28 +27,26 @@ public class NetherFossilFeature extends StructureFeature<NoneFeatureConfigurati
 	}
 
 	public static class FeatureStart extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
-		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			ChunkPos chunkPos = new ChunkPos(i, j);
-			int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
-			int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
-			int m = chunkGenerator.getSeaLevel();
-			int n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m);
-			NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l, levelHeightAccessor);
+			int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
+			int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
+			int k = chunkGenerator.getSeaLevel();
+			int l = k + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - k);
+			NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
 
-			for (BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l); n > m; n--) {
+			for (BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j); l > k; l--) {
 				BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
 				mutableBlockPos.move(Direction.DOWN);
 				BlockState blockState2 = noiseColumn.getBlockState(mutableBlockPos);
@@ -57,8 +55,8 @@ public class NetherFossilFeature extends StructureFeature<NoneFeatureConfigurati
 				}
 			}
 
-			if (n > m) {
-				NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(k, n, l));
+			if (l > k) {
+				NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(i, l, j));
 				this.calculateBoundingBox();
 			}
 		}

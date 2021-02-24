@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,14 +12,11 @@ import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.decoration.Painting;
 
 public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketListener> {
-	private int id;
-	private UUID uuid;
-	private BlockPos pos;
-	private Direction direction;
-	private int motive;
-
-	public ClientboundAddPaintingPacket() {
-	}
+	private final int id;
+	private final UUID uuid;
+	private final BlockPos pos;
+	private final Direction direction;
+	private final int motive;
 
 	public ClientboundAddPaintingPacket(Painting painting) {
 		this.id = painting.getId();
@@ -30,8 +26,7 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 		this.motive = Registry.MOTIVE.getId(painting.motive);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundAddPaintingPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.uuid = friendlyByteBuf.readUUID();
 		this.motive = friendlyByteBuf.readVarInt();
@@ -40,7 +35,7 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeUUID(this.uuid);
 		friendlyByteBuf.writeVarInt(this.motive);

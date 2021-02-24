@@ -1,8 +1,8 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
-import java.io.IOException;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -12,19 +12,16 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundExplodePacket implements Packet<ClientGamePacketListener> {
-	private double x;
-	private double y;
-	private double z;
-	private float power;
-	private List<BlockPos> toBlow;
-	private float knockbackX;
-	private float knockbackY;
-	private float knockbackZ;
+	private final double x;
+	private final double y;
+	private final double z;
+	private final float power;
+	private final List<BlockPos> toBlow;
+	private final float knockbackX;
+	private final float knockbackY;
+	private final float knockbackZ;
 
-	public ClientboundExplodePacket() {
-	}
-
-	public ClientboundExplodePacket(double d, double e, double f, float g, List<BlockPos> list, Vec3 vec3) {
+	public ClientboundExplodePacket(double d, double e, double f, float g, List<BlockPos> list, @Nullable Vec3 vec3) {
 		this.x = d;
 		this.y = e;
 		this.z = f;
@@ -34,53 +31,49 @@ public class ClientboundExplodePacket implements Packet<ClientGamePacketListener
 			this.knockbackX = (float)vec3.x;
 			this.knockbackY = (float)vec3.y;
 			this.knockbackZ = (float)vec3.z;
+		} else {
+			this.knockbackX = 0.0F;
+			this.knockbackY = 0.0F;
+			this.knockbackZ = 0.0F;
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundExplodePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.x = (double)friendlyByteBuf.readFloat();
 		this.y = (double)friendlyByteBuf.readFloat();
 		this.z = (double)friendlyByteBuf.readFloat();
 		this.power = friendlyByteBuf.readFloat();
-		int i = friendlyByteBuf.readInt();
-		this.toBlow = Lists.<BlockPos>newArrayListWithCapacity(i);
-		int j = Mth.floor(this.x);
-		int k = Mth.floor(this.y);
-		int l = Mth.floor(this.z);
-
-		for (int m = 0; m < i; m++) {
-			int n = friendlyByteBuf.readByte() + j;
-			int o = friendlyByteBuf.readByte() + k;
-			int p = friendlyByteBuf.readByte() + l;
-			this.toBlow.add(new BlockPos(n, o, p));
-		}
-
+		int i = Mth.floor(this.x);
+		int j = Mth.floor(this.y);
+		int k = Mth.floor(this.z);
+		this.toBlow = friendlyByteBuf.readList(friendlyByteBufx -> {
+			int l = friendlyByteBufx.readByte() + i;
+			int m = friendlyByteBufx.readByte() + j;
+			int n = friendlyByteBufx.readByte() + k;
+			return new BlockPos(l, m, n);
+		});
 		this.knockbackX = friendlyByteBuf.readFloat();
 		this.knockbackY = friendlyByteBuf.readFloat();
 		this.knockbackZ = friendlyByteBuf.readFloat();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeFloat((float)this.x);
 		friendlyByteBuf.writeFloat((float)this.y);
 		friendlyByteBuf.writeFloat((float)this.z);
 		friendlyByteBuf.writeFloat(this.power);
-		friendlyByteBuf.writeInt(this.toBlow.size());
 		int i = Mth.floor(this.x);
 		int j = Mth.floor(this.y);
 		int k = Mth.floor(this.z);
-
-		for (BlockPos blockPos : this.toBlow) {
+		friendlyByteBuf.writeCollection(this.toBlow, (friendlyByteBufx, blockPos) -> {
 			int l = blockPos.getX() - i;
 			int m = blockPos.getY() - j;
 			int n = blockPos.getZ() - k;
-			friendlyByteBuf.writeByte(l);
-			friendlyByteBuf.writeByte(m);
-			friendlyByteBuf.writeByte(n);
-		}
-
+			friendlyByteBufx.writeByte(l);
+			friendlyByteBufx.writeByte(m);
+			friendlyByteBufx.writeByte(n);
+		});
 		friendlyByteBuf.writeFloat(this.knockbackX);
 		friendlyByteBuf.writeFloat(this.knockbackY);
 		friendlyByteBuf.writeFloat(this.knockbackZ);

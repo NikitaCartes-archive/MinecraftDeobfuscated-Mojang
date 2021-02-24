@@ -265,7 +265,7 @@ public class MineShaftPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			if (this.edgesLiquidOrFloatingInAir(worldGenLevel, boundingBox)) {
+			if (this.edgesLiquid(worldGenLevel, boundingBox)) {
 				return false;
 			} else {
 				int i = 0;
@@ -588,7 +588,7 @@ public class MineShaftPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			if (this.edgesLiquidOrFloatingInAir(worldGenLevel, boundingBox)) {
+			if (this.edgesLiquid(worldGenLevel, boundingBox)) {
 				return false;
 			} else {
 				BlockState blockState = this.type.getPlanksState();
@@ -747,7 +747,7 @@ public class MineShaftPieces {
 			return true;
 		}
 
-		protected boolean edgesLiquidOrFloatingInAir(BlockGetter blockGetter, BoundingBox boundingBox) {
+		protected boolean edgesLiquid(BlockGetter blockGetter, BoundingBox boundingBox) {
 			int i = Math.max(this.boundingBox.x0 - 1, boundingBox.x0);
 			int j = Math.max(this.boundingBox.y0 - 1, boundingBox.y0);
 			int k = Math.max(this.boundingBox.z0 - 1, boundingBox.z0);
@@ -755,50 +755,44 @@ public class MineShaftPieces {
 			int m = Math.min(this.boundingBox.y1 + 1, boundingBox.y1);
 			int n = Math.min(this.boundingBox.z1 + 1, boundingBox.z1);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-			if (this.air(blockGetter, mutableBlockPos, i, j, k)
-				&& this.air(blockGetter, mutableBlockPos, i, j, n)
-				&& this.air(blockGetter, mutableBlockPos, l, j, k)
-				&& this.air(blockGetter, mutableBlockPos, l, j, n)) {
-				return true;
-			} else {
-				for (int o = i; o <= l; o++) {
-					for (int p = k; p <= n; p++) {
-						if (blockGetter.getBlockState(mutableBlockPos.set(o, j, p)).getMaterial().isLiquid()) {
-							return true;
-						}
 
-						if (blockGetter.getBlockState(mutableBlockPos.set(o, m, p)).getMaterial().isLiquid()) {
-							return true;
-						}
+			for (int o = i; o <= l; o++) {
+				for (int p = k; p <= n; p++) {
+					if (blockGetter.getBlockState(mutableBlockPos.set(o, j, p)).getMaterial().isLiquid()) {
+						return true;
+					}
+
+					if (blockGetter.getBlockState(mutableBlockPos.set(o, m, p)).getMaterial().isLiquid()) {
+						return true;
 					}
 				}
-
-				for (int o = i; o <= l; o++) {
-					for (int p = j; p <= m; p++) {
-						if (blockGetter.getBlockState(mutableBlockPos.set(o, p, k)).getMaterial().isLiquid()) {
-							return true;
-						}
-
-						if (blockGetter.getBlockState(mutableBlockPos.set(o, p, n)).getMaterial().isLiquid()) {
-							return true;
-						}
-					}
-				}
-
-				for (int o = k; o <= n; o++) {
-					for (int p = j; p <= m; p++) {
-						if (blockGetter.getBlockState(mutableBlockPos.set(i, p, o)).getMaterial().isLiquid()) {
-							return true;
-						}
-
-						if (blockGetter.getBlockState(mutableBlockPos.set(l, p, o)).getMaterial().isLiquid()) {
-							return true;
-						}
-					}
-				}
-
-				return false;
 			}
+
+			for (int o = i; o <= l; o++) {
+				for (int p = j; p <= m; p++) {
+					if (blockGetter.getBlockState(mutableBlockPos.set(o, p, k)).getMaterial().isLiquid()) {
+						return true;
+					}
+
+					if (blockGetter.getBlockState(mutableBlockPos.set(o, p, n)).getMaterial().isLiquid()) {
+						return true;
+					}
+				}
+			}
+
+			for (int o = k; o <= n; o++) {
+				for (int p = j; p <= m; p++) {
+					if (blockGetter.getBlockState(mutableBlockPos.set(i, p, o)).getMaterial().isLiquid()) {
+						return true;
+					}
+
+					if (blockGetter.getBlockState(mutableBlockPos.set(l, p, o)).getMaterial().isLiquid()) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		protected void setPlanksBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, BlockState blockState, int i, int j, int k) {
@@ -809,11 +803,6 @@ public class MineShaftPieces {
 					worldGenLevel.setBlock(blockPos, blockState, 2);
 				}
 			}
-		}
-
-		private boolean air(BlockGetter blockGetter, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
-			mutableBlockPos.set(i, j, k);
-			return blockGetter.getBlockState(mutableBlockPos).isAir();
 		}
 	}
 
@@ -930,7 +919,7 @@ public class MineShaftPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			if (this.edgesLiquidOrFloatingInAir(worldGenLevel, boundingBox)) {
+			if (this.edgesLiquid(worldGenLevel, boundingBox)) {
 				return false;
 			} else {
 				this.generateBox(
@@ -1081,7 +1070,7 @@ public class MineShaftPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			if (this.edgesLiquidOrFloatingInAir(worldGenLevel, boundingBox)) {
+			if (this.edgesLiquid(worldGenLevel, boundingBox)) {
 				return false;
 			} else {
 				this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 2, 7, 1, CAVE_AIR, CAVE_AIR, false);

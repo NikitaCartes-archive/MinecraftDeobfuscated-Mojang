@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -9,12 +8,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacketListener> {
-	private BlockPos pos;
-	private int type;
-	private CompoundTag tag;
-
-	public ClientboundBlockEntityDataPacket() {
-	}
+	private final BlockPos pos;
+	private final int type;
+	private final CompoundTag tag;
 
 	public ClientboundBlockEntityDataPacket(BlockPos blockPos, int i, CompoundTag compoundTag) {
 		this.pos = blockPos;
@@ -22,15 +18,14 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
 		this.tag = compoundTag;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundBlockEntityDataPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.type = friendlyByteBuf.readUnsignedByte();
 		this.tag = friendlyByteBuf.readNbt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeByte((byte)this.type);
 		friendlyByteBuf.writeNbt(this.tag);

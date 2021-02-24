@@ -131,15 +131,27 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket);
 
-	void handlePlayerCombat(ClientboundPlayerCombatPacket clientboundPlayerCombatPacket);
+	void handlePlayerCombatEnd(ClientboundPlayerCombatEndPacket clientboundPlayerCombatEndPacket);
+
+	void handlePlayerCombatEnter(ClientboundPlayerCombatEnterPacket clientboundPlayerCombatEnterPacket);
+
+	void handlePlayerCombatKill(ClientboundPlayerCombatKillPacket clientboundPlayerCombatKillPacket);
 
 	void handleChangeDifficulty(ClientboundChangeDifficultyPacket clientboundChangeDifficultyPacket);
 
 	void handleSetCamera(ClientboundSetCameraPacket clientboundSetCameraPacket);
 
-	void handleSetBorder(ClientboundSetBorderPacket clientboundSetBorderPacket);
+	void handleInitializeBorder(ClientboundInitializeBorderPacket clientboundInitializeBorderPacket);
 
-	void handleSetTitles(ClientboundSetTitlesPacket clientboundSetTitlesPacket);
+	void handleSetBorderLerpSize(ClientboundSetBorderLerpSizePacket clientboundSetBorderLerpSizePacket);
+
+	void handleSetBorderSize(ClientboundSetBorderSizePacket clientboundSetBorderSizePacket);
+
+	void handleSetBorderWarningDelay(ClientboundSetBorderWarningDelayPacket clientboundSetBorderWarningDelayPacket);
+
+	void handleSetBorderWarningDistance(ClientboundSetBorderWarningDistancePacket clientboundSetBorderWarningDistancePacket);
+
+	void handleSetBorderCenter(ClientboundSetBorderCenterPacket clientboundSetBorderCenterPacket);
 
 	void handleTabListCustomisation(ClientboundTabListPacket clientboundTabListPacket);
 
@@ -182,4 +194,14 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleSetChunkCacheCenter(ClientboundSetChunkCacheCenterPacket clientboundSetChunkCacheCenterPacket);
 
 	void handleBlockBreakAck(ClientboundBlockBreakAckPacket clientboundBlockBreakAckPacket);
+
+	void setActionBarText(ClientboundSetActionBarTextPacket clientboundSetActionBarTextPacket);
+
+	void setSubtitleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket);
+
+	void setTitleText(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket);
+
+	void setTitlesAnimation(ClientboundSetTitlesAnimationPacket clientboundSetTitlesAnimationPacket);
+
+	void handleTitlesClear(ClientboundClearTitlesPacket clientboundClearTitlesPacket);
 }

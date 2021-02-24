@@ -1,6 +1,5 @@
 package net.minecraft.advancements;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -8,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -57,17 +55,17 @@ public class AdvancementList {
 	}
 
 	public void add(Map<ResourceLocation, Advancement.Builder> map) {
-		Function<ResourceLocation, Advancement> function = Functions.forMap(this.advancements, null);
+		Map<ResourceLocation, Advancement.Builder> map2 = Maps.<ResourceLocation, Advancement.Builder>newHashMap(map);
 
-		while (!map.isEmpty()) {
+		while (!map2.isEmpty()) {
 			boolean bl = false;
-			Iterator<Entry<ResourceLocation, Advancement.Builder>> iterator = map.entrySet().iterator();
+			Iterator<Entry<ResourceLocation, Advancement.Builder>> iterator = map2.entrySet().iterator();
 
 			while (iterator.hasNext()) {
 				Entry<ResourceLocation, Advancement.Builder> entry = (Entry<ResourceLocation, Advancement.Builder>)iterator.next();
 				ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 				Advancement.Builder builder = (Advancement.Builder)entry.getValue();
-				if (builder.canBuild(function)) {
+				if (builder.canBuild(this.advancements::get)) {
 					Advancement advancement = builder.build(resourceLocation);
 					this.advancements.put(resourceLocation, advancement);
 					bl = true;
@@ -87,7 +85,7 @@ public class AdvancementList {
 			}
 
 			if (!bl) {
-				for (Entry<ResourceLocation, Advancement.Builder> entry : map.entrySet()) {
+				for (Entry<ResourceLocation, Advancement.Builder> entry : map2.entrySet()) {
 					LOGGER.error("Couldn't load advancement {}: {}", entry.getKey(), entry.getValue());
 				}
 				break;

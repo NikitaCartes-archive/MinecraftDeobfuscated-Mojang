@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -26,14 +25,13 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		ProbabilityFeatureConfiguration probabilityFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		worldgenRandom.setLargeFeatureWithSalt(l, i, j, 10387320);
+		worldgenRandom.setLargeFeatureWithSalt(l, chunkPos.x, chunkPos.z, 10387320);
 		return worldgenRandom.nextFloat() < probabilityFeatureConfiguration.probability;
 	}
 
@@ -43,28 +41,28 @@ public class BuriedTreasureFeature extends StructureFeature<ProbabilityFeatureCo
 	}
 
 	public static class BuriedTreasureStart extends StructureStart<ProbabilityFeatureConfiguration> {
-		public BuriedTreasureStart(StructureFeature<ProbabilityFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public BuriedTreasureStart(StructureFeature<ProbabilityFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			ProbabilityFeatureConfiguration probabilityFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 9), 90, SectionPos.sectionToBlockCoord(j, 9));
+			BlockPos blockPos = new BlockPos(chunkPos.getBlockX(9), 90, chunkPos.getBlockZ(9));
 			this.pieces.add(new BuriedTreasurePieces.BuriedTreasurePiece(blockPos));
 			this.calculateBoundingBox();
 		}
 
 		@Override
 		public BlockPos getLocatePos() {
-			return new BlockPos(SectionPos.sectionToBlockCoord(this.getChunkX(), 9), 0, SectionPos.sectionToBlockCoord(this.getChunkZ(), 9));
+			ChunkPos chunkPos = this.getChunkPos();
+			return new BlockPos(chunkPos.getBlockX(9), 0, chunkPos.getBlockZ(9));
 		}
 	}
 }

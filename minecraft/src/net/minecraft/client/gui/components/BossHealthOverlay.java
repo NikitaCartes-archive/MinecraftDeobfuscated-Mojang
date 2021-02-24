@@ -63,13 +63,53 @@ public class BossHealthOverlay extends GuiComponent {
 	}
 
 	public void update(ClientboundBossEventPacket clientboundBossEventPacket) {
-		if (clientboundBossEventPacket.getOperation() == ClientboundBossEventPacket.Operation.ADD) {
-			this.events.put(clientboundBossEventPacket.getId(), new LerpingBossEvent(clientboundBossEventPacket));
-		} else if (clientboundBossEventPacket.getOperation() == ClientboundBossEventPacket.Operation.REMOVE) {
-			this.events.remove(clientboundBossEventPacket.getId());
-		} else {
-			((LerpingBossEvent)this.events.get(clientboundBossEventPacket.getId())).update(clientboundBossEventPacket);
-		}
+		clientboundBossEventPacket.dispatch(
+			new ClientboundBossEventPacket.Handler() {
+				@Override
+				public void add(
+					UUID uUID,
+					Component component,
+					float f,
+					BossEvent.BossBarColor bossBarColor,
+					BossEvent.BossBarOverlay bossBarOverlay,
+					boolean bl,
+					boolean bl2,
+					boolean bl3
+				) {
+					BossHealthOverlay.this.events.put(uUID, new LerpingBossEvent(uUID, component, f, bossBarColor, bossBarOverlay, bl, bl2, bl3));
+				}
+
+				@Override
+				public void remove(UUID uUID) {
+					BossHealthOverlay.this.events.remove(uUID);
+				}
+
+				@Override
+				public void updateProgress(UUID uUID, float f) {
+					((LerpingBossEvent)BossHealthOverlay.this.events.get(uUID)).setProgress(f);
+				}
+
+				@Override
+				public void updateName(UUID uUID, Component component) {
+					((LerpingBossEvent)BossHealthOverlay.this.events.get(uUID)).setName(component);
+				}
+
+				@Override
+				public void updateStyle(UUID uUID, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+					LerpingBossEvent lerpingBossEvent = (LerpingBossEvent)BossHealthOverlay.this.events.get(uUID);
+					lerpingBossEvent.setColor(bossBarColor);
+					lerpingBossEvent.setOverlay(bossBarOverlay);
+				}
+
+				@Override
+				public void updateProperties(UUID uUID, boolean bl, boolean bl2, boolean bl3) {
+					LerpingBossEvent lerpingBossEvent = (LerpingBossEvent)BossHealthOverlay.this.events.get(uUID);
+					lerpingBossEvent.setDarkenScreen(bl);
+					lerpingBossEvent.setPlayBossMusic(bl2);
+					lerpingBossEvent.setCreateWorldFog(bl3);
+				}
+			}
+		);
 	}
 
 	public void reset() {

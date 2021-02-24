@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -11,19 +10,16 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketListener> {
-	private double x;
-	private double y;
-	private double z;
-	private float xDist;
-	private float yDist;
-	private float zDist;
-	private float maxSpeed;
-	private int count;
-	private boolean overrideLimiter;
-	private ParticleOptions particle;
-
-	public ClientboundLevelParticlesPacket() {
-	}
+	private final double x;
+	private final double y;
+	private final double z;
+	private final float xDist;
+	private final float yDist;
+	private final float zDist;
+	private final float maxSpeed;
+	private final int count;
+	private final boolean overrideLimiter;
+	private final ParticleOptions particle;
 
 	public <T extends ParticleOptions> ClientboundLevelParticlesPacket(
 		T particleOptions, boolean bl, double d, double e, double f, float g, float h, float i, float j, int k
@@ -40,8 +36,7 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 		this.count = k;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundLevelParticlesPacket(FriendlyByteBuf friendlyByteBuf) {
 		ParticleType<?> particleType = Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readInt());
 		if (particleType == null) {
 			particleType = ParticleTypes.BARRIER;
@@ -64,7 +59,7 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(Registry.PARTICLE_TYPE.getId(this.particle.getType()));
 		friendlyByteBuf.writeBoolean(this.overrideLimiter);
 		friendlyByteBuf.writeDouble(this.x);

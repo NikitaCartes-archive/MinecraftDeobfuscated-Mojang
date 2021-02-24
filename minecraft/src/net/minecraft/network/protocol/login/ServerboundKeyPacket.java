@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.login;
 
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import javax.crypto.SecretKey;
@@ -12,11 +11,8 @@ import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 
 public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
-	private byte[] keybytes = new byte[0];
-	private byte[] nonce = new byte[0];
-
-	public ServerboundKeyPacket() {
-	}
+	private final byte[] keybytes;
+	private final byte[] nonce;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, byte[] bs) throws CryptException {
@@ -24,14 +20,13 @@ public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 		this.nonce = Crypt.encryptUsingKey(publicKey, bs);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundKeyPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.keybytes = friendlyByteBuf.readByteArray();
 		this.nonce = friendlyByteBuf.readByteArray();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByteArray(this.keybytes);
 		friendlyByteBuf.writeByteArray(this.nonce);
 	}

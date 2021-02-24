@@ -6,108 +6,146 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration> {
-	private final float[] rs = new float[1024];
+public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
+	private static final Logger LOGGER = LogManager.getLogger();
 
-	public CanyonWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
-		super(codec, 384);
+	public CanyonWorldCarver(Codec<CanyonCarverConfiguration> codec) {
+		super(codec);
 	}
 
-	public boolean isStartChunk(Random random, int i, int j, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
-		return random.nextFloat() <= probabilityFeatureConfiguration.probability;
+	public boolean isStartChunk(CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
+		return random.nextFloat() <= canyonCarverConfiguration.probability;
 	}
 
 	public boolean carve(
+		CarvingContext carvingContext,
+		CanyonCarverConfiguration canyonCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		Random random,
 		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		BitSet bitSet,
-		ProbabilityFeatureConfiguration probabilityFeatureConfiguration
+		ChunkPos chunkPos,
+		BitSet bitSet
 	) {
-		int n = (this.getRange() * 2 - 1) * 16;
-		double d = (double)(j * 16 + random.nextInt(16));
-		double e = (double)(random.nextInt(random.nextInt(40) + 8) + 20);
-		double f = (double)(k * 16 + random.nextInt(16));
-		float g = random.nextFloat() * (float) (Math.PI * 2);
-		float h = (random.nextFloat() - 0.5F) * 2.0F / 8.0F;
-		double o = 3.0;
-		float p = (random.nextFloat() * 2.0F + random.nextFloat()) * 2.0F;
-		int q = n - random.nextInt(n / 4);
-		int r = 0;
-		this.genCanyon(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, p, g, h, 0, q, 3.0, bitSet);
+		int j = (this.getRange() * 2 - 1) * 16;
+		double d = (double)chunkPos.getBlockX(random.nextInt(16));
+		int k = this.getY(carvingContext, canyonCarverConfiguration, random);
+		double e = (double)chunkPos.getBlockZ(random.nextInt(16));
+		float f = random.nextFloat() * (float) (Math.PI * 2);
+		float g = canyonCarverConfiguration.getVerticalRotation().sample(random);
+		double h = (double)canyonCarverConfiguration.getYScale().sample(random);
+		float l = canyonCarverConfiguration.getThickness().sample(random);
+		int m = (int)((float)j * canyonCarverConfiguration.getDistanceFactor().sample(random));
+		int n = 0;
+		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), i, d, (double)k, e, l, f, g, 0, m, h, bitSet);
 		return true;
 	}
 
-	private void genCanyon(
+	private void doCarve(
+		CarvingContext carvingContext,
+		CanyonCarverConfiguration canyonCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		long l,
 		int i,
-		int j,
-		int k,
 		double d,
 		double e,
 		double f,
 		float g,
 		float h,
-		float m,
-		int n,
-		int o,
-		double p,
+		float j,
+		int k,
+		int m,
+		double n,
 		BitSet bitSet
 	) {
 		Random random = new Random(l);
-		float q = 1.0F;
+		float[] fs = this.initWidthFactors(carvingContext, canyonCarverConfiguration, random);
+		float o = 0.0F;
+		float p = 0.0F;
 
-		for (int r = 0; r < 384; r++) {
-			if (r == 0 || random.nextInt(3) == 0) {
-				q = 1.0F + random.nextFloat() * random.nextFloat();
-			}
-
-			this.rs[r] = q * q;
-		}
-
-		float s = 0.0F;
-		float t = 0.0F;
-
-		for (int u = n; u < o; u++) {
-			double v = 1.5 + (double)(Mth.sin((float)u * (float) Math.PI / (float)o) * g);
-			double w = v * p;
-			v *= (double)random.nextFloat() * 0.25 + 0.75;
-			w *= (double)random.nextFloat() * 0.25 + 0.75;
-			float x = Mth.cos(m);
-			float y = Mth.sin(m);
-			d += (double)(Mth.cos(h) * x);
-			e += (double)y;
-			f += (double)(Mth.sin(h) * x);
-			m *= 0.7F;
-			m += t * 0.05F;
-			h += s * 0.05F;
-			t *= 0.8F;
-			s *= 0.5F;
-			t += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
-			s += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
+		for (int q = k; q < m; q++) {
+			double r = 1.5 + (double)(Mth.sin((float)q * (float) Math.PI / (float)m) * g);
+			double s = r * n;
+			r *= (double)canyonCarverConfiguration.getHorizontalRadiusFactor().sample(random);
+			s = this.updateVerticalRadius(canyonCarverConfiguration, random, s, (float)m, (float)q);
+			float t = Mth.cos(j);
+			float u = Mth.sin(j);
+			d += (double)(Mth.cos(h) * t);
+			e += (double)u;
+			f += (double)(Mth.sin(h) * t);
+			j *= 0.7F;
+			j += p * 0.05F;
+			h += o * 0.05F;
+			p *= 0.8F;
+			o *= 0.5F;
+			p += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
+			o += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
 			if (random.nextInt(4) != 0) {
-				if (!this.canReach(j, k, d, f, u, o, g)) {
+				if (!canReach(chunkAccess.getPos(), d, f, q, m, g)) {
 					return;
 				}
 
-				this.carveSphere(chunkAccess, function, l, i, j, k, d, e, f, v, w, bitSet);
+				this.carveEllipsoid(
+					carvingContext,
+					canyonCarverConfiguration,
+					chunkAccess,
+					function,
+					l,
+					i,
+					d,
+					e,
+					f,
+					r,
+					s,
+					bitSet,
+					(carvingContextx, dx, ex, fx, ix) -> this.shouldSkip(carvingContextx, fs, dx, ex, fx, ix)
+				);
 			}
 		}
 	}
 
-	@Override
-	protected boolean skip(double d, double e, double f, int i) {
-		return (d * d + f * f) * (double)this.rs[i - 1] + e * e / 6.0 >= 1.0;
+	private int getY(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
+		int i = canyonCarverConfiguration.getBottomInclusive().resolveY(carvingContext);
+		int j = canyonCarverConfiguration.getTopInclusive().resolveY(carvingContext);
+		if (i >= j) {
+			LOGGER.warn("Empty carver: {} [{}-{}]", this, i, j);
+			return i;
+		} else {
+			return Mth.randomBetweenInclusive(random, i, j);
+		}
+	}
+
+	private float[] initWidthFactors(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
+		int i = carvingContext.getGenDepth();
+		float[] fs = new float[i];
+		float f = 1.0F;
+
+		for (int j = 0; j < i; j++) {
+			if (j == 0 || random.nextInt(canyonCarverConfiguration.getWidthSmoothness()) == 0) {
+				f = 1.0F + random.nextFloat() * random.nextFloat();
+			}
+
+			fs[j] = f * f;
+		}
+
+		return fs;
+	}
+
+	private double updateVerticalRadius(CanyonCarverConfiguration canyonCarverConfiguration, Random random, double d, float f, float g) {
+		float h = 1.0F - Mth.abs(0.5F - g / f) * 2.0F;
+		float i = canyonCarverConfiguration.getVerticalRadiusDefaultFactor() + canyonCarverConfiguration.getVerticalRadiusCenterFactor() * h;
+		return (double)i * d * (double)Mth.randomBetween(random, 0.75F, 1.0F);
+	}
+
+	private boolean shouldSkip(CarvingContext carvingContext, float[] fs, double d, double e, double f, int i) {
+		int j = i - carvingContext.getMinGenY();
+		return (d * d + f * f) * (double)fs[j - 1] + e * e / 6.0 >= 1.0;
 	}
 }

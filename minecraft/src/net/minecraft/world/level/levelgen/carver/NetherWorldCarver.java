@@ -10,13 +10,12 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class NetherWorldCarver extends CaveWorldCarver {
-	public NetherWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
-		super(codec, 128);
+	public NetherWorldCarver(Codec<CarverConfiguration> codec) {
+		super(codec);
 		this.replaceableBlocks = ImmutableSet.of(
 			Blocks.STONE,
 			Blocks.GRANITE,
@@ -55,48 +54,35 @@ public class NetherWorldCarver extends CaveWorldCarver {
 	}
 
 	@Override
-	protected int getCaveY(Random random) {
-		return random.nextInt(this.genHeight);
+	protected int getCaveY(CarvingContext carvingContext, Random random) {
+		return random.nextInt(carvingContext.getGenDepth());
 	}
 
 	@Override
 	protected boolean carveBlock(
+		CarvingContext carvingContext,
+		CarverConfiguration carverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		BitSet bitSet,
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
-		BlockPos.MutableBlockPos mutableBlockPos3,
 		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		int n,
-		int o,
-		int p,
 		MutableBoolean mutableBoolean
 	) {
-		int q = n | p << 4 | o << 8;
-		if (bitSet.get(q)) {
-			return false;
-		} else {
-			bitSet.set(q);
-			mutableBlockPos.set(l, o, m);
-			if (this.canReplaceBlock(chunkAccess.getBlockState(mutableBlockPos))) {
-				BlockState blockState;
-				if (o <= 31) {
-					blockState = LAVA.createLegacyBlock();
-				} else {
-					blockState = CAVE_AIR;
-				}
-
-				chunkAccess.setBlockState(mutableBlockPos, blockState, false);
-				return true;
+		if (this.canReplaceBlock(chunkAccess.getBlockState(mutableBlockPos))) {
+			BlockState blockState;
+			if (mutableBlockPos.getY() <= carvingContext.getMinGenY() + 31) {
+				blockState = LAVA.createLegacyBlock();
 			} else {
-				return false;
+				blockState = CAVE_AIR;
 			}
+
+			chunkAccess.setBlockState(mutableBlockPos, blockState, false);
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

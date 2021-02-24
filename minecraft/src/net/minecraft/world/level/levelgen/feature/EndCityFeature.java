@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -34,14 +33,13 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		return getYPositionForFeature(i, j, chunkGenerator, levelHeightAccessor) >= 60;
+		return getYPositionForFeature(chunkPos, chunkGenerator, levelHeightAccessor) >= 60;
 	}
 
 	@Override
@@ -49,48 +47,47 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		return EndCityFeature.EndCityStart::new;
 	}
 
-	private static int getYPositionForFeature(int i, int j, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
-		Random random = new Random((long)(i + j * 10387313));
+	private static int getYPositionForFeature(ChunkPos chunkPos, ChunkGenerator chunkGenerator, LevelHeightAccessor levelHeightAccessor) {
+		Random random = new Random((long)(chunkPos.x + chunkPos.z * 10387313));
 		Rotation rotation = Rotation.getRandom(random);
-		int k = 5;
-		int l = 5;
+		int i = 5;
+		int j = 5;
 		if (rotation == Rotation.CLOCKWISE_90) {
-			k = -5;
+			i = -5;
 		} else if (rotation == Rotation.CLOCKWISE_180) {
-			k = -5;
-			l = -5;
+			i = -5;
+			j = -5;
 		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
-			l = -5;
+			j = -5;
 		}
 
-		int m = SectionPos.sectionToBlockCoord(i, 7);
-		int n = SectionPos.sectionToBlockCoord(j, 7);
-		int o = chunkGenerator.getFirstOccupiedHeight(m, n, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-		int p = chunkGenerator.getFirstOccupiedHeight(m, n + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-		int q = chunkGenerator.getFirstOccupiedHeight(m + k, n, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-		int r = chunkGenerator.getFirstOccupiedHeight(m + k, n + l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
-		return Math.min(Math.min(o, p), Math.min(q, r));
+		int k = chunkPos.getBlockX(7);
+		int l = chunkPos.getBlockZ(7);
+		int m = chunkGenerator.getFirstOccupiedHeight(k, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int n = chunkGenerator.getFirstOccupiedHeight(k, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int o = chunkGenerator.getFirstOccupiedHeight(k + i, l, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		int p = chunkGenerator.getFirstOccupiedHeight(k + i, l + j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor);
+		return Math.min(Math.min(m, n), Math.min(o, p));
 	}
 
 	public static class EndCityStart extends StructureStart<NoneFeatureConfiguration> {
-		public EndCityStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public EndCityStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
-			int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator, levelHeightAccessor);
-			if (k >= 60) {
-				BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i, 8), k, SectionPos.sectionToBlockCoord(j, 8));
+			int i = EndCityFeature.getYPositionForFeature(chunkPos, chunkGenerator, levelHeightAccessor);
+			if (i >= 60) {
+				BlockPos blockPos = chunkPos.getMiddleBlockPosition(i);
 				EndCityPieces.startHouseTower(structureManager, blockPos, rotation, this.pieces, this.random);
 				this.calculateBoundingBox();
 			}

@@ -40,7 +40,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741839;
+		return 1073741840;
 	}
 
 	static {

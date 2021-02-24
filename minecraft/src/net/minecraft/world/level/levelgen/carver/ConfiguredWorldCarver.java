@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
@@ -31,11 +32,13 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
 		return this.config;
 	}
 
-	public boolean isStartChunk(Random random, int i, int j) {
-		return this.worldCarver.isStartChunk(random, i, j, this.config);
+	public boolean isStartChunk(Random random) {
+		return this.worldCarver.isStartChunk(this.config, random);
 	}
 
-	public boolean carve(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, int j, int k, int l, int m, BitSet bitSet) {
-		return this.worldCarver.carve(chunkAccess, function, random, i, j, k, l, m, bitSet, this.config);
+	public boolean carve(
+		CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, ChunkPos chunkPos, BitSet bitSet
+	) {
+		return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, i, chunkPos, bitSet);
 	}
 }

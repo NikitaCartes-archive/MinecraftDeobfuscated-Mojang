@@ -82,7 +82,7 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Nullable
 	public LevelChunk replaceWithPacketData(
-		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet
+		int i, int j, ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet
 	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
@@ -92,11 +92,6 @@ public class ClientChunkCache extends ChunkSource {
 			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(k);
 			ChunkPos chunkPos = new ChunkPos(i, j);
 			if (!isValidChunk(levelChunk, i, j)) {
-				if (chunkBiomeContainer == null) {
-					LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", i, j);
-					return null;
-				}
-
 				levelChunk = new LevelChunk(this.level, chunkPos, chunkBiomeContainer);
 				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, bitSet);
 				this.storage.replace(k, levelChunk);

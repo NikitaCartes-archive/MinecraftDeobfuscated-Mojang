@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -10,11 +9,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.scores.Objective;
 
 public class ClientboundSetDisplayObjectivePacket implements Packet<ClientGamePacketListener> {
-	private int slot;
-	private String objectiveName;
-
-	public ClientboundSetDisplayObjectivePacket() {
-	}
+	private final int slot;
+	private final String objectiveName;
 
 	public ClientboundSetDisplayObjectivePacket(int i, @Nullable Objective objective) {
 		this.slot = i;
@@ -25,14 +21,13 @@ public class ClientboundSetDisplayObjectivePacket implements Packet<ClientGamePa
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetDisplayObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.slot = friendlyByteBuf.readByte();
 		this.objectiveName = friendlyByteBuf.readUtf(16);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.slot);
 		friendlyByteBuf.writeUtf(this.objectiveName);
 	}

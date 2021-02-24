@@ -1,7 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Sets;
-import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -16,25 +15,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> {
-	private int playerId;
-	private long seed;
-	private boolean hardcore;
-	private GameType gameType;
+	private final int playerId;
+	private final long seed;
+	private final boolean hardcore;
+	private final GameType gameType;
 	@Nullable
-	private GameType previousGameType;
-	private Set<ResourceKey<Level>> levels;
-	private RegistryAccess.RegistryHolder registryHolder;
-	private DimensionType dimensionType;
-	private ResourceKey<Level> dimension;
-	private int maxPlayers;
-	private int chunkRadius;
-	private boolean reducedDebugInfo;
-	private boolean showDeathScreen;
-	private boolean isDebug;
-	private boolean isFlat;
-
-	public ClientboundLoginPacket() {
-	}
+	private final GameType previousGameType;
+	private final Set<ResourceKey<Level>> levels;
+	private final RegistryAccess.RegistryHolder registryHolder;
+	private final DimensionType dimensionType;
+	private final ResourceKey<Level> dimension;
+	private final int maxPlayers;
+	private final int chunkRadius;
+	private final boolean reducedDebugInfo;
+	private final boolean showDeathScreen;
+	private final boolean isDebug;
+	private final boolean isFlat;
 
 	public ClientboundLoginPacket(
 		int i,
@@ -70,19 +66,14 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.isFlat = bl5;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.playerId = friendlyByteBuf.readInt();
 		this.hardcore = friendlyByteBuf.readBoolean();
 		this.gameType = GameType.byId(friendlyByteBuf.readByte());
 		this.previousGameType = GameType.byNullableId(friendlyByteBuf.readByte());
-		int i = friendlyByteBuf.readVarInt();
-		this.levels = Sets.<ResourceKey<Level>>newHashSet();
-
-		for (int j = 0; j < i; j++) {
-			this.levels.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
-		}
-
+		this.levels = friendlyByteBuf.readCollection(
+			Sets::newHashSetWithExpectedSize, friendlyByteBufx -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBufx.readResourceLocation())
+		);
 		this.registryHolder = friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC);
 		this.dimensionType = (DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get();
 		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
@@ -96,17 +87,12 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.playerId);
 		friendlyByteBuf.writeBoolean(this.hardcore);
 		friendlyByteBuf.writeByte(this.gameType.getId());
 		friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
-		friendlyByteBuf.writeVarInt(this.levels.size());
-
-		for (ResourceKey<Level> resourceKey : this.levels) {
-			friendlyByteBuf.writeResourceLocation(resourceKey.location());
-		}
-
+		friendlyByteBuf.writeCollection(this.levels, (friendlyByteBufx, resourceKey) -> friendlyByteBufx.writeResourceLocation(resourceKey.location()));
 		friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC, this.registryHolder);
 		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
@@ -143,6 +129,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		return this.gameType;
 	}
 
+	@Nullable
 	@Environment(EnvType.CLIENT)
 	public GameType getPreviousGameType() {
 		return this.previousGameType;

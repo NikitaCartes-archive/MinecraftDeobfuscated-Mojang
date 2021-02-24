@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,13 +9,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacketListener> {
-	private int id;
-	private int xa;
-	private int ya;
-	private int za;
-
-	public ClientboundSetEntityMotionPacket() {
-	}
+	private final int id;
+	private final int xa;
+	private final int ya;
+	private final int za;
 
 	public ClientboundSetEntityMotionPacket(Entity entity) {
 		this(entity.getId(), entity.getDeltaMovement());
@@ -33,8 +29,7 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		this.za = (int)(g * 8000.0);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetEntityMotionPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.xa = friendlyByteBuf.readShort();
 		this.ya = friendlyByteBuf.readShort();
@@ -42,7 +37,7 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeShort(this.xa);
 		friendlyByteBuf.writeShort(this.ya);

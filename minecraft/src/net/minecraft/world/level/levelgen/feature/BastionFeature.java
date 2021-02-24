@@ -19,10 +19,9 @@ public class BastionFeature extends JigsawFeature {
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		JigsawConfiguration jigsawConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {

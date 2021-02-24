@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -10,15 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 
 public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketListener> {
-	private BlockPos pos;
-	private ResourceLocation name;
-	private ResourceLocation target;
-	private ResourceLocation pool;
-	private String finalState;
-	private JigsawBlockEntity.JointType joint;
-
-	public ServerboundSetJigsawBlockPacket() {
-	}
+	private final BlockPos pos;
+	private final ResourceLocation name;
+	private final ResourceLocation target;
+	private final ResourceLocation pool;
+	private final String finalState;
+	private final JigsawBlockEntity.JointType joint;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundSetJigsawBlockPacket(
@@ -37,18 +33,17 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
 		this.joint = jointType;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundSetJigsawBlockPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.name = friendlyByteBuf.readResourceLocation();
 		this.target = friendlyByteBuf.readResourceLocation();
 		this.pool = friendlyByteBuf.readResourceLocation();
-		this.finalState = friendlyByteBuf.readUtf(32767);
-		this.joint = (JigsawBlockEntity.JointType)JigsawBlockEntity.JointType.byName(friendlyByteBuf.readUtf(32767)).orElse(JigsawBlockEntity.JointType.ALIGNED);
+		this.finalState = friendlyByteBuf.readUtf();
+		this.joint = (JigsawBlockEntity.JointType)JigsawBlockEntity.JointType.byName(friendlyByteBuf.readUtf()).orElse(JigsawBlockEntity.JointType.ALIGNED);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeResourceLocation(this.name);
 		friendlyByteBuf.writeResourceLocation(this.target);

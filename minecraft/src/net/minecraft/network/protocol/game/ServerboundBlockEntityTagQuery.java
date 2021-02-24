@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -8,11 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundBlockEntityTagQuery implements Packet<ServerGamePacketListener> {
-	private int transactionId;
-	private BlockPos pos;
-
-	public ServerboundBlockEntityTagQuery() {
-	}
+	private final int transactionId;
+	private final BlockPos pos;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundBlockEntityTagQuery(int i, BlockPos blockPos) {
@@ -20,14 +16,13 @@ public class ServerboundBlockEntityTagQuery implements Packet<ServerGamePacketLi
 		this.pos = blockPos;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundBlockEntityTagQuery(FriendlyByteBuf friendlyByteBuf) {
 		this.transactionId = friendlyByteBuf.readVarInt();
 		this.pos = friendlyByteBuf.readBlockPos();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.transactionId);
 		friendlyByteBuf.writeBlockPos(this.pos);
 	}

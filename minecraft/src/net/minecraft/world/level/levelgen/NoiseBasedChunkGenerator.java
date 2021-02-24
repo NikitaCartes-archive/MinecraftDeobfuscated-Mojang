@@ -114,7 +114,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			biomeSource, this.cellWidth, this.cellHeight, this.cellCountY, noiseSettings, blendedNoise, simplexNoise, perlinNoise, cavifier
 		);
 		this.aquifersEnabled = noiseGeneratorSettings.isAquifersEnabled();
-		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.GRIMSTONE.defaultBlockState());
+		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState());
 	}
 
 	@Override

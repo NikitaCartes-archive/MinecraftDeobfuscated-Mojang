@@ -4,7 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import java.io.IOException;
+import com.mojang.authlib.properties.PropertyMap;
+import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -16,14 +17,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 
 public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListener> {
-	private ClientboundPlayerInfoPacket.Action action;
-	private final List<ClientboundPlayerInfoPacket.PlayerUpdate> entries = Lists.<ClientboundPlayerInfoPacket.PlayerUpdate>newArrayList();
-
-	public ClientboundPlayerInfoPacket() {
-	}
+	private final ClientboundPlayerInfoPacket.Action action;
+	private final List<ClientboundPlayerInfoPacket.PlayerUpdate> entries;
 
 	public ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action action, ServerPlayer... serverPlayers) {
 		this.action = action;
+		this.entries = Lists.<ClientboundPlayerInfoPacket.PlayerUpdate>newArrayListWithCapacity(serverPlayers.length);
 
 		for (ServerPlayer serverPlayer : serverPlayers) {
 			this.entries
@@ -35,10 +34,11 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 		}
 	}
 
-	public ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action action, Iterable<ServerPlayer> iterable) {
+	public ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action action, Collection<ServerPlayer> collection) {
 		this.action = action;
+		this.entries = Lists.<ClientboundPlayerInfoPacket.PlayerUpdate>newArrayListWithCapacity(collection.size());
 
-		for (ServerPlayer serverPlayer : iterable) {
+		for (ServerPlayer serverPlayer : collection) {
 			this.entries
 				.add(
 					new ClientboundPlayerInfoPacket.PlayerUpdate(
@@ -48,113 +48,15 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundPlayerInfoPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.action = friendlyByteBuf.readEnum(ClientboundPlayerInfoPacket.Action.class);
-		int i = friendlyByteBuf.readVarInt();
-
-		for (int j = 0; j < i; j++) {
-			GameProfile gameProfile = null;
-			int k = 0;
-			GameType gameType = null;
-			Component component = null;
-			switch (this.action) {
-				case ADD_PLAYER:
-					gameProfile = new GameProfile(friendlyByteBuf.readUUID(), friendlyByteBuf.readUtf(16));
-					int l = friendlyByteBuf.readVarInt();
-					int m = 0;
-
-					for (; m < l; m++) {
-						String string = friendlyByteBuf.readUtf(32767);
-						String string2 = friendlyByteBuf.readUtf(32767);
-						if (friendlyByteBuf.readBoolean()) {
-							gameProfile.getProperties().put(string, new Property(string, string2, friendlyByteBuf.readUtf(32767)));
-						} else {
-							gameProfile.getProperties().put(string, new Property(string, string2));
-						}
-					}
-
-					gameType = GameType.byId(friendlyByteBuf.readVarInt());
-					k = friendlyByteBuf.readVarInt();
-					if (friendlyByteBuf.readBoolean()) {
-						component = friendlyByteBuf.readComponent();
-					}
-					break;
-				case UPDATE_GAME_MODE:
-					gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
-					gameType = GameType.byId(friendlyByteBuf.readVarInt());
-					break;
-				case UPDATE_LATENCY:
-					gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
-					k = friendlyByteBuf.readVarInt();
-					break;
-				case UPDATE_DISPLAY_NAME:
-					gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
-					if (friendlyByteBuf.readBoolean()) {
-						component = friendlyByteBuf.readComponent();
-					}
-					break;
-				case REMOVE_PLAYER:
-					gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
-			}
-
-			this.entries.add(new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, k, gameType, component));
-		}
+		this.entries = friendlyByteBuf.readList(this.action::read);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnum(this.action);
-		friendlyByteBuf.writeVarInt(this.entries.size());
-
-		for (ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate : this.entries) {
-			switch (this.action) {
-				case ADD_PLAYER:
-					friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-					friendlyByteBuf.writeUtf(playerUpdate.getProfile().getName());
-					friendlyByteBuf.writeVarInt(playerUpdate.getProfile().getProperties().size());
-
-					for (Property property : playerUpdate.getProfile().getProperties().values()) {
-						friendlyByteBuf.writeUtf(property.getName());
-						friendlyByteBuf.writeUtf(property.getValue());
-						if (property.hasSignature()) {
-							friendlyByteBuf.writeBoolean(true);
-							friendlyByteBuf.writeUtf(property.getSignature());
-						} else {
-							friendlyByteBuf.writeBoolean(false);
-						}
-					}
-
-					friendlyByteBuf.writeVarInt(playerUpdate.getGameMode().getId());
-					friendlyByteBuf.writeVarInt(playerUpdate.getLatency());
-					if (playerUpdate.getDisplayName() == null) {
-						friendlyByteBuf.writeBoolean(false);
-					} else {
-						friendlyByteBuf.writeBoolean(true);
-						friendlyByteBuf.writeComponent(playerUpdate.getDisplayName());
-					}
-					break;
-				case UPDATE_GAME_MODE:
-					friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-					friendlyByteBuf.writeVarInt(playerUpdate.getGameMode().getId());
-					break;
-				case UPDATE_LATENCY:
-					friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-					friendlyByteBuf.writeVarInt(playerUpdate.getLatency());
-					break;
-				case UPDATE_DISPLAY_NAME:
-					friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-					if (playerUpdate.getDisplayName() == null) {
-						friendlyByteBuf.writeBoolean(false);
-					} else {
-						friendlyByteBuf.writeBoolean(true);
-						friendlyByteBuf.writeComponent(playerUpdate.getDisplayName());
-					}
-					break;
-				case REMOVE_PLAYER:
-					friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-			}
-		}
+		friendlyByteBuf.writeCollection(this.entries, this.action::write);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -171,22 +73,133 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 		return this.action;
 	}
 
+	@Nullable
+	private static Component readDisplayName(FriendlyByteBuf friendlyByteBuf) {
+		return friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
+	}
+
+	private static void writeDisplayName(FriendlyByteBuf friendlyByteBuf, @Nullable Component component) {
+		if (component == null) {
+			friendlyByteBuf.writeBoolean(false);
+		} else {
+			friendlyByteBuf.writeBoolean(true);
+			friendlyByteBuf.writeComponent(component);
+		}
+	}
+
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("action", this.action).add("entries", this.entries).toString();
 	}
 
 	public static enum Action {
-		ADD_PLAYER,
-		UPDATE_GAME_MODE,
-		UPDATE_LATENCY,
-		UPDATE_DISPLAY_NAME,
-		REMOVE_PLAYER;
+		ADD_PLAYER {
+			@Override
+			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), friendlyByteBuf.readUtf(16));
+				PropertyMap propertyMap = gameProfile.getProperties();
+				friendlyByteBuf.readWithCount(friendlyByteBufx -> {
+					String string = friendlyByteBufx.readUtf();
+					String string2 = friendlyByteBufx.readUtf();
+					if (friendlyByteBufx.readBoolean()) {
+						String string3 = friendlyByteBufx.readUtf();
+						propertyMap.put(string, new Property(string, string2, string3));
+					} else {
+						propertyMap.put(string, new Property(string, string2));
+					}
+				});
+				GameType gameType = GameType.byId(friendlyByteBuf.readVarInt());
+				int i = friendlyByteBuf.readVarInt();
+				Component component = ClientboundPlayerInfoPacket.readDisplayName(friendlyByteBuf);
+				return new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, i, gameType, component);
+			}
+
+			@Override
+			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
+				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
+				friendlyByteBuf.writeUtf(playerUpdate.getProfile().getName());
+				friendlyByteBuf.writeCollection(playerUpdate.getProfile().getProperties().values(), (friendlyByteBufx, property) -> {
+					friendlyByteBufx.writeUtf(property.getName());
+					friendlyByteBufx.writeUtf(property.getValue());
+					if (property.hasSignature()) {
+						friendlyByteBufx.writeBoolean(true);
+						friendlyByteBufx.writeUtf(property.getSignature());
+					} else {
+						friendlyByteBufx.writeBoolean(false);
+					}
+				});
+				friendlyByteBuf.writeVarInt(playerUpdate.getGameMode().getId());
+				friendlyByteBuf.writeVarInt(playerUpdate.getLatency());
+				ClientboundPlayerInfoPacket.writeDisplayName(friendlyByteBuf, playerUpdate.getDisplayName());
+			}
+		},
+		UPDATE_GAME_MODE {
+			@Override
+			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
+				GameType gameType = GameType.byId(friendlyByteBuf.readVarInt());
+				return new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, 0, gameType, null);
+			}
+
+			@Override
+			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
+				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
+				friendlyByteBuf.writeVarInt(playerUpdate.getGameMode().getId());
+			}
+		},
+		UPDATE_LATENCY {
+			@Override
+			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
+				int i = friendlyByteBuf.readVarInt();
+				return new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, i, null, null);
+			}
+
+			@Override
+			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
+				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
+				friendlyByteBuf.writeVarInt(playerUpdate.getLatency());
+			}
+		},
+		UPDATE_DISPLAY_NAME {
+			@Override
+			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
+				Component component = ClientboundPlayerInfoPacket.readDisplayName(friendlyByteBuf);
+				return new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, 0, null, component);
+			}
+
+			@Override
+			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
+				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
+				ClientboundPlayerInfoPacket.writeDisplayName(friendlyByteBuf, playerUpdate.getDisplayName());
+			}
+		},
+		REMOVE_PLAYER {
+			@Override
+			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), null);
+				return new ClientboundPlayerInfoPacket.PlayerUpdate(gameProfile, 0, null, null);
+			}
+
+			@Override
+			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
+				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
+			}
+		};
+
+		private Action() {
+		}
+
+		protected abstract ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf);
+
+		protected abstract void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate);
 	}
 
-	public class PlayerUpdate {
+	public static class PlayerUpdate {
 		private final int latency;
 		private final GameType gameMode;
 		private final GameProfile profile;
+		@Nullable
 		private final Component displayName;
 
 		public PlayerUpdate(GameProfile gameProfile, int i, @Nullable GameType gameType, @Nullable Component component) {

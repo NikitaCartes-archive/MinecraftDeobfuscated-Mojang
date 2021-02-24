@@ -47,7 +47,7 @@ public class Cavifier {
 		double g = this.getSpaghetti3d(i, j, k);
 		if (bl) {
 			double h = d / 128.0;
-			double l = Mth.clamp(h + 0.35, -1.0, 1.0);
+			double l = Mth.clamp(h + 0.25, -1.0, 1.0);
 			double m = this.getLayerizedCaverns(i, j, k);
 			double n = this.getSpaghetti2d(i, j, k);
 			double o = l + m;
@@ -83,8 +83,8 @@ public class Cavifier {
 		double d = this.spaghetti3dRarityModulator.getValue((double)(i * 2), (double)j, (double)(k * 2));
 		double e = Cavifier.QuantizedSpaghettiRarity.getSpaghettiRarity3D(d);
 		double f = 0.065;
-		double g = 0.085;
-		double h = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti3dThicknessModulator, (double)i, (double)j, (double)k, 0.065, 0.085);
+		double g = 0.088;
+		double h = NoiseUtils.sampleNoiseAndMapToRange(this.spaghetti3dThicknessModulator, (double)i, (double)j, (double)k, 0.065, 0.088);
 		double l = sampleWithRarity(this.spaghetti3dNoiseSource1, (double)i, (double)j, (double)k, e);
 		double m = Math.abs(e * l) - h;
 		double n = sampleWithRarity(this.spaghetti3dNoiseSource2, (double)i, (double)j, (double)k, e);
@@ -141,7 +141,7 @@ public class Cavifier {
 			} else if (d < 0.0) {
 				return 1.0;
 			} else {
-				return d < 0.5 ? 2.0 : 3.0;
+				return d < 0.5 ? 1.5 : 2.0;
 			}
 		}
 	}

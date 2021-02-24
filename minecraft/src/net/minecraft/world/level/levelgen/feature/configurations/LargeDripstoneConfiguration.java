@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.UniformFloat;
+import net.minecraft.util.FloatProvider;
 import net.minecraft.util.UniformInt;
 
 public class LargeDripstoneConfiguration implements FeatureConfiguration {
@@ -13,17 +13,13 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 						.orElse(30)
 						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.floorToCeilingSearchRange),
 					UniformInt.codec(1, 30, 30).fieldOf("column_radius").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.columnRadius),
-					UniformFloat.codec(0.0F, 10.0F, 10.0F).fieldOf("height_scale").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.heightScale),
+					FloatProvider.codec(0.0F, 20.0F).fieldOf("height_scale").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.heightScale),
 					Codec.floatRange(0.1F, 1.0F)
 						.fieldOf("max_column_radius_to_cave_height_ratio")
 						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.maxColumnRadiusToCaveHeightRatio),
-					UniformFloat.codec(0.1F, 5.0F, 5.0F)
-						.fieldOf("stalactite_bluntness")
-						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalactiteBluntness),
-					UniformFloat.codec(0.1F, 5.0F, 5.0F)
-						.fieldOf("stalagmite_bluntness")
-						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalagmiteBluntness),
-					UniformFloat.codec(0.0F, 1.0F, 1.0F).fieldOf("wind_speed").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.windSpeed),
+					FloatProvider.codec(0.1F, 10.0F).fieldOf("stalactite_bluntness").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalactiteBluntness),
+					FloatProvider.codec(0.1F, 10.0F).fieldOf("stalagmite_bluntness").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalagmiteBluntness),
+					FloatProvider.codec(0.0F, 2.0F).fieldOf("wind_speed").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.windSpeed),
 					Codec.intRange(0, 100).fieldOf("min_radius_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minRadiusForWind),
 					Codec.floatRange(0.0F, 5.0F).fieldOf("min_bluntness_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minBluntnessForWind)
 				)
@@ -31,32 +27,32 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 	);
 	public final int floorToCeilingSearchRange;
 	public final UniformInt columnRadius;
-	public final UniformFloat heightScale;
+	public final FloatProvider heightScale;
 	public final float maxColumnRadiusToCaveHeightRatio;
-	public final UniformFloat stalactiteBluntness;
-	public final UniformFloat stalagmiteBluntness;
-	public final UniformFloat windSpeed;
+	public final FloatProvider stalactiteBluntness;
+	public final FloatProvider stalagmiteBluntness;
+	public final FloatProvider windSpeed;
 	public final int minRadiusForWind;
 	public final float minBluntnessForWind;
 
 	public LargeDripstoneConfiguration(
 		int i,
 		UniformInt uniformInt,
-		UniformFloat uniformFloat,
+		FloatProvider floatProvider,
 		float f,
-		UniformFloat uniformFloat2,
-		UniformFloat uniformFloat3,
-		UniformFloat uniformFloat4,
+		FloatProvider floatProvider2,
+		FloatProvider floatProvider3,
+		FloatProvider floatProvider4,
 		int j,
 		float g
 	) {
 		this.floorToCeilingSearchRange = i;
 		this.columnRadius = uniformInt;
-		this.heightScale = uniformFloat;
+		this.heightScale = floatProvider;
 		this.maxColumnRadiusToCaveHeightRatio = f;
-		this.stalactiteBluntness = uniformFloat2;
-		this.stalagmiteBluntness = uniformFloat3;
-		this.windSpeed = uniformFloat4;
+		this.stalactiteBluntness = floatProvider2;
+		this.stalagmiteBluntness = floatProvider3;
+		this.windSpeed = floatProvider4;
 		this.minRadiusForWind = j;
 		this.minBluntnessForWind = g;
 	}

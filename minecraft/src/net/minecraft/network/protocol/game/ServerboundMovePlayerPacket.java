@@ -1,41 +1,31 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
-public class ServerboundMovePlayerPacket implements Packet<ServerGamePacketListener> {
-	protected double x;
-	protected double y;
-	protected double z;
-	protected float yRot;
-	protected float xRot;
-	protected boolean onGround;
-	protected boolean hasPos;
-	protected boolean hasRot;
+public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePacketListener> {
+	protected final double x;
+	protected final double y;
+	protected final double z;
+	protected final float yRot;
+	protected final float xRot;
+	protected final boolean onGround;
+	protected final boolean hasPos;
+	protected final boolean hasRot;
 
-	public ServerboundMovePlayerPacket() {
-	}
-
-	@Environment(EnvType.CLIENT)
-	public ServerboundMovePlayerPacket(boolean bl) {
+	protected ServerboundMovePlayerPacket(double d, double e, double f, float g, float h, boolean bl, boolean bl2, boolean bl3) {
+		this.x = d;
+		this.y = e;
+		this.z = f;
+		this.yRot = g;
+		this.xRot = h;
 		this.onGround = bl;
+		this.hasPos = bl2;
+		this.hasRot = bl3;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
 		serverGamePacketListener.handleMovePlayer(this);
-	}
-
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		this.onGround = friendlyByteBuf.readUnsignedByte() != 0;
-	}
-
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 	}
 
 	public double getX(double d) {
@@ -63,100 +53,86 @@ public class ServerboundMovePlayerPacket implements Packet<ServerGamePacketListe
 	}
 
 	public static class Pos extends ServerboundMovePlayerPacket {
-		public Pos() {
-			this.hasPos = true;
-		}
-
-		@Environment(EnvType.CLIENT)
 		public Pos(double d, double e, double f, boolean bl) {
-			this.x = d;
-			this.y = e;
-			this.z = f;
-			this.onGround = bl;
-			this.hasPos = true;
+			super(d, e, f, 0.0F, 0.0F, bl, true, false);
+		}
+
+		public static ServerboundMovePlayerPacket.Pos read(FriendlyByteBuf friendlyByteBuf) {
+			double d = friendlyByteBuf.readDouble();
+			double e = friendlyByteBuf.readDouble();
+			double f = friendlyByteBuf.readDouble();
+			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
+			return new ServerboundMovePlayerPacket.Pos(d, e, f, bl);
 		}
 
 		@Override
-		public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-			this.x = friendlyByteBuf.readDouble();
-			this.y = friendlyByteBuf.readDouble();
-			this.z = friendlyByteBuf.readDouble();
-			super.read(friendlyByteBuf);
-		}
-
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+		public void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeDouble(this.x);
 			friendlyByteBuf.writeDouble(this.y);
 			friendlyByteBuf.writeDouble(this.z);
-			super.write(friendlyByteBuf);
+			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
 	}
 
 	public static class PosRot extends ServerboundMovePlayerPacket {
-		public PosRot() {
-			this.hasPos = true;
-			this.hasRot = true;
-		}
-
-		@Environment(EnvType.CLIENT)
 		public PosRot(double d, double e, double f, float g, float h, boolean bl) {
-			this.x = d;
-			this.y = e;
-			this.z = f;
-			this.yRot = g;
-			this.xRot = h;
-			this.onGround = bl;
-			this.hasRot = true;
-			this.hasPos = true;
+			super(d, e, f, g, h, bl, true, true);
+		}
+
+		public static ServerboundMovePlayerPacket.PosRot read(FriendlyByteBuf friendlyByteBuf) {
+			double d = friendlyByteBuf.readDouble();
+			double e = friendlyByteBuf.readDouble();
+			double f = friendlyByteBuf.readDouble();
+			float g = friendlyByteBuf.readFloat();
+			float h = friendlyByteBuf.readFloat();
+			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
+			return new ServerboundMovePlayerPacket.PosRot(d, e, f, g, h, bl);
 		}
 
 		@Override
-		public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-			this.x = friendlyByteBuf.readDouble();
-			this.y = friendlyByteBuf.readDouble();
-			this.z = friendlyByteBuf.readDouble();
-			this.yRot = friendlyByteBuf.readFloat();
-			this.xRot = friendlyByteBuf.readFloat();
-			super.read(friendlyByteBuf);
-		}
-
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+		public void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeDouble(this.x);
 			friendlyByteBuf.writeDouble(this.y);
 			friendlyByteBuf.writeDouble(this.z);
 			friendlyByteBuf.writeFloat(this.yRot);
 			friendlyByteBuf.writeFloat(this.xRot);
-			super.write(friendlyByteBuf);
+			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
 	}
 
 	public static class Rot extends ServerboundMovePlayerPacket {
-		public Rot() {
-			this.hasRot = true;
-		}
-
-		@Environment(EnvType.CLIENT)
 		public Rot(float f, float g, boolean bl) {
-			this.yRot = f;
-			this.xRot = g;
-			this.onGround = bl;
-			this.hasRot = true;
+			super(0.0, 0.0, 0.0, f, g, bl, false, true);
+		}
+
+		public static ServerboundMovePlayerPacket.Rot read(FriendlyByteBuf friendlyByteBuf) {
+			float f = friendlyByteBuf.readFloat();
+			float g = friendlyByteBuf.readFloat();
+			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
+			return new ServerboundMovePlayerPacket.Rot(f, g, bl);
 		}
 
 		@Override
-		public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-			this.yRot = friendlyByteBuf.readFloat();
-			this.xRot = friendlyByteBuf.readFloat();
-			super.read(friendlyByteBuf);
-		}
-
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+		public void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeFloat(this.yRot);
 			friendlyByteBuf.writeFloat(this.xRot);
-			super.write(friendlyByteBuf);
+			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
+		}
+	}
+
+	public static class StatusOnly extends ServerboundMovePlayerPacket {
+		public StatusOnly(boolean bl) {
+			super(0.0, 0.0, 0.0, 0.0F, 0.0F, bl, false, false);
+		}
+
+		public static ServerboundMovePlayerPacket.StatusOnly read(FriendlyByteBuf friendlyByteBuf) {
+			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
+			return new ServerboundMovePlayerPacket.StatusOnly(bl);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
 	}
 }

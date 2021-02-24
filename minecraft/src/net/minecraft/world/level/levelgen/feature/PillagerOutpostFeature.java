@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -32,29 +31,31 @@ public class PillagerOutpostFeature extends JigsawFeature {
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		JigsawConfiguration jigsawConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		int k = SectionPos.blockToSectionCoord(i);
-		int m = SectionPos.blockToSectionCoord(j);
-		worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);
+		int i = chunkPos.x >> 4;
+		int j = chunkPos.z >> 4;
+		worldgenRandom.setSeed((long)(i ^ j << 4) ^ l);
 		worldgenRandom.nextInt();
-		return worldgenRandom.nextInt(5) != 0 ? false : !this.isNearVillage(chunkGenerator, l, worldgenRandom, i, j);
+		return worldgenRandom.nextInt(5) != 0 ? false : !this.isNearVillage(chunkGenerator, l, worldgenRandom, chunkPos);
 	}
 
-	private boolean isNearVillage(ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j) {
+	private boolean isNearVillage(ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos) {
 		StructureFeatureConfiguration structureFeatureConfiguration = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
 		if (structureFeatureConfiguration == null) {
 			return false;
 		} else {
+			int i = chunkPos.x;
+			int j = chunkPos.z;
+
 			for (int k = i - 10; k <= i + 10; k++) {
 				for (int m = j - 10; m <= j + 10; m++) {
-					ChunkPos chunkPos = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, k, m);
-					if (k == chunkPos.x && m == chunkPos.z) {
+					ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, k, m);
+					if (k == chunkPos2.x && m == chunkPos2.z) {
 						return true;
 					}
 				}

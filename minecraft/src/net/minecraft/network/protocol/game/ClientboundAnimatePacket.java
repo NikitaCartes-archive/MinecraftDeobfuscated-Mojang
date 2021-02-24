@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,25 +7,21 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
 
 public class ClientboundAnimatePacket implements Packet<ClientGamePacketListener> {
-	private int id;
-	private int action;
-
-	public ClientboundAnimatePacket() {
-	}
+	private final int id;
+	private final int action;
 
 	public ClientboundAnimatePacket(Entity entity, int i) {
 		this.id = entity.getId();
 		this.action = i;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundAnimatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.action = friendlyByteBuf.readUnsignedByte();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeByte(this.action);
 	}

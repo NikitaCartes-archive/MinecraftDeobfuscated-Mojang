@@ -1,31 +1,26 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundSetChunkCacheCenterPacket implements Packet<ClientGamePacketListener> {
-	private int x;
-	private int z;
-
-	public ClientboundSetChunkCacheCenterPacket() {
-	}
+	private final int x;
+	private final int z;
 
 	public ClientboundSetChunkCacheCenterPacket(int i, int j) {
 		this.x = i;
 		this.z = j;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetChunkCacheCenterPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.x = friendlyByteBuf.readVarInt();
 		this.z = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.x);
 		friendlyByteBuf.writeVarInt(this.z);
 	}

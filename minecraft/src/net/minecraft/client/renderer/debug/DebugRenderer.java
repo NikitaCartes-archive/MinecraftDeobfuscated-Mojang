@@ -33,7 +33,6 @@ public class DebugRenderer {
 	public final DebugRenderer.SimpleDebugRenderer heightMapRenderer;
 	public final DebugRenderer.SimpleDebugRenderer collisionBoxRenderer;
 	public final DebugRenderer.SimpleDebugRenderer neighborsUpdateRenderer;
-	public final CaveDebugRenderer caveRenderer;
 	public final StructureRenderer structureRenderer;
 	public final DebugRenderer.SimpleDebugRenderer lightDebugRenderer;
 	public final DebugRenderer.SimpleDebugRenderer worldGenAttemptRenderer;
@@ -54,7 +53,6 @@ public class DebugRenderer {
 		this.heightMapRenderer = new HeightMapRenderer(minecraft);
 		this.collisionBoxRenderer = new CollisionBoxRenderer(minecraft);
 		this.neighborsUpdateRenderer = new NeighborsUpdateRenderer(minecraft);
-		this.caveRenderer = new CaveDebugRenderer();
 		this.structureRenderer = new StructureRenderer(minecraft);
 		this.lightDebugRenderer = new LightDebugRenderer(minecraft);
 		this.worldGenAttemptRenderer = new WorldGenAttemptRenderer();
@@ -76,7 +74,6 @@ public class DebugRenderer {
 		this.heightMapRenderer.clear();
 		this.collisionBoxRenderer.clear();
 		this.neighborsUpdateRenderer.clear();
-		this.caveRenderer.clear();
 		this.structureRenderer.clear();
 		this.lightDebugRenderer.clear();
 		this.worldGenAttemptRenderer.clear();

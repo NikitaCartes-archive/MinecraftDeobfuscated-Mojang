@@ -1,29 +1,24 @@
 package net.minecraft.network.protocol.status;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundPingRequestPacket implements Packet<ServerStatusPacketListener> {
-	private long time;
-
-	public ServerboundPingRequestPacket() {
-	}
+	private final long time;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundPingRequestPacket(long l) {
 		this.time = l;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundPingRequestPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.time = friendlyByteBuf.readLong();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeLong(this.time);
 	}
 

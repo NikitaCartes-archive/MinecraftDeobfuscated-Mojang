@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -10,14 +9,11 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerScoreboard;
 
 public class ClientboundSetScorePacket implements Packet<ClientGamePacketListener> {
-	private String owner = "";
+	private final String owner;
 	@Nullable
-	private String objectiveName;
-	private int score;
-	private ServerScoreboard.Method method;
-
-	public ClientboundSetScorePacket() {
-	}
+	private final String objectiveName;
+	private final int score;
+	private final ServerScoreboard.Method method;
 
 	public ClientboundSetScorePacket(ServerScoreboard.Method method, @Nullable String string, String string2, int i) {
 		if (method != ServerScoreboard.Method.REMOVE && string == null) {
@@ -30,19 +26,20 @@ public class ClientboundSetScorePacket implements Packet<ClientGamePacketListene
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetScorePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.owner = friendlyByteBuf.readUtf(40);
 		this.method = friendlyByteBuf.readEnum(ServerScoreboard.Method.class);
 		String string = friendlyByteBuf.readUtf(16);
 		this.objectiveName = Objects.equals(string, "") ? null : string;
 		if (this.method != ServerScoreboard.Method.REMOVE) {
 			this.score = friendlyByteBuf.readVarInt();
+		} else {
+			this.score = 0;
 		}
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.owner);
 		friendlyByteBuf.writeEnum(this.method);
 		friendlyByteBuf.writeUtf(this.objectiveName == null ? "" : this.objectiveName);

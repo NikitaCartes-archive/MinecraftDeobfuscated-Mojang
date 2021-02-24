@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -8,11 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundSignUpdatePacket implements Packet<ServerGamePacketListener> {
-	private BlockPos pos;
-	private String[] lines;
-
-	public ServerboundSignUpdatePacket() {
-	}
+	private final BlockPos pos;
+	private final String[] lines;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundSignUpdatePacket(BlockPos blockPos, String string, String string2, String string3, String string4) {
@@ -20,8 +16,7 @@ public class ServerboundSignUpdatePacket implements Packet<ServerGamePacketListe
 		this.lines = new String[]{string, string2, string3, string4};
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundSignUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.lines = new String[4];
 
@@ -31,7 +26,7 @@ public class ServerboundSignUpdatePacket implements Packet<ServerGamePacketListe
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 
 		for (int i = 0; i < 4; i++) {

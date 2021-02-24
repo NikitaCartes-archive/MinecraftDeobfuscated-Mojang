@@ -298,10 +298,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.BLACKSTONE_STAIRS,
 				Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS,
 				Blocks.POLISHED_BLACKSTONE_STAIRS,
-				Blocks.GRIMSTONE_STAIRS,
-				Blocks.POLISHED_GRIMSTONE_STAIRS,
-				Blocks.GRIMSTONE_TILE_STAIRS,
-				Blocks.GRIMSTONE_BRICK_STAIRS
+				Blocks.COBBLED_DEEPSLATE_STAIRS,
+				Blocks.POLISHED_DEEPSLATE_STAIRS,
+				Blocks.DEEPSLATE_TILE_STAIRS,
+				Blocks.DEEPSLATE_BRICK_STAIRS
 			);
 		this.tag(BlockTags.SLABS)
 			.addTag(BlockTags.WOODEN_SLABS)
@@ -338,10 +338,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.BLACKSTONE_SLAB,
 				Blocks.POLISHED_BLACKSTONE_BRICK_SLAB,
 				Blocks.POLISHED_BLACKSTONE_SLAB,
-				Blocks.GRIMSTONE_SLAB,
-				Blocks.POLISHED_GRIMSTONE_SLAB,
-				Blocks.GRIMSTONE_TILE_SLAB,
-				Blocks.GRIMSTONE_BRICK_SLAB
+				Blocks.COBBLED_DEEPSLATE_SLAB,
+				Blocks.POLISHED_DEEPSLATE_SLAB,
+				Blocks.DEEPSLATE_TILE_SLAB,
+				Blocks.DEEPSLATE_BRICK_SLAB
 			);
 		this.tag(BlockTags.WALLS)
 			.add(
@@ -362,10 +362,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.BLACKSTONE_WALL,
 				Blocks.POLISHED_BLACKSTONE_BRICK_WALL,
 				Blocks.POLISHED_BLACKSTONE_WALL,
-				Blocks.GRIMSTONE_WALL,
-				Blocks.POLISHED_GRIMSTONE_WALL,
-				Blocks.GRIMSTONE_TILE_WALL,
-				Blocks.GRIMSTONE_BRICK_WALL
+				Blocks.COBBLED_DEEPSLATE_WALL,
+				Blocks.POLISHED_DEEPSLATE_WALL,
+				Blocks.DEEPSLATE_TILE_WALL,
+				Blocks.DEEPSLATE_BRICK_WALL
 			);
 		this.tag(BlockTags.CORAL_PLANTS).add(Blocks.TUBE_CORAL, Blocks.BRAIN_CORAL, Blocks.BUBBLE_CORAL, Blocks.FIRE_CORAL, Blocks.HORN_CORAL);
 		this.tag(BlockTags.CORALS)
@@ -548,7 +548,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.SOUL_WALL_TORCH)
 			.add(Blocks.SOUL_CAMPFIRE);
 		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS).add(Blocks.NETHER_PORTAL).add(Blocks.RESPAWN_ANCHOR);
-		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE);
+		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE);
+		this.tag(BlockTags.IRON_ORES).add(Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE);
+		this.tag(BlockTags.DIAMOND_ORES).add(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE);
+		this.tag(BlockTags.REDSTONE_ORES).add(Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE);
+		this.tag(BlockTags.LAPIS_ORES).add(Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE);
 		this.tag(BlockTags.SOUL_FIRE_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.NON_FLAMMABLE_WOOD)
 			.add(
@@ -606,7 +610,15 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.NETHERRACK, Blocks.MAGMA_BLOCK);
 		this.tag(BlockTags.INFINIBURN_NETHER).addTag(BlockTags.INFINIBURN_OVERWORLD);
 		this.tag(BlockTags.INFINIBURN_END).addTag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.BEDROCK);
-		this.tag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.STONE).add(Blocks.GRANITE).add(Blocks.DIORITE).add(Blocks.ANDESITE).add(Blocks.GRIMSTONE);
+		this.tag(BlockTags.STONE_ORE_REPLACEABLES).add(Blocks.STONE).add(Blocks.GRANITE).add(Blocks.DIORITE).add(Blocks.ANDESITE).add(Blocks.TUFF);
+		this.tag(BlockTags.DEEPSLATE_ORE_REPLACEABLES).add(Blocks.DEEPSLATE);
+		this.tag(BlockTags.BASE_STONE_OVERWORLD)
+			.add(Blocks.STONE)
+			.add(Blocks.GRANITE)
+			.add(Blocks.DIORITE)
+			.add(Blocks.ANDESITE)
+			.add(Blocks.TUFF)
+			.add(Blocks.DEEPSLATE);
 		this.tag(BlockTags.BASE_STONE_NETHER).add(Blocks.NETHERRACK).add(Blocks.BASALT).add(Blocks.BLACKSTONE);
 		this.tag(BlockTags.CANDLES)
 			.add(

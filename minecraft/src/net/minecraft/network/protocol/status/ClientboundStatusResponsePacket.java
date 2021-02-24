@@ -2,7 +2,6 @@ package net.minecraft.network.protocol.status;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,22 +20,18 @@ public class ClientboundStatusResponsePacket implements Packet<ClientStatusPacke
 		.registerTypeHierarchyAdapter(Style.class, new Style.Serializer())
 		.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory())
 		.create();
-	private ServerStatus status;
-
-	public ClientboundStatusResponsePacket() {
-	}
+	private final ServerStatus status;
 
 	public ClientboundStatusResponsePacket(ServerStatus serverStatus) {
 		this.status = serverStatus;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundStatusResponsePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.status = GsonHelper.fromJson(GSON, friendlyByteBuf.readUtf(32767), ServerStatus.class);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(GSON.toJson(this.status));
 	}
 

@@ -1,6 +1,6 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,68 +12,59 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class ServerboundInteractPacket implements Packet<ServerGamePacketListener> {
-	private int entityId;
-	private ServerboundInteractPacket.Action action;
-	private Vec3 location;
-	private InteractionHand hand;
-	private boolean usingSecondaryAction;
+	private final int entityId;
+	private final ServerboundInteractPacket.Action action;
+	private final boolean usingSecondaryAction;
+	private static final ServerboundInteractPacket.Action ATTACK_ACTION = new ServerboundInteractPacket.Action() {
+		@Override
+		public ServerboundInteractPacket.ActionType getType() {
+			return ServerboundInteractPacket.ActionType.ATTACK;
+		}
 
-	public ServerboundInteractPacket() {
-	}
+		@Override
+		public void dispatch(ServerboundInteractPacket.Handler handler) {
+			handler.onAttack();
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+		}
+	};
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundInteractPacket(Entity entity, boolean bl) {
-		this.entityId = entity.getId();
-		this.action = ServerboundInteractPacket.Action.ATTACK;
+	private ServerboundInteractPacket(int i, boolean bl, ServerboundInteractPacket.Action action) {
+		this.entityId = i;
+		this.action = action;
 		this.usingSecondaryAction = bl;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, boolean bl) {
-		this.entityId = entity.getId();
-		this.action = ServerboundInteractPacket.Action.INTERACT;
-		this.hand = interactionHand;
-		this.usingSecondaryAction = bl;
+	public static ServerboundInteractPacket createAttackPacket(Entity entity, boolean bl) {
+		return new ServerboundInteractPacket(entity.getId(), bl, ATTACK_ACTION);
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3, boolean bl) {
-		this.entityId = entity.getId();
-		this.action = ServerboundInteractPacket.Action.INTERACT_AT;
-		this.hand = interactionHand;
-		this.location = vec3;
-		this.usingSecondaryAction = bl;
+	public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand) {
+		return new ServerboundInteractPacket(entity.getId(), bl, new ServerboundInteractPacket.InteractionAction(interactionHand));
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	@Environment(EnvType.CLIENT)
+	public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand, Vec3 vec3) {
+		return new ServerboundInteractPacket(entity.getId(), bl, new ServerboundInteractPacket.InteractionAtLocationAction(interactionHand, vec3));
+	}
+
+	public ServerboundInteractPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
-		this.action = friendlyByteBuf.readEnum(ServerboundInteractPacket.Action.class);
-		if (this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
-			this.location = new Vec3((double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat());
-		}
-
-		if (this.action == ServerboundInteractPacket.Action.INTERACT || this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
-			this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
-		}
-
+		ServerboundInteractPacket.ActionType actionType = friendlyByteBuf.readEnum(ServerboundInteractPacket.ActionType.class);
+		this.action = (ServerboundInteractPacket.Action)actionType.reader.apply(friendlyByteBuf);
 		this.usingSecondaryAction = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeEnum(this.action);
-		if (this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
-			friendlyByteBuf.writeFloat((float)this.location.x);
-			friendlyByteBuf.writeFloat((float)this.location.y);
-			friendlyByteBuf.writeFloat((float)this.location.z);
-		}
-
-		if (this.action == ServerboundInteractPacket.Action.INTERACT || this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
-			friendlyByteBuf.writeEnum(this.hand);
-		}
-
+		friendlyByteBuf.writeEnum(this.action.getType());
+		this.action.write(friendlyByteBuf);
 		friendlyByteBuf.writeBoolean(this.usingSecondaryAction);
 	}
 
@@ -86,26 +77,101 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		return serverLevel.getEntityOrPart(this.entityId);
 	}
 
-	public ServerboundInteractPacket.Action getAction() {
-		return this.action;
-	}
-
-	@Nullable
-	public InteractionHand getHand() {
-		return this.hand;
-	}
-
-	public Vec3 getLocation() {
-		return this.location;
-	}
-
 	public boolean isUsingSecondaryAction() {
 		return this.usingSecondaryAction;
 	}
 
-	public static enum Action {
-		INTERACT,
-		ATTACK,
-		INTERACT_AT;
+	public void dispatch(ServerboundInteractPacket.Handler handler) {
+		this.action.dispatch(handler);
+	}
+
+	interface Action {
+		ServerboundInteractPacket.ActionType getType();
+
+		void dispatch(ServerboundInteractPacket.Handler handler);
+
+		void write(FriendlyByteBuf friendlyByteBuf);
+	}
+
+	static enum ActionType {
+		INTERACT(friendlyByteBuf -> new ServerboundInteractPacket.InteractionAction(friendlyByteBuf)),
+		ATTACK(friendlyByteBuf -> ServerboundInteractPacket.ATTACK_ACTION),
+		INTERACT_AT(friendlyByteBuf -> new ServerboundInteractPacket.InteractionAtLocationAction(friendlyByteBuf));
+
+		private final Function<FriendlyByteBuf, ServerboundInteractPacket.Action> reader;
+
+		private ActionType(Function<FriendlyByteBuf, ServerboundInteractPacket.Action> function) {
+			this.reader = function;
+		}
+	}
+
+	public interface Handler {
+		void onInteraction(InteractionHand interactionHand);
+
+		void onInteraction(InteractionHand interactionHand, Vec3 vec3);
+
+		void onAttack();
+	}
+
+	static class InteractionAction implements ServerboundInteractPacket.Action {
+		private final InteractionHand hand;
+
+		@Environment(EnvType.CLIENT)
+		private InteractionAction(InteractionHand interactionHand) {
+			this.hand = interactionHand;
+		}
+
+		private InteractionAction(FriendlyByteBuf friendlyByteBuf) {
+			this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+		}
+
+		@Override
+		public ServerboundInteractPacket.ActionType getType() {
+			return ServerboundInteractPacket.ActionType.INTERACT;
+		}
+
+		@Override
+		public void dispatch(ServerboundInteractPacket.Handler handler) {
+			handler.onInteraction(this.hand);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeEnum(this.hand);
+		}
+	}
+
+	static class InteractionAtLocationAction implements ServerboundInteractPacket.Action {
+		private final InteractionHand hand;
+		private final Vec3 location;
+
+		@Environment(EnvType.CLIENT)
+		private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
+			this.hand = interactionHand;
+			this.location = vec3;
+		}
+
+		private InteractionAtLocationAction(FriendlyByteBuf friendlyByteBuf) {
+			this.location = new Vec3((double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat(), (double)friendlyByteBuf.readFloat());
+			this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+		}
+
+		@Override
+		public ServerboundInteractPacket.ActionType getType() {
+			return ServerboundInteractPacket.ActionType.INTERACT_AT;
+		}
+
+		@Override
+		public void dispatch(ServerboundInteractPacket.Handler handler) {
+			handler.onInteraction(this.hand, this.location);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeFloat((float)this.location.x);
+			friendlyByteBuf.writeFloat((float)this.location.y);
+			friendlyByteBuf.writeFloat((float)this.location.z);
+			friendlyByteBuf.writeEnum(this.hand);
+		}
 	}
 }

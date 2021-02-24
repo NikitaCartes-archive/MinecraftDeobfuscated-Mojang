@@ -1,29 +1,24 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundAcceptTeleportationPacket implements Packet<ServerGamePacketListener> {
-	private int id;
-
-	public ServerboundAcceptTeleportationPacket() {
-	}
+	private final int id;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundAcceptTeleportationPacket(int i) {
 		this.id = i;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundAcceptTeleportationPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 	}
 

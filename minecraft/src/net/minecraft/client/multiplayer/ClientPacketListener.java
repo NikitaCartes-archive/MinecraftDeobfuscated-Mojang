@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -86,7 +87,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
@@ -107,6 +107,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -123,6 +124,7 @@ import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
@@ -138,7 +140,9 @@ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
@@ -150,7 +154,12 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
@@ -167,8 +176,10 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
@@ -252,6 +263,7 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -539,11 +551,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleRemoveEntity(ClientboundRemoveEntitiesPacket clientboundRemoveEntitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRemoveEntitiesPacket, this, this.minecraft);
-
-		for (int i = 0; i < clientboundRemoveEntitiesPacket.getEntityIds().length; i++) {
-			int j = clientboundRemoveEntitiesPacket.getEntityIds()[i];
-			this.level.removeEntity(j, Entity.RemovalReason.DISCARDED);
-		}
+		clientboundRemoveEntitiesPacket.getEntityIds().forEach(i -> this.level.removeEntity(i, Entity.RemovalReason.DISCARDED));
 	}
 
 	@Override
@@ -630,9 +638,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(clientboundLevelChunkPacket, this, this.minecraft);
 		int i = clientboundLevelChunkPacket.getX();
 		int j = clientboundLevelChunkPacket.getZ();
-		ChunkBiomeContainer chunkBiomeContainer = clientboundLevelChunkPacket.getBiomes() == null
-			? null
-			: new ChunkBiomeContainer(this.registryAccess.registryOrThrow(Registry.BIOME_REGISTRY), this.level, clientboundLevelChunkPacket.getBiomes());
+		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
+			this.registryAccess.registryOrThrow(Registry.BIOME_REGISTRY), this.level, clientboundLevelChunkPacket.getBiomes()
+		);
 		LevelChunk levelChunk = this.level
 			.getChunkSource()
 			.replaceWithPacketData(
@@ -1421,16 +1429,22 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	@Override
-	public void handlePlayerCombat(ClientboundPlayerCombatPacket clientboundPlayerCombatPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundPlayerCombatPacket, this, this.minecraft);
-		if (clientboundPlayerCombatPacket.event == ClientboundPlayerCombatPacket.Event.ENTITY_DIED) {
-			Entity entity = this.level.getEntity(clientboundPlayerCombatPacket.playerId);
-			if (entity == this.minecraft.player) {
-				if (this.minecraft.player.shouldShowDeathScreen()) {
-					this.minecraft.setScreen(new DeathScreen(clientboundPlayerCombatPacket.message, this.level.getLevelData().isHardcore()));
-				} else {
-					this.minecraft.player.respawn();
-				}
+	public void handlePlayerCombatEnd(ClientboundPlayerCombatEndPacket clientboundPlayerCombatEndPacket) {
+	}
+
+	@Override
+	public void handlePlayerCombatEnter(ClientboundPlayerCombatEnterPacket clientboundPlayerCombatEnterPacket) {
+	}
+
+	@Override
+	public void handlePlayerCombatKill(ClientboundPlayerCombatKillPacket clientboundPlayerCombatKillPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundPlayerCombatKillPacket, this, this.minecraft);
+		Entity entity = this.level.getEntity(clientboundPlayerCombatKillPacket.getPlayerId());
+		if (entity == this.minecraft.player) {
+			if (this.minecraft.player.shouldShowDeathScreen()) {
+				this.minecraft.setScreen(new DeathScreen(clientboundPlayerCombatKillPacket.getMessage(), this.level.getLevelData().isHardcore()));
+			} else {
+				this.minecraft.player.respawn();
 			}
 		}
 	}
@@ -1452,39 +1466,84 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	@Override
-	public void handleSetBorder(ClientboundSetBorderPacket clientboundSetBorderPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderPacket, this, this.minecraft);
-		clientboundSetBorderPacket.applyChanges(this.level.getWorldBorder());
+	public void handleInitializeBorder(ClientboundInitializeBorderPacket clientboundInitializeBorderPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundInitializeBorderPacket, this, this.minecraft);
+		WorldBorder worldBorder = this.level.getWorldBorder();
+		worldBorder.setCenter(clientboundInitializeBorderPacket.getNewCenterX(), clientboundInitializeBorderPacket.getNewCenterZ());
+		long l = clientboundInitializeBorderPacket.getLerpTime();
+		if (l > 0L) {
+			worldBorder.lerpSizeBetween(clientboundInitializeBorderPacket.getOldSize(), clientboundInitializeBorderPacket.getNewSize(), l);
+		} else {
+			worldBorder.setSize(clientboundInitializeBorderPacket.getNewSize());
+		}
+
+		worldBorder.setAbsoluteMaxSize(clientboundInitializeBorderPacket.getNewAbsoluteMaxSize());
+		worldBorder.setWarningBlocks(clientboundInitializeBorderPacket.getWarningBlocks());
+		worldBorder.setWarningTime(clientboundInitializeBorderPacket.getWarningTime());
 	}
 
 	@Override
-	public void handleSetTitles(ClientboundSetTitlesPacket clientboundSetTitlesPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundSetTitlesPacket, this, this.minecraft);
-		ClientboundSetTitlesPacket.Type type = clientboundSetTitlesPacket.getType();
-		Component component = null;
-		Component component2 = null;
-		Component component3 = clientboundSetTitlesPacket.getText() != null ? clientboundSetTitlesPacket.getText() : TextComponent.EMPTY;
-		switch (type) {
-			case TITLE:
-				component = component3;
-				break;
-			case SUBTITLE:
-				component2 = component3;
-				break;
-			case ACTIONBAR:
-				this.minecraft.gui.setOverlayMessage(component3, false);
-				return;
-			case RESET:
-				this.minecraft.gui.setTitles(null, null, -1, -1, -1);
-				this.minecraft.gui.resetTitleTimes();
-				return;
-		}
+	public void handleSetBorderCenter(ClientboundSetBorderCenterPacket clientboundSetBorderCenterPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderCenterPacket, this, this.minecraft);
+		this.level.getWorldBorder().setCenter(clientboundSetBorderCenterPacket.getNewCenterX(), clientboundSetBorderCenterPacket.getNewCenterZ());
+	}
 
+	@Override
+	public void handleSetBorderLerpSize(ClientboundSetBorderLerpSizePacket clientboundSetBorderLerpSizePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderLerpSizePacket, this, this.minecraft);
+		this.level
+			.getWorldBorder()
+			.lerpSizeBetween(
+				clientboundSetBorderLerpSizePacket.getOldSize(), clientboundSetBorderLerpSizePacket.getNewSize(), clientboundSetBorderLerpSizePacket.getLerpTime()
+			);
+	}
+
+	@Override
+	public void handleSetBorderSize(ClientboundSetBorderSizePacket clientboundSetBorderSizePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderSizePacket, this, this.minecraft);
+		this.level.getWorldBorder().setSize(clientboundSetBorderSizePacket.getSize());
+	}
+
+	@Override
+	public void handleSetBorderWarningDistance(ClientboundSetBorderWarningDistancePacket clientboundSetBorderWarningDistancePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderWarningDistancePacket, this, this.minecraft);
+		this.level.getWorldBorder().setWarningBlocks(clientboundSetBorderWarningDistancePacket.getWarningBlocks());
+	}
+
+	@Override
+	public void handleSetBorderWarningDelay(ClientboundSetBorderWarningDelayPacket clientboundSetBorderWarningDelayPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSetBorderWarningDelayPacket, this, this.minecraft);
+		this.level.getWorldBorder().setWarningTime(clientboundSetBorderWarningDelayPacket.getWarningDelay());
+	}
+
+	@Override
+	public void handleTitlesClear(ClientboundClearTitlesPacket clientboundClearTitlesPacket) {
+		this.minecraft.gui.clear();
+		if (clientboundClearTitlesPacket.shouldResetTimes()) {
+			this.minecraft.gui.resetTitleTimes();
+		}
+	}
+
+	@Override
+	public void setActionBarText(ClientboundSetActionBarTextPacket clientboundSetActionBarTextPacket) {
+		this.minecraft.gui.setOverlayMessage(clientboundSetActionBarTextPacket.getText(), false);
+	}
+
+	@Override
+	public void setTitleText(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket) {
+		this.minecraft.gui.setTitle(clientboundSetTitleTextPacket.getText());
+	}
+
+	@Override
+	public void setSubtitleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket) {
+		this.minecraft.gui.setSubtitle(clientboundSetSubtitleTextPacket.getText());
+	}
+
+	@Override
+	public void setTitlesAnimation(ClientboundSetTitlesAnimationPacket clientboundSetTitlesAnimationPacket) {
 		this.minecraft
 			.gui
-			.setTitles(
-				component, component2, clientboundSetTitlesPacket.getFadeInTime(), clientboundSetTitlesPacket.getStayTime(), clientboundSetTitlesPacket.getFadeOutTime()
-			);
+			.setTimes(clientboundSetTitlesAnimationPacket.getFadeIn(), clientboundSetTitlesAnimationPacket.getStay(), clientboundSetTitlesAnimationPacket.getFadeOut());
 	}
 
 	@Override
@@ -1766,7 +1825,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		try {
 			friendlyByteBuf = clientboundCustomPayloadPacket.getData();
 			if (ClientboundCustomPayloadPacket.BRAND.equals(resourceLocation)) {
-				this.minecraft.player.setServerBrand(friendlyByteBuf.readUtf(32767));
+				this.minecraft.player.setServerBrand(friendlyByteBuf.readUtf());
 			} else if (ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET.equals(resourceLocation)) {
 				int i = friendlyByteBuf.readInt();
 				float f = friendlyByteBuf.readFloat();
@@ -1776,18 +1835,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				long l = friendlyByteBuf.readVarLong();
 				BlockPos blockPos = friendlyByteBuf.readBlockPos();
 				((NeighborsUpdateRenderer)this.minecraft.debugRenderer.neighborsUpdateRenderer).addUpdate(l, blockPos);
-			} else if (ClientboundCustomPayloadPacket.DEBUG_CAVES_PACKET.equals(resourceLocation)) {
-				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				int j = friendlyByteBuf.readInt();
-				List<BlockPos> list = Lists.<BlockPos>newArrayList();
-				List<Float> list2 = Lists.<Float>newArrayList();
-
-				for (int k = 0; k < j; k++) {
-					list.add(friendlyByteBuf.readBlockPos());
-					list2.add(friendlyByteBuf.readFloat());
-				}
-
-				this.minecraft.debugRenderer.caveRenderer.addTunnel(blockPos2, list, list2);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_STRUCTURES_PACKET.equals(resourceLocation)) {
 				DimensionType dimensionType = this.registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(friendlyByteBuf.readResourceLocation());
 				BoundingBox boundingBox = new BoundingBox(
@@ -1798,12 +1845,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					friendlyByteBuf.readInt(),
 					friendlyByteBuf.readInt()
 				);
-				int m = friendlyByteBuf.readInt();
-				List<BoundingBox> list2 = Lists.<BoundingBox>newArrayList();
-				List<Boolean> list3 = Lists.<Boolean>newArrayList();
+				int j = friendlyByteBuf.readInt();
+				List<BoundingBox> list = Lists.<BoundingBox>newArrayList();
+				List<Boolean> list2 = Lists.<Boolean>newArrayList();
 
-				for (int n = 0; n < m; n++) {
-					list2.add(
+				for (int k = 0; k < j; k++) {
+					list.add(
 						new BoundingBox(
 							friendlyByteBuf.readInt(),
 							friendlyByteBuf.readInt(),
@@ -1813,10 +1860,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 							friendlyByteBuf.readInt()
 						)
 					);
-					list3.add(friendlyByteBuf.readBoolean());
+					list2.add(friendlyByteBuf.readBoolean());
 				}
 
-				this.minecraft.debugRenderer.structureRenderer.addBoundingBox(boundingBox, list2, list3, dimensionType);
+				this.minecraft.debugRenderer.structureRenderer.addBoundingBox(boundingBox, list, list2, dimensionType);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_WORLDGENATTEMPT_PACKET.equals(resourceLocation)) {
 				((WorldGenAttemptRenderer)this.minecraft.debugRenderer.worldGenAttemptRenderer)
 					.addPos(
@@ -1830,47 +1877,47 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			} else if (ClientboundCustomPayloadPacket.DEBUG_VILLAGE_SECTIONS.equals(resourceLocation)) {
 				int i = friendlyByteBuf.readInt();
 
-				for (int j = 0; j < i; j++) {
+				for (int m = 0; m < i; m++) {
 					this.minecraft.debugRenderer.villageSectionsDebugRenderer.setVillageSection(friendlyByteBuf.readSectionPos());
 				}
 
-				int j = friendlyByteBuf.readInt();
+				int m = friendlyByteBuf.readInt();
 
-				for (int m = 0; m < j; m++) {
+				for (int j = 0; j < m; j++) {
 					this.minecraft.debugRenderer.villageSectionsDebugRenderer.setNotVillageSection(friendlyByteBuf.readSectionPos());
 				}
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_ADDED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
-				int m = friendlyByteBuf.readInt();
-				BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(blockPos2, string, m);
+				int j = friendlyByteBuf.readInt();
+				BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(blockPos2, string, j);
 				this.minecraft.debugRenderer.brainDebugRenderer.addPoi(poiInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_REMOVED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				this.minecraft.debugRenderer.brainDebugRenderer.removePoi(blockPos2);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_TICKET_COUNT_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				int j = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.brainDebugRenderer.setFreeTicketCount(blockPos2, j);
+				int m = friendlyByteBuf.readInt();
+				this.minecraft.debugRenderer.brainDebugRenderer.setFreeTicketCount(blockPos2, m);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GOAL_SELECTOR.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				int j = friendlyByteBuf.readInt();
 				int m = friendlyByteBuf.readInt();
-				List<GoalSelectorDebugRenderer.DebugGoal> list2 = Lists.<GoalSelectorDebugRenderer.DebugGoal>newArrayList();
+				int j = friendlyByteBuf.readInt();
+				List<GoalSelectorDebugRenderer.DebugGoal> list = Lists.<GoalSelectorDebugRenderer.DebugGoal>newArrayList();
 
-				for (int k = 0; k < m; k++) {
-					int n = friendlyByteBuf.readInt();
+				for (int n = 0; n < j; n++) {
+					int k = friendlyByteBuf.readInt();
 					boolean bl = friendlyByteBuf.readBoolean();
 					String string2 = friendlyByteBuf.readUtf(255);
-					list2.add(new GoalSelectorDebugRenderer.DebugGoal(blockPos2, n, string2, bl));
+					list.add(new GoalSelectorDebugRenderer.DebugGoal(blockPos2, k, string2, bl));
 				}
 
-				this.minecraft.debugRenderer.goalSelectorRenderer.addGoalSelector(j, list2);
+				this.minecraft.debugRenderer.goalSelectorRenderer.addGoalSelector(m, list);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_RAIDS.equals(resourceLocation)) {
 				int i = friendlyByteBuf.readInt();
 				Collection<BlockPos> collection = Lists.<BlockPos>newArrayList();
 
-				for (int m = 0; m < i; m++) {
+				for (int j = 0; j < i; j++) {
 					collection.add(friendlyByteBuf.readBlockPos());
 				}
 
@@ -1986,19 +2033,19 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			} else if (ClientboundCustomPayloadPacket.DEBUG_HIVE.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
-				int m = friendlyByteBuf.readInt();
+				int j = friendlyByteBuf.readInt();
 				int ab = friendlyByteBuf.readInt();
 				boolean bl7 = friendlyByteBuf.readBoolean();
-				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, ab, bl7, this.level.getGameTime());
+				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, j, ab, bl7, this.level.getGameTime());
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.clear();
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_ADD_MARKER.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				int j = friendlyByteBuf.readInt();
+				int m = friendlyByteBuf.readInt();
 				String string11 = friendlyByteBuf.readUtf();
 				int ab = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, ab);
+				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string11, ab);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT.equals(resourceLocation)) {
 				GameEvent gameEvent = Registry.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
 				BlockPos blockPos8 = friendlyByteBuf.readBlockPos();
@@ -2009,8 +2056,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 						.getOptional(resourceLocation2)
 						.orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation2)))
 					.read(friendlyByteBuf);
-				int m = friendlyByteBuf.readVarInt();
-				this.minecraft.debugRenderer.gameEventListenerRenderer.trackListener(positionSource, m);
+				int j = friendlyByteBuf.readVarInt();
+				this.minecraft.debugRenderer.gameEventListenerRenderer.trackListener(positionSource, j);
 			} else {
 				LOGGER.warn("Unknown custom packed identifier: {}", resourceLocation);
 			}
@@ -2068,44 +2115,44 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleSetPlayerTeamPacket(ClientboundSetPlayerTeamPacket clientboundSetPlayerTeamPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetPlayerTeamPacket, this, this.minecraft);
 		Scoreboard scoreboard = this.level.getScoreboard();
+		ClientboundSetPlayerTeamPacket.Action action = clientboundSetPlayerTeamPacket.getTeamAction();
 		PlayerTeam playerTeam;
-		if (clientboundSetPlayerTeamPacket.getMethod() == 0) {
+		if (action == ClientboundSetPlayerTeamPacket.Action.ADD) {
 			playerTeam = scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName());
 		} else {
 			playerTeam = scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
 		}
 
-		if (clientboundSetPlayerTeamPacket.getMethod() == 0 || clientboundSetPlayerTeamPacket.getMethod() == 2) {
-			playerTeam.setDisplayName(clientboundSetPlayerTeamPacket.getDisplayName());
-			playerTeam.setColor(clientboundSetPlayerTeamPacket.getColor());
-			playerTeam.unpackOptions(clientboundSetPlayerTeamPacket.getOptions());
-			Team.Visibility visibility = Team.Visibility.byName(clientboundSetPlayerTeamPacket.getNametagVisibility());
+		Optional<ClientboundSetPlayerTeamPacket.Parameters> optional = clientboundSetPlayerTeamPacket.getParameters();
+		optional.ifPresent(parameters -> {
+			playerTeam.setDisplayName(parameters.getDisplayName());
+			playerTeam.setColor(parameters.getColor());
+			playerTeam.unpackOptions(parameters.getOptions());
+			Team.Visibility visibility = Team.Visibility.byName(parameters.getNametagVisibility());
 			if (visibility != null) {
 				playerTeam.setNameTagVisibility(visibility);
 			}
 
-			Team.CollisionRule collisionRule = Team.CollisionRule.byName(clientboundSetPlayerTeamPacket.getCollisionRule());
+			Team.CollisionRule collisionRule = Team.CollisionRule.byName(parameters.getCollisionRule());
 			if (collisionRule != null) {
 				playerTeam.setCollisionRule(collisionRule);
 			}
 
-			playerTeam.setPlayerPrefix(clientboundSetPlayerTeamPacket.getPlayerPrefix());
-			playerTeam.setPlayerSuffix(clientboundSetPlayerTeamPacket.getPlayerSuffix());
-		}
-
-		if (clientboundSetPlayerTeamPacket.getMethod() == 0 || clientboundSetPlayerTeamPacket.getMethod() == 3) {
+			playerTeam.setPlayerPrefix(parameters.getPlayerPrefix());
+			playerTeam.setPlayerSuffix(parameters.getPlayerSuffix());
+		});
+		ClientboundSetPlayerTeamPacket.Action action2 = clientboundSetPlayerTeamPacket.getPlayerAction();
+		if (action2 == ClientboundSetPlayerTeamPacket.Action.ADD) {
 			for (String string : clientboundSetPlayerTeamPacket.getPlayers()) {
 				scoreboard.addPlayerToTeam(string, playerTeam);
 			}
-		}
-
-		if (clientboundSetPlayerTeamPacket.getMethod() == 4) {
+		} else if (action2 == ClientboundSetPlayerTeamPacket.Action.REMOVE) {
 			for (String string : clientboundSetPlayerTeamPacket.getPlayers()) {
 				scoreboard.removePlayerFromTeam(string, playerTeam);
 			}
 		}
 
-		if (clientboundSetPlayerTeamPacket.getMethod() == 1) {
+		if (action == ClientboundSetPlayerTeamPacket.Action.REMOVE) {
 			scoreboard.removePlayerTeam(playerTeam);
 		}
 	}

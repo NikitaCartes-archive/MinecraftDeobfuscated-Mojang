@@ -400,7 +400,7 @@ public class ChunkSerializer {
 		CompoundTag compoundTag2 = new CompoundTag();
 
 		for (Entry<StructureFeature<?>, StructureStart<?>> entry : map.entrySet()) {
-			compoundTag2.put(((StructureFeature)entry.getKey()).getFeatureName(), ((StructureStart)entry.getValue()).createTag(chunkPos.x, chunkPos.z));
+			compoundTag2.put(((StructureFeature)entry.getKey()).getFeatureName(), ((StructureStart)entry.getValue()).createTag(chunkPos));
 		}
 
 		compoundTag.put("Starts", compoundTag2);

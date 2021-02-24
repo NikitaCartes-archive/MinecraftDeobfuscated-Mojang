@@ -35,7 +35,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 	}
 
 	public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
-		String string = friendlyByteBuf.readUtf(32767);
+		String string = friendlyByteBuf.readUtf();
 		Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 		ItemStack itemStack = friendlyByteBuf.readItem();
 		float f = friendlyByteBuf.readFloat();

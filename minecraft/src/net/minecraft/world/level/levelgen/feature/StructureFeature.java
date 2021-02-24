@@ -147,17 +147,16 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 				LOGGER.error("Unknown feature id: {}", string);
 				return null;
 			} else {
-				int i = compoundTag.getInt("ChunkX");
-				int j = compoundTag.getInt("ChunkZ");
-				int k = compoundTag.getInt("references");
+				ChunkPos chunkPos = new ChunkPos(compoundTag.getInt("ChunkX"), compoundTag.getInt("ChunkZ"));
+				int i = compoundTag.getInt("references");
 				BoundingBox boundingBox = compoundTag.contains("BB") ? new BoundingBox(compoundTag.getIntArray("BB")) : BoundingBox.getUnknownBox();
 				ListTag listTag = compoundTag.getList("Children", 10);
 
 				try {
-					StructureStart<?> structureStart = structureFeature.createStart(i, j, boundingBox, k, l);
+					StructureStart<?> structureStart = structureFeature.createStart(chunkPos, boundingBox, i, l);
 
-					for (int m = 0; m < listTag.size(); m++) {
-						CompoundTag compoundTag2 = listTag.getCompound(m);
+					for (int j = 0; j < listTag.size(); j++) {
+						CompoundTag compoundTag2 = listTag.getCompound(j);
 						String string2 = compoundTag2.getString("id").toLowerCase(Locale.ROOT);
 						ResourceLocation resourceLocation = new ResourceLocation(string2);
 						ResourceLocation resourceLocation2 = (ResourceLocation)RENAMES.getOrDefault(resourceLocation, resourceLocation);
@@ -168,15 +167,15 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 							try {
 								StructurePiece structurePiece = structurePieceType.load(structureManager, compoundTag2);
 								structureStart.getPieces().add(structurePiece);
-							} catch (Exception var19) {
-								LOGGER.error("Exception loading structure piece with id {}", resourceLocation2, var19);
+							} catch (Exception var18) {
+								LOGGER.error("Exception loading structure piece with id {}", resourceLocation2, var18);
 							}
 						}
 					}
 
 					return structureStart;
-				} catch (Exception var20) {
-					LOGGER.error("Failed Start with id {}", string, var20);
+				} catch (Exception var19) {
+					LOGGER.error("Failed Start with id {}", string, var19);
 					return null;
 				}
 			}
@@ -277,18 +276,17 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		C featureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
 		return true;
 	}
 
-	private StructureStart<C> createStart(int i, int j, BoundingBox boundingBox, int k, long l) {
-		return this.getStartFactory().create(this, i, j, boundingBox, k, l);
+	private StructureStart<C> createStart(ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+		return this.getStartFactory().create(this, chunkPos, boundingBox, i, l);
 	}
 
 	public StructureStart<?> generate(
@@ -308,9 +306,9 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, chunkPos.x, chunkPos.z);
 		if (chunkPos.x == chunkPos2.x
 			&& chunkPos.z == chunkPos2.z
-			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
-			StructureStart<C> structureStart = this.createStart(chunkPos.x, chunkPos.z, BoundingBox.getUnknownBox(), i, l);
-			structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration, levelHeightAccessor);
+			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
+			StructureStart<C> structureStart = this.createStart(chunkPos, BoundingBox.getUnknownBox(), i, l);
+			structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos, biome, featureConfiguration, levelHeightAccessor);
 			if (structureStart.isValid()) {
 				return structureStart;
 			}
@@ -334,6 +332,6 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 	}
 
 	public interface StructureStartFactory<C extends FeatureConfiguration> {
-		StructureStart<C> create(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l);
+		StructureStart<C> create(StructureFeature<C> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l);
 	}
 }

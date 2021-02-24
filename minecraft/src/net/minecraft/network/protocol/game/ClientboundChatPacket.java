@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,12 +9,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundChatPacket implements Packet<ClientGamePacketListener> {
-	private Component message;
-	private ChatType type;
-	private UUID sender;
-
-	public ClientboundChatPacket() {
-	}
+	private final Component message;
+	private final ChatType type;
+	private final UUID sender;
 
 	public ClientboundChatPacket(Component component, ChatType chatType, UUID uUID) {
 		this.message = component;
@@ -23,15 +19,14 @@ public class ClientboundChatPacket implements Packet<ClientGamePacketListener> {
 		this.sender = uUID;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.message = friendlyByteBuf.readComponent();
 		this.type = ChatType.getForIndex(friendlyByteBuf.readByte());
 		this.sender = friendlyByteBuf.readUUID();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeComponent(this.message);
 		friendlyByteBuf.writeByte(this.type.getIndex());
 		friendlyByteBuf.writeUUID(this.sender);

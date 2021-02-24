@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.UniformFloat;
+import net.minecraft.util.FloatProvider;
 import net.minecraft.util.UniformInt;
 
 public class DripstoneClusterConfiguration implements FeatureConfiguration {
@@ -20,10 +20,8 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 					UniformInt.codec(0, 64, 64)
 						.fieldOf("dripstone_block_layer_thickness")
 						.forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.dripstoneBlockLayerThickness),
-					UniformFloat.codec(0.0F, 1.0F, 1.0F).fieldOf("density").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.density),
-					UniformFloat.codec(0.0F, 1.0F, 1.0F).fieldOf("wetness").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.wetness),
-					Codec.floatRange(0.0F, 1.0F).fieldOf("wetness_mean").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.wetnessMean),
-					Codec.floatRange(0.0F, 1.0F).fieldOf("wetness_deviation").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.wetnessDeviation),
+					FloatProvider.codec(0.0F, 2.0F).fieldOf("density").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.density),
+					FloatProvider.codec(0.0F, 2.0F).fieldOf("wetness").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.wetness),
 					Codec.floatRange(0.0F, 1.0F)
 						.fieldOf("chance_of_dripstone_column_at_max_distance_from_center")
 						.forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.chanceOfDripstoneColumnAtMaxDistanceFromCenter),
@@ -42,10 +40,8 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 	public final int maxStalagmiteStalactiteHeightDiff;
 	public final int heightDeviation;
 	public final UniformInt dripstoneBlockLayerThickness;
-	public final UniformFloat density;
-	public final UniformFloat wetness;
-	public final float wetnessMean;
-	public final float wetnessDeviation;
+	public final FloatProvider density;
+	public final FloatProvider wetness;
 	public final float chanceOfDripstoneColumnAtMaxDistanceFromCenter;
 	public final int maxDistanceFromEdgeAffectingChanceOfDripstoneColumn;
 	public final int maxDistanceFromCenterAffectingHeightBias;
@@ -57,11 +53,9 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 		int j,
 		int k,
 		UniformInt uniformInt3,
-		UniformFloat uniformFloat,
-		UniformFloat uniformFloat2,
+		FloatProvider floatProvider,
+		FloatProvider floatProvider2,
 		float f,
-		float g,
-		float h,
 		int l,
 		int m
 	) {
@@ -71,11 +65,9 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 		this.maxStalagmiteStalactiteHeightDiff = j;
 		this.heightDeviation = k;
 		this.dripstoneBlockLayerThickness = uniformInt3;
-		this.density = uniformFloat;
-		this.wetness = uniformFloat2;
-		this.wetnessMean = f;
-		this.wetnessDeviation = g;
-		this.chanceOfDripstoneColumnAtMaxDistanceFromCenter = h;
+		this.density = floatProvider;
+		this.wetness = floatProvider2;
+		this.chanceOfDripstoneColumnAtMaxDistanceFromCenter = f;
 		this.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn = l;
 		this.maxDistanceFromCenterAffectingHeightBias = m;
 	}

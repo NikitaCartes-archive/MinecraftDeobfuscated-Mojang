@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,22 +7,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundDisconnectPacket implements Packet<ClientGamePacketListener> {
-	private Component reason;
-
-	public ClientboundDisconnectPacket() {
-	}
+	private final Component reason;
 
 	public ClientboundDisconnectPacket(Component component) {
 		this.reason = component;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundDisconnectPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.reason = friendlyByteBuf.readComponent();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeComponent(this.reason);
 	}
 

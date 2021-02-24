@@ -139,8 +139,14 @@ public class Blocks {
 	public static final Block GOLD_ORE = register(
 		"gold_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
 	);
+	public static final Block DEEPSLATE_GOLD_ORE = register(
+		"deepslate_gold_ore", new OreBlock(BlockBehaviour.Properties.copy(GOLD_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+	);
 	public static final Block IRON_ORE = register(
 		"iron_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
+	);
+	public static final Block DEEPSLATE_IRON_ORE = register(
+		"deepslate_iron_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block COAL_ORE = register(
 		"coal_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntRange.of(0, 2))
@@ -227,6 +233,9 @@ public class Blocks {
 	);
 	public static final Block LAPIS_ORE = register(
 		"lapis_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntRange.of(2, 5))
+	);
+	public static final Block DEEPSLATE_LAPIS_ORE = register(
+		"deepslate_lapis_ore", new OreBlock(BlockBehaviour.Properties.copy(LAPIS_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), IntRange.of(2, 5))
 	);
 	public static final Block LAPIS_BLOCK = register(
 		"lapis_block", new Block(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.LAPIS).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
@@ -468,6 +477,9 @@ public class Blocks {
 	public static final Block DIAMOND_ORE = register(
 		"diamond_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntRange.of(3, 7))
 	);
+	public static final Block DEEPSLATE_DIAMOND_ORE = register(
+		"deepslate_diamond_ore", new OreBlock(BlockBehaviour.Properties.copy(DIAMOND_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), IntRange.of(3, 7))
+	);
 	public static final Block DIAMOND_BLOCK = register(
 		"diamond_block",
 		new Block(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL))
@@ -639,6 +651,9 @@ public class Blocks {
 		new RedStoneOreBlock(
 			BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().randomTicks().lightLevel(litBlockEmission(9)).strength(3.0F, 3.0F)
 		)
+	);
+	public static final Block DEEPSLATE_REDSTONE_ORE = register(
+		"deepslate_redstone_ore", new RedStoneOreBlock(BlockBehaviour.Properties.copy(REDSTONE_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block REDSTONE_TORCH = register(
 		"redstone_torch",
@@ -3353,35 +3368,46 @@ public class Blocks {
 			BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.DIRT).noCollission().instabreak().strength(0.1F).sound(SoundType.HANGING_ROOTS)
 		)
 	);
-	public static final Block GRIMSTONE = register(
-		"grimstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 6.0F))
+	public static final Block DEEPSLATE = register(
+		"deepslate",
+		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.DEEPSLATE))
 	);
-	public static final Block GRIMSTONE_STAIRS = register(
-		"grimstone_stairs", new StairBlock(GRIMSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(GRIMSTONE))
+	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.copy(DEEPSLATE)));
+	public static final Block COBBLED_DEEPSLATE_STAIRS = register(
+		"cobbled_deepslate_stairs", new StairBlock(COBBLED_DEEPSLATE.defaultBlockState(), BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE))
 	);
-	public static final Block GRIMSTONE_SLAB = register(
-		"grimstone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.5F, 6.0F))
+	public static final Block COBBLED_DEEPSLATE_SLAB = register(
+		"cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.5F, 6.0F))
 	);
-	public static final Block GRIMSTONE_WALL = register("grimstone_wall", new WallBlock(BlockBehaviour.Properties.copy(GRIMSTONE)));
-	public static final Block POLISHED_GRIMSTONE = register("polished_grimstone", new Block(BlockBehaviour.Properties.copy(GRIMSTONE).strength(3.5F, 6.0F)));
-	public static final Block POLISHED_GRIMSTONE_STAIRS = register(
-		"polished_grimstone_stairs", new StairBlock(POLISHED_GRIMSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(POLISHED_GRIMSTONE))
+	public static final Block COBBLED_DEEPSLATE_WALL = register("cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE)));
+	public static final Block POLISHED_DEEPSLATE = register(
+		"polished_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).strength(3.5F, 6.0F).sound(SoundType.POLISHED_DEEPSLATE))
 	);
-	public static final Block POLISHED_GRIMSTONE_SLAB = register("polished_grimstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_GRIMSTONE)));
-	public static final Block POLISHED_GRIMSTONE_WALL = register("polished_grimstone_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_GRIMSTONE)));
-	public static final Block GRIMSTONE_TILES = register("grimstone_tiles", new Block(BlockBehaviour.Properties.copy(GRIMSTONE).strength(1.5F, 6.0F)));
-	public static final Block GRIMSTONE_TILE_STAIRS = register(
-		"grimstone_tile_stairs", new StairBlock(GRIMSTONE_TILES.defaultBlockState(), BlockBehaviour.Properties.copy(GRIMSTONE_TILES))
+	public static final Block POLISHED_DEEPSLATE_STAIRS = register(
+		"polished_deepslate_stairs", new StairBlock(POLISHED_DEEPSLATE.defaultBlockState(), BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE))
 	);
-	public static final Block GRIMSTONE_TILE_SLAB = register("grimstone_tile_slab", new SlabBlock(BlockBehaviour.Properties.copy(GRIMSTONE_TILES)));
-	public static final Block GRIMSTONE_TILE_WALL = register("grimstone_tile_wall", new WallBlock(BlockBehaviour.Properties.copy(GRIMSTONE_TILES)));
-	public static final Block GRIMSTONE_BRICKS = register("grimstone_bricks", new Block(BlockBehaviour.Properties.copy(GRIMSTONE).strength(1.5F, 6.0F)));
-	public static final Block GRIMSTONE_BRICK_STAIRS = register(
-		"grimstone_brick_stairs", new StairBlock(GRIMSTONE_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(GRIMSTONE_BRICKS))
+	public static final Block POLISHED_DEEPSLATE_SLAB = register("polished_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE)));
+	public static final Block POLISHED_DEEPSLATE_WALL = register("polished_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE)));
+	public static final Block DEEPSLATE_TILES = register(
+		"deepslate_tiles", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).strength(1.5F, 6.0F).sound(SoundType.DEEPSLATE_TILES))
 	);
-	public static final Block GRIMSTONE_BRICK_SLAB = register("grimstone_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(GRIMSTONE_BRICKS)));
-	public static final Block GRIMSTONE_BRICK_WALL = register("grimstone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(GRIMSTONE_BRICKS)));
-	public static final Block CHISELED_GRIMSTONE = register("chiseled_grimstone", new Block(BlockBehaviour.Properties.copy(GRIMSTONE).strength(1.5F, 6.0F)));
+	public static final Block DEEPSLATE_TILE_STAIRS = register(
+		"deepslate_tile_stairs", new StairBlock(DEEPSLATE_TILES.defaultBlockState(), BlockBehaviour.Properties.copy(DEEPSLATE_TILES))
+	);
+	public static final Block DEEPSLATE_TILE_SLAB = register("deepslate_tile_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
+	public static final Block DEEPSLATE_TILE_WALL = register("deepslate_tile_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
+	public static final Block DEEPSLATE_BRICKS = register(
+		"deepslate_bricks", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).strength(1.5F, 6.0F).sound(SoundType.DEEPSLATE_BRICKS))
+	);
+	public static final Block DEEPSLATE_BRICK_STAIRS = register(
+		"deepslate_brick_stairs", new StairBlock(DEEPSLATE_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS))
+	);
+	public static final Block DEEPSLATE_BRICK_SLAB = register("deepslate_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
+	public static final Block DEEPSLATE_BRICK_WALL = register("deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
+	public static final Block CHISELED_DEEPSLATE = register(
+		"chiseled_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).strength(1.5F, 6.0F).sound(SoundType.DEEPSLATE_BRICKS))
+	);
+	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;

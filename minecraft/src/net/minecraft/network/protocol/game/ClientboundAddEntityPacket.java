@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,21 +13,18 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListener> {
-	private int id;
-	private UUID uuid;
-	private double x;
-	private double y;
-	private double z;
-	private int xa;
-	private int ya;
-	private int za;
-	private int xRot;
-	private int yRot;
-	private EntityType<?> type;
-	private int data;
-
-	public ClientboundAddEntityPacket() {
-	}
+	private final int id;
+	private final UUID uuid;
+	private final double x;
+	private final double y;
+	private final double z;
+	private final int xa;
+	private final int ya;
+	private final int za;
+	private final int xRot;
+	private final int yRot;
+	private final EntityType<?> type;
+	private final int data;
 
 	public ClientboundAddEntityPacket(int i, UUID uUID, double d, double e, double f, float g, float h, EntityType<?> entityType, int j, Vec3 vec3) {
 		this.id = i;
@@ -68,8 +64,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 		);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundAddEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.uuid = friendlyByteBuf.readUUID();
 		this.type = Registry.ENTITY_TYPE.byId(friendlyByteBuf.readVarInt());
@@ -85,7 +80,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeUUID(this.uuid);
 		friendlyByteBuf.writeVarInt(Registry.ENTITY_TYPE.getId(this.type));

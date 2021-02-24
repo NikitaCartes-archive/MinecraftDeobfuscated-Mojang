@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,22 +11,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketListener> {
-	private double x;
-	private double y;
-	private double z;
-	private int entity;
-	private EntityAnchorArgument.Anchor fromAnchor;
-	private EntityAnchorArgument.Anchor toAnchor;
-	private boolean atEntity;
-
-	public ClientboundPlayerLookAtPacket() {
-	}
+	private final double x;
+	private final double y;
+	private final double z;
+	private final int entity;
+	private final EntityAnchorArgument.Anchor fromAnchor;
+	private final EntityAnchorArgument.Anchor toAnchor;
+	private final boolean atEntity;
 
 	public ClientboundPlayerLookAtPacket(EntityAnchorArgument.Anchor anchor, double d, double e, double f) {
 		this.fromAnchor = anchor;
 		this.x = d;
 		this.y = e;
 		this.z = f;
+		this.entity = 0;
+		this.atEntity = false;
+		this.toAnchor = null;
 	}
 
 	public ClientboundPlayerLookAtPacket(EntityAnchorArgument.Anchor anchor, Entity entity, EntityAnchorArgument.Anchor anchor2) {
@@ -41,21 +40,23 @@ public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketLis
 		this.atEntity = true;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundPlayerLookAtPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.fromAnchor = friendlyByteBuf.readEnum(EntityAnchorArgument.Anchor.class);
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
 		this.z = friendlyByteBuf.readDouble();
-		if (friendlyByteBuf.readBoolean()) {
-			this.atEntity = true;
+		this.atEntity = friendlyByteBuf.readBoolean();
+		if (this.atEntity) {
 			this.entity = friendlyByteBuf.readVarInt();
 			this.toAnchor = friendlyByteBuf.readEnum(EntityAnchorArgument.Anchor.class);
+		} else {
+			this.entity = 0;
+			this.toAnchor = null;
 		}
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnum(this.fromAnchor);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);

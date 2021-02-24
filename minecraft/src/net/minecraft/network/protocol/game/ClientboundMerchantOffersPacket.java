@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,15 +7,12 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketListener> {
-	private int containerId;
-	private MerchantOffers offers;
-	private int villagerLevel;
-	private int villagerXp;
-	private boolean showProgress;
-	private boolean canRestock;
-
-	public ClientboundMerchantOffersPacket() {
-	}
+	private final int containerId;
+	private final MerchantOffers offers;
+	private final int villagerLevel;
+	private final int villagerXp;
+	private final boolean showProgress;
+	private final boolean canRestock;
 
 	public ClientboundMerchantOffersPacket(int i, MerchantOffers merchantOffers, int j, int k, boolean bl, boolean bl2) {
 		this.containerId = i;
@@ -27,8 +23,7 @@ public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketL
 		this.canRestock = bl2;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundMerchantOffersPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readVarInt();
 		this.offers = MerchantOffers.createFromStream(friendlyByteBuf);
 		this.villagerLevel = friendlyByteBuf.readVarInt();
@@ -38,7 +33,7 @@ public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketL
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.containerId);
 		this.offers.writeToStream(friendlyByteBuf);
 		friendlyByteBuf.writeVarInt(this.villagerLevel);

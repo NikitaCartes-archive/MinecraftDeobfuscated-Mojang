@@ -3,8 +3,8 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.data.worldgen.Pools;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -29,14 +29,14 @@ public class JigsawFeature extends StructureFeature<JigsawConfiguration> {
 
 	@Override
 	public StructureFeature.StructureStartFactory<JigsawConfiguration> getStartFactory() {
-		return (structureFeature, i, j, boundingBox, k, l) -> new JigsawFeature.FeatureStart(this, i, j, boundingBox, k, l);
+		return (structureFeature, chunkPos, boundingBox, i, l) -> new JigsawFeature.FeatureStart(this, chunkPos, boundingBox, i, l);
 	}
 
 	public static class FeatureStart extends NoiseAffectingStructureStart<JigsawConfiguration> {
 		private final JigsawFeature feature;
 
-		public FeatureStart(JigsawFeature jigsawFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(jigsawFeature, i, j, boundingBox, k, l);
+		public FeatureStart(JigsawFeature jigsawFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(jigsawFeature, chunkPos, boundingBox, i, l);
 			this.feature = jigsawFeature;
 		}
 
@@ -44,13 +44,12 @@ public class JigsawFeature extends StructureFeature<JigsawConfiguration> {
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			JigsawConfiguration jigsawConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), this.feature.startY, SectionPos.sectionToBlockCoord(j));
+			BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), this.feature.startY, chunkPos.getMinBlockZ());
 			Pools.bootstrap();
 			JigsawPlacement.addPieces(
 				registryAccess,

@@ -193,4 +193,9 @@ public class CombatTracker {
 	public LivingEntity getMob() {
 		return this.mob;
 	}
+
+	public int getKillerId() {
+		LivingEntity livingEntity = this.getKiller();
+		return livingEntity == null ? -1 : livingEntity.getId();
+	}
 }

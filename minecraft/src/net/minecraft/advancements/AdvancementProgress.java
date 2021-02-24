@@ -23,8 +23,16 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 
 public class AdvancementProgress implements Comparable<AdvancementProgress> {
-	private final Map<String, CriterionProgress> criteria = Maps.<String, CriterionProgress>newHashMap();
+	private final Map<String, CriterionProgress> criteria;
 	private String[][] requirements = new String[0][];
+
+	private AdvancementProgress(Map<String, CriterionProgress> map) {
+		this.criteria = map;
+	}
+
+	public AdvancementProgress() {
+		this.criteria = Maps.<String, CriterionProgress>newHashMap();
+	}
 
 	public void update(Map<String, Criterion> map, String[][] strings) {
 		Set<String> set = map.keySet();
@@ -98,23 +106,14 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 	}
 
 	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.criteria.size());
-
-		for (Entry<String, CriterionProgress> entry : this.criteria.entrySet()) {
-			friendlyByteBuf.writeUtf((String)entry.getKey());
-			((CriterionProgress)entry.getValue()).serializeToNetwork(friendlyByteBuf);
-		}
+		friendlyByteBuf.writeMap(
+			this.criteria, FriendlyByteBuf::writeUtf, (friendlyByteBufx, criterionProgress) -> criterionProgress.serializeToNetwork(friendlyByteBufx)
+		);
 	}
 
 	public static AdvancementProgress fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		AdvancementProgress advancementProgress = new AdvancementProgress();
-		int i = friendlyByteBuf.readVarInt();
-
-		for (int j = 0; j < i; j++) {
-			advancementProgress.criteria.put(friendlyByteBuf.readUtf(32767), CriterionProgress.fromNetwork(friendlyByteBuf));
-		}
-
-		return advancementProgress;
+		Map<String, CriterionProgress> map = friendlyByteBuf.readMap(FriendlyByteBuf::readUtf, CriterionProgress::fromNetwork);
+		return new AdvancementProgress(map);
 	}
 
 	@Nullable

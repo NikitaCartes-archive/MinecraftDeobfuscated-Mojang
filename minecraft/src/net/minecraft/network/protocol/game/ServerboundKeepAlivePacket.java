@@ -1,16 +1,12 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundKeepAlivePacket implements Packet<ServerGamePacketListener> {
-	private long id;
-
-	public ServerboundKeepAlivePacket() {
-	}
+	private final long id;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundKeepAlivePacket(long l) {
@@ -21,13 +17,12 @@ public class ServerboundKeepAlivePacket implements Packet<ServerGamePacketListen
 		serverGamePacketListener.handleKeepAlive(this);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundKeepAlivePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readLong();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeLong(this.id);
 	}
 

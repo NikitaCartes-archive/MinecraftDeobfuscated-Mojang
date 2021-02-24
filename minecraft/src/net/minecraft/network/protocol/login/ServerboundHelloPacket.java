@@ -1,27 +1,22 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundHelloPacket implements Packet<ServerLoginPacketListener> {
-	private GameProfile gameProfile;
-
-	public ServerboundHelloPacket() {
-	}
+	private final GameProfile gameProfile;
 
 	public ServerboundHelloPacket(GameProfile gameProfile) {
 		this.gameProfile = gameProfile;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundHelloPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.gameProfile = new GameProfile(null, friendlyByteBuf.readUtf(16));
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.gameProfile.getName());
 	}
 

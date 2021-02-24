@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
@@ -28,23 +28,20 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 	}
 
 	public static class OceanRuinStart extends StructureStart<OceanRuinConfiguration> {
-		public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			OceanRuinConfiguration oceanRuinConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			int k = SectionPos.sectionToBlockCoord(i);
-			int l = SectionPos.sectionToBlockCoord(j);
-			BlockPos blockPos = new BlockPos(k, 90, l);
+			BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
 			Rotation rotation = Rotation.getRandom(this.random);
 			OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);
 			this.calculateBoundingBox();

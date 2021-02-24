@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,25 +9,21 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class ClientboundEntityEventPacket implements Packet<ClientGamePacketListener> {
-	private int entityId;
-	private byte eventId;
-
-	public ClientboundEntityEventPacket() {
-	}
+	private final int entityId;
+	private final byte eventId;
 
 	public ClientboundEntityEventPacket(Entity entity, byte b) {
 		this.entityId = entity.getId();
 		this.eventId = b;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundEntityEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readInt();
 		this.eventId = friendlyByteBuf.readByte();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.entityId);
 		friendlyByteBuf.writeByte(this.eventId);
 	}

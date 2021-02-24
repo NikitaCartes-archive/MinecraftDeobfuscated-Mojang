@@ -2,7 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,25 +20,21 @@ public class ClientboundGameEventPacket implements Packet<ClientGamePacketListen
 	public static final ClientboundGameEventPacket.Type PUFFER_FISH_STING = new ClientboundGameEventPacket.Type(9);
 	public static final ClientboundGameEventPacket.Type GUARDIAN_ELDER_EFFECT = new ClientboundGameEventPacket.Type(10);
 	public static final ClientboundGameEventPacket.Type IMMEDIATE_RESPAWN = new ClientboundGameEventPacket.Type(11);
-	private ClientboundGameEventPacket.Type event;
-	private float param;
-
-	public ClientboundGameEventPacket() {
-	}
+	private final ClientboundGameEventPacket.Type event;
+	private final float param;
 
 	public ClientboundGameEventPacket(ClientboundGameEventPacket.Type type, float f) {
 		this.event = type;
 		this.param = f;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundGameEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.event = ClientboundGameEventPacket.Type.TYPES.get(friendlyByteBuf.readUnsignedByte());
 		this.param = friendlyByteBuf.readFloat();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.event.id);
 		friendlyByteBuf.writeFloat(this.param);
 	}

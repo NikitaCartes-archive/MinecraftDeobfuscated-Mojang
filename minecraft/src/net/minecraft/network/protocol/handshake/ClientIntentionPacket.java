@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.handshake;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -9,13 +8,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientIntentionPacket implements Packet<ServerHandshakePacketListener> {
-	private int protocolVersion;
-	private String hostName;
-	private int port;
-	private ConnectionProtocol intention;
-
-	public ClientIntentionPacket() {
-	}
+	private final int protocolVersion;
+	private final String hostName;
+	private final int port;
+	private final ConnectionProtocol intention;
 
 	@Environment(EnvType.CLIENT)
 	public ClientIntentionPacket(String string, int i, ConnectionProtocol connectionProtocol) {
@@ -25,8 +21,7 @@ public class ClientIntentionPacket implements Packet<ServerHandshakePacketListen
 		this.intention = connectionProtocol;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientIntentionPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.protocolVersion = friendlyByteBuf.readVarInt();
 		this.hostName = friendlyByteBuf.readUtf(255);
 		this.port = friendlyByteBuf.readUnsignedShort();
@@ -34,7 +29,7 @@ public class ClientIntentionPacket implements Packet<ServerHandshakePacketListen
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.protocolVersion);
 		friendlyByteBuf.writeUtf(this.hostName);
 		friendlyByteBuf.writeShort(this.port);

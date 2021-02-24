@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,25 +10,21 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class ClientboundRemoveMobEffectPacket implements Packet<ClientGamePacketListener> {
-	private int entityId;
-	private MobEffect effect;
-
-	public ClientboundRemoveMobEffectPacket() {
-	}
+	private final int entityId;
+	private final MobEffect effect;
 
 	public ClientboundRemoveMobEffectPacket(int i, MobEffect mobEffect) {
 		this.entityId = i;
 		this.effect = mobEffect;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundRemoveMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
 		this.effect = MobEffect.byId(friendlyByteBuf.readUnsignedByte());
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeByte(MobEffect.getId(this.effect));
 	}

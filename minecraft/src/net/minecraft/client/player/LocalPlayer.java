@@ -254,7 +254,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			} else if (bl4) {
 				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
 			} else if (this.lastOnGround != this.onGround) {
-				this.connection.send(new ServerboundMovePlayerPacket(this.onGround));
+				this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(this.onGround));
 			}
 
 			if (bl3) {

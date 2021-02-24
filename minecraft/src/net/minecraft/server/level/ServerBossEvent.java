@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Function;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.util.Mth;
@@ -24,7 +25,7 @@ public class ServerBossEvent extends BossEvent {
 	public void setProgress(float f) {
 		if (f != this.progress) {
 			super.setProgress(f);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROGRESS);
+			this.broadcast(ClientboundBossEventPacket::createUpdateProgressPacket);
 		}
 	}
 
@@ -32,7 +33,7 @@ public class ServerBossEvent extends BossEvent {
 	public void setColor(BossEvent.BossBarColor bossBarColor) {
 		if (bossBarColor != this.color) {
 			super.setColor(bossBarColor);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
+			this.broadcast(ClientboundBossEventPacket::createUpdateStylePacket);
 		}
 	}
 
@@ -40,7 +41,7 @@ public class ServerBossEvent extends BossEvent {
 	public void setOverlay(BossEvent.BossBarOverlay bossBarOverlay) {
 		if (bossBarOverlay != this.overlay) {
 			super.setOverlay(bossBarOverlay);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
+			this.broadcast(ClientboundBossEventPacket::createUpdateStylePacket);
 		}
 	}
 
@@ -48,7 +49,7 @@ public class ServerBossEvent extends BossEvent {
 	public BossEvent setDarkenScreen(boolean bl) {
 		if (bl != this.darkenScreen) {
 			super.setDarkenScreen(bl);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROPERTIES);
+			this.broadcast(ClientboundBossEventPacket::createUpdatePropertiesPacket);
 		}
 
 		return this;
@@ -58,7 +59,7 @@ public class ServerBossEvent extends BossEvent {
 	public BossEvent setPlayBossMusic(boolean bl) {
 		if (bl != this.playBossMusic) {
 			super.setPlayBossMusic(bl);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROPERTIES);
+			this.broadcast(ClientboundBossEventPacket::createUpdatePropertiesPacket);
 		}
 
 		return this;
@@ -68,7 +69,7 @@ public class ServerBossEvent extends BossEvent {
 	public BossEvent setCreateWorldFog(boolean bl) {
 		if (bl != this.createWorldFog) {
 			super.setCreateWorldFog(bl);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROPERTIES);
+			this.broadcast(ClientboundBossEventPacket::createUpdatePropertiesPacket);
 		}
 
 		return this;
@@ -78,13 +79,13 @@ public class ServerBossEvent extends BossEvent {
 	public void setName(Component component) {
 		if (!Objects.equal(component, this.name)) {
 			super.setName(component);
-			this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_NAME);
+			this.broadcast(ClientboundBossEventPacket::createUpdateNamePacket);
 		}
 	}
 
-	private void broadcast(ClientboundBossEventPacket.Operation operation) {
+	private void broadcast(Function<BossEvent, ClientboundBossEventPacket> function) {
 		if (this.visible) {
-			ClientboundBossEventPacket clientboundBossEventPacket = new ClientboundBossEventPacket(operation, this);
+			ClientboundBossEventPacket clientboundBossEventPacket = (ClientboundBossEventPacket)function.apply(this);
 
 			for (ServerPlayer serverPlayer : this.players) {
 				serverPlayer.connection.send(clientboundBossEventPacket);
@@ -94,13 +95,13 @@ public class ServerBossEvent extends BossEvent {
 
 	public void addPlayer(ServerPlayer serverPlayer) {
 		if (this.players.add(serverPlayer) && this.visible) {
-			serverPlayer.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.ADD, this));
+			serverPlayer.connection.send(ClientboundBossEventPacket.createAddPacket(this));
 		}
 	}
 
 	public void removePlayer(ServerPlayer serverPlayer) {
 		if (this.players.remove(serverPlayer) && this.visible) {
-			serverPlayer.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.REMOVE, this));
+			serverPlayer.connection.send(ClientboundBossEventPacket.createRemovePacket(this.getId()));
 		}
 	}
 
@@ -121,8 +122,7 @@ public class ServerBossEvent extends BossEvent {
 			this.visible = bl;
 
 			for (ServerPlayer serverPlayer : this.players) {
-				serverPlayer.connection
-					.send(new ClientboundBossEventPacket(bl ? ClientboundBossEventPacket.Operation.ADD : ClientboundBossEventPacket.Operation.REMOVE, this));
+				serverPlayer.connection.send(bl ? ClientboundBossEventPacket.createAddPacket(this) : ClientboundBossEventPacket.createRemovePacket(this.getId()));
 			}
 		}
 	}

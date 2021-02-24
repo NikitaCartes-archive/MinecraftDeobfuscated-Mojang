@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -13,13 +12,10 @@ import org.apache.logging.log4j.Logger;
 
 public class ClientboundBlockBreakAckPacket implements Packet<ClientGamePacketListener> {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private BlockPos pos;
-	private BlockState state;
-	ServerboundPlayerActionPacket.Action action;
-	private boolean allGood;
-
-	public ClientboundBlockBreakAckPacket() {
-	}
+	private final BlockPos pos;
+	private final BlockState state;
+	private final ServerboundPlayerActionPacket.Action action;
+	private final boolean allGood;
 
 	public ClientboundBlockBreakAckPacket(BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl, String string) {
 		this.pos = blockPos.immutable();
@@ -28,8 +24,7 @@ public class ClientboundBlockBreakAckPacket implements Packet<ClientGamePacketLi
 		this.allGood = bl;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundBlockBreakAckPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.state = Block.BLOCK_STATE_REGISTRY.byId(friendlyByteBuf.readVarInt());
 		this.action = friendlyByteBuf.readEnum(ServerboundPlayerActionPacket.Action.class);
@@ -37,7 +32,7 @@ public class ClientboundBlockBreakAckPacket implements Packet<ClientGamePacketLi
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeVarInt(Block.getId(this.state));
 		friendlyByteBuf.writeEnum(this.action);

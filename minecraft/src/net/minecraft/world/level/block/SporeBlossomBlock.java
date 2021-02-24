@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -36,6 +37,23 @@ public class SporeBlossomBlock extends Block {
 		double e = (double)j + 0.7;
 		double f = (double)k + random.nextDouble();
 		level.addParticle(ParticleTypes.FALLING_SPORE_BLOSSOM, d, e, f, 0.0, 0.0, 0.0);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int l = 0; l < 14; l++) {
+			mutableBlockPos.set(i + Mth.nextInt(random, -10, 10), j - random.nextInt(10), k + Mth.nextInt(random, -10, 10));
+			BlockState blockState2 = level.getBlockState(mutableBlockPos);
+			if (!blockState2.isCollisionShapeFullBlock(level, mutableBlockPos)) {
+				level.addParticle(
+					ParticleTypes.SPORE_BLOSSOM_AIR,
+					(double)mutableBlockPos.getX() + random.nextDouble(),
+					(double)mutableBlockPos.getY() + random.nextDouble(),
+					(double)mutableBlockPos.getZ() + random.nextDouble(),
+					0.0,
+					0.0,
+					0.0
+				);
+			}
+		}
 	}
 
 	@Override

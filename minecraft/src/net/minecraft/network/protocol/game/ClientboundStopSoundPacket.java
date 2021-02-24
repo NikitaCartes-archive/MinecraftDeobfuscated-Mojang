@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,31 +9,33 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 
 public class ClientboundStopSoundPacket implements Packet<ClientGamePacketListener> {
-	private ResourceLocation name;
-	private SoundSource source;
-
-	public ClientboundStopSoundPacket() {
-	}
+	@Nullable
+	private final ResourceLocation name;
+	@Nullable
+	private final SoundSource source;
 
 	public ClientboundStopSoundPacket(@Nullable ResourceLocation resourceLocation, @Nullable SoundSource soundSource) {
 		this.name = resourceLocation;
 		this.source = soundSource;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundStopSoundPacket(FriendlyByteBuf friendlyByteBuf) {
 		int i = friendlyByteBuf.readByte();
 		if ((i & 1) > 0) {
 			this.source = friendlyByteBuf.readEnum(SoundSource.class);
+		} else {
+			this.source = null;
 		}
 
 		if ((i & 2) > 0) {
 			this.name = friendlyByteBuf.readResourceLocation();
+		} else {
+			this.name = null;
 		}
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		if (this.source != null) {
 			if (this.name != null) {
 				friendlyByteBuf.writeByte(3);

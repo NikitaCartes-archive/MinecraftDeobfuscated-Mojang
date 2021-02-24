@@ -1,15 +1,11 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.Difficulty;
 
 public class ServerboundChangeDifficultyPacket implements Packet<ServerGamePacketListener> {
-	private Difficulty difficulty;
-
-	public ServerboundChangeDifficultyPacket() {
-	}
+	private final Difficulty difficulty;
 
 	public ServerboundChangeDifficultyPacket(Difficulty difficulty) {
 		this.difficulty = difficulty;
@@ -19,13 +15,12 @@ public class ServerboundChangeDifficultyPacket implements Packet<ServerGamePacke
 		serverGamePacketListener.handleChangeDifficulty(this);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundChangeDifficultyPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.difficulty = Difficulty.byId(friendlyByteBuf.readUnsignedByte());
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.difficulty.getId());
 	}
 

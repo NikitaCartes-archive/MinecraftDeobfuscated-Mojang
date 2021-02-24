@@ -1,10 +1,8 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -16,14 +14,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacketListener> {
-	private int entityId;
-	private final List<ClientboundUpdateAttributesPacket.AttributeSnapshot> attributes = Lists.<ClientboundUpdateAttributesPacket.AttributeSnapshot>newArrayList();
-
-	public ClientboundUpdateAttributesPacket() {
-	}
+	private final int entityId;
+	private final List<ClientboundUpdateAttributesPacket.AttributeSnapshot> attributes;
 
 	public ClientboundUpdateAttributesPacket(int i, Collection<AttributeInstance> collection) {
 		this.entityId = i;
+		this.attributes = Lists.<ClientboundUpdateAttributesPacket.AttributeSnapshot>newArrayList();
 
 		for (AttributeInstance attributeInstance : collection) {
 			this.attributes
@@ -35,47 +31,38 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundUpdateAttributesPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
-		int i = friendlyByteBuf.readInt();
-
-		for (int j = 0; j < i; j++) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
-			double d = friendlyByteBuf.readDouble();
-			List<AttributeModifier> list = Lists.<AttributeModifier>newArrayList();
-			int k = friendlyByteBuf.readVarInt();
-
-			for (int l = 0; l < k; l++) {
-				UUID uUID = friendlyByteBuf.readUUID();
-				list.add(
-					new AttributeModifier(
-						uUID, "Unknown synced attribute modifier", friendlyByteBuf.readDouble(), AttributeModifier.Operation.fromValue(friendlyByteBuf.readByte())
-					)
+		this.attributes = friendlyByteBuf.readList(
+			friendlyByteBufx -> {
+				ResourceLocation resourceLocation = friendlyByteBufx.readResourceLocation();
+				Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
+				double d = friendlyByteBufx.readDouble();
+				List<AttributeModifier> list = friendlyByteBufx.readList(
+					friendlyByteBufxx -> new AttributeModifier(
+							friendlyByteBufxx.readUUID(),
+							"Unknown synced attribute modifier",
+							friendlyByteBufxx.readDouble(),
+							AttributeModifier.Operation.fromValue(friendlyByteBufxx.readByte())
+						)
 				);
+				return new ClientboundUpdateAttributesPacket.AttributeSnapshot(attribute, d, list);
 			}
-
-			this.attributes.add(new ClientboundUpdateAttributesPacket.AttributeSnapshot(attribute, d, list));
-		}
+		);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeInt(this.attributes.size());
-
-		for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : this.attributes) {
-			friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
-			friendlyByteBuf.writeDouble(attributeSnapshot.getBase());
-			friendlyByteBuf.writeVarInt(attributeSnapshot.getModifiers().size());
-
-			for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {
-				friendlyByteBuf.writeUUID(attributeModifier.getId());
-				friendlyByteBuf.writeDouble(attributeModifier.getAmount());
-				friendlyByteBuf.writeByte(attributeModifier.getOperation().toValue());
-			}
-		}
+		friendlyByteBuf.writeCollection(this.attributes, (friendlyByteBufx, attributeSnapshot) -> {
+			friendlyByteBufx.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+			friendlyByteBufx.writeDouble(attributeSnapshot.getBase());
+			friendlyByteBufx.writeCollection(attributeSnapshot.getModifiers(), (friendlyByteBufxx, attributeModifier) -> {
+				friendlyByteBufxx.writeUUID(attributeModifier.getId());
+				friendlyByteBufxx.writeDouble(attributeModifier.getAmount());
+				friendlyByteBufxx.writeByte(attributeModifier.getOperation().toValue());
+			});
+		});
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -92,7 +79,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		return this.attributes;
 	}
 
-	public class AttributeSnapshot {
+	public static class AttributeSnapshot {
 		private final Attribute attribute;
 		private final double base;
 		private final Collection<AttributeModifier> modifiers;

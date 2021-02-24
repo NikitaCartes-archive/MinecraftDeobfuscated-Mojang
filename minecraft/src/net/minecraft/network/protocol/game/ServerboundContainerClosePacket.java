@@ -1,16 +1,12 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundContainerClosePacket implements Packet<ServerGamePacketListener> {
-	private int containerId;
-
-	public ServerboundContainerClosePacket() {
-	}
+	private final int containerId;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundContainerClosePacket(int i) {
@@ -21,13 +17,12 @@ public class ServerboundContainerClosePacket implements Packet<ServerGamePacketL
 		serverGamePacketListener.handleContainerClose(this);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundContainerClosePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readByte();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 	}
 }

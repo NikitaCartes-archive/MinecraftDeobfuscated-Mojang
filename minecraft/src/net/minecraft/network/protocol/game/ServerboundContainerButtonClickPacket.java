@@ -1,17 +1,13 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundContainerButtonClickPacket implements Packet<ServerGamePacketListener> {
-	private int containerId;
-	private int buttonId;
-
-	public ServerboundContainerButtonClickPacket() {
-	}
+	private final int containerId;
+	private final int buttonId;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundContainerButtonClickPacket(int i, int j) {
@@ -23,14 +19,13 @@ public class ServerboundContainerButtonClickPacket implements Packet<ServerGameP
 		serverGamePacketListener.handleContainerButtonClick(this);
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundContainerButtonClickPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readByte();
 		this.buttonId = friendlyByteBuf.readByte();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 		friendlyByteBuf.writeByte(this.buttonId);
 	}

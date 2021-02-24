@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,16 +8,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.player.Player;
 
 public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListener> {
-	private int entityId;
-	private UUID playerId;
-	private double x;
-	private double y;
-	private double z;
-	private byte yRot;
-	private byte xRot;
-
-	public ClientboundAddPlayerPacket() {
-	}
+	private final int entityId;
+	private final UUID playerId;
+	private final double x;
+	private final double y;
+	private final double z;
+	private final byte yRot;
+	private final byte xRot;
 
 	public ClientboundAddPlayerPacket(Player player) {
 		this.entityId = player.getId();
@@ -30,8 +26,7 @@ public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListen
 		this.xRot = (byte)((int)(player.xRot * 256.0F / 360.0F));
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundAddPlayerPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
 		this.playerId = friendlyByteBuf.readUUID();
 		this.x = friendlyByteBuf.readDouble();
@@ -42,7 +37,7 @@ public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListen
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeUUID(this.playerId);
 		friendlyByteBuf.writeDouble(this.x);

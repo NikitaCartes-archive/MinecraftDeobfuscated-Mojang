@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
@@ -25,22 +25,21 @@ public class ShipwreckFeature extends StructureFeature<ShipwreckConfiguration> {
 	}
 
 	public static class FeatureStart extends StructureStart<ShipwreckConfiguration> {
-		public FeatureStart(StructureFeature<ShipwreckConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public FeatureStart(StructureFeature<ShipwreckConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			ShipwreckConfiguration shipwreckConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
-			BlockPos blockPos = new BlockPos(SectionPos.sectionToBlockCoord(i), 90, SectionPos.sectionToBlockCoord(j));
+			BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
 			ShipwreckPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, shipwreckConfiguration);
 			this.calculateBoundingBox();
 		}

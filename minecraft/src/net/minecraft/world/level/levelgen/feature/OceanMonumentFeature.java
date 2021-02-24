@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -40,20 +39,22 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
-		for (Biome biome2 : biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 16)) {
+		int i = chunkPos.getBlockX(9);
+		int j = chunkPos.getBlockZ(9);
+
+		for (Biome biome2 : biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 16)) {
 			if (!biome2.getGenerationSettings().isValidStart(this)) {
 				return false;
 			}
 		}
 
-		for (Biome biome3 : biomeSource.getBiomesWithin(SectionPos.sectionToBlockCoord(i, 9), chunkGenerator.getSeaLevel(), SectionPos.sectionToBlockCoord(j, 9), 29)) {
+		for (Biome biome3 : biomeSource.getBiomesWithin(i, chunkGenerator.getSeaLevel(), j, 29)) {
 			if (biome3.getBiomeCategory() != Biome.BiomeCategory.OCEAN && biome3.getBiomeCategory() != Biome.BiomeCategory.RIVER) {
 				return false;
 			}
@@ -75,28 +76,27 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 	public static class OceanMonumentStart extends StructureStart<NoneFeatureConfiguration> {
 		private boolean isCreated;
 
-		public OceanMonumentStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public OceanMonumentStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			this.generatePieces(i, j);
+			this.generatePieces(chunkPos);
 		}
 
-		private void generatePieces(int i, int j) {
-			int k = SectionPos.sectionToBlockCoord(i) - 29;
-			int l = SectionPos.sectionToBlockCoord(j) - 29;
+		private void generatePieces(ChunkPos chunkPos) {
+			int i = chunkPos.getMinBlockX() - 29;
+			int j = chunkPos.getMinBlockZ() - 29;
 			Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(this.random);
-			this.pieces.add(new OceanMonumentPieces.MonumentBuilding(this.random, k, l, direction));
+			this.pieces.add(new OceanMonumentPieces.MonumentBuilding(this.random, i, j, direction));
 			this.calculateBoundingBox();
 			this.isCreated = true;
 		}
@@ -112,7 +112,7 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 		) {
 			if (!this.isCreated) {
 				this.pieces.clear();
-				this.generatePieces(this.getChunkX(), this.getChunkZ());
+				this.generatePieces(this.getChunkPos());
 			}
 
 			super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);

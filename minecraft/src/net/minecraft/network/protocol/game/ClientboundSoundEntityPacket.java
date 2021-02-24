@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -12,14 +11,11 @@ import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.Validate;
 
 public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketListener> {
-	private SoundEvent sound;
-	private SoundSource source;
-	private int id;
-	private float volume;
-	private float pitch;
-
-	public ClientboundSoundEntityPacket() {
-	}
+	private final SoundEvent sound;
+	private final SoundSource source;
+	private final int id;
+	private final float volume;
+	private final float pitch;
 
 	public ClientboundSoundEntityPacket(SoundEvent soundEvent, SoundSource soundSource, Entity entity, float f, float g) {
 		Validate.notNull(soundEvent, "sound");
@@ -30,8 +26,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 		this.pitch = g;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSoundEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.sound = Registry.SOUND_EVENT.byId(friendlyByteBuf.readVarInt());
 		this.source = friendlyByteBuf.readEnum(SoundSource.class);
 		this.id = friendlyByteBuf.readVarInt();
@@ -40,7 +35,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(Registry.SOUND_EVENT.getId(this.sound));
 		friendlyByteBuf.writeEnum(this.source);
 		friendlyByteBuf.writeVarInt(this.id);

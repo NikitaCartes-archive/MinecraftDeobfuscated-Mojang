@@ -1,7 +1,8 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
+import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,43 +12,41 @@ import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketListener> {
-	private int mapId;
-	private byte scale;
-	private boolean locked;
+	private final int mapId;
+	private final byte scale;
+	private final boolean locked;
 	@Nullable
-	private MapDecoration[] decorations;
+	private final List<MapDecoration> decorations;
 	@Nullable
-	private MapItemSavedData.MapPatch colorPatch;
-
-	public ClientboundMapItemDataPacket() {
-	}
+	private final MapItemSavedData.MapPatch colorPatch;
 
 	public ClientboundMapItemDataPacket(int i, byte b, boolean bl, @Nullable Collection<MapDecoration> collection, @Nullable MapItemSavedData.MapPatch mapPatch) {
 		this.mapId = i;
 		this.scale = b;
 		this.locked = bl;
-		this.decorations = collection != null ? (MapDecoration[])collection.toArray(new MapDecoration[0]) : null;
+		this.decorations = collection != null ? Lists.<MapDecoration>newArrayList(collection) : null;
 		this.colorPatch = mapPatch;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundMapItemDataPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.mapId = friendlyByteBuf.readVarInt();
 		this.scale = friendlyByteBuf.readByte();
 		this.locked = friendlyByteBuf.readBoolean();
 		if (friendlyByteBuf.readBoolean()) {
-			this.decorations = new MapDecoration[friendlyByteBuf.readVarInt()];
-
-			for (int i = 0; i < this.decorations.length; i++) {
-				MapDecoration.Type type = friendlyByteBuf.readEnum(MapDecoration.Type.class);
-				this.decorations[i] = new MapDecoration(
-					type,
-					friendlyByteBuf.readByte(),
-					friendlyByteBuf.readByte(),
-					(byte)(friendlyByteBuf.readByte() & 15),
-					friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null
-				);
-			}
+			this.decorations = friendlyByteBuf.readList(
+				friendlyByteBufx -> {
+					MapDecoration.Type type = friendlyByteBufx.readEnum(MapDecoration.Type.class);
+					return new MapDecoration(
+						type,
+						friendlyByteBufx.readByte(),
+						friendlyByteBufx.readByte(),
+						(byte)(friendlyByteBufx.readByte() & 15),
+						friendlyByteBufx.readBoolean() ? friendlyByteBufx.readComponent() : null
+					);
+				}
+			);
+		} else {
+			this.decorations = null;
 		}
 
 		int i = friendlyByteBuf.readUnsignedByte();
@@ -57,30 +56,30 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 			int l = friendlyByteBuf.readUnsignedByte();
 			byte[] bs = friendlyByteBuf.readByteArray();
 			this.colorPatch = new MapItemSavedData.MapPatch(k, l, i, j, bs);
+		} else {
+			this.colorPatch = null;
 		}
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.mapId);
 		friendlyByteBuf.writeByte(this.scale);
 		friendlyByteBuf.writeBoolean(this.locked);
 		if (this.decorations != null) {
 			friendlyByteBuf.writeBoolean(true);
-			friendlyByteBuf.writeVarInt(this.decorations.length);
-
-			for (MapDecoration mapDecoration : this.decorations) {
-				friendlyByteBuf.writeEnum(mapDecoration.getType());
-				friendlyByteBuf.writeByte(mapDecoration.getX());
-				friendlyByteBuf.writeByte(mapDecoration.getY());
-				friendlyByteBuf.writeByte(mapDecoration.getRot() & 15);
+			friendlyByteBuf.writeCollection(this.decorations, (friendlyByteBufx, mapDecoration) -> {
+				friendlyByteBufx.writeEnum(mapDecoration.getType());
+				friendlyByteBufx.writeByte(mapDecoration.getX());
+				friendlyByteBufx.writeByte(mapDecoration.getY());
+				friendlyByteBufx.writeByte(mapDecoration.getRot() & 15);
 				if (mapDecoration.getName() != null) {
-					friendlyByteBuf.writeBoolean(true);
-					friendlyByteBuf.writeComponent(mapDecoration.getName());
+					friendlyByteBufx.writeBoolean(true);
+					friendlyByteBufx.writeComponent(mapDecoration.getName());
 				} else {
-					friendlyByteBuf.writeBoolean(false);
+					friendlyByteBufx.writeBoolean(false);
 				}
-			}
+			});
 		} else {
 			friendlyByteBuf.writeBoolean(false);
 		}

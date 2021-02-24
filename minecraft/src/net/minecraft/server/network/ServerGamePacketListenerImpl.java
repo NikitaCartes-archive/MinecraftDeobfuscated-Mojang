@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.ints.Int2ShortMap;
 import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -117,6 +116,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -1264,35 +1264,49 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	public void handleInteract(ServerboundInteractPacket serverboundInteractPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundInteractPacket, this, this.player.getLevel());
 		ServerLevel serverLevel = this.player.getLevel();
-		Entity entity = serverboundInteractPacket.getTarget(serverLevel);
+		final Entity entity = serverboundInteractPacket.getTarget(serverLevel);
 		this.player.resetLastActionTime();
 		this.player.setShiftKeyDown(serverboundInteractPacket.isUsingSecondaryAction());
 		if (entity != null) {
 			double d = 36.0;
 			if (this.player.distanceToSqr(entity) < 36.0) {
-				InteractionHand interactionHand = serverboundInteractPacket.getHand();
-				ItemStack itemStack = interactionHand != null ? this.player.getItemInHand(interactionHand).copy() : ItemStack.EMPTY;
-				Optional<InteractionResult> optional = Optional.empty();
-				if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.INTERACT) {
-					optional = Optional.of(this.player.interactOn(entity, interactionHand));
-				} else if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.INTERACT_AT) {
-					optional = Optional.of(entity.interactAt(this.player, serverboundInteractPacket.getLocation(), interactionHand));
-				} else if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.ATTACK) {
-					if (entity instanceof ItemEntity || entity instanceof ExperienceOrb || entity instanceof AbstractArrow || entity == this.player) {
-						this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_entity_attacked"));
-						LOGGER.warn("Player {} tried to attack an invalid entity", this.player.getName().getString());
-						return;
-					}
+				serverboundInteractPacket.dispatch(
+					new ServerboundInteractPacket.Handler() {
+						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
+							ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(interactionHand).copy();
+							InteractionResult interactionResult = entityInteraction.run(ServerGamePacketListenerImpl.this.player, entity, interactionHand);
+							if (interactionResult.consumesAction()) {
+								CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(ServerGamePacketListenerImpl.this.player, itemStack, entity);
+								if (interactionResult.shouldSwing()) {
+									ServerGamePacketListenerImpl.this.player.swing(interactionHand, true);
+								}
+							}
+						}
 
-					this.player.attack(entity);
-				}
+						@Override
+						public void onInteraction(InteractionHand interactionHand) {
+							this.performInteraction(interactionHand, Player::interactOn);
+						}
 
-				if (optional.isPresent() && ((InteractionResult)optional.get()).consumesAction()) {
-					CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(this.player, itemStack, entity);
-					if (((InteractionResult)optional.get()).shouldSwing()) {
-						this.player.swing(interactionHand, true);
+						@Override
+						public void onInteraction(InteractionHand interactionHand, Vec3 vec3) {
+							this.performInteraction(interactionHand, (serverPlayer, entityxx, interactionHandx) -> entityxx.interactAt(serverPlayer, vec3, interactionHandx));
+						}
+
+						@Override
+						public void onAttack() {
+							if (!(entity instanceof ItemEntity)
+								&& !(entity instanceof ExperienceOrb)
+								&& !(entity instanceof AbstractArrow)
+								&& entity != ServerGamePacketListenerImpl.this.player) {
+								ServerGamePacketListenerImpl.this.player.attack(entity);
+							} else {
+								ServerGamePacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_entity_attacked"));
+								ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
+							}
+						}
 					}
-				}
+				);
 			}
 		}
 	}
@@ -1536,5 +1550,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	@Override
 	public ServerPlayer getPlayer() {
 		return this.player;
+	}
+
+	@FunctionalInterface
+	interface EntityInteraction {
+		InteractionResult run(ServerPlayer serverPlayer, Entity entity, InteractionHand interactionHand);
 	}
 }

@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,25 +7,21 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.Item;
 
 public class ClientboundCooldownPacket implements Packet<ClientGamePacketListener> {
-	private Item item;
-	private int duration;
-
-	public ClientboundCooldownPacket() {
-	}
+	private final Item item;
+	private final int duration;
 
 	public ClientboundCooldownPacket(Item item, int i) {
 		this.item = item;
 		this.duration = i;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundCooldownPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.item = Item.byId(friendlyByteBuf.readVarInt());
 		this.duration = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(Item.getId(this.item));
 		friendlyByteBuf.writeVarInt(this.duration);
 	}

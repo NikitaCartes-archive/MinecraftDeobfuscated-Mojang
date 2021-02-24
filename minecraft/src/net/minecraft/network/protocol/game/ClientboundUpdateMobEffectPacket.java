@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,14 +8,11 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacketListener> {
-	private int entityId;
-	private byte effectId;
-	private byte effectAmplifier;
-	private int effectDurationTicks;
-	private byte flags;
-
-	public ClientboundUpdateMobEffectPacket() {
-	}
+	private final int entityId;
+	private final byte effectId;
+	private final byte effectAmplifier;
+	private final int effectDurationTicks;
+	private final byte flags;
 
 	public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance) {
 		this.entityId = i;
@@ -28,22 +24,23 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 			this.effectDurationTicks = mobEffectInstance.getDuration();
 		}
 
-		this.flags = 0;
+		byte b = 0;
 		if (mobEffectInstance.isAmbient()) {
-			this.flags = (byte)(this.flags | 1);
+			b = (byte)(b | 1);
 		}
 
 		if (mobEffectInstance.isVisible()) {
-			this.flags = (byte)(this.flags | 2);
+			b = (byte)(b | 2);
 		}
 
 		if (mobEffectInstance.showIcon()) {
-			this.flags = (byte)(this.flags | 4);
+			b = (byte)(b | 4);
 		}
+
+		this.flags = b;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
 		this.effectId = friendlyByteBuf.readByte();
 		this.effectAmplifier = friendlyByteBuf.readByte();
@@ -52,7 +49,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeByte(this.effectId);
 		friendlyByteBuf.writeByte(this.effectAmplifier);

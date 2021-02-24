@@ -60,6 +60,10 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
+		this.copy(BlockTags.IRON_ORES, ItemTags.IRON_ORES);
+		this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
+		this.copy(BlockTags.REDSTONE_ORES, ItemTags.REDSTONE_ORES);
+		this.copy(BlockTags.LAPIS_ORES, ItemTags.LAPIS_ORES);
 		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
 		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
 		this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
@@ -164,8 +168,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.CRIMSON_SIGN,
 				Items.WARPED_SIGN
 			);
-		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE);
-		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.GRIMSTONE);
+		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
+		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES).add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET);
 		this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add(Items.TROPICAL_FISH, Items.TROPICAL_FISH_BUCKET);
 	}

@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -9,15 +8,12 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 
 public class ServerboundSetCommandBlockPacket implements Packet<ServerGamePacketListener> {
-	private BlockPos pos;
-	private String command;
-	private boolean trackOutput;
-	private boolean conditional;
-	private boolean automatic;
-	private CommandBlockEntity.Mode mode;
-
-	public ServerboundSetCommandBlockPacket() {
-	}
+	private final BlockPos pos;
+	private final String command;
+	private final boolean trackOutput;
+	private final boolean conditional;
+	private final boolean automatic;
+	private final CommandBlockEntity.Mode mode;
 
 	@Environment(EnvType.CLIENT)
 	public ServerboundSetCommandBlockPacket(BlockPos blockPos, String string, CommandBlockEntity.Mode mode, boolean bl, boolean bl2, boolean bl3) {
@@ -29,10 +25,9 @@ public class ServerboundSetCommandBlockPacket implements Packet<ServerGamePacket
 		this.mode = mode;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundSetCommandBlockPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
-		this.command = friendlyByteBuf.readUtf(32767);
+		this.command = friendlyByteBuf.readUtf();
 		this.mode = friendlyByteBuf.readEnum(CommandBlockEntity.Mode.class);
 		int i = friendlyByteBuf.readByte();
 		this.trackOutput = (i & 1) != 0;
@@ -41,7 +36,7 @@ public class ServerboundSetCommandBlockPacket implements Packet<ServerGamePacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeUtf(this.command);
 		friendlyByteBuf.writeEnum(this.mode);

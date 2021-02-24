@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
-import java.io.IOException;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,13 +12,22 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 
 public class ClientboundAwardStatsPacket implements Packet<ClientGamePacketListener> {
-	private Object2IntMap<Stat<?>> stats;
-
-	public ClientboundAwardStatsPacket() {
-	}
+	private final Object2IntMap<Stat<?>> stats;
 
 	public ClientboundAwardStatsPacket(Object2IntMap<Stat<?>> object2IntMap) {
 		this.stats = object2IntMap;
+	}
+
+	public ClientboundAwardStatsPacket(FriendlyByteBuf friendlyByteBuf) {
+		this.stats = friendlyByteBuf.readMap(Object2IntOpenHashMap::new, friendlyByteBufx -> {
+			int i = friendlyByteBufx.readVarInt();
+			int j = friendlyByteBufx.readVarInt();
+			return readStatCap(Registry.STAT_TYPE.byId(i), j);
+		}, FriendlyByteBuf::readVarInt);
+	}
+
+	private static <T> Stat<T> readStatCap(StatType<T> statType, int i) {
+		return statType.get(statType.getRegistry().byId(i));
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -28,34 +35,14 @@ public class ClientboundAwardStatsPacket implements Packet<ClientGamePacketListe
 	}
 
 	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		int i = friendlyByteBuf.readVarInt();
-		this.stats = new Object2IntOpenHashMap<>(i);
-
-		for (int j = 0; j < i; j++) {
-			this.readStat(Registry.STAT_TYPE.byId(friendlyByteBuf.readVarInt()), friendlyByteBuf);
-		}
+	public void write(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeMap(this.stats, (friendlyByteBufx, stat) -> {
+			friendlyByteBufx.writeVarInt(Registry.STAT_TYPE.getId(stat.getType()));
+			friendlyByteBufx.writeVarInt(this.getStatIdCap(stat));
+		}, FriendlyByteBuf::writeVarInt);
 	}
 
-	private <T> void readStat(StatType<T> statType, FriendlyByteBuf friendlyByteBuf) {
-		int i = friendlyByteBuf.readVarInt();
-		int j = friendlyByteBuf.readVarInt();
-		this.stats.put(statType.get(statType.getRegistry().byId(i)), j);
-	}
-
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeVarInt(this.stats.size());
-
-		for (Entry<Stat<?>> entry : this.stats.object2IntEntrySet()) {
-			Stat<?> stat = (Stat<?>)entry.getKey();
-			friendlyByteBuf.writeVarInt(Registry.STAT_TYPE.getId(stat.getType()));
-			friendlyByteBuf.writeVarInt(this.getId(stat));
-			friendlyByteBuf.writeVarInt(entry.getIntValue());
-		}
-	}
-
-	private <T> int getId(Stat<T> stat) {
+	private <T> int getStatIdCap(Stat<T> stat) {
 		return stat.getType().getRegistry().getId(stat.getValue());
 	}
 

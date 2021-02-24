@@ -1,7 +1,7 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,106 +10,81 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.BossEvent;
 
 public class ClientboundBossEventPacket implements Packet<ClientGamePacketListener> {
-	private UUID id;
-	private ClientboundBossEventPacket.Operation operation;
-	private Component name;
-	private float pct;
-	private BossEvent.BossBarColor color;
-	private BossEvent.BossBarOverlay overlay;
-	private boolean darkenScreen;
-	private boolean playMusic;
-	private boolean createWorldFog;
+	private final UUID id;
+	private final ClientboundBossEventPacket.Operation operation;
+	private static final ClientboundBossEventPacket.Operation REMOVE_OPERATION = new ClientboundBossEventPacket.Operation() {
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.REMOVE;
+		}
 
-	public ClientboundBossEventPacket() {
-	}
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.remove(uUID);
+		}
 
-	public ClientboundBossEventPacket(ClientboundBossEventPacket.Operation operation, BossEvent bossEvent) {
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+		}
+	};
+
+	private ClientboundBossEventPacket(UUID uUID, ClientboundBossEventPacket.Operation operation) {
+		this.id = uUID;
 		this.operation = operation;
-		this.id = bossEvent.getId();
-		this.name = bossEvent.getName();
-		this.pct = bossEvent.getProgress();
-		this.color = bossEvent.getColor();
-		this.overlay = bossEvent.getOverlay();
-		this.darkenScreen = bossEvent.shouldDarkenScreen();
-		this.playMusic = bossEvent.shouldPlayBossMusic();
-		this.createWorldFog = bossEvent.shouldCreateWorldFog();
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundBossEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readUUID();
-		this.operation = friendlyByteBuf.readEnum(ClientboundBossEventPacket.Operation.class);
-		switch (this.operation) {
-			case ADD:
-				this.name = friendlyByteBuf.readComponent();
-				this.pct = friendlyByteBuf.readFloat();
-				this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
-				this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
-				this.decodeProperties(friendlyByteBuf.readUnsignedByte());
-			case REMOVE:
-			default:
-				break;
-			case UPDATE_PROGRESS:
-				this.pct = friendlyByteBuf.readFloat();
-				break;
-			case UPDATE_NAME:
-				this.name = friendlyByteBuf.readComponent();
-				break;
-			case UPDATE_STYLE:
-				this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
-				this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
-				break;
-			case UPDATE_PROPERTIES:
-				this.decodeProperties(friendlyByteBuf.readUnsignedByte());
-		}
+		ClientboundBossEventPacket.OperationType operationType = friendlyByteBuf.readEnum(ClientboundBossEventPacket.OperationType.class);
+		this.operation = (ClientboundBossEventPacket.Operation)operationType.reader.apply(friendlyByteBuf);
 	}
 
-	private void decodeProperties(int i) {
-		this.darkenScreen = (i & 1) > 0;
-		this.playMusic = (i & 2) > 0;
-		this.createWorldFog = (i & 4) > 0;
+	public static ClientboundBossEventPacket createAddPacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(bossEvent.getId(), new ClientboundBossEventPacket.AddOperation(bossEvent));
+	}
+
+	public static ClientboundBossEventPacket createRemovePacket(UUID uUID) {
+		return new ClientboundBossEventPacket(uUID, REMOVE_OPERATION);
+	}
+
+	public static ClientboundBossEventPacket createUpdateProgressPacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(bossEvent.getId(), new ClientboundBossEventPacket.UpdateProgressOperation(bossEvent.getProgress()));
+	}
+
+	public static ClientboundBossEventPacket createUpdateNamePacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(bossEvent.getId(), new ClientboundBossEventPacket.UpdateNameOperation(bossEvent.getName()));
+	}
+
+	public static ClientboundBossEventPacket createUpdateStylePacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(bossEvent.getId(), new ClientboundBossEventPacket.UpdateStyleOperation(bossEvent.getColor(), bossEvent.getOverlay()));
+	}
+
+	public static ClientboundBossEventPacket createUpdatePropertiesPacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(
+			bossEvent.getId(),
+			new ClientboundBossEventPacket.UpdatePropertiesOperation(bossEvent.shouldDarkenScreen(), bossEvent.shouldPlayBossMusic(), bossEvent.shouldCreateWorldFog())
+		);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUUID(this.id);
-		friendlyByteBuf.writeEnum(this.operation);
-		switch (this.operation) {
-			case ADD:
-				friendlyByteBuf.writeComponent(this.name);
-				friendlyByteBuf.writeFloat(this.pct);
-				friendlyByteBuf.writeEnum(this.color);
-				friendlyByteBuf.writeEnum(this.overlay);
-				friendlyByteBuf.writeByte(this.encodeProperties());
-			case REMOVE:
-			default:
-				break;
-			case UPDATE_PROGRESS:
-				friendlyByteBuf.writeFloat(this.pct);
-				break;
-			case UPDATE_NAME:
-				friendlyByteBuf.writeComponent(this.name);
-				break;
-			case UPDATE_STYLE:
-				friendlyByteBuf.writeEnum(this.color);
-				friendlyByteBuf.writeEnum(this.overlay);
-				break;
-			case UPDATE_PROPERTIES:
-				friendlyByteBuf.writeByte(this.encodeProperties());
-		}
+		friendlyByteBuf.writeEnum(this.operation.getType());
+		this.operation.write(friendlyByteBuf);
 	}
 
-	private int encodeProperties() {
+	private static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
 		int i = 0;
-		if (this.darkenScreen) {
+		if (bl) {
 			i |= 1;
 		}
 
-		if (this.playMusic) {
+		if (bl2) {
 			i |= 2;
 		}
 
-		if (this.createWorldFog) {
+		if (bl3) {
 			i |= 4;
 		}
 
@@ -121,56 +96,228 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	}
 
 	@Environment(EnvType.CLIENT)
-	public UUID getId() {
-		return this.id;
+	public void dispatch(ClientboundBossEventPacket.Handler handler) {
+		this.operation.dispatch(this.id, handler);
+	}
+
+	static class AddOperation implements ClientboundBossEventPacket.Operation {
+		private final Component name;
+		private final float progress;
+		private final BossEvent.BossBarColor color;
+		private final BossEvent.BossBarOverlay overlay;
+		private final boolean darkenScreen;
+		private final boolean playMusic;
+		private final boolean createWorldFog;
+
+		private AddOperation(BossEvent bossEvent) {
+			this.name = bossEvent.getName();
+			this.progress = bossEvent.getProgress();
+			this.color = bossEvent.getColor();
+			this.overlay = bossEvent.getOverlay();
+			this.darkenScreen = bossEvent.shouldDarkenScreen();
+			this.playMusic = bossEvent.shouldPlayBossMusic();
+			this.createWorldFog = bossEvent.shouldCreateWorldFog();
+		}
+
+		private AddOperation(FriendlyByteBuf friendlyByteBuf) {
+			this.name = friendlyByteBuf.readComponent();
+			this.progress = friendlyByteBuf.readFloat();
+			this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
+			this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
+			int i = friendlyByteBuf.readUnsignedByte();
+			this.darkenScreen = (i & 1) > 0;
+			this.playMusic = (i & 2) > 0;
+			this.createWorldFog = (i & 4) > 0;
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.ADD;
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.add(uUID, this.name, this.progress, this.color, this.overlay, this.darkenScreen, this.playMusic, this.createWorldFog);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeComponent(this.name);
+			friendlyByteBuf.writeFloat(this.progress);
+			friendlyByteBuf.writeEnum(this.color);
+			friendlyByteBuf.writeEnum(this.overlay);
+			friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ClientboundBossEventPacket.Operation getOperation() {
-		return this.operation;
+	public interface Handler {
+		default void add(
+			UUID uUID, Component component, float f, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay, boolean bl, boolean bl2, boolean bl3
+		) {
+		}
+
+		default void remove(UUID uUID) {
+		}
+
+		default void updateProgress(UUID uUID, float f) {
+		}
+
+		default void updateName(UUID uUID, Component component) {
+		}
+
+		default void updateStyle(UUID uUID, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+		}
+
+		default void updateProperties(UUID uUID, boolean bl, boolean bl2, boolean bl3) {
+		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	public Component getName() {
-		return this.name;
+	interface Operation {
+		ClientboundBossEventPacket.OperationType getType();
+
+		@Environment(EnvType.CLIENT)
+		void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler);
+
+		void write(FriendlyByteBuf friendlyByteBuf);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public float getPercent() {
-		return this.pct;
+	static enum OperationType {
+		ADD(friendlyByteBuf -> new ClientboundBossEventPacket.AddOperation(friendlyByteBuf)),
+		REMOVE(friendlyByteBuf -> ClientboundBossEventPacket.REMOVE_OPERATION),
+		UPDATE_PROGRESS(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateProgressOperation(friendlyByteBuf)),
+		UPDATE_NAME(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateNameOperation(friendlyByteBuf)),
+		UPDATE_STYLE(friendlyByteBuf -> new ClientboundBossEventPacket.UpdateStyleOperation(friendlyByteBuf)),
+		UPDATE_PROPERTIES(friendlyByteBuf -> new ClientboundBossEventPacket.UpdatePropertiesOperation(friendlyByteBuf));
+
+		private final Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
+
+		private OperationType(Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> function) {
+			this.reader = function;
+		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	public BossEvent.BossBarColor getColor() {
-		return this.color;
+	static class UpdateNameOperation implements ClientboundBossEventPacket.Operation {
+		private final Component name;
+
+		private UpdateNameOperation(Component component) {
+			this.name = component;
+		}
+
+		private UpdateNameOperation(FriendlyByteBuf friendlyByteBuf) {
+			this.name = friendlyByteBuf.readComponent();
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.UPDATE_NAME;
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.updateName(uUID, this.name);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeComponent(this.name);
+		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	public BossEvent.BossBarOverlay getOverlay() {
-		return this.overlay;
+	static class UpdateProgressOperation implements ClientboundBossEventPacket.Operation {
+		private final float progress;
+
+		private UpdateProgressOperation(float f) {
+			this.progress = f;
+		}
+
+		private UpdateProgressOperation(FriendlyByteBuf friendlyByteBuf) {
+			this.progress = friendlyByteBuf.readFloat();
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.UPDATE_PROGRESS;
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.updateProgress(uUID, this.progress);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeFloat(this.progress);
+		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	public boolean shouldDarkenScreen() {
-		return this.darkenScreen;
+	static class UpdatePropertiesOperation implements ClientboundBossEventPacket.Operation {
+		private final boolean darkenScreen;
+		private final boolean playMusic;
+		private final boolean createWorldFog;
+
+		private UpdatePropertiesOperation(boolean bl, boolean bl2, boolean bl3) {
+			this.darkenScreen = bl;
+			this.playMusic = bl2;
+			this.createWorldFog = bl3;
+		}
+
+		private UpdatePropertiesOperation(FriendlyByteBuf friendlyByteBuf) {
+			int i = friendlyByteBuf.readUnsignedByte();
+			this.darkenScreen = (i & 1) > 0;
+			this.playMusic = (i & 2) > 0;
+			this.createWorldFog = (i & 4) > 0;
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.UPDATE_PROPERTIES;
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.updateProperties(uUID, this.darkenScreen, this.playMusic, this.createWorldFog);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	public boolean shouldPlayMusic() {
-		return this.playMusic;
-	}
+	static class UpdateStyleOperation implements ClientboundBossEventPacket.Operation {
+		private final BossEvent.BossBarColor color;
+		private final BossEvent.BossBarOverlay overlay;
 
-	@Environment(EnvType.CLIENT)
-	public boolean shouldCreateWorldFog() {
-		return this.createWorldFog;
-	}
+		private UpdateStyleOperation(BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+			this.color = bossBarColor;
+			this.overlay = bossBarOverlay;
+		}
 
-	public static enum Operation {
-		ADD,
-		REMOVE,
-		UPDATE_PROGRESS,
-		UPDATE_NAME,
-		UPDATE_STYLE,
-		UPDATE_PROPERTIES;
+		private UpdateStyleOperation(FriendlyByteBuf friendlyByteBuf) {
+			this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
+			this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.UPDATE_STYLE;
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.updateStyle(uUID, this.color, this.overlay);
+		}
+
+		@Override
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeEnum(this.color);
+			friendlyByteBuf.writeEnum(this.overlay);
+		}
 	}
 }

@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,11 +9,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundContainerSetContentPacket implements Packet<ClientGamePacketListener> {
-	private int containerId;
-	private List<ItemStack> items;
-
-	public ClientboundContainerSetContentPacket() {
-	}
+	private final int containerId;
+	private final List<ItemStack> items;
 
 	public ClientboundContainerSetContentPacket(int i, NonNullList<ItemStack> nonNullList) {
 		this.containerId = i;
@@ -25,8 +21,7 @@ public class ClientboundContainerSetContentPacket implements Packet<ClientGamePa
 		}
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundContainerSetContentPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readUnsignedByte();
 		int i = friendlyByteBuf.readShort();
 		this.items = NonNullList.<ItemStack>withSize(i, ItemStack.EMPTY);
@@ -37,7 +32,7 @@ public class ClientboundContainerSetContentPacket implements Packet<ClientGamePa
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 		friendlyByteBuf.writeShort(this.items.size());
 

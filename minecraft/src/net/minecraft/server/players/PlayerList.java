@@ -35,11 +35,16 @@ import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
@@ -262,7 +267,7 @@ public abstract class PlayerList {
 		Set<Objective> set = Sets.<Objective>newHashSet();
 
 		for (PlayerTeam playerTeam : serverScoreboard.getPlayerTeams()) {
-			serverPlayer.connection.send(new ClientboundSetPlayerTeamPacket(playerTeam, 0));
+			serverPlayer.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(playerTeam, true));
 		}
 
 		for (int i = 0; i < 19; i++) {
@@ -281,27 +286,27 @@ public abstract class PlayerList {
 		serverLevel.getWorldBorder().addListener(new BorderChangeListener() {
 			@Override
 			public void onBorderSizeSet(WorldBorder worldBorder, double d) {
-				PlayerList.this.broadcastAll(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.SET_SIZE));
+				PlayerList.this.broadcastAll(new ClientboundSetBorderSizePacket(worldBorder));
 			}
 
 			@Override
 			public void onBorderSizeLerping(WorldBorder worldBorder, double d, double e, long l) {
-				PlayerList.this.broadcastAll(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.LERP_SIZE));
+				PlayerList.this.broadcastAll(new ClientboundSetBorderLerpSizePacket(worldBorder));
 			}
 
 			@Override
 			public void onBorderCenterSet(WorldBorder worldBorder, double d, double e) {
-				PlayerList.this.broadcastAll(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.SET_CENTER));
+				PlayerList.this.broadcastAll(new ClientboundSetBorderCenterPacket(worldBorder));
 			}
 
 			@Override
 			public void onBorderSetWarningTime(WorldBorder worldBorder, int i) {
-				PlayerList.this.broadcastAll(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.SET_WARNING_TIME));
+				PlayerList.this.broadcastAll(new ClientboundSetBorderWarningDelayPacket(worldBorder));
 			}
 
 			@Override
 			public void onBorderSetWarningBlocks(WorldBorder worldBorder, int i) {
-				PlayerList.this.broadcastAll(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.SET_WARNING_BLOCKS));
+				PlayerList.this.broadcastAll(new ClientboundSetBorderWarningDistancePacket(worldBorder));
 			}
 
 			@Override
@@ -674,7 +679,7 @@ public abstract class PlayerList {
 
 	public void sendLevelInfo(ServerPlayer serverPlayer, ServerLevel serverLevel) {
 		WorldBorder worldBorder = this.server.overworld().getWorldBorder();
-		serverPlayer.connection.send(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.INITIALIZE));
+		serverPlayer.connection.send(new ClientboundInitializeBorderPacket(worldBorder));
 		serverPlayer.connection
 			.send(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
 		serverPlayer.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle()));

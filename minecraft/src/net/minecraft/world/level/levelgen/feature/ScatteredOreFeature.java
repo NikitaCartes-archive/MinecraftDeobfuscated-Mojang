@@ -3,13 +3,12 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
-public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
-	NoSurfaceOreFeature(Codec<OreConfiguration> codec) {
+public class ScatteredOreFeature extends Feature<OreConfiguration> {
+	ScatteredOreFeature(Codec<OreConfiguration> codec) {
 		super(codec);
 	}
 
@@ -24,8 +23,13 @@ public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
 
 		for (int j = 0; j < i; j++) {
 			this.offsetTargetPos(mutableBlockPos, random, blockPos, Math.min(j, 7));
-			if (oreConfiguration.target.test(worldGenLevel.getBlockState(mutableBlockPos), random) && !this.isFacingAir(worldGenLevel, mutableBlockPos)) {
-				worldGenLevel.setBlock(mutableBlockPos, oreConfiguration.state, 2);
+			BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
+
+			for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
+				if (OreFeature.canPlaceOre(blockState, worldGenLevel::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
+					worldGenLevel.setBlock(mutableBlockPos, targetBlockState.state, 2);
+					break;
+				}
 			}
 		}
 
@@ -41,18 +45,5 @@ public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
 
 	private int getRandomPlacementInOneAxisRelativeToOrigin(Random random, int i) {
 		return Math.round((random.nextFloat() - random.nextFloat()) * (float)i);
-	}
-
-	private boolean isFacingAir(LevelAccessor levelAccessor, BlockPos blockPos) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-		for (Direction direction : Direction.values()) {
-			mutableBlockPos.setWithOffset(blockPos, direction);
-			if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

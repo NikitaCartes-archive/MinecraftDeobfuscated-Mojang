@@ -2,7 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,22 +11,18 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketListener> {
-	private int entity;
+	private final int entity;
 	private final List<Pair<EquipmentSlot, ItemStack>> slots;
-
-	public ClientboundSetEquipmentPacket() {
-		this.slots = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
-	}
 
 	public ClientboundSetEquipmentPacket(int i, List<Pair<EquipmentSlot, ItemStack>> list) {
 		this.entity = i;
 		this.slots = list;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetEquipmentPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entity = friendlyByteBuf.readVarInt();
 		EquipmentSlot[] equipmentSlots = EquipmentSlot.values();
+		this.slots = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
 		int i;
 		do {
@@ -39,7 +34,7 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entity);
 		int i = this.slots.size();
 

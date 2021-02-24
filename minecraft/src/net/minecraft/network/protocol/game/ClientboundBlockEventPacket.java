@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -10,13 +9,10 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.block.Block;
 
 public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListener> {
-	private BlockPos pos;
-	private int b0;
-	private int b1;
-	private Block block;
-
-	public ClientboundBlockEventPacket() {
-	}
+	private final BlockPos pos;
+	private final int b0;
+	private final int b1;
+	private final Block block;
 
 	public ClientboundBlockEventPacket(BlockPos blockPos, Block block, int i, int j) {
 		this.pos = blockPos;
@@ -25,8 +21,7 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
 		this.b1 = j;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundBlockEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.b0 = friendlyByteBuf.readUnsignedByte();
 		this.b1 = friendlyByteBuf.readUnsignedByte();
@@ -34,7 +29,7 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeByte(this.b0);
 		friendlyByteBuf.writeByte(this.b1);

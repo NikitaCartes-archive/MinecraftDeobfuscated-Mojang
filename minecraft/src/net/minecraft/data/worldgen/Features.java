@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ClampedNormalFloat;
 import net.minecraft.util.UniformFloat;
 import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.block.Blocks;
@@ -398,8 +399,12 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> SPRING_WATER = register(
 		"spring_water",
 		Feature.SPRING
-			.configured(new SpringConfiguration(Features.States.WATER_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE)))
-			.decorated(FeatureDecorator.RANGE_BIASED_TO_BOTTOM.configured(new BiasedRangeDecoratorConfiguration(VerticalAnchor.bottom(), VerticalAnchor.top(), 8)))
+			.configured(
+				new SpringConfiguration(
+					Features.States.WATER_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF)
+				)
+			)
+			.range(VerticalAnchor.bottom(), VerticalAnchor.top())
 			.squared()
 			.count(50)
 	);
@@ -658,6 +663,29 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_GIANT = register("red_mushroom_giant", RED_MUSHROOM_TAIGA.count(3));
 	public static final ConfiguredFeature<?, ?> BROWN_MUSHROOM_SWAMP = register("brown_mushroom_swamp", BROWN_MUSHROOM_TAIGA.count(8));
 	public static final ConfiguredFeature<?, ?> RED_MUSHROOM_SWAMP = register("red_mushroom_swamp", RED_MUSHROOM_TAIGA.count(8));
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_IRON_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.IRON_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_IRON_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_REDSTONE_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.REDSTONE_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_REDSTONE_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_GOLD_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.GOLD_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_GOLD_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_DIAMOND_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.DIAMOND_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_DIAMOND_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_LAPIS_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.LAPIS_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_LAPIS_ORE)
+	);
+	public static final OreConfiguration ORE_COAL_CONFIG = new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17);
+	public static final OreConfiguration ORE_IRON_CONFIG = new OreConfiguration(ORE_IRON_TARGET_LIST, 9);
+	public static final OreConfiguration ORE_REDSTONE_CONFIG = new OreConfiguration(ORE_REDSTONE_TARGET_LIST, 8);
 	public static final ConfiguredFeature<?, ?> ORE_MAGMA = register(
 		"ore_magma",
 		Feature.ORE
@@ -758,95 +786,60 @@ public class Features {
 		"ore_andesite",
 		Feature.ORE
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.ANDESITE, 64))
-			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(79))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.absolute(79))
 			.squared()
-			.count(4)
+			.count(2)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_TUFF = register(
+		"ore_tuff",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.TUFF, 64))
+			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(0))
+			.squared()
+			.count(2)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_COAL_UPPER = register(
-		"ore_coal_upper",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
-			.range(VerticalAnchor.absolute(136), VerticalAnchor.top())
-			.squared()
-			.count(30)
+		"ore_coal_upper", Feature.ORE.configured(ORE_COAL_CONFIG).range(VerticalAnchor.absolute(136), VerticalAnchor.top()).squared().count(30)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_COAL_LOWER = register(
-		"ore_coal_lower",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
-			.depthAverage(VerticalAnchor.absolute(96), 96)
-			.squared()
-			.count(20)
+		"ore_coal_lower", Feature.ORE.configured(ORE_COAL_CONFIG).depthAverage(VerticalAnchor.absolute(96), 96).squared().count(20)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_IRON_UPPER = register(
+		"ore_iron_upper", Feature.ORE.configured(ORE_IRON_CONFIG).depthAverage(VerticalAnchor.absolute(256), 128).squared().count(40)
+	);
+	public static final ConfiguredFeature<?, ?> ORE_IRON_MIDDLE = register(
+		"ore_iron_middle", Feature.ORE.configured(ORE_IRON_CONFIG).depthAverage(VerticalAnchor.absolute(32), 48).squared().count(10)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_IRON_LOWER = register(
 		"ore_iron_lower",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.IRON_ORE, 9))
-			.depthAverage(VerticalAnchor.absolute(32), 48)
-			.squared()
-			.count(20)
-	);
-	public static final ConfiguredFeature<?, ?> ORE_IRON_UPPER = register(
-		"ore_iron_upper",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.IRON_ORE, 9))
-			.depthAverage(VerticalAnchor.absolute(256), 128)
-			.squared()
-			.count(40)
+		Feature.ORE.configured(new OreConfiguration(ORE_IRON_TARGET_LIST, 4)).range(VerticalAnchor.bottom(), VerticalAnchor.absolute(-8)).squared().count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD_EXTRA = register(
 		"ore_gold_extra",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GOLD_ORE, 9))
-			.range(VerticalAnchor.absolute(32), VerticalAnchor.absolute(79))
-			.squared()
-			.count(20)
+		Feature.ORE.configured(new OreConfiguration(ORE_GOLD_TARGET_LIST, 9)).range(VerticalAnchor.absolute(32), VerticalAnchor.absolute(79)).squared().count(20)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_GOLD = register(
-		"ore_gold",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.GOLD_ORE, 9))
-			.depthAverage(VerticalAnchor.absolute(-16), 48)
-			.squared()
-			.count(4)
+		"ore_gold", Feature.ORE.configured(new OreConfiguration(ORE_GOLD_TARGET_LIST, 9, 0.5F)).depthAverage(VerticalAnchor.absolute(-16), 48).squared().count(6)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_REDSTONE = register(
-		"ore_redstone",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.REDSTONE_ORE, 8))
-			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(15))
-			.squared()
-			.count(6)
+		"ore_redstone", Feature.ORE.configured(ORE_REDSTONE_CONFIG).range(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)).squared().count(6)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_REDSTONE_LOWER = register(
-		"ore_redstone_lower",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.REDSTONE_ORE, 8))
-			.depthAverage(VerticalAnchor.bottom(), 32)
-			.squared()
-			.count(12)
+		"ore_redstone_lower", Feature.ORE.configured(ORE_REDSTONE_CONFIG).depthAverage(VerticalAnchor.bottom(), 32).squared().count(12)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
-		"ore_diamond",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.DIAMOND_ORE, 8))
-			.depthAverage(VerticalAnchor.bottom(), 80)
-			.squared()
-			.count(4)
+		"ore_diamond", Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8, 0.5F)).depthAverage(VerticalAnchor.bottom(), 80).squared().count(4)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_LAPIS = register(
-		"ore_lapis",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.LAPIS_ORE, 7))
-			.depthAverage(VerticalAnchor.absolute(0), 32)
-			.squared()
+		"ore_lapis", Feature.ORE.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7)).depthAverage(VerticalAnchor.absolute(0), 32).squared()
 	);
 	public static final ConfiguredFeature<?, ?> ORE_LAPIS_BURIED = register(
 		"ore_lapis_buried",
-		Feature.NO_SURFACE_ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.LAPIS_ORE, 7))
+		Feature.SCATTERED_ORE
+			.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7, 1.0F))
 			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(64))
 			.squared()
+			.count(2)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_INFESTED = register(
 		"ore_infested",
@@ -866,15 +859,15 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DEBRIS_LARGE = register(
 		"ore_debris_large",
-		Feature.NO_SURFACE_ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 3))
+		Feature.SCATTERED_ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 3, 1.0F))
 			.depthAverage(VerticalAnchor.absolute(16), 8)
 			.squared()
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DEBRIS_SMALL = register(
 		"ore_debris_small",
-		Feature.NO_SURFACE_ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 2))
+		Feature.SCATTERED_ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NETHER_ORE_REPLACEABLES, Features.States.ANCIENT_DEBRIS, 2, 1.0F))
 			.range(Features.Decorators.RANGE_8_8)
 			.squared()
 	);
@@ -884,14 +877,24 @@ public class Features {
 			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10))
 			.depthAverage(VerticalAnchor.absolute(48), 48)
 			.squared()
-			.count(20)
+			.count(10)
 	);
 	public static final ConfiguredFeature<?, ?> DRIPSTONE_CLUSTER_FEATURE = register(
 		"dripstone_cluster",
 		Feature.DRIPSTONE_CLUSTER
 			.configured(
 				new DripstoneClusterConfiguration(
-					12, UniformInt.of(3, 3), UniformInt.of(2, 6), 1, 3, UniformInt.of(2, 2), UniformFloat.of(0.3F, 0.4F), UniformFloat.of(0.1F, 0.9F), 0.1F, 0.3F, 0.1F, 3, 8
+					12,
+					UniformInt.of(3, 3),
+					UniformInt.of(2, 6),
+					1,
+					3,
+					UniformInt.of(2, 2),
+					UniformFloat.of(0.3F, 0.4F),
+					ClampedNormalFloat.of(0.1F, 0.3F, 0.1F, 0.9F),
+					0.1F,
+					3,
+					8
 				)
 			)
 			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(59))
@@ -952,13 +955,13 @@ public class Features {
 						Blocks.DRIPSTONE_BLOCK.defaultBlockState(),
 						Blocks.CALCITE.defaultBlockState(),
 						Blocks.TUFF.defaultBlockState(),
-						Blocks.GRIMSTONE.defaultBlockState()
+						Blocks.DEEPSLATE.defaultBlockState()
 					)
 				)
 			)
 			.squared()
 			.range(VerticalAnchor.bottom(), VerticalAnchor.absolute(54))
-			.count(UniformInt.of(20, 20))
+			.count(UniformInt.of(40, 20))
 	);
 	public static final ConfiguredFeature<?, ?> CRIMSON_FUNGI = register(
 		"crimson_fungi",
@@ -1534,7 +1537,7 @@ public class Features {
 						new SimpleStateProvider(Features.States.AMETHYST_BLOCK),
 						new SimpleStateProvider(Features.States.BUDDING_AMETHYST),
 						new SimpleStateProvider(Features.States.CALCITE),
-						new SimpleStateProvider(Features.States.TUFF),
+						new SimpleStateProvider(Features.States.SMOOTH_BASALT),
 						ImmutableList.of(
 							Blocks.SMALL_AMETHYST_BUD.defaultBlockState(),
 							Blocks.MEDIUM_AMETHYST_BUD.defaultBlockState(),
@@ -1555,7 +1558,8 @@ public class Features {
 					3,
 					-16,
 					16,
-					0.05
+					0.05,
+					1
 				)
 			)
 			.range(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(46))
@@ -1618,7 +1622,7 @@ public class Features {
 			.needWater()
 			.build();
 		public static final SpringConfiguration LAVA_SPRING_CONFIG = new SpringConfiguration(
-			Features.States.LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE)
+			Features.States.LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF)
 		);
 		public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(
 			Features.States.LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK)
@@ -1729,10 +1733,15 @@ public class Features {
 		protected static final BlockState COAL_ORE = Blocks.COAL_ORE.defaultBlockState();
 		protected static final BlockState COPPER_ORE = Blocks.COPPER_ORE.defaultBlockState();
 		protected static final BlockState IRON_ORE = Blocks.IRON_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_IRON_ORE = Blocks.DEEPSLATE_IRON_ORE.defaultBlockState();
 		protected static final BlockState GOLD_ORE = Blocks.GOLD_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_GOLD_ORE = Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState();
 		protected static final BlockState REDSTONE_ORE = Blocks.REDSTONE_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_REDSTONE_ORE = Blocks.DEEPSLATE_REDSTONE_ORE.defaultBlockState();
 		protected static final BlockState DIAMOND_ORE = Blocks.DIAMOND_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_DIAMOND_ORE = Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState();
 		protected static final BlockState LAPIS_ORE = Blocks.LAPIS_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_LAPIS_ORE = Blocks.LAPIS_ORE.defaultBlockState();
 		protected static final BlockState STONE = Blocks.STONE.defaultBlockState();
 		protected static final BlockState EMERALD_ORE = Blocks.EMERALD_ORE.defaultBlockState();
 		protected static final BlockState INFESTED_STONE = Blocks.INFESTED_STONE.defaultBlockState();
@@ -1755,6 +1764,7 @@ public class Features {
 		protected static final BlockState AMETHYST_BLOCK = Blocks.AMETHYST_BLOCK.defaultBlockState();
 		protected static final BlockState BUDDING_AMETHYST = Blocks.BUDDING_AMETHYST.defaultBlockState();
 		protected static final BlockState CALCITE = Blocks.CALCITE.defaultBlockState();
+		protected static final BlockState SMOOTH_BASALT = Blocks.SMOOTH_BASALT.defaultBlockState();
 		protected static final BlockState TUFF = Blocks.TUFF.defaultBlockState();
 	}
 }

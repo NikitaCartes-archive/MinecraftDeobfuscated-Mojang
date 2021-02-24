@@ -1,18 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacketListener> {
-	private int containerId;
-	private int size;
-	private int entityId;
-
-	public ClientboundHorseScreenOpenPacket() {
-	}
+	private final int containerId;
+	private final int size;
+	private final int entityId;
 
 	public ClientboundHorseScreenOpenPacket(int i, int j, int k) {
 		this.containerId = i;
@@ -20,22 +16,21 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
 		this.entityId = k;
 	}
 
-	public void handle(ClientGamePacketListener clientGamePacketListener) {
-		clientGamePacketListener.handleHorseScreenOpen(this);
-	}
-
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundHorseScreenOpenPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readUnsignedByte();
 		this.size = friendlyByteBuf.readVarInt();
 		this.entityId = friendlyByteBuf.readInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 		friendlyByteBuf.writeVarInt(this.size);
 		friendlyByteBuf.writeInt(this.entityId);
+	}
+
+	public void handle(ClientGamePacketListener clientGamePacketListener) {
+		clientGamePacketListener.handleHorseScreenOpen(this);
 	}
 
 	@Environment(EnvType.CLIENT)

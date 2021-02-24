@@ -1,18 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundTakeItemEntityPacket implements Packet<ClientGamePacketListener> {
-	private int itemId;
-	private int playerId;
-	private int amount;
-
-	public ClientboundTakeItemEntityPacket() {
-	}
+	private final int itemId;
+	private final int playerId;
+	private final int amount;
 
 	public ClientboundTakeItemEntityPacket(int i, int j, int k) {
 		this.itemId = i;
@@ -20,15 +16,14 @@ public class ClientboundTakeItemEntityPacket implements Packet<ClientGamePacketL
 		this.amount = k;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundTakeItemEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.itemId = friendlyByteBuf.readVarInt();
 		this.playerId = friendlyByteBuf.readVarInt();
 		this.amount = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.itemId);
 		friendlyByteBuf.writeVarInt(this.playerId);
 		friendlyByteBuf.writeVarInt(this.amount);

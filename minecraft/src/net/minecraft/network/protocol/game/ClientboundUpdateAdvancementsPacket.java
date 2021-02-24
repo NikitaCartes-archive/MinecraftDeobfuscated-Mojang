@@ -1,12 +1,12 @@
 package net.minecraft.network.protocol.game;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import java.io.IOException;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
@@ -16,85 +16,45 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientboundUpdateAdvancementsPacket implements Packet<ClientGamePacketListener> {
-	private boolean reset;
-	private Map<ResourceLocation, Advancement.Builder> added;
-	private Set<ResourceLocation> removed;
-	private Map<ResourceLocation, AdvancementProgress> progress;
-
-	public ClientboundUpdateAdvancementsPacket() {
-	}
+	private final boolean reset;
+	private final Map<ResourceLocation, Advancement.Builder> added;
+	private final Set<ResourceLocation> removed;
+	private final Map<ResourceLocation, AdvancementProgress> progress;
 
 	public ClientboundUpdateAdvancementsPacket(
 		boolean bl, Collection<Advancement> collection, Set<ResourceLocation> set, Map<ResourceLocation, AdvancementProgress> map
 	) {
 		this.reset = bl;
-		this.added = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
+		Builder<ResourceLocation, Advancement.Builder> builder = ImmutableMap.builder();
 
 		for (Advancement advancement : collection) {
-			this.added.put(advancement.getId(), advancement.deconstruct());
+			builder.put(advancement.getId(), advancement.deconstruct());
 		}
 
-		this.removed = set;
-		this.progress = Maps.<ResourceLocation, AdvancementProgress>newHashMap(map);
+		this.added = builder.build();
+		this.removed = ImmutableSet.copyOf(set);
+		this.progress = ImmutableMap.copyOf(map);
+	}
+
+	public ClientboundUpdateAdvancementsPacket(FriendlyByteBuf friendlyByteBuf) {
+		this.reset = friendlyByteBuf.readBoolean();
+		this.added = friendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, Advancement.Builder::fromNetwork);
+		this.removed = friendlyByteBuf.readCollection(Sets::newLinkedHashSetWithExpectedSize, FriendlyByteBuf::readResourceLocation);
+		this.progress = friendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, AdvancementProgress::fromNetwork);
+	}
+
+	@Override
+	public void write(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeBoolean(this.reset);
+		friendlyByteBuf.writeMap(this.added, FriendlyByteBuf::writeResourceLocation, (friendlyByteBufx, builder) -> builder.serializeToNetwork(friendlyByteBufx));
+		friendlyByteBuf.writeCollection(this.removed, FriendlyByteBuf::writeResourceLocation);
+		friendlyByteBuf.writeMap(
+			this.progress, FriendlyByteBuf::writeResourceLocation, (friendlyByteBufx, advancementProgress) -> advancementProgress.serializeToNetwork(friendlyByteBufx)
+		);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.handleUpdateAdvancementsPacket(this);
-	}
-
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		this.reset = friendlyByteBuf.readBoolean();
-		this.added = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
-		this.removed = Sets.<ResourceLocation>newLinkedHashSet();
-		this.progress = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
-		int i = friendlyByteBuf.readVarInt();
-
-		for (int j = 0; j < i; j++) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			Advancement.Builder builder = Advancement.Builder.fromNetwork(friendlyByteBuf);
-			this.added.put(resourceLocation, builder);
-		}
-
-		i = friendlyByteBuf.readVarInt();
-
-		for (int j = 0; j < i; j++) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			this.removed.add(resourceLocation);
-		}
-
-		i = friendlyByteBuf.readVarInt();
-
-		for (int j = 0; j < i; j++) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			this.progress.put(resourceLocation, AdvancementProgress.fromNetwork(friendlyByteBuf));
-		}
-	}
-
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeBoolean(this.reset);
-		friendlyByteBuf.writeVarInt(this.added.size());
-
-		for (Entry<ResourceLocation, Advancement.Builder> entry : this.added.entrySet()) {
-			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-			Advancement.Builder builder = (Advancement.Builder)entry.getValue();
-			friendlyByteBuf.writeResourceLocation(resourceLocation);
-			builder.serializeToNetwork(friendlyByteBuf);
-		}
-
-		friendlyByteBuf.writeVarInt(this.removed.size());
-
-		for (ResourceLocation resourceLocation2 : this.removed) {
-			friendlyByteBuf.writeResourceLocation(resourceLocation2);
-		}
-
-		friendlyByteBuf.writeVarInt(this.progress.size());
-
-		for (Entry<ResourceLocation, AdvancementProgress> entry : this.progress.entrySet()) {
-			friendlyByteBuf.writeResourceLocation((ResourceLocation)entry.getKey());
-			((AdvancementProgress)entry.getValue()).serializeToNetwork(friendlyByteBuf);
-		}
 	}
 
 	@Environment(EnvType.CLIENT)

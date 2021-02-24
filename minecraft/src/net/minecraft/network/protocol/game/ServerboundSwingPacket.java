@@ -1,27 +1,22 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
 
 public class ServerboundSwingPacket implements Packet<ServerGamePacketListener> {
-	private InteractionHand hand;
-
-	public ServerboundSwingPacket() {
-	}
+	private final InteractionHand hand;
 
 	public ServerboundSwingPacket(InteractionHand interactionHand) {
 		this.hand = interactionHand;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundSwingPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnum(this.hand);
 	}
 

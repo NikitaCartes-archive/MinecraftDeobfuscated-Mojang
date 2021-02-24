@@ -1,28 +1,23 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 
 public class ServerboundRecipeBookSeenRecipePacket implements Packet<ServerGamePacketListener> {
-	private ResourceLocation recipe;
-
-	public ServerboundRecipeBookSeenRecipePacket() {
-	}
+	private final ResourceLocation recipe;
 
 	public ServerboundRecipeBookSeenRecipePacket(Recipe<?> recipe) {
 		this.recipe = recipe.getId();
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ServerboundRecipeBookSeenRecipePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.recipe = friendlyByteBuf.readResourceLocation();
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeResourceLocation(this.recipe);
 	}
 

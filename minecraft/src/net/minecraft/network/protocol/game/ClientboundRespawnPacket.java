@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,18 +12,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener> {
-	private DimensionType dimensionType;
-	private ResourceKey<Level> dimension;
-	private long seed;
-	private GameType playerGameType;
+	private final DimensionType dimensionType;
+	private final ResourceKey<Level> dimension;
+	private final long seed;
+	private final GameType playerGameType;
 	@Nullable
-	private GameType previousPlayerGameType;
-	private boolean isDebug;
-	private boolean isFlat;
-	private boolean keepAllPlayerData;
-
-	public ClientboundRespawnPacket() {
-	}
+	private final GameType previousPlayerGameType;
+	private final boolean isDebug;
+	private final boolean isFlat;
+	private final boolean keepAllPlayerData;
 
 	public ClientboundRespawnPacket(
 		DimensionType dimensionType, ResourceKey<Level> resourceKey, long l, GameType gameType, @Nullable GameType gameType2, boolean bl, boolean bl2, boolean bl3
@@ -39,12 +35,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		this.keepAllPlayerData = bl3;
 	}
 
-	public void handle(ClientGamePacketListener clientGamePacketListener) {
-		clientGamePacketListener.handleRespawn(this);
-	}
-
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundRespawnPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.dimensionType = (DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get();
 		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.seed = friendlyByteBuf.readLong();
@@ -56,7 +47,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
@@ -65,6 +56,10 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		friendlyByteBuf.writeBoolean(this.isDebug);
 		friendlyByteBuf.writeBoolean(this.isFlat);
 		friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
+	}
+
+	public void handle(ClientGamePacketListener clientGamePacketListener) {
+		clientGamePacketListener.handleRespawn(this);
 	}
 
 	@Environment(EnvType.CLIENT)

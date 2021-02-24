@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,14 +7,11 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
 
 public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketListener> {
-	private double x;
-	private double y;
-	private double z;
-	private float yRot;
-	private float xRot;
-
-	public ClientboundMoveVehiclePacket() {
-	}
+	private final double x;
+	private final double y;
+	private final double z;
+	private final float yRot;
+	private final float xRot;
 
 	public ClientboundMoveVehiclePacket(Entity entity) {
 		this.x = entity.getX();
@@ -25,8 +21,7 @@ public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketList
 		this.xRot = entity.xRot;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundMoveVehiclePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
 		this.z = friendlyByteBuf.readDouble();
@@ -35,7 +30,7 @@ public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketList
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
 		friendlyByteBuf.writeDouble(this.z);

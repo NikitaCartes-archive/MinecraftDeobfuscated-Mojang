@@ -1,9 +1,10 @@
 package net.minecraft.client.gui.components;
 
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 
@@ -12,16 +13,16 @@ public class LerpingBossEvent extends BossEvent {
 	protected float targetPercent;
 	protected long setTime;
 
-	public LerpingBossEvent(ClientboundBossEventPacket clientboundBossEventPacket) {
-		super(
-			clientboundBossEventPacket.getId(), clientboundBossEventPacket.getName(), clientboundBossEventPacket.getColor(), clientboundBossEventPacket.getOverlay()
-		);
-		this.targetPercent = clientboundBossEventPacket.getPercent();
-		this.progress = clientboundBossEventPacket.getPercent();
+	public LerpingBossEvent(
+		UUID uUID, Component component, float f, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay, boolean bl, boolean bl2, boolean bl3
+	) {
+		super(uUID, component, bossBarColor, bossBarOverlay);
+		this.targetPercent = f;
+		this.progress = f;
 		this.setTime = Util.getMillis();
-		this.setDarkenScreen(clientboundBossEventPacket.shouldDarkenScreen());
-		this.setPlayBossMusic(clientboundBossEventPacket.shouldPlayMusic());
-		this.setCreateWorldFog(clientboundBossEventPacket.shouldCreateWorldFog());
+		this.setDarkenScreen(bl);
+		this.setPlayBossMusic(bl2);
+		this.setCreateWorldFog(bl3);
 	}
 
 	@Override
@@ -36,23 +37,5 @@ public class LerpingBossEvent extends BossEvent {
 		long l = Util.getMillis() - this.setTime;
 		float f = Mth.clamp((float)l / 100.0F, 0.0F, 1.0F);
 		return Mth.lerp(f, this.progress, this.targetPercent);
-	}
-
-	public void update(ClientboundBossEventPacket clientboundBossEventPacket) {
-		switch (clientboundBossEventPacket.getOperation()) {
-			case UPDATE_NAME:
-				this.setName(clientboundBossEventPacket.getName());
-				break;
-			case UPDATE_PROGRESS:
-				this.setProgress(clientboundBossEventPacket.getPercent());
-				break;
-			case UPDATE_STYLE:
-				this.setColor(clientboundBossEventPacket.getColor());
-				this.setOverlay(clientboundBossEventPacket.getOverlay());
-				break;
-			case UPDATE_PROPERTIES:
-				this.setDarkenScreen(clientboundBossEventPacket.shouldDarkenScreen());
-				this.setPlayBossMusic(clientboundBossEventPacket.shouldPlayMusic());
-		}
 	}
 }

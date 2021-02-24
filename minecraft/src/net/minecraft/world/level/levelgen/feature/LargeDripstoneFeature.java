@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.FloatProvider;
 import net.minecraft.util.Mth;
-import net.minecraft.util.UniformFloat;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -73,9 +73,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 	}
 
 	private static LargeDripstoneFeature.LargeDripstone makeDripstone(
-		BlockPos blockPos, boolean bl, Random random, int i, UniformFloat uniformFloat, UniformFloat uniformFloat2
+		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2
 	) {
-		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)uniformFloat.sample(random), (double)uniformFloat2.sample(random));
+		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random));
 	}
 
 	static final class LargeDripstone {
@@ -167,9 +167,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		@Nullable
 		private final Vec3 windSpeed;
 
-		private WindOffsetter(int i, Random random, UniformFloat uniformFloat) {
+		private WindOffsetter(int i, Random random, FloatProvider floatProvider) {
 			this.originY = i;
-			float f = uniformFloat.sample(random);
+			float f = floatProvider.sample(random);
 			float g = Mth.randomBetween(random, 0.0F, (float) Math.PI);
 			this.windSpeed = new Vec3((double)(Mth.cos(g) * f), 0.0, (double)(Mth.sin(g) * f));
 		}

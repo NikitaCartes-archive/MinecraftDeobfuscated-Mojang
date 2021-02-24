@@ -7,7 +7,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,14 +24,13 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public abstract class StructureStart<C extends FeatureConfiguration> {
 	public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(
-		StructureFeature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L
+		StructureFeature.MINESHAFT, new ChunkPos(0, 0), BoundingBox.getUnknownBox(), 0, 0L
 	) {
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			MineshaftConfiguration mineshaftConfiguration,
 			LevelHeightAccessor levelHeightAccessor
@@ -42,18 +40,16 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 	private final StructureFeature<C> feature;
 	protected final List<StructurePiece> pieces = Lists.<StructurePiece>newArrayList();
 	protected BoundingBox boundingBox;
-	private final int chunkX;
-	private final int chunkZ;
+	private final ChunkPos chunkPos;
 	private int references;
 	protected final WorldgenRandom random;
 
-	public StructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public StructureStart(StructureFeature<C> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
 		this.feature = structureFeature;
-		this.chunkX = i;
-		this.chunkZ = j;
-		this.references = k;
+		this.chunkPos = chunkPos;
+		this.references = i;
 		this.random = new WorldgenRandom();
-		this.random.setLargeFeatureSeed(l, i, j);
+		this.random.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
 		this.boundingBox = boundingBox;
 	}
 
@@ -61,8 +57,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		RegistryAccess registryAccess,
 		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
-		int i,
-		int j,
+		ChunkPos chunkPos,
 		Biome biome,
 		C featureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
@@ -112,12 +107,12 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		}
 	}
 
-	public CompoundTag createTag(int i, int j) {
+	public CompoundTag createTag(ChunkPos chunkPos) {
 		CompoundTag compoundTag = new CompoundTag();
 		if (this.isValid()) {
 			compoundTag.putString("id", Registry.STRUCTURE_FEATURE.getKey(this.getFeature()).toString());
-			compoundTag.putInt("ChunkX", i);
-			compoundTag.putInt("ChunkZ", j);
+			compoundTag.putInt("ChunkX", chunkPos.x);
+			compoundTag.putInt("ChunkZ", chunkPos.z);
 			compoundTag.putInt("references", this.references);
 			compoundTag.put("BB", this.boundingBox.createTag());
 			ListTag listTag = new ListTag();
@@ -171,16 +166,12 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		return !this.pieces.isEmpty();
 	}
 
-	public int getChunkX() {
-		return this.chunkX;
-	}
-
-	public int getChunkZ() {
-		return this.chunkZ;
+	public ChunkPos getChunkPos() {
+		return this.chunkPos;
 	}
 
 	public BlockPos getLocatePos() {
-		return new BlockPos(SectionPos.sectionToBlockCoord(this.chunkX), 0, SectionPos.sectionToBlockCoord(this.chunkZ));
+		return new BlockPos(this.chunkPos.getMinBlockX(), 0, this.chunkPos.getMinBlockZ());
 	}
 
 	public boolean canBeReferenced() {

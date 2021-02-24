@@ -1,22 +1,19 @@
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketListener> {
-	private String objectiveName;
-	private Component displayName;
-	private ObjectiveCriteria.RenderType renderType;
-	private int method;
-
-	public ClientboundSetObjectivePacket() {
-	}
+	private final String objectiveName;
+	private final Component displayName;
+	private final ObjectiveCriteria.RenderType renderType;
+	private final int method;
 
 	public ClientboundSetObjectivePacket(Objective objective, int i) {
 		this.objectiveName = objective.getName();
@@ -25,18 +22,20 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 		this.method = i;
 	}
 
-	@Override
-	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public ClientboundSetObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.objectiveName = friendlyByteBuf.readUtf(16);
 		this.method = friendlyByteBuf.readByte();
-		if (this.method == 0 || this.method == 2) {
+		if (this.method != 0 && this.method != 2) {
+			this.displayName = TextComponent.EMPTY;
+			this.renderType = ObjectiveCriteria.RenderType.INTEGER;
+		} else {
 			this.displayName = friendlyByteBuf.readComponent();
 			this.renderType = friendlyByteBuf.readEnum(ObjectiveCriteria.RenderType.class);
 		}
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.objectiveName);
 		friendlyByteBuf.writeByte(this.method);
 		if (this.method == 0 || this.method == 2) {

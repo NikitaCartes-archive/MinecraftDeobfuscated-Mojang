@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -38,10 +37,9 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 		BiomeSource biomeSource,
 		long l,
 		WorldgenRandom worldgenRandom,
-		int i,
-		int j,
-		Biome biome,
 		ChunkPos chunkPos,
+		Biome biome,
+		ChunkPos chunkPos2,
 		NoneFeatureConfiguration noneFeatureConfiguration,
 		LevelHeightAccessor levelHeightAccessor
 	) {
@@ -59,30 +57,27 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 	}
 
 	public static class NetherBridgeStart extends StructureStart<NoneFeatureConfiguration> {
-		public NetherBridgeStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, boundingBox, k, l);
+		public NetherBridgeStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+			super(structureFeature, chunkPos, boundingBox, i, l);
 		}
 
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
-			int i,
-			int j,
+			ChunkPos chunkPos,
 			Biome biome,
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
-			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(
-				this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2)
-			);
+			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
 			this.pieces.add(startPiece);
 			startPiece.addChildren(startPiece, this.pieces, this.random);
 			List<StructurePiece> list = startPiece.pendingChildren;
 
 			while (!list.isEmpty()) {
-				int k = this.random.nextInt(list.size());
-				StructurePiece structurePiece = (StructurePiece)list.remove(k);
+				int i = this.random.nextInt(list.size());
+				StructurePiece structurePiece = (StructurePiece)list.remove(i);
 				structurePiece.addChildren(startPiece, this.pieces, this.random);
 			}
 

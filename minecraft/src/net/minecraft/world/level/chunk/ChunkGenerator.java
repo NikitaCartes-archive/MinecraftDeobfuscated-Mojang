@@ -44,6 +44,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -132,24 +133,24 @@ public abstract class ChunkGenerator {
 		WorldgenRandom worldgenRandom = new WorldgenRandom();
 		int i = 8;
 		ChunkPos chunkPos = chunkAccess.getPos();
-		int j = chunkPos.x;
-		int k = chunkPos.z;
 		BiomeGenerationSettings biomeGenerationSettings = this.biomeSource
 			.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos.getMinBlockZ()))
 			.getGenerationSettings();
+		CarvingContext carvingContext = new CarvingContext(this);
 		BitSet bitSet = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
 
-		for (int m = j - 8; m <= j + 8; m++) {
-			for (int n = k - 8; n <= k + 8; n++) {
+		for (int j = -8; j <= 8; j++) {
+			for (int k = -8; k <= 8; k++) {
+				ChunkPos chunkPos2 = new ChunkPos(chunkPos.x + j, chunkPos.z + k);
 				List<Supplier<ConfiguredWorldCarver<?>>> list = biomeGenerationSettings.getCarvers(carving);
 				ListIterator<Supplier<ConfiguredWorldCarver<?>>> listIterator = list.listIterator();
 
 				while (listIterator.hasNext()) {
-					int o = listIterator.nextIndex();
+					int m = listIterator.nextIndex();
 					ConfiguredWorldCarver<?> configuredWorldCarver = (ConfiguredWorldCarver<?>)((Supplier)listIterator.next()).get();
-					worldgenRandom.setLargeFeatureSeed(l + (long)o, m, n);
-					if (configuredWorldCarver.isStartChunk(worldgenRandom, m, n)) {
-						configuredWorldCarver.carve(chunkAccess, biomeManager2::getBiome, worldgenRandom, this.getSeaLevel(), m, n, j, k, bitSet);
+					worldgenRandom.setLargeFeatureSeed(l + (long)m, chunkPos2.x, chunkPos2.z);
+					if (configuredWorldCarver.isStartChunk(worldgenRandom)) {
+						configuredWorldCarver.carve(carvingContext, chunkAccess, biomeManager2::getBiome, worldgenRandom, this.getSeaLevel(), chunkPos2, bitSet);
 					}
 				}
 			}
