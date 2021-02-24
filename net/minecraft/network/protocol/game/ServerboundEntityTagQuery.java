@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,11 +11,8 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundEntityTagQuery
 implements Packet<ServerGamePacketListener> {
-    private int transactionId;
-    private int entityId;
-
-    public ServerboundEntityTagQuery() {
-    }
+    private final int transactionId;
+    private final int entityId;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundEntityTagQuery(int i, int j) {
@@ -24,14 +20,13 @@ implements Packet<ServerGamePacketListener> {
         this.entityId = j;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundEntityTagQuery(FriendlyByteBuf friendlyByteBuf) {
         this.transactionId = friendlyByteBuf.readVarInt();
         this.entityId = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.transactionId);
         friendlyByteBuf.writeVarInt(this.entityId);
     }

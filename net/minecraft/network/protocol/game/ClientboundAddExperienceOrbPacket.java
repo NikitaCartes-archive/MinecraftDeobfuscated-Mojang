@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,14 +12,11 @@ import net.minecraft.world.entity.ExperienceOrb;
 
 public class ClientboundAddExperienceOrbPacket
 implements Packet<ClientGamePacketListener> {
-    private int id;
-    private double x;
-    private double y;
-    private double z;
-    private int value;
-
-    public ClientboundAddExperienceOrbPacket() {
-    }
+    private final int id;
+    private final double x;
+    private final double y;
+    private final double z;
+    private final int value;
 
     public ClientboundAddExperienceOrbPacket(ExperienceOrb experienceOrb) {
         this.id = experienceOrb.getId();
@@ -30,8 +26,7 @@ implements Packet<ClientGamePacketListener> {
         this.value = experienceOrb.getValue();
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundAddExperienceOrbPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readVarInt();
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
@@ -40,7 +35,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.id);
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);

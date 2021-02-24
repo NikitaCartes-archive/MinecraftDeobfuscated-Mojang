@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,12 +13,9 @@ import net.minecraft.world.item.crafting.Recipe;
 
 public class ServerboundPlaceRecipePacket
 implements Packet<ServerGamePacketListener> {
-    private int containerId;
-    private ResourceLocation recipe;
-    private boolean shiftDown;
-
-    public ServerboundPlaceRecipePacket() {
-    }
+    private final int containerId;
+    private final ResourceLocation recipe;
+    private final boolean shiftDown;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundPlaceRecipePacket(int i, Recipe<?> recipe, boolean bl) {
@@ -28,15 +24,14 @@ implements Packet<ServerGamePacketListener> {
         this.shiftDown = bl;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPlaceRecipePacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readByte();
         this.recipe = friendlyByteBuf.readResourceLocation();
         this.shiftDown = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
         friendlyByteBuf.writeResourceLocation(this.recipe);
         friendlyByteBuf.writeBoolean(this.shiftDown);

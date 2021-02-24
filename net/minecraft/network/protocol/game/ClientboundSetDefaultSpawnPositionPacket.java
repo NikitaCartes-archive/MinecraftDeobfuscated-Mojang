@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -13,25 +12,23 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundSetDefaultSpawnPositionPacket
 implements Packet<ClientGamePacketListener> {
-    private BlockPos pos;
-    private float angle;
-
-    public ClientboundSetDefaultSpawnPositionPacket() {
-    }
+    private final BlockPos pos;
+    private final float angle;
 
     public ClientboundSetDefaultSpawnPositionPacket(BlockPos blockPos, float f) {
         this.pos = blockPos;
         this.angle = f;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetDefaultSpawnPositionPacket(FriendlyByteBuf friendlyByteBuf) {
         this.pos = friendlyByteBuf.readBlockPos();
+        this.angle = friendlyByteBuf.readFloat();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.pos);
+        friendlyByteBuf.writeFloat(this.angle);
     }
 
     @Override

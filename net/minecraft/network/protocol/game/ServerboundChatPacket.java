@@ -3,17 +3,13 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundChatPacket
 implements Packet<ServerGamePacketListener> {
-    private String message;
-
-    public ServerboundChatPacket() {
-    }
+    private final String message;
 
     public ServerboundChatPacket(String string) {
         if (string.length() > 256) {
@@ -22,13 +18,12 @@ implements Packet<ServerGamePacketListener> {
         this.message = string;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
         this.message = friendlyByteBuf.readUtf(256);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.message);
     }
 

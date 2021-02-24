@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +11,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundContainerSetDataPacket
 implements Packet<ClientGamePacketListener> {
-    private int containerId;
-    private int id;
-    private int value;
-
-    public ClientboundContainerSetDataPacket() {
-    }
+    private final int containerId;
+    private final int id;
+    private final int value;
 
     public ClientboundContainerSetDataPacket(int i, int j, int k) {
         this.containerId = i;
@@ -25,23 +21,22 @@ implements Packet<ClientGamePacketListener> {
         this.value = k;
     }
 
-    @Override
-    public void handle(ClientGamePacketListener clientGamePacketListener) {
-        clientGamePacketListener.handleContainerSetData(this);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundContainerSetDataPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readUnsignedByte();
         this.id = friendlyByteBuf.readShort();
         this.value = friendlyByteBuf.readShort();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
         friendlyByteBuf.writeShort(this.id);
         friendlyByteBuf.writeShort(this.value);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handleContainerSetData(this);
     }
 
     @Environment(value=EnvType.CLIENT)

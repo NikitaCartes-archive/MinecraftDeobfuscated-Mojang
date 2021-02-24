@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +11,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundSetExperiencePacket
 implements Packet<ClientGamePacketListener> {
-    private float experienceProgress;
-    private int totalExperience;
-    private int experienceLevel;
-
-    public ClientboundSetExperiencePacket() {
-    }
+    private final float experienceProgress;
+    private final int totalExperience;
+    private final int experienceLevel;
 
     public ClientboundSetExperiencePacket(float f, int i, int j) {
         this.experienceProgress = f;
@@ -25,15 +21,14 @@ implements Packet<ClientGamePacketListener> {
         this.experienceLevel = j;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetExperiencePacket(FriendlyByteBuf friendlyByteBuf) {
         this.experienceProgress = friendlyByteBuf.readFloat();
         this.experienceLevel = friendlyByteBuf.readVarInt();
         this.totalExperience = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeFloat(this.experienceProgress);
         friendlyByteBuf.writeVarInt(this.experienceLevel);
         friendlyByteBuf.writeVarInt(this.totalExperience);

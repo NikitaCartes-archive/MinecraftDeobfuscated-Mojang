@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -16,12 +15,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundOpenScreenPacket
 implements Packet<ClientGamePacketListener> {
-    private int containerId;
-    private int type;
-    private Component title;
-
-    public ClientboundOpenScreenPacket() {
-    }
+    private final int containerId;
+    private final int type;
+    private final Component title;
 
     public ClientboundOpenScreenPacket(int i, MenuType<?> menuType, Component component) {
         this.containerId = i;
@@ -29,15 +25,14 @@ implements Packet<ClientGamePacketListener> {
         this.title = component;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundOpenScreenPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readVarInt();
         this.type = friendlyByteBuf.readVarInt();
         this.title = friendlyByteBuf.readComponent();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.containerId);
         friendlyByteBuf.writeVarInt(this.type);
         friendlyByteBuf.writeComponent(this.title);

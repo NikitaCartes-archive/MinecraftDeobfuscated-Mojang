@@ -15,6 +15,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -96,6 +98,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
@@ -125,9 +128,11 @@ implements PreparableReloadListener {
     private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap();
     private final Queue<Particle> particlesToAdd = Queues.newArrayDeque();
     private final Map<ResourceLocation, MutableSpriteSet> spriteSets = Maps.newHashMap();
-    private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
+    private final TextureAtlas textureAtlas;
+    private final Object2IntOpenHashMap<ParticleGroup> trackedParticleCounts = new Object2IntOpenHashMap();
 
     public ParticleEngine(ClientLevel clientLevel, TextureManager textureManager) {
+        this.textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
         textureManager.register(this.textureAtlas.location(), this.textureAtlas);
         this.level = clientLevel;
         this.textureManager = textureManager;
@@ -312,7 +317,15 @@ implements PreparableReloadListener {
     }
 
     public void add(Particle particle) {
-        this.particlesToAdd.add(particle);
+        Optional<ParticleGroup> optional = particle.getParticleGroup();
+        if (optional.isPresent()) {
+            if (this.hasSpaceInParticleLimit(optional.get())) {
+                this.particlesToAdd.add(particle);
+                this.updateCount(optional.get(), 1);
+            }
+        } else {
+            this.particlesToAdd.add(particle);
+        }
     }
 
     public void tick() {
@@ -345,9 +358,14 @@ implements PreparableReloadListener {
                 Particle particle = iterator.next();
                 this.tickParticle(particle);
                 if (particle.isAlive()) continue;
+                particle.getParticleGroup().ifPresent(particleGroup -> this.updateCount((ParticleGroup)particleGroup, -1));
                 iterator.remove();
             }
         }
+    }
+
+    private void updateCount(ParticleGroup particleGroup, int i) {
+        this.trackedParticleCounts.addTo(particleGroup, i);
     }
 
     private void tickParticle(Particle particle) {
@@ -403,6 +421,7 @@ implements PreparableReloadListener {
         this.level = clientLevel;
         this.particles.clear();
         this.trackingEmitters.clear();
+        this.trackedParticleCounts.clear();
     }
 
     public void destroy(BlockPos blockPos, BlockState blockState) {
@@ -470,6 +489,10 @@ implements PreparableReloadListener {
 
     public String countParticles() {
         return String.valueOf(this.particles.values().stream().mapToInt(Collection::size).sum());
+    }
+
+    private boolean hasSpaceInParticleLimit(ParticleGroup particleGroup) {
+        return this.trackedParticleCounts.getInt(particleGroup) < particleGroup.getLimit();
     }
 
     @Environment(value=EnvType.CLIENT)

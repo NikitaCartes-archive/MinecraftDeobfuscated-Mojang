@@ -28,8 +28,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class AdvancementProgress
 implements Comparable<AdvancementProgress> {
-    private final Map<String, CriterionProgress> criteria = Maps.newHashMap();
+    private final Map<String, CriterionProgress> criteria;
     private String[][] requirements = new String[0][];
+
+    private AdvancementProgress(Map<String, CriterionProgress> map) {
+        this.criteria = map;
+    }
+
+    public AdvancementProgress() {
+        this.criteria = Maps.newHashMap();
+    }
 
     public void update(Map<String, Criterion> map, String[][] strings) {
         Set<String> set = map.keySet();
@@ -89,21 +97,13 @@ implements Comparable<AdvancementProgress> {
         return "AdvancementProgress{criteria=" + this.criteria + ", requirements=" + Arrays.deepToString((Object[])this.requirements) + '}';
     }
 
-    public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarInt(this.criteria.size());
-        for (Map.Entry<String, CriterionProgress> entry : this.criteria.entrySet()) {
-            friendlyByteBuf.writeUtf(entry.getKey());
-            entry.getValue().serializeToNetwork(friendlyByteBuf);
-        }
+    public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeMap(this.criteria, FriendlyByteBuf::writeUtf, (friendlyByteBuf, criterionProgress) -> criterionProgress.serializeToNetwork((FriendlyByteBuf)friendlyByteBuf));
     }
 
     public static AdvancementProgress fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-        AdvancementProgress advancementProgress = new AdvancementProgress();
-        int i = friendlyByteBuf.readVarInt();
-        for (int j = 0; j < i; ++j) {
-            advancementProgress.criteria.put(friendlyByteBuf.readUtf(Short.MAX_VALUE), CriterionProgress.fromNetwork(friendlyByteBuf));
-        }
-        return advancementProgress;
+        Map<String, CriterionProgress> map = friendlyByteBuf.readMap(FriendlyByteBuf::readUtf, CriterionProgress::fromNetwork);
+        return new AdvancementProgress(map);
     }
 
     @Nullable

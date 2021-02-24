@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,11 +13,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class ServerboundUseItemOnPacket
 implements Packet<ServerGamePacketListener> {
-    private BlockHitResult blockHit;
-    private InteractionHand hand;
-
-    public ServerboundUseItemOnPacket() {
-    }
+    private final BlockHitResult blockHit;
+    private final InteractionHand hand;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundUseItemOnPacket(InteractionHand interactionHand, BlockHitResult blockHitResult) {
@@ -26,14 +22,13 @@ implements Packet<ServerGamePacketListener> {
         this.blockHit = blockHitResult;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundUseItemOnPacket(FriendlyByteBuf friendlyByteBuf) {
         this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
         this.blockHit = friendlyByteBuf.readBlockHitResult();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeEnum(this.hand);
         friendlyByteBuf.writeBlockHitResult(this.blockHit);
     }

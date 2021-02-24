@@ -5,7 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,23 +16,19 @@ import net.minecraft.world.item.ItemStack;
 
 public class ClientboundSetEquipmentPacket
 implements Packet<ClientGamePacketListener> {
-    private int entity;
+    private final int entity;
     private final List<Pair<EquipmentSlot, ItemStack>> slots;
-
-    public ClientboundSetEquipmentPacket() {
-        this.slots = Lists.newArrayList();
-    }
 
     public ClientboundSetEquipmentPacket(int i, List<Pair<EquipmentSlot, ItemStack>> list) {
         this.entity = i;
         this.slots = list;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetEquipmentPacket(FriendlyByteBuf friendlyByteBuf) {
         byte i;
         this.entity = friendlyByteBuf.readVarInt();
         EquipmentSlot[] equipmentSlots = EquipmentSlot.values();
+        this.slots = Lists.newArrayList();
         do {
             i = friendlyByteBuf.readByte();
             EquipmentSlot equipmentSlot = equipmentSlots[i & 0x7F];
@@ -43,7 +38,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entity);
         int i = this.slots.size();
         for (int j = 0; j < i; ++j) {

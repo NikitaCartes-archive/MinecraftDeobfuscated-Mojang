@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.ClampedNormalFloat;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -39,7 +40,7 @@ extends Feature<DripstoneClusterConfiguration> {
             return false;
         }
         int i = dripstoneClusterConfiguration.height.sample(random);
-        float f = DripstoneClusterFeature.randomBetweenBiased(random, dripstoneClusterConfiguration.wetness.getBaseValue(), dripstoneClusterConfiguration.wetness.getMaxValue(), dripstoneClusterConfiguration.wetnessMean, dripstoneClusterConfiguration.wetnessDeviation);
+        float f = dripstoneClusterConfiguration.wetness.sample(random);
         float g = dripstoneClusterConfiguration.density.sample(random);
         int j = dripstoneClusterConfiguration.radius.sample(random);
         int k = dripstoneClusterConfiguration.radius.sample(random);
@@ -168,7 +169,7 @@ extends Feature<DripstoneClusterConfiguration> {
     }
 
     private static float randomBetweenBiased(Random random, float f, float g, float h, float i) {
-        return Mth.clamp(Mth.normal(random, h, i), f, g);
+        return ClampedNormalFloat.sample(random, h, i, f, g);
     }
 }
 

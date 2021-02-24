@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
@@ -15,11 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerboundSeenAdvancementsPacket
 implements Packet<ServerGamePacketListener> {
-    private Action action;
-    private ResourceLocation tab;
-
-    public ServerboundSeenAdvancementsPacket() {
-    }
+    private final Action action;
+    @Nullable
+    private final ResourceLocation tab;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundSeenAdvancementsPacket(Action action, @Nullable ResourceLocation resourceLocation) {
@@ -37,16 +34,13 @@ implements Packet<ServerGamePacketListener> {
         return new ServerboundSeenAdvancementsPacket(Action.CLOSED_SCREEN, null);
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundSeenAdvancementsPacket(FriendlyByteBuf friendlyByteBuf) {
         this.action = friendlyByteBuf.readEnum(Action.class);
-        if (this.action == Action.OPENED_TAB) {
-            this.tab = friendlyByteBuf.readResourceLocation();
-        }
+        this.tab = this.action == Action.OPENED_TAB ? friendlyByteBuf.readResourceLocation() : null;
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeEnum(this.action);
         if (this.action == Action.OPENED_TAB) {
             friendlyByteBuf.writeResourceLocation(this.tab);
@@ -62,6 +56,7 @@ implements Packet<ServerGamePacketListener> {
         return this.action;
     }
 
+    @Nullable
     public ResourceLocation getTab() {
         return this.tab;
     }

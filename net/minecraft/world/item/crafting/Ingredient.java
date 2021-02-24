@@ -86,10 +86,7 @@ implements Predicate<ItemStack> {
 
     public void toNetwork(FriendlyByteBuf friendlyByteBuf) {
         this.dissolve();
-        friendlyByteBuf.writeVarInt(this.itemStacks.length);
-        for (int i = 0; i < this.itemStacks.length; ++i) {
-            friendlyByteBuf.writeItem(this.itemStacks[i]);
-        }
+        friendlyByteBuf.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
     }
 
     public JsonElement toJson() {
@@ -130,8 +127,7 @@ implements Predicate<ItemStack> {
     }
 
     public static Ingredient fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-        int i = friendlyByteBuf.readVarInt();
-        return Ingredient.fromValues(Stream.generate(() -> new ItemValue(friendlyByteBuf.readItem())).limit(i));
+        return Ingredient.fromValues(friendlyByteBuf.readList(FriendlyByteBuf::readItem).stream().map(itemStack -> new ItemValue((ItemStack)itemStack)));
     }
 
     public static Ingredient fromJson(@Nullable JsonElement jsonElement2) {

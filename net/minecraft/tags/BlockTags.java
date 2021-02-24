@@ -54,6 +54,10 @@ public final class BlockTags {
     public static final Tag.Named<Block> FLOWERS = BlockTags.bind("flowers");
     public static final Tag.Named<Block> PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
     public static final Tag.Named<Block> GOLD_ORES = BlockTags.bind("gold_ores");
+    public static final Tag.Named<Block> IRON_ORES = BlockTags.bind("iron_ores");
+    public static final Tag.Named<Block> DIAMOND_ORES = BlockTags.bind("diamond_ores");
+    public static final Tag.Named<Block> REDSTONE_ORES = BlockTags.bind("redstone_ores");
+    public static final Tag.Named<Block> LAPIS_ORES = BlockTags.bind("lapis_ores");
     public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = BlockTags.bind("non_flammable_wood");
     public static final Tag.Named<Block> CANDLES = BlockTags.bind("candles");
     public static final Tag.Named<Block> FLOWER_POTS = BlockTags.bind("flower_pots");
@@ -98,6 +102,8 @@ public final class BlockTags {
     public static final Tag.Named<Block> INFINIBURN_NETHER = BlockTags.bind("infiniburn_nether");
     public static final Tag.Named<Block> INFINIBURN_END = BlockTags.bind("infiniburn_end");
     public static final Tag.Named<Block> BASE_STONE_OVERWORLD = BlockTags.bind("base_stone_overworld");
+    public static final Tag.Named<Block> STONE_ORE_REPLACEABLES = BlockTags.bind("stone_ore_replaceables");
+    public static final Tag.Named<Block> DEEPSLATE_ORE_REPLACEABLES = BlockTags.bind("deepslate_ore_replaceables");
     public static final Tag.Named<Block> BASE_STONE_NETHER = BlockTags.bind("base_stone_nether");
     public static final Tag.Named<Block> CANDLE_CAKES = BlockTags.bind("candle_cakes");
     public static final Tag.Named<Block> CAULDRONS = BlockTags.bind("cauldrons");

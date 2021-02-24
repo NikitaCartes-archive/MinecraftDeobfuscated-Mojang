@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,16 +13,13 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 
 public class ServerboundClientInformationPacket
 implements Packet<ServerGamePacketListener> {
-    private String language;
-    private int viewDistance;
-    private ChatVisiblity chatVisibility;
-    private boolean chatColors;
-    private int modelCustomisation;
-    private HumanoidArm mainHand;
-    private boolean textFilteringEnabled;
-
-    public ServerboundClientInformationPacket() {
-    }
+    private final String language;
+    private final int viewDistance;
+    private final ChatVisiblity chatVisibility;
+    private final boolean chatColors;
+    private final int modelCustomisation;
+    private final HumanoidArm mainHand;
+    private final boolean textFilteringEnabled;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm, boolean bl2) {
@@ -36,8 +32,7 @@ implements Packet<ServerGamePacketListener> {
         this.textFilteringEnabled = bl2;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundClientInformationPacket(FriendlyByteBuf friendlyByteBuf) {
         this.language = friendlyByteBuf.readUtf(16);
         this.viewDistance = friendlyByteBuf.readByte();
         this.chatVisibility = friendlyByteBuf.readEnum(ChatVisiblity.class);
@@ -48,7 +43,7 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.language);
         friendlyByteBuf.writeByte(this.viewDistance);
         friendlyByteBuf.writeEnum(this.chatVisibility);

@@ -5,7 +5,6 @@ package net.minecraft.network.protocol.status;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,22 +20,18 @@ import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 public class ClientboundStatusResponsePacket
 implements Packet<ClientStatusPacketListener> {
     private static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)ServerStatus.Version.class), new ServerStatus.Version.Serializer()).registerTypeAdapter((Type)((Object)ServerStatus.Players.class), new ServerStatus.Players.Serializer()).registerTypeAdapter((Type)((Object)ServerStatus.class), new ServerStatus.Serializer()).registerTypeHierarchyAdapter(Component.class, new Component.Serializer()).registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory()).create();
-    private ServerStatus status;
-
-    public ClientboundStatusResponsePacket() {
-    }
+    private final ServerStatus status;
 
     public ClientboundStatusResponsePacket(ServerStatus serverStatus) {
         this.status = serverStatus;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundStatusResponsePacket(FriendlyByteBuf friendlyByteBuf) {
         this.status = GsonHelper.fromJson(GSON, friendlyByteBuf.readUtf(Short.MAX_VALUE), ServerStatus.class);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(GSON.toJson(this.status));
     }
 

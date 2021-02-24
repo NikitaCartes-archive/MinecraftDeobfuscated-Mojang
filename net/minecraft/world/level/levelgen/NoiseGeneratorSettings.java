@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public final class NoiseGeneratorSettings {
-    public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(NoiseGeneratorSettings::structureSettings), ((MapCodec)NoiseSettings.CODEC.fieldOf("noise")).forGetter(NoiseGeneratorSettings::noiseSettings), ((MapCodec)BlockState.CODEC.fieldOf("default_block")).forGetter(NoiseGeneratorSettings::getDefaultBlock), ((MapCodec)BlockState.CODEC.fieldOf("default_fluid")).forGetter(NoiseGeneratorSettings::getDefaultFluid), ((MapCodec)Codec.INT.fieldOf("bedrock_roof_position")).forGetter(NoiseGeneratorSettings::getBedrockRoofPosition), ((MapCodec)Codec.INT.fieldOf("bedrock_floor_position")).forGetter(NoiseGeneratorSettings::getBedrockFloorPosition), ((MapCodec)Codec.INT.fieldOf("sea_level")).forGetter(NoiseGeneratorSettings::seaLevel), ((MapCodec)Codec.BOOL.fieldOf("disable_mob_generation")).forGetter(NoiseGeneratorSettings::disableMobGeneration), ((MapCodec)Codec.BOOL.fieldOf("aquifers_enabled")).forGetter(NoiseGeneratorSettings::isAquifersEnabled), ((MapCodec)Codec.BOOL.fieldOf("noise_caves_enabled")).forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled), ((MapCodec)Codec.BOOL.fieldOf("grimstone_enabled")).forGetter(NoiseGeneratorSettings::isGrimstoneEnabled)).apply((Applicative<NoiseGeneratorSettings, ?>)instance, NoiseGeneratorSettings::new));
+    public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(NoiseGeneratorSettings::structureSettings), ((MapCodec)NoiseSettings.CODEC.fieldOf("noise")).forGetter(NoiseGeneratorSettings::noiseSettings), ((MapCodec)BlockState.CODEC.fieldOf("default_block")).forGetter(NoiseGeneratorSettings::getDefaultBlock), ((MapCodec)BlockState.CODEC.fieldOf("default_fluid")).forGetter(NoiseGeneratorSettings::getDefaultFluid), ((MapCodec)Codec.INT.fieldOf("bedrock_roof_position")).forGetter(NoiseGeneratorSettings::getBedrockRoofPosition), ((MapCodec)Codec.INT.fieldOf("bedrock_floor_position")).forGetter(NoiseGeneratorSettings::getBedrockFloorPosition), ((MapCodec)Codec.INT.fieldOf("sea_level")).forGetter(NoiseGeneratorSettings::seaLevel), ((MapCodec)Codec.BOOL.fieldOf("disable_mob_generation")).forGetter(NoiseGeneratorSettings::disableMobGeneration), ((MapCodec)Codec.BOOL.fieldOf("aquifers_enabled")).forGetter(NoiseGeneratorSettings::isAquifersEnabled), ((MapCodec)Codec.BOOL.fieldOf("noise_caves_enabled")).forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled), ((MapCodec)Codec.BOOL.fieldOf("deepslate_enabled")).forGetter(NoiseGeneratorSettings::isDeepslateEnabled)).apply((Applicative<NoiseGeneratorSettings, ?>)instance, NoiseGeneratorSettings::new));
     public static final Codec<Supplier<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
     private final StructureSettings structureSettings;
     private final NoiseSettings noiseSettings;
@@ -39,7 +39,7 @@ public final class NoiseGeneratorSettings {
     private final boolean disableMobGeneration;
     private final boolean aquifersEnabled;
     private final boolean noiseCavesEnabled;
-    private final boolean grimstoneEnabled;
+    private final boolean deepslateEnabled;
     public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("amplified"));
     public static final ResourceKey<NoiseGeneratorSettings> NETHER = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("nether"));
@@ -59,7 +59,7 @@ public final class NoiseGeneratorSettings {
         this.disableMobGeneration = bl;
         this.aquifersEnabled = bl2;
         this.noiseCavesEnabled = bl3;
-        this.grimstoneEnabled = bl4;
+        this.deepslateEnabled = bl4;
     }
 
     public StructureSettings structureSettings() {
@@ -103,8 +103,8 @@ public final class NoiseGeneratorSettings {
         return this.noiseCavesEnabled;
     }
 
-    protected boolean isGrimstoneEnabled() {
-        return this.grimstoneEnabled;
+    protected boolean isDeepslateEnabled() {
+        return this.deepslateEnabled;
     }
 
     public boolean stable(ResourceKey<NoiseGeneratorSettings> resourceKey) {

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,15 +13,12 @@ import net.minecraft.world.item.ItemStack;
 
 public class ServerboundContainerClickPacket
 implements Packet<ServerGamePacketListener> {
-    private int containerId;
-    private int slotNum;
-    private int buttonNum;
-    private short uid;
-    private ItemStack itemStack = ItemStack.EMPTY;
-    private ClickType clickType;
-
-    public ServerboundContainerClickPacket() {
-    }
+    private final int containerId;
+    private final int slotNum;
+    private final int buttonNum;
+    private final short uid;
+    private final ItemStack itemStack;
+    private final ClickType clickType;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundContainerClickPacket(int i, int j, int k, ClickType clickType, ItemStack itemStack, short s) {
@@ -39,8 +35,7 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleContainerClick(this);
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundContainerClickPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readByte();
         this.slotNum = friendlyByteBuf.readShort();
         this.buttonNum = friendlyByteBuf.readByte();
@@ -50,7 +45,7 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
         friendlyByteBuf.writeShort(this.slotNum);
         friendlyByteBuf.writeByte(this.buttonNum);

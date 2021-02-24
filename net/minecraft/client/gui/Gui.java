@@ -1062,22 +1062,7 @@ extends GuiComponent {
         this.animateOverlayMessageColor = bl;
     }
 
-    public void setTitles(@Nullable Component component, @Nullable Component component2, int i, int j, int k) {
-        if (component == null && component2 == null && i < 0 && j < 0 && k < 0) {
-            this.title = null;
-            this.subtitle = null;
-            this.titleTime = 0;
-            return;
-        }
-        if (component != null) {
-            this.title = component;
-            this.titleTime = this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime;
-            return;
-        }
-        if (component2 != null) {
-            this.subtitle = component2;
-            return;
-        }
+    public void setTimes(int i, int j, int k) {
         if (i >= 0) {
             this.titleFadeInTime = i;
         }
@@ -1090,6 +1075,21 @@ extends GuiComponent {
         if (this.titleTime > 0) {
             this.titleTime = this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime;
         }
+    }
+
+    public void setSubtitle(Component component) {
+        this.subtitle = component;
+    }
+
+    public void setTitle(Component component) {
+        this.title = component;
+        this.titleTime = this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime;
+    }
+
+    public void clear() {
+        this.title = null;
+        this.subtitle = null;
+        this.titleTime = 0;
     }
 
     public UUID guessChatUUID(Component component) {

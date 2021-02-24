@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,12 +12,9 @@ import net.minecraft.world.entity.Entity;
 
 public class ServerboundPlayerCommandPacket
 implements Packet<ServerGamePacketListener> {
-    private int id;
-    private Action action;
-    private int data;
-
-    public ServerboundPlayerCommandPacket() {
-    }
+    private final int id;
+    private final Action action;
+    private final int data;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerCommandPacket(Entity entity, Action action) {
@@ -32,15 +28,14 @@ implements Packet<ServerGamePacketListener> {
         this.data = i;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPlayerCommandPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readVarInt();
         this.action = friendlyByteBuf.readEnum(Action.class);
         this.data = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.id);
         friendlyByteBuf.writeEnum(this.action);
         friendlyByteBuf.writeVarInt(this.data);

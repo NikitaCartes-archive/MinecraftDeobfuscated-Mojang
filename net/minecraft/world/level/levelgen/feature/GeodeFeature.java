@@ -39,17 +39,14 @@ extends Feature<GeodeConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<GeodeConfiguration> featurePlaceContext) {
+        int o;
         int n;
-        int m;
         GeodeConfiguration geodeConfiguration = featurePlaceContext.config();
         Random random = featurePlaceContext.random();
         BlockPos blockPos = featurePlaceContext.origin();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         int i = geodeConfiguration.minGenOffset;
         int j = geodeConfiguration.maxGenOffset;
-        if (worldGenLevel.getFluidState(blockPos.offset(0, j / 3, 0)).isSource()) {
-            return false;
-        }
         LinkedList<Pair<BlockPos, Integer>> list = Lists.newLinkedList();
         int k = geodeConfiguration.minDistributionPoints + random.nextInt(geodeConfiguration.maxDistributionPoints - geodeConfiguration.minDistributionPoints);
         WorldgenRandom worldgenRandom = new WorldgenRandom(worldGenLevel.getSeed());
@@ -65,27 +62,33 @@ extends Feature<GeodeConfiguration> {
         double h = 1.0 / Math.sqrt(geodeLayerSettings.outerLayer + d);
         double l = 1.0 / Math.sqrt(geodeCrackSettings.baseCrackSize + random.nextDouble() / 2.0 + (k > 3 ? d : 0.0));
         boolean bl = (double)random.nextFloat() < geodeCrackSettings.generateCrackChance;
-        for (m = 0; m < k; ++m) {
-            n = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance);
-            int o = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance);
-            int p = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance);
-            list.add(Pair.of(blockPos.offset(n, o, p), geodeConfiguration.minPointOffset + random.nextInt(geodeConfiguration.maxPointOffset - geodeConfiguration.minPointOffset)));
+        int m = 0;
+        for (n = 0; n < k; ++n) {
+            int q;
+            int p;
+            o = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance);
+            BlockPos blockPos2 = blockPos.offset(o, p = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance), q = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance));
+            BlockState blockState = worldGenLevel.getBlockState(blockPos2);
+            if ((blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA)) && ++m > geodeConfiguration.invalidBlocksThreshold) {
+                return false;
+            }
+            list.add(Pair.of(blockPos2, geodeConfiguration.minPointOffset + random.nextInt(geodeConfiguration.maxPointOffset - geodeConfiguration.minPointOffset)));
         }
         if (bl) {
-            m = random.nextInt(4);
-            n = k * 2 + 1;
-            if (m == 0) {
-                list2.add(blockPos.offset(n, 7, 0));
-                list2.add(blockPos.offset(n, 5, 0));
-                list2.add(blockPos.offset(n, 1, 0));
-            } else if (m == 1) {
-                list2.add(blockPos.offset(0, 7, n));
-                list2.add(blockPos.offset(0, 5, n));
-                list2.add(blockPos.offset(0, 1, n));
-            } else if (m == 2) {
-                list2.add(blockPos.offset(n, 7, n));
-                list2.add(blockPos.offset(n, 5, n));
-                list2.add(blockPos.offset(n, 1, n));
+            n = random.nextInt(4);
+            o = k * 2 + 1;
+            if (n == 0) {
+                list2.add(blockPos.offset(o, 7, 0));
+                list2.add(blockPos.offset(o, 5, 0));
+                list2.add(blockPos.offset(o, 1, 0));
+            } else if (n == 1) {
+                list2.add(blockPos.offset(0, 7, o));
+                list2.add(blockPos.offset(0, 5, o));
+                list2.add(blockPos.offset(0, 1, o));
+            } else if (n == 2) {
+                list2.add(blockPos.offset(o, 7, o));
+                list2.add(blockPos.offset(o, 5, o));
+                list2.add(blockPos.offset(o, 1, o));
             } else {
                 list2.add(blockPos.offset(0, 7, 0));
                 list2.add(blockPos.offset(0, 5, 0));
@@ -93,59 +96,59 @@ extends Feature<GeodeConfiguration> {
             }
         }
         ArrayList<BlockPos> list3 = Lists.newArrayList();
-        for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(i, i, i), blockPos.offset(j, j, j))) {
-            double q = normalNoise.getValue(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()) * geodeConfiguration.noiseMultiplier;
-            double r = 0.0;
+        for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos.offset(i, i, i), blockPos.offset(j, j, j))) {
+            double r = normalNoise.getValue(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ()) * geodeConfiguration.noiseMultiplier;
             double s = 0.0;
+            double t = 0.0;
             for (Pair pair : list) {
-                r += Mth.fastInvSqrt(blockPos2.distSqr((Vec3i)pair.getFirst()) + (double)((Integer)pair.getSecond()).intValue()) + q;
+                s += Mth.fastInvSqrt(blockPos3.distSqr((Vec3i)pair.getFirst()) + (double)((Integer)pair.getSecond()).intValue()) + r;
             }
-            for (BlockPos blockPos3 : list2) {
-                s += Mth.fastInvSqrt(blockPos2.distSqr(blockPos3) + (double)geodeCrackSettings.crackPointOffset) + q;
+            for (BlockPos blockPos2 : list2) {
+                t += Mth.fastInvSqrt(blockPos3.distSqr(blockPos2) + (double)geodeCrackSettings.crackPointOffset) + r;
             }
-            if (r < h) continue;
-            if (bl && s >= l && r < e) {
-                if (!worldGenLevel.getFluidState(blockPos2).isEmpty()) continue;
-                worldGenLevel.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 2);
+            if (s < h) continue;
+            if (bl && t >= l && s < e) {
+                if (!worldGenLevel.getFluidState(blockPos3).isEmpty()) continue;
+                worldGenLevel.setBlock(blockPos3, Blocks.AIR.defaultBlockState(), 2);
                 continue;
             }
-            if (r >= e) {
-                worldGenLevel.setBlock(blockPos2, geodeBlockSettings.fillingProvider.getState(random, blockPos2), 2);
+            if (s >= e) {
+                worldGenLevel.setBlock(blockPos3, geodeBlockSettings.fillingProvider.getState(random, blockPos3), 2);
                 continue;
             }
-            if (r >= f) {
+            if (s >= f) {
                 boolean bl2;
                 boolean bl3 = bl2 = (double)random.nextFloat() < geodeConfiguration.useAlternateLayer0Chance;
                 if (bl2) {
-                    worldGenLevel.setBlock(blockPos2, geodeBlockSettings.alternateInnerLayerProvider.getState(random, blockPos2), 2);
+                    worldGenLevel.setBlock(blockPos3, geodeBlockSettings.alternateInnerLayerProvider.getState(random, blockPos3), 2);
                 } else {
-                    worldGenLevel.setBlock(blockPos2, geodeBlockSettings.innerLayerProvider.getState(random, blockPos2), 2);
+                    worldGenLevel.setBlock(blockPos3, geodeBlockSettings.innerLayerProvider.getState(random, blockPos3), 2);
                 }
                 if (geodeConfiguration.placementsRequireLayer0Alternate && !bl2 || !((double)random.nextFloat() < geodeConfiguration.usePotentialPlacementsChance)) continue;
-                list3.add(blockPos2.immutable());
+                list3.add(blockPos3.immutable());
                 continue;
             }
-            if (r >= g) {
-                worldGenLevel.setBlock(blockPos2, geodeBlockSettings.middleLayerProvider.getState(random, blockPos2), 2);
+            if (s >= g) {
+                worldGenLevel.setBlock(blockPos3, geodeBlockSettings.middleLayerProvider.getState(random, blockPos3), 2);
                 continue;
             }
-            if (!(r >= h)) continue;
-            worldGenLevel.setBlock(blockPos2, geodeBlockSettings.outerLayerProvider.getState(random, blockPos2), 2);
+            if (!(s >= h)) continue;
+            worldGenLevel.setBlock(blockPos3, geodeBlockSettings.outerLayerProvider.getState(random, blockPos3), 2);
         }
         List<BlockState> list4 = geodeBlockSettings.innerPlacements;
-        block4: for (BlockPos blockPos4 : list3) {
-            BlockState blockState = list4.get(random.nextInt(list4.size()));
+        block4: for (BlockPos blockPos5 : list3) {
+            BlockState blockState2 = list4.get(random.nextInt(list4.size()));
             for (Direction direction : DIRECTIONS) {
-                if (blockState.hasProperty(BlockStateProperties.FACING)) {
-                    blockState = (BlockState)blockState.setValue(BlockStateProperties.FACING, direction);
+                if (blockState2.hasProperty(BlockStateProperties.FACING)) {
+                    blockState2 = (BlockState)blockState2.setValue(BlockStateProperties.FACING, direction);
                 }
-                BlockPos blockPos5 = blockPos4.relative(direction);
-                BlockState blockState2 = worldGenLevel.getBlockState(blockPos5);
-                if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
-                    blockState = (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, blockState2.getFluidState().isSource());
+                BlockPos blockPos6 = blockPos5.relative(direction);
+                BlockState blockState = worldGenLevel.getBlockState(blockPos6);
+                if (blockState2.hasProperty(BlockStateProperties.WATERLOGGED)) {
+                    blockState2 = (BlockState)blockState2.setValue(BlockStateProperties.WATERLOGGED, blockState.getFluidState().isSource());
                 }
-                if (!BuddingAmethystBlock.canClusterGrowAtState(blockState2)) continue;
-                worldGenLevel.setBlock(blockPos5, blockState, 2);
+                if (!BuddingAmethystBlock.canClusterGrowAtState(blockState)) continue;
+                worldGenLevel.setBlock(blockPos6, blockState2, 2);
                 continue block4;
             }
         }

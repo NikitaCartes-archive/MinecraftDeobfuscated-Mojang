@@ -16,9 +16,10 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.io.IOException;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,40 +33,31 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundCommandsPacket
 implements Packet<ClientGamePacketListener> {
-    private RootCommandNode<SharedSuggestionProvider> root;
-
-    public ClientboundCommandsPacket() {
-    }
+    private final RootCommandNode<SharedSuggestionProvider> root;
 
     public ClientboundCommandsPacket(RootCommandNode<SharedSuggestionProvider> rootCommandNode) {
         this.root = rootCommandNode;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        Entry[] entrys = new Entry[friendlyByteBuf.readVarInt()];
-        for (int i = 0; i < entrys.length; ++i) {
-            entrys[i] = ClientboundCommandsPacket.readNode(friendlyByteBuf);
-        }
-        ClientboundCommandsPacket.resolveEntries(entrys);
-        this.root = (RootCommandNode)entrys[friendlyByteBuf.readVarInt()].node;
+    public ClientboundCommandsPacket(FriendlyByteBuf friendlyByteBuf) {
+        List<Entry> list = friendlyByteBuf.readList(ClientboundCommandsPacket::readNode);
+        ClientboundCommandsPacket.resolveEntries(list);
+        int i = friendlyByteBuf.readVarInt();
+        this.root = (RootCommandNode)list.get(i).node;
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf2) {
         Object2IntMap<CommandNode<SharedSuggestionProvider>> object2IntMap = ClientboundCommandsPacket.enumerateNodes(this.root);
-        CommandNode<SharedSuggestionProvider>[] commandNodes = ClientboundCommandsPacket.getNodesInIdOrder(object2IntMap);
-        friendlyByteBuf.writeVarInt(commandNodes.length);
-        for (CommandNode<SharedSuggestionProvider> commandNode : commandNodes) {
-            ClientboundCommandsPacket.writeNode(friendlyByteBuf, commandNode, object2IntMap);
-        }
-        friendlyByteBuf.writeVarInt(object2IntMap.get(this.root));
+        List<CommandNode<SharedSuggestionProvider>> list = ClientboundCommandsPacket.getNodesInIdOrder(object2IntMap);
+        friendlyByteBuf2.writeCollection(list, (friendlyByteBuf, commandNode) -> ClientboundCommandsPacket.writeNode(friendlyByteBuf, commandNode, object2IntMap));
+        friendlyByteBuf2.writeVarInt(object2IntMap.get(this.root));
     }
 
-    private static void resolveEntries(Entry[] entrys) {
-        ArrayList<Entry> list = Lists.newArrayList(entrys);
-        while (!list.isEmpty()) {
-            boolean bl = list.removeIf(entry -> entry.build(entrys));
+    private static void resolveEntries(List<Entry> list) {
+        ArrayList<Entry> list2 = Lists.newArrayList(list);
+        while (!list2.isEmpty()) {
+            boolean bl = list2.removeIf(entry -> entry.build(list));
             if (bl) continue;
             throw new IllegalStateException("Server sent an impossible command tree");
         }
@@ -87,12 +79,13 @@ implements Packet<ClientGamePacketListener> {
         return object2IntMap;
     }
 
-    private static CommandNode<SharedSuggestionProvider>[] getNodesInIdOrder(Object2IntMap<CommandNode<SharedSuggestionProvider>> object2IntMap) {
-        CommandNode[] commandNodes = new CommandNode[object2IntMap.size()];
+    private static List<CommandNode<SharedSuggestionProvider>> getNodesInIdOrder(Object2IntMap<CommandNode<SharedSuggestionProvider>> object2IntMap) {
+        ObjectArrayList<CommandNode<SharedSuggestionProvider>> objectArrayList = new ObjectArrayList<CommandNode<SharedSuggestionProvider>>(object2IntMap.size());
+        objectArrayList.size(object2IntMap.size());
         for (Object2IntMap.Entry entry : Object2IntMaps.fastIterable(object2IntMap)) {
-            commandNodes[entry.getIntValue()] = (CommandNode)entry.getKey();
+            objectArrayList.set(entry.getIntValue(), (CommandNode<SharedSuggestionProvider>)entry.getKey());
         }
-        return commandNodes;
+        return objectArrayList;
     }
 
     private static Entry readNode(FriendlyByteBuf friendlyByteBuf) {
@@ -107,7 +100,7 @@ implements Packet<ClientGamePacketListener> {
     private static ArgumentBuilder<SharedSuggestionProvider, ?> createBuilder(FriendlyByteBuf friendlyByteBuf, byte b) {
         int i = b & 3;
         if (i == 2) {
-            String string = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+            String string = friendlyByteBuf.readUtf();
             ArgumentType<?> argumentType = ArgumentTypes.deserialize(friendlyByteBuf);
             if (argumentType == null) {
                 return null;
@@ -119,7 +112,7 @@ implements Packet<ClientGamePacketListener> {
             return requiredArgumentBuilder;
         }
         if (i == 1) {
-            return LiteralArgumentBuilder.literal(friendlyByteBuf.readUtf(Short.MAX_VALUE));
+            return LiteralArgumentBuilder.literal(friendlyByteBuf.readUtf());
         }
         return null;
     }
@@ -190,16 +183,16 @@ implements Packet<ClientGamePacketListener> {
             this.children = is;
         }
 
-        public boolean build(Entry[] entrys) {
+        public boolean build(List<Entry> list) {
             if (this.node == null) {
                 if (this.builder == null) {
                     this.node = new RootCommandNode<SharedSuggestionProvider>();
                 } else {
                     if ((this.flags & 8) != 0) {
-                        if (entrys[this.redirect].node == null) {
+                        if (list.get((int)this.redirect).node == null) {
                             return false;
                         }
-                        this.builder.redirect(entrys[this.redirect].node);
+                        this.builder.redirect(list.get((int)this.redirect).node);
                     }
                     if ((this.flags & 4) != 0) {
                         this.builder.executes(commandContext -> 0);
@@ -208,11 +201,11 @@ implements Packet<ClientGamePacketListener> {
                 }
             }
             for (int i : this.children) {
-                if (entrys[i].node != null) continue;
+                if (list.get((int)i).node != null) continue;
                 return false;
             }
             for (int i : this.children) {
-                CommandNode<SharedSuggestionProvider> commandNode = entrys[i].node;
+                CommandNode<SharedSuggestionProvider> commandNode = list.get((int)i).node;
                 if (commandNode instanceof RootCommandNode) continue;
                 this.node.addChild(commandNode);
             }

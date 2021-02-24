@@ -5,7 +5,10 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
@@ -53,13 +56,13 @@ import net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature;
 import net.minecraft.world.level.levelgen.feature.MonsterRoomFeature;
 import net.minecraft.world.level.levelgen.feature.NetherForestVegetationFeature;
 import net.minecraft.world.level.levelgen.feature.NoOpFeature;
-import net.minecraft.world.level.levelgen.feature.NoSurfaceOreFeature;
 import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.level.levelgen.feature.RandomBooleanSelectorFeature;
 import net.minecraft.world.level.levelgen.feature.RandomPatchFeature;
 import net.minecraft.world.level.levelgen.feature.RandomSelectorFeature;
 import net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature;
 import net.minecraft.world.level.levelgen.feature.ReplaceBlockFeature;
+import net.minecraft.world.level.levelgen.feature.ScatteredOreFeature;
 import net.minecraft.world.level.levelgen.feature.SeaPickleFeature;
 import net.minecraft.world.level.levelgen.feature.SeagrassFeature;
 import net.minecraft.world.level.levelgen.feature.SimpleBlockFeature;
@@ -155,7 +158,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<LayerConfiguration> FILL_LAYER = Feature.register("fill_layer", new FillLayerFeature(LayerConfiguration.CODEC));
     public static final BonusChestFeature BONUS_CHEST = Feature.register("bonus_chest", new BonusChestFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> BASALT_PILLAR = Feature.register("basalt_pillar", new BasaltPillarFeature(NoneFeatureConfiguration.CODEC));
-    public static final Feature<OreConfiguration> NO_SURFACE_ORE = Feature.register("no_surface_ore", new NoSurfaceOreFeature(OreConfiguration.CODEC));
+    public static final Feature<OreConfiguration> SCATTERED_ORE = Feature.register("scattered_ore", new ScatteredOreFeature(OreConfiguration.CODEC));
     public static final Feature<RandomFeatureConfiguration> RANDOM_SELECTOR = Feature.register("random_selector", new RandomSelectorFeature(RandomFeatureConfiguration.CODEC));
     public static final Feature<SimpleRandomFeatureConfiguration> SIMPLE_RANDOM_SELECTOR = Feature.register("simple_random_selector", new SimpleRandomSelectorFeature(SimpleRandomFeatureConfiguration.CODEC));
     public static final Feature<RandomBooleanFeatureConfiguration> RANDOM_BOOLEAN_SELECTOR = Feature.register("random_boolean_selector", new RandomBooleanSelectorFeature(RandomBooleanFeatureConfiguration.CODEC));
@@ -202,6 +205,20 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 
     public static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::isAir);
+    }
+
+    public static boolean checkNeighbors(Function<BlockPos, BlockState> function, BlockPos blockPos, Predicate<BlockState> predicate) {
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (Direction direction : Direction.values()) {
+            mutableBlockPos.setWithOffset(blockPos, direction);
+            if (!predicate.test(function.apply(mutableBlockPos))) continue;
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isAdjacentToAir(Function<BlockPos, BlockState> function, BlockPos blockPos) {
+        return Feature.checkNeighbors(function, blockPos, BlockBehaviour.BlockStateBase::isAir);
     }
 }
 

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,34 +13,31 @@ import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket
 implements Packet<ClientGamePacketListener> {
-    private int entityId;
-    private byte effectId;
-    private byte effectAmplifier;
-    private int effectDurationTicks;
-    private byte flags;
-
-    public ClientboundUpdateMobEffectPacket() {
-    }
+    private final int entityId;
+    private final byte effectId;
+    private final byte effectAmplifier;
+    private final int effectDurationTicks;
+    private final byte flags;
 
     public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance) {
         this.entityId = i;
         this.effectId = (byte)(MobEffect.getId(mobEffectInstance.getEffect()) & 0xFF);
         this.effectAmplifier = (byte)(mobEffectInstance.getAmplifier() & 0xFF);
         this.effectDurationTicks = mobEffectInstance.getDuration() > Short.MAX_VALUE ? Short.MAX_VALUE : mobEffectInstance.getDuration();
-        this.flags = 0;
+        byte b = 0;
         if (mobEffectInstance.isAmbient()) {
-            this.flags = (byte)(this.flags | 1);
+            b = (byte)(b | 1);
         }
         if (mobEffectInstance.isVisible()) {
-            this.flags = (byte)(this.flags | 2);
+            b = (byte)(b | 2);
         }
         if (mobEffectInstance.showIcon()) {
-            this.flags = (byte)(this.flags | 4);
+            b = (byte)(b | 4);
         }
+        this.flags = b;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entityId = friendlyByteBuf.readVarInt();
         this.effectId = friendlyByteBuf.readByte();
         this.effectAmplifier = friendlyByteBuf.readByte();
@@ -50,7 +46,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entityId);
         friendlyByteBuf.writeByte(this.effectId);
         friendlyByteBuf.writeByte(this.effectAmplifier);

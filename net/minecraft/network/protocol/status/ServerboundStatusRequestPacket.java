@@ -3,19 +3,20 @@
  */
 package net.minecraft.network.protocol.status;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.status.ServerStatusPacketListener;
 
 public class ServerboundStatusRequestPacket
 implements Packet<ServerStatusPacketListener> {
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundStatusRequestPacket() {
+    }
+
+    public ServerboundStatusRequestPacket(FriendlyByteBuf friendlyByteBuf) {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
     }
 
     @Override

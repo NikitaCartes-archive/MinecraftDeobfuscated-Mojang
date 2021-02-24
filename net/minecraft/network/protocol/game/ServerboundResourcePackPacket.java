@@ -3,29 +3,24 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundResourcePackPacket
 implements Packet<ServerGamePacketListener> {
-    private Action action;
-
-    public ServerboundResourcePackPacket() {
-    }
+    private final Action action;
 
     public ServerboundResourcePackPacket(Action action) {
         this.action = action;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundResourcePackPacket(FriendlyByteBuf friendlyByteBuf) {
         this.action = friendlyByteBuf.readEnum(Action.class);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeEnum(this.action);
     }
 

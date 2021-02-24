@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,17 +14,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class ClientboundMoveEntityPacket
+public abstract class ClientboundMoveEntityPacket
 implements Packet<ClientGamePacketListener> {
-    protected int entityId;
-    protected short xa;
-    protected short ya;
-    protected short za;
-    protected byte yRot;
-    protected byte xRot;
-    protected boolean onGround;
-    protected boolean hasRot;
-    protected boolean hasPos;
+    protected final int entityId;
+    protected final short xa;
+    protected final short ya;
+    protected final short za;
+    protected final byte yRot;
+    protected final byte xRot;
+    protected final boolean onGround;
+    protected final boolean hasRot;
+    protected final boolean hasPos;
 
     public static long entityToPacket(double d) {
         return Mth.lfloor(d * 4096.0);
@@ -48,21 +47,16 @@ implements Packet<ClientGamePacketListener> {
         return new Vec3(l, m, n).scale(2.44140625E-4);
     }
 
-    public ClientboundMoveEntityPacket() {
-    }
-
-    public ClientboundMoveEntityPacket(int i) {
+    protected ClientboundMoveEntityPacket(int i, short s, short t, short u, byte b, byte c, boolean bl, boolean bl2, boolean bl3) {
         this.entityId = i;
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.entityId = friendlyByteBuf.readVarInt();
-    }
-
-    @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        friendlyByteBuf.writeVarInt(this.entityId);
+        this.xa = s;
+        this.ya = t;
+        this.za = u;
+        this.yRot = b;
+        this.xRot = c;
+        this.onGround = bl;
+        this.hasRot = bl2;
+        this.hasPos = bl3;
     }
 
     @Override
@@ -107,29 +101,21 @@ implements Packet<ClientGamePacketListener> {
 
     public static class Rot
     extends ClientboundMoveEntityPacket {
-        public Rot() {
-            this.hasRot = true;
-        }
-
         public Rot(int i, byte b, byte c, boolean bl) {
-            super(i);
-            this.yRot = b;
-            this.xRot = c;
-            this.hasRot = true;
-            this.onGround = bl;
+            super(i, (short)0, (short)0, (short)0, b, c, bl, true, false);
+        }
+
+        public static Rot read(FriendlyByteBuf friendlyByteBuf) {
+            int i = friendlyByteBuf.readVarInt();
+            byte b = friendlyByteBuf.readByte();
+            byte c = friendlyByteBuf.readByte();
+            boolean bl = friendlyByteBuf.readBoolean();
+            return new Rot(i, b, c, bl);
         }
 
         @Override
-        public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.read(friendlyByteBuf);
-            this.yRot = friendlyByteBuf.readByte();
-            this.xRot = friendlyByteBuf.readByte();
-            this.onGround = friendlyByteBuf.readBoolean();
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.write(friendlyByteBuf);
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeVarInt(this.entityId);
             friendlyByteBuf.writeByte(this.yRot);
             friendlyByteBuf.writeByte(this.xRot);
             friendlyByteBuf.writeBoolean(this.onGround);
@@ -138,31 +124,22 @@ implements Packet<ClientGamePacketListener> {
 
     public static class Pos
     extends ClientboundMoveEntityPacket {
-        public Pos() {
-            this.hasPos = true;
-        }
-
         public Pos(int i, short s, short t, short u, boolean bl) {
-            super(i);
-            this.xa = s;
-            this.ya = t;
-            this.za = u;
-            this.onGround = bl;
-            this.hasPos = true;
+            super(i, s, t, u, (byte)0, (byte)0, bl, false, true);
+        }
+
+        public static Pos read(FriendlyByteBuf friendlyByteBuf) {
+            int i = friendlyByteBuf.readVarInt();
+            short s = friendlyByteBuf.readShort();
+            short t = friendlyByteBuf.readShort();
+            short u = friendlyByteBuf.readShort();
+            boolean bl = friendlyByteBuf.readBoolean();
+            return new Pos(i, s, t, u, bl);
         }
 
         @Override
-        public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.read(friendlyByteBuf);
-            this.xa = friendlyByteBuf.readShort();
-            this.ya = friendlyByteBuf.readShort();
-            this.za = friendlyByteBuf.readShort();
-            this.onGround = friendlyByteBuf.readBoolean();
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.write(friendlyByteBuf);
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeVarInt(this.entityId);
             friendlyByteBuf.writeShort(this.xa);
             friendlyByteBuf.writeShort(this.ya);
             friendlyByteBuf.writeShort(this.za);
@@ -172,37 +149,24 @@ implements Packet<ClientGamePacketListener> {
 
     public static class PosRot
     extends ClientboundMoveEntityPacket {
-        public PosRot() {
-            this.hasRot = true;
-            this.hasPos = true;
-        }
-
         public PosRot(int i, short s, short t, short u, byte b, byte c, boolean bl) {
-            super(i);
-            this.xa = s;
-            this.ya = t;
-            this.za = u;
-            this.yRot = b;
-            this.xRot = c;
-            this.onGround = bl;
-            this.hasRot = true;
-            this.hasPos = true;
+            super(i, s, t, u, b, c, bl, true, true);
+        }
+
+        public static PosRot read(FriendlyByteBuf friendlyByteBuf) {
+            int i = friendlyByteBuf.readVarInt();
+            short s = friendlyByteBuf.readShort();
+            short t = friendlyByteBuf.readShort();
+            short u = friendlyByteBuf.readShort();
+            byte b = friendlyByteBuf.readByte();
+            byte c = friendlyByteBuf.readByte();
+            boolean bl = friendlyByteBuf.readBoolean();
+            return new PosRot(i, s, t, u, b, c, bl);
         }
 
         @Override
-        public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.read(friendlyByteBuf);
-            this.xa = friendlyByteBuf.readShort();
-            this.ya = friendlyByteBuf.readShort();
-            this.za = friendlyByteBuf.readShort();
-            this.yRot = friendlyByteBuf.readByte();
-            this.xRot = friendlyByteBuf.readByte();
-            this.onGround = friendlyByteBuf.readBoolean();
-        }
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-            super.write(friendlyByteBuf);
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeVarInt(this.entityId);
             friendlyByteBuf.writeShort(this.xa);
             friendlyByteBuf.writeShort(this.ya);
             friendlyByteBuf.writeShort(this.za);

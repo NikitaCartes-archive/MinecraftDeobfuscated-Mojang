@@ -35,29 +35,28 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class FeatureStart
     extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
-        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, boundingBox, k, l);
+        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+            super(structureFeature, chunkPos, boundingBox, i, l);
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
-            int n;
-            ChunkPos chunkPos = new ChunkPos(i, j);
-            int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
-            int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
-            int m = chunkGenerator.getSeaLevel();
-            NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(k, l, levelHeightAccessor);
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l);
-            for (n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m); n > m; --n) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+            int l;
+            int i = chunkPos.getMinBlockX() + this.random.nextInt(16);
+            int j = chunkPos.getMinBlockZ() + this.random.nextInt(16);
+            int k = chunkGenerator.getSeaLevel();
+            NoiseColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, levelHeightAccessor);
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, l, j);
+            for (l = k + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - k); l > k; --l) {
                 BlockState blockState = noiseColumn.getBlockState(mutableBlockPos);
                 mutableBlockPos.move(Direction.DOWN);
                 BlockState blockState2 = noiseColumn.getBlockState(mutableBlockPos);
                 if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(EmptyBlockGetter.INSTANCE, mutableBlockPos, Direction.UP))) break;
             }
-            if (n <= m) {
+            if (l <= k) {
                 return;
             }
-            NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(k, n, l));
+            NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(i, l, j));
             this.calculateBoundingBox();
         }
     }

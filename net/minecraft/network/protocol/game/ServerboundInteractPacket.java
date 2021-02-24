@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,64 +17,60 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerboundInteractPacket
 implements Packet<ServerGamePacketListener> {
-    private int entityId;
-    private Action action;
-    private Vec3 location;
-    private InteractionHand hand;
-    private boolean usingSecondaryAction;
+    private final int entityId;
+    private final Action action;
+    private final boolean usingSecondaryAction;
+    private static final Action ATTACK_ACTION = new Action(){
 
-    public ServerboundInteractPacket() {
-    }
+        @Override
+        public ActionType getType() {
+            return ActionType.ATTACK;
+        }
+
+        @Override
+        public void dispatch(Handler handler) {
+            handler.onAttack();
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+        }
+    };
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundInteractPacket(Entity entity, boolean bl) {
-        this.entityId = entity.getId();
-        this.action = Action.ATTACK;
+    private ServerboundInteractPacket(int i, boolean bl, Action action) {
+        this.entityId = i;
+        this.action = action;
         this.usingSecondaryAction = bl;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, boolean bl) {
-        this.entityId = entity.getId();
-        this.action = Action.INTERACT;
-        this.hand = interactionHand;
-        this.usingSecondaryAction = bl;
+    public static ServerboundInteractPacket createAttackPacket(Entity entity, boolean bl) {
+        return new ServerboundInteractPacket(entity.getId(), bl, ATTACK_ACTION);
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3, boolean bl) {
-        this.entityId = entity.getId();
-        this.action = Action.INTERACT_AT;
-        this.hand = interactionHand;
-        this.location = vec3;
-        this.usingSecondaryAction = bl;
+    public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand) {
+        return new ServerboundInteractPacket(entity.getId(), bl, new InteractionAction(interactionHand));
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    @Environment(value=EnvType.CLIENT)
+    public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand, Vec3 vec3) {
+        return new ServerboundInteractPacket(entity.getId(), bl, new InteractionAtLocationAction(interactionHand, vec3));
+    }
+
+    public ServerboundInteractPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entityId = friendlyByteBuf.readVarInt();
-        this.action = friendlyByteBuf.readEnum(Action.class);
-        if (this.action == Action.INTERACT_AT) {
-            this.location = new Vec3(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
-        }
-        if (this.action == Action.INTERACT || this.action == Action.INTERACT_AT) {
-            this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
-        }
+        ActionType actionType = friendlyByteBuf.readEnum(ActionType.class);
+        this.action = (Action)actionType.reader.apply(friendlyByteBuf);
         this.usingSecondaryAction = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entityId);
-        friendlyByteBuf.writeEnum(this.action);
-        if (this.action == Action.INTERACT_AT) {
-            friendlyByteBuf.writeFloat((float)this.location.x);
-            friendlyByteBuf.writeFloat((float)this.location.y);
-            friendlyByteBuf.writeFloat((float)this.location.z);
-        }
-        if (this.action == Action.INTERACT || this.action == Action.INTERACT_AT) {
-            friendlyByteBuf.writeEnum(this.hand);
-        }
+        friendlyByteBuf.writeEnum(this.action.getType());
+        this.action.write(friendlyByteBuf);
         friendlyByteBuf.writeBoolean(this.usingSecondaryAction);
     }
 
@@ -88,28 +84,104 @@ implements Packet<ServerGamePacketListener> {
         return serverLevel.getEntityOrPart(this.entityId);
     }
 
-    public Action getAction() {
-        return this.action;
-    }
-
-    @Nullable
-    public InteractionHand getHand() {
-        return this.hand;
-    }
-
-    public Vec3 getLocation() {
-        return this.location;
-    }
-
     public boolean isUsingSecondaryAction() {
         return this.usingSecondaryAction;
     }
 
-    public static enum Action {
-        INTERACT,
-        ATTACK,
-        INTERACT_AT;
+    public void dispatch(Handler handler) {
+        this.action.dispatch(handler);
+    }
 
+    static class InteractionAtLocationAction
+    implements Action {
+        private final InteractionHand hand;
+        private final Vec3 location;
+
+        @Environment(value=EnvType.CLIENT)
+        private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
+            this.hand = interactionHand;
+            this.location = vec3;
+        }
+
+        private InteractionAtLocationAction(FriendlyByteBuf friendlyByteBuf) {
+            this.location = new Vec3(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
+            this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+        }
+
+        @Override
+        public ActionType getType() {
+            return ActionType.INTERACT_AT;
+        }
+
+        @Override
+        public void dispatch(Handler handler) {
+            handler.onInteraction(this.hand, this.location);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeFloat((float)this.location.x);
+            friendlyByteBuf.writeFloat((float)this.location.y);
+            friendlyByteBuf.writeFloat((float)this.location.z);
+            friendlyByteBuf.writeEnum(this.hand);
+        }
+    }
+
+    static class InteractionAction
+    implements Action {
+        private final InteractionHand hand;
+
+        @Environment(value=EnvType.CLIENT)
+        private InteractionAction(InteractionHand interactionHand) {
+            this.hand = interactionHand;
+        }
+
+        private InteractionAction(FriendlyByteBuf friendlyByteBuf) {
+            this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+        }
+
+        @Override
+        public ActionType getType() {
+            return ActionType.INTERACT;
+        }
+
+        @Override
+        public void dispatch(Handler handler) {
+            handler.onInteraction(this.hand);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeEnum(this.hand);
+        }
+    }
+
+    static interface Action {
+        public ActionType getType();
+
+        public void dispatch(Handler var1);
+
+        public void write(FriendlyByteBuf var1);
+    }
+
+    public static interface Handler {
+        public void onInteraction(InteractionHand var1);
+
+        public void onInteraction(InteractionHand var1, Vec3 var2);
+
+        public void onAttack();
+    }
+
+    static enum ActionType {
+        INTERACT(friendlyByteBuf -> new InteractionAction((FriendlyByteBuf)friendlyByteBuf)),
+        ATTACK(friendlyByteBuf -> ServerboundInteractPacket.method_34210()),
+        INTERACT_AT(friendlyByteBuf -> new InteractionAtLocationAction((FriendlyByteBuf)friendlyByteBuf));
+
+        private final Function<FriendlyByteBuf, Action> reader;
+
+        private ActionType(Function<FriendlyByteBuf, Action> function) {
+            this.reader = function;
+        }
     }
 }
 

@@ -101,7 +101,7 @@ public class EntityDataSerializers {
 
         @Override
         public String read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readUtf(Short.MAX_VALUE);
+            return friendlyByteBuf.readUtf();
         }
 
         @Override

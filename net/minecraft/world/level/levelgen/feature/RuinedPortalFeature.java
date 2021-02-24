@@ -129,12 +129,12 @@ extends StructureFeature<RuinedPortalConfiguration> {
 
     public static class FeatureStart
     extends StructureStart<RuinedPortalConfiguration> {
-        protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, boundingBox, k, l);
+        protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+            super(structureFeature, chunkPos, boundingBox, i, l);
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration, LevelHeightAccessor levelHeightAccessor) {
             boolean bl;
             RuinedPortalPiece.VerticalPlacement verticalPlacement;
             RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
@@ -176,14 +176,14 @@ extends StructureFeature<RuinedPortalConfiguration> {
             Rotation rotation = Util.getRandom(Rotation.values(), (Random)this.random);
             Mirror mirror = this.random.nextFloat() < 0.5f ? Mirror.NONE : Mirror.FRONT_BACK;
             BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
-            BlockPos blockPos2 = new ChunkPos(i, j).getWorldPosition();
+            BlockPos blockPos2 = chunkPos.getWorldPosition();
             BoundingBox boundingBox = structureTemplate.getBoundingBox(blockPos2, rotation, blockPos, mirror);
             Vec3i vec3i = boundingBox.getCenter();
-            int k = vec3i.getX();
-            int l = vec3i.getZ();
-            int m = chunkGenerator.getBaseHeight(k, l, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
-            int n = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, m, boundingBox.getYSpan(), boundingBox, levelHeightAccessor);
-            BlockPos blockPos3 = new BlockPos(blockPos2.getX(), n, blockPos2.getZ());
+            int i = vec3i.getX();
+            int j = vec3i.getZ();
+            int k = chunkGenerator.getBaseHeight(i, j, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
+            int l = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, k, boundingBox.getYSpan(), boundingBox, levelHeightAccessor);
+            BlockPos blockPos3 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
             if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN || ruinedPortalConfiguration.portalType == Type.OCEAN || ruinedPortalConfiguration.portalType == Type.STANDARD) {
                 properties.cold = RuinedPortalFeature.isCold(blockPos3, biome);
             }

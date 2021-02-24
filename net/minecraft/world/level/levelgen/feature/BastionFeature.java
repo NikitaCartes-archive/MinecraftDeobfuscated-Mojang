@@ -20,7 +20,7 @@ extends JigsawFeature {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, JigsawConfiguration jigsawConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, JigsawConfiguration jigsawConfiguration, LevelHeightAccessor levelHeightAccessor) {
         return worldgenRandom.nextInt(5) >= 2;
     }
 }

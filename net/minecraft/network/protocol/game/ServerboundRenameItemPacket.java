@@ -3,29 +3,24 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundRenameItemPacket
 implements Packet<ServerGamePacketListener> {
-    private String name;
-
-    public ServerboundRenameItemPacket() {
-    }
+    private final String name;
 
     public ServerboundRenameItemPacket(String string) {
         this.name = string;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.name = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+    public ServerboundRenameItemPacket(FriendlyByteBuf friendlyByteBuf) {
+        this.name = friendlyByteBuf.readUtf();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.name);
     }
 

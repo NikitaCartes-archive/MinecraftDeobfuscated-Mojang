@@ -4,7 +4,6 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
-import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,17 +14,13 @@ import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 
 public class ClientboundGameProfilePacket
 implements Packet<ClientLoginPacketListener> {
-    private GameProfile gameProfile;
-
-    public ClientboundGameProfilePacket() {
-    }
+    private final GameProfile gameProfile;
 
     public ClientboundGameProfilePacket(GameProfile gameProfile) {
         this.gameProfile = gameProfile;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundGameProfilePacket(FriendlyByteBuf friendlyByteBuf) {
         int[] is = new int[4];
         for (int i = 0; i < is.length; ++i) {
             is[i] = friendlyByteBuf.readInt();
@@ -36,7 +31,7 @@ implements Packet<ClientLoginPacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         for (int i : SerializableUUID.uuidToIntArray(this.gameProfile.getId())) {
             friendlyByteBuf.writeInt(i);
         }

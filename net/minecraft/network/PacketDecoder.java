@@ -34,11 +34,10 @@ extends ByteToMessageDecoder {
         }
         FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf);
         int i = friendlyByteBuf.readVarInt();
-        Packet<?> packet = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, i);
+        Packet<?> packet = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, i, friendlyByteBuf);
         if (packet == null) {
             throw new IOException("Bad packet id " + i);
         }
-        packet.read(friendlyByteBuf);
         if (friendlyByteBuf.readableBytes() > 0) {
             throw new IOException("Packet " + channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId() + "/" + i + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + friendlyByteBuf.readableBytes() + " bytes extra whilst reading packet " + i);
         }

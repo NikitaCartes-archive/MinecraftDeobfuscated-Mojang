@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,22 +14,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundSetCameraPacket
 implements Packet<ClientGamePacketListener> {
-    public int cameraId;
-
-    public ClientboundSetCameraPacket() {
-    }
+    private final int cameraId;
 
     public ClientboundSetCameraPacket(Entity entity) {
         this.cameraId = entity.getId();
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetCameraPacket(FriendlyByteBuf friendlyByteBuf) {
         this.cameraId = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.cameraId);
     }
 

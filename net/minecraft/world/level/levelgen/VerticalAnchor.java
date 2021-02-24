@@ -9,7 +9,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.function.Function;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.placement.DecorationContext;
+import net.minecraft.world.level.levelgen.WorldGenerationContext;
 
 public abstract class VerticalAnchor {
     public static final Codec<VerticalAnchor> CODEC = ExtraCodecs.xor(Absolute.CODEC, ExtraCodecs.xor(AboveBottom.CODEC, BelowTop.CODEC)).xmap(VerticalAnchor::merge, VerticalAnchor::split);
@@ -56,7 +56,7 @@ public abstract class VerticalAnchor {
         return this.value;
     }
 
-    public abstract int resolveY(DecorationContext var1);
+    public abstract int resolveY(WorldGenerationContext var1);
 
     static final class BelowTop
     extends VerticalAnchor {
@@ -67,8 +67,8 @@ public abstract class VerticalAnchor {
         }
 
         @Override
-        public int resolveY(DecorationContext decorationContext) {
-            return decorationContext.getGenDepth() - 1 + decorationContext.getMinGenY() - this.value();
+        public int resolveY(WorldGenerationContext worldGenerationContext) {
+            return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.value();
         }
     }
 
@@ -81,8 +81,8 @@ public abstract class VerticalAnchor {
         }
 
         @Override
-        public int resolveY(DecorationContext decorationContext) {
-            return decorationContext.getMinGenY() + this.value();
+        public int resolveY(WorldGenerationContext worldGenerationContext) {
+            return worldGenerationContext.getMinGenY() + this.value();
         }
     }
 
@@ -95,7 +95,7 @@ public abstract class VerticalAnchor {
         }
 
         @Override
-        public int resolveY(DecorationContext decorationContext) {
+        public int resolveY(WorldGenerationContext worldGenerationContext) {
             return this.value();
         }
     }

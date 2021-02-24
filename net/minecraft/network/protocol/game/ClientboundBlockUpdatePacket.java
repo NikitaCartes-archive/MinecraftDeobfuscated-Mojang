@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -16,11 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ClientboundBlockUpdatePacket
 implements Packet<ClientGamePacketListener> {
-    private BlockPos pos;
-    private BlockState blockState;
-
-    public ClientboundBlockUpdatePacket() {
-    }
+    private final BlockPos pos;
+    private final BlockState blockState;
 
     public ClientboundBlockUpdatePacket(BlockPos blockPos, BlockState blockState) {
         this.pos = blockPos;
@@ -31,14 +27,13 @@ implements Packet<ClientGamePacketListener> {
         this(blockPos, blockGetter.getBlockState(blockPos));
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundBlockUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
         this.pos = friendlyByteBuf.readBlockPos();
         this.blockState = Block.BLOCK_STATE_REGISTRY.byId(friendlyByteBuf.readVarInt());
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.pos);
         friendlyByteBuf.writeVarInt(Block.getId(this.blockState));
     }

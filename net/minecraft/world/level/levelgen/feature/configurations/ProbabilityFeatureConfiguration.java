@@ -7,12 +7,10 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class ProbabilityFeatureConfiguration
-implements CarverConfiguration,
-FeatureConfiguration {
+implements FeatureConfiguration {
     public static final Codec<ProbabilityFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("probability")).forGetter(probabilityFeatureConfiguration -> Float.valueOf(probabilityFeatureConfiguration.probability))).apply((Applicative<ProbabilityFeatureConfiguration, ?>)instance, ProbabilityFeatureConfiguration::new));
     public final float probability;
 

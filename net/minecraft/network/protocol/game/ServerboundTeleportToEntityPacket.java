@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -14,22 +13,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerboundTeleportToEntityPacket
 implements Packet<ServerGamePacketListener> {
-    private UUID uuid;
-
-    public ServerboundTeleportToEntityPacket() {
-    }
+    private final UUID uuid;
 
     public ServerboundTeleportToEntityPacket(UUID uUID) {
         this.uuid = uUID;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundTeleportToEntityPacket(FriendlyByteBuf friendlyByteBuf) {
         this.uuid = friendlyByteBuf.readUUID();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUUID(this.uuid);
     }
 

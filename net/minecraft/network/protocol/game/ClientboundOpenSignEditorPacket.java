@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -13,28 +12,24 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundOpenSignEditorPacket
 implements Packet<ClientGamePacketListener> {
-    private BlockPos pos;
-
-    public ClientboundOpenSignEditorPacket() {
-    }
+    private final BlockPos pos;
 
     public ClientboundOpenSignEditorPacket(BlockPos blockPos) {
         this.pos = blockPos;
     }
 
-    @Override
-    public void handle(ClientGamePacketListener clientGamePacketListener) {
-        clientGamePacketListener.handleOpenSignEditor(this);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundOpenSignEditorPacket(FriendlyByteBuf friendlyByteBuf) {
         this.pos = friendlyByteBuf.readBlockPos();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.pos);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handleOpenSignEditor(this);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -64,6 +64,14 @@ public class ChunkPos {
         return false;
     }
 
+    public int getMiddleBlockX() {
+        return this.getBlockX(8);
+    }
+
+    public int getMiddleBlockZ() {
+        return this.getBlockZ(8);
+    }
+
     public int getMinBlockX() {
         return SectionPos.sectionToBlockCoord(this.x);
     }
@@ -73,11 +81,11 @@ public class ChunkPos {
     }
 
     public int getMaxBlockX() {
-        return SectionPos.sectionToBlockCoord(this.x, 15);
+        return this.getBlockX(15);
     }
 
     public int getMaxBlockZ() {
-        return SectionPos.sectionToBlockCoord(this.z, 15);
+        return this.getBlockZ(15);
     }
 
     public int getRegionX() {
@@ -94,6 +102,18 @@ public class ChunkPos {
 
     public int getRegionLocalZ() {
         return this.z & 0x1F;
+    }
+
+    public int getBlockX(int i) {
+        return SectionPos.sectionToBlockCoord(this.x, i);
+    }
+
+    public int getBlockZ(int i) {
+        return SectionPos.sectionToBlockCoord(this.z, i);
+    }
+
+    public BlockPos getMiddleBlockPosition(int i) {
+        return new BlockPos(this.getMiddleBlockX(), i, this.getMiddleBlockZ());
     }
 
     public String toString() {

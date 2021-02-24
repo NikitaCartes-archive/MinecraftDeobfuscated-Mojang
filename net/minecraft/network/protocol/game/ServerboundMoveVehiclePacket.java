@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -11,14 +10,11 @@ import net.minecraft.world.entity.Entity;
 
 public class ServerboundMoveVehiclePacket
 implements Packet<ServerGamePacketListener> {
-    private double x;
-    private double y;
-    private double z;
-    private float yRot;
-    private float xRot;
-
-    public ServerboundMoveVehiclePacket() {
-    }
+    private final double x;
+    private final double y;
+    private final double z;
+    private final float yRot;
+    private final float xRot;
 
     public ServerboundMoveVehiclePacket(Entity entity) {
         this.x = entity.getX();
@@ -28,8 +24,7 @@ implements Packet<ServerGamePacketListener> {
         this.xRot = entity.xRot;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundMoveVehiclePacket(FriendlyByteBuf friendlyByteBuf) {
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
         this.z = friendlyByteBuf.readDouble();
@@ -38,7 +33,7 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);
         friendlyByteBuf.writeDouble(this.z);

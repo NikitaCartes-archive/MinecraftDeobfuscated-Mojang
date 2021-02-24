@@ -3,7 +3,8 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,29 +13,23 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundRemoveEntitiesPacket
 implements Packet<ClientGamePacketListener> {
-    private int[] entityIds;
+    private final IntList entityIds;
 
-    public ClientboundRemoveEntitiesPacket() {
+    public ClientboundRemoveEntitiesPacket(IntList intList) {
+        this.entityIds = new IntArrayList(intList);
     }
 
     public ClientboundRemoveEntitiesPacket(int ... is) {
-        this.entityIds = is;
+        this.entityIds = new IntArrayList(is);
+    }
+
+    public ClientboundRemoveEntitiesPacket(FriendlyByteBuf friendlyByteBuf) {
+        this.entityIds = friendlyByteBuf.readIntIdList();
     }
 
     @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.entityIds = new int[friendlyByteBuf.readVarInt()];
-        for (int i = 0; i < this.entityIds.length; ++i) {
-            this.entityIds[i] = friendlyByteBuf.readVarInt();
-        }
-    }
-
-    @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        friendlyByteBuf.writeVarInt(this.entityIds.length);
-        for (int i : this.entityIds) {
-            friendlyByteBuf.writeVarInt(i);
-        }
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeIntIdList(this.entityIds);
     }
 
     @Override
@@ -43,7 +38,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int[] getEntityIds() {
+    public IntList getEntityIds() {
         return this.entityIds;
     }
 }

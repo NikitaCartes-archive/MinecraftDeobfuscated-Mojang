@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -14,26 +13,22 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundTagQueryPacket
 implements Packet<ClientGamePacketListener> {
-    private int transactionId;
+    private final int transactionId;
     @Nullable
-    private CompoundTag tag;
-
-    public ClientboundTagQueryPacket() {
-    }
+    private final CompoundTag tag;
 
     public ClientboundTagQueryPacket(int i, @Nullable CompoundTag compoundTag) {
         this.transactionId = i;
         this.tag = compoundTag;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundTagQueryPacket(FriendlyByteBuf friendlyByteBuf) {
         this.transactionId = friendlyByteBuf.readVarInt();
         this.tag = friendlyByteBuf.readNbt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.transactionId);
         friendlyByteBuf.writeNbt(this.tag);
     }

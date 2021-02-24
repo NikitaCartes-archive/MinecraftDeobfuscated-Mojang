@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,12 +12,9 @@ import net.minecraft.world.item.ItemStack;
 
 public class ServerboundEditBookPacket
 implements Packet<ServerGamePacketListener> {
-    private ItemStack book;
-    private boolean signing;
-    private int slot;
-
-    public ServerboundEditBookPacket() {
-    }
+    private final ItemStack book;
+    private final boolean signing;
+    private final int slot;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundEditBookPacket(ItemStack itemStack, boolean bl, int i) {
@@ -27,15 +23,14 @@ implements Packet<ServerGamePacketListener> {
         this.slot = i;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundEditBookPacket(FriendlyByteBuf friendlyByteBuf) {
         this.book = friendlyByteBuf.readItem();
         this.signing = friendlyByteBuf.readBoolean();
         this.slot = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeItem(this.book);
         friendlyByteBuf.writeBoolean(this.signing);
         friendlyByteBuf.writeVarInt(this.slot);

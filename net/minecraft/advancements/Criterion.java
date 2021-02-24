@@ -56,20 +56,11 @@ public class Criterion {
     }
 
     public static Map<String, Criterion> criteriaFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-        HashMap<String, Criterion> map = Maps.newHashMap();
-        int i = friendlyByteBuf.readVarInt();
-        for (int j = 0; j < i; ++j) {
-            map.put(friendlyByteBuf.readUtf(Short.MAX_VALUE), Criterion.criterionFromNetwork(friendlyByteBuf));
-        }
-        return map;
+        return friendlyByteBuf.readMap(FriendlyByteBuf::readUtf, Criterion::criterionFromNetwork);
     }
 
-    public static void serializeToNetwork(Map<String, Criterion> map, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarInt(map.size());
-        for (Map.Entry<String, Criterion> entry : map.entrySet()) {
-            friendlyByteBuf.writeUtf(entry.getKey());
-            entry.getValue().serializeToNetwork(friendlyByteBuf);
-        }
+    public static void serializeToNetwork(Map<String, Criterion> map, FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeMap(map, FriendlyByteBuf::writeUtf, (friendlyByteBuf, criterion) -> criterion.serializeToNetwork((FriendlyByteBuf)friendlyByteBuf));
     }
 
     @Nullable

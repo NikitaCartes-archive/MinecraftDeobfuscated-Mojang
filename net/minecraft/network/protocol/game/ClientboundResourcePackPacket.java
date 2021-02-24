@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +11,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundResourcePackPacket
 implements Packet<ClientGamePacketListener> {
-    private String url;
-    private String hash;
-    private boolean required;
-
-    public ClientboundResourcePackPacket() {
-    }
+    private final String url;
+    private final String hash;
+    private final boolean required;
 
     public ClientboundResourcePackPacket(String string, String string2, boolean bl) {
         if (string2.length() > 40) {
@@ -28,15 +24,14 @@ implements Packet<ClientGamePacketListener> {
         this.required = bl;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.url = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+    public ClientboundResourcePackPacket(FriendlyByteBuf friendlyByteBuf) {
+        this.url = friendlyByteBuf.readUtf();
         this.hash = friendlyByteBuf.readUtf(40);
         this.required = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.url);
         friendlyByteBuf.writeUtf(this.hash);
         friendlyByteBuf.writeBoolean(this.required);

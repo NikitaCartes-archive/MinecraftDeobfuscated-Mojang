@@ -114,7 +114,7 @@ implements CraftingRecipe {
 
         @Override
         public ShapelessRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
-            String string = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+            String string = friendlyByteBuf.readUtf();
             int i = friendlyByteBuf.readVarInt();
             NonNullList<Ingredient> nonNullList = NonNullList.withSize(i, Ingredient.EMPTY);
             for (int j = 0; j < nonNullList.size(); ++j) {

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -11,23 +10,19 @@ import net.minecraft.world.entity.player.Abilities;
 
 public class ServerboundPlayerAbilitiesPacket
 implements Packet<ServerGamePacketListener> {
-    private boolean isFlying;
-
-    public ServerboundPlayerAbilitiesPacket() {
-    }
+    private final boolean isFlying;
 
     public ServerboundPlayerAbilitiesPacket(Abilities abilities) {
         this.isFlying = abilities.flying;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPlayerAbilitiesPacket(FriendlyByteBuf friendlyByteBuf) {
         byte b = friendlyByteBuf.readByte();
         this.isFlying = (b & 2) != 0;
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         int b = 0;
         if (this.isFlying) {
             b = (byte)(b | 2);

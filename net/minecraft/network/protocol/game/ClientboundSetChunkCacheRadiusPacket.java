@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,22 +11,18 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundSetChunkCacheRadiusPacket
 implements Packet<ClientGamePacketListener> {
-    private int radius;
-
-    public ClientboundSetChunkCacheRadiusPacket() {
-    }
+    private final int radius;
 
     public ClientboundSetChunkCacheRadiusPacket(int i) {
         this.radius = i;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetChunkCacheRadiusPacket(FriendlyByteBuf friendlyByteBuf) {
         this.radius = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.radius);
     }
 

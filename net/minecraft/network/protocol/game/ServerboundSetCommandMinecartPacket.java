@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,12 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerboundSetCommandMinecartPacket
 implements Packet<ServerGamePacketListener> {
-    private int entity;
-    private String command;
-    private boolean trackOutput;
-
-    public ServerboundSetCommandMinecartPacket() {
-    }
+    private final int entity;
+    private final String command;
+    private final boolean trackOutput;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundSetCommandMinecartPacket(int i, String string, boolean bl) {
@@ -31,15 +27,14 @@ implements Packet<ServerGamePacketListener> {
         this.trackOutput = bl;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundSetCommandMinecartPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entity = friendlyByteBuf.readVarInt();
-        this.command = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+        this.command = friendlyByteBuf.readUtf();
         this.trackOutput = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entity);
         friendlyByteBuf.writeUtf(this.command);
         friendlyByteBuf.writeBoolean(this.trackOutput);

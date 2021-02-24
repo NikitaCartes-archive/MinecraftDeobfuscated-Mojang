@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,10 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class ClientboundSelectAdvancementsTabPacket
 implements Packet<ClientGamePacketListener> {
     @Nullable
-    private ResourceLocation tab;
-
-    public ClientboundSelectAdvancementsTabPacket() {
-    }
+    private final ResourceLocation tab;
 
     public ClientboundSelectAdvancementsTabPacket(@Nullable ResourceLocation resourceLocation) {
         this.tab = resourceLocation;
@@ -29,15 +25,12 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSelectAdvancementsTab(this);
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        if (friendlyByteBuf.readBoolean()) {
-            this.tab = friendlyByteBuf.readResourceLocation();
-        }
+    public ClientboundSelectAdvancementsTabPacket(FriendlyByteBuf friendlyByteBuf) {
+        this.tab = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readResourceLocation() : null;
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBoolean(this.tab != null);
         if (this.tab != null) {
             friendlyByteBuf.writeResourceLocation(this.tab);

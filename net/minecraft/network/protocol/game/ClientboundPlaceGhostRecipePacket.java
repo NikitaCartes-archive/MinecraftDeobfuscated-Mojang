@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,15 +13,28 @@ import net.minecraft.world.item.crafting.Recipe;
 
 public class ClientboundPlaceGhostRecipePacket
 implements Packet<ClientGamePacketListener> {
-    private int containerId;
-    private ResourceLocation recipe;
-
-    public ClientboundPlaceGhostRecipePacket() {
-    }
+    private final int containerId;
+    private final ResourceLocation recipe;
 
     public ClientboundPlaceGhostRecipePacket(int i, Recipe<?> recipe) {
         this.containerId = i;
         this.recipe = recipe.getId();
+    }
+
+    public ClientboundPlaceGhostRecipePacket(FriendlyByteBuf friendlyByteBuf) {
+        this.containerId = friendlyByteBuf.readByte();
+        this.recipe = friendlyByteBuf.readResourceLocation();
+    }
+
+    @Override
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeByte(this.containerId);
+        friendlyByteBuf.writeResourceLocation(this.recipe);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handlePlaceRecipe(this);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -33,23 +45,6 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public int getContainerId() {
         return this.containerId;
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.containerId = friendlyByteBuf.readByte();
-        this.recipe = friendlyByteBuf.readResourceLocation();
-    }
-
-    @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        friendlyByteBuf.writeByte(this.containerId);
-        friendlyByteBuf.writeResourceLocation(this.recipe);
-    }
-
-    @Override
-    public void handle(ClientGamePacketListener clientGamePacketListener) {
-        clientGamePacketListener.handlePlaceRecipe(this);
     }
 }
 

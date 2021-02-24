@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,11 +11,8 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundCommandSuggestionPacket
 implements Packet<ServerGamePacketListener> {
-    private int id;
-    private String command;
-
-    public ServerboundCommandSuggestionPacket() {
-    }
+    private final int id;
+    private final String command;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundCommandSuggestionPacket(int i, String string) {
@@ -24,14 +20,13 @@ implements Packet<ServerGamePacketListener> {
         this.command = string;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundCommandSuggestionPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readVarInt();
         this.command = friendlyByteBuf.readUtf(32500);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.id);
         friendlyByteBuf.writeUtf(this.command, 32500);
     }

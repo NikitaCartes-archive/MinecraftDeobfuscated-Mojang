@@ -350,7 +350,7 @@ public class Advancement {
             for (int i = 0; i < strings.length; ++i) {
                 strings[i] = new String[friendlyByteBuf.readVarInt()];
                 for (int j = 0; j < strings[i].length; ++j) {
-                    strings[i][j] = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+                    strings[i][j] = friendlyByteBuf.readUtf();
                 }
             }
             return new Builder(resourceLocation, displayInfo, AdvancementRewards.EMPTY, map, strings);

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,10 +11,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundLockDifficultyPacket
 implements Packet<ServerGamePacketListener> {
-    private boolean locked;
-
-    public ServerboundLockDifficultyPacket() {
-    }
+    private final boolean locked;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundLockDifficultyPacket(boolean bl) {
@@ -27,13 +23,12 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleLockDifficulty(this);
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundLockDifficultyPacket(FriendlyByteBuf friendlyByteBuf) {
         this.locked = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBoolean(this.locked);
     }
 

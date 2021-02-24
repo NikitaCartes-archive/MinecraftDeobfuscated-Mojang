@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +11,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundContainerAckPacket
 implements Packet<ClientGamePacketListener> {
-    private int containerId;
-    private short uid;
-    private boolean accepted;
-
-    public ClientboundContainerAckPacket() {
-    }
+    private final int containerId;
+    private final short uid;
+    private final boolean accepted;
 
     public ClientboundContainerAckPacket(int i, short s, boolean bl) {
         this.containerId = i;
@@ -25,23 +21,22 @@ implements Packet<ClientGamePacketListener> {
         this.accepted = bl;
     }
 
-    @Override
-    public void handle(ClientGamePacketListener clientGamePacketListener) {
-        clientGamePacketListener.handleContainerAck(this);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundContainerAckPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readUnsignedByte();
         this.uid = friendlyByteBuf.readShort();
         this.accepted = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
         friendlyByteBuf.writeShort(this.uid);
         friendlyByteBuf.writeBoolean(this.accepted);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handleContainerAck(this);
     }
 
     @Environment(value=EnvType.CLIENT)

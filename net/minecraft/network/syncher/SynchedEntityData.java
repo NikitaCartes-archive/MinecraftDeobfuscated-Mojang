@@ -4,12 +4,14 @@
 package net.minecraft.network.syncher;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -30,9 +32,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class SynchedEntityData {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Map<Class<? extends Entity>, Integer> ENTITY_ID_POOL = Maps.newHashMap();
+    private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<Class<? extends Entity>>();
     private final Entity entity;
-    private final Map<Integer, DataItem<?>> itemsById = Maps.newHashMap();
+    private final Int2ObjectMap<DataItem<?>> itemsById = new Int2ObjectOpenHashMap();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private boolean isEmpty = true;
     private boolean isDirty;
@@ -54,13 +56,13 @@ public class SynchedEntityData {
             }
         }
         if (ENTITY_ID_POOL.containsKey(class_)) {
-            i = ENTITY_ID_POOL.get(class_) + 1;
+            i = ENTITY_ID_POOL.getInt(class_) + 1;
         } else {
             int j = 0;
             Class<? extends Entity> class3 = class_;
             while (class3 != Entity.class) {
                 if (!ENTITY_ID_POOL.containsKey(class3 = class3.getSuperclass())) continue;
-                j = ENTITY_ID_POOL.get(class3) + 1;
+                j = ENTITY_ID_POOL.getInt(class3) + 1;
                 break;
             }
             i = j;
@@ -89,16 +91,16 @@ public class SynchedEntityData {
     private <T> void createDataItem(EntityDataAccessor<T> entityDataAccessor, T object) {
         DataItem<T> dataItem = new DataItem<T>(entityDataAccessor, object);
         this.lock.writeLock().lock();
-        this.itemsById.put(entityDataAccessor.getId(), dataItem);
+        this.itemsById.put(entityDataAccessor.getId(), (DataItem<?>)dataItem);
         this.isEmpty = false;
         this.lock.writeLock().unlock();
     }
 
     private <T> DataItem<T> getItem(EntityDataAccessor<T> entityDataAccessor) {
-        DataItem<?> dataItem;
+        DataItem dataItem;
         this.lock.readLock().lock();
         try {
-            dataItem = this.itemsById.get(entityDataAccessor.getId());
+            dataItem = (DataItem)this.itemsById.get(entityDataAccessor.getId());
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Getting synched entity data");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Synched entity data");
@@ -128,11 +130,10 @@ public class SynchedEntityData {
         return this.isDirty;
     }
 
-    public static void pack(List<DataItem<?>> list, FriendlyByteBuf friendlyByteBuf) {
+    public static void pack(@Nullable List<DataItem<?>> list, FriendlyByteBuf friendlyByteBuf) {
         if (list != null) {
-            int j = list.size();
-            for (int i = 0; i < j; ++i) {
-                SynchedEntityData.writeDataItem(friendlyByteBuf, list.get(i));
+            for (DataItem<?> dataItem : list) {
+                SynchedEntityData.writeDataItem(friendlyByteBuf, dataItem);
             }
         }
         friendlyByteBuf.writeByte(255);
@@ -140,10 +141,10 @@ public class SynchedEntityData {
 
     @Nullable
     public List<DataItem<?>> packDirty() {
-        ArrayList<DataItem<?>> list = null;
+        ArrayList list = null;
         if (this.isDirty) {
             this.lock.readLock().lock();
-            for (DataItem<?> dataItem : this.itemsById.values()) {
+            for (DataItem dataItem : this.itemsById.values()) {
                 if (!dataItem.isDirty()) continue;
                 dataItem.setDirty(false);
                 if (list == null) {
@@ -159,9 +160,9 @@ public class SynchedEntityData {
 
     @Nullable
     public List<DataItem<?>> getAll() {
-        ArrayList<DataItem<?>> list = null;
+        ArrayList list = null;
         this.lock.readLock().lock();
-        for (DataItem<?> dataItem : this.itemsById.values()) {
+        for (DataItem dataItem : this.itemsById.values()) {
             if (list == null) {
                 list = Lists.newArrayList();
             }
@@ -208,7 +209,7 @@ public class SynchedEntityData {
     public void assignValues(List<DataItem<?>> list) {
         this.lock.writeLock().lock();
         for (DataItem<?> dataItem : list) {
-            DataItem<?> dataItem2 = this.itemsById.get(dataItem.getAccessor().getId());
+            DataItem dataItem2 = (DataItem)this.itemsById.get(dataItem.getAccessor().getId());
             if (dataItem2 == null) continue;
             this.assignValue(dataItem2, dataItem);
             this.entity.onSyncedDataUpdated(dataItem.getAccessor());
@@ -232,7 +233,7 @@ public class SynchedEntityData {
     public void clearDirty() {
         this.isDirty = false;
         this.lock.readLock().lock();
-        for (DataItem<?> dataItem : this.itemsById.values()) {
+        for (DataItem dataItem : this.itemsById.values()) {
             dataItem.setDirty(false);
         }
         this.lock.readLock().unlock();

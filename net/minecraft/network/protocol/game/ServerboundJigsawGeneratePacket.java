@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -13,12 +12,9 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundJigsawGeneratePacket
 implements Packet<ServerGamePacketListener> {
-    private BlockPos pos;
-    private int levels;
-    private boolean keepJigsaws;
-
-    public ServerboundJigsawGeneratePacket() {
-    }
+    private final BlockPos pos;
+    private final int levels;
+    private final boolean keepJigsaws;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundJigsawGeneratePacket(BlockPos blockPos, int i, boolean bl) {
@@ -27,15 +23,14 @@ implements Packet<ServerGamePacketListener> {
         this.keepJigsaws = bl;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundJigsawGeneratePacket(FriendlyByteBuf friendlyByteBuf) {
         this.pos = friendlyByteBuf.readBlockPos();
         this.levels = friendlyByteBuf.readVarInt();
         this.keepJigsaws = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.pos);
         friendlyByteBuf.writeVarInt(this.levels);
         friendlyByteBuf.writeBoolean(this.keepJigsaws);

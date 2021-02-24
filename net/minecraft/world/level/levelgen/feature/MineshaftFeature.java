@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -34,8 +33,8 @@ extends StructureFeature<MineshaftConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
-        worldgenRandom.setLargeFeatureSeed(l, i, j);
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
         double d = mineshaftConfiguration.probability;
         return worldgenRandom.nextDouble() < d;
     }
@@ -47,22 +46,22 @@ extends StructureFeature<MineshaftConfiguration> {
 
     public static class MineShaftStart
     extends StructureStart<MineshaftConfiguration> {
-        public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, boundingBox, k, l);
+        public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+            super(structureFeature, chunkPos, boundingBox, i, l);
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
-            MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2), mineshaftConfiguration.type);
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, MineshaftConfiguration mineshaftConfiguration, LevelHeightAccessor levelHeightAccessor) {
+            MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2), mineshaftConfiguration.type);
             this.pieces.add(mineShaftRoom);
             mineShaftRoom.addChildren(mineShaftRoom, this.pieces, this.random);
             this.calculateBoundingBox();
             if (mineshaftConfiguration.type == Type.MESA) {
-                int k = -5;
-                int l = chunkGenerator.getSeaLevel() - this.boundingBox.y1 + this.boundingBox.getYSpan() / 2 - -5;
-                this.boundingBox.move(0, l, 0);
+                int i = -5;
+                int j = chunkGenerator.getSeaLevel() - this.boundingBox.y1 + this.boundingBox.getYSpan() / 2 - -5;
+                this.boundingBox.move(0, j, 0);
                 for (StructurePiece structurePiece : this.pieces) {
-                    structurePiece.move(0, l, 0);
+                    structurePiece.move(0, j, 0);
                 }
             } else {
                 this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);

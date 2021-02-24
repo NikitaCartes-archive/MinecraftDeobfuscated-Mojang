@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +11,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundSetHealthPacket
 implements Packet<ClientGamePacketListener> {
-    private float health;
-    private int food;
-    private float saturation;
-
-    public ClientboundSetHealthPacket() {
-    }
+    private final float health;
+    private final int food;
+    private final float saturation;
 
     public ClientboundSetHealthPacket(float f, int i, float g) {
         this.health = f;
@@ -25,15 +21,14 @@ implements Packet<ClientGamePacketListener> {
         this.saturation = g;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetHealthPacket(FriendlyByteBuf friendlyByteBuf) {
         this.health = friendlyByteBuf.readFloat();
         this.food = friendlyByteBuf.readVarInt();
         this.saturation = friendlyByteBuf.readFloat();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeFloat(this.health);
         friendlyByteBuf.writeVarInt(this.food);
         friendlyByteBuf.writeFloat(this.saturation);

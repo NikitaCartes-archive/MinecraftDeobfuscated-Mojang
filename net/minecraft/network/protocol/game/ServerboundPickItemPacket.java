@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,23 +11,19 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundPickItemPacket
 implements Packet<ServerGamePacketListener> {
-    private int slot;
-
-    public ServerboundPickItemPacket() {
-    }
+    private final int slot;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundPickItemPacket(int i) {
         this.slot = i;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPickItemPacket(FriendlyByteBuf friendlyByteBuf) {
         this.slot = friendlyByteBuf.readVarInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.slot);
     }
 

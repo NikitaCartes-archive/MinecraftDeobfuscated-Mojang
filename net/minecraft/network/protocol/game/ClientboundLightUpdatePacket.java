@@ -4,7 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
-import java.io.IOException;
 import java.util.BitSet;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -21,23 +20,26 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundLightUpdatePacket
 implements Packet<ClientGamePacketListener> {
-    private int x;
-    private int z;
-    private BitSet skyYMask = new BitSet();
-    private BitSet blockYMask = new BitSet();
-    private BitSet emptySkyYMask = new BitSet();
-    private BitSet emptyBlockYMask = new BitSet();
-    private final List<byte[]> skyUpdates = Lists.newArrayList();
-    private final List<byte[]> blockUpdates = Lists.newArrayList();
-    private boolean trustEdges;
-
-    public ClientboundLightUpdatePacket() {
-    }
+    private final int x;
+    private final int z;
+    private final BitSet skyYMask;
+    private final BitSet blockYMask;
+    private final BitSet emptySkyYMask;
+    private final BitSet emptyBlockYMask;
+    private final List<byte[]> skyUpdates;
+    private final List<byte[]> blockUpdates;
+    private final boolean trustEdges;
 
     public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, @Nullable BitSet bitSet, @Nullable BitSet bitSet2, boolean bl) {
         this.x = chunkPos.x;
         this.z = chunkPos.z;
         this.trustEdges = bl;
+        this.skyYMask = new BitSet();
+        this.blockYMask = new BitSet();
+        this.emptySkyYMask = new BitSet();
+        this.emptyBlockYMask = new BitSet();
+        this.skyUpdates = Lists.newArrayList();
+        this.blockUpdates = Lists.newArrayList();
         for (int i = 0; i < levelLightEngine.getLightSectionCount(); ++i) {
             if (bitSet == null || bitSet.get(i)) {
                 ClientboundLightUpdatePacket.prepareSectionData(chunkPos, levelLightEngine, LightLayer.SKY, i, this.skyYMask, this.emptySkyYMask, this.skyUpdates);
@@ -59,28 +61,20 @@ implements Packet<ClientGamePacketListener> {
         }
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        int j;
-        this.x = friendlyByteBuf.readVarInt();
-        this.z = friendlyByteBuf.readVarInt();
-        this.trustEdges = friendlyByteBuf.readBoolean();
-        this.skyYMask = friendlyByteBuf.readBitSet();
-        this.blockYMask = friendlyByteBuf.readBitSet();
-        this.emptySkyYMask = friendlyByteBuf.readBitSet();
-        this.emptyBlockYMask = friendlyByteBuf.readBitSet();
-        int i = friendlyByteBuf.readVarInt();
-        for (j = 0; j < i; ++j) {
-            this.skyUpdates.add(friendlyByteBuf.readByteArray(2048));
-        }
-        j = friendlyByteBuf.readVarInt();
-        for (int k = 0; k < j; ++k) {
-            this.blockUpdates.add(friendlyByteBuf.readByteArray(2048));
-        }
+    public ClientboundLightUpdatePacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.x = friendlyByteBuf2.readVarInt();
+        this.z = friendlyByteBuf2.readVarInt();
+        this.trustEdges = friendlyByteBuf2.readBoolean();
+        this.skyYMask = friendlyByteBuf2.readBitSet();
+        this.blockYMask = friendlyByteBuf2.readBitSet();
+        this.emptySkyYMask = friendlyByteBuf2.readBitSet();
+        this.emptyBlockYMask = friendlyByteBuf2.readBitSet();
+        this.skyUpdates = friendlyByteBuf2.readList(friendlyByteBuf -> friendlyByteBuf.readByteArray(2048));
+        this.blockUpdates = friendlyByteBuf2.readList(friendlyByteBuf -> friendlyByteBuf.readByteArray(2048));
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.x);
         friendlyByteBuf.writeVarInt(this.z);
         friendlyByteBuf.writeBoolean(this.trustEdges);
@@ -88,14 +82,8 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeBitSet(this.blockYMask);
         friendlyByteBuf.writeBitSet(this.emptySkyYMask);
         friendlyByteBuf.writeBitSet(this.emptyBlockYMask);
-        friendlyByteBuf.writeVarInt(this.skyUpdates.size());
-        for (byte[] bs : this.skyUpdates) {
-            friendlyByteBuf.writeByteArray(bs);
-        }
-        friendlyByteBuf.writeVarInt(this.blockUpdates.size());
-        for (byte[] bs : this.blockUpdates) {
-            friendlyByteBuf.writeByteArray(bs);
-        }
+        friendlyByteBuf.writeCollection(this.skyUpdates, FriendlyByteBuf::writeByteArray);
+        friendlyByteBuf.writeCollection(this.blockUpdates, FriendlyByteBuf::writeByteArray);
     }
 
     @Override

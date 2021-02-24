@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,11 +12,8 @@ import net.minecraft.world.item.ItemStack;
 
 public class ServerboundSetCreativeModeSlotPacket
 implements Packet<ServerGamePacketListener> {
-    private int slotNum;
-    private ItemStack itemStack = ItemStack.EMPTY;
-
-    public ServerboundSetCreativeModeSlotPacket() {
-    }
+    private final int slotNum;
+    private final ItemStack itemStack;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundSetCreativeModeSlotPacket(int i, ItemStack itemStack) {
@@ -30,14 +26,13 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleSetCreativeModeSlot(this);
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundSetCreativeModeSlotPacket(FriendlyByteBuf friendlyByteBuf) {
         this.slotNum = friendlyByteBuf.readShort();
         this.itemStack = friendlyByteBuf.readItem();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeShort(this.slotNum);
         friendlyByteBuf.writeItem(this.itemStack);
     }

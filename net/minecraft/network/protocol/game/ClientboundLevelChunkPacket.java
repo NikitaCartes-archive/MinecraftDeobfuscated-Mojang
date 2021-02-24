@@ -6,7 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.io.IOException;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
@@ -23,21 +22,16 @@ import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.jetbrains.annotations.Nullable;
 
 public class ClientboundLevelChunkPacket
 implements Packet<ClientGamePacketListener> {
-    private int x;
-    private int z;
-    private BitSet availableSections;
-    private CompoundTag heightmaps;
-    @Nullable
-    private int[] biomes;
-    private byte[] buffer;
-    private List<CompoundTag> blockEntitiesTags;
-
-    public ClientboundLevelChunkPacket() {
-    }
+    private final int x;
+    private final int z;
+    private final BitSet availableSections;
+    private final CompoundTag heightmaps;
+    private final int[] biomes;
+    private final byte[] buffer;
+    private final List<CompoundTag> blockEntitiesTags;
 
     public ClientboundLevelChunkPacket(LevelChunk levelChunk) {
         ChunkPos chunkPos = levelChunk.getPos();
@@ -59,8 +53,7 @@ implements Packet<ClientGamePacketListener> {
         }
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundLevelChunkPacket(FriendlyByteBuf friendlyByteBuf) {
         this.x = friendlyByteBuf.readInt();
         this.z = friendlyByteBuf.readInt();
         this.availableSections = friendlyByteBuf.readBitSet();
@@ -72,28 +65,19 @@ implements Packet<ClientGamePacketListener> {
         }
         this.buffer = new byte[i];
         friendlyByteBuf.readBytes(this.buffer);
-        int j = friendlyByteBuf.readVarInt();
-        this.blockEntitiesTags = Lists.newArrayList();
-        for (int k = 0; k < j; ++k) {
-            this.blockEntitiesTags.add(friendlyByteBuf.readNbt());
-        }
+        this.blockEntitiesTags = friendlyByteBuf.readList(FriendlyByteBuf::readNbt);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeInt(this.x);
         friendlyByteBuf.writeInt(this.z);
         friendlyByteBuf.writeBitSet(this.availableSections);
         friendlyByteBuf.writeNbt(this.heightmaps);
-        if (this.biomes != null) {
-            friendlyByteBuf.writeVarIntArray(this.biomes);
-        }
+        friendlyByteBuf.writeVarIntArray(this.biomes);
         friendlyByteBuf.writeVarInt(this.buffer.length);
         friendlyByteBuf.writeBytes(this.buffer);
-        friendlyByteBuf.writeVarInt(this.blockEntitiesTags.size());
-        for (CompoundTag compoundTag : this.blockEntitiesTags) {
-            friendlyByteBuf.writeNbt(compoundTag);
-        }
+        friendlyByteBuf.writeCollection(this.blockEntitiesTags, FriendlyByteBuf::writeNbt);
     }
 
     @Override
@@ -159,7 +143,6 @@ implements Packet<ClientGamePacketListener> {
         return this.blockEntitiesTags;
     }
 
-    @Nullable
     @Environment(value=EnvType.CLIENT)
     public int[] getBiomes() {
         return this.biomes;

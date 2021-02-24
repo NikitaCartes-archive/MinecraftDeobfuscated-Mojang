@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.login;
 
-import java.io.IOException;
 import java.security.PublicKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,12 +14,9 @@ import net.minecraft.util.CryptException;
 
 public class ClientboundHelloPacket
 implements Packet<ClientLoginPacketListener> {
-    private String serverId;
-    private byte[] publicKey;
-    private byte[] nonce;
-
-    public ClientboundHelloPacket() {
-    }
+    private final String serverId;
+    private final byte[] publicKey;
+    private final byte[] nonce;
 
     public ClientboundHelloPacket(String string, byte[] bs, byte[] cs) {
         this.serverId = string;
@@ -28,15 +24,14 @@ implements Packet<ClientLoginPacketListener> {
         this.nonce = cs;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundHelloPacket(FriendlyByteBuf friendlyByteBuf) {
         this.serverId = friendlyByteBuf.readUtf(20);
         this.publicKey = friendlyByteBuf.readByteArray();
         this.nonce = friendlyByteBuf.readByteArray();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.serverId);
         friendlyByteBuf.writeByteArray(this.publicKey);
         friendlyByteBuf.writeByteArray(this.nonce);

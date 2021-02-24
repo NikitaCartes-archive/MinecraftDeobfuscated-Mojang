@@ -20,6 +20,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -36,6 +37,7 @@ import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
@@ -51,7 +53,9 @@ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
@@ -63,7 +67,12 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
@@ -80,8 +89,10 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
@@ -225,15 +236,27 @@ extends PacketListener {
 
     public void handleUpdateTags(ClientboundUpdateTagsPacket var1);
 
-    public void handlePlayerCombat(ClientboundPlayerCombatPacket var1);
+    public void handlePlayerCombatEnd(ClientboundPlayerCombatEndPacket var1);
+
+    public void handlePlayerCombatEnter(ClientboundPlayerCombatEnterPacket var1);
+
+    public void handlePlayerCombatKill(ClientboundPlayerCombatKillPacket var1);
 
     public void handleChangeDifficulty(ClientboundChangeDifficultyPacket var1);
 
     public void handleSetCamera(ClientboundSetCameraPacket var1);
 
-    public void handleSetBorder(ClientboundSetBorderPacket var1);
+    public void handleInitializeBorder(ClientboundInitializeBorderPacket var1);
 
-    public void handleSetTitles(ClientboundSetTitlesPacket var1);
+    public void handleSetBorderLerpSize(ClientboundSetBorderLerpSizePacket var1);
+
+    public void handleSetBorderSize(ClientboundSetBorderSizePacket var1);
+
+    public void handleSetBorderWarningDelay(ClientboundSetBorderWarningDelayPacket var1);
+
+    public void handleSetBorderWarningDistance(ClientboundSetBorderWarningDistancePacket var1);
+
+    public void handleSetBorderCenter(ClientboundSetBorderCenterPacket var1);
 
     public void handleTabListCustomisation(ClientboundTabListPacket var1);
 
@@ -276,5 +299,15 @@ extends PacketListener {
     public void handleSetChunkCacheCenter(ClientboundSetChunkCacheCenterPacket var1);
 
     public void handleBlockBreakAck(ClientboundBlockBreakAckPacket var1);
+
+    public void setActionBarText(ClientboundSetActionBarTextPacket var1);
+
+    public void setSubtitleText(ClientboundSetSubtitleTextPacket var1);
+
+    public void setTitleText(ClientboundSetTitleTextPacket var1);
+
+    public void setTitlesAnimation(ClientboundSetTitlesAnimationPacket var1);
+
+    public void handleTitlesClear(ClientboundClearTitlesPacket var1);
 }
 

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,15 +12,12 @@ import net.minecraft.world.entity.player.Abilities;
 
 public class ClientboundPlayerAbilitiesPacket
 implements Packet<ClientGamePacketListener> {
-    private boolean invulnerable;
-    private boolean isFlying;
-    private boolean canFly;
-    private boolean instabuild;
-    private float flyingSpeed;
-    private float walkingSpeed;
-
-    public ClientboundPlayerAbilitiesPacket() {
-    }
+    private final boolean invulnerable;
+    private final boolean isFlying;
+    private final boolean canFly;
+    private final boolean instabuild;
+    private final float flyingSpeed;
+    private final float walkingSpeed;
 
     public ClientboundPlayerAbilitiesPacket(Abilities abilities) {
         this.invulnerable = abilities.invulnerable;
@@ -32,8 +28,7 @@ implements Packet<ClientGamePacketListener> {
         this.walkingSpeed = abilities.getWalkingSpeed();
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundPlayerAbilitiesPacket(FriendlyByteBuf friendlyByteBuf) {
         byte b = friendlyByteBuf.readByte();
         this.invulnerable = (b & 1) != 0;
         this.isFlying = (b & 2) != 0;
@@ -44,7 +39,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         byte b = 0;
         if (this.invulnerable) {
             b = (byte)(b | 1);

@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,25 +13,21 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundSetEntityLinkPacket
 implements Packet<ClientGamePacketListener> {
-    private int sourceId;
-    private int destId;
-
-    public ClientboundSetEntityLinkPacket() {
-    }
+    private final int sourceId;
+    private final int destId;
 
     public ClientboundSetEntityLinkPacket(Entity entity, @Nullable Entity entity2) {
         this.sourceId = entity.getId();
         this.destId = entity2 != null ? entity2.getId() : 0;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetEntityLinkPacket(FriendlyByteBuf friendlyByteBuf) {
         this.sourceId = friendlyByteBuf.readInt();
         this.destId = friendlyByteBuf.readInt();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeInt(this.sourceId);
         friendlyByteBuf.writeInt(this.destId);
     }

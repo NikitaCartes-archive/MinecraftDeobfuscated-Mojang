@@ -124,15 +124,14 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
             LOGGER.error("Unknown feature id: {}", (Object)string);
             return null;
         }
-        int i = compoundTag.getInt("ChunkX");
-        int j = compoundTag.getInt("ChunkZ");
-        int k = compoundTag.getInt("references");
+        ChunkPos chunkPos = new ChunkPos(compoundTag.getInt("ChunkX"), compoundTag.getInt("ChunkZ"));
+        int i = compoundTag.getInt("references");
         BoundingBox boundingBox = compoundTag.contains("BB") ? new BoundingBox(compoundTag.getIntArray("BB")) : BoundingBox.getUnknownBox();
         ListTag listTag = compoundTag.getList("Children", 10);
         try {
-            StructureStart<?> structureStart = super.createStart(i, j, boundingBox, k, l);
-            for (int m = 0; m < listTag.size(); ++m) {
-                CompoundTag compoundTag2 = listTag.getCompound(m);
+            StructureStart<?> structureStart = super.createStart(chunkPos, boundingBox, i, l);
+            for (int j = 0; j < listTag.size(); ++j) {
+                CompoundTag compoundTag2 = listTag.getCompound(j);
                 String string2 = compoundTag2.getString("id").toLowerCase(Locale.ROOT);
                 ResourceLocation resourceLocation = new ResourceLocation(string2);
                 ResourceLocation resourceLocation2 = RENAMES.getOrDefault(resourceLocation, resourceLocation);
@@ -222,19 +221,19 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
         return new ChunkPos(n * k + p, o * k + q);
     }
 
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         return true;
     }
 
-    private StructureStart<C> createStart(int i, int j, BoundingBox boundingBox, int k, long l) {
-        return this.getStartFactory().create(this, i, j, boundingBox, k, l);
+    private StructureStart<C> createStart(ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+        return this.getStartFactory().create(this, chunkPos, boundingBox, i, l);
     }
 
     public StructureStart<?> generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, StructureManager structureManager, long l, ChunkPos chunkPos, Biome biome, int i, WorldgenRandom worldgenRandom, StructureFeatureConfiguration structureFeatureConfiguration, C featureConfiguration, LevelHeightAccessor levelHeightAccessor) {
         ChunkPos chunkPos2 = this.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, chunkPos.x, chunkPos.z);
-        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos.x, chunkPos.z, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
-            StructureStart<C> structureStart = this.createStart(chunkPos.x, chunkPos.z, BoundingBox.getUnknownBox(), i, l);
-            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos.x, chunkPos.z, biome, featureConfiguration, levelHeightAccessor);
+        if (chunkPos.x == chunkPos2.x && chunkPos.z == chunkPos2.z && this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
+            StructureStart<C> structureStart = this.createStart(chunkPos, BoundingBox.getUnknownBox(), i, l);
+            structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos, biome, featureConfiguration, levelHeightAccessor);
             if (structureStart.isValid()) {
                 return structureStart;
             }
@@ -257,7 +256,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
     }
 
     public static interface StructureStartFactory<C extends FeatureConfiguration> {
-        public StructureStart<C> create(StructureFeature<C> var1, int var2, int var3, BoundingBox var4, int var5, long var6);
+        public StructureStart<C> create(StructureFeature<C> var1, ChunkPos var2, BoundingBox var3, int var4, long var5);
     }
 }
 

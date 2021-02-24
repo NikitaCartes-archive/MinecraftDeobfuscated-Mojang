@@ -40,7 +40,7 @@ implements RecipeSerializer<T> {
 
     @Override
     public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
-        String string = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+        String string = friendlyByteBuf.readUtf();
         Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
         ItemStack itemStack = friendlyByteBuf.readItem();
         float f = friendlyByteBuf.readFloat();

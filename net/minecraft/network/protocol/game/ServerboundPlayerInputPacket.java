@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,13 +11,10 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundPlayerInputPacket
 implements Packet<ServerGamePacketListener> {
-    private float xxa;
-    private float zza;
-    private boolean isJumping;
-    private boolean isShiftKeyDown;
-
-    public ServerboundPlayerInputPacket() {
-    }
+    private final float xxa;
+    private final float zza;
+    private final boolean isJumping;
+    private final boolean isShiftKeyDown;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerInputPacket(float f, float g, boolean bl, boolean bl2) {
@@ -28,8 +24,7 @@ implements Packet<ServerGamePacketListener> {
         this.isShiftKeyDown = bl2;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPlayerInputPacket(FriendlyByteBuf friendlyByteBuf) {
         this.xxa = friendlyByteBuf.readFloat();
         this.zza = friendlyByteBuf.readFloat();
         byte b = friendlyByteBuf.readByte();
@@ -38,7 +33,7 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeFloat(this.xxa);
         friendlyByteBuf.writeFloat(this.zza);
         byte b = 0;

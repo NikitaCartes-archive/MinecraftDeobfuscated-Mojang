@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,16 +12,13 @@ import net.minecraft.world.entity.Entity;
 
 public class ClientboundTeleportEntityPacket
 implements Packet<ClientGamePacketListener> {
-    private int id;
-    private double x;
-    private double y;
-    private double z;
-    private byte yRot;
-    private byte xRot;
-    private boolean onGround;
-
-    public ClientboundTeleportEntityPacket() {
-    }
+    private final int id;
+    private final double x;
+    private final double y;
+    private final double z;
+    private final byte yRot;
+    private final byte xRot;
+    private final boolean onGround;
 
     public ClientboundTeleportEntityPacket(Entity entity) {
         this.id = entity.getId();
@@ -34,8 +30,7 @@ implements Packet<ClientGamePacketListener> {
         this.onGround = entity.isOnGround();
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundTeleportEntityPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readVarInt();
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
@@ -46,7 +41,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.id);
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);

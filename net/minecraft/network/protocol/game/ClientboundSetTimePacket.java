@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,31 +11,25 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundSetTimePacket
 implements Packet<ClientGamePacketListener> {
-    private long gameTime;
-    private long dayTime;
-
-    public ClientboundSetTimePacket() {
-    }
+    private final long gameTime;
+    private final long dayTime;
 
     public ClientboundSetTimePacket(long l, long m, boolean bl) {
         this.gameTime = l;
-        this.dayTime = m;
-        if (!bl) {
-            this.dayTime = -this.dayTime;
-            if (this.dayTime == 0L) {
-                this.dayTime = -1L;
-            }
+        long n = m;
+        if (!bl && (n = -n) == 0L) {
+            n = -1L;
         }
+        this.dayTime = n;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetTimePacket(FriendlyByteBuf friendlyByteBuf) {
         this.gameTime = friendlyByteBuf.readLong();
         this.dayTime = friendlyByteBuf.readLong();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeLong(this.gameTime);
         friendlyByteBuf.writeLong(this.dayTime);
     }

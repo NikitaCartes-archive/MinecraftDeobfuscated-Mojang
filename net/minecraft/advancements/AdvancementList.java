@@ -3,11 +3,10 @@
  */
 package net.minecraft.advancements;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -59,15 +58,15 @@ public class AdvancementList {
     }
 
     public void add(Map<ResourceLocation, Advancement.Builder> map) {
-        Function<ResourceLocation, Object> function = Functions.forMap(this.advancements, null);
-        while (!map.isEmpty()) {
+        HashMap<ResourceLocation, Advancement.Builder> map2 = Maps.newHashMap(map);
+        while (!map2.isEmpty()) {
             boolean bl = false;
-            Iterator<Map.Entry<ResourceLocation, Advancement.Builder>> iterator = map.entrySet().iterator();
+            Iterator iterator = map2.entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<ResourceLocation, Advancement.Builder> entry = iterator.next();
-                ResourceLocation resourceLocation = entry.getKey();
-                Advancement.Builder builder = entry.getValue();
-                if (!builder.canBuild(function)) continue;
+                Map.Entry entry = iterator.next();
+                ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
+                Advancement.Builder builder = (Advancement.Builder)entry.getValue();
+                if (!builder.canBuild(this.advancements::get)) continue;
                 Advancement advancement = builder.build(resourceLocation);
                 this.advancements.put(resourceLocation, advancement);
                 bl = true;
@@ -83,8 +82,8 @@ public class AdvancementList {
                 this.listener.onAddAdvancementTask(advancement);
             }
             if (bl) continue;
-            for (Map.Entry<ResourceLocation, Advancement.Builder> entry : map.entrySet()) {
-                LOGGER.error("Couldn't load advancement {}: {}", (Object)entry.getKey(), (Object)entry.getValue());
+            for (Map.Entry entry : map2.entrySet()) {
+                LOGGER.error("Couldn't load advancement {}: {}", entry.getKey(), entry.getValue());
             }
         }
         LOGGER.info("Loaded {} advancements", (Object)this.advancements.size());

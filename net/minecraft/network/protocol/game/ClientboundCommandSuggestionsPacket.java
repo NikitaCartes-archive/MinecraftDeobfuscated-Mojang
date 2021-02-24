@@ -3,12 +3,10 @@
  */
 package net.minecraft.network.protocol.game;
 
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,45 +17,39 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundCommandSuggestionsPacket
 implements Packet<ClientGamePacketListener> {
-    private int id;
-    private Suggestions suggestions;
-
-    public ClientboundCommandSuggestionsPacket() {
-    }
+    private final int id;
+    private final Suggestions suggestions;
 
     public ClientboundCommandSuggestionsPacket(int i, Suggestions suggestions) {
         this.id = i;
         this.suggestions = suggestions;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.id = friendlyByteBuf.readVarInt();
-        int i = friendlyByteBuf.readVarInt();
-        int j = friendlyByteBuf.readVarInt();
+    public ClientboundCommandSuggestionsPacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.id = friendlyByteBuf2.readVarInt();
+        int i = friendlyByteBuf2.readVarInt();
+        int j = friendlyByteBuf2.readVarInt();
         StringRange stringRange = StringRange.between(i, i + j);
-        int k = friendlyByteBuf.readVarInt();
-        ArrayList<Suggestion> list = Lists.newArrayListWithCapacity(k);
-        for (int l = 0; l < k; ++l) {
-            String string = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+        List<Suggestion> list = friendlyByteBuf2.readList(friendlyByteBuf -> {
+            String string = friendlyByteBuf.readUtf();
             Component component = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
-            list.add(new Suggestion(stringRange, string, component));
-        }
+            return new Suggestion(stringRange, string, component);
+        });
         this.suggestions = new Suggestions(stringRange, list);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        friendlyByteBuf.writeVarInt(this.id);
-        friendlyByteBuf.writeVarInt(this.suggestions.getRange().getStart());
-        friendlyByteBuf.writeVarInt(this.suggestions.getRange().getLength());
-        friendlyByteBuf.writeVarInt(this.suggestions.getList().size());
-        for (Suggestion suggestion : this.suggestions.getList()) {
+    public void write(FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeVarInt(this.id);
+        friendlyByteBuf2.writeVarInt(this.suggestions.getRange().getStart());
+        friendlyByteBuf2.writeVarInt(this.suggestions.getRange().getLength());
+        friendlyByteBuf2.writeCollection(this.suggestions.getList(), (friendlyByteBuf, suggestion) -> {
             friendlyByteBuf.writeUtf(suggestion.getText());
             friendlyByteBuf.writeBoolean(suggestion.getTooltip() != null);
-            if (suggestion.getTooltip() == null) continue;
-            friendlyByteBuf.writeComponent(ComponentUtils.fromMessage(suggestion.getTooltip()));
-        }
+            if (suggestion.getTooltip() != null) {
+                friendlyByteBuf.writeComponent(ComponentUtils.fromMessage(suggestion.getTooltip()));
+            }
+        });
     }
 
     @Override

@@ -5,7 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.shorts.ShortIterator;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
-import java.io.IOException;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,40 +19,34 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public class ClientboundSectionBlocksUpdatePacket
 implements Packet<ClientGamePacketListener> {
-    private SectionPos sectionPos;
-    private short[] positions;
-    private BlockState[] states;
-    private boolean suppressLightUpdates;
-
-    public ClientboundSectionBlocksUpdatePacket() {
-    }
+    private final SectionPos sectionPos;
+    private final short[] positions;
+    private final BlockState[] states;
+    private final boolean suppressLightUpdates;
 
     public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection, boolean bl) {
         this.sectionPos = sectionPos;
         this.suppressLightUpdates = bl;
-        this.initFields(shortSet.size());
-        int i = 0;
+        int i = shortSet.size();
+        this.positions = new short[i];
+        this.states = new BlockState[i];
+        int j = 0;
         ShortIterator shortIterator = shortSet.iterator();
         while (shortIterator.hasNext()) {
             short s;
-            this.positions[i] = s = ((Short)shortIterator.next()).shortValue();
-            this.states[i] = levelChunkSection.getBlockState(SectionPos.sectionRelativeX(s), SectionPos.sectionRelativeY(s), SectionPos.sectionRelativeZ(s));
-            ++i;
+            this.positions[j] = s = ((Short)shortIterator.next()).shortValue();
+            this.states[j] = levelChunkSection.getBlockState(SectionPos.sectionRelativeX(s), SectionPos.sectionRelativeY(s), SectionPos.sectionRelativeZ(s));
+            ++j;
         }
     }
 
-    private void initFields(int i) {
-        this.positions = new short[i];
-        this.states = new BlockState[i];
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
         this.sectionPos = SectionPos.of(friendlyByteBuf.readLong());
         this.suppressLightUpdates = friendlyByteBuf.readBoolean();
         int i = friendlyByteBuf.readVarInt();
-        this.initFields(i);
-        for (int j = 0; j < this.positions.length; ++j) {
+        this.positions = new short[i];
+        this.states = new BlockState[i];
+        for (int j = 0; j < i; ++j) {
             long l = friendlyByteBuf.readVarLong();
             this.positions[j] = (short)(l & 0xFFFL);
             this.states[j] = Block.BLOCK_STATE_REGISTRY.byId((int)(l >>> 12));
@@ -61,7 +54,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeLong(this.sectionPos.asLong());
         friendlyByteBuf.writeBoolean(this.suppressLightUpdates);
         friendlyByteBuf.writeVarInt(this.positions.length);

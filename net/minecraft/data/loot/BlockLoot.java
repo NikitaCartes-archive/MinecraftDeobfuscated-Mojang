@@ -171,6 +171,14 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         return LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Lock", "BlockEntityTag.Lock").copy("LootTable", "BlockEntityTag.LootTable").copy("LootTableSeed", "BlockEntityTag.LootTableSeed"))).apply(SetContainerContents.setContents().withEntry(DynamicLoot.dynamicEntry(ShulkerBoxBlock.CONTENTS))))));
     }
 
+    private static LootTable.Builder createLapisOreDrops(Block block) {
+        return BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.LAPIS_LAZULI).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0f, 9.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))));
+    }
+
+    private static LootTable.Builder createRedstoneOreDrops(Block block) {
+        return BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.REDSTONE).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0f, 5.0f)))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))));
+    }
+
     private static LootTable.Builder createBannerDrop(Block block) {
         return LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Patterns", "BlockEntityTag.Patterns")))));
     }
@@ -270,7 +278,9 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SAND);
         this.dropSelf(Blocks.RED_SAND);
         this.dropSelf(Blocks.GOLD_ORE);
+        this.dropSelf(Blocks.DEEPSLATE_GOLD_ORE);
         this.dropSelf(Blocks.IRON_ORE);
+        this.dropSelf(Blocks.DEEPSLATE_IRON_ORE);
         this.dropSelf(Blocks.OAK_LOG);
         this.dropSelf(Blocks.SPRUCE_LOG);
         this.dropSelf(Blocks.BIRCH_LOG);
@@ -381,6 +391,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SOUL_SOIL);
         this.dropSelf(Blocks.BASALT);
         this.dropSelf(Blocks.POLISHED_BASALT);
+        this.dropSelf(Blocks.SMOOTH_BASALT);
         this.dropSelf(Blocks.SOUL_TORCH);
         this.dropSelf(Blocks.CARVED_PUMPKIN);
         this.dropSelf(Blocks.JACK_O_LANTERN);
@@ -685,19 +696,19 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.BIG_DRIPLEAF);
         this.dropSelf(Blocks.MOSS_BLOCK);
         this.dropSelf(Blocks.ROOTED_DIRT);
-        this.dropSelf(Blocks.GRIMSTONE);
-        this.dropSelf(Blocks.GRIMSTONE_STAIRS);
-        this.dropSelf(Blocks.GRIMSTONE_WALL);
-        this.dropSelf(Blocks.POLISHED_GRIMSTONE);
-        this.dropSelf(Blocks.POLISHED_GRIMSTONE_STAIRS);
-        this.dropSelf(Blocks.POLISHED_GRIMSTONE_WALL);
-        this.dropSelf(Blocks.GRIMSTONE_TILES);
-        this.dropSelf(Blocks.GRIMSTONE_TILE_STAIRS);
-        this.dropSelf(Blocks.GRIMSTONE_TILE_WALL);
-        this.dropSelf(Blocks.GRIMSTONE_BRICKS);
-        this.dropSelf(Blocks.GRIMSTONE_BRICK_STAIRS);
-        this.dropSelf(Blocks.GRIMSTONE_BRICK_WALL);
-        this.dropSelf(Blocks.CHISELED_GRIMSTONE);
+        this.dropSelf(Blocks.COBBLED_DEEPSLATE);
+        this.dropSelf(Blocks.COBBLED_DEEPSLATE_STAIRS);
+        this.dropSelf(Blocks.COBBLED_DEEPSLATE_WALL);
+        this.dropSelf(Blocks.POLISHED_DEEPSLATE);
+        this.dropSelf(Blocks.POLISHED_DEEPSLATE_STAIRS);
+        this.dropSelf(Blocks.POLISHED_DEEPSLATE_WALL);
+        this.dropSelf(Blocks.DEEPSLATE_TILES);
+        this.dropSelf(Blocks.DEEPSLATE_TILE_STAIRS);
+        this.dropSelf(Blocks.DEEPSLATE_TILE_WALL);
+        this.dropSelf(Blocks.DEEPSLATE_BRICKS);
+        this.dropSelf(Blocks.DEEPSLATE_BRICK_STAIRS);
+        this.dropSelf(Blocks.DEEPSLATE_BRICK_WALL);
+        this.dropSelf(Blocks.CHISELED_DEEPSLATE);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);
@@ -707,6 +718,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropOther(Blocks.LAVA_CAULDRON, Blocks.CAULDRON);
         this.dropOther(Blocks.POWDER_SNOW_CAULDRON, Blocks.CAULDRON);
         this.add(Blocks.STONE, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.COBBLESTONE));
+        this.add(Blocks.DEEPSLATE, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.COBBLED_DEEPSLATE));
         this.add(Blocks.GRASS_BLOCK, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
         this.add(Blocks.PODZOL, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
         this.add(Blocks.MYCELIUM, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
@@ -798,10 +810,10 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.WAXED_CUT_COPPER_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.GRIMSTONE_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.POLISHED_GRIMSTONE_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.GRIMSTONE_TILE_SLAB, BlockLoot::createSlabItemTable);
-        this.add(Blocks.GRIMSTONE_BRICK_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.COBBLED_DEEPSLATE_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.POLISHED_DEEPSLATE_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.DEEPSLATE_TILE_SLAB, BlockLoot::createSlabItemTable);
+        this.add(Blocks.DEEPSLATE_BRICK_SLAB, BlockLoot::createSlabItemTable);
         this.add(Blocks.ACACIA_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.BIRCH_DOOR, BlockLoot::createDoorTable);
         this.add(Blocks.DARK_OAK_DOOR, BlockLoot::createDoorTable);
@@ -934,8 +946,10 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.EMERALD_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.EMERALD));
         this.add(Blocks.NETHER_QUARTZ_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.QUARTZ));
         this.add(Blocks.DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
+        this.add(Blocks.DEEPSLATE_DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
         this.add(Blocks.NETHER_GOLD_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.GOLD_NUGGET).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 6.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
-        this.add(Blocks.LAPIS_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.LAPIS_LAZULI).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0f, 9.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
+        this.add(Blocks.LAPIS_ORE, BlockLoot::createLapisOreDrops);
+        this.add(Blocks.DEEPSLATE_LAPIS_ORE, BlockLoot::createLapisOreDrops);
         this.add(Blocks.COBWEB, (Block block) -> BlockLoot.createSilkTouchOrShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.STRING))));
         this.add(Blocks.DEAD_BUSH, (Block block) -> BlockLoot.createShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0f, 2.0f))))));
         this.add(Blocks.NETHER_SPROUTS, BlockLoot::createShearsOnlyDrop);
@@ -956,7 +970,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.GRASS, BlockLoot::createGrassDrops);
         this.add(Blocks.GLOWSTONE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.GLOWSTONE_DUST).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 4.0f)))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))).apply(LimitCount.limitCount(IntRange.range(1, 4))))));
         this.add(Blocks.MELON, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.MELON_SLICE).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0f, 7.0f)))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))).apply(LimitCount.limitCount(IntRange.upperBound(9))))));
-        this.add(Blocks.REDSTONE_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.REDSTONE).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0f, 5.0f)))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE)))));
+        this.add(Blocks.REDSTONE_ORE, BlockLoot::createRedstoneOreDrops);
+        this.add(Blocks.DEEPSLATE_REDSTONE_ORE, BlockLoot::createRedstoneOreDrops);
         this.add(Blocks.SEA_LANTERN, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 3.0f)))).apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))).apply(LimitCount.limitCount(IntRange.range(1, 5))))));
         this.add(Blocks.NETHER_WART, (Block block) -> LootTable.lootTable().withPool(BlockLoot.applyExplosionDecay(block, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.NETHER_WART).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 4.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(NetherWartBlock.AGE, 3))))).apply((LootItemFunction.Builder)ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(NetherWartBlock.AGE, 3))))))));
         this.add(Blocks.SNOW, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().when(LootItemEntityPropertyCondition.entityPresent(LootContext.EntityTarget.THIS)).add(AlternativesEntry.alternatives(new LootPoolEntryContainer.Builder[]{AlternativesEntry.alternatives(new LootPoolEntryContainer.Builder[]{LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, true))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 2)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0f))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 3)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(3.0f))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 4)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0f))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 5)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(5.0f))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 6)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(6.0f))), ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.SNOWBALL).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 7)))).apply(SetItemCountFunction.setCount(ConstantValue.exactly(7.0f))), LootItem.lootTableItem(Items.SNOWBALL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(8.0f)))}).when(HAS_NO_SILK_TOUCH), AlternativesEntry.alternatives(new LootPoolEntryContainer.Builder[]{LootItem.lootTableItem(Blocks.SNOW).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, true))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 2))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(3.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 3))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 4))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(5.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 5))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(6.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 6))), ((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Blocks.SNOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(7.0f)))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SnowLayerBlock.LAYERS, 7))), LootItem.lootTableItem(Blocks.SNOW_BLOCK)})}))));

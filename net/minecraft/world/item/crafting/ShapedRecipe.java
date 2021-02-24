@@ -259,7 +259,7 @@ implements CraftingRecipe {
         public ShapedRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
             int i = friendlyByteBuf.readVarInt();
             int j = friendlyByteBuf.readVarInt();
-            String string = friendlyByteBuf.readUtf(Short.MAX_VALUE);
+            String string = friendlyByteBuf.readUtf();
             NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
             for (int k = 0; k < nonNullList.size(); ++k) {
                 nonNullList.set(k, Ingredient.fromNetwork(friendlyByteBuf));

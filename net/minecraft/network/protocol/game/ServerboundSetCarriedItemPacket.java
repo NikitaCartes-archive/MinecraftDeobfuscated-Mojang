@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,23 +11,19 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundSetCarriedItemPacket
 implements Packet<ServerGamePacketListener> {
-    private int slot;
-
-    public ServerboundSetCarriedItemPacket() {
-    }
+    private final int slot;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundSetCarriedItemPacket(int i) {
         this.slot = i;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundSetCarriedItemPacket(FriendlyByteBuf friendlyByteBuf) {
         this.slot = friendlyByteBuf.readShort();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeShort(this.slot);
     }
 

@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -33,35 +32,35 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
-        return chunkGenerator.hasStronghold(new ChunkPos(i, j));
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, ChunkPos chunkPos, Biome biome, ChunkPos chunkPos2, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        return chunkGenerator.hasStronghold(chunkPos);
     }
 
     public static class StrongholdStart
     extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
         private final long seed;
 
-        public StrongholdStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, boundingBox, k, l);
+        public StrongholdStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+            super(structureFeature, chunkPos, boundingBox, i, l);
             this.seed = l;
         }
 
         @Override
-        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
             StrongholdPieces.StartPiece startPiece;
-            int k = 0;
+            int i = 0;
             do {
                 this.pieces.clear();
                 this.boundingBox = BoundingBox.getUnknownBox();
-                this.random.setLargeFeatureSeed(this.seed + (long)k++, i, j);
+                this.random.setLargeFeatureSeed(this.seed + (long)i++, chunkPos.x, chunkPos.z);
                 StrongholdPieces.resetPieces();
-                startPiece = new StrongholdPieces.StartPiece(this.random, SectionPos.sectionToBlockCoord(i, 2), SectionPos.sectionToBlockCoord(j, 2));
+                startPiece = new StrongholdPieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
                 this.pieces.add(startPiece);
                 startPiece.addChildren(startPiece, this.pieces, this.random);
                 List<StructurePiece> list = startPiece.pendingChildren;
                 while (!list.isEmpty()) {
-                    int l = this.random.nextInt(list.size());
-                    StructurePiece structurePiece = list.remove(l);
+                    int j = this.random.nextInt(list.size());
+                    StructurePiece structurePiece = list.remove(j);
                     structurePiece.addChildren(startPiece, this.pieces, this.random);
                 }
                 this.calculateBoundingBox();

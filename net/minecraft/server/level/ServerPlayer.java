@@ -56,7 +56,9 @@ import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
@@ -327,13 +329,13 @@ implements ContainerListener {
     @Override
     public void onEnterCombat() {
         super.onEnterCombat();
-        this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTER_COMBAT));
+        this.connection.send(new ClientboundPlayerCombatEnterPacket());
     }
 
     @Override
     public void onLeaveCombat() {
         super.onLeaveCombat();
-        this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.END_COMBAT));
+        this.connection.send(new ClientboundPlayerCombatEndPacket(this.getCombatTracker()));
     }
 
     @Override
@@ -360,7 +362,7 @@ implements ContainerListener {
             this.containerMenu = this.inventoryMenu;
         }
         if (!this.entitiesToRemove.isEmpty()) {
-            this.connection.send(new ClientboundRemoveEntitiesPacket(this.entitiesToRemove.toIntArray()));
+            this.connection.send(new ClientboundRemoveEntitiesPacket(this.entitiesToRemove));
             this.entitiesToRemove.clear();
         }
         if ((entity = this.getCamera()) != this) {
@@ -446,13 +448,13 @@ implements ContainerListener {
         boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
         if (bl) {
             Component component = this.getCombatTracker().getDeathMessage();
-            this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED, component), future -> {
+            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component), future -> {
                 if (!future.isSuccess()) {
                     int i = 256;
                     String string = component.getString(256);
                     TranslatableComponent component2 = new TranslatableComponent("death.attack.message_too_long", new TextComponent(string).withStyle(ChatFormatting.YELLOW));
                     MutableComponent component3 = new TranslatableComponent("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-                    this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED, component3));
+                    this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3));
                 }
             });
             Team team = this.getTeam();
@@ -464,7 +466,7 @@ implements ContainerListener {
                 this.server.getPlayerList().broadcastToAllExceptTeam(this, component);
             }
         } else {
-            this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED));
+            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), TextComponent.EMPTY));
         }
         this.removeEntitiesOnShoulder();
         if (this.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {

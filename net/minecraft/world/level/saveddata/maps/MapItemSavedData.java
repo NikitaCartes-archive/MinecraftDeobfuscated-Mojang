@@ -353,10 +353,10 @@ extends SavedData {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public void addClientSideDecorations(MapDecoration[] mapDecorations) {
+    public void addClientSideDecorations(List<MapDecoration> list) {
         this.decorations.clear();
-        for (int i = 0; i < mapDecorations.length; ++i) {
-            MapDecoration mapDecoration = mapDecorations[i];
+        for (int i = 0; i < list.size(); ++i) {
+            MapDecoration mapDecoration = list.get(i);
             this.decorations.put("icon-" + i, mapDecoration);
         }
     }

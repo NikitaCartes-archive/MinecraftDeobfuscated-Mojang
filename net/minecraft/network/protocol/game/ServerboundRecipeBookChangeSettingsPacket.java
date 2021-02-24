@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,12 +12,9 @@ import net.minecraft.world.inventory.RecipeBookType;
 
 public class ServerboundRecipeBookChangeSettingsPacket
 implements Packet<ServerGamePacketListener> {
-    private RecipeBookType bookType;
-    private boolean isOpen;
-    private boolean isFiltering;
-
-    public ServerboundRecipeBookChangeSettingsPacket() {
-    }
+    private final RecipeBookType bookType;
+    private final boolean isOpen;
+    private final boolean isFiltering;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundRecipeBookChangeSettingsPacket(RecipeBookType recipeBookType, boolean bl, boolean bl2) {
@@ -27,15 +23,14 @@ implements Packet<ServerGamePacketListener> {
         this.isFiltering = bl2;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundRecipeBookChangeSettingsPacket(FriendlyByteBuf friendlyByteBuf) {
         this.bookType = friendlyByteBuf.readEnum(RecipeBookType.class);
         this.isOpen = friendlyByteBuf.readBoolean();
         this.isFiltering = friendlyByteBuf.readBoolean();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeEnum(this.bookType);
         friendlyByteBuf.writeBoolean(this.isOpen);
         friendlyByteBuf.writeBoolean(this.isFiltering);

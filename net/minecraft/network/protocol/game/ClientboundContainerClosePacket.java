@@ -3,35 +3,30 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundContainerClosePacket
 implements Packet<ClientGamePacketListener> {
-    private int containerId;
-
-    public ClientboundContainerClosePacket() {
-    }
+    private final int containerId;
 
     public ClientboundContainerClosePacket(int i) {
         this.containerId = i;
     }
 
-    @Override
-    public void handle(ClientGamePacketListener clientGamePacketListener) {
-        clientGamePacketListener.handleContainerClose(this);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundContainerClosePacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readUnsignedByte();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeByte(this.containerId);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handleContainerClose(this);
     }
 }
 

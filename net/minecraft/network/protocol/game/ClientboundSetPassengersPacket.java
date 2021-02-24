@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,11 +13,8 @@ import net.minecraft.world.entity.Entity;
 
 public class ClientboundSetPassengersPacket
 implements Packet<ClientGamePacketListener> {
-    private int vehicle;
-    private int[] passengers;
-
-    public ClientboundSetPassengersPacket() {
-    }
+    private final int vehicle;
+    private final int[] passengers;
 
     public ClientboundSetPassengersPacket(Entity entity) {
         this.vehicle = entity.getId();
@@ -29,14 +25,13 @@ implements Packet<ClientGamePacketListener> {
         }
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ClientboundSetPassengersPacket(FriendlyByteBuf friendlyByteBuf) {
         this.vehicle = friendlyByteBuf.readVarInt();
         this.passengers = friendlyByteBuf.readVarIntArray();
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.vehicle);
         friendlyByteBuf.writeVarIntArray(this.passengers);
     }

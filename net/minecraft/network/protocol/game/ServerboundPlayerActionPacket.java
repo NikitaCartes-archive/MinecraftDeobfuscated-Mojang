@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -14,12 +13,9 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundPlayerActionPacket
 implements Packet<ServerGamePacketListener> {
-    private BlockPos pos;
-    private Direction direction;
-    private Action action;
-
-    public ServerboundPlayerActionPacket() {
-    }
+    private final BlockPos pos;
+    private final Direction direction;
+    private final Action action;
 
     @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerActionPacket(Action action, BlockPos blockPos, Direction direction) {
@@ -28,15 +24,14 @@ implements Packet<ServerGamePacketListener> {
         this.direction = direction;
     }
 
-    @Override
-    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public ServerboundPlayerActionPacket(FriendlyByteBuf friendlyByteBuf) {
         this.action = friendlyByteBuf.readEnum(Action.class);
         this.pos = friendlyByteBuf.readBlockPos();
         this.direction = Direction.from3DDataValue(friendlyByteBuf.readUnsignedByte());
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+    public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeEnum(this.action);
         friendlyByteBuf.writeBlockPos(this.pos);
         friendlyByteBuf.writeByte(this.direction.get3DDataValue());
