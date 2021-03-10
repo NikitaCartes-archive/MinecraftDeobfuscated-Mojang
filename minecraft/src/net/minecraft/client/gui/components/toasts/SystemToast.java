@@ -57,8 +57,8 @@ public class SystemToast implements Toast {
 			this.changed = false;
 		}
 
-		toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, TEXTURE);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F);
 		int i = this.width();
 		int j = 12;
 		if (i == 160 && this.messageLines.size() <= 1) {

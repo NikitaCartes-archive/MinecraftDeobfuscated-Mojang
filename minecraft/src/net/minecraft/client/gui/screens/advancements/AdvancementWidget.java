@@ -13,6 +13,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -136,7 +137,8 @@ public class AdvancementWidget extends GuiComponent {
 				advancementWidgetType = AdvancementWidgetType.UNOBTAINED;
 			}
 
-			this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
 			this.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
 			this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
 		}
@@ -186,8 +188,9 @@ public class AdvancementWidget extends GuiComponent {
 		}
 
 		int o = this.width - n;
-		this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
 		int p = j + this.y;
 		int q;

@@ -317,17 +317,13 @@ public class ItemCommands {
 		Map<Entity, ItemStack> map = Maps.<Entity, ItemStack>newHashMapWithExpectedSize(collection.size());
 
 		for (Entity entity : collection) {
-			if (entity instanceof ServerPlayer) {
-				((ServerPlayer)entity).inventoryMenu.broadcastChanges();
-			}
-
 			SlotAccess slotAccess = entity.getSlot(i);
 			if (slotAccess != SlotAccess.NULL) {
 				ItemStack itemStack = applyModifier(commandSourceStack, lootItemFunction, slotAccess.get().copy());
 				if (slotAccess.set(itemStack)) {
 					map.put(entity, itemStack);
 					if (entity instanceof ServerPlayer) {
-						((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+						((ServerPlayer)entity).containerMenu.broadcastChanges();
 					}
 				}
 			}
@@ -378,15 +374,11 @@ public class ItemCommands {
 		List<Entity> list = Lists.<Entity>newArrayListWithCapacity(collection.size());
 
 		for (Entity entity : collection) {
-			if (entity instanceof ServerPlayer) {
-				((ServerPlayer)entity).inventoryMenu.broadcastChanges();
-			}
-
 			SlotAccess slotAccess = entity.getSlot(i);
 			if (slotAccess != SlotAccess.NULL && slotAccess.set(itemStack.copy())) {
 				list.add(entity);
 				if (entity instanceof ServerPlayer) {
-					((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+					((ServerPlayer)entity).containerMenu.broadcastChanges();
 				}
 			}
 		}

@@ -63,6 +63,7 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.GlowItemFrame;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
@@ -241,9 +242,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	public static final EntityType<Giant> GIANT = register(
 		"giant", EntityType.Builder.of(Giant::new, MobCategory.MONSTER).sized(3.6F, 12.0F).clientTrackingRange(10)
 	);
-	public static final EntityType<ItemFrame> GLOW_ITEM_FRAME = register(
+	public static final EntityType<GlowItemFrame> GLOW_ITEM_FRAME = register(
 		"glow_item_frame",
-		EntityType.Builder.<ItemFrame>of(ItemFrame::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
+		EntityType.Builder.<GlowItemFrame>of(GlowItemFrame::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
 	);
 	public static final EntityType<GlowSquid> GLOW_SQUID = register(
 		"glow_squid", EntityType.Builder.of(GlowSquid::new, MobCategory.WATER_CREATURE).sized(0.8F, 0.8F).clientTrackingRange(10)

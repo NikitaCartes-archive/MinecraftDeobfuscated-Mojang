@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -33,17 +34,21 @@ public class RecipeToast implements Toast {
 		if (this.recipes.isEmpty()) {
 			return Toast.Visibility.HIDE;
 		} else {
-			toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-			RenderSystem.color3f(1.0F, 1.0F, 1.0F);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, TEXTURE);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F);
 			toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
 			toastComponent.getMinecraft().font.draw(poseStack, TITLE_TEXT, 30.0F, 7.0F, -11534256);
 			toastComponent.getMinecraft().font.draw(poseStack, DESCRIPTION_TEXT, 30.0F, 18.0F, -16777216);
 			Recipe<?> recipe = (Recipe<?>)this.recipes.get((int)(l / Math.max(1L, 5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
 			ItemStack itemStack = recipe.getToastSymbol();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.6F, 0.6F, 1.0F);
+			PoseStack poseStack2 = RenderSystem.getModelViewStack();
+			poseStack2.pushPose();
+			poseStack2.scale(0.6F, 0.6F, 1.0F);
+			RenderSystem.applyModelViewMatrix();
 			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(itemStack, 3, 3);
-			RenderSystem.popMatrix();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(recipe.getResultItem(), 8, 8);
 			return l - this.lastChanged >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
 		}

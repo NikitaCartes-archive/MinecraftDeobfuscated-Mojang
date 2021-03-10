@@ -14,11 +14,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 
-public interface ResourceManager {
+public interface ResourceManager extends ResourceProvider {
 	@Environment(EnvType.CLIENT)
 	Set<String> getNamespaces();
-
-	Resource getResource(ResourceLocation resourceLocation) throws IOException;
 
 	@Environment(EnvType.CLIENT)
 	boolean hasResource(ResourceLocation resourceLocation);

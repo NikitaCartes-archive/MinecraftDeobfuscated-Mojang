@@ -31,7 +31,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 	private final WoodType type;
 
@@ -75,24 +74,24 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		boolean bl2 = itemStack.is(Items.GLOW_INK_SAC);
 		boolean bl3 = itemStack.is(Items.INK_SAC);
 		boolean bl4 = (bl2 || bl || bl3) && player.getAbilities().mayBuild;
-		boolean bl5 = (Boolean)blockState.getValue(LIT);
-		if ((!bl2 || !bl5) && (!bl3 || bl5)) {
-			if (level.isClientSide) {
-				return bl4 ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+		if (level.isClientSide) {
+			return bl4 ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+		} else {
+			BlockEntity blockEntity = level.getBlockEntity(blockPos);
+			if (!(blockEntity instanceof SignBlockEntity)) {
+				return InteractionResult.PASS;
 			} else {
-				BlockEntity blockEntity = level.getBlockEntity(blockPos);
-				if (blockEntity instanceof SignBlockEntity) {
-					SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
+				SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
+				boolean bl5 = signBlockEntity.hasGlowingText();
+				if ((!bl2 || !bl5) && (!bl3 || bl5)) {
 					if (bl4) {
 						boolean bl6;
 						if (bl2) {
 							level.playSound(null, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-							level.setBlockAndUpdate(blockPos, blockState.setValue(LIT, Boolean.valueOf(true)));
-							bl6 = true;
+							bl6 = signBlockEntity.setHasGlowingText(true);
 						} else if (bl3) {
 							level.playSound(null, blockPos, SoundEvents.INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-							level.setBlockAndUpdate(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)));
-							bl6 = true;
+							bl6 = signBlockEntity.setHasGlowingText(false);
 						} else {
 							level.playSound(null, blockPos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
 							bl6 = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor());
@@ -108,8 +107,6 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 					return InteractionResult.PASS;
 				}
 			}
-		} else {
-			return InteractionResult.PASS;
 		}
 	}
 

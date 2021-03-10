@@ -222,8 +222,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		int k = row(12) + 20;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		this.minecraft.getTextureManager().bind(OPTIONS_BACKGROUND);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, OPTIONS_BACKGROUND);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float g = 32.0F;
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 		bufferBuilder.vertex(0.0, (double)this.height, 0.0).uv(0.0F, (float)(this.height - k) / 32.0F + 0.0F).color(64, 64, 64, 255).endVertex();
@@ -266,8 +266,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	private void drawRemoveIcon(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
-		this.minecraft.getTextureManager().bind(CROSS_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, CROSS_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 7.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 7, 8, 14);
 		if (bl) {
@@ -278,8 +278,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	private void drawOpped(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
-		this.minecraft.getTextureManager().bind(OP_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, OP_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 8.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 8, 8, 16);
 		if (bl) {
@@ -290,8 +290,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	private void drawNormal(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
-		this.minecraft.getTextureManager().bind(USER_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, USER_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 8.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 8, 8, 16);
 		if (bl) {
@@ -332,7 +332,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 			RealmsPlayerScreen.this.drawRemoveIcon(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 22, j + 2, k, l);
 			RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 8.0F, 8.0F, 8, 8, 64, 64);
 				GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 40.0F, 8.0F, 8, 8, 64, 64);
 			});

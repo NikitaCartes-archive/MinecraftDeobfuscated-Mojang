@@ -142,6 +142,7 @@ public class BlockFamilies {
 		.wall(Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
 		.stairs(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS)
 		.slab(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB)
+		.cracked(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS)
 		.getFamily();
 	public static final BlockFamily BRICKS = familyBuilder(Blocks.BRICKS).wall(Blocks.BRICK_WALL).stairs(Blocks.BRICK_STAIRS).slab(Blocks.BRICK_SLAB).getFamily();
 	public static final BlockFamily END_STONE_BRICKS = familyBuilder(Blocks.END_STONE_BRICKS)
@@ -224,6 +225,7 @@ public class BlockFamilies {
 		.stairs(Blocks.NETHER_BRICK_STAIRS)
 		.slab(Blocks.NETHER_BRICK_SLAB)
 		.chiseled(Blocks.CHISELED_NETHER_BRICKS)
+		.cracked(Blocks.CRACKED_NETHER_BRICKS)
 		.getFamily();
 	public static final BlockFamily RED_NETHER_BRICKS = familyBuilder(Blocks.RED_NETHER_BRICKS)
 		.slab(Blocks.RED_NETHER_BRICK_SLAB)
@@ -293,30 +295,33 @@ public class BlockFamilies {
 		.stairs(Blocks.STONE_BRICK_STAIRS)
 		.slab(Blocks.STONE_BRICK_SLAB)
 		.chiseled(Blocks.CHISELED_STONE_BRICKS)
+		.cracked(Blocks.CRACKED_STONE_BRICKS)
 		.dontGenerateRecipe()
 		.getFamily();
 	public static final BlockFamily DEEPSLATE = familyBuilder(Blocks.DEEPSLATE).getFamily();
 	public static final BlockFamily COBBLED_DEEPSLATE = familyBuilder(Blocks.COBBLED_DEEPSLATE)
 		.slab(Blocks.COBBLED_DEEPSLATE_SLAB)
 		.stairs(Blocks.COBBLED_DEEPSLATE_STAIRS)
+		.wall(Blocks.COBBLED_DEEPSLATE_WALL)
 		.chiseled(Blocks.CHISELED_DEEPSLATE)
 		.polished(Blocks.POLISHED_DEEPSLATE)
-		.wall(Blocks.COBBLED_DEEPSLATE_WALL)
 		.getFamily();
 	public static final BlockFamily POLISHED_DEEPSLATE = familyBuilder(Blocks.POLISHED_DEEPSLATE)
 		.slab(Blocks.POLISHED_DEEPSLATE_SLAB)
 		.stairs(Blocks.POLISHED_DEEPSLATE_STAIRS)
 		.wall(Blocks.POLISHED_DEEPSLATE_WALL)
 		.getFamily();
-	public static final BlockFamily DEEPSLATE_TILES = familyBuilder(Blocks.DEEPSLATE_TILES)
-		.slab(Blocks.DEEPSLATE_TILE_SLAB)
-		.stairs(Blocks.DEEPSLATE_TILE_STAIRS)
-		.wall(Blocks.DEEPSLATE_TILE_WALL)
-		.getFamily();
 	public static final BlockFamily DEEPSLATE_BRICKS = familyBuilder(Blocks.DEEPSLATE_BRICKS)
 		.slab(Blocks.DEEPSLATE_BRICK_SLAB)
 		.stairs(Blocks.DEEPSLATE_BRICK_STAIRS)
 		.wall(Blocks.DEEPSLATE_BRICK_WALL)
+		.cracked(Blocks.CRACKED_DEEPSLATE_BRICKS)
+		.getFamily();
+	public static final BlockFamily DEEPSLATE_TILES = familyBuilder(Blocks.DEEPSLATE_TILES)
+		.slab(Blocks.DEEPSLATE_TILE_SLAB)
+		.stairs(Blocks.DEEPSLATE_TILE_STAIRS)
+		.wall(Blocks.DEEPSLATE_TILE_WALL)
+		.cracked(Blocks.CRACKED_DEEPSLATE_TILES)
 		.getFamily();
 
 	private static BlockFamily.Builder familyBuilder(Block block) {

@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -24,8 +25,9 @@ public class AdvancementToast implements Toast {
 
 	@Override
 	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
-		toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, TEXTURE);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F);
 		DisplayInfo displayInfo = this.advancement.getDisplay();
 		toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {

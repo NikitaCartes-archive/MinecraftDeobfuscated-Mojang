@@ -15,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
@@ -80,19 +81,18 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		Lighting.setupForFlatItems();
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		RenderSystem.matrixMode(5889);
-		RenderSystem.pushMatrix();
-		RenderSystem.loadIdentity();
 		int m = (int)this.minecraft.getWindow().getGuiScale();
 		RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
-		RenderSystem.translatef(-0.34F, 0.23F, 0.0F);
-		RenderSystem.multMatrix(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
-		RenderSystem.matrixMode(5888);
+		Matrix4f matrix4f = Matrix4f.createTranslateMatrix(-0.34F, 0.23F, 0.0F);
+		matrix4f.multiply(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
+		RenderSystem.backupProjectionMatrix();
+		RenderSystem.setProjectionMatrix(matrix4f);
 		poseStack.pushPose();
 		PoseStack.Pose pose = poseStack.last();
 		pose.pose().setIdentity();
@@ -127,19 +127,16 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			p = 1.0F;
 		}
 
-		RenderSystem.enableRescaleNormal();
 		this.bookModel.setupAnim(0.0F, o, p, h);
 		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		VertexConsumer vertexConsumer = bufferSource.getBuffer(this.bookModel.renderType(ENCHANTING_BOOK_LOCATION));
 		this.bookModel.renderToBuffer(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		bufferSource.endBatch();
 		poseStack.popPose();
-		RenderSystem.matrixMode(5889);
 		RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-		RenderSystem.popMatrix();
-		RenderSystem.matrixMode(5888);
+		RenderSystem.restoreProjectionMatrix();
 		Lighting.setupFor3DItems();
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
 		int q = this.menu.getGoldCount();
 
@@ -147,9 +144,10 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int s = k + 60;
 			int t = s + 20;
 			this.setBlitOffset(0);
-			this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
 			int u = this.menu.costs[r];
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			if (u == 0) {
 				this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
 			} else {

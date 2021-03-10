@@ -39,8 +39,6 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleMapItemData(ClientboundMapItemDataPacket clientboundMapItemDataPacket);
 
-	void handleContainerAck(ClientboundContainerAckPacket clientboundContainerAckPacket);
-
 	void handleContainerClose(ClientboundContainerClosePacket clientboundContainerClosePacket);
 
 	void handleContainerContent(ClientboundContainerSetContentPacket clientboundContainerSetContentPacket);

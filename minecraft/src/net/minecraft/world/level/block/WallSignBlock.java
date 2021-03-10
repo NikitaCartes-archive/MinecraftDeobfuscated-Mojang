@@ -37,9 +37,7 @@ public class WallSignBlock extends SignBlock {
 
 	public WallSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
 		super(properties, woodType);
-		this.registerDefaultState(
-			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(LIT, Boolean.valueOf(false))
-		);
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(false)));
 	}
 
 	@Override
@@ -100,6 +98,6 @@ public class WallSignBlock extends SignBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED, LIT);
+		builder.add(FACING, WATERLOGGED);
 	}
 }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -26,8 +27,9 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(HORSE_INVENTORY_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, HORSE_INVENTORY_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);

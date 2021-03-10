@@ -45,4 +45,8 @@ public class DecorationContext implements WorldGenerationContext {
 	public int getMinBuildHeight() {
 		return this.level.getMinBuildHeight();
 	}
+
+	public WorldGenLevel getLevel() {
+		return this.level;
+	}
 }

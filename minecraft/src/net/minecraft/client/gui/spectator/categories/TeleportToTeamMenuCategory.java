@@ -58,7 +58,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 
 	@Override
 	public void renderIcon(PoseStack poseStack, float f, int i) {
-		Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
+		RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
 		GuiComponent.blit(poseStack, 0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
 	}
 
@@ -119,8 +119,8 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 				GuiComponent.fill(poseStack, 1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
 			}
 
-			Minecraft.getInstance().getTextureManager().bind(this.location);
-			RenderSystem.color4f(f, f, f, (float)i / 255.0F);
+			RenderSystem.setShaderTexture(0, this.location);
+			RenderSystem.setShaderColor(f, f, f, (float)i / 255.0F);
 			GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
 			GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
 		}

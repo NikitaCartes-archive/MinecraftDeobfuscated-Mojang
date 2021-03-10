@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -65,7 +66,8 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
 		int k = 29;
 		if (!this.collection.hasCraftable()) {
 			k += 25;
@@ -77,12 +79,14 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		boolean bl = this.animationTime > 0.0F;
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		if (bl) {
 			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)(this.x + 8), (float)(this.y + 12), 0.0F);
-			RenderSystem.scalef(g, g, 1.0F);
-			RenderSystem.translatef((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
+			poseStack2.pushPose();
+			poseStack2.translate((double)(this.x + 8), (double)(this.y + 12), 0.0);
+			poseStack2.scale(g, g, 1.0F);
+			poseStack2.translate((double)(-(this.x + 8)), (double)(-(this.y + 12)), 0.0);
+			RenderSystem.applyModelViewMatrix();
 			this.animationTime -= f;
 		}
 
@@ -98,7 +102,8 @@ public class RecipeButton extends AbstractWidget {
 
 		minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
 		if (bl) {
-			RenderSystem.popMatrix();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 		}
 	}
 

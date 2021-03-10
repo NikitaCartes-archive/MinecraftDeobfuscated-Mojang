@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 
 public class SimpleBlockFeature extends Feature<SimpleBlockConfiguration> {
@@ -15,13 +17,26 @@ public class SimpleBlockFeature extends Feature<SimpleBlockConfiguration> {
 		SimpleBlockConfiguration simpleBlockConfiguration = featurePlaceContext.config();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
-		if (simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState(blockPos.below()))
-			&& simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos))
-			&& simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above()))) {
-			worldGenLevel.setBlock(blockPos, simpleBlockConfiguration.toPlace, 2);
-			return true;
-		} else {
-			return false;
+		if ((simpleBlockConfiguration.placeOn.isEmpty() || simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState(blockPos.below())))
+			&& (simpleBlockConfiguration.placeIn.isEmpty() || simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos)))
+			&& (simpleBlockConfiguration.placeUnder.isEmpty() || simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above())))) {
+			BlockState blockState = simpleBlockConfiguration.toPlace.getState(featurePlaceContext.random(), blockPos);
+			if (blockState.canSurvive(worldGenLevel, blockPos)) {
+				if (blockState.getBlock() instanceof DoublePlantBlock) {
+					if (!worldGenLevel.isEmptyBlock(blockPos.above())) {
+						return false;
+					}
+
+					DoublePlantBlock doublePlantBlock = (DoublePlantBlock)blockState.getBlock();
+					doublePlantBlock.placeAt(worldGenLevel, blockPos, 2);
+				} else {
+					worldGenLevel.setBlock(blockPos, blockState, 2);
+				}
+
+				return true;
+			}
 		}
+
+		return false;
 	}
 }

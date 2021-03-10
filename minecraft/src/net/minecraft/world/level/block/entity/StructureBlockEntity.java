@@ -1,17 +1,17 @@
 package net.minecraft.world.level.block.entity;
 
-import com.google.common.collect.Lists;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +37,7 @@ public class StructureBlockEntity extends BlockEntity {
 	private String author = "";
 	private String metaData = "";
 	private BlockPos structurePos = new BlockPos(0, 1, 0);
-	private BlockPos structureSize = BlockPos.ZERO;
+	private Vec3i structureSize = Vec3i.ZERO;
 	private Mirror mirror = Mirror.NONE;
 	private Rotation rotation = Rotation.NONE;
 	private StructureMode mode;
@@ -90,7 +90,7 @@ public class StructureBlockEntity extends BlockEntity {
 		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 48);
 		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 48);
 		int n = Mth.clamp(compoundTag.getInt("sizeZ"), 0, 48);
-		this.structureSize = new BlockPos(l, m, n);
+		this.structureSize = new Vec3i(l, m, n);
 
 		try {
 			this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
@@ -190,12 +190,12 @@ public class StructureBlockEntity extends BlockEntity {
 		this.structurePos = blockPos;
 	}
 
-	public BlockPos getStructureSize() {
+	public Vec3i getStructureSize() {
 		return this.structureSize;
 	}
 
-	public void setStructureSize(BlockPos blockPos) {
-		this.structureSize = blockPos;
+	public void setStructureSize(Vec3i vec3i) {
+		this.structureSize = vec3i;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -269,17 +269,16 @@ public class StructureBlockEntity extends BlockEntity {
 		} else {
 			BlockPos blockPos = this.getBlockPos();
 			int i = 80;
-			BlockPos blockPos2 = new BlockPos(blockPos.getX() - 80, 0, blockPos.getZ() - 80);
+			BlockPos blockPos2 = new BlockPos(blockPos.getX() - 80, this.level.getMinBuildHeight(), blockPos.getZ() - 80);
 			BlockPos blockPos3 = new BlockPos(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80);
-			List<StructureBlockEntity> list = this.getNearbyCornerBlocks(blockPos2, blockPos3);
-			List<StructureBlockEntity> list2 = this.filterRelatedCornerBlocks(list);
-			if (list2.size() < 1) {
-				return false;
-			} else {
-				BoundingBox boundingBox = this.calculateEnclosingBoundingBox(blockPos, list2);
-				if (boundingBox.x1 - boundingBox.x0 > 1 && boundingBox.y1 - boundingBox.y0 > 1 && boundingBox.z1 - boundingBox.z0 > 1) {
+			Stream<BlockPos> stream = this.getRelatedCorners(blockPos2, blockPos3);
+			return calculateEnclosingBoundingBox(blockPos, stream).filter(boundingBox -> {
+				int ix = boundingBox.x1 - boundingBox.x0;
+				int j = boundingBox.y1 - boundingBox.y0;
+				int k = boundingBox.z1 - boundingBox.z0;
+				if (ix > 1 && j > 1 && k > 1) {
 					this.structurePos = new BlockPos(boundingBox.x0 - blockPos.getX() + 1, boundingBox.y0 - blockPos.getY() + 1, boundingBox.z0 - blockPos.getZ() + 1);
-					this.structureSize = new BlockPos(boundingBox.x1 - boundingBox.x0 - 1, boundingBox.y1 - boundingBox.y0 - 1, boundingBox.z1 - boundingBox.z0 - 1);
+					this.structureSize = new Vec3i(ix - 1, j - 1, k - 1);
 					this.setChanged();
 					BlockState blockState = this.level.getBlockState(blockPos);
 					this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -287,63 +286,35 @@ public class StructureBlockEntity extends BlockEntity {
 				} else {
 					return false;
 				}
-			}
+			}).isPresent();
 		}
 	}
 
-	private List<StructureBlockEntity> filterRelatedCornerBlocks(List<StructureBlockEntity> list) {
-		Predicate<StructureBlockEntity> predicate = structureBlockEntity -> structureBlockEntity.mode == StructureMode.CORNER
-				&& Objects.equals(this.structureName, structureBlockEntity.structureName);
-		return (List<StructureBlockEntity>)list.stream().filter(predicate).collect(Collectors.toList());
+	private Stream<BlockPos> getRelatedCorners(BlockPos blockPos, BlockPos blockPos2) {
+		return BlockPos.betweenClosedStream(blockPos, blockPos2)
+			.filter(blockPosx -> this.level.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK))
+			.map(this.level::getBlockEntity)
+			.filter(blockEntity -> blockEntity instanceof StructureBlockEntity)
+			.map(blockEntity -> (StructureBlockEntity)blockEntity)
+			.filter(structureBlockEntity -> structureBlockEntity.mode == StructureMode.CORNER && Objects.equals(this.structureName, structureBlockEntity.structureName))
+			.map(BlockEntity::getBlockPos);
 	}
 
-	private List<StructureBlockEntity> getNearbyCornerBlocks(BlockPos blockPos, BlockPos blockPos2) {
-		List<StructureBlockEntity> list = Lists.<StructureBlockEntity>newArrayList();
-
-		for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
-			BlockState blockState = this.level.getBlockState(blockPos3);
-			if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
-				BlockEntity blockEntity = this.level.getBlockEntity(blockPos3);
-				if (blockEntity != null && blockEntity instanceof StructureBlockEntity) {
-					list.add((StructureBlockEntity)blockEntity);
-				}
-			}
-		}
-
-		return list;
-	}
-
-	private BoundingBox calculateEnclosingBoundingBox(BlockPos blockPos, List<StructureBlockEntity> list) {
-		BoundingBox boundingBox;
-		if (list.size() > 1) {
-			BlockPos blockPos2 = ((StructureBlockEntity)list.get(0)).getBlockPos();
-			boundingBox = new BoundingBox(blockPos2, blockPos2);
+	private static Optional<BoundingBox> calculateEnclosingBoundingBox(BlockPos blockPos, Stream<BlockPos> stream) {
+		Iterator<BlockPos> iterator = stream.iterator();
+		if (!iterator.hasNext()) {
+			return Optional.empty();
 		} else {
-			boundingBox = new BoundingBox(blockPos, blockPos);
+			BlockPos blockPos2 = (BlockPos)iterator.next();
+			BoundingBox boundingBox = new BoundingBox(blockPos2);
+			if (iterator.hasNext()) {
+				iterator.forEachRemaining(boundingBox::encapsulate);
+			} else {
+				boundingBox.encapsulate(blockPos);
+			}
+
+			return Optional.of(boundingBox);
 		}
-
-		for (StructureBlockEntity structureBlockEntity : list) {
-			BlockPos blockPos3 = structureBlockEntity.getBlockPos();
-			if (blockPos3.getX() < boundingBox.x0) {
-				boundingBox.x0 = blockPos3.getX();
-			} else if (blockPos3.getX() > boundingBox.x1) {
-				boundingBox.x1 = blockPos3.getX();
-			}
-
-			if (blockPos3.getY() < boundingBox.y0) {
-				boundingBox.y0 = blockPos3.getY();
-			} else if (blockPos3.getY() > boundingBox.y1) {
-				boundingBox.y1 = blockPos3.getY();
-			}
-
-			if (blockPos3.getZ() < boundingBox.z0) {
-				boundingBox.z0 = blockPos3.getZ();
-			} else if (blockPos3.getZ() > boundingBox.z1) {
-				boundingBox.z1 = blockPos3.getZ();
-			}
-		}
-
-		return boundingBox;
 	}
 
 	public boolean saveStructure() {
@@ -410,10 +381,10 @@ public class StructureBlockEntity extends BlockEntity {
 			this.author = structureTemplate.getAuthor();
 		}
 
-		BlockPos blockPos2 = structureTemplate.getSize();
-		boolean bl2 = this.structureSize.equals(blockPos2);
+		Vec3i vec3i = structureTemplate.getSize();
+		boolean bl2 = this.structureSize.equals(vec3i);
 		if (!bl2) {
-			this.structureSize = blockPos2;
+			this.structureSize = vec3i;
 			this.setChanged();
 			BlockState blockState = serverLevel.getBlockState(blockPos);
 			serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -430,8 +401,8 @@ public class StructureBlockEntity extends BlockEntity {
 				structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0F, 1.0F))).setRandom(createRandom(this.seed));
 			}
 
-			BlockPos blockPos3 = blockPos.offset(this.structurePos);
-			structureTemplate.placeInWorld(serverLevel, blockPos3, blockPos3, structurePlaceSettings, createRandom(this.seed), 2);
+			BlockPos blockPos2 = blockPos.offset(this.structurePos);
+			structureTemplate.placeInWorld(serverLevel, blockPos2, blockPos2, structurePlaceSettings, createRandom(this.seed), 2);
 			return true;
 		}
 	}

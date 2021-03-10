@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -37,8 +37,9 @@ public class LockIconButton extends Button {
 
 	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
-		Minecraft.getInstance().getTextureManager().bind(Button.WIDGETS_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, Button.WIDGETS_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		LockIconButton.Icon icon;
 		if (!this.active) {
 			icon = this.locked ? LockIconButton.Icon.LOCKED_DISABLED : LockIconButton.Icon.UNLOCKED_DISABLED;

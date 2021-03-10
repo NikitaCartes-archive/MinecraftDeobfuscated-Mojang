@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.PropertyMap.Serializer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import java.io.File;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -186,6 +187,8 @@ public class Main {
 				LOGGER.error("Unhandled game exception", var68);
 			}
 		}
+
+		BufferUploader.reset();
 
 		try {
 			minecraft.stop();

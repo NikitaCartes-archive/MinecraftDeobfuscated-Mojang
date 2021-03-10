@@ -16,6 +16,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -149,7 +150,16 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 			} else {
 				ChunkPos chunkPos = new ChunkPos(compoundTag.getInt("ChunkX"), compoundTag.getInt("ChunkZ"));
 				int i = compoundTag.getInt("references");
-				BoundingBox boundingBox = compoundTag.contains("BB") ? new BoundingBox(compoundTag.getIntArray("BB")) : BoundingBox.getUnknownBox();
+				BoundingBox boundingBox;
+				if (compoundTag.contains("BB")) {
+					boundingBox = (BoundingBox)BoundingBox.CODEC
+						.parse(NbtOps.INSTANCE, compoundTag.get("BB"))
+						.resultOrPartial(LOGGER::error)
+						.orElse(new BoundingBox(BlockPos.ZERO));
+				} else {
+					boundingBox = BoundingBox.getUnknownBox();
+				}
+
 				ListTag listTag = compoundTag.getList("Children", 10);
 
 				try {

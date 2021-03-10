@@ -20,10 +20,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entry<E>> extends AbstractContainerEventHandler implements Widget {
+	public static final ResourceLocation WHITE_TEXTURE_LOCATION = new ResourceLocation("textures/misc/white.png");
 	protected final Minecraft minecraft;
 	protected final int itemHeight;
 	private final List<E> children = new AbstractSelectionList.TrackedList();
@@ -174,8 +177,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		if (this.renderBackground) {
-			this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			float g = 32.0F;
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
@@ -205,7 +209,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		this.renderList(poseStack, m, n, i, j, f);
 		if (this.renderTopAndBottom) {
-			this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			RenderSystem.enableDepthTest();
 			RenderSystem.depthFunc(519);
 			float h = 32.0F;
@@ -235,9 +240,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			RenderSystem.disableAlphaTest();
-			RenderSystem.shadeModel(7425);
 			RenderSystem.disableTexture();
+			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+			RenderSystem.setShaderTexture(0, WHITE_TEXTURE_LOCATION);
 			int p = 4;
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
@@ -279,8 +284,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		this.renderDecorations(poseStack, i, j);
 		RenderSystem.enableTexture();
-		RenderSystem.shadeModel(7424);
-		RenderSystem.enableAlphaTest();
 		RenderSystem.disableBlend();
 	}
 
@@ -457,15 +460,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 					int t = this.x0 + this.width / 2 - s / 2;
 					int u = this.x0 + this.width / 2 + s / 2;
 					RenderSystem.disableTexture();
+					RenderSystem.setShader(GameRenderer::getPositionShader);
 					float g = this.isFocused() ? 1.0F : 0.5F;
-					RenderSystem.color4f(g, g, g, 1.0F);
+					RenderSystem.setShaderColor(g, g, g, 1.0F);
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)t, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q - 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)t, (double)(q - 2), 0.0).endVertex();
 					tesselator.end();
-					RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)(t + 1), (double)(q + r + 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(u - 1), (double)(q + r + 1), 0.0).endVertex();

@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.GlowItemFrame;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.Painting;
@@ -42,7 +43,7 @@ public class HangingEntityItem extends Item {
 					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 
-				hangingEntity = new ItemFrame(EntityType.GLOW_ITEM_FRAME, level, blockPos2, direction);
+				hangingEntity = new GlowItemFrame(level, blockPos2, direction);
 			}
 
 			CompoundTag compoundTag = itemStack.getTag();

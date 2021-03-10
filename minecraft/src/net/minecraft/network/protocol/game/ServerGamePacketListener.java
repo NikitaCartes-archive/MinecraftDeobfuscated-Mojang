@@ -11,8 +11,6 @@ public interface ServerGamePacketListener extends PacketListener {
 
 	void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket);
 
-	void handleContainerAck(ServerboundContainerAckPacket serverboundContainerAckPacket);
-
 	void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket);
 
 	void handleContainerClick(ServerboundContainerClickPacket serverboundContainerClickPacket);

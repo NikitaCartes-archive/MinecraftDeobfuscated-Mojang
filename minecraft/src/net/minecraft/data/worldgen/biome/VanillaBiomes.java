@@ -1506,6 +1506,35 @@ public class VanillaBiomes {
 			.build();
 	}
 
+	public static Biome lushCaves() {
+		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
+		BiomeDefaultFeatures.commonSpawns(builder);
+		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
+		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
+		builder2.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
+		BiomeDefaultFeatures.addDefaultCarvers(builder2);
+		BiomeDefaultFeatures.addDefaultLakes(builder2);
+		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
+		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
+		BiomeDefaultFeatures.addPlainGrass(builder2);
+		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
+		BiomeDefaultFeatures.addDefaultOres(builder2);
+		BiomeDefaultFeatures.addLushCavesSpecialOres(builder2);
+		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
+		BiomeDefaultFeatures.addLushCavesVegetationFeatures(builder2);
+		return new Biome.BiomeBuilder()
+			.precipitation(Biome.Precipitation.RAIN)
+			.biomeCategory(Biome.BiomeCategory.UNDERGROUND)
+			.depth(0.1F)
+			.scale(0.2F)
+			.temperature(0.5F)
+			.downfall(0.5F)
+			.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).skyColor(calculateSkyColor(0.5F)).build())
+			.mobSpawnSettings(builder.build())
+			.generationSettings(builder2.build())
+			.build();
+	}
+
 	public static Biome dripstoneCaves() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.commonSpawns(builder);
@@ -1528,7 +1557,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.addDripstone(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.RAIN)
-			.biomeCategory(Biome.BiomeCategory.PLAINS)
+			.biomeCategory(Biome.BiomeCategory.UNDERGROUND)
 			.depth(0.125F)
 			.scale(0.05F)
 			.temperature(0.8F)

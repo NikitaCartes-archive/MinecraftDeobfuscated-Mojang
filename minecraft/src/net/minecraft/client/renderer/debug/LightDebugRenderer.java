@@ -25,7 +25,6 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Level level = this.minecraft.level;
-		RenderSystem.pushMatrix();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableTexture();
@@ -54,6 +53,5 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		RenderSystem.enableTexture();
-		RenderSystem.popMatrix();
 	}
 }

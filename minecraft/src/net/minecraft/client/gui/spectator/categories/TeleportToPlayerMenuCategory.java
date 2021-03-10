@@ -3,6 +3,7 @@ package net.minecraft.client.gui.spectator.categories;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +64,7 @@ public class TeleportToPlayerMenuCategory implements SpectatorMenuCategory, Spec
 
 	@Override
 	public void renderIcon(PoseStack poseStack, float f, int i) {
-		Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
+		RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
 		GuiComponent.blit(poseStack, 0, 0, 0.0F, 0.0F, 16, 16, 256, 256);
 	}
 

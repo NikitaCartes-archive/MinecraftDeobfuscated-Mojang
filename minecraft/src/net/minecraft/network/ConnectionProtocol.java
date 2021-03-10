@@ -31,7 +31,6 @@ import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
@@ -120,7 +119,6 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
@@ -202,7 +200,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundClearTitlesPacket.class, ClientboundClearTitlesPacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
-					.addPacket(ClientboundContainerAckPacket.class, ClientboundContainerAckPacket::new)
 					.addPacket(ClientboundContainerClosePacket.class, ClientboundContainerClosePacket::new)
 					.addPacket(ClientboundContainerSetContentPacket.class, ClientboundContainerSetContentPacket::new)
 					.addPacket(ClientboundContainerSetDataPacket.class, ClientboundContainerSetDataPacket::new)
@@ -297,7 +294,6 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCommandSuggestionPacket.class, ServerboundCommandSuggestionPacket::new)
-					.addPacket(ServerboundContainerAckPacket.class, ServerboundContainerAckPacket::new)
 					.addPacket(ServerboundContainerButtonClickPacket.class, ServerboundContainerButtonClickPacket::new)
 					.addPacket(ServerboundContainerClickPacket.class, ServerboundContainerClickPacket::new)
 					.addPacket(ServerboundContainerClosePacket.class, ServerboundContainerClosePacket::new)

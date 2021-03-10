@@ -5,7 +5,6 @@ import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
 import com.mojang.blaze3d.font.GlyphInfo;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -56,32 +55,26 @@ public class Font {
 	}
 
 	public int drawShadow(PoseStack poseStack, String string, float f, float g, int i, boolean bl) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(string, f, g, i, poseStack.last().pose(), true, bl);
 	}
 
 	public int draw(PoseStack poseStack, String string, float f, float g, int i) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(string, f, g, i, poseStack.last().pose(), false, this.isBidirectional());
 	}
 
 	public int drawShadow(PoseStack poseStack, FormattedCharSequence formattedCharSequence, float f, float g, int i) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(formattedCharSequence, f, g, i, poseStack.last().pose(), true);
 	}
 
 	public int drawShadow(PoseStack poseStack, Component component, float f, float g, int i) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(component.getVisualOrderText(), f, g, i, poseStack.last().pose(), true);
 	}
 
 	public int draw(PoseStack poseStack, FormattedCharSequence formattedCharSequence, float f, float g, int i) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(formattedCharSequence, f, g, i, poseStack.last().pose(), false);
 	}
 
 	public int draw(PoseStack poseStack, Component component, float f, float g, int i) {
-		RenderSystem.enableAlphaTest();
 		return this.drawInternal(component.getVisualOrderText(), f, g, i, poseStack.last().pose(), false);
 	}
 

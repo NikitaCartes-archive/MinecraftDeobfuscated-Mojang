@@ -1,16 +1,20 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import java.util.Random;
+import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfiguration;
 
-public class HeightmapDecorator<DC extends DecoratorConfiguration> extends BaseHeightmapDecorator<DC> {
-	public HeightmapDecorator(Codec<DC> codec) {
+public class HeightmapDecorator extends FeatureDecorator<HeightmapConfiguration> {
+	public HeightmapDecorator(Codec<HeightmapConfiguration> codec) {
 		super(codec);
 	}
 
-	@Override
-	protected Heightmap.Types type(DC decoratorConfiguration) {
-		return Heightmap.Types.MOTION_BLOCKING;
+	public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, HeightmapConfiguration heightmapConfiguration, BlockPos blockPos) {
+		int i = blockPos.getX();
+		int j = blockPos.getZ();
+		int k = decorationContext.getHeight(heightmapConfiguration.heightmap, i, j);
+		return k > decorationContext.getMinBuildHeight() ? Stream.of(new BlockPos(i, k, j)) : Stream.of();
 	}
 }

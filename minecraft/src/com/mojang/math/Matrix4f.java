@@ -362,8 +362,24 @@ public final class Matrix4f {
 		matrix4f.m22 = -2.0F / j;
 		matrix4f.m33 = 1.0F;
 		matrix4f.m03 = -1.0F;
-		matrix4f.m13 = -1.0F;
+		matrix4f.m13 = 1.0F;
 		matrix4f.m23 = -(i + h) / j;
+		return matrix4f;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static Matrix4f orthographic(float f, float g, float h, float i, float j, float k) {
+		Matrix4f matrix4f = new Matrix4f();
+		float l = g - f;
+		float m = h - i;
+		float n = k - j;
+		matrix4f.m00 = 2.0F / l;
+		matrix4f.m11 = 2.0F / m;
+		matrix4f.m22 = -2.0F / n;
+		matrix4f.m03 = -(g + f) / l;
+		matrix4f.m13 = -(h + i) / m;
+		matrix4f.m23 = -(k + j) / n;
+		matrix4f.m33 = 1.0F;
 		return matrix4f;
 	}
 

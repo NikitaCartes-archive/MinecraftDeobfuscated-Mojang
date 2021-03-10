@@ -31,7 +31,7 @@ public class ForkingTrunkPlacer extends TrunkPlacer {
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
 		LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
 	) {
-		setDirtAt(levelSimulatedRW, blockPos.below());
+		setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
 		List<FoliagePlacer.FoliageAttachment> list = Lists.<FoliagePlacer.FoliageAttachment>newArrayList();
 		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		int j = i - random.nextInt(4) - 1;

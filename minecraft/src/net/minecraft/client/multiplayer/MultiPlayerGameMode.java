@@ -1,7 +1,11 @@
 package net.minecraft.client.multiplayer;
 
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,6 +15,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -31,6 +36,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
@@ -344,11 +350,27 @@ public class MultiPlayerGameMode {
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
 	}
 
-	public ItemStack handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
-		short s = player.containerMenu.backup(player.getInventory());
-		ItemStack itemStack = player.containerMenu.clicked(j, k, clickType, player);
-		this.connection.send(new ServerboundContainerClickPacket(i, j, k, clickType, itemStack, s));
-		return itemStack;
+	public void handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
+		NonNullList<Slot> nonNullList = player.containerMenu.slots;
+		int l = nonNullList.size();
+		List<ItemStack> list = Lists.<ItemStack>newArrayListWithCapacity(l);
+
+		for (Slot slot : nonNullList) {
+			list.add(slot.getItem().copy());
+		}
+
+		player.containerMenu.clicked(j, k, clickType, player);
+		Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+
+		for (int m = 0; m < l; m++) {
+			ItemStack itemStack = (ItemStack)list.get(m);
+			ItemStack itemStack2 = nonNullList.get(m).getItem();
+			if (!ItemStack.matches(itemStack, itemStack2)) {
+				int2ObjectMap.put(m, itemStack2.copy());
+			}
+		}
+
+		this.connection.send(new ServerboundContainerClickPacket(i, j, k, clickType, player.containerMenu.getCarried().copy(), int2ObjectMap));
 	}
 
 	public void handlePlaceRecipe(int i, Recipe<?> recipe, boolean bl) {

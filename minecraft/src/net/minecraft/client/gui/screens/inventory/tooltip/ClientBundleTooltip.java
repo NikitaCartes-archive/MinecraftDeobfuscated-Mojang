@@ -86,8 +86,8 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	private void blit(PoseStack poseStack, int i, int j, int k, TextureManager textureManager, ClientBundleTooltip.Texture texture) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		textureManager.bind(TEXTURE_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
 		GuiComponent.blit(poseStack, i, j, k, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
 	}
 

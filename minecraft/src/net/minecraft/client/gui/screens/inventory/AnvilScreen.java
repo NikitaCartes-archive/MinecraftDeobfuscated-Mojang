@@ -11,6 +11,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.Slot;
@@ -21,9 +22,11 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	private static final ResourceLocation ANVIL_LOCATION = new ResourceLocation("textures/gui/container/anvil.png");
 	private static final Component TOO_EXPENSIVE_TEXT = new TranslatableComponent("container.repair.expensive");
 	private EditBox name;
+	private final Player player;
 
 	public AnvilScreen(AnvilMenu anvilMenu, Inventory inventory, Component component) {
 		super(anvilMenu, inventory, component, ANVIL_LOCATION);
+		this.player = inventory.player;
 		this.titleLabelX = 60;
 	}
 
@@ -99,7 +102,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 				component = null;
 			} else {
 				component = new TranslatableComponent("container.repair.cost", k);
-				if (!this.menu.getSlot(2).mayPickup(this.inventory.player)) {
+				if (!this.menu.getSlot(2).mayPickup(this.player)) {
 					l = 16736352;
 				}
 			}

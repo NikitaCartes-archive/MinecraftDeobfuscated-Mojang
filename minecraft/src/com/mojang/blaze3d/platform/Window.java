@@ -76,9 +76,10 @@ public final class Window implements AutoCloseable {
 		GLFW.glfwDefaultWindowHints();
 		GLFW.glfwWindowHint(139265, 196609);
 		GLFW.glfwWindowHint(139275, 221185);
-		GLFW.glfwWindowHint(139266, 2);
-		GLFW.glfwWindowHint(139267, 0);
-		GLFW.glfwWindowHint(139272, 0);
+		GLFW.glfwWindowHint(139266, 3);
+		GLFW.glfwWindowHint(139267, 2);
+		GLFW.glfwWindowHint(139272, 204801);
+		GLFW.glfwWindowHint(139270, 1);
 		this.window = GLFW.glfwCreateWindow(this.width, this.height, string2, this.fullscreen && monitor != null ? monitor.getMonitor() : 0L, 0L);
 		if (monitor != null) {
 			VideoMode videoMode = monitor.getPreferredVidMode(this.fullscreen ? this.preferredFullscreenVideoMode : Optional.empty());

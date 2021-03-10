@@ -5,7 +5,6 @@ import net.minecraft.util.ThreadingDetector;
 
 public class SimpleRandomSource implements RandomSource {
 	private final AtomicLong seed = new AtomicLong();
-	private boolean haveNextNextGaussian = false;
 
 	public SimpleRandomSource(long l) {
 		this.setSeed(l);
@@ -52,11 +51,17 @@ public class SimpleRandomSource implements RandomSource {
 
 	@Override
 	public long nextLong() {
-		return ((long)this.nextInt() << 32) + (long)this.nextInt();
+		int i = this.next(32);
+		int j = this.next(32);
+		long l = (long)i << 32;
+		return l + (long)j;
 	}
 
 	@Override
 	public double nextDouble() {
-		return (double)(((long)this.next(26) << 27) + (long)this.next(27)) * 1.110223E-16F;
+		int i = this.next(26);
+		int j = this.next(27);
+		long l = ((long)i << 27) + (long)j;
+		return (double)l * 1.110223E-16F;
 	}
 }

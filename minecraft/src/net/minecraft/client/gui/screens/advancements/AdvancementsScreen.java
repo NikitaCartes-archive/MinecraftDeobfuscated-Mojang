@@ -13,6 +13,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -118,28 +119,31 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 			drawCenteredString(poseStack, this.font, NO_ADVANCEMENTS_LABEL, m, l + 18 + 56 - 9 / 2, -1);
 			drawCenteredString(poseStack, this.font, VERY_SAD_LABEL, m, l + 18 + 113 - 9, -1);
 		} else {
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)(k + 9), (float)(l + 18), 0.0F);
+			PoseStack poseStack2 = RenderSystem.getModelViewStack();
+			poseStack2.pushPose();
+			poseStack2.translate((double)(k + 9), (double)(l + 18), 0.0);
+			RenderSystem.applyModelViewMatrix();
 			advancementTab.drawContents(poseStack);
-			RenderSystem.popMatrix();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 			RenderSystem.depthFunc(515);
 			RenderSystem.disableDepthTest();
 		}
 	}
 
 	public void renderWindow(PoseStack poseStack, int i, int j) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
-		this.minecraft.getTextureManager().bind(WINDOW_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, WINDOW_LOCATION);
 		this.blit(poseStack, i, j, 0, 0, 252, 140);
 		if (this.tabs.size() > 1) {
-			this.minecraft.getTextureManager().bind(TABS_LOCATION);
+			RenderSystem.setShaderTexture(0, TABS_LOCATION);
 
 			for (AdvancementTab advancementTab : this.tabs.values()) {
 				advancementTab.drawTab(poseStack, i, j, advancementTab == this.selectedTab);
 			}
 
-			RenderSystem.enableRescaleNormal();
 			RenderSystem.defaultBlendFunc();
 
 			for (AdvancementTab advancementTab : this.tabs.values()) {
@@ -153,14 +157,17 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 	}
 
 	private void renderTooltips(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (this.selectedTab != null) {
-			RenderSystem.pushMatrix();
+			PoseStack poseStack2 = RenderSystem.getModelViewStack();
+			poseStack2.pushPose();
+			poseStack2.translate((double)(k + 9), (double)(l + 18), 400.0);
+			RenderSystem.applyModelViewMatrix();
 			RenderSystem.enableDepthTest();
-			RenderSystem.translatef((float)(k + 9), (float)(l + 18), 400.0F);
 			this.selectedTab.drawTooltips(poseStack, i - k - 9, j - l - 18, k, l);
 			RenderSystem.disableDepthTest();
-			RenderSystem.popMatrix();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 		}
 
 		if (this.tabs.size() > 1) {

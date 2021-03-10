@@ -49,13 +49,13 @@ public class ChatComponent extends GuiComponent {
 					bl = true;
 				}
 
-				double d = this.getScale();
-				int l = Mth.ceil((double)this.getWidth() / d);
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(2.0F, 8.0F, 0.0F);
-				RenderSystem.scaled(d, d, 1.0);
-				double e = this.minecraft.options.chatOpacity * 0.9F + 0.1F;
-				double f = this.minecraft.options.textBackgroundOpacity;
+				float f = (float)this.getScale();
+				int l = Mth.ceil((float)this.getWidth() / f);
+				poseStack.pushPose();
+				poseStack.translate(2.0, 8.0, 0.0);
+				poseStack.scale(f, f, 1.0F);
+				double d = this.minecraft.options.chatOpacity * 0.9F + 0.1F;
+				double e = this.minecraft.options.textBackgroundOpacity;
 				double g = 9.0 * (this.minecraft.options.chatLineSpacing + 1.0);
 				double h = -8.0 * (this.minecraft.options.chatLineSpacing + 1.0) + 4.0 * this.minecraft.options.chatLineSpacing;
 				int m = 0;
@@ -66,8 +66,8 @@ public class ChatComponent extends GuiComponent {
 						int o = i - guiMessage.getAddedTime();
 						if (o < 200 || bl) {
 							double p = bl ? 1.0 : getTimeFactor(o);
-							int q = (int)(255.0 * p * e);
-							int r = (int)(255.0 * p * f);
+							int q = (int)(255.0 * p * d);
+							int r = (int)(255.0 * p * e);
 							m++;
 							if (q > 3) {
 								int s = 0;
@@ -78,7 +78,6 @@ public class ChatComponent extends GuiComponent {
 								RenderSystem.enableBlend();
 								poseStack.translate(0.0, 0.0, 50.0);
 								this.minecraft.font.drawShadow(poseStack, guiMessage.getMessage(), 0.0F, (float)((int)(t + h)), 16777215 + (q << 24));
-								RenderSystem.disableAlphaTest();
 								RenderSystem.disableBlend();
 								poseStack.popPose();
 							}
@@ -87,8 +86,8 @@ public class ChatComponent extends GuiComponent {
 				}
 
 				if (!this.chatQueue.isEmpty()) {
-					int nx = (int)(128.0 * e);
-					int u = (int)(255.0 * f);
+					int nx = (int)(128.0 * d);
+					int u = (int)(255.0 * e);
 					poseStack.pushPose();
 					poseStack.translate(0.0, 0.0, 50.0);
 					fill(poseStack, -2, 0, l + 4, 9, u << 24);
@@ -96,13 +95,11 @@ public class ChatComponent extends GuiComponent {
 					poseStack.translate(0.0, 0.0, 50.0);
 					this.minecraft.font.drawShadow(poseStack, new TranslatableComponent("chat.queue", this.chatQueue.size()), 0.0F, 1.0F, 16777215 + (nx << 24));
 					poseStack.popPose();
-					RenderSystem.disableAlphaTest();
 					RenderSystem.disableBlend();
 				}
 
 				if (bl) {
 					int nx = 9;
-					RenderSystem.translatef(-3.0F, 0.0F, 0.0F);
 					int u = k * nx + k;
 					int o = m * nx + m;
 					int v = this.chatScrollbarPos * o / k;
@@ -115,7 +112,7 @@ public class ChatComponent extends GuiComponent {
 					}
 				}
 
-				RenderSystem.popMatrix();
+				poseStack.popPose();
 			}
 		}
 	}

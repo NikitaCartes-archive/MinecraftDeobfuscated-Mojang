@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -136,16 +137,16 @@ public class ShipwreckPieces {
 		) {
 			int i = worldGenLevel.getMaxBuildHeight();
 			int j = 0;
-			BlockPos blockPos2 = this.template.getSize();
+			Vec3i vec3i = this.template.getSize();
 			Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
-			int k = blockPos2.getX() * blockPos2.getZ();
+			int k = vec3i.getX() * vec3i.getZ();
 			if (k == 0) {
 				j = worldGenLevel.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
 			} else {
-				BlockPos blockPos3 = this.templatePosition.offset(blockPos2.getX() - 1, 0, blockPos2.getZ() - 1);
+				BlockPos blockPos2 = this.templatePosition.offset(vec3i.getX() - 1, 0, vec3i.getZ() - 1);
 
-				for (BlockPos blockPos4 : BlockPos.betweenClosed(this.templatePosition, blockPos3)) {
-					int l = worldGenLevel.getHeight(types, blockPos4.getX(), blockPos4.getZ());
+				for (BlockPos blockPos3 : BlockPos.betweenClosed(this.templatePosition, blockPos2)) {
+					int l = worldGenLevel.getHeight(types, blockPos3.getX(), blockPos3.getZ());
 					j += l;
 					i = Math.min(i, l);
 				}
@@ -153,7 +154,7 @@ public class ShipwreckPieces {
 				j /= k;
 			}
 
-			int m = this.isBeached ? i - blockPos2.getY() / 2 - random.nextInt(3) : j;
+			int m = this.isBeached ? i - vec3i.getY() / 2 - random.nextInt(3) : j;
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
 			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}

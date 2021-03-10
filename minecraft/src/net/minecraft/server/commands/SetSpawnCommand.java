@@ -38,7 +38,7 @@ public class SetSpawnCommand {
 							Commands.argument("pos", BlockPosArgument.blockPos())
 								.executes(
 									commandContext -> setSpawn(
-											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), BlockPosArgument.getOrLoadBlockPos(commandContext, "pos"), 0.0F
+											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), BlockPosArgument.getSpawnablePos(commandContext, "pos"), 0.0F
 										)
 								)
 								.then(
@@ -47,7 +47,7 @@ public class SetSpawnCommand {
 											commandContext -> setSpawn(
 													commandContext.getSource(),
 													EntityArgument.getPlayers(commandContext, "targets"),
-													BlockPosArgument.getOrLoadBlockPos(commandContext, "pos"),
+													BlockPosArgument.getSpawnablePos(commandContext, "pos"),
 													AngleArgument.getAngle(commandContext, "angle")
 												)
 										)

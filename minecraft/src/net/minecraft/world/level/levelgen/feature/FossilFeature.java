@@ -3,56 +3,39 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.apache.commons.lang3.mutable.MutableInt;
 
-public class FossilFeature extends Feature<NoneFeatureConfiguration> {
-	private static final ResourceLocation SPINE_1 = new ResourceLocation("fossil/spine_1");
-	private static final ResourceLocation SPINE_2 = new ResourceLocation("fossil/spine_2");
-	private static final ResourceLocation SPINE_3 = new ResourceLocation("fossil/spine_3");
-	private static final ResourceLocation SPINE_4 = new ResourceLocation("fossil/spine_4");
-	private static final ResourceLocation SPINE_1_COAL = new ResourceLocation("fossil/spine_1_coal");
-	private static final ResourceLocation SPINE_2_COAL = new ResourceLocation("fossil/spine_2_coal");
-	private static final ResourceLocation SPINE_3_COAL = new ResourceLocation("fossil/spine_3_coal");
-	private static final ResourceLocation SPINE_4_COAL = new ResourceLocation("fossil/spine_4_coal");
-	private static final ResourceLocation SKULL_1 = new ResourceLocation("fossil/skull_1");
-	private static final ResourceLocation SKULL_2 = new ResourceLocation("fossil/skull_2");
-	private static final ResourceLocation SKULL_3 = new ResourceLocation("fossil/skull_3");
-	private static final ResourceLocation SKULL_4 = new ResourceLocation("fossil/skull_4");
-	private static final ResourceLocation SKULL_1_COAL = new ResourceLocation("fossil/skull_1_coal");
-	private static final ResourceLocation SKULL_2_COAL = new ResourceLocation("fossil/skull_2_coal");
-	private static final ResourceLocation SKULL_3_COAL = new ResourceLocation("fossil/skull_3_coal");
-	private static final ResourceLocation SKULL_4_COAL = new ResourceLocation("fossil/skull_4_coal");
-	private static final ResourceLocation[] fossils = new ResourceLocation[]{SPINE_1, SPINE_2, SPINE_3, SPINE_4, SKULL_1, SKULL_2, SKULL_3, SKULL_4};
-	private static final ResourceLocation[] fossilsCoal = new ResourceLocation[]{
-		SPINE_1_COAL, SPINE_2_COAL, SPINE_3_COAL, SPINE_4_COAL, SKULL_1_COAL, SKULL_2_COAL, SKULL_3_COAL, SKULL_4_COAL
-	};
-
-	public FossilFeature(Codec<NoneFeatureConfiguration> codec) {
+public class FossilFeature extends Feature<FossilFeatureConfiguration> {
+	public FossilFeature(Codec<FossilFeatureConfiguration> codec) {
 		super(codec);
 	}
 
 	@Override
-	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
+	public boolean place(FeaturePlaceContext<FossilFeatureConfiguration> featurePlaceContext) {
 		Random random = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
 		Rotation rotation = Rotation.getRandom(random);
-		int i = random.nextInt(fossils.length);
+		FossilFeatureConfiguration fossilFeatureConfiguration = featurePlaceContext.config();
+		int i = random.nextInt(fossilFeatureConfiguration.fossilStructures.size());
 		StructureManager structureManager = worldGenLevel.getLevel().getServer().getStructureManager();
-		StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
-		StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
+		StructureTemplate structureTemplate = structureManager.getOrCreate((ResourceLocation)fossilFeatureConfiguration.fossilStructures.get(i));
+		StructureTemplate structureTemplate2 = structureManager.getOrCreate((ResourceLocation)fossilFeatureConfiguration.overlayStructures.get(i));
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		BoundingBox boundingBox = new BoundingBox(
 			chunkPos.getMinBlockX(),
@@ -62,31 +45,47 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 			worldGenLevel.getMaxBuildHeight(),
 			chunkPos.getMaxBlockZ()
 		);
-		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
-			.setRotation(rotation)
-			.setBoundingBox(boundingBox)
-			.setRandom(random)
-			.addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-		BlockPos blockPos2 = structureTemplate.getSize(rotation);
-		int j = random.nextInt(16 - blockPos2.getX());
-		int k = random.nextInt(16 - blockPos2.getZ());
+		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(random);
+		Vec3i vec3i = structureTemplate.getSize(rotation);
+		int j = random.nextInt(16 - vec3i.getX());
+		int k = random.nextInt(16 - vec3i.getZ());
 		int l = worldGenLevel.getMaxBuildHeight();
 
-		for (int m = 0; m < blockPos2.getX(); m++) {
-			for (int n = 0; n < blockPos2.getZ(); n++) {
+		for (int m = 0; m < vec3i.getX(); m++) {
+			for (int n = 0; n < vec3i.getZ(); n++) {
 				l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
 			}
 		}
 
-		int m = Math.max(l - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
-		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
-		BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9F);
-		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);
-		structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
-		structurePlaceSettings.popProcessor(blockRotProcessor);
-		BlockRotProcessor blockRotProcessor2 = new BlockRotProcessor(0.1F);
-		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor2);
-		structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
-		return true;
+		int m = Mth.clamp(blockPos.getY(), worldGenLevel.getMinBuildHeight(), l - 15);
+		BlockPos blockPos2 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, 0, k).atY(m), Mirror.NONE, rotation);
+		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos2)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
+			)
+		 {
+			return false;
+		} else {
+			structurePlaceSettings.clearProcessors();
+			((StructureProcessorList)fossilFeatureConfiguration.fossilProcessors.get())
+				.list()
+				.forEach(structureProcessor -> structurePlaceSettings.addProcessor(structureProcessor));
+			structureTemplate.placeInWorld(worldGenLevel, blockPos2, blockPos2, structurePlaceSettings, random, 4);
+			structurePlaceSettings.clearProcessors();
+			((StructureProcessorList)fossilFeatureConfiguration.overlayProcessors.get())
+				.list()
+				.forEach(structureProcessor -> structurePlaceSettings.addProcessor(structureProcessor));
+			structureTemplate2.placeInWorld(worldGenLevel, blockPos2, blockPos2, structurePlaceSettings, random, 4);
+			return true;
+		}
+	}
+
+	private static int countEmptyCorners(WorldGenLevel worldGenLevel, BoundingBox boundingBox) {
+		MutableInt mutableInt = new MutableInt(0);
+		boundingBox.forAllCorners(blockPos -> {
+			BlockState blockState = worldGenLevel.getBlockState(blockPos);
+			if (blockState.isAir() || blockState.is(Blocks.LAVA) || blockState.is(Blocks.WATER)) {
+				mutableInt.add(1);
+			}
+		});
+		return mutableInt.getValue();
 	}
 }

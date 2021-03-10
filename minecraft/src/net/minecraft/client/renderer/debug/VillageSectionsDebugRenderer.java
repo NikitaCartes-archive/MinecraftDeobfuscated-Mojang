@@ -32,14 +32,12 @@ public class VillageSectionsDebugRenderer implements DebugRenderer.SimpleDebugRe
 
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
-		RenderSystem.pushMatrix();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableTexture();
 		this.doRender(d, e, f);
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
-		RenderSystem.popMatrix();
 	}
 
 	private void doRender(double d, double e, double f) {

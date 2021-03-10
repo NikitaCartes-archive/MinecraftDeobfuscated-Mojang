@@ -21,6 +21,7 @@ public class Cavifier {
 	private final NormalNoise spaghettiRoughnessNoise;
 	private final NormalNoise spaghettiRoughnessModulator;
 	private final NormalNoise caveEntranceNoiseSource;
+	private final NormalNoise cheeseNoiseSource;
 
 	public Cavifier(RandomSource randomSource, int i) {
 		this.minCellY = i;
@@ -39,23 +40,24 @@ public class Cavifier {
 		this.spaghettiRoughnessModulator = NormalNoise.create(new SimpleRandomSource(randomSource.nextLong()), -8, 1.0);
 		this.caveEntranceNoiseSource = NormalNoise.create(new SimpleRandomSource(randomSource.nextLong()), -8, 1.0, 1.0, 1.0);
 		this.layerNoiseSource = NormalNoise.create(new SimpleRandomSource(randomSource.nextLong()), -8, 1.0);
+		this.cheeseNoiseSource = NormalNoise.create(new SimpleRandomSource(randomSource.nextLong()), -6, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0);
 	}
 
-	public double cavify(int i, int j, int k, double d, double e) {
-		boolean bl = e >= 375.0;
-		double f = this.spaghettiRoughness(i, j, k);
-		double g = this.getSpaghetti3d(i, j, k);
+	public double cavify(int i, int j, int k, double d) {
+		boolean bl = d < 375.0;
+		double e = this.spaghettiRoughness(i, j, k);
+		double f = this.getSpaghetti3d(i, j, k);
 		if (bl) {
-			double h = d / 128.0;
-			double l = Mth.clamp(h + 0.25, -1.0, 1.0);
-			double m = this.getLayerizedCaverns(i, j, k);
-			double n = this.getSpaghetti2d(i, j, k);
-			double o = l + m;
-			double p = Math.min(o, Math.min(g, n) + f);
-			double q = Math.max(p, this.getPillars(i, j, k));
-			return 128.0 * Mth.clamp(q, -1.0, 1.0);
+			return Math.min(d, (f + e) * 128.0 * 64.0);
 		} else {
-			return Math.min(e, (g + f) * 128.0);
+			double g = this.cheeseNoiseSource.getValue((double)i, (double)((float)j / 2.0F), (double)k);
+			double h = Mth.clamp(g + 0.25, -1.0, 1.0);
+			double l = this.getLayerizedCaverns(i, j, k);
+			double m = this.getSpaghetti2d(i, j, k);
+			double n = h + l;
+			double o = Math.min(n, Math.min(f, m) + e);
+			double p = Math.max(o, this.getPillars(i, j, k));
+			return 128.0 * Mth.clamp(p, -1.0, 1.0);
 		}
 	}
 

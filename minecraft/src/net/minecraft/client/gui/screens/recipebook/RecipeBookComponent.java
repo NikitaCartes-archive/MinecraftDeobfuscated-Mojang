@@ -21,6 +21,7 @@ import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
@@ -230,10 +231,11 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.isVisible()) {
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 0.0F, 100.0F);
-			this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			poseStack.pushPose();
+			poseStack.translate(0.0, 0.0, 100.0);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
 			this.blit(poseStack, k, l, 1, 1, 147, 166);
@@ -249,7 +251,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 
 			this.filterButton.render(poseStack, i, j, f);
 			this.recipeBookPage.render(poseStack, k, l, i, j, f);
-			RenderSystem.popMatrix();
+			poseStack.popPose();
 		}
 	}
 

@@ -49,7 +49,9 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 		}
 	}
 
-	protected static void slotChangedCraftingGrid(int i, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer) {
+	protected static void slotChangedCraftingGrid(
+		AbstractContainerMenu abstractContainerMenu, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer
+	) {
 		if (!level.isClientSide) {
 			ServerPlayer serverPlayer = (ServerPlayer)player;
 			ItemStack itemStack = ItemStack.EMPTY;
@@ -62,13 +64,14 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 			}
 
 			resultContainer.setItem(0, itemStack);
-			serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(i, 0, itemStack));
+			abstractContainerMenu.setRemoteSlot(0, itemStack);
+			serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, 0, itemStack));
 		}
 	}
 
 	@Override
 	public void slotsChanged(Container container) {
-		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this.containerId, level, this.player, this.craftSlots, this.resultSlots));
+		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots));
 	}
 
 	@Override
@@ -136,9 +139,9 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 				return ItemStack.EMPTY;
 			}
 
-			ItemStack itemStack3 = slot.onTake(player, itemStack2);
+			slot.onTake(player, itemStack2);
 			if (i == 0) {
-				player.drop(itemStack3, false);
+				player.drop(itemStack2, false);
 			}
 		}
 

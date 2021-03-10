@@ -31,8 +31,8 @@ public class BossHealthOverlay extends GuiComponent {
 
 			for (LerpingBossEvent lerpingBossEvent : this.events.values()) {
 				int k = i / 2 - 91;
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-				this.minecraft.getTextureManager().bind(GUI_BARS_LOCATION);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShaderTexture(0, GUI_BARS_LOCATION);
 				this.drawBar(poseStack, k, j, lerpingBossEvent);
 				Component component = lerpingBossEvent.getName();
 				int m = this.minecraft.font.width(component);

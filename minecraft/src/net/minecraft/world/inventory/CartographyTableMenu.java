@@ -56,7 +56,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 			}
 
 			@Override
-			public ItemStack onTake(Player player, ItemStack itemStack) {
+			public void onTake(Player player, ItemStack itemStack) {
 				CartographyTableMenu.this.slots.get(0).remove(1);
 				CartographyTableMenu.this.slots.get(1).remove(1);
 				itemStack.getItem().onCraftedBy(itemStack, player.level, player);
@@ -67,7 +67,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 						CartographyTableMenu.this.lastSoundTime = l;
 					}
 				});
-				return super.onTake(player, itemStack);
+				super.onTake(player, itemStack);
 			}
 		});
 

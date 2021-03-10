@@ -142,8 +142,7 @@ public class PlayerTabOverlay extends GuiComponent {
 			int x = q + t * p + t * 5;
 			int y = r + w * 9;
 			fill(poseStack, x, y, x + p, y + 8, u);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.enableAlphaTest();
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			if (v < list.size()) {
@@ -154,7 +153,7 @@ public class PlayerTabOverlay extends GuiComponent {
 					boolean bl2 = player != null
 						&& player.isModelPartShown(PlayerModelPart.CAPE)
 						&& ("Dinnerbone".equals(gameProfile.getName()) || "Grumm".equals(gameProfile.getName()));
-					this.minecraft.getTextureManager().bind(playerInfo2.getSkinLocation());
+					RenderSystem.setShaderTexture(0, playerInfo2.getSkinLocation());
 					int z = 8 + (bl2 ? 8 : 0);
 					int aa = 8 * (bl2 ? -1 : 1);
 					GuiComponent.blit(poseStack, x, y, 8, 8, 8.0F, (float)z, 8, aa, 64, 64);
@@ -195,8 +194,8 @@ public class PlayerTabOverlay extends GuiComponent {
 	}
 
 	protected void renderPingIcon(PoseStack poseStack, int i, int j, int k, PlayerInfo playerInfo) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
 		int l = 0;
 		int m;
 		if (playerInfo.getLatency() < 0) {
@@ -221,7 +220,7 @@ public class PlayerTabOverlay extends GuiComponent {
 	private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo, PoseStack poseStack) {
 		int l = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
 		if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
-			this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+			RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
 			long m = Util.getMillis();
 			if (this.visibilityId == playerInfo.getRenderVisibilityId()) {
 				if (l < playerInfo.getLastHealth()) {

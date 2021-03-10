@@ -34,6 +34,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -406,17 +407,17 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
 		lightTexture.turnOnLightLayer();
-		RenderSystem.enableAlphaTest();
-		RenderSystem.defaultAlphaFunc();
 		RenderSystem.enableDepthTest();
-		RenderSystem.enableFog();
-		RenderSystem.pushMatrix();
-		RenderSystem.multMatrix(poseStack.last().pose());
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
+		poseStack2.pushPose();
+		poseStack2.mulPoseMatrix(poseStack.last().pose());
+		RenderSystem.applyModelViewMatrix();
 
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			Iterable<Particle> iterable = (Iterable<Particle>)this.particles.get(particleRenderType);
 			if (iterable != null) {
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = tesselator.getBuilder();
 				particleRenderType.begin(bufferBuilder, this.textureManager);
@@ -424,8 +425,8 @@ public class ParticleEngine implements PreparableReloadListener {
 				for (Particle particle : iterable) {
 					try {
 						particle.render(bufferBuilder, camera, f);
-					} catch (Throwable var16) {
-						CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering Particle");
+					} catch (Throwable var17) {
+						CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering Particle");
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 						crashReportCategory.setDetail("Particle", particle::toString);
 						crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
@@ -437,13 +438,11 @@ public class ParticleEngine implements PreparableReloadListener {
 			}
 		}
 
-		RenderSystem.popMatrix();
+		poseStack2.popPose();
+		RenderSystem.applyModelViewMatrix();
 		RenderSystem.depthMask(true);
-		RenderSystem.depthFunc(515);
 		RenderSystem.disableBlend();
-		RenderSystem.defaultAlphaFunc();
 		lightTexture.turnOffLightLayer();
-		RenderSystem.disableFog();
 	}
 
 	public void setLevel(@Nullable ClientLevel clientLevel) {

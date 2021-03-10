@@ -22,7 +22,6 @@ public abstract class AbstractTreeGrower {
 			return false;
 		} else {
 			serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-			configuredFeature.config.setFromSapling();
 			if (configuredFeature.place(serverLevel, chunkGenerator, random, blockPos)) {
 				return true;
 			} else {

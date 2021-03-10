@@ -30,7 +30,7 @@ public class StraightTrunkPlacer extends TrunkPlacer {
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
 		LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
 	) {
-		setDirtAt(levelSimulatedRW, blockPos.below());
+		setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
 
 		for (int j = 0; j < i; j++) {
 			placeLog(levelSimulatedRW, random, blockPos.above(j), set, boundingBox, treeConfiguration);

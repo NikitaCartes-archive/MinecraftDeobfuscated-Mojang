@@ -13,6 +13,9 @@ public class FoliagePlacerType<P extends FoliagePlacer> {
 	public static final FoliagePlacerType<MegaJungleFoliagePlacer> MEGA_JUNGLE_FOLIAGE_PLACER = register("jungle_foliage_placer", MegaJungleFoliagePlacer.CODEC);
 	public static final FoliagePlacerType<MegaPineFoliagePlacer> MEGA_PINE_FOLIAGE_PLACER = register("mega_pine_foliage_placer", MegaPineFoliagePlacer.CODEC);
 	public static final FoliagePlacerType<DarkOakFoliagePlacer> DARK_OAK_FOLIAGE_PLACER = register("dark_oak_foliage_placer", DarkOakFoliagePlacer.CODEC);
+	public static final FoliagePlacerType<RandomSpreadFoliagePlacer> RANDOM_SPREAD_FOLIAGE_PLACER = register(
+		"random_spread_foliage_placer", RandomSpreadFoliagePlacer.CODEC
+	);
 	private final Codec<P> codec;
 
 	private static <P extends FoliagePlacer> FoliagePlacerType<P> register(String string, Codec<P> codec) {

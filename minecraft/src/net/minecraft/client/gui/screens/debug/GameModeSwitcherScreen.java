@@ -14,6 +14,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -69,9 +70,10 @@ public class GameModeSwitcherScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (!this.checkToClose()) {
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			poseStack.pushPose();
 			RenderSystem.enableBlend();
-			this.minecraft.getTextureManager().bind(GAMEMODE_SWITCHER_LOCATION);
+			RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
 			int k = this.width / 2 - 62;
 			int l = this.height / 2 - 31 - 27;
 			blit(poseStack, k, l, 0.0F, 0.0F, 125, 75, 128, 128);
@@ -228,7 +230,8 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		private void drawSlot(PoseStack poseStack, TextureManager textureManager) {
-			textureManager.bind(GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
 			poseStack.translate((double)this.x, (double)this.y, 0.0);
 			blit(poseStack, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
@@ -236,7 +239,8 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		private void drawSelection(PoseStack poseStack, TextureManager textureManager) {
-			textureManager.bind(GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
 			poseStack.translate((double)this.x, (double)this.y, 0.0);
 			blit(poseStack, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);

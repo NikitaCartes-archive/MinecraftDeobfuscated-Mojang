@@ -120,8 +120,8 @@ public class Phantom extends FlyingMob implements Enemy {
 	public void tick() {
 		super.tick();
 		if (this.level.isClientSide) {
-			float f = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount) * 7.448451F + (float) Math.PI);
-			float g = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount + 1) * 7.448451F + (float) Math.PI);
+			float f = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount) * 7.448451F * (float) (Math.PI / 180.0) + (float) Math.PI);
+			float g = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount + 1) * 7.448451F * (float) (Math.PI / 180.0) + (float) Math.PI);
 			if (f > 0.0F && g <= 0.0F) {
 				this.level
 					.playLocalSound(

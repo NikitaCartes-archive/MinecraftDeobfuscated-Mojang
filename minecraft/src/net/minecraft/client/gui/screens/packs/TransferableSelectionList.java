@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -93,19 +94,21 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.pack.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
-			this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, this.pack.getIconTexture());
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
-				this.minecraft.getTextureManager().bind(TransferableSelectionList.ICON_OVERLAY_LOCATION);
+				RenderSystem.setShaderTexture(0, TransferableSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				int p = n - k;
 				int q = o - j;
 				if (!this.pack.getCompatibility().isCompatible()) {

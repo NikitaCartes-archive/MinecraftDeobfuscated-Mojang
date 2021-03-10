@@ -151,6 +151,9 @@ public class Blocks {
 	public static final Block COAL_ORE = register(
 		"coal_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntRange.of(0, 2))
 	);
+	public static final Block DEEPSLATE_COAL_ORE = register(
+		"deepslate_coal_ore", new OreBlock(BlockBehaviour.Properties.copy(COAL_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+	);
 	public static final Block NETHER_GOLD_ORE = register(
 		"nether_gold_ore",
 		new OreBlock(
@@ -1018,6 +1021,9 @@ public class Blocks {
 	);
 	public static final Block EMERALD_ORE = register(
 		"emerald_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntRange.of(3, 7))
+	);
+	public static final Block DEEPSLATE_EMERALD_ORE = register(
+		"deepslate_emerald_ore", new OreBlock(BlockBehaviour.Properties.copy(EMERALD_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), IntRange.of(3, 7))
 	);
 	public static final Block ENDER_CHEST = register(
 		"ender_chest",
@@ -3199,7 +3205,10 @@ public class Blocks {
 			EXPOSED_COPPER
 		)
 	);
-	public static final Block COPPER_ORE = register("copper_ore", new Block(BlockBehaviour.Properties.copy(IRON_ORE)));
+	public static final Block COPPER_ORE = register("copper_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE)));
+	public static final Block DEEPSLATE_COPPER_ORE = register(
+		"deepslate_copper_ore", new OreBlock(BlockBehaviour.Properties.copy(COPPER_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+	);
 	public static final Block OXIDIZED_CUT_COPPER = register("oxidized_cut_copper", new WeatheringCopperFullBlock(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
 	public static final Block WEATHERED_CUT_COPPER = register(
 		"weathered_cut_copper",
@@ -3313,32 +3322,21 @@ public class Blocks {
 	public static final Block CAVE_VINES_HEAD = register(
 		"cave_vines_head",
 		new CaveVinesHeadBlock(
-			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN)
-				.randomTicks()
-				.noCollission()
-				.lightLevel(glowBerryBlockEmission(10))
-				.instabreak()
-				.sound(SoundType.CAVE_VINES)
+			BlockBehaviour.Properties.of(Material.PLANT).randomTicks().noCollission().lightLevel(glowBerryBlockEmission(10)).instabreak().sound(SoundType.CAVE_VINES)
 		)
 	);
 	public static final Block CAVE_VINES_BODY = register(
 		"cave_vines_body",
 		new CaveVinesBodyBlock(
-			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN)
-				.noCollission()
-				.lightLevel(glowBerryBlockEmission(14))
-				.instabreak()
-				.sound(SoundType.CAVE_VINES)
+			BlockBehaviour.Properties.of(Material.PLANT).noCollission().lightLevel(glowBerryBlockEmission(14)).instabreak().sound(SoundType.CAVE_VINES)
 		)
 	);
 	public static final Block SPORE_BLOSSOM = register(
-		"spore_blossom", new SporeBlossomBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).noCollission().sound(SoundType.SPORE_BLOSSOM))
+		"spore_blossom", new SporeBlossomBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().sound(SoundType.SPORE_BLOSSOM))
 	);
-	public static final Block AZALEA = register(
-		"azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).sound(SoundType.AZALEA).noOcclusion())
-	);
+	public static final Block AZALEA = register("azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).sound(SoundType.AZALEA).noOcclusion()));
 	public static final Block FLOWERING_AZALEA = register(
-		"flowering_azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).sound(SoundType.FLOWERING_AZALEA).noOcclusion())
+		"flowering_azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).sound(SoundType.FLOWERING_AZALEA).noOcclusion())
 	);
 	public static final Block MOSS_CARPET = register(
 		"moss_carpet", new CarpetBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).strength(0.1F).sound(SoundType.MOSS_CARPET))
@@ -3347,17 +3345,14 @@ public class Blocks {
 		"moss_block", new MossBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).strength(0.1F).sound(SoundType.MOSS))
 	);
 	public static final Block BIG_DRIPLEAF = register(
-		"big_dripleaf", new BigDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).strength(0.1F).sound(SoundType.BIG_DRIPLEAF))
+		"big_dripleaf", new BigDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT).strength(0.1F).sound(SoundType.BIG_DRIPLEAF))
 	);
 	public static final Block BIG_DRIPLEAF_STEM = register(
-		"big_dripleaf_stem",
-		new BigDripleafStemBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).noCollission().strength(0.1F).sound(SoundType.BIG_DRIPLEAF))
+		"big_dripleaf_stem", new BigDripleafStemBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().strength(0.1F).sound(SoundType.BIG_DRIPLEAF))
 	);
 	public static final Block SMALL_DRIPLEAF = register(
 		"small_dripleaf",
-		new SmallDripleafBlock(
-			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).strength(0.1F).noCollission().instabreak().sound(SoundType.SMALL_DRIPLEAF)
-		)
+		new SmallDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT).strength(0.1F).noCollission().instabreak().sound(SoundType.SMALL_DRIPLEAF))
 	);
 	public static final Block ROOTED_DIRT = register(
 		"rooted_dirt", new Block(BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.DIRT).strength(0.1F).sound(SoundType.ROOTED_DIRT))
@@ -3370,7 +3365,9 @@ public class Blocks {
 	);
 	public static final Block DEEPSLATE = register(
 		"deepslate",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.DEEPSLATE))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.DEEPSLATE)
+		)
 	);
 	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.copy(DEEPSLATE)));
 	public static final Block COBBLED_DEEPSLATE_STAIRS = register(
@@ -3406,6 +3403,11 @@ public class Blocks {
 	public static final Block DEEPSLATE_BRICK_WALL = register("deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
 	public static final Block CHISELED_DEEPSLATE = register(
 		"chiseled_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).strength(1.5F, 6.0F).sound(SoundType.DEEPSLATE_BRICKS))
+	);
+	public static final Block CRACKED_DEEPSLATE_BRICKS = register("cracked_deepslate_bricks", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
+	public static final Block CRACKED_DEEPSLATE_TILES = register("cracked_deepslate_tiles", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
+	public static final Block INFESTED_DEEPSLATE = register(
+		"infested_deepslate", new InfestedBlock(DEEPSLATE, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
 	);
 	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
 

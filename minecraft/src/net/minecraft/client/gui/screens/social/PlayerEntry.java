@@ -112,7 +112,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			this.minecraft.font.draw(poseStack, component, (float)r, (float)(s + 12), PLAYER_STATUS_COLOR);
 		}
 
-		this.minecraft.getTextureManager().bind((ResourceLocation)this.skinGetter.get());
+		RenderSystem.setShaderTexture(0, (ResourceLocation)this.skinGetter.get());
 		GuiComponent.blit(poseStack, p, q, 24, 24, 8.0F, 8.0F, 8, 8, 64, 64);
 		RenderSystem.enableBlend();
 		GuiComponent.blit(poseStack, p, q, 24, 24, 40.0F, 8.0F, 8, 8, 64, 64);

@@ -4,8 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.TextComponent;
@@ -24,8 +24,9 @@ public class PageButton extends Button {
 
 	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		Minecraft.getInstance().getTextureManager().bind(BookViewScreen.BOOK_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
 		int k = 0;
 		int l = 192;
 		if (this.isHovered()) {

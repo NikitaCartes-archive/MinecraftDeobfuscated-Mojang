@@ -47,7 +47,7 @@ public class Carvers {
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(
-					0.005F,
+					0.00125F,
 					CarverDebugSettings.of(false, Blocks.OAK_BUTTON.defaultBlockState()),
 					VerticalAnchor.absolute(40),
 					VerticalAnchor.absolute(80),

@@ -75,17 +75,18 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	protected void setSize(int i, boolean bl) {
-		this.entityData.set(ID_SIZE, i);
+		int j = Mth.clamp(i, 1, 127);
+		this.entityData.set(ID_SIZE, j);
 		this.reapplyPosition();
 		this.refreshDimensions();
-		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)(i * i));
-		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)i));
-		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue((double)i);
+		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)(j * j));
+		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)j));
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue((double)j);
 		if (bl) {
 			this.setHealth(this.getMaxHealth());
 		}
 
-		this.xpReward = i;
+		this.xpReward = j;
 	}
 
 	public int getSize() {
@@ -101,12 +102,7 @@ public class Slime extends Mob implements Enemy {
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		int i = compoundTag.getInt("Size");
-		if (i < 0) {
-			i = 0;
-		}
-
-		this.setSize(i + 1, false);
+		this.setSize(compoundTag.getInt("Size") + 1, false);
 		super.readAdditionalSaveData(compoundTag);
 		this.wasOnGround = compoundTag.getBoolean("wasOnGround");
 	}

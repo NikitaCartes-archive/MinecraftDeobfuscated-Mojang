@@ -89,13 +89,12 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			float v = (float)(o - s);
 			float w = (float)(p - t) + r;
 			float x = (float)(q - u);
-			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lines());
-			Matrix4f matrix4f2 = poseStack.last().pose();
+			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lineStrip());
+			PoseStack.Pose pose2 = poseStack.last();
 			int y = 16;
 
-			for (int z = 0; z < 16; z++) {
-				stringVertex(v, w, x, vertexConsumer2, matrix4f2, fraction(z, 16));
-				stringVertex(v, w, x, vertexConsumer2, matrix4f2, fraction(z + 1, 16));
+			for (int z = 0; z <= 16; z++) {
+				stringVertex(v, w, x, vertexConsumer2, pose2, fraction(z, 16), fraction(z + 1, 17));
 			}
 
 			poseStack.popPose();
@@ -117,8 +116,18 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			.endVertex();
 	}
 
-	private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, Matrix4f matrix4f, float i) {
-		vertexConsumer.vertex(matrix4f, f * i, g * (i * i + i) * 0.5F + 0.25F, h * i).color(0, 0, 0, 255).endVertex();
+	private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, PoseStack.Pose pose, float i, float j) {
+		float k = f * i;
+		float l = g * (i * i + i) * 0.5F + 0.25F;
+		float m = h * i;
+		float n = f * j - k;
+		float o = g * (j * j + j) * 0.5F + 0.25F - l;
+		float p = h * j - m;
+		float q = Mth.sqrt(n * n + o * o + p * p);
+		n /= q;
+		o /= q;
+		p /= q;
+		vertexConsumer.vertex(pose.pose(), k, l, m).color(0, 0, 0, 255).normal(pose.normal(), n, o, p).endVertex();
 	}
 
 	public ResourceLocation getTextureLocation(FishingHook fishingHook) {

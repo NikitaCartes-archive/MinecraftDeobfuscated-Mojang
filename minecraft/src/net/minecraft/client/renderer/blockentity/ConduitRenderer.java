@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -93,7 +92,7 @@ public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> 
 			poseStack.translate(0.5, (double)(0.3F + k * 0.2F), 0.5);
 			Vector3f vector3f = new Vector3f(0.5F, 1.0F, 0.5F);
 			vector3f.normalize();
-			poseStack.mulPose(new Quaternion(vector3f, h, true));
+			poseStack.mulPose(vector3f.rotationDegrees(h));
 			this.cage.render(poseStack, ACTIVE_SHELL_TEXTURE.buffer(multiBufferSource, RenderType::entityCutoutNoCull), i, j);
 			poseStack.popPose();
 			int l = conduitBlockEntity.tickCount / 66 % 3;

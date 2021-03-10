@@ -9,6 +9,7 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.components.StateSwitchingButton;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
@@ -44,14 +45,15 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		if (this.animationTime > 0.0F) {
 			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)(this.x + 8), (float)(this.y + 12), 0.0F);
-			RenderSystem.scalef(1.0F, g, 1.0F);
-			RenderSystem.translatef((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
+			poseStack.pushPose();
+			poseStack.translate((double)(this.x + 8), (double)(this.y + 12), 0.0);
+			poseStack.scale(1.0F, g, 1.0F);
+			poseStack.translate((double)(-(this.x + 8)), (double)(-(this.y + 12)), 0.0);
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.getTextureManager().bind(this.resourceLocation);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, this.resourceLocation);
 		RenderSystem.disableDepthTest();
 		int k = this.xTexStart;
 		int l = this.yTexStart;
@@ -68,12 +70,12 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 			m -= 2;
 		}
 
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		this.blit(poseStack, m, this.y, k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
 		this.renderIcon(minecraft.getItemRenderer());
 		if (this.animationTime > 0.0F) {
-			RenderSystem.popMatrix();
+			poseStack.popPose();
 			this.animationTime -= f;
 		}
 	}

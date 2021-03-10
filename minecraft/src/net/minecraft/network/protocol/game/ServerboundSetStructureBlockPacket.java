@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Mth;
@@ -17,7 +18,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 	private final StructureMode mode;
 	private final String name;
 	private final BlockPos offset;
-	private final BlockPos size;
+	private final Vec3i size;
 	private final Mirror mirror;
 	private final Rotation rotation;
 	private final String data;
@@ -34,7 +35,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		StructureMode structureMode,
 		String string,
 		BlockPos blockPos2,
-		BlockPos blockPos3,
+		Vec3i vec3i,
 		Mirror mirror,
 		Rotation rotation,
 		String string2,
@@ -49,7 +50,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		this.mode = structureMode;
 		this.name = string;
 		this.offset = blockPos2;
-		this.size = blockPos3;
+		this.size = vec3i;
 		this.mirror = mirror;
 		this.rotation = rotation;
 		this.data = string2;
@@ -70,7 +71,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 			Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48)
 		);
 		int j = 48;
-		this.size = new BlockPos(
+		this.size = new Vec3i(
 			Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48)
 		);
 		this.mirror = friendlyByteBuf.readEnum(Mirror.class);
@@ -141,7 +142,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		return this.offset;
 	}
 
-	public BlockPos getSize() {
+	public Vec3i getSize() {
 		return this.size;
 	}
 

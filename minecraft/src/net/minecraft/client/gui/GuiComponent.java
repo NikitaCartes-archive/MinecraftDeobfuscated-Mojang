@@ -12,6 +12,7 @@ import com.mojang.math.Matrix4f;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -69,6 +70,7 @@ public abstract class GuiComponent {
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, 0.0F).color(g, h, o, f).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)k, (float)l, 0.0F).color(g, h, o, f).endVertex();
@@ -87,17 +89,14 @@ public abstract class GuiComponent {
 	protected static void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o) {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
-		RenderSystem.disableAlphaTest();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.shadeModel(7425);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, o, m, n);
 		tesselator.end();
-		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
-		RenderSystem.enableAlphaTest();
 		RenderSystem.enableTexture();
 	}
 
@@ -184,6 +183,7 @@ public abstract class GuiComponent {
 	}
 
 	private static void innerBlit(Matrix4f matrix4f, int i, int j, int k, int l, int m, float f, float g, float h, float n) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).uv(f, n).endVertex();
@@ -191,7 +191,6 @@ public abstract class GuiComponent {
 		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).uv(g, h).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).uv(f, h).endVertex();
 		bufferBuilder.end();
-		RenderSystem.enableAlphaTest();
 		BufferUploader.end(bufferBuilder);
 	}
 

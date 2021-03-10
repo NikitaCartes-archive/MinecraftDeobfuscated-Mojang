@@ -104,13 +104,24 @@ public abstract class FoliagePlacer {
 			for (int m = -i; m <= i + k; m++) {
 				if (!this.shouldSkipLocationSigned(random, l, j, m, i, bl)) {
 					mutableBlockPos.setWithOffset(blockPos, l, j, m);
-					if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
-						levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.leavesProvider.getState(random, mutableBlockPos), 19);
-						boundingBox.expand(new BoundingBox(mutableBlockPos, mutableBlockPos));
-						set.add(mutableBlockPos.immutable());
-					}
+					this.tryPlaceLeaf(levelSimulatedRW, random, treeConfiguration, set, boundingBox, mutableBlockPos);
 				}
 			}
+		}
+	}
+
+	protected void tryPlaceLeaf(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		Set<BlockPos> set,
+		BoundingBox boundingBox,
+		BlockPos.MutableBlockPos mutableBlockPos
+	) {
+		if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
+			levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.foliageProvider.getState(random, mutableBlockPos), 19);
+			boundingBox.expand(new BoundingBox(mutableBlockPos));
+			set.add(mutableBlockPos.immutable());
 		}
 	}
 

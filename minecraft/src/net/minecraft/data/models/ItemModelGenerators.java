@@ -243,6 +243,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SPECTRAL_ARROW, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPIDER_EYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPRUCE_BOAT, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SPYGLASS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.STICK, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.STONE_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.STONE_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);

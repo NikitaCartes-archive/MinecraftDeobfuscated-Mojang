@@ -53,6 +53,9 @@ public final class ItemTags {
 	public static final Tag.Named<Item> DIAMOND_ORES = bind("diamond_ores");
 	public static final Tag.Named<Item> REDSTONE_ORES = bind("redstone_ores");
 	public static final Tag.Named<Item> LAPIS_ORES = bind("lapis_ores");
+	public static final Tag.Named<Item> COAL_ORES = bind("coal_ores");
+	public static final Tag.Named<Item> EMERALD_ORES = bind("emerald_ores");
+	public static final Tag.Named<Item> COPPER_ORES = bind("copper_ores");
 	public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = bind("soul_fire_base_blocks");
 	public static final Tag.Named<Item> CANDLES = bind("candles");

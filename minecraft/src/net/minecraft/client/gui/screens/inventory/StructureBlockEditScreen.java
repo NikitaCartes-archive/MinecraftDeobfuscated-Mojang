@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -206,18 +207,18 @@ public class StructureBlockEditScreen extends Screen {
 		this.posZEdit.setMaxLength(15);
 		this.posZEdit.setValue(Integer.toString(blockPos.getZ()));
 		this.children.add(this.posZEdit);
-		BlockPos blockPos2 = this.structure.getStructureSize();
+		Vec3i vec3i = this.structure.getStructureSize();
 		this.sizeXEdit = new EditBox(this.font, this.width / 2 - 152, 120, 80, 20, new TranslatableComponent("structure_block.size.x"));
 		this.sizeXEdit.setMaxLength(15);
-		this.sizeXEdit.setValue(Integer.toString(blockPos2.getX()));
+		this.sizeXEdit.setValue(Integer.toString(vec3i.getX()));
 		this.children.add(this.sizeXEdit);
 		this.sizeYEdit = new EditBox(this.font, this.width / 2 - 72, 120, 80, 20, new TranslatableComponent("structure_block.size.y"));
 		this.sizeYEdit.setMaxLength(15);
-		this.sizeYEdit.setValue(Integer.toString(blockPos2.getY()));
+		this.sizeYEdit.setValue(Integer.toString(vec3i.getY()));
 		this.children.add(this.sizeYEdit);
 		this.sizeZEdit = new EditBox(this.font, this.width / 2 + 8, 120, 80, 20, new TranslatableComponent("structure_block.size.z"));
 		this.sizeZEdit.setMaxLength(15);
-		this.sizeZEdit.setValue(Integer.toString(blockPos2.getZ()));
+		this.sizeZEdit.setValue(Integer.toString(vec3i.getZ()));
 		this.children.add(this.sizeZEdit);
 		this.integrityEdit = new EditBox(this.font, this.width / 2 - 152, 120, 80, 20, new TranslatableComponent("structure_block.integrity.integrity"));
 		this.integrityEdit.setMaxLength(15);
@@ -351,7 +352,7 @@ public class StructureBlockEditScreen extends Screen {
 		BlockPos blockPos = new BlockPos(
 			this.parseCoordinate(this.posXEdit.getValue()), this.parseCoordinate(this.posYEdit.getValue()), this.parseCoordinate(this.posZEdit.getValue())
 		);
-		BlockPos blockPos2 = new BlockPos(
+		Vec3i vec3i = new Vec3i(
 			this.parseCoordinate(this.sizeXEdit.getValue()), this.parseCoordinate(this.sizeYEdit.getValue()), this.parseCoordinate(this.sizeZEdit.getValue())
 		);
 		float f = this.parseIntegrity(this.integrityEdit.getValue());
@@ -365,7 +366,7 @@ public class StructureBlockEditScreen extends Screen {
 					this.structure.getMode(),
 					this.nameEdit.getValue(),
 					blockPos,
-					blockPos2,
+					vec3i,
 					this.structure.getMirror(),
 					this.structure.getRotation(),
 					this.dataEdit.getValue(),

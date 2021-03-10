@@ -165,22 +165,22 @@ public class FaceBakery {
 			Vector3f vector3f3;
 			switch (blockElementRotation.axis) {
 				case X:
-					vector3f2 = new Vector3f(1.0F, 0.0F, 0.0F);
+					vector3f2 = Vector3f.XP;
 					vector3f3 = new Vector3f(0.0F, 1.0F, 1.0F);
 					break;
 				case Y:
-					vector3f2 = new Vector3f(0.0F, 1.0F, 0.0F);
+					vector3f2 = Vector3f.YP;
 					vector3f3 = new Vector3f(1.0F, 0.0F, 1.0F);
 					break;
 				case Z:
-					vector3f2 = new Vector3f(0.0F, 0.0F, 1.0F);
+					vector3f2 = Vector3f.ZP;
 					vector3f3 = new Vector3f(1.0F, 1.0F, 0.0F);
 					break;
 				default:
 					throw new IllegalArgumentException("There are only 3 axes");
 			}
 
-			Quaternion quaternion = new Quaternion(vector3f2, blockElementRotation.angle, true);
+			Quaternion quaternion = vector3f2.rotationDegrees(blockElementRotation.angle);
 			if (blockElementRotation.rescale) {
 				if (Math.abs(blockElementRotation.angle) == 22.5F) {
 					vector3f3.mul(RESCALE_22_5);

@@ -423,6 +423,11 @@ public class SoundEvents {
 	public static final SoundEvent GLASS_PLACE = register("block.glass.place");
 	public static final SoundEvent GLASS_STEP = register("block.glass.step");
 	public static final SoundEvent GLOW_INK_SAC_USE = register("item.glow_ink_sac.use");
+	public static final SoundEvent GLOW_ITEM_FRAME_ADD_ITEM = register("entity.glow_item_frame.add_item");
+	public static final SoundEvent GLOW_ITEM_FRAME_BREAK = register("entity.glow_item_frame.break");
+	public static final SoundEvent GLOW_ITEM_FRAME_PLACE = register("entity.glow_item_frame.place");
+	public static final SoundEvent GLOW_ITEM_FRAME_REMOVE_ITEM = register("entity.glow_item_frame.remove_item");
+	public static final SoundEvent GLOW_ITEM_FRAME_ROTATE_ITEM = register("entity.glow_item_frame.rotate_item");
 	public static final SoundEvent GLOW_SQUID_AMBIENT = register("entity.glow_squid.ambient");
 	public static final SoundEvent GLOW_SQUID_DEATH = register("entity.glow_squid.death");
 	public static final SoundEvent GLOW_SQUID_HURT = register("entity.glow_squid.hurt");

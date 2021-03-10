@@ -100,10 +100,13 @@ public class ToastComponent extends GuiComponent {
 				this.visibleTime = l;
 			}
 
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)i - (float)this.toast.width() * this.getVisibility(l), (float)(j * this.toast.height()), (float)(800 + j));
+			PoseStack poseStack2 = RenderSystem.getModelViewStack();
+			poseStack2.pushPose();
+			poseStack2.translate((double)((float)i - (float)this.toast.width() * this.getVisibility(l)), (double)(j * this.toast.height()), (double)(800 + j));
+			RenderSystem.applyModelViewMatrix();
 			Toast.Visibility visibility = this.toast.render(poseStack, ToastComponent.this, l - this.visibleTime);
-			RenderSystem.popMatrix();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 			if (visibility != this.visibility) {
 				this.animationTime = l - (long)((int)((1.0F - this.getVisibility(l)) * 600.0F));
 				this.visibility = visibility;

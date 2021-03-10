@@ -96,13 +96,11 @@ public class DebugScreenOverlay extends GuiComponent {
 
 	public void render(PoseStack poseStack) {
 		this.minecraft.getProfiler().push("debug");
-		RenderSystem.pushMatrix();
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
 		this.drawGameInformation(poseStack);
 		this.drawSystemInformation(poseStack);
-		RenderSystem.popMatrix();
 		if (this.minecraft.options.renderFpsChart) {
 			int i = this.minecraft.getWindow().getGuiScaledWidth();
 			this.drawChart(poseStack, this.minecraft.getFrameTimer(), 0, i / 2, true);

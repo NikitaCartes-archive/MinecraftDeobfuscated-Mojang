@@ -39,8 +39,8 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 			double d = (double)chunkPos.getBlockX(random.nextInt(16));
 			double e = (double)this.getCaveY(carvingContext, random);
 			double f = (double)chunkPos.getBlockZ(random.nextInt(16));
-			double g = (double)Mth.randomBetween(random, 0.2F, 1.8F);
-			double h = (double)Mth.randomBetween(random, 0.2F, 1.8F);
+			double g = (double)Mth.randomBetween(random, 0.3F, 1.7F);
+			double h = (double)Mth.randomBetween(random, 0.3F, 1.7F);
 			double m = (double)Mth.randomBetween(random, -1.0F, 0.0F);
 			WorldCarver.CarveSkipChecker carveSkipChecker = (carvingContextx, ex, fx, gx, ix) -> shouldSkip(ex, fx, gx, m);
 			int n = 1;

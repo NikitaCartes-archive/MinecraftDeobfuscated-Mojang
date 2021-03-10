@@ -24,9 +24,6 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		RenderSystem.enableDepthTest();
-		RenderSystem.shadeModel(7425);
-		RenderSystem.enableAlphaTest();
-		RenderSystem.defaultAlphaFunc();
 		Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -38,7 +35,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		double i = (double)chunkPos.getMinBlockX() - d;
 		double j = (double)chunkPos.getMinBlockZ() - f;
 		RenderSystem.lineWidth(1.0F);
-		bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = -16; k <= 32; k += 16) {
 			for (int l = -16; l <= 32; l += 16) {
@@ -84,7 +81,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		tesselator.end();
 		RenderSystem.lineWidth(2.0F);
-		bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = 0; k <= 16; k += 16) {
 			for (int l = 0; l <= 16; l += 16) {
@@ -110,6 +107,5 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.lineWidth(1.0F);
 		RenderSystem.enableBlend();
 		RenderSystem.enableTexture();
-		RenderSystem.shadeModel(7424);
 	}
 }

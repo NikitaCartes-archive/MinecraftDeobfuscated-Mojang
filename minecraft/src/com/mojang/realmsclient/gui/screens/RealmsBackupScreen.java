@@ -375,13 +375,13 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 		private void drawRestore(PoseStack poseStack, int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-			RealmsBackupScreen.this.minecraft.getTextureManager().bind(RealmsBackupScreen.RESTORE_ICON_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.setShaderTexture(0, RealmsBackupScreen.RESTORE_ICON_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			poseStack.pushPose();
+			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float f = bl ? 28.0F : 0.0F;
 			GuiComponent.blit(poseStack, i * 2, j * 2, 0.0F, f, 23, 28, 23, 56);
-			RenderSystem.popMatrix();
+			poseStack.popPose();
 			if (bl) {
 				RealmsBackupScreen.this.toolTip = RealmsBackupScreen.RESTORE_TOOLTIP;
 			}
@@ -389,13 +389,13 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 		private void drawInfo(PoseStack poseStack, int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-			RealmsBackupScreen.this.minecraft.getTextureManager().bind(RealmsBackupScreen.PLUS_ICON_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.setShaderTexture(0, RealmsBackupScreen.PLUS_ICON_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			poseStack.pushPose();
+			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float f = bl ? 15.0F : 0.0F;
 			GuiComponent.blit(poseStack, i * 2, j * 2, 0.0F, f, 15, 15, 15, 30);
-			RenderSystem.popMatrix();
+			poseStack.popPose();
 			if (bl) {
 				RealmsBackupScreen.this.toolTip = RealmsBackupScreen.HAS_CHANGES_TOOLTIP;
 			}

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -31,8 +32,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.material.FluidState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class StructurePiece {
+	private static final Logger LOGGER = LogManager.getLogger();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
 	protected BoundingBox boundingBox;
 	@Nullable
@@ -63,7 +67,10 @@ public abstract class StructurePiece {
 	public StructurePiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
 		this(structurePieceType, compoundTag.getInt("GD"));
 		if (compoundTag.contains("BB")) {
-			this.boundingBox = new BoundingBox(compoundTag.getIntArray("BB"));
+			this.boundingBox = (BoundingBox)BoundingBox.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("BB"))
+				.resultOrPartial(LOGGER::error)
+				.orElse(new BoundingBox(BlockPos.ZERO));
 		}
 
 		int i = compoundTag.getInt("O");
@@ -73,7 +80,7 @@ public abstract class StructurePiece {
 	public final CompoundTag createTag() {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("id", Registry.STRUCTURE_PIECE.getKey(this.getType()).toString());
-		compoundTag.put("BB", this.boundingBox.createTag());
+		BoundingBox.CODEC.encodeStart(NbtOps.INSTANCE, this.boundingBox).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("BB", tag));
 		Direction direction = this.getOrientation();
 		compoundTag.putInt("O", direction == null ? -1 : direction.get2DDataValue());
 		compoundTag.putInt("GD", this.genDepth);

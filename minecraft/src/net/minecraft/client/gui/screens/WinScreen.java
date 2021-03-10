@@ -21,6 +21,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -147,7 +148,8 @@ public class WinScreen extends Screen {
 	}
 
 	private void renderBg(int i, int j, float f) {
-		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 		int k = this.width;
 		float g = -this.time * 0.5F * this.scrollSpeed;
 		float h = (float)this.height - this.time * 0.5F * this.scrollSpeed;
@@ -183,27 +185,25 @@ public class WinScreen extends Screen {
 		int m = this.height + 50;
 		this.time += f;
 		float g = -this.time * this.scrollSpeed;
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef(0.0F, g, 0.0F);
-		this.minecraft.getTextureManager().bind(LOGO_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.enableAlphaTest();
+		poseStack.pushPose();
+		poseStack.translate(0.0, (double)g, 0.0);
+		RenderSystem.setShaderTexture(0, LOGO_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
 		this.blitOutlineBlack(l, m, (integer, integer2) -> {
 			this.blit(poseStack, integer + 0, integer2, 0, 0, 155, 44);
 			this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
 		});
 		RenderSystem.disableBlend();
-		this.minecraft.getTextureManager().bind(EDITION_LOCATION);
+		RenderSystem.setShaderTexture(0, EDITION_LOCATION);
 		blit(poseStack, l + 88, m + 37, 0.0F, 0.0F, 98, 14, 128, 16);
-		RenderSystem.disableAlphaTest();
 		int n = m + 100;
 
 		for (int o = 0; o < this.lines.size(); o++) {
 			if (o == this.lines.size() - 1) {
 				float h = (float)n + g - (float)(this.height / 2 - 6);
 				if (h < 0.0F) {
-					RenderSystem.translatef(0.0F, -h, 0.0F);
+					poseStack.translate(0.0, (double)(-h), 0.0);
 				}
 			}
 
@@ -220,8 +220,9 @@ public class WinScreen extends Screen {
 			n += 12;
 		}
 
-		RenderSystem.popMatrix();
-		this.minecraft.getTextureManager().bind(VIGNETTE_LOCATION);
+		poseStack.popPose();
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
 		int o = this.width;

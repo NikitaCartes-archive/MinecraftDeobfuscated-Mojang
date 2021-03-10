@@ -128,10 +128,10 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 		if (this.isVisible) {
 			this.time += f;
 			RenderSystem.enableBlend();
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 0.0F, 170.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
+			poseStack.pushPose();
+			poseStack.translate(0.0, 0.0, 170.0);
 			int k = this.recipeButtons.size() <= 16 ? 4 : 5;
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -146,7 +146,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 				overlayRecipeButton.render(poseStack, i, j, f);
 			}
 
-			RenderSystem.popMatrix();
+			poseStack.popPose();
 		}
 	}
 
@@ -218,8 +218,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 
 		@Override
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
-			RenderSystem.enableAlphaTest();
-			OverlayRecipeComponent.this.minecraft.getTextureManager().bind(OverlayRecipeComponent.RECIPE_BOOK_LOCATION);
+			RenderSystem.setShaderTexture(0, OverlayRecipeComponent.RECIPE_BOOK_LOCATION);
 			int k = 152;
 			if (!this.isCraftable) {
 				k += 26;
@@ -231,20 +230,22 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			}
 
 			this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
+			float g = 0.42F;
+			PoseStack poseStack2 = RenderSystem.getModelViewStack();
+			poseStack2.pushPose();
+			poseStack2.scale(0.42F, 0.42F, 1.0F);
+			RenderSystem.applyModelViewMatrix();
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
-				RenderSystem.pushMatrix();
-				float g = 0.42F;
 				int m = (int)((float)(this.x + pos.x) / 0.42F - 3.0F);
 				int n = (int)((float)(this.y + pos.y) / 0.42F - 3.0F);
-				RenderSystem.scalef(0.42F, 0.42F, 1.0F);
 				OverlayRecipeComponent.this.minecraft
 					.getItemRenderer()
 					.renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], m, n);
-				RenderSystem.popMatrix();
 			}
 
-			RenderSystem.disableAlphaTest();
+			poseStack2.popPose();
+			RenderSystem.applyModelViewMatrix();
 		}
 
 		@Environment(EnvType.CLIENT)

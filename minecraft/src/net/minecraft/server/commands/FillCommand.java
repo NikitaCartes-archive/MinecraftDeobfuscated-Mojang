@@ -45,7 +45,7 @@ public class FillCommand {
 										.executes(
 											commandContext -> fillBlocks(
 													commandContext.getSource(),
-													new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+													BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 													BlockStateArgument.getBlock(commandContext, "block"),
 													FillCommand.Mode.REPLACE,
 													null
@@ -56,7 +56,7 @@ public class FillCommand {
 												.executes(
 													commandContext -> fillBlocks(
 															commandContext.getSource(),
-															new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+															BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 															BlockStateArgument.getBlock(commandContext, "block"),
 															FillCommand.Mode.REPLACE,
 															null
@@ -67,7 +67,7 @@ public class FillCommand {
 														.executes(
 															commandContext -> fillBlocks(
 																	commandContext.getSource(),
-																	new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+																	BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 																	BlockStateArgument.getBlock(commandContext, "block"),
 																	FillCommand.Mode.REPLACE,
 																	BlockPredicateArgument.getBlockPredicate(commandContext, "filter")
@@ -80,7 +80,7 @@ public class FillCommand {
 												.executes(
 													commandContext -> fillBlocks(
 															commandContext.getSource(),
-															new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+															BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 															BlockStateArgument.getBlock(commandContext, "block"),
 															FillCommand.Mode.REPLACE,
 															blockInWorld -> blockInWorld.getLevel().isEmptyBlock(blockInWorld.getPos())
@@ -92,7 +92,7 @@ public class FillCommand {
 												.executes(
 													commandContext -> fillBlocks(
 															commandContext.getSource(),
-															new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+															BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 															BlockStateArgument.getBlock(commandContext, "block"),
 															FillCommand.Mode.OUTLINE,
 															null
@@ -104,7 +104,7 @@ public class FillCommand {
 												.executes(
 													commandContext -> fillBlocks(
 															commandContext.getSource(),
-															new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+															BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 															BlockStateArgument.getBlock(commandContext, "block"),
 															FillCommand.Mode.HOLLOW,
 															null
@@ -116,7 +116,7 @@ public class FillCommand {
 												.executes(
 													commandContext -> fillBlocks(
 															commandContext.getSource(),
-															new BoundingBox(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
+															BoundingBox.createProper(BlockPosArgument.getLoadedBlockPos(commandContext, "from"), BlockPosArgument.getLoadedBlockPos(commandContext, "to")),
 															BlockStateArgument.getBlock(commandContext, "block"),
 															FillCommand.Mode.DESTROY,
 															null

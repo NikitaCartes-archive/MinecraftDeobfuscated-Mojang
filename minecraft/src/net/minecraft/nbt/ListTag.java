@@ -147,17 +147,6 @@ public class ListTag extends CollectionTag<Tag> {
 		return 0;
 	}
 
-	public int[] getIntArray(int i) {
-		if (i >= 0 && i < this.list.size()) {
-			Tag tag = (Tag)this.list.get(i);
-			if (tag.getId() == 11) {
-				return ((IntArrayTag)tag).getAsIntArray();
-			}
-		}
-
-		return new int[0];
-	}
-
 	public double getDouble(int i) {
 		if (i >= 0 && i < this.list.size()) {
 			Tag tag = (Tag)this.list.get(i);

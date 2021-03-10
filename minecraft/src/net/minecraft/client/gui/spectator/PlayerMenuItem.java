@@ -48,8 +48,8 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 
 	@Override
 	public void renderIcon(PoseStack poseStack, float f, int i) {
-		Minecraft.getInstance().getTextureManager().bind(this.location);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, (float)i / 255.0F);
+		RenderSystem.setShaderTexture(0, this.location);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, (float)i / 255.0F);
 		GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
 		GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
 	}

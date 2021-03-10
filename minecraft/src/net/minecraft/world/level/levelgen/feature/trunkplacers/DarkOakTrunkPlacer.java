@@ -34,10 +34,10 @@ public class DarkOakTrunkPlacer extends TrunkPlacer {
 	) {
 		List<FoliagePlacer.FoliageAttachment> list = Lists.<FoliagePlacer.FoliageAttachment>newArrayList();
 		BlockPos blockPos2 = blockPos.below();
-		setDirtAt(levelSimulatedRW, blockPos2);
-		setDirtAt(levelSimulatedRW, blockPos2.east());
-		setDirtAt(levelSimulatedRW, blockPos2.south());
-		setDirtAt(levelSimulatedRW, blockPos2.south().east());
+		setDirtAt(levelSimulatedRW, random, blockPos2, treeConfiguration);
+		setDirtAt(levelSimulatedRW, random, blockPos2.east(), treeConfiguration);
+		setDirtAt(levelSimulatedRW, random, blockPos2.south(), treeConfiguration);
+		setDirtAt(levelSimulatedRW, random, blockPos2.south().east(), treeConfiguration);
 		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		int j = i - random.nextInt(4);
 		int k = 2 - random.nextInt(3);

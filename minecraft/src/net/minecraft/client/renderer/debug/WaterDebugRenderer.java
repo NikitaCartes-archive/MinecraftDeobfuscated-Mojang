@@ -26,7 +26,7 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		LevelReader levelReader = this.minecraft.player.level;
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.color4f(0.0F, 1.0F, 0.0F, 0.75F);
+		RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 0.75F);
 		RenderSystem.disableTexture();
 		RenderSystem.lineWidth(6.0F);
 

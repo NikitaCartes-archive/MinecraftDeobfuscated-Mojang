@@ -8,6 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.configurations.BiasedRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
@@ -45,15 +46,15 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"lava_lake", new LakeLavaPlacementDecorator(ChanceDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<CountConfiguration> GLOWSTONE = register("glowstone", new GlowstoneDecorator(CountConfiguration.CODEC));
-	public static final FeatureDecorator<NoneDecoratorConfiguration> HEIGHTMAP = register("heightmap", new HeightmapDecorator<>(NoneDecoratorConfiguration.CODEC));
-	public static final FeatureDecorator<NoneDecoratorConfiguration> HEIGHTMAP_SPREAD_DOUBLE = register(
-		"heightmap_spread_double", new HeightmapDoubleDecorator<>(NoneDecoratorConfiguration.CODEC)
+	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
+	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = register(
+		"heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC)
 	);
-	public static final FeatureDecorator<NoneDecoratorConfiguration> TOP_SOLID_HEIGHTMAP = register(
-		"top_solid_heightmap", new TopSolidHeightMapDecorator(NoneDecoratorConfiguration.CODEC)
+	public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = register(
+		"heightmap_with_water_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC)
 	);
-	public static final FeatureDecorator<NoneDecoratorConfiguration> HEIGHTMAP_WORLD_SURFACE = register(
-		"heightmap_world_surface", new HeightMapWorldSurfaceDecorator(NoneDecoratorConfiguration.CODEC)
+	public static final FeatureDecorator<CaveDecoratorConfiguration> CAVE_SURFACE = register(
+		"cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
 	public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_BIASED_TO_BOTTOM = register(

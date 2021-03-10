@@ -174,7 +174,8 @@ public class PostChain implements AutoCloseable {
 								IOUtils.closeQuietly(resource);
 							}
 
-							textureManager.bind(resourceLocation);
+							RenderSystem.setShaderTexture(0, resourceLocation);
+							textureManager.bindForSetup(resourceLocation);
 							AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
 							int j = GsonHelper.getAsInt(jsonObject2, "width");
 							int k = GsonHelper.getAsInt(jsonObject2, "height");
@@ -295,7 +296,7 @@ public class PostChain implements AutoCloseable {
 	}
 
 	private void updateOrthoMatrix() {
-		this.shaderOrthoMatrix = Matrix4f.orthographic((float)this.screenTarget.width, (float)this.screenTarget.height, 0.1F, 1000.0F);
+		this.shaderOrthoMatrix = Matrix4f.orthographic(0.0F, (float)this.screenTarget.width, (float)this.screenTarget.height, 0.0F, 0.1F, 1000.0F);
 	}
 
 	public void resize(int i, int j) {

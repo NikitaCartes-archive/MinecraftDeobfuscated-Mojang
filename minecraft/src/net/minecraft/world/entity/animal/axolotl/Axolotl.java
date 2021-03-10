@@ -230,7 +230,7 @@ public class Axolotl extends Animal implements Bucketable {
 
 	@Override
 	public double getVisibilityPercent(@Nullable Entity entity) {
-		return this.isPlayingDead() ? 0.0 : 1.0;
+		return this.isPlayingDead() ? 0.0 : super.getVisibilityPercent(entity);
 	}
 
 	@Nullable

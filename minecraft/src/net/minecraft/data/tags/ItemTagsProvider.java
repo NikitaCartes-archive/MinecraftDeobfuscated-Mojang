@@ -64,6 +64,9 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
 		this.copy(BlockTags.REDSTONE_ORES, ItemTags.REDSTONE_ORES);
 		this.copy(BlockTags.LAPIS_ORES, ItemTags.LAPIS_ORES);
+		this.copy(BlockTags.COAL_ORES, ItemTags.COAL_ORES);
+		this.copy(BlockTags.EMERALD_ORES, ItemTags.EMERALD_ORES);
+		this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
 		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
 		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
 		this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);

@@ -219,7 +219,7 @@ public class TestCommand {
 			BlockPos blockPos2 = new BlockPos(
 				blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 			);
-			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new BlockPos(i, j, k), Rotation.NONE, serverLevel);
+			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
 
 			for (int l = 0; l < i; l++) {
 				for (int m = 0; m < k; m++) {

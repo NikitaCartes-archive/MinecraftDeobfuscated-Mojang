@@ -1,15 +1,18 @@
 package com.mojang.blaze3d.pipeline;
 
-import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
 
 @Environment(EnvType.CLIENT)
 public class RenderTarget {
@@ -54,7 +57,7 @@ public class RenderTarget {
 		}
 
 		this.createBuffers(i, j, bl);
-		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+		GlStateManager._glBindFramebuffer(36160, 0);
 	}
 
 	public void destroyBuffers() {
@@ -72,7 +75,7 @@ public class RenderTarget {
 		}
 
 		if (this.frameBufferId > -1) {
-			GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+			GlStateManager._glBindFramebuffer(36160, 0);
 			GlStateManager._glDeleteFramebuffers(this.frameBufferId);
 			this.frameBufferId = -1;
 		}
@@ -80,23 +83,10 @@ public class RenderTarget {
 
 	public void copyDepthFrom(RenderTarget renderTarget) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		if (GlStateManager.supportsFramebufferBlit()) {
-			GlStateManager._glBindFramebuffer(36008, renderTarget.frameBufferId);
-			GlStateManager._glBindFramebuffer(36009, this.frameBufferId);
-			GlStateManager._glBlitFrameBuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, this.width, this.height, 256, 9728);
-		} else {
-			GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
-			int i = GlStateManager.getFramebufferDepthTexture();
-			if (i != 0) {
-				int j = GlStateManager.getActiveTextureName();
-				GlStateManager._bindTexture(i);
-				GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, renderTarget.frameBufferId);
-				GlStateManager._glCopyTexSubImage2D(3553, 0, 0, 0, 0, 0, Math.min(this.width, renderTarget.width), Math.min(this.height, renderTarget.height));
-				GlStateManager._bindTexture(j);
-			}
-		}
-
-		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+		GlStateManager._glBindFramebuffer(36008, renderTarget.frameBufferId);
+		GlStateManager._glBindFramebuffer(36009, this.frameBufferId);
+		GlStateManager._glBlitFrameBuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, this.width, this.height, 256, 9728);
+		GlStateManager._glBindFramebuffer(36160, 0);
 	}
 
 	public void createBuffers(int i, int j, boolean bl) {
@@ -112,8 +102,6 @@ public class RenderTarget {
 			GlStateManager._bindTexture(this.depthBufferId);
 			GlStateManager._texParameter(3553, 10241, 9728);
 			GlStateManager._texParameter(3553, 10240, 9728);
-			GlStateManager._texParameter(3553, 10242, 10496);
-			GlStateManager._texParameter(3553, 10243, 10496);
 			GlStateManager._texParameter(3553, 34892, 0);
 			GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
 		}
@@ -121,10 +109,10 @@ public class RenderTarget {
 		this.setFilterMode(9728);
 		GlStateManager._bindTexture(this.colorTextureId);
 		GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
-		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
-		GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, 3553, this.colorTextureId, 0);
+		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
+		GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
 		if (this.useDepth) {
-			GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, 3553, this.depthBufferId, 0);
+			GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
 		}
 
 		this.checkStatus();
@@ -138,32 +126,25 @@ public class RenderTarget {
 		GlStateManager._bindTexture(this.colorTextureId);
 		GlStateManager._texParameter(3553, 10241, i);
 		GlStateManager._texParameter(3553, 10240, i);
-		GlStateManager._texParameter(3553, 10242, 10496);
-		GlStateManager._texParameter(3553, 10243, 10496);
 		GlStateManager._bindTexture(0);
 	}
 
 	public void checkStatus() {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		int i = GlStateManager.glCheckFramebufferStatus(GlConst.GL_FRAMEBUFFER);
-		if (i != GlConst.GL_FRAMEBUFFER_COMPLETE) {
-			if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+		int i = GlStateManager.glCheckFramebufferStatus(36160);
+		if (i != 36053) {
+			if (i == 36054) {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-			} else if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+			} else if (i == 36055) {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-			} else if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
+			} else if (i == 36059) {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
-			} else if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER) {
+			} else if (i == 36060) {
 				throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
 			} else {
 				throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
 			}
 		}
-	}
-
-	public void bindRead() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		GlStateManager._bindTexture(this.colorTextureId);
 	}
 
 	public void unbindRead() {
@@ -181,7 +162,7 @@ public class RenderTarget {
 
 	private void _bindWrite(boolean bl) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
+		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		if (bl) {
 			GlStateManager._viewport(0, 0, this.viewWidth, this.viewHeight);
 		}
@@ -189,9 +170,9 @@ public class RenderTarget {
 
 	public void unbindWrite() {
 		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0));
+			RenderSystem.recordRenderCall(() -> GlStateManager._glBindFramebuffer(36160, 0));
 		} else {
-			GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+			GlStateManager._glBindFramebuffer(36160, 0);
 		}
 	}
 
@@ -220,23 +201,25 @@ public class RenderTarget {
 		GlStateManager._colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
 		GlStateManager._depthMask(false);
-		GlStateManager._matrixMode(5889);
-		GlStateManager._loadIdentity();
-		GlStateManager._ortho(0.0, (double)i, (double)j, 0.0, 1000.0, 3000.0);
-		GlStateManager._matrixMode(5888);
-		GlStateManager._loadIdentity();
-		GlStateManager._translatef(0.0F, 0.0F, -2000.0F);
 		GlStateManager._viewport(0, 0, i, j);
-		GlStateManager._enableTexture();
-		GlStateManager._disableLighting();
-		GlStateManager._disableAlphaTest();
 		if (bl) {
 			GlStateManager._disableBlend();
-			GlStateManager._enableColorMaterial();
 		}
 
-		GlStateManager._color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.bindRead();
+		Minecraft minecraft = Minecraft.getInstance();
+		ShaderInstance shaderInstance = minecraft.gameRenderer.blitShader;
+		shaderInstance.setSampler("DiffuseSampler", this.colorTextureId);
+		Matrix4f matrix4f = Matrix4f.orthographic((float)i, (float)(-j), 1000.0F, 3000.0F);
+		RenderSystem.setProjectionMatrix(matrix4f);
+		if (shaderInstance.MODEL_VIEW_MATRIX != null) {
+			shaderInstance.MODEL_VIEW_MATRIX.set(Matrix4f.createTranslateMatrix(0.0F, 0.0F, -2000.0F));
+		}
+
+		if (shaderInstance.PROJECTION_MATRIX != null) {
+			shaderInstance.PROJECTION_MATRIX.set(matrix4f);
+		}
+
+		shaderInstance.apply();
 		float f = (float)i;
 		float g = (float)j;
 		float h = (float)this.viewWidth / (float)this.width;
@@ -248,8 +231,9 @@ public class RenderTarget {
 		bufferBuilder.vertex((double)f, (double)g, 0.0).uv(h, 0.0F).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex((double)f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0F, k).color(255, 255, 255, 255).endVertex();
-		tesselator.end();
-		this.unbindRead();
+		bufferBuilder.end();
+		BufferUploader._endInternal(bufferBuilder);
+		shaderInstance.clear();
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
 	}

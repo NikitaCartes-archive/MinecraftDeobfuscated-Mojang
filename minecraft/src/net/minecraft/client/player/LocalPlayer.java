@@ -312,7 +312,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	public void clientSideCloseContainer() {
-		this.getInventory().setCarried(ItemStack.EMPTY);
 		super.closeContainer();
 		this.minecraft.setScreen(null);
 	}

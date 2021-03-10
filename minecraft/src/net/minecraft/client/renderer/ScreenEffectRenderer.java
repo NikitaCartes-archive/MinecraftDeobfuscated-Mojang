@@ -28,7 +28,6 @@ public class ScreenEffectRenderer {
 	private static final ResourceLocation UNDERWATER_LOCATION = new ResourceLocation("textures/misc/underwater.png");
 
 	public static void renderScreenEffect(Minecraft minecraft, PoseStack poseStack) {
-		RenderSystem.disableAlphaTest();
 		Player player = minecraft.player;
 		if (!player.noPhysics) {
 			BlockState blockState = getViewBlockingState(player);
@@ -46,8 +45,6 @@ public class ScreenEffectRenderer {
 				renderFire(minecraft, poseStack);
 			}
 		}
-
-		RenderSystem.enableAlphaTest();
 	}
 
 	@Nullable
@@ -69,7 +66,7 @@ public class ScreenEffectRenderer {
 	}
 
 	private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
-		minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		float f = 0.1F;
 		float g = -1.0F;
@@ -92,12 +89,14 @@ public class ScreenEffectRenderer {
 	}
 
 	private static void renderWater(Minecraft minecraft, PoseStack poseStack) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.enableTexture();
-		minecraft.getTextureManager().bind(UNDERWATER_LOCATION);
+		RenderSystem.setShaderTexture(0, UNDERWATER_LOCATION);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		float f = minecraft.player.getBrightness();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.setShaderColor(f, f, f, 0.1F);
 		float g = 4.0F;
 		float h = -1.0F;
 		float i = 1.0F;
@@ -107,11 +106,11 @@ public class ScreenEffectRenderer {
 		float m = -minecraft.player.yRot / 64.0F;
 		float n = minecraft.player.xRot / 64.0F;
 		Matrix4f matrix4f = poseStack.last().pose();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).color(f, f, f, 0.1F).uv(4.0F + m, 4.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).color(f, f, f, 0.1F).uv(0.0F + m, 4.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).color(f, f, f, 0.1F).uv(0.0F + m, 0.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).color(f, f, f, 0.1F).uv(4.0F + m, 0.0F + n).endVertex();
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).uv(4.0F + m, 4.0F + n).endVertex();
+		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).uv(0.0F + m, 4.0F + n).endVertex();
+		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).uv(0.0F + m, 0.0F + n).endVertex();
+		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).uv(4.0F + m, 0.0F + n).endVertex();
 		bufferBuilder.end();
 		BufferUploader.end(bufferBuilder);
 		RenderSystem.disableBlend();
@@ -119,13 +118,14 @@ public class ScreenEffectRenderer {
 
 	private static void renderFire(Minecraft minecraft, PoseStack poseStack) {
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 		RenderSystem.depthFunc(519);
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableTexture();
 		TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_1.sprite();
-		minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
 		float f = textureAtlasSprite.getU0();
 		float g = textureAtlasSprite.getU1();
 		float h = (f + g) / 2.0F;

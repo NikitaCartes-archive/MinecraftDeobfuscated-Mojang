@@ -27,7 +27,10 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.server.LanServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -217,6 +220,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private final ServerData serverData;
 		private final ResourceLocation iconLocation;
 		private String lastIconB64;
+		@Nullable
 		private DynamicTexture icon;
 		private long lastClickTime;
 
@@ -225,7 +229,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			this.serverData = serverData;
 			this.minecraft = Minecraft.getInstance();
 			this.iconLocation = new ResourceLocation("servers/" + Hashing.sha1().hashUnencodedChars(serverData.ip) + "/icon");
-			this.icon = (DynamicTexture)this.minecraft.getTextureManager().getTexture(this.iconLocation);
+			AbstractTexture abstractTexture = this.minecraft.getTextureManager().getTexture(this.iconLocation, MissingTextureAtlasSprite.getTexture());
+			if (abstractTexture != MissingTextureAtlasSprite.getTexture() && abstractTexture instanceof DynamicTexture) {
+				this.icon = (DynamicTexture)abstractTexture;
+			}
 		}
 
 		@Override
@@ -300,8 +307,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				list2 = Collections.emptyList();
 			}
 
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
 			GuiComponent.blit(poseStack, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
 			String string = this.serverData.getIconB64();
 			if (!Objects.equals(string, this.lastIconB64)) {
@@ -313,10 +321,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				}
 			}
 
-			if (this.icon != null) {
-				this.drawIcon(poseStack, k, j, this.iconLocation);
-			} else {
+			if (this.icon == null) {
 				this.drawIcon(poseStack, k, j, ServerSelectionList.ICON_MISSING);
+			} else {
+				this.drawIcon(poseStack, k, j, this.iconLocation);
 			}
 
 			int t = n - k;
@@ -328,9 +336,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			if (this.minecraft.options.touchscreen || bl) {
-				this.minecraft.getTextureManager().bind(ServerSelectionList.ICON_OVERLAY_LOCATION);
+				RenderSystem.setShaderTexture(0, ServerSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				int v = n - k;
 				int w = o - j;
 				if (this.canJoin()) {
@@ -364,7 +373,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		}
 
 		protected void drawIcon(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
-			this.minecraft.getTextureManager().bind(resourceLocation);
+			RenderSystem.setShaderTexture(0, resourceLocation);
 			RenderSystem.enableBlend();
 			GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();

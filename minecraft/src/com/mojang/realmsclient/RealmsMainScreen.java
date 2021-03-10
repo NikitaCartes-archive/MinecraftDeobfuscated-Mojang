@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.mojang.realmsclient.client.Ping;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PingResult;
@@ -44,6 +45,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -735,8 +737,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		if (this.trialsAvailable && !this.createdTrial && this.shouldShowPopup()) {
-			this.minecraft.getTextureManager().bind(TRIAL_ICON_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = 8;
 			int l = 8;
 			int m = 0;
@@ -759,12 +761,13 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private void drawRealmsLogo(PoseStack poseStack, int i, int j) {
-		this.minecraft.getTextureManager().bind(LOGO_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.pushMatrix();
-		RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, LOGO_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		poseStack.pushPose();
+		poseStack.scale(0.5F, 0.5F, 0.5F);
 		GuiComponent.blit(poseStack, i * 2, j * 2 - 5, 0.0F, 0.0F, 200, 50, 200, 50);
-		RenderSystem.popMatrix();
+		poseStack.popPose();
 	}
 
 	@Override
@@ -806,19 +809,19 @@ public class RealmsMainScreen extends RealmsScreen {
 			this.showingPopup = true;
 		}
 
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.7F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.7F);
 		RenderSystem.enableBlend();
-		this.minecraft.getTextureManager().bind(DARKEN_LOCATION);
+		RenderSystem.setShaderTexture(0, DARKEN_LOCATION);
 		int m = 0;
 		int n = 32;
 		GuiComponent.blit(poseStack, 0, 32, 0.0F, 0.0F, this.width, this.height - 40 - 32, 310, 166);
 		RenderSystem.disableBlend();
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(POPUP_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, POPUP_LOCATION);
 		GuiComponent.blit(poseStack, k, l, 0.0F, 0.0F, 310, 166, 310, 166);
 		if (!teaserImages.isEmpty()) {
-			this.minecraft.getTextureManager().bind((ResourceLocation)teaserImages.get(this.carouselIndex));
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, (ResourceLocation)teaserImages.get(this.carouselIndex));
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k + 7, l + 7, 0.0F, 0.0F, 195, 152, 195, 152);
 			if (this.carouselTick % 95 < 5) {
 				if (!this.hasSwitchedCarouselImage) {
@@ -856,8 +859,8 @@ public class RealmsMainScreen extends RealmsScreen {
 			this.fillGradient(poseStack, k - 2, l + 17, k + 18, l + 18, n, n);
 		}
 
-		this.minecraft.getTextureManager().bind(INVITE_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, INVITE_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		boolean bl5 = bl2 && bl;
 		float g = bl5 ? 16.0F : 0.0F;
 		GuiComponent.blit(poseStack, k, l - 6, g, 0.0F, 15, 25, 31, 25);
@@ -865,8 +868,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		if (bl6) {
 			int o = (Math.min(m, 6) - 1) * 8;
 			int p = (int)(Math.max(0.0F, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57F), Mth.cos((float)this.animTick * 0.35F))) * -6.0F);
-			this.minecraft.getTextureManager().bind(INVITATION_ICONS_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, INVITATION_ICONS_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			float h = bl3 ? 8.0F : 0.0F;
 			GuiComponent.blit(poseStack, k + 4, l + 4 + p, (float)o, h, 8, 8, 48, 16);
 		}
@@ -924,8 +927,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
-		this.minecraft.getTextureManager().bind(EXPIRED_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, EXPIRED_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltip(SERVER_EXPIRED_TOOLTIP);
@@ -933,8 +936,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
-		this.minecraft.getTextureManager().bind(EXPIRES_SOON_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, EXPIRES_SOON_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (this.animTick % 20 < 10) {
 			GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
 		} else {
@@ -953,8 +956,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
-		this.minecraft.getTextureManager().bind(ON_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, ON_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltip(SERVER_OPEN_TOOLTIP);
@@ -962,8 +965,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
-		this.minecraft.getTextureManager().bind(OFF_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, OFF_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltip(SERVER_CLOSED_TOOLTIP);
@@ -976,8 +979,8 @@ public class RealmsMainScreen extends RealmsScreen {
 			bl = true;
 		}
 
-		this.minecraft.getTextureManager().bind(LEAVE_ICON_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, LEAVE_ICON_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 28.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, f, 0.0F, 28, 28, 56, 28);
 		if (bl) {
@@ -992,8 +995,8 @@ public class RealmsMainScreen extends RealmsScreen {
 			bl = true;
 		}
 
-		this.minecraft.getTextureManager().bind(CONFIGURE_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, CONFIGURE_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 28.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, f, 0.0F, 28, 28, 56, 28);
 		if (bl) {
@@ -1035,8 +1038,8 @@ public class RealmsMainScreen extends RealmsScreen {
 			bl2 = true;
 		}
 
-		this.minecraft.getTextureManager().bind(QUESTIONMARK_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, QUESTIONMARK_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 20.0F : 0.0F;
 		GuiComponent.blit(poseStack, k, l, f, 0.0F, 20, 20, 40, 20);
 		if (bl2) {
@@ -1050,11 +1053,11 @@ public class RealmsMainScreen extends RealmsScreen {
 			bl4 = true;
 		}
 
-		this.minecraft.getTextureManager().bind(NEWS_LOCATION);
+		RenderSystem.setShaderTexture(0, NEWS_LOCATION);
 		if (bl3) {
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		} else {
-			RenderSystem.color4f(0.5F, 0.5F, 0.5F, 1.0F);
+			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
 		}
 
 		boolean bl5 = bl3 && bl2;
@@ -1066,32 +1069,32 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		if (bl && bl3) {
 			int m = bl4 ? 0 : (int)(Math.max(0.0F, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57F), Mth.cos((float)this.animTick * 0.35F))) * -6.0F);
-			this.minecraft.getTextureManager().bind(INVITATION_ICONS_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, INVITATION_ICONS_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k + 10, l + 2 + m, 40.0F, 0.0F, 8, 8, 48, 16);
 		}
 	}
 
 	private void renderLocal(PoseStack poseStack) {
 		String string = "LOCAL!";
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef((float)(this.width / 2 - 25), 20.0F, 0.0F);
-		RenderSystem.rotatef(-20.0F, 0.0F, 0.0F, 1.0F);
-		RenderSystem.scalef(1.5F, 1.5F, 1.5F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		poseStack.pushPose();
+		poseStack.translate((double)(this.width / 2 - 25), 20.0, 0.0);
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
+		poseStack.scale(1.5F, 1.5F, 1.5F);
 		this.font.draw(poseStack, "LOCAL!", 0.0F, 0.0F, 8388479);
-		RenderSystem.popMatrix();
+		poseStack.popPose();
 	}
 
 	private void renderStage(PoseStack poseStack) {
 		String string = "STAGE!";
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef((float)(this.width / 2 - 25), 20.0F, 0.0F);
-		RenderSystem.rotatef(-20.0F, 0.0F, 0.0F, 1.0F);
-		RenderSystem.scalef(1.5F, 1.5F, 1.5F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		poseStack.pushPose();
+		poseStack.translate((double)(this.width / 2 - 25), 20.0, 0.0);
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
+		poseStack.scale(1.5F, 1.5F, 1.5F);
 		this.font.draw(poseStack, "STAGE!", 0.0F, 0.0F, -256);
-		RenderSystem.popMatrix();
+		poseStack.popPose();
 	}
 
 	public RealmsMainScreen newScreen() {
@@ -1130,8 +1133,8 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		@Override
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
-			RealmsMainScreen.this.minecraft.getTextureManager().bind(RealmsMainScreen.CROSS_ICON_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, RealmsMainScreen.CROSS_ICON_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			float g = this.isHovered() ? 12.0F : 0.0F;
 			blit(poseStack, this.x, this.y, 0.0F, g, 12, 12, 12, 24);
 			if (this.isMouseOver((double)i, (double)j)) {
@@ -1378,9 +1381,8 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		private void renderLegacy(RealmsServer realmsServer, PoseStack poseStack, int i, int j, int k, int l) {
 			if (realmsServer.state == RealmsServer.State.UNINITIALIZED) {
-				RealmsMainScreen.this.minecraft.getTextureManager().bind(RealmsMainScreen.WORLDICON_LOCATION);
-				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-				RenderSystem.enableAlphaTest();
+				RenderSystem.setShaderTexture(0, RealmsMainScreen.WORLDICON_LOCATION);
+				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.blit(poseStack, i + 10, j + 6, 0.0F, 0.0F, 40, 20, 40, 20);
 				float f = 0.5F + (1.0F + Mth.sin((float)RealmsMainScreen.this.animTick * 0.25F)) * 0.25F;
 				int m = 0xFF000000 | (int)(127.0F * f) << 16 | (int)(255.0F * f) << 8 | (int)(127.0F * f);
@@ -1419,9 +1421,9 @@ public class RealmsMainScreen extends RealmsScreen {
 				}
 
 				if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.expired) {
-					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					RenderSystem.enableBlend();
-					RealmsMainScreen.this.minecraft.getTextureManager().bind(RealmsMainScreen.BUTTON_LOCATION);
+					RenderSystem.setShaderTexture(0, RealmsMainScreen.BUTTON_LOCATION);
 					RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 					Component component;
 					Component component2;
@@ -1470,7 +1472,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
 				RealmsMainScreen.this.font.draw(poseStack, realmsServer.getName(), (float)(i + 2), (float)(j + 1), 16777215);
 				RealmsTextureManager.withBoundFace(realmsServer.ownerUUID, () -> {
-					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					GuiComponent.blit(poseStack, i - 36, j, 32, 32, 8.0F, 8.0F, 8, 8, 64, 64);
 					GuiComponent.blit(poseStack, i - 36, j, 32, 32, 40.0F, 8.0F, 8, 8, 64, 64);
 				});

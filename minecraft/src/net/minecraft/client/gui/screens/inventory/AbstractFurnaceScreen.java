@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.recipebook.AbstractFurnaceRecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -73,8 +74,9 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(this.texture);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, this.texture);
 		int k = this.leftPos;
 		int l = this.topPos;
 		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);

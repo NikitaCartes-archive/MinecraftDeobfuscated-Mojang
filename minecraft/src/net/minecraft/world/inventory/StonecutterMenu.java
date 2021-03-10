@@ -54,7 +54,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 			}
 
 			@Override
-			public ItemStack onTake(Player player, ItemStack itemStack) {
+			public void onTake(Player player, ItemStack itemStack) {
 				itemStack.onCraftedBy(player.level, player, itemStack.getCount());
 				StonecutterMenu.this.resultContainer.awardUsedRecipes(player);
 				ItemStack itemStack2 = StonecutterMenu.this.inputSlot.remove(1);
@@ -69,7 +69,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 						StonecutterMenu.this.lastSoundTime = l;
 					}
 				});
-				return super.onTake(player, itemStack);
+				super.onTake(player, itemStack);
 			}
 		});
 

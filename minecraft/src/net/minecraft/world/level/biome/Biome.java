@@ -250,15 +250,11 @@ public final class Biome {
 
 					try {
 						int q = worldGenRegion.getMinBuildHeight() + 1;
+						int r = worldGenRegion.getMaxBuildHeight() - 1;
 						structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature)
 							.forEach(
 								structureStart -> structureStart.placeInChunk(
-										worldGenRegion,
-										structureFeatureManager,
-										chunkGenerator,
-										worldgenRandom,
-										new BoundingBox(o, q, p, o + 15, worldGenRegion.getMaxBuildHeight() - 1, p + 15),
-										new ChunkPos(m, n)
+										worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)
 									)
 							);
 					} catch (Exception var21) {
@@ -533,7 +529,8 @@ public final class Biome {
 		RIVER("river"),
 		SWAMP("swamp"),
 		MUSHROOM("mushroom"),
-		NETHER("nether");
+		NETHER("nether"),
+		UNDERGROUND("underground");
 
 		public static final Codec<Biome.BiomeCategory> CODEC = StringRepresentable.fromEnum(Biome.BiomeCategory::values, Biome.BiomeCategory::byName);
 		private static final Map<String, Biome.BiomeCategory> BY_NAME = (Map<String, Biome.BiomeCategory>)Arrays.stream(values())

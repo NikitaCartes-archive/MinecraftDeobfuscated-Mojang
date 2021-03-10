@@ -47,56 +47,64 @@ public class GiveCommand {
 	}
 
 	private static int giveItem(CommandSourceStack commandSourceStack, ItemInput itemInput, Collection<ServerPlayer> collection, int i) throws CommandSyntaxException {
-		for (ServerPlayer serverPlayer : collection) {
-			int j = i;
+		int j = itemInput.getItem().getMaxStackSize();
+		int k = j * 100;
+		if (i > k) {
+			String string = itemInput.getItem().getDescriptionId();
+			commandSourceStack.sendFailure(new TranslatableComponent("commands.give.failed.toomanyitems", k, string));
+			return 0;
+		} else {
+			for (ServerPlayer serverPlayer : collection) {
+				int l = i;
 
-			while (j > 0) {
-				int k = Math.min(itemInput.getItem().getMaxStackSize(), j);
-				j -= k;
-				ItemStack itemStack = itemInput.createItemStack(k, false);
-				boolean bl = serverPlayer.getInventory().add(itemStack);
-				if (bl && itemStack.isEmpty()) {
-					itemStack.setCount(1);
-					ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
-					if (itemEntity != null) {
-						itemEntity.makeFakeItem();
-					}
+				while (l > 0) {
+					int m = Math.min(j, l);
+					l -= m;
+					ItemStack itemStack = itemInput.createItemStack(m, false);
+					boolean bl = serverPlayer.getInventory().add(itemStack);
+					if (bl && itemStack.isEmpty()) {
+						itemStack.setCount(1);
+						ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
+						if (itemEntity != null) {
+							itemEntity.makeFakeItem();
+						}
 
-					serverPlayer.level
-						.playSound(
-							null,
-							serverPlayer.getX(),
-							serverPlayer.getY(),
-							serverPlayer.getZ(),
-							SoundEvents.ITEM_PICKUP,
-							SoundSource.PLAYERS,
-							0.2F,
-							((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
-						);
-					serverPlayer.inventoryMenu.broadcastChanges();
-				} else {
-					ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
-					if (itemEntity != null) {
-						itemEntity.setNoPickUpDelay();
-						itemEntity.setOwner(serverPlayer.getUUID());
+						serverPlayer.level
+							.playSound(
+								null,
+								serverPlayer.getX(),
+								serverPlayer.getY(),
+								serverPlayer.getZ(),
+								SoundEvents.ITEM_PICKUP,
+								SoundSource.PLAYERS,
+								0.2F,
+								((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
+							);
+						serverPlayer.containerMenu.broadcastChanges();
+					} else {
+						ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
+						if (itemEntity != null) {
+							itemEntity.setNoPickUpDelay();
+							itemEntity.setOwner(serverPlayer.getUUID());
+						}
 					}
 				}
 			}
-		}
 
-		if (collection.size() == 1) {
-			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
-					"commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
-				),
-				true
-			);
-		} else {
-			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), collection.size()), true
-			);
-		}
+			if (collection.size() == 1) {
+				commandSourceStack.sendSuccess(
+					new TranslatableComponent(
+						"commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
+					),
+					true
+				);
+			} else {
+				commandSourceStack.sendSuccess(
+					new TranslatableComponent("commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), collection.size()), true
+				);
+			}
 
-		return collection.size();
+			return collection.size();
+		}
 	}
 }

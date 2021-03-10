@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -130,10 +131,10 @@ public class JigsawBlockEntity extends BlockEntity {
 		BlockPos blockPos = this.getBlockPos();
 		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 		StructureTemplate structureTemplate = new StructureTemplate();
-		structureTemplate.fillFromWorld(serverLevel, blockPos, new BlockPos(1, 1, 1), false, null);
+		structureTemplate.fillFromWorld(serverLevel, blockPos, new Vec3i(1, 1, 1), false, null);
 		StructurePoolElement structurePoolElement = new SinglePoolElement(structureTemplate);
 		PoolElementStructurePiece poolElementStructurePiece = new PoolElementStructurePiece(
-			structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos)
+			structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos)
 		);
 		JigsawPlacement.addPieces(
 			serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random, serverLevel

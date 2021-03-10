@@ -26,12 +26,6 @@ public class OverlayTexture implements AutoCloseable {
 
 		RenderSystem.activeTexture(33985);
 		this.texture.bind();
-		RenderSystem.matrixMode(5890);
-		RenderSystem.loadIdentity();
-		float f = 0.06666667F;
-		RenderSystem.scalef(0.06666667F, 0.06666667F, 0.06666667F);
-		RenderSystem.matrixMode(5888);
-		this.texture.bind();
 		nativeImage.upload(0, 0, 0, 0, 0, nativeImage.getWidth(), nativeImage.getHeight(), false, true, false, false);
 		RenderSystem.activeTexture(33984);
 	}

@@ -42,8 +42,8 @@ public enum BlockModelRotation implements ModelState {
 
 	private BlockModelRotation(int j, int k) {
 		this.index = getIndex(j, k);
-		Quaternion quaternion = new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (float)(-k), true);
-		quaternion.mul(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (float)(-j), true));
+		Quaternion quaternion = Vector3f.YP.rotationDegrees((float)(-k));
+		quaternion.mul(Vector3f.XP.rotationDegrees((float)(-j)));
 		OctahedralGroup octahedralGroup = OctahedralGroup.IDENTITY;
 
 		for (int l = 0; l < k; l += 90) {

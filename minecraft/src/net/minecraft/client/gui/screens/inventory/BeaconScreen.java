@@ -7,8 +7,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -43,15 +43,11 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		this.imageHeight = 219;
 		beaconMenu.addSlotListener(new ContainerListener() {
 			@Override
-			public void refreshContainer(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList) {
-			}
-
-			@Override
 			public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
 			}
 
 			@Override
-			public void setContainerData(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+			public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
 				BeaconScreen.this.primary = beaconMenu.getPrimaryEffect();
 				BeaconScreen.this.secondary = beaconMenu.getSecondaryEffect();
 				BeaconScreen.this.initPowerButtons = true;
@@ -141,8 +137,9 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(BEACON_LOCATION);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, BEACON_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
@@ -248,7 +245,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		protected void renderIcon(PoseStack poseStack) {
-			Minecraft.getInstance().getTextureManager().bind(this.sprite.atlas().location());
+			RenderSystem.setShaderTexture(0, this.sprite.atlas().location());
 			blit(poseStack, this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
 		}
 	}
@@ -263,8 +260,9 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
-			Minecraft.getInstance().getTextureManager().bind(BeaconScreen.BEACON_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, BeaconScreen.BEACON_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = 219;
 			int l = 0;
 			if (!this.active) {

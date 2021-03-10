@@ -16,8 +16,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
@@ -38,7 +38,7 @@ public class BundleItem extends Item {
 	}
 
 	@Override
-	public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Inventory inventory) {
+	public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
 		if (clickAction != ClickAction.SECONDARY) {
 			return false;
 		} else {
@@ -47,7 +47,7 @@ public class BundleItem extends Item {
 				removeOne(itemStack).ifPresent(itemStack2x -> add(itemStack, slot.safeInsert(itemStack2x)));
 			} else if (itemStack2.getItem().canFitInsideContainerItems()) {
 				int i = (64 - getContentWeight(itemStack)) / getWeight(itemStack2);
-				add(itemStack, slot.safeTake(itemStack2.getCount(), i, inventory.player));
+				add(itemStack, slot.safeTake(itemStack2.getCount(), i, player));
 			}
 
 			return true;
@@ -55,10 +55,10 @@ public class BundleItem extends Item {
 	}
 
 	@Override
-	public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Inventory inventory) {
-		if (clickAction == ClickAction.SECONDARY && slot.allowModification(inventory.player)) {
+	public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess) {
+		if (clickAction == ClickAction.SECONDARY && slot.allowModification(player)) {
 			if (itemStack2.isEmpty()) {
-				removeOne(itemStack).ifPresent(inventory::setCarried);
+				removeOne(itemStack).ifPresent(slotAccess::set);
 			} else {
 				itemStack2.shrink(add(itemStack, itemStack2));
 			}

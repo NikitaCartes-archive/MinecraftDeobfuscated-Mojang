@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.Runnables;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.CubeMap;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
@@ -263,16 +265,18 @@ public class TitleScreen extends Screen {
 		int k = 274;
 		int l = this.width / 2 - 137;
 		int m = 30;
-		this.minecraft.getTextureManager().bind(PANORAMA_OVERLAY);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, PANORAMA_OVERLAY);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0F, 1.0F)) : 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0F, 1.0F)) : 1.0F);
 		blit(poseStack, 0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
 		float h = this.fading ? Mth.clamp(g - 1.0F, 0.0F, 1.0F) : 1.0F;
 		int n = Mth.ceil(h * 255.0F) << 24;
 		if ((n & -67108864) != 0) {
-			this.minecraft.getTextureManager().bind(MINECRAFT_LOGO);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, h);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, MINECRAFT_LOGO);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, h);
 			if (this.minceraftEasterEgg) {
 				this.blitOutlineBlack(l, 30, (integer, integer2) -> {
 					this.blit(poseStack, integer + 0, integer2, 0, 0, 99, 44);
@@ -288,17 +292,17 @@ public class TitleScreen extends Screen {
 				});
 			}
 
-			this.minecraft.getTextureManager().bind(MINECRAFT_EDITION);
+			RenderSystem.setShaderTexture(0, MINECRAFT_EDITION);
 			blit(poseStack, l + 88, 67, 0.0F, 0.0F, 98, 14, 128, 16);
 			if (this.splash != null) {
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef((float)(this.width / 2 + 90), 70.0F, 0.0F);
-				RenderSystem.rotatef(-20.0F, 0.0F, 0.0F, 1.0F);
+				poseStack.pushPose();
+				poseStack.translate((double)(this.width / 2 + 90), 70.0, 0.0);
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
 				float o = 1.8F - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0F * (float) (Math.PI * 2)) * 0.1F);
 				o = o * 100.0F / (float)(this.font.width(this.splash) + 32);
-				RenderSystem.scalef(o, o, o);
+				poseStack.scale(o, o, o);
 				drawCenteredString(poseStack, this.font, this.splash, 0, -8, 16776960 | n);
-				RenderSystem.popMatrix();
+				poseStack.popPose();
 			}
 
 			String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();

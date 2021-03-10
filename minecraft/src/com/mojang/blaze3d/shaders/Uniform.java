@@ -3,6 +3,7 @@ package com.mojang.blaze3d.shaders;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
@@ -21,13 +22,13 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	private final FloatBuffer floatValues;
 	private final String name;
 	private boolean dirty;
-	private final Effect parent;
+	private final Shader parent;
 
-	public Uniform(String string, int i, int j, Effect effect) {
+	public Uniform(String string, int i, int j, Shader shader) {
 		this.name = string;
 		this.count = j;
 		this.type = i;
-		this.parent = effect;
+		this.parent = shader;
 		if (i <= 3) {
 			this.intValues = MemoryUtil.memAllocInt(j);
 			this.floatValues = null;
@@ -50,6 +51,10 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 
 	public static int glGetAttribLocation(int i, CharSequence charSequence) {
 		return GlStateManager._glGetAttribLocation(i, charSequence);
+	}
+
+	public static void glBindAttribLocation(int i, int j, CharSequence charSequence) {
+		GlStateManager._glBindAttribLocation(i, j, charSequence);
 	}
 
 	public void close() {
@@ -97,14 +102,14 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void set(float f) {
+	public final void set(float f) {
 		this.floatValues.position(0);
 		this.floatValues.put(0, f);
 		this.markDirty();
 	}
 
 	@Override
-	public void set(float f, float g) {
+	public final void set(float f, float g) {
 		this.floatValues.position(0);
 		this.floatValues.put(0, f);
 		this.floatValues.put(1, g);
@@ -112,7 +117,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void set(float f, float g, float h) {
+	public final void set(float f, float g, float h) {
 		this.floatValues.position(0);
 		this.floatValues.put(0, f);
 		this.floatValues.put(1, g);
@@ -121,7 +126,16 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void set(float f, float g, float h, float i) {
+	public final void set(Vector3f vector3f) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, vector3f.x());
+		this.floatValues.put(1, vector3f.y());
+		this.floatValues.put(2, vector3f.z());
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(float f, float g, float h, float i) {
 		this.floatValues.position(0);
 		this.floatValues.put(f);
 		this.floatValues.put(g);
@@ -132,7 +146,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void setSafe(float f, float g, float h, float i) {
+	public final void setSafe(float f, float g, float h, float i) {
 		this.floatValues.position(0);
 		if (this.type >= 4) {
 			this.floatValues.put(0, f);
@@ -154,7 +168,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void setSafe(int i, int j, int k, int l) {
+	public final void setSafe(int i, int j, int k, int l) {
 		this.intValues.position(0);
 		if (this.type >= 0) {
 			this.intValues.put(0, i);
@@ -176,7 +190,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void set(float[] fs) {
+	public final void set(float[] fs) {
 		if (fs.length < this.count) {
 			LOGGER.warn("Uniform.set called with a too-small value array (expected {}, got {}). Ignoring.", this.count, fs.length);
 		} else {
@@ -188,7 +202,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
-	public void set(Matrix4f matrix4f) {
+	public final void set(Matrix4f matrix4f) {
 		this.floatValues.position(0);
 		matrix4f.store(this.floatValues);
 		this.markDirty();

@@ -50,7 +50,6 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 			BlockPos blockPos = new BlockPos(d, 0.0, f);
 			this.trackedGameEvents.removeIf(GameEventListenerRenderer.TrackedGameEvent::isExpired);
 			this.trackedListeners.removeIf(trackedListener -> trackedListener.isExpired(level, blockPos));
-			RenderSystem.pushMatrix();
 			RenderSystem.disableTexture();
 			RenderSystem.enableDepthTest();
 			RenderSystem.enableBlend();
@@ -146,7 +145,6 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 			RenderSystem.depthMask(true);
 			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
-			RenderSystem.popMatrix();
 		}
 	}
 

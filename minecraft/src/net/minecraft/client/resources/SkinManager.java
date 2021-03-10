@@ -25,6 +25,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 
@@ -64,12 +65,8 @@ public class SkinManager {
 	) {
 		String string = Hashing.sha1().hashUnencodedChars(minecraftProfileTexture.getHash()).toString();
 		ResourceLocation resourceLocation = new ResourceLocation("skins/" + string);
-		AbstractTexture abstractTexture = this.textureManager.getTexture(resourceLocation);
-		if (abstractTexture != null) {
-			if (skinTextureCallback != null) {
-				skinTextureCallback.onSkinTextureAvailable(type, resourceLocation, minecraftProfileTexture);
-			}
-		} else {
+		AbstractTexture abstractTexture = this.textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
+		if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
 			File file = new File(this.skinsDirectory, string.length() > 2 ? string.substring(0, 2) : "xx");
 			File file2 = new File(file, string);
 			HttpTexture httpTexture = new HttpTexture(file2, minecraftProfileTexture.getUrl(), DefaultPlayerSkin.getDefaultSkin(), type == Type.SKIN, () -> {
@@ -78,6 +75,8 @@ public class SkinManager {
 				}
 			});
 			this.textureManager.register(resourceLocation, httpTexture);
+		} else if (skinTextureCallback != null) {
+			skinTextureCallback.onSkinTextureAvailable(type, resourceLocation, minecraftProfileTexture);
 		}
 
 		return resourceLocation;

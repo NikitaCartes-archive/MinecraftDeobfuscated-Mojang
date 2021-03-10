@@ -53,24 +53,28 @@ public abstract class Column {
 			return Optional.empty();
 		} else {
 			int j = blockPos.getY();
-			mutableBlockPos.setY(j);
-
-			for (int k = 1; k < i && levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate); k++) {
-				mutableBlockPos.move(Direction.UP);
-			}
-
-			OptionalInt optionalInt = levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
-			mutableBlockPos.setY(j);
-
-			for (int l = 1; l < i && levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate); l++) {
-				mutableBlockPos.move(Direction.DOWN);
-			}
-
-			OptionalInt optionalInt2 = levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2)
-				? OptionalInt.of(mutableBlockPos.getY())
-				: OptionalInt.empty();
+			OptionalInt optionalInt = scanDirection(levelSimulatedReader, i, predicate, predicate2, mutableBlockPos, j, Direction.UP);
+			OptionalInt optionalInt2 = scanDirection(levelSimulatedReader, i, predicate, predicate2, mutableBlockPos, j, Direction.DOWN);
 			return Optional.of(create(optionalInt2, optionalInt));
 		}
+	}
+
+	private static OptionalInt scanDirection(
+		LevelSimulatedReader levelSimulatedReader,
+		int i,
+		Predicate<BlockState> predicate,
+		Predicate<BlockState> predicate2,
+		BlockPos.MutableBlockPos mutableBlockPos,
+		int j,
+		Direction direction
+	) {
+		mutableBlockPos.setY(j);
+
+		for (int k = 1; k < i && levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate); k++) {
+			mutableBlockPos.move(direction);
+		}
+
+		return levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
 	}
 
 	public static final class Line extends Column {

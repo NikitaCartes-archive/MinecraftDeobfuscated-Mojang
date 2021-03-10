@@ -180,7 +180,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		if (!this.canReplaceBlock(blockState, blockState2) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
-			if (mutableBlockPos.getY() < carvingContext.getMinGenY() + 11 && !isDebugEnabled(carverConfiguration)) {
+			if (mutableBlockPos.getY() < carvingContext.getMinGenY() + 9 && !isDebugEnabled(carverConfiguration)) {
 				chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
 			} else {
 				chunkAccess.setBlockState(mutableBlockPos, getCaveAirState(carverConfiguration), false);

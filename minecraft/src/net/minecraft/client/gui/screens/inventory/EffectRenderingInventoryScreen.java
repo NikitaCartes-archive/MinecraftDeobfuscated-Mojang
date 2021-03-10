@@ -52,7 +52,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int i = this.leftPos - 124;
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty()) {
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int j = 33;
 			if (collection.size() > 5) {
 				j = 132 / (collection.size() - 1);
@@ -66,11 +66,11 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 	}
 
 	private void renderBackgrounds(PoseStack poseStack, int i, int j, Iterable<MobEffectInstance> iterable) {
-		this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
+		RenderSystem.setShaderTexture(0, INVENTORY_LOCATION);
 		int k = this.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			this.blit(poseStack, i, k, 0, 166, 140, 32);
 			k += j;
 		}
@@ -83,7 +83,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			MobEffect mobEffect = mobEffectInstance.getEffect();
 			TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
-			this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+			RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
 			blit(poseStack, i + 6, k + 7, this.getBlitOffset(), 18, 18, textureAtlasSprite);
 			k += j;
 		}
