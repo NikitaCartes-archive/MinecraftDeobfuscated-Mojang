@@ -669,6 +669,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.WEATHERED_COPPER);
         this.dropSelf(Blocks.OXIDIZED_COPPER);
         this.dropSelf(Blocks.COPPER_ORE);
+        this.dropSelf(Blocks.DEEPSLATE_COPPER_ORE);
         this.dropSelf(Blocks.CUT_COPPER);
         this.dropSelf(Blocks.EXPOSED_CUT_COPPER);
         this.dropSelf(Blocks.WEATHERED_CUT_COPPER);
@@ -709,6 +710,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.DEEPSLATE_BRICK_STAIRS);
         this.dropSelf(Blocks.DEEPSLATE_BRICK_WALL);
         this.dropSelf(Blocks.CHISELED_DEEPSLATE);
+        this.dropSelf(Blocks.CRACKED_DEEPSLATE_BRICKS);
+        this.dropSelf(Blocks.CRACKED_DEEPSLATE_TILES);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);
@@ -943,7 +946,9 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.BROWN_MUSHROOM_BLOCK, (Block block) -> BlockLoot.createMushroomBlockDrop(block, Blocks.BROWN_MUSHROOM));
         this.add(Blocks.RED_MUSHROOM_BLOCK, (Block block) -> BlockLoot.createMushroomBlockDrop(block, Blocks.RED_MUSHROOM));
         this.add(Blocks.COAL_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.COAL));
+        this.add(Blocks.DEEPSLATE_COAL_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.COAL));
         this.add(Blocks.EMERALD_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.EMERALD));
+        this.add(Blocks.DEEPSLATE_EMERALD_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.EMERALD));
         this.add(Blocks.NETHER_QUARTZ_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.QUARTZ));
         this.add(Blocks.DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
         this.add(Blocks.DEEPSLATE_DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
@@ -1048,6 +1053,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.otherWhenSilkTouch(Blocks.INFESTED_MOSSY_STONE_BRICKS, Blocks.MOSSY_STONE_BRICKS);
         this.otherWhenSilkTouch(Blocks.INFESTED_CRACKED_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS);
         this.otherWhenSilkTouch(Blocks.INFESTED_CHISELED_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS);
+        this.otherWhenSilkTouch(Blocks.INFESTED_DEEPSLATE, Blocks.DEEPSLATE);
         this.addNetherVinesDropTable(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT);
         this.addNetherVinesDropTable(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
         this.add(Blocks.CAKE, BlockLoot.noDrop());

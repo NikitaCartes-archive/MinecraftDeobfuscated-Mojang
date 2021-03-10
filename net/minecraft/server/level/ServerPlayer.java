@@ -40,6 +40,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
@@ -109,6 +110,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ComplexItem;
@@ -144,8 +146,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerPlayer
-extends Player
-implements ContainerListener {
+extends Player {
     private static final Logger LOGGER = LogManager.getLogger();
     public ServerGamePacketListenerImpl connection;
     public final MinecraftServer server;
@@ -184,8 +185,57 @@ implements ContainerListener {
     private float respawnAngle;
     private final TextFilter textFilter;
     private boolean textFilteringEnabled = true;
+    private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer(){
+
+        @Override
+        public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
+            ServerPlayer.this.connection.send(new ClientboundContainerSetContentPacket(abstractContainerMenu.containerId, nonNullList));
+            this.broadcastCarriedItem(itemStack);
+            for (int i = 0; i < is.length; ++i) {
+                this.broadcastDataValue(abstractContainerMenu, i, is[i]);
+            }
+        }
+
+        @Override
+        public void sendSlotChange(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
+            ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, i, itemStack));
+        }
+
+        @Override
+        public void sendCarriedChange(AbstractContainerMenu abstractContainerMenu, ItemStack itemStack) {
+            this.broadcastCarriedItem(itemStack);
+        }
+
+        @Override
+        public void sendDataChange(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+            this.broadcastDataValue(abstractContainerMenu, i, j);
+        }
+
+        private void broadcastDataValue(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+            ServerPlayer.this.connection.send(new ClientboundContainerSetDataPacket(abstractContainerMenu.containerId, i, j));
+        }
+
+        private void broadcastCarriedItem(ItemStack itemStack) {
+            ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, itemStack));
+        }
+    };
+    private final ContainerListener containerListener = new ContainerListener(){
+
+        @Override
+        public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
+            if (abstractContainerMenu.getSlot(i) instanceof ResultSlot) {
+                return;
+            }
+            if (abstractContainerMenu == ServerPlayer.this.inventoryMenu) {
+                CriteriaTriggers.INVENTORY_CHANGED.trigger(ServerPlayer.this, ServerPlayer.this.getInventory(), itemStack);
+            }
+        }
+
+        @Override
+        public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+        }
+    };
     private int containerCounter;
-    public boolean ignoreSlotUpdateHack;
     public int latency;
     public boolean wonGame;
 
@@ -322,8 +372,13 @@ implements ContainerListener {
         this.lastSentExp = -1;
     }
 
-    public void initMenu() {
-        this.containerMenu.addSlotListener(this);
+    private void initMenu(AbstractContainerMenu abstractContainerMenu) {
+        abstractContainerMenu.addSlotListener(this.containerListener);
+        abstractContainerMenu.setSynchronizer(this.containerSynchronizer);
+    }
+
+    public void initInventoryMenu() {
+        this.initMenu(this.inventoryMenu);
     }
 
     @Override
@@ -815,6 +870,7 @@ implements ContainerListener {
     @Override
     public void openTextEdit(SignBlockEntity signBlockEntity) {
         signBlockEntity.setAllowedPlayerEditor(this);
+        this.connection.send(new ClientboundBlockUpdatePacket(this.level, signBlockEntity.getBlockPos()));
         this.connection.send(new ClientboundOpenSignEditorPacket(signBlockEntity.getBlockPos()));
     }
 
@@ -839,7 +895,7 @@ implements ContainerListener {
             return OptionalInt.empty();
         }
         this.connection.send(new ClientboundOpenScreenPacket(abstractContainerMenu.containerId, abstractContainerMenu.getType(), menuProvider.getDisplayName()));
-        abstractContainerMenu.addSlotListener(this);
+        this.initMenu(abstractContainerMenu);
         this.containerMenu = abstractContainerMenu;
         return OptionalInt.of(this.containerCounter);
     }
@@ -857,7 +913,7 @@ implements ContainerListener {
         this.nextContainerCounter();
         this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, container.getContainerSize(), abstractHorse.getId()));
         this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), container, abstractHorse);
-        this.containerMenu.addSlotListener(this);
+        this.initMenu(this.containerMenu);
     }
 
     @Override
@@ -877,49 +933,14 @@ implements ContainerListener {
     }
 
     @Override
-    public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
-        if (abstractContainerMenu.getSlot(i) instanceof ResultSlot) {
-            return;
-        }
-        if (abstractContainerMenu == this.inventoryMenu) {
-            CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.getInventory(), itemStack);
-        }
-        if (this.ignoreSlotUpdateHack) {
-            return;
-        }
-        this.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, i, itemStack));
-    }
-
-    public void refreshContainer(AbstractContainerMenu abstractContainerMenu) {
-        this.refreshContainer(abstractContainerMenu, abstractContainerMenu.getItems());
-    }
-
-    @Override
-    public void refreshContainer(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList) {
-        this.connection.send(new ClientboundContainerSetContentPacket(abstractContainerMenu.containerId, nonNullList));
-        this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.getInventory().getCarried()));
-    }
-
-    @Override
-    public void setContainerData(AbstractContainerMenu abstractContainerMenu, int i, int j) {
-        this.connection.send(new ClientboundContainerSetDataPacket(abstractContainerMenu.containerId, i, j));
-    }
-
-    @Override
     public void closeContainer() {
         this.connection.send(new ClientboundContainerClosePacket(this.containerMenu.containerId));
         this.doCloseContainer();
     }
 
-    public void broadcastCarriedItem() {
-        if (this.ignoreSlotUpdateHack) {
-            return;
-        }
-        this.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, this.getInventory().getCarried()));
-    }
-
     public void doCloseContainer() {
         this.containerMenu.removed(this);
+        this.inventoryMenu.transferState(this.containerMenu);
         this.containerMenu = this.inventoryMenu;
     }
 

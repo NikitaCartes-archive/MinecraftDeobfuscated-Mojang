@@ -72,7 +72,7 @@ extends AbstractContainerMenu {
             }
 
             @Override
-            public ItemStack onTake(Player player, ItemStack itemStack) {
+            public void onTake(Player player, ItemStack itemStack) {
                 ((Slot)CartographyTableMenu.this.slots.get(0)).remove(1);
                 ((Slot)CartographyTableMenu.this.slots.get(1)).remove(1);
                 itemStack.getItem().onCraftedBy(itemStack, player.level, player);
@@ -83,7 +83,7 @@ extends AbstractContainerMenu {
                         CartographyTableMenu.this.lastSoundTime = l;
                     }
                 });
-                return super.onTake(player, itemStack);
+                super.onTake(player, itemStack);
             }
         });
         for (j = 0; j < 3; ++j) {

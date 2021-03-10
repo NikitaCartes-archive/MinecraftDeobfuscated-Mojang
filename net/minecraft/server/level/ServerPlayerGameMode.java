@@ -267,7 +267,7 @@ public class ServerPlayerGameMode {
             serverPlayer.setItemInHand(interactionHand, ItemStack.EMPTY);
         }
         if (!serverPlayer.isUsingItem()) {
-            serverPlayer.refreshContainer(serverPlayer.inventoryMenu);
+            serverPlayer.inventoryMenu.sendAllDataToRemote();
         }
         return interactionResultHolder.getResult();
     }

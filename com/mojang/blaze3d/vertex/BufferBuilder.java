@@ -253,6 +253,16 @@ implements BufferVertexConsumer {
         }
         ++this.vertices;
         this.ensureVertexCapacity();
+        if (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP) {
+            int i = this.format.getVertexSize();
+            this.buffer.position(this.nextElementByte);
+            ByteBuffer byteBuffer = this.buffer.duplicate();
+            byteBuffer.position(this.nextElementByte - i).limit(this.nextElementByte);
+            this.buffer.put(byteBuffer);
+            this.nextElementByte += i;
+            ++this.vertices;
+            this.ensureVertexCapacity();
+        }
     }
 
     @Override

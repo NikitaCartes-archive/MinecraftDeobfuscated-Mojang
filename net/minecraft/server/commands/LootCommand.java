@@ -155,9 +155,8 @@ public class LootCommand {
         for (Entity entity : collection) {
             if (entity instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer)entity;
-                serverPlayer.inventoryMenu.broadcastChanges();
                 LootCommand.setSlots(entity, list, i, j, list2);
-                serverPlayer.inventoryMenu.broadcastChanges();
+                serverPlayer.containerMenu.broadcastChanges();
                 continue;
             }
             LootCommand.setSlots(entity, list, i, j, list2);

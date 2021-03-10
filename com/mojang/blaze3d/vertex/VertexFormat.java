@@ -3,7 +3,11 @@
  */
 package com.mojang.blaze3d.vertex;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -15,13 +19,18 @@ import net.fabricmc.api.Environment;
 @Environment(value=EnvType.CLIENT)
 public class VertexFormat {
     private final ImmutableList<VertexFormatElement> elements;
+    private final ImmutableMap<String, VertexFormatElement> elementMapping;
     private final IntList offsets = new IntArrayList();
     private final int vertexSize;
+    private int vertexArrayObject;
+    private int vertexBufferObject;
+    private int indexBufferObject;
 
-    public VertexFormat(ImmutableList<VertexFormatElement> immutableList) {
-        this.elements = immutableList;
+    public VertexFormat(ImmutableMap<String, VertexFormatElement> immutableMap) {
+        this.elementMapping = immutableMap;
+        this.elements = ((ImmutableCollection)immutableMap.values()).asList();
         int i = 0;
-        for (VertexFormatElement vertexFormatElement : immutableList) {
+        for (VertexFormatElement vertexFormatElement : immutableMap.values()) {
             this.offsets.add(i);
             i += vertexFormatElement.getByteSize();
         }
@@ -29,7 +38,7 @@ public class VertexFormat {
     }
 
     public String toString() {
-        return "format: " + this.elements.size() + " elements: " + this.elements.stream().map(Object::toString).collect(Collectors.joining(" "));
+        return "format: " + this.elementMapping.size() + " elements: " + this.elementMapping.entrySet().stream().map(Object::toString).collect(Collectors.joining(" "));
     }
 
     public int getIntegerSize() {
@@ -44,6 +53,10 @@ public class VertexFormat {
         return this.elements;
     }
 
+    public ImmutableList<String> getElementAttributeNames() {
+        return ((ImmutableSet)this.elementMapping.keySet()).asList();
+    }
+
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -55,39 +68,72 @@ public class VertexFormat {
         if (this.vertexSize != vertexFormat.vertexSize) {
             return false;
         }
-        return this.elements.equals(vertexFormat.elements);
+        return this.elementMapping.equals(vertexFormat.elementMapping);
     }
 
     public int hashCode() {
-        return this.elements.hashCode();
+        return this.elementMapping.hashCode();
     }
 
-    public void setupBufferState(long l) {
+    public void setupBufferState() {
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> this.setupBufferState(l));
+            RenderSystem.recordRenderCall(this::_setupBufferState);
             return;
         }
+        this._setupBufferState();
+    }
+
+    private void _setupBufferState() {
         int i = this.getVertexSize();
         ImmutableList<VertexFormatElement> list = this.getElements();
         for (int j = 0; j < list.size(); ++j) {
-            ((VertexFormatElement)list.get(j)).setupBufferState(l + (long)this.offsets.getInt(j), i);
+            ((VertexFormatElement)list.get(j)).setupBufferState(j, this.offsets.getInt(j), i);
         }
     }
 
     public void clearBufferState() {
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(this::clearBufferState);
+            RenderSystem.recordRenderCall(this::_clearBufferState);
             return;
         }
-        for (VertexFormatElement vertexFormatElement : this.getElements()) {
-            vertexFormatElement.clearBufferState();
+        this._clearBufferState();
+    }
+
+    private void _clearBufferState() {
+        ImmutableList<VertexFormatElement> immutableList = this.getElements();
+        for (int i = 0; i < immutableList.size(); ++i) {
+            VertexFormatElement vertexFormatElement = (VertexFormatElement)immutableList.get(i);
+            vertexFormatElement.clearBufferState(i);
         }
+    }
+
+    public int getOrCreateVertexArrayObject() {
+        if (this.vertexArrayObject == 0) {
+            this.vertexArrayObject = GlStateManager._glGenVertexArrays();
+        }
+        return this.vertexArrayObject;
+    }
+
+    public int getOrCreateVertexBufferObject() {
+        if (this.vertexBufferObject == 0) {
+            this.vertexBufferObject = GlStateManager._glGenBuffers();
+        }
+        return this.vertexBufferObject;
+    }
+
+    public int getOrCreateIndexBufferObject() {
+        if (this.indexBufferObject == 0) {
+            this.indexBufferObject = GlStateManager._glGenBuffers();
+        }
+        return this.indexBufferObject;
     }
 
     @Environment(value=EnvType.CLIENT)
     public static enum Mode {
-        LINES(1, 2, 2),
-        LINE_STRIP(3, 2, 1),
+        LINES(4, 2, 2),
+        LINE_STRIP(5, 2, 1),
+        DEBUG_LINES(1, 2, 2),
+        DEBUG_LINE_STRIP(3, 2, 1),
         TRIANGLES(4, 3, 3),
         TRIANGLE_STRIP(5, 3, 1),
         TRIANGLE_FAN(6, 3, 1),
@@ -106,14 +152,16 @@ public class VertexFormat {
         public int indexCount(int i) {
             int j;
             switch (this) {
-                case LINES: 
                 case LINE_STRIP: 
+                case DEBUG_LINES: 
+                case DEBUG_LINE_STRIP: 
                 case TRIANGLES: 
                 case TRIANGLE_STRIP: 
                 case TRIANGLE_FAN: {
                     j = i;
                     break;
                 }
+                case LINES: 
                 case QUADS: {
                     j = i / 4 * 6;
                     break;

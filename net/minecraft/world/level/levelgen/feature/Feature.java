@@ -40,9 +40,11 @@ import net.minecraft.world.level.levelgen.feature.EndIslandFeature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.FillLayerFeature;
 import net.minecraft.world.level.levelgen.feature.FossilFeature;
+import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.GeodeFeature;
 import net.minecraft.world.level.levelgen.feature.GlowLichenFeature;
 import net.minecraft.world.level.levelgen.feature.GlowstoneFeature;
+import net.minecraft.world.level.levelgen.feature.GrowingPlantFeature;
 import net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.HugeFungusFeature;
@@ -62,6 +64,7 @@ import net.minecraft.world.level.levelgen.feature.RandomPatchFeature;
 import net.minecraft.world.level.levelgen.feature.RandomSelectorFeature;
 import net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature;
 import net.minecraft.world.level.levelgen.feature.ReplaceBlockFeature;
+import net.minecraft.world.level.levelgen.feature.RootSystemFeature;
 import net.minecraft.world.level.levelgen.feature.ScatteredOreFeature;
 import net.minecraft.world.level.levelgen.feature.SeaPickleFeature;
 import net.minecraft.world.level.levelgen.feature.SeagrassFeature;
@@ -74,8 +77,10 @@ import net.minecraft.world.level.levelgen.feature.SpringFeature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.TwistingVinesFeature;
 import net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature;
+import net.minecraft.world.level.levelgen.feature.VegetationPatchFeature;
 import net.minecraft.world.level.levelgen.feature.VinesFeature;
 import net.minecraft.world.level.levelgen.feature.VoidStartPlatformFeature;
+import net.minecraft.world.level.levelgen.feature.WaterloggedVegetationPatchFeature;
 import net.minecraft.world.level.levelgen.feature.WeepingVinesFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
@@ -89,6 +94,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfi
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.GrowingPlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
@@ -100,6 +106,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureCo
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
@@ -107,6 +114,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration;
 
 public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<NoneFeatureConfiguration> NO_OP = Feature.register("no_op", new NoOpFeature(NoneFeatureConfiguration.CODEC));
@@ -120,13 +128,17 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<ReplaceBlockConfiguration> EMERALD_ORE = Feature.register("emerald_ore", new ReplaceBlockFeature(ReplaceBlockConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> VOID_START_PLATFORM = Feature.register("void_start_platform", new VoidStartPlatformFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> DESERT_WELL = Feature.register("desert_well", new DesertWellFeature(NoneFeatureConfiguration.CODEC));
-    public static final Feature<NoneFeatureConfiguration> FOSSIL = Feature.register("fossil", new FossilFeature(NoneFeatureConfiguration.CODEC));
+    public static final Feature<FossilFeatureConfiguration> FOSSIL = Feature.register("fossil", new FossilFeature(FossilFeatureConfiguration.CODEC));
     public static final Feature<HugeMushroomFeatureConfiguration> HUGE_RED_MUSHROOM = Feature.register("huge_red_mushroom", new HugeRedMushroomFeature(HugeMushroomFeatureConfiguration.CODEC));
     public static final Feature<HugeMushroomFeatureConfiguration> HUGE_BROWN_MUSHROOM = Feature.register("huge_brown_mushroom", new HugeBrownMushroomFeature(HugeMushroomFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> ICE_SPIKE = Feature.register("ice_spike", new IceSpikeFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> GLOWSTONE_BLOB = Feature.register("glowstone_blob", new GlowstoneFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> FREEZE_TOP_LAYER = Feature.register("freeze_top_layer", new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> VINES = Feature.register("vines", new VinesFeature(NoneFeatureConfiguration.CODEC));
+    public static final Feature<GrowingPlantConfiguration> GROWING_PLANT = Feature.register("growing_plant", new GrowingPlantFeature(GrowingPlantConfiguration.CODEC));
+    public static final Feature<VegetationPatchConfiguration> VEGETATION_PATCH = Feature.register("vegetation_patch", new VegetationPatchFeature(VegetationPatchConfiguration.CODEC));
+    public static final Feature<VegetationPatchConfiguration> WATERLOGGED_VEGETATION_PATCH = Feature.register("waterlogged_vegetation_patch", new WaterloggedVegetationPatchFeature(VegetationPatchConfiguration.CODEC));
+    public static final Feature<RootSystemConfiguration> ROOT_SYSTEM = Feature.register("root_system", new RootSystemFeature(RootSystemConfiguration.CODEC));
     public static final Feature<GlowLichenConfiguration> GLOW_LICHEN = Feature.register("glow_lichen", new GlowLichenFeature(GlowLichenConfiguration.CODEC));
     public static final Feature<UnderwaterMagmaConfiguration> UNDERWATER_MAGMA = Feature.register("underwater_magma", new UnderwaterMagmaFeature(UnderwaterMagmaConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> MONSTER_ROOM = Feature.register("monster_room", new MonsterRoomFeature(NoneFeatureConfiguration.CODEC));
@@ -196,7 +208,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     }
 
     public static boolean isDirt(BlockState blockState) {
-        return blockState.is(Blocks.DIRT) || blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.PODZOL) || blockState.is(Blocks.COARSE_DIRT) || blockState.is(Blocks.MYCELIUM);
+        return blockState.is(Blocks.DIRT) || blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.PODZOL) || blockState.is(Blocks.COARSE_DIRT) || blockState.is(Blocks.MYCELIUM) || blockState.is(Blocks.ROOTED_DIRT);
     }
 
     public static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

@@ -7,27 +7,21 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
-import net.minecraft.world.level.levelgen.placement.EdgeDecorator;
+import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
-public class HeightmapDoubleDecorator<DC extends DecoratorConfiguration>
-extends EdgeDecorator<DC> {
-    public HeightmapDoubleDecorator(Codec<DC> codec) {
+public class HeightmapDoubleDecorator
+extends FeatureDecorator<HeightmapConfiguration> {
+    public HeightmapDoubleDecorator(Codec<HeightmapConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    protected Heightmap.Types type(DC decoratorConfiguration) {
-        return Heightmap.Types.MOTION_BLOCKING;
-    }
-
-    @Override
-    public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, DC decoratorConfiguration, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, HeightmapConfiguration heightmapConfiguration, BlockPos blockPos) {
+        int j;
         int i = blockPos.getX();
-        int j = blockPos.getZ();
-        int k = decorationContext.getHeight(this.type(decoratorConfiguration), i, j);
+        int k = decorationContext.getHeight(heightmapConfiguration.heightmap, i, j = blockPos.getZ());
         if (k == decorationContext.getMinBuildHeight()) {
             return Stream.of(new BlockPos[0]);
         }

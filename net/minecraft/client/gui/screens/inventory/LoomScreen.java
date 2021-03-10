@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
@@ -13,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -74,7 +76,8 @@ extends AbstractContainerScreen<LoomMenu> {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         this.renderBackground(poseStack);
-        this.minecraft.getTextureManager().bind(BG_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
@@ -118,7 +121,7 @@ extends AbstractContainerScreen<LoomMenu> {
                 int r = q - this.startIndex;
                 int s = n + r % 4 * 14;
                 int t = o + r / 4 * 14;
-                this.minecraft.getTextureManager().bind(BG_LOCATION);
+                RenderSystem.setShaderTexture(0, BG_LOCATION);
                 int u = this.imageHeight;
                 if (q == ((LoomMenu)this.menu).getSelectedBannerPatternIndex()) {
                     u += 14;
@@ -131,7 +134,7 @@ extends AbstractContainerScreen<LoomMenu> {
         } else if (this.displaySpecialPattern) {
             int n = k + 60;
             int o = l + 13;
-            this.minecraft.getTextureManager().bind(BG_LOCATION);
+            RenderSystem.setShaderTexture(0, BG_LOCATION);
             this.blit(poseStack, n, o, 0, this.imageHeight, 14, 14);
             int p = ((LoomMenu)this.menu).getSelectedBannerPatternIndex();
             this.renderPattern(p, n, o);

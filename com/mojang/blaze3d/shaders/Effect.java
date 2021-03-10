@@ -3,18 +3,12 @@
  */
 package com.mojang.blaze3d.shaders;
 
-import com.mojang.blaze3d.shaders.Program;
+import com.mojang.blaze3d.shaders.Shader;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
-public interface Effect {
-    public int getId();
-
-    public void markDirty();
-
-    public Program getVertexProgram();
-
-    public Program getFragmentProgram();
+public interface Effect
+extends Shader {
 }
 

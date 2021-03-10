@@ -38,8 +38,8 @@ extends GuiComponent {
         for (LerpingBossEvent lerpingBossEvent : this.events.values()) {
             int k = i / 2 - 91;
             int l = j;
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            this.minecraft.getTextureManager().bind(GUI_BARS_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderTexture(0, GUI_BARS_LOCATION);
             this.drawBar(poseStack, k, l, lerpingBossEvent);
             Component component = lerpingBossEvent.getName();
             int m = this.minecraft.font.width(component);

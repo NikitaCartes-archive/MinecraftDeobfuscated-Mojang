@@ -73,14 +73,11 @@ public class ItemCommands {
         HashMap<Entity, ItemStack> map = Maps.newHashMapWithExpectedSize(collection.size());
         for (Entity entity : collection) {
             ItemStack itemStack;
-            SlotAccess slotAccess;
-            if (entity instanceof ServerPlayer) {
-                ((ServerPlayer)entity).inventoryMenu.broadcastChanges();
-            }
-            if ((slotAccess = entity.getSlot(i)) == SlotAccess.NULL || !slotAccess.set(itemStack = ItemCommands.applyModifier(commandSourceStack, lootItemFunction, slotAccess.get().copy()))) continue;
+            SlotAccess slotAccess = entity.getSlot(i);
+            if (slotAccess == SlotAccess.NULL || !slotAccess.set(itemStack = ItemCommands.applyModifier(commandSourceStack, lootItemFunction, slotAccess.get().copy()))) continue;
             map.put(entity, itemStack);
             if (!(entity instanceof ServerPlayer)) continue;
-            ((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+            ((ServerPlayer)entity).containerMenu.broadcastChanges();
         }
         if (map.isEmpty()) {
             throw ERROR_TARGET_NO_CHANGES.create(i);
@@ -115,14 +112,11 @@ public class ItemCommands {
     private static int setEntityItem(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, int i, ItemStack itemStack) throws CommandSyntaxException {
         ArrayList<Entity> list = Lists.newArrayListWithCapacity(collection.size());
         for (Entity entity : collection) {
-            SlotAccess slotAccess;
-            if (entity instanceof ServerPlayer) {
-                ((ServerPlayer)entity).inventoryMenu.broadcastChanges();
-            }
-            if ((slotAccess = entity.getSlot(i)) == SlotAccess.NULL || !slotAccess.set(itemStack.copy())) continue;
+            SlotAccess slotAccess = entity.getSlot(i);
+            if (slotAccess == SlotAccess.NULL || !slotAccess.set(itemStack.copy())) continue;
             list.add(entity);
             if (!(entity instanceof ServerPlayer)) continue;
-            ((ServerPlayer)entity).inventoryMenu.broadcastChanges();
+            ((ServerPlayer)entity).containerMenu.broadcastChanges();
         }
         if (list.isEmpty()) {
             throw ERROR_TARGET_NO_CHANGES_KNOWN_ITEM.create(itemStack.getDisplayName(), i);

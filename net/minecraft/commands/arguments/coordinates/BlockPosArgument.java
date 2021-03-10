@@ -22,12 +22,14 @@ import net.minecraft.commands.arguments.coordinates.LocalCoordinates;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 
 public class BlockPosArgument
 implements ArgumentType<Coordinates> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "~ ~ ~", "^ ^ ^", "^1 ^ ^-5", "~0.5 ~1 ~-5");
     public static final SimpleCommandExceptionType ERROR_NOT_LOADED = new SimpleCommandExceptionType(new TranslatableComponent("argument.pos.unloaded"));
     public static final SimpleCommandExceptionType ERROR_OUT_OF_WORLD = new SimpleCommandExceptionType(new TranslatableComponent("argument.pos.outofworld"));
+    public static final SimpleCommandExceptionType ERROR_OUT_OF_BOUNDS = new SimpleCommandExceptionType(new TranslatableComponent("argument.pos.outofbounds"));
 
     public static BlockPosArgument blockPos() {
         return new BlockPosArgument();
@@ -44,8 +46,12 @@ implements ArgumentType<Coordinates> {
         return blockPos;
     }
 
-    public static BlockPos getOrLoadBlockPos(CommandContext<CommandSourceStack> commandContext, String string) {
-        return commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+    public static BlockPos getSpawnablePos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        BlockPos blockPos = commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+        if (!Level.isInSpawnableBounds(blockPos)) {
+            throw ERROR_OUT_OF_BOUNDS.create();
+        }
+        return blockPos;
     }
 
     @Override

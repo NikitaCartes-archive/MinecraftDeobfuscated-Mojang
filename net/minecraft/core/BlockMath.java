@@ -5,7 +5,6 @@ package net.minecraft.core;
 
 import com.google.common.collect.Maps;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import java.util.Map;
@@ -22,11 +21,11 @@ public class BlockMath {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final Map<Direction, Transformation> VANILLA_UV_TRANSFORM_LOCAL_TO_GLOBAL = Util.make(Maps.newEnumMap(Direction.class), enumMap -> {
         enumMap.put(Direction.SOUTH, Transformation.identity());
-        enumMap.put(Direction.EAST, new Transformation(null, new Quaternion(new Vector3f(0.0f, 1.0f, 0.0f), 90.0f, true), null, null));
-        enumMap.put(Direction.WEST, new Transformation(null, new Quaternion(new Vector3f(0.0f, 1.0f, 0.0f), -90.0f, true), null, null));
-        enumMap.put(Direction.NORTH, new Transformation(null, new Quaternion(new Vector3f(0.0f, 1.0f, 0.0f), 180.0f, true), null, null));
-        enumMap.put(Direction.UP, new Transformation(null, new Quaternion(new Vector3f(1.0f, 0.0f, 0.0f), -90.0f, true), null, null));
-        enumMap.put(Direction.DOWN, new Transformation(null, new Quaternion(new Vector3f(1.0f, 0.0f, 0.0f), 90.0f, true), null, null));
+        enumMap.put(Direction.EAST, new Transformation(null, Vector3f.YP.rotationDegrees(90.0f), null, null));
+        enumMap.put(Direction.WEST, new Transformation(null, Vector3f.YP.rotationDegrees(-90.0f), null, null));
+        enumMap.put(Direction.NORTH, new Transformation(null, Vector3f.YP.rotationDegrees(180.0f), null, null));
+        enumMap.put(Direction.UP, new Transformation(null, Vector3f.XP.rotationDegrees(-90.0f), null, null));
+        enumMap.put(Direction.DOWN, new Transformation(null, Vector3f.XP.rotationDegrees(90.0f), null, null));
     });
     public static final Map<Direction, Transformation> VANILLA_UV_TRANSFORM_GLOBAL_TO_LOCAL = Util.make(Maps.newEnumMap(Direction.class), enumMap -> {
         for (Direction direction : Direction.values()) {

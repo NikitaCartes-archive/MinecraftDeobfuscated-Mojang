@@ -21,6 +21,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.achievement.StatsUpdateListener;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
@@ -140,14 +141,13 @@ implements StatsUpdateListener {
 
     private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
         this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
-        RenderSystem.enableRescaleNormal();
         this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
-        RenderSystem.disableRescaleNormal();
     }
 
     private void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(STATS_ICON_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, STATS_ICON_LOCATION);
         StatsScreen.blit(poseStack, i, j, this.getBlitOffset(), k, l, 18, 18, 128, 128);
     }
 
@@ -357,10 +357,10 @@ implements StatsUpdateListener {
             int l = j - 12;
             int m = StatsScreen.this.font.width(component);
             this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, 0.0f, 400.0f);
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 400.0);
             StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
         }
 
         protected Component getString(Item item) {

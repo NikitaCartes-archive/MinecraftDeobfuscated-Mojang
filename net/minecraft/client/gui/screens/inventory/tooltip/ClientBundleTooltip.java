@@ -87,8 +87,8 @@ implements ClientTooltipComponent {
     }
 
     private void blit(PoseStack poseStack, int i, int j, int k, TextureManager textureManager, Texture texture) {
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        textureManager.bind(TEXTURE_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
         GuiComponent.blit(poseStack, i, j, k, texture.x, texture.y, texture.w, texture.h, 128, 128);
     }
 

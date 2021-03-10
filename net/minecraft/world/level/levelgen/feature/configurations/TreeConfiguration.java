@@ -9,74 +9,71 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 
 public class TreeConfiguration
 implements FeatureConfiguration {
-    public static final Codec<TreeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("trunk_provider")).forGetter(treeConfiguration -> treeConfiguration.trunkProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("leaves_provider")).forGetter(treeConfiguration -> treeConfiguration.leavesProvider), ((MapCodec)FoliagePlacer.CODEC.fieldOf("foliage_placer")).forGetter(treeConfiguration -> treeConfiguration.foliagePlacer), ((MapCodec)TrunkPlacer.CODEC.fieldOf("trunk_placer")).forGetter(treeConfiguration -> treeConfiguration.trunkPlacer), ((MapCodec)FeatureSize.CODEC.fieldOf("minimum_size")).forGetter(treeConfiguration -> treeConfiguration.minimumSize), ((MapCodec)TreeDecorator.CODEC.listOf().fieldOf("decorators")).forGetter(treeConfiguration -> treeConfiguration.decorators), ((MapCodec)Codec.INT.fieldOf("max_water_depth")).orElse(0).forGetter(treeConfiguration -> treeConfiguration.maxWaterDepth), ((MapCodec)Codec.BOOL.fieldOf("ignore_vines")).orElse(false).forGetter(treeConfiguration -> treeConfiguration.ignoreVines), ((MapCodec)Heightmap.Types.CODEC.fieldOf("heightmap")).forGetter(treeConfiguration -> treeConfiguration.heightmap)).apply((Applicative<TreeConfiguration, ?>)instance, TreeConfiguration::new));
+    public static final Codec<TreeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("trunk_provider")).forGetter(treeConfiguration -> treeConfiguration.trunkProvider), ((MapCodec)TrunkPlacer.CODEC.fieldOf("trunk_placer")).forGetter(treeConfiguration -> treeConfiguration.trunkPlacer), ((MapCodec)BlockStateProvider.CODEC.fieldOf("foliage_provider")).forGetter(treeConfiguration -> treeConfiguration.foliageProvider), ((MapCodec)FoliagePlacer.CODEC.fieldOf("foliage_placer")).forGetter(treeConfiguration -> treeConfiguration.foliagePlacer), ((MapCodec)BlockStateProvider.CODEC.fieldOf("dirt_provider")).forGetter(treeConfiguration -> treeConfiguration.dirtProvider), ((MapCodec)FeatureSize.CODEC.fieldOf("minimum_size")).forGetter(treeConfiguration -> treeConfiguration.minimumSize), ((MapCodec)TreeDecorator.CODEC.listOf().fieldOf("decorators")).forGetter(treeConfiguration -> treeConfiguration.decorators), ((MapCodec)Codec.BOOL.fieldOf("ignore_vines")).orElse(false).forGetter(treeConfiguration -> treeConfiguration.ignoreVines), ((MapCodec)Codec.BOOL.fieldOf("force_dirt")).orElse(false).forGetter(treeConfiguration -> treeConfiguration.forceDirt)).apply((Applicative<TreeConfiguration, ?>)instance, TreeConfiguration::new));
     public final BlockStateProvider trunkProvider;
-    public final BlockStateProvider leavesProvider;
-    public final List<TreeDecorator> decorators;
-    public transient boolean fromSapling;
-    public final FoliagePlacer foliagePlacer;
+    public final BlockStateProvider dirtProvider;
     public final TrunkPlacer trunkPlacer;
+    public final BlockStateProvider foliageProvider;
+    public final FoliagePlacer foliagePlacer;
     public final FeatureSize minimumSize;
-    public final int maxWaterDepth;
+    public final List<TreeDecorator> decorators;
     public final boolean ignoreVines;
-    public final Heightmap.Types heightmap;
+    public final boolean forceDirt;
 
-    protected TreeConfiguration(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, TrunkPlacer trunkPlacer, FeatureSize featureSize, List<TreeDecorator> list, int i, boolean bl, Heightmap.Types types) {
+    protected TreeConfiguration(BlockStateProvider blockStateProvider, TrunkPlacer trunkPlacer, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, BlockStateProvider blockStateProvider3, FeatureSize featureSize, List<TreeDecorator> list, boolean bl, boolean bl2) {
         this.trunkProvider = blockStateProvider;
-        this.leavesProvider = blockStateProvider2;
-        this.decorators = list;
-        this.foliagePlacer = foliagePlacer;
-        this.minimumSize = featureSize;
         this.trunkPlacer = trunkPlacer;
-        this.maxWaterDepth = i;
+        this.foliageProvider = blockStateProvider2;
+        this.foliagePlacer = foliagePlacer;
+        this.dirtProvider = blockStateProvider3;
+        this.minimumSize = featureSize;
+        this.decorators = list;
         this.ignoreVines = bl;
-        this.heightmap = types;
-    }
-
-    public void setFromSapling() {
-        this.fromSapling = true;
+        this.forceDirt = bl2;
     }
 
     public TreeConfiguration withDecorators(List<TreeDecorator> list) {
-        return new TreeConfiguration(this.trunkProvider, this.leavesProvider, this.foliagePlacer, this.trunkPlacer, this.minimumSize, list, this.maxWaterDepth, this.ignoreVines, this.heightmap);
+        return new TreeConfiguration(this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, list, this.ignoreVines, this.forceDirt);
     }
 
     public static class TreeConfigurationBuilder {
         public final BlockStateProvider trunkProvider;
-        public final BlockStateProvider leavesProvider;
-        private final FoliagePlacer foliagePlacer;
         private final TrunkPlacer trunkPlacer;
+        public final BlockStateProvider foliageProvider;
+        private final FoliagePlacer foliagePlacer;
+        private BlockStateProvider dirtProvider;
         private final FeatureSize minimumSize;
         private List<TreeDecorator> decorators = ImmutableList.of();
-        private int maxWaterDepth;
         private boolean ignoreVines;
-        private Heightmap.Types heightmap = Heightmap.Types.OCEAN_FLOOR;
+        private boolean forceDirt;
 
-        public TreeConfigurationBuilder(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, TrunkPlacer trunkPlacer, FeatureSize featureSize) {
+        public TreeConfigurationBuilder(BlockStateProvider blockStateProvider, TrunkPlacer trunkPlacer, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, FeatureSize featureSize) {
             this.trunkProvider = blockStateProvider;
-            this.leavesProvider = blockStateProvider2;
-            this.foliagePlacer = foliagePlacer;
             this.trunkPlacer = trunkPlacer;
+            this.foliageProvider = blockStateProvider2;
+            this.dirtProvider = new SimpleStateProvider(Blocks.DIRT.defaultBlockState());
+            this.foliagePlacer = foliagePlacer;
             this.minimumSize = featureSize;
+        }
+
+        public TreeConfigurationBuilder dirt(BlockStateProvider blockStateProvider) {
+            this.dirtProvider = blockStateProvider;
+            return this;
         }
 
         public TreeConfigurationBuilder decorators(List<TreeDecorator> list) {
             this.decorators = list;
-            return this;
-        }
-
-        public TreeConfigurationBuilder maxWaterDepth(int i) {
-            this.maxWaterDepth = i;
             return this;
         }
 
@@ -85,13 +82,13 @@ implements FeatureConfiguration {
             return this;
         }
 
-        public TreeConfigurationBuilder heightmap(Heightmap.Types types) {
-            this.heightmap = types;
+        public TreeConfigurationBuilder forceDirt() {
+            this.forceDirt = true;
             return this;
         }
 
         public TreeConfiguration build() {
-            return new TreeConfiguration(this.trunkProvider, this.leavesProvider, this.foliagePlacer, this.trunkPlacer, this.minimumSize, this.decorators, this.maxWaterDepth, this.ignoreVines, this.heightmap);
+            return new TreeConfiguration(this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, this.decorators, this.ignoreVines, this.forceDirt);
         }
     }
 }

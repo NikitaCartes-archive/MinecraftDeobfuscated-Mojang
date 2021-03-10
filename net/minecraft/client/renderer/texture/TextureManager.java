@@ -34,7 +34,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureManager
@@ -52,7 +51,7 @@ AutoCloseable {
         this.resourceManager = resourceManager;
     }
 
-    public void bind(ResourceLocation resourceLocation) {
+    public void bindForSetup(ResourceLocation resourceLocation) {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> this._bind(resourceLocation));
         } else {
@@ -111,9 +110,17 @@ AutoCloseable {
         }
     }
 
-    @Nullable
     public AbstractTexture getTexture(ResourceLocation resourceLocation) {
-        return this.byPath.get(resourceLocation);
+        AbstractTexture abstractTexture = this.byPath.get(resourceLocation);
+        if (abstractTexture == null) {
+            abstractTexture = new SimpleTexture(resourceLocation);
+            this.register(resourceLocation, abstractTexture);
+        }
+        return abstractTexture;
+    }
+
+    public AbstractTexture getTexture(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
+        return this.byPath.getOrDefault(resourceLocation, abstractTexture);
     }
 
     public ResourceLocation register(String string, DynamicTexture dynamicTexture) {
@@ -151,8 +158,8 @@ AutoCloseable {
     }
 
     public void release(ResourceLocation resourceLocation) {
-        AbstractTexture abstractTexture = this.getTexture(resourceLocation);
-        if (abstractTexture != null) {
+        AbstractTexture abstractTexture = this.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
+        if (abstractTexture != MissingTextureAtlasSprite.getTexture()) {
             TextureUtil.releaseTextureId(abstractTexture.getId());
         }
     }

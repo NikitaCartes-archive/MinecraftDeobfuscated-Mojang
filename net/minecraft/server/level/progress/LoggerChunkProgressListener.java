@@ -3,6 +3,8 @@
  */
 package net.minecraft.server.level.progress;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.progress.ChunkProgressListener;
@@ -41,6 +43,11 @@ implements ChunkProgressListener {
             this.nextTickTime += 500L;
             LOGGER.info(new TranslatableComponent("menu.preparingSpawn", Mth.clamp(i, 0, 100)).getString());
         }
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void start() {
     }
 
     @Override

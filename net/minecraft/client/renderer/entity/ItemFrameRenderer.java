@@ -50,7 +50,7 @@ extends EntityRenderer<T> {
 
     @Override
     protected int getBlockLightLevel(T itemFrame, BlockPos blockPos) {
-        return ((ItemFrame)itemFrame).isGlowFrame() ? 5 : super.getBlockLightLevel(itemFrame, blockPos);
+        return ((Entity)itemFrame).getType() == EntityType.GLOW_ITEM_FRAME ? 5 : super.getBlockLightLevel(itemFrame, blockPos);
     }
 
     @Override
@@ -110,7 +110,8 @@ extends EntityRenderer<T> {
     }
 
     private ModelResourceLocation getFrameModelResourceLoc(T itemFrame, ItemStack itemStack) {
-        boolean bl = ((ItemFrame)itemFrame).isGlowFrame();
+        boolean bl;
+        boolean bl2 = bl = ((Entity)itemFrame).getType() == EntityType.GLOW_ITEM_FRAME;
         if (itemStack.is(Items.FILLED_MAP)) {
             return bl ? GLOW_MAP_FRAME_LOCATION : MAP_FRAME_LOCATION;
         }

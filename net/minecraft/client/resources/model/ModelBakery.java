@@ -174,6 +174,7 @@ public class ModelBakery {
         }
         profilerFiller.popPush("special");
         this.loadTopLevel(new ModelResourceLocation("minecraft:trident_in_hand#inventory"));
+        this.loadTopLevel(new ModelResourceLocation("minecraft:spyglass_in_hand#inventory"));
         profilerFiller.popPush("textures");
         LinkedHashSet set = Sets.newLinkedHashSet();
         Set set2 = this.topLevelModels.values().stream().flatMap(unbakedModel -> unbakedModel.getMaterials(this::getModel, set).stream()).collect(Collectors.toSet());
@@ -197,7 +198,7 @@ public class ModelBakery {
             TextureAtlas.Preparations preparations = pair.getSecond();
             textureAtlas.reload(preparations);
             textureManager.register(textureAtlas.location(), textureAtlas);
-            textureManager.bind(textureAtlas.location());
+            textureManager.bindForSetup(textureAtlas.location());
             textureAtlas.updateFilter(preparations);
         }
         this.atlasSet = new AtlasSet(this.atlasPreparations.values().stream().map(Pair::getFirst).collect(Collectors.toList()));

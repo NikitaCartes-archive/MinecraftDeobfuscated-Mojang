@@ -14,6 +14,7 @@ import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
@@ -50,13 +51,14 @@ extends StateSwitchingButton {
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         if (this.animationTime > 0.0f) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(this.x + 8, this.y + 12, 0.0f);
-            RenderSystem.scalef(1.0f, g, 1.0f);
-            RenderSystem.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
+            poseStack.pushPose();
+            poseStack.translate(this.x + 8, this.y + 12, 0.0);
+            poseStack.scale(1.0f, g, 1.0f);
+            poseStack.translate(-(this.x + 8), -(this.y + 12), 0.0);
         }
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getTextureManager().bind(this.resourceLocation);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, this.resourceLocation);
         RenderSystem.disableDepthTest();
         int k = this.xTexStart;
         int l = this.yTexStart;
@@ -70,12 +72,12 @@ extends StateSwitchingButton {
         if (this.isStateTriggered) {
             m -= 2;
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(poseStack, m, this.y, k, l, this.width, this.height);
         RenderSystem.enableDepthTest();
         this.renderIcon(minecraft.getItemRenderer());
         if (this.animationTime > 0.0f) {
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             this.animationTime -= f;
         }
     }

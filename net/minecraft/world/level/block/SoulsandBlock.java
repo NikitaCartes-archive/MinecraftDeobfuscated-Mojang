@@ -45,7 +45,7 @@ extends Block {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), false);
+        BubbleColumnBlock.updateColumn(serverLevel, blockPos.above(), blockState);
     }
 
     @Override

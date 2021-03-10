@@ -39,6 +39,7 @@ public enum Direction implements StringRepresentable
     WEST(4, 5, 1, "west", AxisDirection.NEGATIVE, Axis.X, new Vec3i(-1, 0, 0)),
     EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, new Vec3i(1, 0, 0));
 
+    public static final Codec<Direction> CODEC;
     private final int data3d;
     private final int oppositeIndex;
     private final int data2d;
@@ -227,7 +228,6 @@ public enum Direction implements StringRepresentable
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static Direction byName(@Nullable String string) {
         if (string == null) {
             return null;
@@ -317,6 +317,7 @@ public enum Direction implements StringRepresentable
     }
 
     static {
+        CODEC = StringRepresentable.fromEnum(Direction::values, Direction::byName);
         VALUES = Direction.values();
         BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction::getName, direction -> direction));
         BY_3D_DATA = (Direction[])Arrays.stream(VALUES).sorted(Comparator.comparingInt(direction -> direction.data3d)).toArray(Direction[]::new);

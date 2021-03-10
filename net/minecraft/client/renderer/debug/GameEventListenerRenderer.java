@@ -58,7 +58,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         BlockPos blockPos2 = new BlockPos(d, 0.0, f);
         this.trackedGameEvents.removeIf(TrackedGameEvent::isExpired);
         this.trackedListeners.removeIf(trackedListener -> trackedListener.isExpired(level, blockPos2));
-        RenderSystem.pushMatrix();
         RenderSystem.disableTexture();
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
@@ -111,7 +110,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         RenderSystem.depthMask(true);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
     }
 
     private static void renderTransparentFilledBox(AABB aABB, float f, float g, float h, float i) {

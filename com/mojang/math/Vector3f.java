@@ -5,6 +5,7 @@ package com.mojang.math;
 
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
+import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.stream.DoubleStream;
@@ -23,6 +24,7 @@ public final class Vector3f {
     public static Vector3f YP = new Vector3f(0.0f, 1.0f, 0.0f);
     public static Vector3f ZN = new Vector3f(0.0f, 0.0f, -1.0f);
     public static Vector3f ZP = new Vector3f(0.0f, 0.0f, 1.0f);
+    public static Vector3f ZERO = new Vector3f(0.0f, 0.0f, 0.0f);
     private float x;
     private float y;
     private float z;
@@ -34,6 +36,11 @@ public final class Vector3f {
         this.x = f;
         this.y = g;
         this.z = h;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Vector3f(Vector4f vector4f) {
+        this(vector4f.x(), vector4f.y(), vector4f.z());
     }
 
     public Vector3f(Vec3 vec3) {

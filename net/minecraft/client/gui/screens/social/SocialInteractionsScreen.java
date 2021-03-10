@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.social;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.Locale;
@@ -186,7 +187,7 @@ extends Screen {
     public void renderBackground(PoseStack poseStack) {
         int i = this.marginX() + 3;
         super.renderBackground(poseStack);
-        this.minecraft.getTextureManager().bind(SOCIAL_INTERACTIONS_LOCATION);
+        RenderSystem.setShaderTexture(0, SOCIAL_INTERACTIONS_LOCATION);
         this.blit(poseStack, i, 64, 1, 1, 236, 8);
         int j = this.backgroundUnits();
         for (int k = 0; k < j; ++k) {

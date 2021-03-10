@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -65,12 +66,12 @@ extends AbstractWidget {
 
     @Override
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
-        boolean bl;
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
         int k = 29;
         if (!this.collection.hasCraftable()) {
             k += 25;
@@ -79,13 +80,15 @@ extends AbstractWidget {
         if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
             l += 25;
         }
-        boolean bl2 = bl = this.animationTime > 0.0f;
+        boolean bl = this.animationTime > 0.0f;
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
         if (bl) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(this.x + 8, this.y + 12, 0.0f);
-            RenderSystem.scalef(g, g, 1.0f);
-            RenderSystem.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
+            poseStack2.pushPose();
+            poseStack2.translate(this.x + 8, this.y + 12, 0.0);
+            poseStack2.scale(g, g, 1.0f);
+            poseStack2.translate(-(this.x + 8), -(this.y + 12), 0.0);
+            RenderSystem.applyModelViewMatrix();
             this.animationTime -= f;
         }
         this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
@@ -99,7 +102,8 @@ extends AbstractWidget {
         }
         minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
         if (bl) {
-            RenderSystem.popMatrix();
+            poseStack2.popPose();
+            RenderSystem.applyModelViewMatrix();
         }
     }
 

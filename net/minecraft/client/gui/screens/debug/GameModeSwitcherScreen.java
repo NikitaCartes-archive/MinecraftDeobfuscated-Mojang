@@ -17,6 +17,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -69,9 +70,10 @@ extends Screen {
         if (this.checkToClose()) {
             return;
         }
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         poseStack.pushPose();
         RenderSystem.enableBlend();
-        this.minecraft.getTextureManager().bind(GAMEMODE_SWITCHER_LOCATION);
+        RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
         int k = this.width / 2 - 62;
         int l = this.height / 2 - 31 - 27;
         GameModeSwitcherScreen.blit(poseStack, k, l, 0.0f, 0.0f, 125, 75, 128, 128);
@@ -164,7 +166,8 @@ extends Screen {
         }
 
         private void drawSlot(PoseStack poseStack, TextureManager textureManager) {
-            textureManager.bind(GAMEMODE_SWITCHER_LOCATION);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
             poseStack.pushPose();
             poseStack.translate(this.x, this.y, 0.0);
             GameModeSlot.blit(poseStack, 0, 0, 0.0f, 75.0f, 26, 26, 128, 128);
@@ -172,7 +175,8 @@ extends Screen {
         }
 
         private void drawSelection(PoseStack poseStack, TextureManager textureManager) {
-            textureManager.bind(GAMEMODE_SWITCHER_LOCATION);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
             poseStack.pushPose();
             poseStack.translate(this.x, this.y, 0.0);
             GameModeSlot.blit(poseStack, 0, 0, 26.0f, 75.0f, 26, 26, 128, 128);

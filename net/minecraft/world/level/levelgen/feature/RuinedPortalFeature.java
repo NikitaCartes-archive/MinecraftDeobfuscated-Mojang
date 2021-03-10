@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -178,16 +177,16 @@ extends StructureFeature<RuinedPortalConfiguration> {
             BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
             BlockPos blockPos2 = chunkPos.getWorldPosition();
             BoundingBox boundingBox = structureTemplate.getBoundingBox(blockPos2, rotation, blockPos, mirror);
-            Vec3i vec3i = boundingBox.getCenter();
-            int i = vec3i.getX();
-            int j = vec3i.getZ();
+            BlockPos blockPos3 = boundingBox.getCenter();
+            int i = blockPos3.getX();
+            int j = blockPos3.getZ();
             int k = chunkGenerator.getBaseHeight(i, j, RuinedPortalPiece.getHeightMapType(verticalPlacement), levelHeightAccessor) - 1;
             int l = RuinedPortalFeature.findSuitableY(this.random, chunkGenerator, verticalPlacement, properties.airPocket, k, boundingBox.getYSpan(), boundingBox, levelHeightAccessor);
-            BlockPos blockPos3 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
+            BlockPos blockPos4 = new BlockPos(blockPos2.getX(), l, blockPos2.getZ());
             if (ruinedPortalConfiguration.portalType == Type.MOUNTAIN || ruinedPortalConfiguration.portalType == Type.OCEAN || ruinedPortalConfiguration.portalType == Type.STANDARD) {
-                properties.cold = RuinedPortalFeature.isCold(blockPos3, biome);
+                properties.cold = RuinedPortalFeature.isCold(blockPos4, biome);
             }
-            this.pieces.add(new RuinedPortalPiece(blockPos3, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos));
+            this.pieces.add(new RuinedPortalPiece(blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos));
             this.calculateBoundingBox();
         }
     }

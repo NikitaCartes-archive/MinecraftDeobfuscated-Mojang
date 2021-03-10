@@ -89,6 +89,7 @@ import net.minecraft.client.particle.WakeParticle;
 import net.minecraft.client.particle.WaterCurrentDownParticle;
 import net.minecraft.client.particle.WaterDropParticle;
 import net.minecraft.client.particle.WhiteAshParticle;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -382,16 +383,16 @@ implements PreparableReloadListener {
 
     public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
         lightTexture.turnOnLightLayer();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
         RenderSystem.enableDepthTest();
-        RenderSystem.enableFog();
-        RenderSystem.pushMatrix();
-        RenderSystem.multMatrix(poseStack.last().pose());
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        poseStack2.pushPose();
+        poseStack2.mulPoseMatrix(poseStack.last().pose());
+        RenderSystem.applyModelViewMatrix();
         for (ParticleRenderType particleRenderType : RENDER_ORDER) {
             Iterable iterable = this.particles.get(particleRenderType);
             if (iterable == null) continue;
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
             particleRenderType.begin(bufferBuilder, this.textureManager);
@@ -408,13 +409,11 @@ implements PreparableReloadListener {
             }
             particleRenderType.end(tesselator);
         }
-        RenderSystem.popMatrix();
+        poseStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
         RenderSystem.depthMask(true);
-        RenderSystem.depthFunc(515);
         RenderSystem.disableBlend();
-        RenderSystem.defaultAlphaFunc();
         lightTexture.turnOffLightLayer();
-        RenderSystem.disableFog();
     }
 
     public void setLevel(@Nullable ClientLevel clientLevel) {

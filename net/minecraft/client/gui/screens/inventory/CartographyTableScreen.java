@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -42,8 +43,9 @@ extends AbstractContainerScreen<CartographyTableMenu> {
         MapItemSavedData mapItemSavedData;
         Integer integer;
         this.renderBackground(poseStack);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(BG_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
@@ -80,39 +82,39 @@ extends AbstractContainerScreen<CartographyTableMenu> {
         int j = this.topPos;
         if (bl2 && !bl4) {
             this.blit(poseStack, i + 67, j + 13, this.imageWidth, 66, 66, 66);
-            this.renderMap(integer, mapItemSavedData, i + 85, j + 31, 0.226f);
+            this.renderMap(poseStack, integer, mapItemSavedData, i + 85, j + 31, 0.226f);
         } else if (bl) {
             this.blit(poseStack, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
-            this.renderMap(integer, mapItemSavedData, i + 86, j + 16, 0.34f);
-            this.minecraft.getTextureManager().bind(BG_LOCATION);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, 0.0f, 1.0f);
+            this.renderMap(poseStack, integer, mapItemSavedData, i + 86, j + 16, 0.34f);
+            RenderSystem.setShaderTexture(0, BG_LOCATION);
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 1.0);
             this.blit(poseStack, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
-            this.renderMap(integer, mapItemSavedData, i + 70, j + 32, 0.34f);
-            RenderSystem.popMatrix();
+            this.renderMap(poseStack, integer, mapItemSavedData, i + 70, j + 32, 0.34f);
+            poseStack.popPose();
         } else if (bl3) {
             this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-            this.renderMap(integer, mapItemSavedData, i + 71, j + 17, 0.45f);
-            this.minecraft.getTextureManager().bind(BG_LOCATION);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, 0.0f, 1.0f);
+            this.renderMap(poseStack, integer, mapItemSavedData, i + 71, j + 17, 0.45f);
+            RenderSystem.setShaderTexture(0, BG_LOCATION);
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 1.0);
             this.blit(poseStack, i + 66, j + 12, 0, this.imageHeight, 66, 66);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
         } else {
             this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-            this.renderMap(integer, mapItemSavedData, i + 71, j + 17, 0.45f);
+            this.renderMap(poseStack, integer, mapItemSavedData, i + 71, j + 17, 0.45f);
         }
     }
 
-    private void renderMap(@Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
+    private void renderMap(PoseStack poseStack, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
         if (integer != null && mapItemSavedData != null) {
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(i, j, 1.0f);
-            RenderSystem.scalef(f, f, 1.0f);
+            poseStack.pushPose();
+            poseStack.translate(i, j, 1.0);
+            poseStack.scale(f, f, 1.0f);
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            this.minecraft.gameRenderer.getMapRenderer().render(new PoseStack(), bufferSource, integer, mapItemSavedData, true, 0xF000F0);
+            this.minecraft.gameRenderer.getMapRenderer().render(poseStack, bufferSource, integer, mapItemSavedData, true, 0xF000F0);
             bufferSource.endBatch();
-            RenderSystem.popMatrix();
+            poseStack.popPose();
         }
     }
 }

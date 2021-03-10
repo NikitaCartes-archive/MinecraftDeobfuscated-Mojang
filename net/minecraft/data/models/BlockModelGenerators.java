@@ -71,9 +71,15 @@ public class BlockModelGenerators {
     private final BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput;
     private final Consumer<Item> skippedAutoModelsOutput;
     private final List<Block> nonOrientableTrapdoor = ImmutableList.of(Blocks.OAK_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.IRON_TRAPDOOR);
-    private final Map<Block, MirroredModelFactory> mirroredModels = ImmutableMap.builder().put(Blocks.STONE, ModelTemplates.CUBE_MIRRORED_ALL::create).put(Blocks.COBBLED_DEEPSLATE, ModelTemplates.CUBE_MIRRORED_ALL::create).put(Blocks.DEEPSLATE, ModelTemplates.CUBE_COLUMN_MIRRORED::create).build();
-    private final Map<Block, TexturedModel> texturedModels = ImmutableMap.builder().put(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.SANDSTONE)).put(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.RED_SANDSTONE)).put(Blocks.SMOOTH_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"))).put(Blocks.SMOOTH_RED_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"))).put(Blocks.CUT_SANDSTONE, TexturedModel.COLUMN.get(Blocks.SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_SANDSTONE)))).put(Blocks.CUT_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.RED_SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE)))).put(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.QUARTZ_BLOCK)).put(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).put(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.BLACKSTONE)).put(Blocks.DEEPSLATE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.DEEPSLATE)).build();
-    private static final Map<BlockFamily.Variant, BiConsumer<BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, (object, block) -> BlockFamilyProvider.method_33526((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.FENCE, BlockFamilyProvider::fence).put(BlockFamily.Variant.FENCE_GATE, BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, (object, block) -> BlockFamilyProvider.method_33523((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.WALL, BlockFamilyProvider::wall).build();
+    private final Map<Block, BlockStateGeneratorSupplier> fullBlockModelCustomGenerators = ImmutableMap.builder().put(Blocks.STONE, BlockModelGenerators::createMirroredCubeGenerator).put(Blocks.DEEPSLATE, BlockModelGenerators::createMirroredColumnGenerator).build();
+    private final Map<Block, TexturedModel> texturedModels = ImmutableMap.builder().put(Blocks.SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.SANDSTONE)).put(Blocks.RED_SANDSTONE, TexturedModel.TOP_BOTTOM_WITH_WALL.get(Blocks.RED_SANDSTONE)).put(Blocks.SMOOTH_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"))).put(Blocks.SMOOTH_RED_SANDSTONE, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"))).put(Blocks.CUT_SANDSTONE, TexturedModel.COLUMN.get(Blocks.SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_SANDSTONE)))).put(Blocks.CUT_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.RED_SANDSTONE).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE)))).put(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.QUARTZ_BLOCK)).put(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).put(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.BLACKSTONE)).put(Blocks.DEEPSLATE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.DEEPSLATE)).put(Blocks.CHISELED_QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.CHISELED_QUARTZ_BLOCK).updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_QUARTZ_BLOCK)))).put(Blocks.CHISELED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_SANDSTONE).updateTextures(textureMapping -> {
+        textureMapping.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"));
+        textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_SANDSTONE));
+    })).put(Blocks.CHISELED_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_RED_SANDSTONE).updateTextures(textureMapping -> {
+        textureMapping.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"));
+        textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_RED_SANDSTONE));
+    })).build();
+    private static final Map<BlockFamily.Variant, BiConsumer<BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, (object, block) -> BlockFamilyProvider.method_34660((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.CHISELED, (object, block) -> BlockFamilyProvider.method_33526((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.CRACKED, (object, block) -> BlockFamilyProvider.method_33526((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.FENCE, BlockFamilyProvider::fence).put(BlockFamily.Variant.FENCE_GATE, BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, (object, block) -> BlockFamilyProvider.method_33523((BlockFamilyProvider)object, block)).put(BlockFamily.Variant.WALL, BlockFamilyProvider::wall).build();
     public static final Map<BooleanProperty, Function<ResourceLocation, Variant>> MULTIFACE_GENERATOR = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(BlockStateProperties.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation));
         hashMap.put(BlockStateProperties.EAST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true));
@@ -82,6 +88,16 @@ public class BlockModelGenerators {
         hashMap.put(BlockStateProperties.UP, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true));
         hashMap.put(BlockStateProperties.DOWN, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true));
     });
+
+    private static BlockStateGenerator createMirroredCubeGenerator(Block block, ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
+        ResourceLocation resourceLocation2 = ModelTemplates.CUBE_MIRRORED_ALL.create(block, textureMapping, biConsumer);
+        return BlockModelGenerators.createRotatedVariant(block, resourceLocation, resourceLocation2);
+    }
+
+    private static BlockStateGenerator createMirroredColumnGenerator(Block block, ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
+        ResourceLocation resourceLocation2 = ModelTemplates.CUBE_COLUMN_MIRRORED.create(block, textureMapping, biConsumer);
+        return BlockModelGenerators.createRotatedVariant(block, resourceLocation, resourceLocation2).with(BlockModelGenerators.createRotatedPillar());
+    }
 
     public BlockModelGenerators(Consumer<BlockStateGenerator> consumer, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer, Consumer<Item> consumer2) {
         this.blockStateOutput = consumer;
@@ -252,13 +268,8 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, provider.create(block, this.modelOutput)));
     }
 
-    private void createTrivialBlock(Block block, TextureMapping textureMapping, ModelTemplate modelTemplate) {
-        ResourceLocation resourceLocation = modelTemplate.create(block, textureMapping, this.modelOutput);
-        this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, resourceLocation));
-    }
-
     private BlockFamilyProvider family(Block block) {
-        TexturedModel texturedModel = this.texturedModels.containsKey(block) ? this.texturedModels.get(block) : TexturedModel.CUBE.get(block);
+        TexturedModel texturedModel = this.texturedModels.getOrDefault(block, TexturedModel.CUBE.get(block));
         return new BlockFamilyProvider(texturedModel.getMapping()).fullBlock(block, texturedModel.getTemplate());
     }
 
@@ -664,11 +675,6 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(Blocks.LAVA_CAULDRON, ModelTemplates.CAULDRON_FULL.create(Blocks.LAVA_CAULDRON, TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.LAVA, "_still")), this.modelOutput)));
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.WATER_CAULDRON).with(PropertyDispatch.property(LayeredCauldronBlock.LEVEL).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_LEVEL1.createWithSuffix(Blocks.WATER_CAULDRON, "_level1", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_LEVEL2.createWithSuffix(Blocks.WATER_CAULDRON, "_level2", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_FULL.createWithSuffix(Blocks.WATER_CAULDRON, "_full", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.WATER, "_still")), this.modelOutput)))));
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.POWDER_SNOW_CAULDRON).with(PropertyDispatch.property(LayeredCauldronBlock.LEVEL).select((Integer)1, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_LEVEL1.createWithSuffix(Blocks.POWDER_SNOW_CAULDRON, "_level1", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput))).select((Integer)2, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_LEVEL2.createWithSuffix(Blocks.POWDER_SNOW_CAULDRON, "_level2", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput))).select((Integer)3, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CAULDRON_FULL.createWithSuffix(Blocks.POWDER_SNOW_CAULDRON, "_full", TextureMapping.cauldron(TextureMapping.getBlockTexture(Blocks.POWDER_SNOW)), this.modelOutput)))));
-    }
-
-    private void createChiseledSandsone(Block block, Block block2) {
-        TextureMapping textureMapping = new TextureMapping().put(TextureSlot.END, TextureMapping.getBlockTexture(block2, "_top")).put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block));
-        this.createTrivialBlock(block, textureMapping, ModelTemplates.CUBE_COLUMN);
     }
 
     private void createChorusFlower() {
@@ -1236,11 +1242,13 @@ public class BlockModelGenerators {
         this.createSimpleFlatItemModel(Items.STRUCTURE_VOID);
         this.createAirLikeBlock(Blocks.MOVING_PISTON, TextureMapping.getBlockTexture(Blocks.PISTON, "_side"));
         this.createTrivialBlock(Blocks.COAL_ORE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.DEEPSLATE_COAL_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.COAL_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.DIAMOND_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.DEEPSLATE_DIAMOND_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.DIAMOND_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.EMERALD_ORE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.DEEPSLATE_EMERALD_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.EMERALD_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.GOLD_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.NETHER_GOLD_ORE, TexturedModel.CUBE);
@@ -1260,11 +1268,8 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.REDSTONE_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.GILDED_BLACKSTONE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.BLUE_ICE, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CHISELED_NETHER_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CLAY, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.COARSE_DIRT, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CRACKED_NETHER_BRICKS, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CRACKED_STONE_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CRYING_OBSIDIAN, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.END_STONE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.GLOWSTONE, TexturedModel.CUBE);
@@ -1291,20 +1296,14 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.TARGET, TexturedModel.COLUMN);
         this.createTrivialBlock(Blocks.WARPED_WART_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.WET_SPONGE, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CHISELED_QUARTZ_BLOCK, TexturedModel.COLUMN.updateTexture(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_QUARTZ_BLOCK))));
-        this.createTrivialBlock(Blocks.CHISELED_STONE_BRICKS, TexturedModel.CUBE);
-        this.createChiseledSandsone(Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE);
-        this.createChiseledSandsone(Blocks.CHISELED_RED_SANDSTONE, Blocks.RED_SANDSTONE);
-        this.createTrivialBlock(Blocks.CHISELED_POLISHED_BLACKSTONE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.AMETHYST_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.BUDDING_AMETHYST, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CALCITE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.TUFF, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.DRIPSTONE_BLOCK, TexturedModel.CUBE);
-        this.createTrivialBlock(Blocks.CHISELED_DEEPSLATE, TexturedModel.CUBE);
         this.createPetrifiedOakSlab();
         this.createTrivialCube(Blocks.COPPER_ORE);
+        this.createTrivialCube(Blocks.DEEPSLATE_COPPER_ORE);
         this.createTrivialCube(Blocks.COPPER_BLOCK);
         this.createTrivialCube(Blocks.EXPOSED_COPPER);
         this.createTrivialCube(Blocks.WEATHERED_COPPER);
@@ -1627,6 +1626,7 @@ public class BlockModelGenerators {
         this.copyModel(Blocks.MOSSY_STONE_BRICKS, Blocks.INFESTED_MOSSY_STONE_BRICKS);
         this.createInfestedStone();
         this.copyModel(Blocks.STONE_BRICKS, Blocks.INFESTED_STONE_BRICKS);
+        this.copyModel(Blocks.DEEPSLATE, Blocks.INFESTED_DEEPSLATE);
         SpawnEggItem.eggs().forEach(spawnEggItem -> this.delegateItemModel((Item)spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
     }
 
@@ -1722,9 +1722,8 @@ public class BlockModelGenerators {
 
         public BlockFamilyProvider fullBlock(Block block, ModelTemplate modelTemplate) {
             this.fullBlock = modelTemplate.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
-            if (BlockModelGenerators.this.mirroredModels.containsKey(block)) {
-                ResourceLocation resourceLocation = ((MirroredModelFactory)BlockModelGenerators.this.mirroredModels.get(block)).create(block, this.mapping, BlockModelGenerators.this.modelOutput);
-                BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(block, this.fullBlock, resourceLocation));
+            if (BlockModelGenerators.this.fullBlockModelCustomGenerators.containsKey(block)) {
+                BlockModelGenerators.this.blockStateOutput.accept(((BlockStateGeneratorSupplier)BlockModelGenerators.this.fullBlockModelCustomGenerators.get(block)).create(block, this.fullBlock, this.mapping, BlockModelGenerators.this.modelOutput));
             } else {
                 BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, this.fullBlock));
             }
@@ -1790,7 +1789,7 @@ public class BlockModelGenerators {
             if (this.family == null) {
                 throw new IllegalStateException("Family not defined");
             }
-            Block block2 = this.family.getShapes().get((Object)BlockFamily.Variant.WALL_SIGN);
+            Block block2 = this.family.getVariants().get((Object)BlockFamily.Variant.WALL_SIGN);
             ResourceLocation resourceLocation = ModelTemplates.PARTICLE_ONLY.create(block, this.mapping, (BiConsumer<ResourceLocation, Supplier<JsonElement>>)BlockModelGenerators.this.modelOutput);
             BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, resourceLocation));
             BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block2, resourceLocation));
@@ -1819,6 +1818,12 @@ public class BlockModelGenerators {
             return this;
         }
 
+        private BlockFamilyProvider fullBlockVariant(Block block) {
+            TexturedModel texturedModel = BlockModelGenerators.this.texturedModels.getOrDefault(block, TexturedModel.CUBE.get(block));
+            BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block, texturedModel.create(block, BlockModelGenerators.this.modelOutput)));
+            return this;
+        }
+
         private BlockFamilyProvider door(Block block) {
             BlockModelGenerators.this.createDoor(block);
             return this;
@@ -1838,7 +1843,7 @@ public class BlockModelGenerators {
 
         public BlockFamilyProvider generateFor(BlockFamily blockFamily) {
             this.family = blockFamily;
-            blockFamily.getShapes().forEach((variant, block) -> {
+            blockFamily.getVariants().forEach((variant, block) -> {
                 BiConsumer biConsumer = (BiConsumer)SHAPE_CONSUMERS.get(variant);
                 if (biConsumer != null) {
                     biConsumer.accept(this, block);
@@ -1849,8 +1854,8 @@ public class BlockModelGenerators {
     }
 
     @FunctionalInterface
-    static interface MirroredModelFactory {
-        public ResourceLocation create(Block var1, TextureMapping var2, BiConsumer<ResourceLocation, Supplier<JsonElement>> var3);
+    static interface BlockStateGeneratorSupplier {
+        public BlockStateGenerator create(Block var1, ResourceLocation var2, TextureMapping var3, BiConsumer<ResourceLocation, Supplier<JsonElement>> var4);
     }
 }
 

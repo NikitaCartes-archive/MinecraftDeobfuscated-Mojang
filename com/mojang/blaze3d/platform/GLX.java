@@ -5,7 +5,6 @@ package com.mojang.blaze3d.platform;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -15,12 +14,12 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.GameRenderer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.Version;
@@ -28,18 +27,13 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLCapabilities;
 import oshi.SystemInfo;
 import oshi.hardware.Processor;
 
 @Environment(value=EnvType.CLIENT)
 public class GLX {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static String capsString = "";
     private static String cpuInfo;
-    private static final Map<Integer, String> LOOKUP_MAP;
 
     public static String getOpenGLVersionString() {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
@@ -96,17 +90,8 @@ public class GLX {
         return GLFW.glfwWindowShouldClose(window.getWindow());
     }
 
-    public static void _setupNvFogDistance() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        if (GL.getCapabilities().GL_NV_fog_distance) {
-            GlStateManager._fogi(34138, 34139);
-        }
-    }
-
     public static void _init(int i, boolean bl) {
         RenderSystem.assertThread(RenderSystem::isInInitPhase);
-        GLCapabilities gLCapabilities = GL.getCapabilities();
-        capsString = "Using framebuffer using " + GlStateManager._init_fbo(gLCapabilities);
         try {
             Processor[] processors = new SystemInfo().getHardware().getProcessors();
             cpuInfo = String.format("%dx %s", processors.length, processors[0]).replaceAll("\\s+", " ");
@@ -114,10 +99,6 @@ public class GLX {
             // empty catch block
         }
         GlDebug.enableDebugCallback(i, bl);
-    }
-
-    public static String _getCapsString() {
-        return capsString;
     }
 
     public static String _getCpuInfo() {
@@ -128,45 +109,42 @@ public class GLX {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         GlStateManager._disableTexture();
         GlStateManager._depthMask(false);
+        RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GL11.glLineWidth(4.0f);
-        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+        RenderSystem.lineWidth(4.0f);
+        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
         if (bl) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(i, 0.0, 0.0).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(1.0f, 0.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(i, 0.0, 0.0).color(0, 0, 0, 255).normal(1.0f, 0.0f, 0.0f).endVertex();
         }
         if (bl2) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(0.0, i, 0.0).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(0.0, i, 0.0).color(0, 0, 0, 255).normal(0.0f, 1.0f, 0.0f).endVertex();
         }
         if (bl3) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, i).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(0.0f, 0.0f, 1.0f).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, i).color(0, 0, 0, 255).normal(0.0f, 0.0f, 1.0f).endVertex();
         }
         tesselator.end();
-        GL11.glLineWidth(2.0f);
-        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+        RenderSystem.lineWidth(2.0f);
+        bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
         if (bl) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(255, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(i, 0.0, 0.0).color(255, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(255, 0, 0, 255).normal(1.0f, 0.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(i, 0.0, 0.0).color(255, 0, 0, 255).normal(1.0f, 0.0f, 0.0f).endVertex();
         }
         if (bl2) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 255, 0, 255).endVertex();
-            bufferBuilder.vertex(0.0, i, 0.0).color(0, 255, 0, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 255, 0, 255).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(0.0, i, 0.0).color(0, 255, 0, 255).normal(0.0f, 1.0f, 0.0f).endVertex();
         }
         if (bl3) {
-            bufferBuilder.vertex(0.0, 0.0, 0.0).color(127, 127, 255, 255).endVertex();
-            bufferBuilder.vertex(0.0, 0.0, i).color(127, 127, 255, 255).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, 0.0).color(127, 127, 255, 255).normal(0.0f, 0.0f, 1.0f).endVertex();
+            bufferBuilder.vertex(0.0, 0.0, i).color(127, 127, 255, 255).normal(0.0f, 0.0f, 1.0f).endVertex();
         }
         tesselator.end();
-        GL11.glLineWidth(1.0f);
+        RenderSystem.lineWidth(1.0f);
         GlStateManager._depthMask(true);
         GlStateManager._enableTexture();
-    }
-
-    public static String getErrorString(int i) {
-        return LOOKUP_MAP.get(i);
     }
 
     public static <T> T make(Supplier<T> supplier) {
@@ -176,20 +154,6 @@ public class GLX {
     public static <T> T make(T object, Consumer<T> consumer) {
         consumer.accept(object);
         return object;
-    }
-
-    static {
-        LOOKUP_MAP = GLX.make(Maps.newHashMap(), hashMap -> {
-            hashMap.put(0, "No error");
-            hashMap.put(1280, "Enum parameter is invalid for this function");
-            hashMap.put(1281, "Parameter is invalid for this function");
-            hashMap.put(1282, "Current state is invalid for this function");
-            hashMap.put(1283, "Stack overflow");
-            hashMap.put(1284, "Stack underflow");
-            hashMap.put(1285, "Out of memory");
-            hashMap.put(1286, "Operation on incomplete framebuffer");
-            hashMap.put(1286, "Operation on incomplete framebuffer");
-        });
     }
 }
 

@@ -33,10 +33,10 @@ extends TrunkPlacer {
     @Override
     public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
         BlockPos blockPos2 = blockPos.below();
-        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos2);
-        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos2.east());
-        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos2.south());
-        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos2.south().east());
+        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos2, treeConfiguration);
+        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos2.east(), treeConfiguration);
+        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos2.south(), treeConfiguration);
+        GiantTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos2.south().east(), treeConfiguration);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int j = 0; j < i; ++j) {
             GiantTrunkPlacer.placeLogIfFreeWithOffset(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration, blockPos, 0, j, 0);

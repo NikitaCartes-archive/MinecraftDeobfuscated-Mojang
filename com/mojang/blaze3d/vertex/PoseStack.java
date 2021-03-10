@@ -67,6 +67,16 @@ public class PoseStack {
         return this.poseStack.size() == 1;
     }
 
+    public void setIdentity() {
+        Pose pose = this.poseStack.getLast();
+        pose.pose.setIdentity();
+        pose.normal.setIdentity();
+    }
+
+    public void mulPoseMatrix(Matrix4f matrix4f) {
+        this.poseStack.getLast().pose.multiply(matrix4f);
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static final class Pose {
         private final Matrix4f pose;

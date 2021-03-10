@@ -60,7 +60,7 @@ extends Slot {
     }
 
     @Override
-    public ItemStack onTake(Player player, ItemStack itemStack) {
+    public void onTake(Player player, ItemStack itemStack) {
         this.checkTakeAchievements(itemStack);
         NonNullList<ItemStack> nonNullList = player.level.getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level);
         for (int i = 0; i < nonNullList.size(); ++i) {
@@ -83,7 +83,6 @@ extends Slot {
             if (this.player.getInventory().add(itemStack3)) continue;
             this.player.drop(itemStack3, false);
         }
-        return itemStack;
     }
 }
 

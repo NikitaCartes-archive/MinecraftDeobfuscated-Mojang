@@ -195,11 +195,11 @@ public class DebugRenderer {
         double j = camera.getPosition().x;
         double k = camera.getPosition().y;
         double l = camera.getPosition().z;
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
-        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
-        RenderSystem.multMatrix(new Matrix4f(camera.rotation()));
-        RenderSystem.scalef(g, -g, g);
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.translate((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
+        poseStack.mulPoseMatrix(new Matrix4f(camera.rotation()));
+        poseStack.scale(g, -g, g);
         RenderSystem.enableTexture();
         if (bl2) {
             RenderSystem.disableDepthTest();
@@ -207,15 +207,16 @@ public class DebugRenderer {
             RenderSystem.enableDepthTest();
         }
         RenderSystem.depthMask(true);
-        RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
+        poseStack.scale(-1.0f, 1.0f, 1.0f);
+        RenderSystem.applyModelViewMatrix();
         float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
-        RenderSystem.enableAlphaTest();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         font.drawInBatch(string, m -= h / g, 0.0f, i, false, Transformation.identity().getMatrix(), (MultiBufferSource)bufferSource, bl2, 0, 0xF000F0);
         bufferSource.endBatch();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableDepthTest();
-        RenderSystem.popMatrix();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     @Environment(value=EnvType.CLIENT)

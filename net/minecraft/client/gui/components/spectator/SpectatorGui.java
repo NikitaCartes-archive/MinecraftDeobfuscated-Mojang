@@ -65,11 +65,10 @@ implements SpectatorMenuListener {
     }
 
     protected void renderPage(PoseStack poseStack, float f, int i, int j, SpectatorPage spectatorPage) {
-        RenderSystem.enableRescaleNormal();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, f);
-        this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f);
+        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         this.blit(poseStack, i - 91, j, 0, 0, 182, 22);
         if (spectatorPage.getSelectedSlot() >= 0) {
             this.blit(poseStack, i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 0, 22, 24, 22);
@@ -77,20 +76,19 @@ implements SpectatorMenuListener {
         for (int k = 0; k < 9; ++k) {
             this.renderSlot(poseStack, k, this.minecraft.getWindow().getGuiScaledWidth() / 2 - 90 + k * 20 + 2, j + 3, f, spectatorPage.getItem(k));
         }
-        RenderSystem.disableRescaleNormal();
         RenderSystem.disableBlend();
     }
 
     private void renderSlot(PoseStack poseStack, int i, int j, float f, float g, SpectatorMenuItem spectatorMenuItem) {
-        this.minecraft.getTextureManager().bind(SPECTATOR_LOCATION);
+        RenderSystem.setShaderTexture(0, SPECTATOR_LOCATION);
         if (spectatorMenuItem != SpectatorMenu.EMPTY_SLOT) {
             int k = (int)(g * 255.0f);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(j, f, 0.0f);
+            poseStack.pushPose();
+            poseStack.translate(j, f, 0.0);
             float h = spectatorMenuItem.isEnabled() ? 1.0f : 0.25f;
-            RenderSystem.color4f(h, h, h, g);
+            RenderSystem.setShaderColor(h, h, h, g);
             spectatorMenuItem.renderIcon(poseStack, h, k);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             if (k > 3 && spectatorMenuItem.isEnabled()) {
                 Component component = this.minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
                 this.minecraft.font.drawShadow(poseStack, component, (float)(j + 19 - 2 - this.minecraft.font.width(component)), f + 6.0f + 3.0f, 0xFFFFFF + (k << 24));
@@ -107,12 +105,10 @@ implements SpectatorMenuListener {
             if (component != null) {
                 int j = (this.minecraft.getWindow().getGuiScaledWidth() - this.minecraft.font.width(component)) / 2;
                 int k = this.minecraft.getWindow().getGuiScaledHeight() - 35;
-                RenderSystem.pushMatrix();
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 this.minecraft.font.drawShadow(poseStack, component, (float)j, (float)k, 0xFFFFFF + (i << 24));
                 RenderSystem.disableBlend();
-                RenderSystem.popMatrix();
             }
         }
     }

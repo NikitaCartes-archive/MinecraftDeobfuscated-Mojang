@@ -45,31 +45,27 @@ public class RealmsTextureManager {
 
     public static void bindWorldTemplate(String string, @Nullable String string2) {
         if (string2 == null) {
-            Minecraft.getInstance().getTextureManager().bind(TEMPLATE_ICON_LOCATION);
+            RenderSystem.setShaderTexture(0, TEMPLATE_ICON_LOCATION);
             return;
         }
         int i = RealmsTextureManager.getTextureId(string, string2);
-        RenderSystem.bindTexture(i);
+        RenderSystem.setShaderTexture(0, i);
     }
 
     public static void withBoundFace(String string, Runnable runnable) {
-        RenderSystem.pushTextureAttributes();
-        try {
-            RealmsTextureManager.bindFace(string);
-            runnable.run();
-        } finally {
-            RenderSystem.popAttributes();
-        }
+        RealmsTextureManager.bindFace(string);
+        runnable.run();
     }
 
     private static void bindDefaultFace(UUID uUID) {
-        Minecraft.getInstance().getTextureManager().bind(DefaultPlayerSkin.getDefaultSkin(uUID));
+        RenderSystem.setShaderTexture(0, DefaultPlayerSkin.getDefaultSkin(uUID));
     }
 
     private static void bindFace(final String string) {
         UUID uUID = UUIDTypeAdapter.fromString(string);
         if (TEXTURES.containsKey(string)) {
-            RenderSystem.bindTexture(TEXTURES.get(string).textureId);
+            int i = TEXTURES.get(string).textureId;
+            RenderSystem.setShaderTexture(0, i);
             return;
         }
         if (SKIN_FETCH_STATUS.containsKey(string)) {
@@ -77,7 +73,7 @@ public class RealmsTextureManager {
                 RealmsTextureManager.bindDefaultFace(uUID);
             } else if (FETCHED_SKINS.containsKey(string)) {
                 int i = RealmsTextureManager.getTextureId(string, FETCHED_SKINS.get(string));
-                RenderSystem.bindTexture(i);
+                RenderSystem.setShaderTexture(0, i);
             } else {
                 RealmsTextureManager.bindDefaultFace(uUID);
             }
@@ -182,7 +178,7 @@ public class RealmsTextureManager {
             iOException.printStackTrace();
         }
         RenderSystem.activeTexture(33984);
-        RenderSystem.bindTexture(i);
+        RenderSystem.bindTextureForSetup(i);
         TextureUtil.initTexture(intBuffer, j, k);
         TEXTURES.put(string, new RealmsTexture(string2, i));
         return i;

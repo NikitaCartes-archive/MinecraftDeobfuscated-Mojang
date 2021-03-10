@@ -11,8 +11,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import it.unimi.dsi.fastutil.ints.Int2ShortMap;
-import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +35,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -50,7 +49,6 @@ import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
@@ -66,7 +64,6 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
@@ -175,7 +172,6 @@ ServerGamePacketListener {
     private long keepAliveChallenge;
     private int chatSpamTickCount;
     private int dropSpamTickCount;
-    private final Int2ShortMap expectedAcks = new Int2ShortOpenHashMap();
     private double firstGoodX;
     private double firstGoodY;
     private double firstGoodZ;
@@ -1264,32 +1260,18 @@ ServerGamePacketListener {
     public void handleContainerClick(ServerboundContainerClickPacket serverboundContainerClickPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundContainerClickPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.containerMenu.containerId == serverboundContainerClickPacket.getContainerId() && this.player.containerMenu.isSynched(this.player)) {
+        if (this.player.containerMenu.containerId == serverboundContainerClickPacket.getContainerId()) {
             if (this.player.isSpectator()) {
-                NonNullList<ItemStack> nonNullList = NonNullList.create();
-                for (int i = 0; i < this.player.containerMenu.slots.size(); ++i) {
-                    nonNullList.add(this.player.containerMenu.slots.get(i).getItem());
-                }
-                this.player.refreshContainer(this.player.containerMenu, nonNullList);
+                this.player.containerMenu.sendAllDataToRemote();
             } else {
-                ItemStack itemStack = this.player.containerMenu.clicked(serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
-                if (ItemStack.matches(serverboundContainerClickPacket.getItem(), itemStack)) {
-                    this.player.connection.send(new ClientboundContainerAckPacket(serverboundContainerClickPacket.getContainerId(), serverboundContainerClickPacket.getUid(), true));
-                    this.player.ignoreSlotUpdateHack = true;
-                    this.player.containerMenu.broadcastChanges();
-                    this.player.broadcastCarriedItem();
-                    this.player.ignoreSlotUpdateHack = false;
-                } else {
-                    this.expectedAcks.put(this.player.containerMenu.containerId, serverboundContainerClickPacket.getUid());
-                    this.player.connection.send(new ClientboundContainerAckPacket(serverboundContainerClickPacket.getContainerId(), serverboundContainerClickPacket.getUid(), false));
-                    this.player.containerMenu.setSynched(this.player, false);
-                    NonNullList<ItemStack> nonNullList2 = NonNullList.create();
-                    for (int j = 0; j < this.player.containerMenu.slots.size(); ++j) {
-                        ItemStack itemStack2 = this.player.containerMenu.slots.get(j).getItem();
-                        nonNullList2.add(itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2);
-                    }
-                    this.player.refreshContainer(this.player.containerMenu, nonNullList2);
+                this.player.containerMenu.suppressRemoteUpdates();
+                this.player.containerMenu.clicked(serverboundContainerClickPacket.getSlotNum(), serverboundContainerClickPacket.getButtonNum(), serverboundContainerClickPacket.getClickType(), this.player);
+                for (Int2ObjectMap.Entry entry : Int2ObjectMaps.fastIterable(serverboundContainerClickPacket.getChangedSlots())) {
+                    this.player.containerMenu.setRemoteSlot(entry.getIntKey(), (ItemStack)entry.getValue());
                 }
+                this.player.containerMenu.setRemoteCarried(serverboundContainerClickPacket.getCarriedItem());
+                this.player.containerMenu.resumeRemoteUpdates();
+                this.player.containerMenu.broadcastChanges();
             }
         }
     }
@@ -1298,7 +1280,7 @@ ServerGamePacketListener {
     public void handlePlaceRecipe(ServerboundPlaceRecipePacket serverboundPlaceRecipePacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundPlaceRecipePacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.isSpectator() || this.player.containerMenu.containerId != serverboundPlaceRecipePacket.getContainerId() || !this.player.containerMenu.isSynched(this.player) || !(this.player.containerMenu instanceof RecipeBookMenu)) {
+        if (this.player.isSpectator() || this.player.containerMenu.containerId != serverboundPlaceRecipePacket.getContainerId() || !(this.player.containerMenu instanceof RecipeBookMenu)) {
             return;
         }
         this.server.getRecipeManager().byKey(serverboundPlaceRecipePacket.getRecipe()).ifPresent(recipe -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(serverboundPlaceRecipePacket.isShiftDown(), (Recipe<?>)recipe, this.player));
@@ -1308,7 +1290,7 @@ ServerGamePacketListener {
     public void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && this.player.containerMenu.isSynched(this.player) && !this.player.isSpectator()) {
+        if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator()) {
             this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
             this.player.containerMenu.broadcastChanges();
         }
@@ -1339,21 +1321,11 @@ ServerGamePacketListener {
                 } else {
                     this.player.inventoryMenu.setItem(serverboundSetCreativeModeSlotPacket.getSlotNum(), itemStack);
                 }
-                this.player.inventoryMenu.setSynched(this.player, true);
                 this.player.inventoryMenu.broadcastChanges();
             } else if (bl && bl3 && this.dropSpamTickCount < 200) {
                 this.dropSpamTickCount += 20;
                 this.player.drop(itemStack, true);
             }
-        }
-    }
-
-    @Override
-    public void handleContainerAck(ServerboundContainerAckPacket serverboundContainerAckPacket) {
-        PacketUtils.ensureRunningOnSameThread(serverboundContainerAckPacket, this, this.player.getLevel());
-        int i = this.player.containerMenu.containerId;
-        if (i == serverboundContainerAckPacket.getContainerId() && this.expectedAcks.getOrDefault(i, (short)(serverboundContainerAckPacket.getUid() + 1)) == serverboundContainerAckPacket.getUid() && !this.player.containerMenu.isSynched(this.player) && !this.player.isSpectator()) {
-            this.player.containerMenu.setSynched(this.player, true);
         }
     }
 

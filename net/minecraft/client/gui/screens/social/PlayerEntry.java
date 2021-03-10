@@ -119,7 +119,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
             s = j + (m - (this.minecraft.font.lineHeight + this.minecraft.font.lineHeight)) / 2;
             this.minecraft.font.draw(poseStack, component, (float)r, (float)(s + 12), PLAYER_STATUS_COLOR);
         }
-        this.minecraft.getTextureManager().bind(this.skinGetter.get());
+        RenderSystem.setShaderTexture(0, this.skinGetter.get());
         GuiComponent.blit(poseStack, p, q, 24, 24, 8.0f, 8.0f, 8, 8, 64, 64);
         RenderSystem.enableBlend();
         GuiComponent.blit(poseStack, p, q, 24, 24, 40.0f, 8.0f, 8, 8, 64, 64);

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
@@ -39,13 +40,13 @@ extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
     }
 
     @Override
-    protected int getPasses(double d) {
-        return super.getPasses(d) + 1;
+    protected float getOffset() {
+        return 1.0f;
     }
 
     @Override
-    protected float getOffset() {
-        return 1.0f;
+    protected RenderType renderType() {
+        return RenderType.endGateway();
     }
 
     @Override

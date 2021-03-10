@@ -92,7 +92,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
         for (int r = 0; r < 4; ++r) {
             FormattedCharSequence formattedCharSequence = formattedCharSequences[r];
             float s = -this.font.width(formattedCharSequence) / 2;
-            int t = blockState.getValue(SignBlock.LIT) != false ? 0xF000F0 : i;
+            int t = signBlockEntity.hasGlowingText() ? 0xF000F0 : i;
             this.font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, t);
         }
         poseStack.popPose();

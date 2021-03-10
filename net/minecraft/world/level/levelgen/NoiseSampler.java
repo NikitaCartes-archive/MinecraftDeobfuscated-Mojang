@@ -115,16 +115,16 @@ public class NoiseSampler {
             int ah = ag + l;
             double ai = this.blendedNoise.sampleAndClampNoise(i, ah, j, ac, ad, ae, af);
             double aj = this.computeInitialDensity(ah, d, e, aa) + ai;
-            aj = this.cavify(i * this.cellWidth, ah * this.cellHeight, j * this.cellWidth, ai, aj);
+            aj = this.cavify(i * this.cellWidth, ah * this.cellHeight, j * this.cellWidth, aj);
             ds[ag] = aj = this.applySlide(aj, ah);
         }
     }
 
-    private double cavify(int i, int j, int k, double d, double e) {
+    private double cavify(int i, int j, int k, double d) {
         if (this.cavifier == null) {
-            return e;
+            return d;
         }
-        return this.cavifier.cavify(i, j, k, d, e);
+        return this.cavifier.cavify(i, j, k, d);
     }
 
     private double computeInitialDensity(int i, double d, double e, double f) {

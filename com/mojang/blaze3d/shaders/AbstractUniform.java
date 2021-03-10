@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.shaders;
 
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -28,6 +29,9 @@ public class AbstractUniform {
     }
 
     public void set(float[] fs) {
+    }
+
+    public void set(Vector3f vector3f) {
     }
 
     public void set(Matrix4f matrix4f) {

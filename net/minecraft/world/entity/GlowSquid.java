@@ -63,6 +63,7 @@ extends Squid {
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
+        super.readAdditionalSaveData(compoundTag);
         this.setDarkTicks(compoundTag.getInt("DarkTicksRemaining"));
     }
 
@@ -82,7 +83,7 @@ extends Squid {
         if (bl) {
             this.setDarkTicks(100);
         }
-        return false;
+        return bl;
     }
 
     private void setDarkTicks(int i) {

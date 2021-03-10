@@ -427,6 +427,11 @@ public class SoundEvents {
     public static final SoundEvent GLASS_PLACE = SoundEvents.register("block.glass.place");
     public static final SoundEvent GLASS_STEP = SoundEvents.register("block.glass.step");
     public static final SoundEvent GLOW_INK_SAC_USE = SoundEvents.register("item.glow_ink_sac.use");
+    public static final SoundEvent GLOW_ITEM_FRAME_ADD_ITEM = SoundEvents.register("entity.glow_item_frame.add_item");
+    public static final SoundEvent GLOW_ITEM_FRAME_BREAK = SoundEvents.register("entity.glow_item_frame.break");
+    public static final SoundEvent GLOW_ITEM_FRAME_PLACE = SoundEvents.register("entity.glow_item_frame.place");
+    public static final SoundEvent GLOW_ITEM_FRAME_REMOVE_ITEM = SoundEvents.register("entity.glow_item_frame.remove_item");
+    public static final SoundEvent GLOW_ITEM_FRAME_ROTATE_ITEM = SoundEvents.register("entity.glow_item_frame.rotate_item");
     public static final SoundEvent GLOW_SQUID_AMBIENT = SoundEvents.register("entity.glow_squid.ambient");
     public static final SoundEvent GLOW_SQUID_DEATH = SoundEvents.register("entity.glow_squid.death");
     public static final SoundEvent GLOW_SQUID_HURT = SoundEvents.register("entity.glow_squid.hurt");

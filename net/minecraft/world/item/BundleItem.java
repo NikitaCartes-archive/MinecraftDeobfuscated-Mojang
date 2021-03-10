@@ -19,8 +19,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
@@ -47,7 +47,7 @@ extends Item {
     }
 
     @Override
-    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Inventory inventory) {
+    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
         if (clickAction != ClickAction.SECONDARY) {
             return false;
         }
@@ -56,18 +56,18 @@ extends Item {
             BundleItem.removeOne(itemStack).ifPresent(itemStack2 -> BundleItem.add(itemStack, slot.safeInsert((ItemStack)itemStack2)));
         } else if (itemStack22.getItem().canFitInsideContainerItems()) {
             int i = (64 - BundleItem.getContentWeight(itemStack)) / BundleItem.getWeight(itemStack22);
-            BundleItem.add(itemStack, slot.safeTake(itemStack22.getCount(), i, inventory.player));
+            BundleItem.add(itemStack, slot.safeTake(itemStack22.getCount(), i, player));
         }
         return true;
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Inventory inventory) {
-        if (clickAction != ClickAction.SECONDARY || !slot.allowModification(inventory.player)) {
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemStack2, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess) {
+        if (clickAction != ClickAction.SECONDARY || !slot.allowModification(player)) {
             return false;
         }
         if (itemStack2.isEmpty()) {
-            BundleItem.removeOne(itemStack).ifPresent(inventory::setCarried);
+            BundleItem.removeOne(itemStack).ifPresent(slotAccess::set);
         } else {
             itemStack2.shrink(BundleItem.add(itemStack, itemStack2));
         }

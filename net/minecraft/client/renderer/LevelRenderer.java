@@ -11,6 +11,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -69,6 +70,7 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RunningTrimmedMean;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -159,7 +161,6 @@ AutoCloseable {
     private final ObjectArrayList<RenderChunkInfo> renderChunks = new ObjectArrayList();
     private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
     private ViewArea viewArea;
-    private final VertexFormat skyFormat = DefaultVertexFormat.POSITION;
     @Nullable
     private VertexBuffer starBuffer;
     @Nullable
@@ -207,7 +208,6 @@ AutoCloseable {
     private Vec3 prevCloudColor = Vec3.ZERO;
     private CloudStatus prevCloudsType;
     private ChunkRenderDispatcher chunkRenderDispatcher;
-    private final VertexFormat format = DefaultVertexFormat.BLOCK;
     private int lastViewDistance = -1;
     private int renderedEntities;
     private int culledEntities;
@@ -258,12 +258,9 @@ AutoCloseable {
         int k = Mth.floor(g);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.enableAlphaTest();
         RenderSystem.disableCull();
-        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.defaultAlphaFunc();
         RenderSystem.enableDepthTest();
         int l = 5;
         if (Minecraft.useFancyGraphics()) {
@@ -272,7 +269,8 @@ AutoCloseable {
         RenderSystem.depthMask(Minecraft.useShaderTransparency());
         int m = -1;
         float n = (float)this.ticks + f;
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShader(GameRenderer::getParticleShader);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int o = k - l; o <= k + l; ++o) {
             for (int p = i - l; p <= i + l; ++p) {
@@ -307,7 +305,7 @@ AutoCloseable {
                             tesselator.end();
                         }
                         m = 0;
-                        this.minecraft.getTextureManager().bind(RAIN_LOCATION);
+                        RenderSystem.setShaderTexture(0, RAIN_LOCATION);
                         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
                     }
                     int y = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 0x1F;
@@ -329,7 +327,7 @@ AutoCloseable {
                         tesselator.end();
                     }
                     m = 1;
-                    this.minecraft.getTextureManager().bind(SNOW_LOCATION);
+                    RenderSystem.setShaderTexture(0, SNOW_LOCATION);
                     bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
                 }
                 float af = -((float)(this.ticks & 0x1FF) + f) / 512.0f;
@@ -356,8 +354,6 @@ AutoCloseable {
         }
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
-        RenderSystem.defaultAlphaFunc();
-        RenderSystem.disableAlphaTest();
         lightTexture.turnOffLightLayer();
     }
 
@@ -412,10 +408,6 @@ AutoCloseable {
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
-        this.textureManager.bind(FORCEFIELD_LOCATION);
-        RenderSystem.texParameter(3553, 10242, 10497);
-        RenderSystem.texParameter(3553, 10243, 10497);
-        RenderSystem.bindTexture(0);
         this.initOutline();
         if (Minecraft.useShaderTransparency()) {
             this.initTransparency();
@@ -519,8 +511,7 @@ AutoCloseable {
             this.darkBuffer.close();
         }
         this.darkBuffer = new VertexBuffer();
-        this.drawSkyHemisphere(bufferBuilder, -16.0f, true);
-        bufferBuilder.end();
+        LevelRenderer.buildSkyDisc(bufferBuilder, -16.0f);
         this.darkBuffer.upload(bufferBuilder);
     }
 
@@ -531,29 +522,19 @@ AutoCloseable {
             this.skyBuffer.close();
         }
         this.skyBuffer = new VertexBuffer();
-        this.drawSkyHemisphere(bufferBuilder, 16.0f, false);
-        bufferBuilder.end();
+        LevelRenderer.buildSkyDisc(bufferBuilder, 16.0f);
         this.skyBuffer.upload(bufferBuilder);
     }
 
-    private void drawSkyHemisphere(BufferBuilder bufferBuilder, float f, boolean bl) {
-        int i = 64;
-        int j = 6;
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        for (int k = -384; k <= 384; k += 64) {
-            for (int l = -384; l <= 384; l += 64) {
-                float g = k;
-                float h = k + 64;
-                if (bl) {
-                    h = k;
-                    g = k + 64;
-                }
-                bufferBuilder.vertex(g, f, l).endVertex();
-                bufferBuilder.vertex(h, f, l).endVertex();
-                bufferBuilder.vertex(h, f, l + 64).endVertex();
-                bufferBuilder.vertex(g, f, l + 64).endVertex();
-            }
+    private static void buildSkyDisc(BufferBuilder bufferBuilder, float f) {
+        float g = Math.signum(f) * 512.0f;
+        float h = 512.0f;
+        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
+        bufferBuilder.vertex(0.0, f, 0.0).endVertex();
+        for (int i = -180; i <= 180; i += 45) {
+            bufferBuilder.vertex(g * Mth.cos((float)i * ((float)Math.PI / 180)), f, 512.0f * Mth.sin((float)i * ((float)Math.PI / 180))).endVertex();
         }
+        bufferBuilder.end();
     }
 
     private void createStars() {
@@ -868,6 +849,7 @@ AutoCloseable {
         boolean bl3;
         Frustum frustum;
         boolean bl2;
+        RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
         this.blockEntityRenderDispatcher.prepare(this.level, camera, this.minecraft.hitResult);
         this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
         ProfilerFiller profilerFiller = this.level.getProfiler();
@@ -893,13 +875,15 @@ AutoCloseable {
         }
         profilerFiller.popPush("clear");
         FogRenderer.setupColor(camera, f, this.minecraft.level, this.minecraft.options.renderDistance, gameRenderer.getDarkenWorldAmount(f));
+        FogRenderer.levelFogColor();
         RenderSystem.clear(16640, Minecraft.ON_OSX);
         float h = gameRenderer.getRenderDistance();
         boolean bl5 = bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
         if (this.minecraft.options.renderDistance >= 4) {
             FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3);
             profilerFiller.popPush("sky");
-            this.renderSky(poseStack, f);
+            RenderSystem.setShader(GameRenderer::getPositionShader);
+            this.renderSky(poseStack, matrix4f, f);
         }
         profilerFiller.popPush("fog");
         FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl3);
@@ -916,9 +900,9 @@ AutoCloseable {
         long r = Mth.clamp(q, n, 33333333L);
         this.compileChunksUntil(l + r);
         profilerFiller.popPush("terrain");
-        this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
-        this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
-        this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g);
+        this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g, matrix4f);
+        this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g, matrix4f);
+        this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g, matrix4f);
         if (this.level.effects().constantAmbientLight()) {
             Lighting.setupNetherLevel(poseStack.last().pose());
         } else {
@@ -1007,6 +991,8 @@ AutoCloseable {
         }
         this.checkPoseStack(poseStack);
         bufferSource.endBatch(RenderType.solid());
+        bufferSource.endBatch(RenderType.endPortal());
+        bufferSource.endBatch(RenderType.endGateway());
         bufferSource.endBatch(Sheets.solidBlockSheet());
         bufferSource.endBatch(Sheets.cutoutBlockSheet());
         bufferSource.endBatch(Sheets.bedSheet());
@@ -1045,10 +1031,13 @@ AutoCloseable {
                 this.renderHitOutline(poseStack, vertexConsumer3, camera.getEntity(), d, e, g, blockPos, blockState);
             }
         }
-        RenderSystem.pushMatrix();
-        RenderSystem.multMatrix(poseStack.last().pose());
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        poseStack2.pushPose();
+        poseStack2.mulPoseMatrix(poseStack.last().pose());
+        RenderSystem.applyModelViewMatrix();
         this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
-        RenderSystem.popMatrix();
+        poseStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
         bufferSource.endBatch(Sheets.translucentCullBlockSheet());
         bufferSource.endBatch(Sheets.bannerSheet());
         bufferSource.endBatch(Sheets.shieldSheet());
@@ -1067,9 +1056,9 @@ AutoCloseable {
             this.translucentTarget.clear(Minecraft.ON_OSX);
             this.translucentTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
             profilerFiller.popPush("translucent");
-            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
+            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g, matrix4f);
             profilerFiller.popPush("string");
-            this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g);
+            this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g, matrix4f);
             this.particlesTarget.clear(Minecraft.ON_OSX);
             this.particlesTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
             RenderStateShard.PARTICLES_TARGET.setupRenderState();
@@ -1078,26 +1067,31 @@ AutoCloseable {
             RenderStateShard.PARTICLES_TARGET.clearRenderState();
         } else {
             profilerFiller.popPush("translucent");
-            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
+            if (this.translucentTarget != null) {
+                this.translucentTarget.clear(Minecraft.ON_OSX);
+            }
+            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g, matrix4f);
             bufferSource.endBatch(RenderType.lines());
             bufferSource.endBatch();
             profilerFiller.popPush("string");
-            this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g);
+            this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g, matrix4f);
             profilerFiller.popPush("particles");
             this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
         }
-        RenderSystem.pushMatrix();
-        RenderSystem.multMatrix(poseStack.last().pose());
+        poseStack2.pushPose();
+        poseStack2.mulPoseMatrix(poseStack.last().pose());
+        RenderSystem.applyModelViewMatrix();
         if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
             if (this.transparencyChain != null) {
                 this.cloudsTarget.clear(Minecraft.ON_OSX);
                 RenderStateShard.CLOUDS_TARGET.setupRenderState();
                 profilerFiller.popPush("clouds");
-                this.renderClouds(poseStack, f, d, e, g);
+                this.renderClouds(poseStack, matrix4f, f, d, e, g);
                 RenderStateShard.CLOUDS_TARGET.clearRenderState();
             } else {
                 profilerFiller.popPush("clouds");
-                this.renderClouds(poseStack, f, d, e, g);
+                RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+                this.renderClouds(poseStack, matrix4f, f, d, e, g);
             }
         }
         if (this.transparencyChain != null) {
@@ -1116,10 +1110,10 @@ AutoCloseable {
             RenderSystem.depthMask(true);
         }
         this.renderDebug(camera);
-        RenderSystem.shadeModel(7424);
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
+        poseStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
         FogRenderer.setupNoFog();
     }
 
@@ -1137,7 +1131,8 @@ AutoCloseable {
         this.entityRenderDispatcher.render(entity, h - d, i - e, j - f, k, g, poseStack, multiBufferSource, this.entityRenderDispatcher.getPackedLightCoords(entity, g));
     }
 
-    private void renderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f) {
+    private void renderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f, Matrix4f matrix4f) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         renderType.setupRenderState();
         if (renderType == RenderType.translucent()) {
             this.minecraft.getProfiler().push("translucent_sort");
@@ -1160,22 +1155,63 @@ AutoCloseable {
         this.minecraft.getProfiler().popPush(() -> "render_" + renderType);
         boolean bl = renderType != RenderType.translucent();
         ListIterator objectListIterator = this.renderChunks.listIterator(bl ? 0 : this.renderChunks.size());
+        VertexFormat vertexFormat = renderType.format();
+        ShaderInstance shaderInstance = RenderSystem.getShader();
+        BufferUploader.reset();
+        for (int k = 0; k < 12; ++k) {
+            int l = RenderSystem.getShaderTexture(k);
+            shaderInstance.setSampler("Sampler" + k, l);
+        }
+        if (shaderInstance.MODEL_VIEW_MATRIX != null) {
+            shaderInstance.MODEL_VIEW_MATRIX.set(poseStack.last().pose());
+        }
+        if (shaderInstance.PROJECTION_MATRIX != null) {
+            shaderInstance.PROJECTION_MATRIX.set(matrix4f);
+        }
+        if (shaderInstance.COLOR_MODULATOR != null) {
+            shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
+        }
+        if (shaderInstance.FOG_START != null) {
+            shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
+        }
+        if (shaderInstance.FOG_END != null) {
+            shaderInstance.FOG_END.set(RenderSystem.getShaderFogEnd());
+        }
+        if (shaderInstance.FOG_COLOR != null) {
+            shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+        }
+        if (shaderInstance.TEXTURE_MATRIX != null) {
+            shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
+        }
+        if (shaderInstance.GAME_TIME != null) {
+            shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
+        }
+        RenderSystem.setupShaderLights(shaderInstance);
+        shaderInstance.apply();
+        Uniform uniform = shaderInstance.CHUNK_OFFSET;
+        boolean bl2 = false;
         while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
             RenderChunkInfo renderChunkInfo2 = bl ? (RenderChunkInfo)objectListIterator.next() : (RenderChunkInfo)objectListIterator.previous();
             ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo2.chunk;
             if (renderChunk.getCompiledChunk().isEmpty(renderType)) continue;
             VertexBuffer vertexBuffer = renderChunk.getBuffer(renderType);
-            poseStack.pushPose();
             BlockPos blockPos = renderChunk.getOrigin();
-            poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
-            vertexBuffer.bind();
-            this.format.setupBufferState(0L);
-            vertexBuffer.draw(poseStack.last().pose());
-            poseStack.popPose();
+            if (uniform != null) {
+                uniform.set((float)((double)blockPos.getX() - d), (float)((double)blockPos.getY() - e), (float)((double)blockPos.getZ() - f));
+                uniform.upload();
+            }
+            vertexBuffer.drawChunkLayer();
+            bl2 = true;
+        }
+        if (uniform != null) {
+            uniform.set(Vector3f.ZERO);
+        }
+        shaderInstance.clear();
+        if (bl2) {
+            vertexFormat.clearBufferState();
         }
         VertexBuffer.unbind();
-        RenderSystem.clearCurrentColor();
-        this.format.clearBufferState();
+        VertexBuffer.unbindVertexArray();
         this.minecraft.getProfiler().pop();
         renderType.clearRenderState();
     }
@@ -1195,9 +1231,11 @@ AutoCloseable {
             for (RenderChunkInfo renderChunkInfo : this.renderChunks) {
                 int i;
                 ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
-                RenderSystem.pushMatrix();
                 BlockPos blockPos = renderChunk.getOrigin();
-                RenderSystem.translated((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
+                PoseStack poseStack = RenderSystem.getModelViewStack();
+                poseStack.pushPose();
+                poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
+                RenderSystem.applyModelViewMatrix();
                 if (this.minecraft.chunkPath) {
                     bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
                     RenderSystem.lineWidth(10.0f);
@@ -1259,7 +1297,8 @@ AutoCloseable {
                         tesselator.end();
                     }
                 }
-                RenderSystem.popMatrix();
+                poseStack.popPose();
+                RenderSystem.applyModelViewMatrix();
             }
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
@@ -1272,8 +1311,10 @@ AutoCloseable {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.lineWidth(10.0f);
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)(this.frustumPos.x - camera.getPosition().x), (float)(this.frustumPos.y - camera.getPosition().y), (float)(this.frustumPos.z - camera.getPosition().z));
+            PoseStack poseStack2 = RenderSystem.getModelViewStack();
+            poseStack2.pushPose();
+            poseStack2.translate((float)(this.frustumPos.x - camera.getPosition().x), (float)(this.frustumPos.y - camera.getPosition().y), (float)(this.frustumPos.z - camera.getPosition().z));
+            RenderSystem.applyModelViewMatrix();
             RenderSystem.depthMask(true);
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             this.addFrustumQuad(bufferBuilder, 0, 1, 2, 3, 0, 1, 1);
@@ -1285,7 +1326,7 @@ AutoCloseable {
             tesselator.end();
             RenderSystem.depthMask(false);
             bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             this.addFrustumVertex(bufferBuilder, 0);
             this.addFrustumVertex(bufferBuilder, 1);
             this.addFrustumVertex(bufferBuilder, 1);
@@ -1311,7 +1352,8 @@ AutoCloseable {
             this.addFrustumVertex(bufferBuilder, 3);
             this.addFrustumVertex(bufferBuilder, 7);
             tesselator.end();
-            RenderSystem.popMatrix();
+            poseStack2.popPose();
+            RenderSystem.applyModelViewMatrix();
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
             RenderSystem.enableCull();
@@ -1357,11 +1399,11 @@ AutoCloseable {
     }
 
     private void renderEndSky(PoseStack poseStack) {
-        RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(false);
-        this.textureManager.bind(END_SKY_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         for (int i = 0; i < 6; ++i) {
@@ -1393,10 +1435,9 @@ AutoCloseable {
         RenderSystem.depthMask(true);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
     }
 
-    public void renderSky(PoseStack poseStack, float f) {
+    public void renderSky(PoseStack poseStack, Matrix4f matrix4f, float f) {
         float r;
         float q;
         float p;
@@ -1418,21 +1459,16 @@ AutoCloseable {
         FogRenderer.levelFogColor();
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.depthMask(false);
-        RenderSystem.enableFog();
-        RenderSystem.color3f(g, h, i);
-        this.skyBuffer.bind();
-        this.skyFormat.setupBufferState(0L);
-        this.skyBuffer.draw(poseStack.last().pose());
-        VertexBuffer.unbind();
-        this.skyFormat.clearBufferState();
-        RenderSystem.disableFog();
-        RenderSystem.disableAlphaTest();
+        RenderSystem.setShaderColor(g, h, i);
+        ShaderInstance shaderInstance = RenderSystem.getShader();
+        this.skyBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
         if (fs != null) {
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             RenderSystem.disableTexture();
-            RenderSystem.shadeModel(7425);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f);
             poseStack.pushPose();
             poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
             j = Mth.sin(this.level.getSunAngle(f)) < 0.0f ? 180.0f : 0.0f;
@@ -1441,40 +1477,40 @@ AutoCloseable {
             float k = fs[0];
             l = fs[1];
             float m = fs[2];
-            Matrix4f matrix4f = poseStack.last().pose();
+            Matrix4f matrix4f2 = poseStack.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(k, l, m, fs[3]).endVertex();
+            bufferBuilder.vertex(matrix4f2, 0.0f, 100.0f, 0.0f).color(k, l, m, fs[3]).endVertex();
             n = 16;
             for (int o = 0; o <= 16; ++o) {
                 p = (float)o * ((float)Math.PI * 2) / 16.0f;
                 q = Mth.sin(p);
                 r = Mth.cos(p);
-                bufferBuilder.vertex(matrix4f, q * 120.0f, r * 120.0f, -r * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
+                bufferBuilder.vertex(matrix4f2, q * 120.0f, r * 120.0f, -r * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
             }
             bufferBuilder.end();
             BufferUploader.end(bufferBuilder);
             poseStack.popPose();
-            RenderSystem.shadeModel(7424);
         }
         RenderSystem.enableTexture();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         poseStack.pushPose();
         j = 1.0f - this.level.getRainLevel(f);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, j);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, j);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0f));
-        Matrix4f matrix4f2 = poseStack.last().pose();
+        Matrix4f matrix4f3 = poseStack.last().pose();
         l = 30.0f;
-        this.textureManager.bind(SUN_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, SUN_LOCATION);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix4f2, -l, 100.0f, -l).uv(0.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, l, 100.0f, -l).uv(1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, l, 100.0f, l).uv(1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(matrix4f2, -l, 100.0f, l).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(matrix4f3, -l, 100.0f, -l).uv(0.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(matrix4f3, l, 100.0f, -l).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(matrix4f3, l, 100.0f, l).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(matrix4f3, -l, 100.0f, l).uv(0.0f, 1.0f).endVertex();
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         l = 20.0f;
-        this.textureManager.bind(MOON_LOCATION);
+        RenderSystem.setShaderTexture(0, MOON_LOCATION);
         int s = this.level.getMoonPhase();
         int t = s % 4;
         n = s / 4 % 2;
@@ -1483,62 +1519,48 @@ AutoCloseable {
         q = (float)(t + 1) / 4.0f;
         r = (float)(n + 1) / 2.0f;
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(matrix4f2, -l, -100.0f, l).uv(q, r).endVertex();
-        bufferBuilder.vertex(matrix4f2, l, -100.0f, l).uv(u, r).endVertex();
-        bufferBuilder.vertex(matrix4f2, l, -100.0f, -l).uv(u, p).endVertex();
-        bufferBuilder.vertex(matrix4f2, -l, -100.0f, -l).uv(q, p).endVertex();
+        bufferBuilder.vertex(matrix4f3, -l, -100.0f, l).uv(q, r).endVertex();
+        bufferBuilder.vertex(matrix4f3, l, -100.0f, l).uv(u, r).endVertex();
+        bufferBuilder.vertex(matrix4f3, l, -100.0f, -l).uv(u, p).endVertex();
+        bufferBuilder.vertex(matrix4f3, -l, -100.0f, -l).uv(q, p).endVertex();
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         RenderSystem.disableTexture();
         float v = this.level.getStarBrightness(f) * j;
         if (v > 0.0f) {
-            RenderSystem.color4f(v, v, v, v);
-            this.starBuffer.bind();
-            this.skyFormat.setupBufferState(0L);
-            this.starBuffer.draw(poseStack.last().pose());
-            VertexBuffer.unbind();
-            this.skyFormat.clearBufferState();
+            RenderSystem.setShaderColor(v, v, v, v);
+            this.starBuffer.drawWithShader(poseStack.last().pose(), matrix4f, GameRenderer.getPositionShader());
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableFog();
         poseStack.popPose();
         RenderSystem.disableTexture();
-        RenderSystem.color3f(0.0f, 0.0f, 0.0f);
+        RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f);
         double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getLevelData().getHorizonHeight();
         if (d < 0.0) {
             poseStack.pushPose();
             poseStack.translate(0.0, 12.0, 0.0);
-            this.darkBuffer.bind();
-            this.skyFormat.setupBufferState(0L);
-            this.darkBuffer.draw(poseStack.last().pose());
-            VertexBuffer.unbind();
-            this.skyFormat.clearBufferState();
+            this.darkBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
             poseStack.popPose();
         }
         if (this.level.effects().hasGround()) {
-            RenderSystem.color3f(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f);
+            RenderSystem.setShaderColor(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f);
         } else {
-            RenderSystem.color3f(g, h, i);
+            RenderSystem.setShaderColor(g, h, i);
         }
         RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
-        RenderSystem.disableFog();
     }
 
-    public void renderClouds(PoseStack poseStack, float f, double d, double e, double g) {
+    public void renderClouds(PoseStack poseStack, Matrix4f matrix4f, float f, double d, double e, double g) {
         float h = this.level.effects().getCloudHeight();
         if (Float.isNaN(h)) {
             return;
         }
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
-        RenderSystem.defaultAlphaFunc();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.enableFog();
         RenderSystem.depthMask(true);
         float i = 12.0f;
         float j = 4.0f;
@@ -1575,31 +1597,28 @@ AutoCloseable {
             bufferBuilder.end();
             this.cloudBuffer.upload(bufferBuilder);
         }
-        this.textureManager.bind(CLOUDS_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+        RenderSystem.setShaderTexture(0, CLOUDS_LOCATION);
+        FogRenderer.levelFogColor();
         poseStack.pushPose();
         poseStack.scale(12.0f, 1.0f, 12.0f);
         poseStack.translate(-p, q, -r);
         if (this.cloudBuffer != null) {
             int v;
-            this.cloudBuffer.bind();
-            DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL.setupBufferState(0L);
             for (int w = v = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; w < 2; ++w) {
                 if (w == 0) {
                     RenderSystem.colorMask(false, false, false, false);
                 } else {
                     RenderSystem.colorMask(true, true, true, true);
                 }
-                this.cloudBuffer.draw(poseStack.last().pose());
+                ShaderInstance shaderInstance = RenderSystem.getShader();
+                this.cloudBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
             }
-            VertexBuffer.unbind();
-            DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL.clearBufferState();
         }
         poseStack.popPose();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableAlphaTest();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
-        RenderSystem.disableFog();
     }
 
     private void buildClouds(BufferBuilder bufferBuilder, double d, double e, double f, Vec3 vec3) {
@@ -1733,18 +1752,18 @@ AutoCloseable {
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        this.textureManager.bind(FORCEFIELD_LOCATION);
+        RenderSystem.setShaderTexture(0, FORCEFIELD_LOCATION);
         RenderSystem.depthMask(Minecraft.useShaderTransparency());
-        RenderSystem.pushMatrix();
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        RenderSystem.applyModelViewMatrix();
         int i = worldBorder.getStatus().getColor();
         float j = (float)(i >> 16 & 0xFF) / 255.0f;
         float k = (float)(i >> 8 & 0xFF) / 255.0f;
         float l = (float)(i & 0xFF) / 255.0f;
-        RenderSystem.color4f(j, k, l, (float)e);
+        RenderSystem.setShaderColor(j, k, l, (float)e);
         RenderSystem.polygonOffset(-3.0f, -3.0f);
         RenderSystem.enablePolygonOffset();
-        RenderSystem.defaultAlphaFunc();
-        RenderSystem.enableAlphaTest();
         RenderSystem.disableCull();
         float m = (float)(Util.getMillis() % 3000L) / 3000.0f;
         float n = 0.0f;
@@ -1814,12 +1833,11 @@ AutoCloseable {
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         RenderSystem.enableCull();
-        RenderSystem.disableAlphaTest();
         RenderSystem.polygonOffset(0.0f, 0.0f);
         RenderSystem.disablePolygonOffset();
-        RenderSystem.enableAlphaTest();
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
         RenderSystem.depthMask(true);
     }
 
@@ -1842,10 +1860,14 @@ AutoCloseable {
     }
 
     private static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j) {
-        Matrix4f matrix4f = poseStack.last().pose();
+        PoseStack.Pose pose = poseStack.last();
         voxelShape.forAllEdges((k, l, m, n, o, p) -> {
-            vertexConsumer.vertex(matrix4f, (float)(k + d), (float)(l + e), (float)(m + f)).color(g, h, i, j).endVertex();
-            vertexConsumer.vertex(matrix4f, (float)(n + d), (float)(o + e), (float)(p + f)).color(g, h, i, j).endVertex();
+            float q = (float)(n - k);
+            float r = (float)(o - l);
+            float s = (float)(p - m);
+            float t = Mth.sqrt(q * q + r * r + s * s);
+            vertexConsumer.vertex(pose.pose(), (float)(k + d), (float)(l + e), (float)(m + f)).color(g, h, i, j).normal(pose.normal(), q /= t, r /= t, s /= t).endVertex();
+            vertexConsumer.vertex(pose.pose(), (float)(n + d), (float)(o + e), (float)(p + f)).color(g, h, i, j).normal(pose.normal(), q, r, s).endVertex();
         });
     }
 
@@ -1865,30 +1887,30 @@ AutoCloseable {
         float t = (float)g;
         float u = (float)h;
         float v = (float)i;
-        vertexConsumer.vertex(matrix4f, q, r, s).color(j, o, p, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, s).color(j, o, p, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, r, s).color(n, k, p, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, s).color(n, k, p, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, r, s).color(n, o, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, r, v).color(n, o, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).endVertex();
-        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, s).color(j, o, p, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, s).color(j, o, p, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, s).color(n, k, p, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, s).color(n, k, p, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, s).color(n, o, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, v).color(n, o, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(-1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(-1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(0.0f, -1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(0.0f, -1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(0.0f, 0.0f, -1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(0.0f, 0.0f, -1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(1.0f, 0.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(0.0f, 0.0f, 1.0f).endVertex();
     }
 
     public static void addChainedFilledBoxVertices(BufferBuilder bufferBuilder, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m) {

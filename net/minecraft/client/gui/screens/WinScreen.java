@@ -26,6 +26,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -148,7 +149,8 @@ extends Screen {
     }
 
     private void renderBg(int i, int j, float f) {
-        this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
         int k = this.width;
         float g = -this.time * 0.5f * this.scrollSpeed;
         float h = (float)this.height - this.time * 0.5f * this.scrollSpeed;
@@ -183,25 +185,23 @@ extends Screen {
         int m = this.height + 50;
         this.time += f;
         float g = -this.time * this.scrollSpeed;
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.0f, g, 0.0f);
-        this.minecraft.getTextureManager().bind(LOGO_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.enableAlphaTest();
+        poseStack.pushPose();
+        poseStack.translate(0.0, g, 0.0);
+        RenderSystem.setShaderTexture(0, LOGO_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
         this.blitOutlineBlack(l, m, (integer, integer2) -> {
             this.blit(poseStack, integer + 0, (int)integer2, 0, 0, 155, 44);
             this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
         });
         RenderSystem.disableBlend();
-        this.minecraft.getTextureManager().bind(EDITION_LOCATION);
+        RenderSystem.setShaderTexture(0, EDITION_LOCATION);
         WinScreen.blit(poseStack, l + 88, m + 37, 0.0f, 0.0f, 98, 14, 128, 16);
-        RenderSystem.disableAlphaTest();
         int n = m + 100;
         for (o = 0; o < this.lines.size(); ++o) {
             float h;
             if (o == this.lines.size() - 1 && (h = (float)n + g - (float)(this.height / 2 - 6)) < 0.0f) {
-                RenderSystem.translatef(0.0f, -h, 0.0f);
+                poseStack.translate(0.0, -h, 0.0);
             }
             if ((float)n + g + 12.0f + 8.0f > 0.0f && (float)n + g < (float)this.height) {
                 FormattedCharSequence formattedCharSequence = this.lines.get(o);
@@ -214,8 +214,9 @@ extends Screen {
             }
             n += 12;
         }
-        RenderSystem.popMatrix();
-        this.minecraft.getTextureManager().bind(VIGNETTE_LOCATION);
+        poseStack.popPose();
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
         o = this.width;

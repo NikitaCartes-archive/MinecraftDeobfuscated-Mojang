@@ -193,6 +193,14 @@ extends Vec3i {
         return SectionPos.asLong(this.x(), this.y(), this.z());
     }
 
+    @Override
+    public SectionPos offset(int i, int j, int k) {
+        if (i == 0 && j == 0 && k == 0) {
+            return this;
+        }
+        return new SectionPos(this.x() + i, this.y() + j, this.z() + k);
+    }
+
     public Stream<BlockPos> blocksInside() {
         return BlockPos.betweenClosedStream(this.minBlockX(), this.minBlockY(), this.minBlockZ(), this.maxBlockX(), this.maxBlockY(), this.maxBlockZ());
     }
@@ -227,6 +235,11 @@ extends Vec3i {
                 return false;
             }
         }, false);
+    }
+
+    @Override
+    public /* synthetic */ Vec3i offset(int i, int j, int k) {
+        return this.offset(i, j, k);
     }
 }
 

@@ -57,17 +57,17 @@ public abstract class Column {
             return Optional.empty();
         }
         int j = blockPos.getY();
+        OptionalInt optionalInt = Column.scanDirection(levelSimulatedReader, i, predicate, predicate2, mutableBlockPos, j, Direction.UP);
+        OptionalInt optionalInt2 = Column.scanDirection(levelSimulatedReader, i, predicate, predicate2, mutableBlockPos, j, Direction.DOWN);
+        return Optional.of(Column.create(optionalInt2, optionalInt));
+    }
+
+    private static OptionalInt scanDirection(LevelSimulatedReader levelSimulatedReader, int i, Predicate<BlockState> predicate, Predicate<BlockState> predicate2, BlockPos.MutableBlockPos mutableBlockPos, int j, Direction direction) {
         mutableBlockPos.setY(j);
         for (int k = 1; k < i && levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate); ++k) {
-            mutableBlockPos.move(Direction.UP);
+            mutableBlockPos.move(direction);
         }
-        OptionalInt optionalInt = levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
-        mutableBlockPos.setY(j);
-        for (int l = 1; l < i && levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate); ++l) {
-            mutableBlockPos.move(Direction.DOWN);
-        }
-        OptionalInt optionalInt2 = levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
-        return Optional.of(Column.create(optionalInt2, optionalInt));
+        return levelSimulatedReader.isStateAtPosition(mutableBlockPos, predicate2) ? OptionalInt.of(mutableBlockPos.getY()) : OptionalInt.empty();
     }
 
     public static final class Ray

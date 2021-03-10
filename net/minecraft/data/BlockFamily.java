@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockFamily {
     private final Block baseBlock;
-    private final Map<Variant, Block> shapes = Maps.newHashMap();
+    private final Map<Variant, Block> variants = Maps.newHashMap();
     private boolean generateModel = true;
     private boolean generateRecipe = true;
     @Nullable
@@ -28,12 +28,12 @@ public class BlockFamily {
         return this.baseBlock;
     }
 
-    public Map<Variant, Block> getShapes() {
-        return this.shapes;
+    public Map<Variant, Block> getVariants() {
+        return this.variants;
     }
 
     public Block get(Variant variant) {
-        return this.shapes.get((Object)variant);
+        return this.variants.get((Object)variant);
     }
 
     public boolean shouldGenerateModel() {
@@ -70,63 +70,68 @@ public class BlockFamily {
         }
 
         public Builder button(Block block) {
-            this.family.shapes.put(Variant.BUTTON, block);
+            this.family.variants.put(Variant.BUTTON, block);
             return this;
         }
 
         public Builder chiseled(Block block) {
-            this.family.shapes.put(Variant.CHISELED, block);
+            this.family.variants.put(Variant.CHISELED, block);
+            return this;
+        }
+
+        public Builder cracked(Block block) {
+            this.family.variants.put(Variant.CRACKED, block);
             return this;
         }
 
         public Builder door(Block block) {
-            this.family.shapes.put(Variant.DOOR, block);
+            this.family.variants.put(Variant.DOOR, block);
             return this;
         }
 
         public Builder fence(Block block) {
-            this.family.shapes.put(Variant.FENCE, block);
+            this.family.variants.put(Variant.FENCE, block);
             return this;
         }
 
         public Builder fenceGate(Block block) {
-            this.family.shapes.put(Variant.FENCE_GATE, block);
+            this.family.variants.put(Variant.FENCE_GATE, block);
             return this;
         }
 
         public Builder sign(Block block, Block block2) {
-            this.family.shapes.put(Variant.SIGN, block);
-            this.family.shapes.put(Variant.WALL_SIGN, block2);
+            this.family.variants.put(Variant.SIGN, block);
+            this.family.variants.put(Variant.WALL_SIGN, block2);
             return this;
         }
 
         public Builder slab(Block block) {
-            this.family.shapes.put(Variant.SLAB, block);
+            this.family.variants.put(Variant.SLAB, block);
             return this;
         }
 
         public Builder stairs(Block block) {
-            this.family.shapes.put(Variant.STAIRS, block);
+            this.family.variants.put(Variant.STAIRS, block);
             return this;
         }
 
         public Builder pressurePlate(Block block) {
-            this.family.shapes.put(Variant.PRESSURE_PLATE, block);
+            this.family.variants.put(Variant.PRESSURE_PLATE, block);
             return this;
         }
 
         public Builder polished(Block block) {
-            this.family.shapes.put(Variant.POLISHED, block);
+            this.family.variants.put(Variant.POLISHED, block);
             return this;
         }
 
         public Builder trapdoor(Block block) {
-            this.family.shapes.put(Variant.TRAPDOOR, block);
+            this.family.variants.put(Variant.TRAPDOOR, block);
             return this;
         }
 
         public Builder wall(Block block) {
-            this.family.shapes.put(Variant.WALL, block);
+            this.family.variants.put(Variant.WALL, block);
             return this;
         }
 
@@ -154,6 +159,7 @@ public class BlockFamily {
     public static enum Variant {
         BUTTON("button"),
         CHISELED("chiseled"),
+        CRACKED("cracked"),
         DOOR("door"),
         FENCE("fence"),
         FENCE_GATE("fence_gate"),

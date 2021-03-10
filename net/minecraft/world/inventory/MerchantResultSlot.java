@@ -51,7 +51,7 @@ extends Slot {
     }
 
     @Override
-    public ItemStack onTake(Player player, ItemStack itemStack) {
+    public void onTake(Player player, ItemStack itemStack) {
         this.checkTakeAchievements(itemStack);
         MerchantOffer merchantOffer = this.slots.getActiveOffer();
         if (merchantOffer != null) {
@@ -65,7 +65,6 @@ extends Slot {
             }
             this.merchant.overrideXp(this.merchant.getVillagerXp() + merchantOffer.getXp());
         }
-        return itemStack;
     }
 }
 

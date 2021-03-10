@@ -16,7 +16,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -191,9 +190,9 @@ extends TemplateStructurePiece {
 
     private void spreadNetherrack(Random random, LevelAccessor levelAccessor) {
         boolean bl = this.verticalPlacement == VerticalPlacement.ON_LAND_SURFACE || this.verticalPlacement == VerticalPlacement.ON_OCEAN_FLOOR;
-        Vec3i vec3i = this.boundingBox.getCenter();
-        int i = vec3i.getX();
-        int j = vec3i.getZ();
+        BlockPos blockPos = this.boundingBox.getCenter();
+        int i = blockPos.getX();
+        int j = blockPos.getZ();
         float[] fs = new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.9f, 0.9f, 0.8f, 0.7f, 0.6f, 0.4f, 0.2f};
         int k = fs.length;
         int l = (this.boundingBox.getXSpan() + this.boundingBox.getZSpan()) / 2;

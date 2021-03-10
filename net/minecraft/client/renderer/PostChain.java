@@ -182,7 +182,8 @@ implements AutoCloseable {
                                 }
                             }
                             IOUtils.closeQuietly((Closeable)resource);
-                            textureManager.bind(resourceLocation);
+                            RenderSystem.setShaderTexture(0, resourceLocation);
+                            textureManager.bindForSetup(resourceLocation);
                             AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
                             int j = GsonHelper.getAsInt(jsonObject2, "width");
                             int k = GsonHelper.getAsInt(jsonObject2, "height");
@@ -299,7 +300,7 @@ implements AutoCloseable {
     }
 
     private void updateOrthoMatrix() {
-        this.shaderOrthoMatrix = Matrix4f.orthographic(this.screenTarget.width, this.screenTarget.height, 0.1f, 1000.0f);
+        this.shaderOrthoMatrix = Matrix4f.orthographic(0.0f, this.screenTarget.width, this.screenTarget.height, 0.0f, 0.1f, 1000.0f);
     }
 
     public void resize(int i, int j) {

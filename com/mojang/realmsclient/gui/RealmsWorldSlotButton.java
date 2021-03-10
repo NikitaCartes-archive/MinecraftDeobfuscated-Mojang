@@ -134,31 +134,31 @@ implements TickableWidget {
         if (bl3) {
             RealmsTextureManager.bindWorldTemplate(String.valueOf(n), string2);
         } else if (bl2) {
-            textureManager.bind(EMPTY_SLOT_LOCATION);
+            RenderSystem.setShaderTexture(0, EMPTY_SLOT_LOCATION);
         } else if (string2 != null && n != -1L) {
             RealmsTextureManager.bindWorldTemplate(String.valueOf(n), string2);
         } else if (m == 1) {
-            textureManager.bind(DEFAULT_WORLD_SLOT_1);
+            RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_1);
         } else if (m == 2) {
-            textureManager.bind(DEFAULT_WORLD_SLOT_2);
+            RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_2);
         } else if (m == 3) {
-            textureManager.bind(DEFAULT_WORLD_SLOT_3);
+            RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_3);
         }
         if (bl) {
             float f = 0.85f + 0.15f * Mth.cos((float)this.animTick * 0.2f);
-            RenderSystem.color4f(f, f, f, 1.0f);
+            RenderSystem.setShaderColor(f, f, f, 1.0f);
         } else {
-            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsWorldSlotButton.blit(poseStack, i + 3, j + 3, 0.0f, 0.0f, 74, 74, 74, 74);
-        textureManager.bind(SLOT_FRAME_LOCATION);
+        RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
         boolean bl6 = bl5 = bl4 && action != Action.NOTHING;
         if (bl5) {
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         } else if (bl) {
-            RenderSystem.color4f(0.8f, 0.8f, 0.8f, 1.0f);
+            RenderSystem.setShaderColor(0.8f, 0.8f, 0.8f, 1.0f);
         } else {
-            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsWorldSlotButton.blit(poseStack, i, j, 0.0f, 0.0f, 80, 80, 80, 80);
         RealmsWorldSlotButton.drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 0xFFFFFF);

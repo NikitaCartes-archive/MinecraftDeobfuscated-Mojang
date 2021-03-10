@@ -43,7 +43,6 @@ implements SoundEventListener {
         if (!this.isListening || this.subtitles.isEmpty()) {
             return;
         }
-        RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         Vec3 vec3 = new Vec3(this.minecraft.player.getX(), this.minecraft.player.getEyeY(), this.minecraft.player.getZ());
@@ -76,9 +75,9 @@ implements SoundEventListener {
             int o = this.minecraft.font.width(component);
             int p = Mth.floor(Mth.clampedLerp(255.0, 75.0, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
             int q = p << 16 | p << 8 | p;
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0f, 0.0f);
-            RenderSystem.scalef(1.0f, 1.0f, 1.0f);
+            poseStack.pushPose();
+            poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0f, 0.0);
+            poseStack.scale(1.0f, 1.0f, 1.0f);
             SubtitleOverlay.fill(poseStack, -l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8f));
             RenderSystem.enableBlend();
             if (!bl) {
@@ -89,11 +88,10 @@ implements SoundEventListener {
                 }
             }
             this.minecraft.font.draw(poseStack, component, (float)(-o / 2), (float)(-n), q + -16777216);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             ++i;
         }
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
     }
 
     @Override

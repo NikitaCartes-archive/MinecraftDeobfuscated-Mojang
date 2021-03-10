@@ -26,7 +26,7 @@ public class BuriedTreasurePieces {
     extends StructurePiece {
         public BuriedTreasurePiece(BlockPos blockPos) {
             super(StructurePieceType.BURIED_TREASURE_PIECE, 0);
-            this.boundingBox = new BoundingBox(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            this.boundingBox = new BoundingBox(blockPos);
         }
 
         public BuriedTreasurePiece(StructureManager structureManager, CompoundTag compoundTag) {
@@ -58,7 +58,7 @@ public class BuriedTreasurePieces {
                         }
                         worldGenLevel.setBlock(blockPos2, blockState3, 3);
                     }
-                    this.boundingBox = new BoundingBox(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ());
+                    this.boundingBox = new BoundingBox(mutableBlockPos);
                     return this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
                 }
                 mutableBlockPos.move(0, -1, 0);

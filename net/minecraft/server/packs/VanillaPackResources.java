@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
@@ -39,12 +42,15 @@ import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class VanillaPackResources
-implements PackResources {
+implements PackResources,
+ResourceProvider {
     public static Path generatedDir;
     private static final Logger LOGGER;
     public static Class<?> clientObject;
@@ -218,6 +224,49 @@ implements PackResources {
 
     @Override
     public void close() {
+    }
+
+    @Override
+    public Resource getResource(final ResourceLocation resourceLocation) throws IOException {
+        return new Resource(){
+            @Nullable
+            InputStream inputStream;
+
+            @Override
+            public void close() throws IOException {
+                if (this.inputStream != null) {
+                    this.inputStream.close();
+                }
+            }
+
+            @Override
+            @Environment(value=EnvType.CLIENT)
+            public ResourceLocation getLocation() {
+                return resourceLocation;
+            }
+
+            @Override
+            public InputStream getInputStream() {
+                try {
+                    this.inputStream = VanillaPackResources.this.getResource(PackType.CLIENT_RESOURCES, resourceLocation);
+                } catch (IOException iOException) {
+                    throw new UncheckedIOException("Could not get client resource from vanilla pack", iOException);
+                }
+                return this.inputStream;
+            }
+
+            @Override
+            @Nullable
+            @Environment(value=EnvType.CLIENT)
+            public <T> T getMetadata(MetadataSectionSerializer<T> metadataSectionSerializer) {
+                return null;
+            }
+
+            @Override
+            public String getSourceName() {
+                return resourceLocation.toString();
+            }
+        };
     }
 
     static {

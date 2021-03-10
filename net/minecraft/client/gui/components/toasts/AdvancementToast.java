@@ -13,6 +13,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -30,8 +31,9 @@ implements Toast {
 
     @Override
     public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
-        toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-        RenderSystem.color3f(1.0f, 1.0f, 1.0f);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f);
         DisplayInfo displayInfo = this.advancement.getDisplay();
         toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
         if (displayInfo != null) {

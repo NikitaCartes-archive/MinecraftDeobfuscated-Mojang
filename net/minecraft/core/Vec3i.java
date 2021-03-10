@@ -92,6 +92,13 @@ implements Comparable<Vec3i> {
         return this;
     }
 
+    public Vec3i offset(int i, int j, int k) {
+        if (i == 0 && j == 0 && k == 0) {
+            return this;
+        }
+        return new Vec3i(this.getX() + i, this.getY() + j, this.getZ() + k);
+    }
+
     public Vec3i above() {
         return this.above(1);
     }

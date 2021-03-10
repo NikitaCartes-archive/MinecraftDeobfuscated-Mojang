@@ -34,10 +34,9 @@ extends Slot {
     }
 
     @Override
-    public ItemStack onTake(Player player, ItemStack itemStack) {
+    public void onTake(Player player, ItemStack itemStack) {
         this.checkTakeAchievements(itemStack);
         super.onTake(player, itemStack);
-        return itemStack;
     }
 
     @Override

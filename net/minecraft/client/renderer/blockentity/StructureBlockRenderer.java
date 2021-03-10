@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -38,8 +39,8 @@ implements BlockEntityRenderer<StructureBlockEntity> {
             return;
         }
         BlockPos blockPos = structureBlockEntity.getStructurePos();
-        BlockPos blockPos2 = structureBlockEntity.getStructureSize();
-        if (blockPos2.getX() < 1 || blockPos2.getY() < 1 || blockPos2.getZ() < 1) {
+        Vec3i vec3i = structureBlockEntity.getStructureSize();
+        if (vec3i.getX() < 1 || vec3i.getY() < 1 || vec3i.getZ() < 1) {
             return;
         }
         if (structureBlockEntity.getMode() != StructureMode.SAVE && structureBlockEntity.getMode() != StructureMode.LOAD) {
@@ -48,21 +49,21 @@ implements BlockEntityRenderer<StructureBlockEntity> {
         double d = blockPos.getX();
         double e = blockPos.getZ();
         double g = blockPos.getY();
-        double h = g + (double)blockPos2.getY();
+        double h = g + (double)vec3i.getY();
         switch (structureBlockEntity.getMirror()) {
             case LEFT_RIGHT: {
-                k = blockPos2.getX();
-                l = -blockPos2.getZ();
+                k = vec3i.getX();
+                l = -vec3i.getZ();
                 break;
             }
             case FRONT_BACK: {
-                k = -blockPos2.getX();
-                l = blockPos2.getZ();
+                k = -vec3i.getX();
+                l = vec3i.getZ();
                 break;
             }
             default: {
-                k = blockPos2.getX();
-                l = blockPos2.getZ();
+                k = vec3i.getX();
+                l = vec3i.getZ();
             }
         }
         switch (structureBlockEntity.getRotation()) {

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
@@ -29,6 +30,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -103,8 +105,12 @@ implements ResourceManagerReloadListener {
         }
         poseStack.pushPose();
         boolean bl3 = bl2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
-        if (itemStack.is(Items.TRIDENT) && bl2) {
-            bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+        if (bl2) {
+            if (itemStack.is(Items.TRIDENT)) {
+                bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+            } else if (itemStack.is(Items.SPYGLASS)) {
+                bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+            }
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
         poseStack.translate(-0.5, -0.5, -0.5);
@@ -181,7 +187,7 @@ implements ResourceManagerReloadListener {
     }
 
     public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
-        BakedModel bakedModel = itemStack.is(Items.TRIDENT) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack);
+        BakedModel bakedModel = itemStack.is(Items.TRIDENT) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : (itemStack.is(Items.SPYGLASS) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack));
         ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
         BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity, i);
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
@@ -205,34 +211,32 @@ implements ResourceManagerReloadListener {
 
     protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
         boolean bl;
-        RenderSystem.pushMatrix();
-        this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
         this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-        RenderSystem.enableRescaleNormal();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.translatef(i, j, 100.0f + this.blitOffset);
-        RenderSystem.translatef(8.0f, 8.0f, 0.0f);
-        RenderSystem.scalef(1.0f, -1.0f, 1.0f);
-        RenderSystem.scalef(16.0f, 16.0f, 16.0f);
-        PoseStack poseStack = new PoseStack();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.translate(i, j, 100.0f + this.blitOffset);
+        poseStack.translate(8.0, 8.0, 0.0);
+        poseStack.scale(1.0f, -1.0f, 1.0f);
+        poseStack.scale(16.0f, 16.0f, 16.0f);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack poseStack2 = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean bl2 = bl = !bakedModel.usesBlockLight();
         if (bl) {
             Lighting.setupForFlatItems();
         }
-        this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
+        this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack2, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
         if (bl) {
             Lighting.setupFor3DItems();
         }
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
@@ -291,7 +295,6 @@ implements ResourceManagerReloadListener {
         if (itemStack.isBarVisible()) {
             RenderSystem.disableDepthTest();
             RenderSystem.disableTexture();
-            RenderSystem.disableAlphaTest();
             RenderSystem.disableBlend();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -300,7 +303,6 @@ implements ResourceManagerReloadListener {
             this.fillRect(bufferBuilder, i + 2, j + 13, 13, 2, 0, 0, 0, 255);
             this.fillRect(bufferBuilder, i + 2, j + 13, k, 1, l >> 16 & 0xFF, l >> 8 & 0xFF, l & 0xFF, 255);
             RenderSystem.enableBlend();
-            RenderSystem.enableAlphaTest();
             RenderSystem.enableTexture();
             RenderSystem.enableDepthTest();
         }
@@ -319,12 +321,14 @@ implements ResourceManagerReloadListener {
     }
 
     private void fillRect(BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o, int p) {
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(i + 0, j + 0, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + 0, j + l, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + k, j + l, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + k, j + 0, 0.0).color(m, n, o, p).endVertex();
-        Tesselator.getInstance().end();
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
     }
 
     @Override

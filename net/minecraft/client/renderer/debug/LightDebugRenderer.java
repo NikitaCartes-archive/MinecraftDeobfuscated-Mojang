@@ -29,7 +29,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel level = this.minecraft.level;
-        RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableTexture();
@@ -47,7 +46,6 @@ implements DebugRenderer.SimpleDebugRenderer {
             DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
         }
         RenderSystem.enableTexture();
-        RenderSystem.popMatrix();
     }
 }
 

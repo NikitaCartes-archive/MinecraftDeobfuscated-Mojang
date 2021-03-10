@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
@@ -19,6 +20,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.IdMapper;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;
@@ -56,10 +58,10 @@ import org.jetbrains.annotations.Nullable;
 public class StructureTemplate {
     private final List<Palette> palettes = Lists.newArrayList();
     private final List<StructureEntityInfo> entityInfoList = Lists.newArrayList();
-    private BlockPos size = BlockPos.ZERO;
+    private Vec3i size = Vec3i.ZERO;
     private String author = "?";
 
-    public BlockPos getSize() {
+    public Vec3i getSize() {
         return this.size;
     }
 
@@ -71,31 +73,31 @@ public class StructureTemplate {
         return this.author;
     }
 
-    public void fillFromWorld(Level level, BlockPos blockPos, BlockPos blockPos2, boolean bl, @Nullable Block block) {
-        if (blockPos2.getX() < 1 || blockPos2.getY() < 1 || blockPos2.getZ() < 1) {
+    public void fillFromWorld(Level level, BlockPos blockPos, Vec3i vec3i, boolean bl, @Nullable Block block) {
+        if (vec3i.getX() < 1 || vec3i.getY() < 1 || vec3i.getZ() < 1) {
             return;
         }
-        BlockPos blockPos3 = blockPos.offset(blockPos2).offset(-1, -1, -1);
+        BlockPos blockPos2 = blockPos.offset(vec3i).offset(-1, -1, -1);
         ArrayList<StructureBlockInfo> list = Lists.newArrayList();
         ArrayList<StructureBlockInfo> list2 = Lists.newArrayList();
         ArrayList<StructureBlockInfo> list3 = Lists.newArrayList();
-        BlockPos blockPos4 = new BlockPos(Math.min(blockPos.getX(), blockPos3.getX()), Math.min(blockPos.getY(), blockPos3.getY()), Math.min(blockPos.getZ(), blockPos3.getZ()));
-        BlockPos blockPos5 = new BlockPos(Math.max(blockPos.getX(), blockPos3.getX()), Math.max(blockPos.getY(), blockPos3.getY()), Math.max(blockPos.getZ(), blockPos3.getZ()));
-        this.size = blockPos2;
-        for (BlockPos blockPos6 : BlockPos.betweenClosed(blockPos4, blockPos5)) {
+        BlockPos blockPos3 = new BlockPos(Math.min(blockPos.getX(), blockPos2.getX()), Math.min(blockPos.getY(), blockPos2.getY()), Math.min(blockPos.getZ(), blockPos2.getZ()));
+        BlockPos blockPos4 = new BlockPos(Math.max(blockPos.getX(), blockPos2.getX()), Math.max(blockPos.getY(), blockPos2.getY()), Math.max(blockPos.getZ(), blockPos2.getZ()));
+        this.size = vec3i;
+        for (BlockPos blockPos5 : BlockPos.betweenClosed(blockPos3, blockPos4)) {
             StructureBlockInfo structureBlockInfo;
-            BlockPos blockPos7 = blockPos6.subtract(blockPos4);
-            BlockState blockState = level.getBlockState(blockPos6);
+            BlockPos blockPos6 = blockPos5.subtract(blockPos3);
+            BlockState blockState = level.getBlockState(blockPos5);
             if (block != null && blockState.is(block)) continue;
-            BlockEntity blockEntity = level.getBlockEntity(blockPos6);
+            BlockEntity blockEntity = level.getBlockEntity(blockPos5);
             if (blockEntity != null) {
                 CompoundTag compoundTag = blockEntity.save(new CompoundTag());
                 compoundTag.remove("x");
                 compoundTag.remove("y");
                 compoundTag.remove("z");
-                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, compoundTag.copy());
+                structureBlockInfo = new StructureBlockInfo(blockPos6, blockState, compoundTag.copy());
             } else {
-                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, null);
+                structureBlockInfo = new StructureBlockInfo(blockPos6, blockState, null);
             }
             StructureTemplate.addToLists(structureBlockInfo, list, list2, list3);
         }
@@ -103,7 +105,7 @@ public class StructureTemplate {
         this.palettes.clear();
         this.palettes.add(new Palette(list4));
         if (bl) {
-            this.fillEntityList(level, blockPos4, blockPos5.offset(1, 1, 1));
+            this.fillEntityList(level, blockPos3, blockPos4.offset(1, 1, 1));
         } else {
             this.entityInfoList.clear();
         }
@@ -348,11 +350,11 @@ public class StructureTemplate {
         }
     }
 
-    public BlockPos getSize(Rotation rotation) {
+    public Vec3i getSize(Rotation rotation) {
         switch (rotation) {
             case COUNTERCLOCKWISE_90: 
             case CLOCKWISE_90: {
-                return new BlockPos(this.size.getZ(), this.size.getY(), this.size.getX());
+                return new Vec3i(this.size.getZ(), this.size.getY(), this.size.getX());
             }
         }
         return this.size;
@@ -459,50 +461,15 @@ public class StructureTemplate {
     }
 
     public BoundingBox getBoundingBox(BlockPos blockPos, Rotation rotation, BlockPos blockPos2, Mirror mirror) {
-        BlockPos blockPos3 = this.getSize(rotation);
-        int i = blockPos2.getX();
-        int j = blockPos2.getZ();
-        int k = blockPos3.getX() - 1;
-        int l = blockPos3.getY() - 1;
-        int m = blockPos3.getZ() - 1;
-        BoundingBox boundingBox = new BoundingBox(0, 0, 0, 0, 0, 0);
-        switch (rotation) {
-            case NONE: {
-                boundingBox = new BoundingBox(0, 0, 0, k, l, m);
-                break;
-            }
-            case CLOCKWISE_180: {
-                boundingBox = new BoundingBox(i + i - k, 0, j + j - m, i + i, l, j + j);
-                break;
-            }
-            case COUNTERCLOCKWISE_90: {
-                boundingBox = new BoundingBox(i - j, 0, i + j - m, i - j + k, l, i + j);
-                break;
-            }
-            case CLOCKWISE_90: {
-                boundingBox = new BoundingBox(i + j - k, 0, j - i, i + j, l, j - i + m);
-            }
-        }
-        switch (mirror) {
-            case NONE: {
-                break;
-            }
-            case FRONT_BACK: {
-                this.mirrorAABB(rotation, k, m, boundingBox, Direction.WEST, Direction.EAST);
-                break;
-            }
-            case LEFT_RIGHT: {
-                this.mirrorAABB(rotation, m, k, boundingBox, Direction.NORTH, Direction.SOUTH);
-            }
-        }
-        boundingBox.move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-        return boundingBox;
+        return StructureTemplate.getBoundingBox(blockPos, rotation, blockPos2, mirror, this.size);
     }
 
-    private void mirrorAABB(Rotation rotation, int i, int j, BoundingBox boundingBox, Direction direction, Direction direction2) {
-        BlockPos blockPos = BlockPos.ZERO;
-        blockPos = rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90 ? blockPos.relative(rotation.rotate(direction), j) : (rotation == Rotation.CLOCKWISE_180 ? blockPos.relative(direction2, i) : blockPos.relative(direction, i));
-        boundingBox.move(blockPos.getX(), 0, blockPos.getZ());
+    @VisibleForTesting
+    protected static BoundingBox getBoundingBox(BlockPos blockPos, Rotation rotation, BlockPos blockPos2, Mirror mirror, Vec3i vec3i) {
+        Vec3i vec3i2 = vec3i.offset(-1, -1, -1);
+        BlockPos blockPos3 = StructureTemplate.transform(BlockPos.ZERO, mirror, rotation, blockPos2);
+        BlockPos blockPos4 = StructureTemplate.transform(BlockPos.ZERO.offset(vec3i2), mirror, rotation, blockPos2);
+        return BoundingBox.createProper(blockPos3, blockPos4).move(blockPos);
     }
 
     public CompoundTag save(CompoundTag compoundTag) {
@@ -575,7 +542,7 @@ public class StructureTemplate {
         this.palettes.clear();
         this.entityInfoList.clear();
         ListTag listTag = compoundTag.getList("size", 3);
-        this.size = new BlockPos(listTag.getInt(0), listTag.getInt(1), listTag.getInt(2));
+        this.size = new Vec3i(listTag.getInt(0), listTag.getInt(1), listTag.getInt(2));
         ListTag listTag2 = compoundTag.getList("blocks", 10);
         if (compoundTag.contains("palettes", 9)) {
             listTag3 = compoundTag.getList("palettes", 9);

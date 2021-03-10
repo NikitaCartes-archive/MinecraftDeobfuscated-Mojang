@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.advancements.AdvancementTabType;
 import net.minecraft.client.gui.screens.advancements.AdvancementWidget;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -81,21 +82,22 @@ extends GuiComponent {
             this.scrollY = 56 - (this.maxY + this.minY) / 2;
             this.centered = true;
         }
-        RenderSystem.pushMatrix();
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, 950.0);
         RenderSystem.enableDepthTest();
-        RenderSystem.translatef(0.0f, 0.0f, 950.0f);
         RenderSystem.colorMask(false, false, false, false);
         AdvancementTab.fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
         RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.translatef(0.0f, 0.0f, -950.0f);
+        poseStack.translate(0.0, 0.0, -950.0);
         RenderSystem.depthFunc(518);
         AdvancementTab.fill(poseStack, 234, 113, 0, 0, -16777216);
         RenderSystem.depthFunc(515);
         ResourceLocation resourceLocation = this.display.getBackground();
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         if (resourceLocation != null) {
-            this.minecraft.getTextureManager().bind(resourceLocation);
+            RenderSystem.setShaderTexture(0, resourceLocation);
         } else {
-            this.minecraft.getTextureManager().bind(TextureManager.INTENTIONAL_MISSING_TEXTURE);
+            RenderSystem.setShaderTexture(0, TextureManager.INTENTIONAL_MISSING_TEXTURE);
         }
         int i = Mth.floor(this.scrollX);
         int j = Mth.floor(this.scrollY);
@@ -110,18 +112,17 @@ extends GuiComponent {
         this.root.drawConnectivity(poseStack, i, j, false);
         this.root.draw(poseStack, i, j);
         RenderSystem.depthFunc(518);
-        RenderSystem.translatef(0.0f, 0.0f, -950.0f);
+        poseStack.translate(0.0, 0.0, -950.0);
         RenderSystem.colorMask(false, false, false, false);
         AdvancementTab.fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
         RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.translatef(0.0f, 0.0f, 950.0f);
         RenderSystem.depthFunc(515);
-        RenderSystem.popMatrix();
+        poseStack.popPose();
     }
 
     public void drawTooltips(PoseStack poseStack, int i, int j, int k, int l) {
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.0f, 0.0f, 200.0f);
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, -200.0);
         AdvancementTab.fill(poseStack, 0, 0, 234, 113, Mth.floor(this.fade * 255.0f) << 24);
         boolean bl = false;
         int m = Mth.floor(this.scrollX);
@@ -134,7 +135,7 @@ extends GuiComponent {
                 break;
             }
         }
-        RenderSystem.popMatrix();
+        poseStack.popPose();
         this.fade = bl ? Mth.clamp(this.fade + 0.02f, 0.0f, 0.3f) : Mth.clamp(this.fade - 0.04f, 0.0f, 1.0f);
     }
 

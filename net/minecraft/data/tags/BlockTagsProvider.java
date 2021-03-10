@@ -95,6 +95,9 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.IRON_ORES).add((Block[])new Block[]{Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE});
         this.tag(BlockTags.DIAMOND_ORES).add((Block[])new Block[]{Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE});
         this.tag(BlockTags.REDSTONE_ORES).add((Block[])new Block[]{Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE});
+        this.tag(BlockTags.COAL_ORES).add((Block[])new Block[]{Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE});
+        this.tag(BlockTags.EMERALD_ORES).add((Block[])new Block[]{Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE});
+        this.tag(BlockTags.COPPER_ORES).add((Block[])new Block[]{Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE});
         this.tag(BlockTags.LAPIS_ORES).add((Block[])new Block[]{Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE});
         this.tag(BlockTags.SOUL_FIRE_BASE_BLOCKS).add((Block[])new Block[]{Blocks.SOUL_SAND, Blocks.SOUL_SOIL});
         this.tag(BlockTags.NON_FLAMMABLE_WOOD).add((Block[])new Block[]{Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.CRIMSON_PLANKS, Blocks.WARPED_PLANKS, Blocks.CRIMSON_SLAB, Blocks.WARPED_SLAB, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.CRIMSON_FENCE, Blocks.WARPED_FENCE, Blocks.CRIMSON_TRAPDOOR, Blocks.WARPED_TRAPDOOR, Blocks.CRIMSON_FENCE_GATE, Blocks.WARPED_FENCE_GATE, Blocks.CRIMSON_STAIRS, Blocks.WARPED_STAIRS, Blocks.CRIMSON_BUTTON, Blocks.WARPED_BUTTON, Blocks.CRIMSON_DOOR, Blocks.WARPED_DOOR, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.WARPED_WALL_SIGN});
@@ -119,8 +122,8 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add((Block[])new Block[]{Blocks.SNOW, Blocks.POWDER_SNOW});
         this.tag(BlockTags.DRIPSTONE_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.DIRT);
         this.tag(BlockTags.CAVE_VINES).add(Blocks.CAVE_VINES_BODY).add(Blocks.CAVE_VINES_HEAD);
-        this.tag(BlockTags.LUSH_PLANTS_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.CAVE_VINES).add(Blocks.DIRT).add(Blocks.GRAVEL).add(Blocks.SAND).add(Blocks.MOSS_BLOCK).addTag(BlockTags.FLOWERS).add(Blocks.GRASS).add(Blocks.TALL_GRASS).add(Blocks.MOSS_CARPET).add(Blocks.SMALL_DRIPLEAF).add(Blocks.BIG_DRIPLEAF).add(Blocks.BIG_DRIPLEAF_STEM).add(Blocks.VINE);
-        this.tag(BlockTags.AZALEA_LOG_REPLACEABLE).addTag(BlockTags.FLOWERS).addTag(BlockTags.LEAVES).add(Blocks.GRASS).add(Blocks.FERN).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.SMALL_DRIPLEAF);
+        this.tag(BlockTags.LUSH_PLANTS_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.CAVE_VINES).add(Blocks.DIRT).add(Blocks.GRAVEL).add(Blocks.SAND);
+        this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.LUSH_PLANTS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
         this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
     }
 

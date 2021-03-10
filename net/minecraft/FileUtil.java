@@ -3,6 +3,7 @@
  */
 package net.minecraft;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import org.apache.commons.io.FilenameUtils;
 
 public class FileUtil {
     private static final Pattern COPY_COUNTER_PATTERN = Pattern.compile("(<name>.*) \\((<count>\\d*)\\)", 66);
@@ -81,6 +83,16 @@ public class FileUtil {
             throw new InvalidPathException(string3, "empty resource name");
         }
         return path.resolve(path2);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static String getFullResourcePath(String string) {
+        return FilenameUtils.getFullPath(string).replace(File.separator, "/");
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static String normalizeResourcePath(String string) {
+        return FilenameUtils.normalize(string).replace(File.separator, "/");
     }
 }
 

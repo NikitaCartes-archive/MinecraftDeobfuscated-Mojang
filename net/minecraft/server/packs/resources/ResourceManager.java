@@ -17,12 +17,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceProvider;
 
-public interface ResourceManager {
+public interface ResourceManager
+extends ResourceProvider {
     @Environment(value=EnvType.CLIENT)
     public Set<String> getNamespaces();
-
-    public Resource getResource(ResourceLocation var1) throws IOException;
 
     @Environment(value=EnvType.CLIENT)
     public boolean hasResource(ResourceLocation var1);

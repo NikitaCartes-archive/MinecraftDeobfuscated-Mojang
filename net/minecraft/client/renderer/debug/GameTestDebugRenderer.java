@@ -37,10 +37,9 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     private void renderMarker(BlockPos blockPos, Marker marker) {
-        RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.color4f(0.0f, 1.0f, 0.0f, 0.75f);
+        RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 0.75f);
         RenderSystem.disableTexture();
         DebugRenderer.renderFilledBox(blockPos, 0.02f, marker.getR(), marker.getG(), marker.getB(), marker.getA());
         if (!marker.text.isEmpty()) {
@@ -51,7 +50,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
     }
 
     @Environment(value=EnvType.CLIENT)

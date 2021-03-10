@@ -129,8 +129,7 @@ extends GuiComponent {
             int x = q + t * p + t * 5;
             int y = r + w * 9;
             PlayerTabOverlay.fill(poseStack, x, y, x + p, y + 8, n2);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.enableAlphaTest();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             if (v >= list.size()) continue;
@@ -139,7 +138,7 @@ extends GuiComponent {
             if (bl) {
                 Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
                 boolean bl22 = player != null && player.isModelPartShown(PlayerModelPart.CAPE) && ("Dinnerbone".equals(gameProfile.getName()) || "Grumm".equals(gameProfile.getName()));
-                this.minecraft.getTextureManager().bind(playerInfo2.getSkinLocation());
+                RenderSystem.setShaderTexture(0, playerInfo2.getSkinLocation());
                 int z = 8 + (bl22 ? 8 : 0);
                 int aa = 8 * (bl22 ? -1 : 1);
                 GuiComponent.blit(poseStack, x, y, 8, 8, 8.0f, z, 8, aa, 64, 64);
@@ -167,8 +166,8 @@ extends GuiComponent {
     }
 
     protected void renderPingIcon(PoseStack poseStack, int i, int j, int k, PlayerInfo playerInfo) {
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
         boolean l = false;
         int m = playerInfo.getLatency() < 0 ? 5 : (playerInfo.getLatency() < 150 ? 0 : (playerInfo.getLatency() < 300 ? 1 : (playerInfo.getLatency() < 600 ? 2 : (playerInfo.getLatency() < 1000 ? 3 : 4))));
         this.setBlitOffset(this.getBlitOffset() + 100);
@@ -180,7 +179,7 @@ extends GuiComponent {
         int l = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
         if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
             boolean bl;
-            this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+            RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
             long m = Util.getMillis();
             if (this.visibilityId == playerInfo.getRenderVisibilityId()) {
                 if (l < playerInfo.getLastHealth()) {

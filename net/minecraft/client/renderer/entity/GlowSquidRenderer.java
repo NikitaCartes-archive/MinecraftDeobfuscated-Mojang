@@ -29,7 +29,11 @@ extends SquidRenderer<GlowSquid> {
 
     @Override
     protected int getBlockLightLevel(GlowSquid glowSquid, BlockPos blockPos) {
-        return Mth.clamp(15 - glowSquid.getDarkTicksRemaining(), 0, 15);
+        int i = (int)Mth.clampedLerp(0.0, 15.0, 1.0f - (float)glowSquid.getDarkTicksRemaining() / 10.0f);
+        if (i == 15) {
+            return 15;
+        }
+        return Math.max(i, super.getBlockLightLevel(glowSquid, blockPos));
     }
 }
 

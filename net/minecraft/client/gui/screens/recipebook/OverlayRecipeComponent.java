@@ -128,10 +128,10 @@ GuiEventListener {
         }
         this.time += f;
         RenderSystem.enableBlend();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.0f, 0.0f, 170.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, 170.0);
         int k = this.recipeButtons.size() <= 16 ? 4 : 5;
         int l = Math.min(this.recipeButtons.size(), k);
         int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -144,7 +144,7 @@ GuiEventListener {
         for (OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
             overlayRecipeButton.render(poseStack, i, j, f);
         }
-        RenderSystem.popMatrix();
+        poseStack.popPose();
     }
 
     private void nineInchSprite(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
@@ -214,8 +214,7 @@ GuiEventListener {
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
             int l;
-            RenderSystem.enableAlphaTest();
-            OverlayRecipeComponent.this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
+            RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
             int k = 152;
             if (!this.isCraftable) {
                 k += 26;
@@ -225,16 +224,18 @@ GuiEventListener {
                 l += 26;
             }
             this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
+            float g = 0.42f;
+            PoseStack poseStack2 = RenderSystem.getModelViewStack();
+            poseStack2.pushPose();
+            poseStack2.scale(0.42f, 0.42f, 1.0f);
+            RenderSystem.applyModelViewMatrix();
             for (Pos pos : this.ingredientPos) {
-                RenderSystem.pushMatrix();
-                float g = 0.42f;
                 int m = (int)((float)(this.x + pos.x) / 0.42f - 3.0f);
                 int n2 = (int)((float)(this.y + pos.y) / 0.42f - 3.0f);
-                RenderSystem.scalef(0.42f, 0.42f, 1.0f);
                 OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], m, n2);
-                RenderSystem.popMatrix();
             }
-            RenderSystem.disableAlphaTest();
+            poseStack2.popPose();
+            RenderSystem.applyModelViewMatrix();
         }
 
         @Environment(value=EnvType.CLIENT)

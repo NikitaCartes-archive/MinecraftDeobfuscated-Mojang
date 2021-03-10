@@ -38,7 +38,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
-        RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableTexture();
@@ -56,7 +55,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         });
         RenderSystem.enableDepthTest();
         RenderSystem.enableTexture();
-        RenderSystem.popMatrix();
     }
 
     @Environment(value=EnvType.CLIENT)

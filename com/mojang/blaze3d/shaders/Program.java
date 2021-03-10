@@ -6,13 +6,14 @@ package com.mojang.blaze3d.shaders;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.shaders.Effect;
+import com.mojang.blaze3d.shaders.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.GlslPreprocessor;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(value=EnvType.CLIENT)
@@ -20,49 +21,53 @@ public class Program {
     private final Type type;
     private final String name;
     private final int id;
-    private int references;
 
-    private Program(Type type, int i, String string) {
+    protected Program(Type type, int i, String string) {
         this.type = type;
         this.id = i;
         this.name = string;
     }
 
-    public void attachToEffect(Effect effect) {
+    public void attachToShader(Shader shader) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        ++this.references;
-        GlStateManager.glAttachShader(effect.getId(), this.id);
+        GlStateManager.glAttachShader(shader.getId(), this.getId());
     }
 
     public void close() {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        --this.references;
-        if (this.references <= 0) {
-            GlStateManager.glDeleteShader(this.id);
-            this.type.getPrograms().remove(this.name);
-        }
+        GlStateManager.glDeleteShader(this.id);
+        this.type.getPrograms().remove(this.name);
     }
 
     public String getName() {
         return this.name;
     }
 
-    public static Program compileShader(Type type, String string, InputStream inputStream, String string2) throws IOException {
+    public static Program compileShader(Type type, String string, InputStream inputStream, String string2, GlslPreprocessor glslPreprocessor) throws IOException {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        int i = Program.compileShaderInternal(type, string, inputStream, string2, glslPreprocessor);
+        Program program = new Program(type, i, string);
+        type.getPrograms().put(string, program);
+        return program;
+    }
+
+    protected static int compileShaderInternal(Type type, String string, InputStream inputStream, String string2, GlslPreprocessor glslPreprocessor) throws IOException {
         String string3 = TextureUtil.readResourceAsString(inputStream);
         if (string3 == null) {
             throw new IOException("Could not load program " + type.getName());
         }
         int i = GlStateManager.glCreateShader(type.getGlType());
-        GlStateManager.glShaderSource(i, string3);
+        GlStateManager.glShaderSource(i, glslPreprocessor.process(string3));
         GlStateManager.glCompileShader(i);
         if (GlStateManager.glGetShaderi(i, 35713) == 0) {
             String string4 = StringUtils.trim(GlStateManager.glGetShaderInfoLog(i, 32768));
             throw new IOException("Couldn't compile " + type.getName() + " program (" + string2 + ", " + string + ") : " + string4);
         }
-        Program program = new Program(type, i, string);
-        type.getPrograms().put(string, program);
-        return program;
+        return i;
+    }
+
+    protected int getId() {
+        return this.id;
     }
 
     @Environment(value=EnvType.CLIENT)

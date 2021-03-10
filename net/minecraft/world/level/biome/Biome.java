@@ -200,7 +200,8 @@ public final class Biome {
                     int p = SectionPos.sectionToBlockCoord(n);
                     try {
                         int q = worldGenRegion.getMinBuildHeight() + 1;
-                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, q, p, o + 15, worldGenRegion.getMaxBuildHeight() - 1, p + 15), new ChunkPos(m, n)));
+                        int r = worldGenRegion.getMaxBuildHeight() - 1;
+                        structureFeatureManager.startsForFeature(SectionPos.of(blockPos), structureFeature).forEach(structureStart -> structureStart.placeInChunk(worldGenRegion, structureFeatureManager, chunkGenerator, worldgenRandom, new BoundingBox(o, q, p, o + 15, r, p + 15), new ChunkPos(m, n)));
                     } catch (Exception exception) {
                         CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                         crashReport.addCategory("Feature").setDetail("Id", Registry.STRUCTURE_FEATURE.getKey(structureFeature)).setDetail("Description", () -> structureFeature.toString());
@@ -581,7 +582,8 @@ public final class Biome {
         RIVER("river"),
         SWAMP("swamp"),
         MUSHROOM("mushroom"),
-        NETHER("nether");
+        NETHER("nether"),
+        UNDERGROUND("underground");
 
         public static final Codec<BiomeCategory> CODEC;
         private static final Map<String, BiomeCategory> BY_NAME;

@@ -273,13 +273,13 @@ extends RealmsScreen {
 
         private void drawRestore(PoseStack poseStack, int i, int j, int k, int l) {
             boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-            RealmsBackupScreen.this.minecraft.getTextureManager().bind(RESTORE_ICON_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.setShaderTexture(0, RESTORE_ICON_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            poseStack.pushPose();
+            poseStack.scale(0.5f, 0.5f, 0.5f);
             float f = bl ? 28.0f : 0.0f;
             GuiComponent.blit(poseStack, i * 2, j * 2, 0.0f, f, 23, 28, 23, 56);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             if (bl) {
                 RealmsBackupScreen.this.toolTip = RESTORE_TOOLTIP;
             }
@@ -287,13 +287,13 @@ extends RealmsScreen {
 
         private void drawInfo(PoseStack poseStack, int i, int j, int k, int l) {
             boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-            RealmsBackupScreen.this.minecraft.getTextureManager().bind(PLUS_ICON_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.setShaderTexture(0, PLUS_ICON_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            poseStack.pushPose();
+            poseStack.scale(0.5f, 0.5f, 0.5f);
             float f = bl ? 15.0f : 0.0f;
             GuiComponent.blit(poseStack, i * 2, j * 2, 0.0f, f, 15, 15, 15, 30);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             if (bl) {
                 RealmsBackupScreen.this.toolTip = HAS_CHANGES_TOOLTIP;
             }

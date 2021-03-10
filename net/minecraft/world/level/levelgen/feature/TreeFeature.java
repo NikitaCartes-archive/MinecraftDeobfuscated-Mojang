@@ -24,7 +24,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -77,36 +76,23 @@ extends Feature<TreeConfiguration> {
     }
 
     private boolean doPlace(WorldGenLevel worldGenLevel, Random random, BlockPos blockPos, Set<BlockPos> set, Set<BlockPos> set2, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
-        BlockPos blockPos2;
-        int n;
         int i = treeConfiguration.trunkPlacer.getTreeHeight(random);
         int j = treeConfiguration.foliagePlacer.foliageHeight(random, i, treeConfiguration);
         int k = i - j;
         int l = treeConfiguration.foliagePlacer.foliageRadius(random, k);
-        if (!treeConfiguration.fromSapling) {
-            int m = worldGenLevel.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, blockPos).getY();
-            n = worldGenLevel.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
-            if (n - m > treeConfiguration.maxWaterDepth) {
-                return false;
-            }
-            int o = treeConfiguration.heightmap == Heightmap.Types.OCEAN_FLOOR ? m : (treeConfiguration.heightmap == Heightmap.Types.WORLD_SURFACE ? n : worldGenLevel.getHeightmapPos(treeConfiguration.heightmap, blockPos).getY());
-            blockPos2 = new BlockPos(blockPos.getX(), o, blockPos.getZ());
-        } else {
-            blockPos2 = blockPos;
-        }
-        if (blockPos2.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos2.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
+        if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
             return false;
         }
-        if (!TreeFeature.isGrassOrDirtOrFarmland(worldGenLevel, blockPos2.below())) {
+        if (!TreeFeature.isGrassOrDirtOrFarmland(worldGenLevel, blockPos.below())) {
             return false;
         }
         OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
-        n = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos2, treeConfiguration);
-        if (!(n >= i || optionalInt.isPresent() && n >= optionalInt.getAsInt())) {
+        int m = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos, treeConfiguration);
+        if (!(m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt())) {
             return false;
         }
-        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, random, n, blockPos2, set, boundingBox, treeConfiguration);
-        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, random, treeConfiguration, n, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l, set2, boundingBox));
+        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, random, m, blockPos, set, boundingBox, treeConfiguration);
+        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, random, treeConfiguration, m, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l, set2, boundingBox));
         return true;
     }
 

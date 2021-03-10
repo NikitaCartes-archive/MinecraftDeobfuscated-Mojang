@@ -119,7 +119,6 @@ import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
@@ -203,7 +202,6 @@ import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -914,7 +912,7 @@ implements ClientGamePacketListener {
         this.minecraft.getTutorial().onGetItem(itemStack);
         if (clientboundContainerSetSlotPacket.getContainerId() == -1) {
             if (!(this.minecraft.screen instanceof CreativeModeInventoryScreen)) {
-                player.getInventory().setCarried(itemStack);
+                player.containerMenu.setCarried(itemStack);
             }
         } else if (clientboundContainerSetSlotPacket.getContainerId() == -2) {
             player.getInventory().setItem(i, itemStack);
@@ -933,21 +931,6 @@ implements ClientGamePacketListener {
             } else if (!(clientboundContainerSetSlotPacket.getContainerId() != player.containerMenu.containerId || clientboundContainerSetSlotPacket.getContainerId() == 0 && bl)) {
                 player.containerMenu.setItem(i, itemStack);
             }
-        }
-    }
-
-    @Override
-    public void handleContainerAck(ClientboundContainerAckPacket clientboundContainerAckPacket) {
-        PacketUtils.ensureRunningOnSameThread(clientboundContainerAckPacket, this, this.minecraft);
-        AbstractContainerMenu abstractContainerMenu = null;
-        LocalPlayer player = this.minecraft.player;
-        if (clientboundContainerAckPacket.getContainerId() == 0) {
-            abstractContainerMenu = player.inventoryMenu;
-        } else if (clientboundContainerAckPacket.getContainerId() == player.containerMenu.containerId) {
-            abstractContainerMenu = player.containerMenu;
-        }
-        if (abstractContainerMenu != null && !clientboundContainerAckPacket.isAccepted()) {
-            this.send(new ServerboundContainerAckPacket(clientboundContainerAckPacket.getContainerId(), clientboundContainerAckPacket.getUid(), true));
         }
     }
 
@@ -1928,7 +1911,7 @@ implements ClientGamePacketListener {
     public void handlePlaceRecipe(ClientboundPlaceGhostRecipePacket clientboundPlaceGhostRecipePacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundPlaceGhostRecipePacket, this, this.minecraft);
         AbstractContainerMenu abstractContainerMenu = this.minecraft.player.containerMenu;
-        if (abstractContainerMenu.containerId != clientboundPlaceGhostRecipePacket.getContainerId() || !abstractContainerMenu.isSynched(this.minecraft.player)) {
+        if (abstractContainerMenu.containerId != clientboundPlaceGhostRecipePacket.getContainerId()) {
             return;
         }
         this.recipeManager.byKey(clientboundPlaceGhostRecipePacket.getRecipe()).ifPresent(recipe -> {

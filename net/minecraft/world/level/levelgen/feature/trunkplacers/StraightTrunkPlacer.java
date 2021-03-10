@@ -32,7 +32,7 @@ extends TrunkPlacer {
 
     @Override
     public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
-        StraightTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos.below());
+        StraightTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
         for (int j = 0; j < i; ++j) {
             StraightTrunkPlacer.placeLog(levelSimulatedRW, random, blockPos.above(j), set, boundingBox, treeConfiguration);
         }

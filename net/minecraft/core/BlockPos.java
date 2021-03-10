@@ -107,6 +107,7 @@ extends Vec3i {
         return new BlockPos((double)this.getX() + d, (double)this.getY() + e, (double)this.getZ() + f);
     }
 
+    @Override
     public BlockPos offset(int i, int j, int k) {
         if (i == 0 && j == 0 && k == 0) {
             return this;
@@ -443,6 +444,11 @@ extends Vec3i {
         return this.above();
     }
 
+    @Override
+    public /* synthetic */ Vec3i offset(int i, int j, int k) {
+        return this.offset(i, j, k);
+    }
+
     static {
         PACKED_Z_LENGTH = PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
         PACKED_Y_LENGTH = 64 - PACKED_X_LENGTH - PACKED_Z_LENGTH;
@@ -605,6 +611,11 @@ extends Vec3i {
         @Override
         public /* synthetic */ Vec3i above() {
             return super.above();
+        }
+
+        @Override
+        public /* synthetic */ Vec3i offset(int i, int j, int k) {
+            return this.offset(i, j, k);
         }
 
         @Override

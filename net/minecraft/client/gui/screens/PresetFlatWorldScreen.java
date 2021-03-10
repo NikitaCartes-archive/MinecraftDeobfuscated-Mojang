@@ -203,12 +203,12 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.0f, 0.0f, 400.0f);
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, 400.0);
         PresetFlatWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         PresetFlatWorldScreen.drawString(poseStack, this.font, this.shareText, 50, 30, 0xA0A0A0);
         PresetFlatWorldScreen.drawString(poseStack, this.font, this.listText, 50, 70, 0xA0A0A0);
-        RenderSystem.popMatrix();
+        poseStack.popPose();
         this.export.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);
     }
@@ -339,14 +339,12 @@ extends Screen {
 
             private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
                 this.blitSlotBg(poseStack, i + 1, j + 1);
-                RenderSystem.enableRescaleNormal();
                 PresetFlatWorldScreen.this.itemRenderer.renderGuiItem(new ItemStack(item), i + 2, j + 2);
-                RenderSystem.disableRescaleNormal();
             }
 
             private void blitSlotBg(PoseStack poseStack, int i, int j) {
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                PresetsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(poseStack, i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }
         }

@@ -10,9 +10,10 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -26,8 +27,11 @@ import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfig
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class StructureStart<C extends FeatureConfiguration> {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(StructureFeature.MINESHAFT, new ChunkPos(0, 0), BoundingBox.getUnknownBox(), 0, 0L){
 
         @Override
@@ -70,12 +74,12 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
                 return;
             }
             BoundingBox boundingBox2 = this.pieces.get((int)0).boundingBox;
-            Vec3i vec3i = boundingBox2.getCenter();
-            BlockPos blockPos = new BlockPos(vec3i.getX(), boundingBox2.y0, vec3i.getZ());
+            BlockPos blockPos = boundingBox2.getCenter();
+            BlockPos blockPos2 = new BlockPos(blockPos.getX(), boundingBox2.y0, blockPos.getZ());
             Iterator<StructurePiece> iterator = this.pieces.iterator();
             while (iterator.hasNext()) {
                 StructurePiece structurePiece = iterator.next();
-                if (!structurePiece.getBoundingBox().intersects(boundingBox) || structurePiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos)) continue;
+                if (!structurePiece.getBoundingBox().intersects(boundingBox) || structurePiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2)) continue;
                 iterator.remove();
             }
             this.calculateBoundingBox();
@@ -102,7 +106,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
         compoundTag.putInt("ChunkX", chunkPos.x);
         compoundTag.putInt("ChunkZ", chunkPos.z);
         compoundTag.putInt("references", this.references);
-        compoundTag.put("BB", this.boundingBox.createTag());
+        BoundingBox.CODEC.encodeStart(NbtOps.INSTANCE, this.boundingBox).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("BB", (Tag)tag));
         ListTag listTag = new ListTag();
         List<StructurePiece> list = this.pieces;
         synchronized (list) {

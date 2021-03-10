@@ -63,7 +63,7 @@ SpectatorMenuItem {
 
     @Override
     public void renderIcon(PoseStack poseStack, float f, int i) {
-        Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
+        RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
         GuiComponent.blit(poseStack, 0, 0, 16.0f, 0.0f, 16, 16, 256, 256);
     }
 
@@ -119,8 +119,8 @@ SpectatorMenuItem {
                 float j = (float)(integer & 0xFF) / 255.0f;
                 GuiComponent.fill(poseStack, 1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
             }
-            Minecraft.getInstance().getTextureManager().bind(this.location);
-            RenderSystem.color4f(f, f, f, (float)i / 255.0f);
+            RenderSystem.setShaderTexture(0, this.location);
+            RenderSystem.setShaderColor(f, f, f, (float)i / 255.0f);
             GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0f, 8.0f, 8, 8, 64, 64);
             GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0f, 8.0f, 8, 8, 64, 64);
         }

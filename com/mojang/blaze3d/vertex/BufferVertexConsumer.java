@@ -24,7 +24,10 @@ extends VertexConsumer {
 
     @Override
     default public VertexConsumer vertex(double d, double e, double f) {
-        if (this.currentElement().getType() != VertexFormatElement.Type.FLOAT) {
+        if (this.currentElement().getUsage() != VertexFormatElement.Usage.POSITION) {
+            return this;
+        }
+        if (this.currentElement().getType() != VertexFormatElement.Type.FLOAT || this.currentElement().getCount() != 3) {
             throw new IllegalStateException();
         }
         this.putFloat(0, (float)d);
@@ -40,7 +43,7 @@ extends VertexConsumer {
         if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.COLOR) {
             return this;
         }
-        if (vertexFormatElement.getType() != VertexFormatElement.Type.UBYTE) {
+        if (vertexFormatElement.getType() != VertexFormatElement.Type.UBYTE || vertexFormatElement.getCount() != 4) {
             throw new IllegalStateException();
         }
         this.putByte(0, (byte)i);
@@ -57,7 +60,7 @@ extends VertexConsumer {
         if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.UV || vertexFormatElement.getIndex() != 0) {
             return this;
         }
-        if (vertexFormatElement.getType() != VertexFormatElement.Type.FLOAT) {
+        if (vertexFormatElement.getType() != VertexFormatElement.Type.FLOAT || vertexFormatElement.getCount() != 2) {
             throw new IllegalStateException();
         }
         this.putFloat(0, f);
@@ -81,7 +84,7 @@ extends VertexConsumer {
         if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.UV || vertexFormatElement.getIndex() != i) {
             return this;
         }
-        if (vertexFormatElement.getType() != VertexFormatElement.Type.SHORT) {
+        if (vertexFormatElement.getType() != VertexFormatElement.Type.SHORT || vertexFormatElement.getCount() != 2) {
             throw new IllegalStateException();
         }
         this.putShort(0, s);
@@ -96,7 +99,7 @@ extends VertexConsumer {
         if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.NORMAL) {
             return this;
         }
-        if (vertexFormatElement.getType() != VertexFormatElement.Type.BYTE) {
+        if (vertexFormatElement.getType() != VertexFormatElement.Type.BYTE || vertexFormatElement.getCount() != 3) {
             throw new IllegalStateException();
         }
         this.putByte(0, BufferVertexConsumer.normalIntValue(f));

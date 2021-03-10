@@ -21,12 +21,14 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Function4;
+import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
@@ -503,6 +505,7 @@ WindowEventHandler {
         } else {
             this.setScreen(new TitleScreen(true));
         }
+        this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack());
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
         this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
@@ -769,6 +772,7 @@ WindowEventHandler {
             }
         }
         this.screen = screen;
+        BufferUploader.reset();
         if (screen != null) {
             this.mouseHandler.releaseMouse();
             KeyMapping.releaseAll();
@@ -840,7 +844,7 @@ WindowEventHandler {
 
     private void runTick(boolean bl) {
         boolean bl2;
-        int i;
+        int j;
         Runnable runnable;
         this.window.setErrorSection("Pre render");
         long l = Util.getNanos();
@@ -856,12 +860,12 @@ WindowEventHandler {
             runnable.run();
         }
         if (bl) {
-            i = this.timer.advanceTime(Util.getMillis());
+            int i = this.timer.advanceTime(Util.getMillis());
             this.profiler.push("scheduledExecutables");
             this.runAllTasks();
             this.profiler.pop();
             this.profiler.push("tick");
-            for (int j = 0; j < Math.min(10, i); ++j) {
+            for (j = 0; j < Math.min(10, i); ++j) {
                 this.profiler.incrementCounter("clientTick");
                 this.tick();
             }
@@ -873,8 +877,14 @@ WindowEventHandler {
         this.soundManager.updateSource(this.gameRenderer.getMainCamera());
         this.profiler.pop();
         this.profiler.push("render");
-        RenderSystem.pushMatrix();
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        RenderSystem.applyModelViewMatrix();
         RenderSystem.clear(16640, ON_OSX);
+        this.mainRenderTarget.clearChannels[0] = 0.1f;
+        this.mainRenderTarget.clearChannels[1] = 0.2f;
+        this.mainRenderTarget.clearChannels[2] = 0.3f;
+        this.mainRenderTarget.clear(ON_OSX);
         this.mainRenderTarget.bindWrite(true);
         FogRenderer.setupNoFog();
         this.profiler.push("display");
@@ -895,15 +905,17 @@ WindowEventHandler {
         }
         this.profiler.push("blit");
         this.mainRenderTarget.unbindWrite();
-        RenderSystem.popMatrix();
-        RenderSystem.pushMatrix();
+        poseStack.popPose();
+        poseStack.pushPose();
+        RenderSystem.applyModelViewMatrix();
         this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
-        RenderSystem.popMatrix();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
         this.profiler.popPush("updateDisplay");
         this.window.updateDisplay();
-        i = this.getFramerateLimit();
-        if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
-            RenderSystem.limitDisplayFPS(i);
+        j = this.getFramerateLimit();
+        if ((double)j < Option.FRAMERATE_LIMIT.getMaxValue()) {
+            RenderSystem.limitDisplayFPS(j);
         }
         this.profiler.popPush("yield");
         Thread.yield();
@@ -1031,12 +1043,12 @@ WindowEventHandler {
         List<ResultField> list = profileResults.getTimes(this.debugPath);
         ResultField resultField = list.remove(0);
         RenderSystem.clear(256, ON_OSX);
-        RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0, this.window.getWidth(), this.window.getHeight(), 0.0, 1000.0, 3000.0);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
+        Matrix4f matrix4f = Matrix4f.orthographic(0.0f, this.window.getWidth(), 0.0f, this.window.getHeight(), 1000.0f, 3000.0f);
+        RenderSystem.setProjectionMatrix(matrix4f);
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        poseStack2.setIdentity();
+        poseStack2.translate(0.0, 0.0, -2000.0);
+        RenderSystem.applyModelViewMatrix();
         RenderSystem.lineWidth(1.0f);
         RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
@@ -1538,9 +1550,8 @@ WindowEventHandler {
             GameProfileCache.setUsesAuthentication(false);
             this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer((Thread)thread, this, registryHolder, levelStorageAccess, serverStem.packRepository(), serverStem.serverResources(), worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
-                storingChunkProgressListener.start();
                 this.progressListener.set(storingChunkProgressListener);
-                return new ProcessorChunkProgressListener(storingChunkProgressListener, this.progressTasks::add);
+                return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
             }));
             this.isLocalServer = true;
         } catch (Throwable throwable) {

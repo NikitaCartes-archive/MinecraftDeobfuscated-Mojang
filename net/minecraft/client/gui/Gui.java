@@ -15,6 +15,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,7 @@ import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -192,17 +194,18 @@ extends GuiComponent {
             this.renderHotbar(f, poseStack);
         }
         if (!this.minecraft.options.hideGui) {
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
             RenderSystem.enableBlend();
-            RenderSystem.enableAlphaTest();
             this.renderCrosshair(poseStack);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.defaultBlendFunc();
             this.minecraft.getProfiler().push("bossHealth");
             this.bossOverlay.render(poseStack);
             this.minecraft.getProfiler().pop();
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
             if (this.minecraft.gameMode.canHurtPlayer()) {
                 this.renderPlayerHealth(poseStack);
             }
@@ -223,7 +226,6 @@ extends GuiComponent {
         if (this.minecraft.player.getSleepTimer() > 0) {
             this.minecraft.getProfiler().push("sleep");
             RenderSystem.disableDepthTest();
-            RenderSystem.disableAlphaTest();
             float j = this.minecraft.player.getSleepTimer();
             float k = j / 100.0f;
             if (k > 1.0f) {
@@ -231,10 +233,9 @@ extends GuiComponent {
             }
             l = (int)(220.0f * k) << 24 | 0x101020;
             Gui.fill(poseStack, 0, 0, this.screenWidth, this.screenHeight, l);
-            RenderSystem.enableAlphaTest();
             RenderSystem.enableDepthTest();
             this.minecraft.getProfiler().pop();
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
         if (this.minecraft.isDemo()) {
             this.renderDemoOverlay(poseStack);
@@ -255,8 +256,8 @@ extends GuiComponent {
                     m = 255;
                 }
                 if (m > 8) {
-                    RenderSystem.pushMatrix();
-                    RenderSystem.translatef(this.screenWidth / 2, this.screenHeight - 68, 0.0f);
+                    poseStack.pushPose();
+                    poseStack.translate(this.screenWidth / 2, this.screenHeight - 68, 0.0);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     l = 0xFFFFFF;
@@ -268,7 +269,7 @@ extends GuiComponent {
                     this.drawBackdrop(poseStack, font, -4, o, 0xFFFFFF | n);
                     font.draw(poseStack, this.overlayMessageString, (float)(-o / 2), -4.0f, l | n);
                     RenderSystem.disableBlend();
-                    RenderSystem.popMatrix();
+                    poseStack.popPose();
                 }
                 this.minecraft.getProfiler().pop();
             }
@@ -284,27 +285,27 @@ extends GuiComponent {
                     m = (int)(j * 255.0f / (float)this.titleFadeOutTime);
                 }
                 if ((m = Mth.clamp(m, 0, 255)) > 8) {
-                    RenderSystem.pushMatrix();
-                    RenderSystem.translatef(this.screenWidth / 2, this.screenHeight / 2, 0.0f);
+                    poseStack.pushPose();
+                    poseStack.translate(this.screenWidth / 2, this.screenHeight / 2, 0.0);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    RenderSystem.pushMatrix();
-                    RenderSystem.scalef(4.0f, 4.0f, 4.0f);
+                    poseStack.pushPose();
+                    poseStack.scale(4.0f, 4.0f, 4.0f);
                     int l2 = m << 24 & 0xFF000000;
                     n = font.width(this.title);
                     this.drawBackdrop(poseStack, font, -10, n, 0xFFFFFF | l2);
                     font.drawShadow(poseStack, this.title, (float)(-n / 2), -10.0f, 0xFFFFFF | l2);
-                    RenderSystem.popMatrix();
+                    poseStack.popPose();
                     if (this.subtitle != null) {
-                        RenderSystem.pushMatrix();
-                        RenderSystem.scalef(2.0f, 2.0f, 2.0f);
+                        poseStack.pushPose();
+                        poseStack.scale(2.0f, 2.0f, 2.0f);
                         o = font.width(this.subtitle);
                         this.drawBackdrop(poseStack, font, 5, o, 0xFFFFFF | l2);
                         font.drawShadow(poseStack, this.subtitle, (float)(-o / 2), 5.0f, 0xFFFFFF | l2);
-                        RenderSystem.popMatrix();
+                        poseStack.popPose();
                     }
                     RenderSystem.disableBlend();
-                    RenderSystem.popMatrix();
+                    poseStack.popPose();
                 }
                 this.minecraft.getProfiler().pop();
             }
@@ -321,13 +322,12 @@ extends GuiComponent {
             }
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, this.screenHeight - 48, 0.0f);
+            poseStack.pushPose();
+            poseStack.translate(0.0, this.screenHeight - 48, 0.0);
             this.minecraft.getProfiler().push("chat");
             this.chat.render(poseStack, this.tickCount);
             this.minecraft.getProfiler().pop();
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             objective2 = scoreboard.getDisplayObjective(0);
             if (this.minecraft.options.keyPlayerList.isDown() && (!this.minecraft.isLocalServer() || this.minecraft.player.connection.getOnlinePlayers().size() > 1 || objective2 != null)) {
                 this.tabList.setVisible(true);
@@ -336,8 +336,7 @@ extends GuiComponent {
                 this.tabList.setVisible(false);
             }
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.enableAlphaTest();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private void drawBackdrop(PoseStack poseStack, Font font, int i, int j, int k) {
@@ -357,14 +356,17 @@ extends GuiComponent {
             return;
         }
         if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo) {
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(this.screenWidth / 2, this.screenHeight / 2, this.getBlitOffset());
             Camera camera = this.minecraft.gameRenderer.getMainCamera();
-            RenderSystem.rotatef(camera.getXRot(), -1.0f, 0.0f, 0.0f);
-            RenderSystem.rotatef(camera.getYRot(), 0.0f, 1.0f, 0.0f);
-            RenderSystem.scalef(-1.0f, -1.0f, -1.0f);
+            PoseStack poseStack2 = RenderSystem.getModelViewStack();
+            poseStack2.pushPose();
+            poseStack2.translate(this.screenWidth / 2, this.screenHeight / 2, this.getBlitOffset());
+            poseStack2.mulPose(Vector3f.XN.rotationDegrees(camera.getXRot()));
+            poseStack2.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot()));
+            poseStack2.scale(-1.0f, -1.0f, -1.0f);
+            RenderSystem.applyModelViewMatrix();
             RenderSystem.renderCrosshair(10);
-            RenderSystem.popMatrix();
+            poseStack2.popPose();
+            RenderSystem.applyModelViewMatrix();
         } else {
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             int i = 15;
@@ -414,7 +416,7 @@ extends GuiComponent {
         int j = 0;
         MobEffectTextureManager mobEffectTextureManager = this.minecraft.getMobEffectTextures();
         ArrayList<Runnable> list = Lists.newArrayListWithExpectedSize(collection.size());
-        this.minecraft.getTextureManager().bind(AbstractContainerScreen.INVENTORY_LOCATION);
+        RenderSystem.setShaderTexture(0, AbstractContainerScreen.INVENTORY_LOCATION);
         for (MobEffectInstance mobEffectInstance : Ordering.natural().reverse().sortedCopy(collection)) {
             MobEffect mobEffect = mobEffectInstance.getEffect();
             if (!mobEffectInstance.showIcon()) continue;
@@ -429,7 +431,7 @@ extends GuiComponent {
                 k -= 25 * ++j;
                 l += 26;
             }
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             float f = 1.0f;
             if (mobEffectInstance.isAmbient()) {
                 this.blit(poseStack, k, l, 165, 166, 24, 24);
@@ -445,15 +447,15 @@ extends GuiComponent {
             int o = l;
             float g = f;
             list.add(() -> {
-                this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, g);
+                RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, g);
                 Gui.blit(poseStack, n + 3, o + 3, this.getBlitOffset(), 18, 18, textureAtlasSprite);
             });
         }
         list.forEach(Runnable::run);
     }
 
-    protected void renderHotbar(float f, PoseStack poseStack) {
+    private void renderHotbar(float f, PoseStack poseStack) {
         float g;
         int p;
         int o;
@@ -462,8 +464,9 @@ extends GuiComponent {
         if (player == null) {
             return;
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         ItemStack itemStack = player.getOffhandItem();
         HumanoidArm humanoidArm = player.getMainArm().getOpposite();
         int i = this.screenWidth / 2;
@@ -481,7 +484,6 @@ extends GuiComponent {
             }
         }
         this.setBlitOffset(j);
-        RenderSystem.enableRescaleNormal();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         int m = 1;
@@ -504,19 +506,18 @@ extends GuiComponent {
             if (humanoidArm == HumanoidArm.RIGHT) {
                 p = i - 91 - 22;
             }
-            this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
+            RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
             int q = (int)(g * 19.0f);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             this.blit(poseStack, p, o, 0, 94, 18, 18);
             this.blit(poseStack, p, o + 18 - q, 18, 112 - q, 18, q);
         }
-        RenderSystem.disableRescaleNormal();
         RenderSystem.disableBlend();
     }
 
     public void renderJumpMeter(PoseStack poseStack, int i) {
         this.minecraft.getProfiler().push("jumpBar");
-        this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
+        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
         float f = this.minecraft.player.getJumpRidingScale();
         int j = 182;
         int k = (int)(f * 183.0f);
@@ -532,7 +533,7 @@ extends GuiComponent {
         int m;
         int l;
         this.minecraft.getProfiler().push("expBar");
-        this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
+        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
         int j = this.minecraft.player.getXpNeededForNextLevel();
         if (j > 0) {
             int k = 182;
@@ -576,13 +577,11 @@ extends GuiComponent {
                 l = 255;
             }
             if (l > 0) {
-                RenderSystem.pushMatrix();
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 Gui.fill(poseStack, j - 2, k - 2, j + i + 2, k + this.getFont().lineHeight + 2, this.minecraft.options.getBackgroundColor(0));
                 this.getFont().drawShadow(poseStack, mutableComponent, (float)j, (float)k, 0xFFFFFF + (l << 24));
                 RenderSystem.disableBlend();
-                RenderSystem.popMatrix();
             }
         }
         this.minecraft.getProfiler().pop();
@@ -870,9 +869,8 @@ extends GuiComponent {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, f);
-        RenderSystem.disableAlphaTest();
-        this.minecraft.getTextureManager().bind(resourceLocation);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f);
+        RenderSystem.setShaderTexture(0, resourceLocation);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -883,8 +881,7 @@ extends GuiComponent {
         tesselator.end();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private void renderSpyglassOverlay(float f) {
@@ -892,8 +889,7 @@ extends GuiComponent {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableAlphaTest();
-        this.minecraft.getTextureManager().bind(SPYGLASS_SCOPE_LOCATION);
+        RenderSystem.setShaderTexture(0, SPYGLASS_SCOPE_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         float h = g = (float)Math.min(this.screenWidth, this.screenHeight);
@@ -910,6 +906,7 @@ extends GuiComponent {
         bufferBuilder.vertex(n, m, -90.0).uv(1.0f, 0.0f).endVertex();
         bufferBuilder.vertex(l, m, -90.0).uv(0.0f, 0.0f).endVertex();
         tesselator.end();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.disableTexture();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(0.0, this.screenHeight, -90.0).color(0, 0, 0, 255).endVertex();
@@ -932,8 +929,7 @@ extends GuiComponent {
         RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private void updateVignetteBrightness(Entity entity) {
@@ -954,11 +950,12 @@ extends GuiComponent {
         RenderSystem.depthMask(false);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (f > 0.0f) {
-            RenderSystem.color4f(0.0f, f, f, 1.0f);
+            RenderSystem.setShaderColor(0.0f, f, f, 1.0f);
         } else {
-            RenderSystem.color4f(this.vignetteBrightness, this.vignetteBrightness, this.vignetteBrightness, 1.0f);
+            RenderSystem.setShaderColor(this.vignetteBrightness, this.vignetteBrightness, this.vignetteBrightness, 1.0f);
         }
-        this.minecraft.getTextureManager().bind(VIGNETTE_LOCATION);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -969,7 +966,7 @@ extends GuiComponent {
         tesselator.end();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.defaultBlendFunc();
     }
 
@@ -979,12 +976,11 @@ extends GuiComponent {
             f *= f;
             f = f * 0.8f + 0.2f;
         }
-        RenderSystem.disableAlphaTest();
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, f);
-        this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, f);
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
         TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
         float g = textureAtlasSprite.getU0();
         float h = textureAtlasSprite.getV0();
@@ -1000,25 +996,28 @@ extends GuiComponent {
         tesselator.end();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private void renderSlot(int i, int j, float f, Player player, ItemStack itemStack, int k) {
         if (itemStack.isEmpty()) {
             return;
         }
+        PoseStack poseStack = RenderSystem.getModelViewStack();
         float g = (float)itemStack.getPopTime() - f;
         if (g > 0.0f) {
-            RenderSystem.pushMatrix();
             float h = 1.0f + g / 5.0f;
-            RenderSystem.translatef(i + 8, j + 12, 0.0f);
-            RenderSystem.scalef(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
-            RenderSystem.translatef(-(i + 8), -(j + 12), 0.0f);
+            poseStack.pushPose();
+            poseStack.translate(i + 8, j + 12, 0.0);
+            poseStack.scale(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
+            poseStack.translate(-(i + 8), -(j + 12), 0.0);
+            RenderSystem.applyModelViewMatrix();
         }
         this.itemRenderer.renderAndDecorateItem(player, itemStack, i, j, k);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         if (g > 0.0f) {
-            RenderSystem.popMatrix();
+            poseStack.popPose();
+            RenderSystem.applyModelViewMatrix();
         }
         this.itemRenderer.renderGuiItemDecorations(this.minecraft.font, itemStack, i, j);
     }

@@ -12,6 +12,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuType;
@@ -60,7 +61,7 @@ extends RecipeBookMenu<CraftingContainer> {
         }
     }
 
-    protected static void slotChangedCraftingGrid(int i, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer) {
+    protected static void slotChangedCraftingGrid(AbstractContainerMenu abstractContainerMenu, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer) {
         CraftingRecipe craftingRecipe;
         if (level.isClientSide) {
             return;
@@ -72,12 +73,13 @@ extends RecipeBookMenu<CraftingContainer> {
             itemStack = craftingRecipe.assemble(craftingContainer);
         }
         resultContainer.setItem(0, itemStack);
-        serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(i, 0, itemStack));
+        abstractContainerMenu.setRemoteSlot(0, itemStack);
+        serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, 0, itemStack));
     }
 
     @Override
     public void slotsChanged(Container container) {
-        this.access.execute((level, blockPos) -> CraftingMenu.slotChangedCraftingGrid(this.containerId, level, this.player, this.craftSlots, this.resultSlots));
+        this.access.execute((level, blockPos) -> CraftingMenu.slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots));
     }
 
     @Override
@@ -131,9 +133,9 @@ extends RecipeBookMenu<CraftingContainer> {
             if (itemStack2.getCount() == itemStack.getCount()) {
                 return ItemStack.EMPTY;
             }
-            ItemStack itemStack3 = slot.onTake(player, itemStack2);
+            slot.onTake(player, itemStack2);
             if (i == 0) {
-                player.drop(itemStack3, false);
+                player.drop(itemStack2, false);
             }
         }
         return itemStack;

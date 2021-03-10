@@ -50,16 +50,16 @@ public abstract class TrunkPlacer {
 
     protected static void setBlock(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState, BoundingBox boundingBox) {
         TreeFeature.setBlockKnownShape(levelWriter, blockPos, blockState);
-        boundingBox.expand(new BoundingBox(blockPos, blockPos));
+        boundingBox.expand(new BoundingBox(blockPos));
     }
 
     private static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> Feature.isDirt(blockState) && !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.MYCELIUM));
     }
 
-    protected static void setDirtAt(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos) {
-        if (!TrunkPlacer.isDirt(levelSimulatedRW, blockPos)) {
-            TreeFeature.setBlockKnownShape(levelSimulatedRW, blockPos, Blocks.DIRT.defaultBlockState());
+    protected static void setDirtAt(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+        if (treeConfiguration.forceDirt || !TrunkPlacer.isDirt(levelSimulatedRW, blockPos)) {
+            TreeFeature.setBlockKnownShape(levelSimulatedRW, blockPos, treeConfiguration.dirtProvider.getState(random, blockPos));
         }
     }
 

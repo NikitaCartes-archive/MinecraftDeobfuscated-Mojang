@@ -3,20 +3,26 @@
  */
 package net.minecraft.client.renderer;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -60,32 +66,65 @@ public abstract class RenderStateShard {
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();
     });
-    protected static final AlphaStateShard NO_ALPHA = new AlphaStateShard(0.0f);
-    protected static final AlphaStateShard DEFAULT_ALPHA = new AlphaStateShard(0.003921569f);
-    protected static final AlphaStateShard MIDWAY_ALPHA = new AlphaStateShard(0.5f);
-    protected static final ShadeModelStateShard FLAT_SHADE = new ShadeModelStateShard(false);
-    protected static final ShadeModelStateShard SMOOTH_SHADE = new ShadeModelStateShard(true);
+    protected static final ShaderStateShard NO_SHADER = new ShaderStateShard();
+    protected static final ShaderStateShard BLOCK_SHADER = new ShaderStateShard(GameRenderer::getBlockShader);
+    protected static final ShaderStateShard NEW_ENTITY_SHADER = new ShaderStateShard(GameRenderer::getNewEntityShader);
+    protected static final ShaderStateShard POSITION_COLOR_LIGHTMAP_SHADER = new ShaderStateShard(GameRenderer::getPositionColorLightmapShader);
+    protected static final ShaderStateShard POSITION_SHADER = new ShaderStateShard(GameRenderer::getPositionShader);
+    protected static final ShaderStateShard POSITION_COLOR_TEX_SHADER = new ShaderStateShard(GameRenderer::getPositionColorTexShader);
+    protected static final ShaderStateShard POSITION_TEX_SHADER = new ShaderStateShard(GameRenderer::getPositionTexShader);
+    protected static final ShaderStateShard POSITION_COLOR_TEX_LIGHTMAP_SHADER = new ShaderStateShard(GameRenderer::getPositionColorTexLightmapShader);
+    protected static final ShaderStateShard POSITION_COLOR_SHADER = new ShaderStateShard(GameRenderer::getPositionColorShader);
+    protected static final ShaderStateShard RENDERTYPE_SOLID_SHADER = new ShaderStateShard(GameRenderer::getRendertypeSolidShader);
+    protected static final ShaderStateShard RENDERTYPE_CUTOUT_MIPPED_SHADER = new ShaderStateShard(GameRenderer::getRendertypeCutoutMippedShader);
+    protected static final ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeCutoutShader);
+    protected static final ShaderStateShard RENDERTYPE_TRANSLUCENT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTranslucentShader);
+    protected static final ShaderStateShard RENDERTYPE_TRANSLUCENT_MOVING_BLOCK_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTranslucentMovingBlockShader);
+    protected static final ShaderStateShard RENDERTYPE_TRANSLUCENT_NO_CRUMBLING_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTranslucentNoCrumblingShader);
+    protected static final ShaderStateShard RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeArmorCutoutNoCullShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_SOLID_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntitySolidShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityCutoutShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_NO_CULL_Z_OFFSET_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityCutoutNoCullZOffsetShader);
+    protected static final ShaderStateShard RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeItemEntityTranslucentCullShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityTranslucentCullShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityTranslucentShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_SMOOTH_CUTOUT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntitySmoothCutoutShader);
+    protected static final ShaderStateShard RENDERTYPE_BEACON_BEAM_SHADER = new ShaderStateShard(GameRenderer::getRendertypeBeaconBeamShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_DECAL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityDecalShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_NO_OUTLINE_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityNoOutlineShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_SHADOW_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityShadowShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_ALPHA_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityAlphaShader);
+    protected static final ShaderStateShard RENDERTYPE_EYES_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEyesShader);
+    protected static final ShaderStateShard RENDERTYPE_ENERGY_SWIRL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEnergySwirlShader);
+    protected static final ShaderStateShard RENDERTYPE_LEASH_SHADER = new ShaderStateShard(GameRenderer::getRendertypeLeashShader);
+    protected static final ShaderStateShard RENDERTYPE_WATER_MASK_SHADER = new ShaderStateShard(GameRenderer::getRendertypeWaterMaskShader);
+    protected static final ShaderStateShard RENDERTYPE_OUTLINE_SHADER = new ShaderStateShard(GameRenderer::getRendertypeOutlineShader);
+    protected static final ShaderStateShard RENDERTYPE_ARMOR_GLINT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeArmorGlintShader);
+    protected static final ShaderStateShard RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeArmorEntityGlintShader);
+    protected static final ShaderStateShard RENDERTYPE_GLINT_TRANSLUCENT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeGlintTranslucentShader);
+    protected static final ShaderStateShard RENDERTYPE_GLINT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeGlintShader);
+    protected static final ShaderStateShard RENDERTYPE_GLINT_DIRECT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeGlintDirectShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_GLINT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityGlintShader);
+    protected static final ShaderStateShard RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityGlintDirectShader);
+    protected static final ShaderStateShard RENDERTYPE_CRUMBLING_SHADER = new ShaderStateShard(GameRenderer::getRendertypeCrumblingShader);
+    protected static final ShaderStateShard RENDERTYPE_TEXT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextShader);
+    protected static final ShaderStateShard RENDERTYPE_TEXT_SEE_THROUGH_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextSeeThroughShader);
+    protected static final ShaderStateShard RENDERTYPE_LIGHTNING_SHADER = new ShaderStateShard(GameRenderer::getRendertypeLightningShader);
+    protected static final ShaderStateShard RENDERTYPE_TRIPWIRE_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTripwireShader);
+    protected static final ShaderStateShard RENDERTYPE_END_PORTAL_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEndPortalShader);
+    protected static final ShaderStateShard RENDERTYPE_END_GATEWAY_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEndGatewayShader);
+    protected static final ShaderStateShard RENDERTYPE_LINES_SHADER = new ShaderStateShard(GameRenderer::getRendertypeLinesShader);
     protected static final TextureStateShard BLOCK_SHEET_MIPPED = new TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, true);
     protected static final TextureStateShard BLOCK_SHEET = new TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, false);
-    protected static final TextureStateShard NO_TEXTURE = new TextureStateShard();
+    protected static final EmptyTextureStateShard NO_TEXTURE = new EmptyTextureStateShard();
     protected static final TexturingStateShard DEFAULT_TEXTURING = new TexturingStateShard("default_texturing", () -> {}, () -> {});
-    protected static final TexturingStateShard OUTLINE_TEXTURING = new TexturingStateShard("outline_texturing", () -> RenderSystem.setupOutline(), () -> RenderSystem.teardownOutline());
-    protected static final TexturingStateShard GLINT_TEXTURING = new TexturingStateShard("glint_texturing", () -> RenderStateShard.setupGlintTexturing(8.0f), () -> {
-        RenderSystem.matrixMode(5890);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(5888);
-    });
-    protected static final TexturingStateShard ENTITY_GLINT_TEXTURING = new TexturingStateShard("entity_glint_texturing", () -> RenderStateShard.setupGlintTexturing(0.16f), () -> {
-        RenderSystem.matrixMode(5890);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(5888);
-    });
+    protected static final TexturingStateShard GLINT_TEXTURING = new TexturingStateShard("glint_texturing", () -> RenderStateShard.setupGlintTexturing(8.0f), () -> RenderSystem.resetTextureMatrix());
+    protected static final TexturingStateShard ENTITY_GLINT_TEXTURING = new TexturingStateShard("entity_glint_texturing", () -> RenderStateShard.setupGlintTexturing(0.16f), () -> RenderSystem.resetTextureMatrix());
     protected static final LightmapStateShard LIGHTMAP = new LightmapStateShard(true);
     protected static final LightmapStateShard NO_LIGHTMAP = new LightmapStateShard(false);
     protected static final OverlayStateShard OVERLAY = new OverlayStateShard(true);
     protected static final OverlayStateShard NO_OVERLAY = new OverlayStateShard(false);
-    protected static final DiffuseLightingStateShard DIFFUSE_LIGHTING = new DiffuseLightingStateShard(true);
-    protected static final DiffuseLightingStateShard NO_DIFFUSE_LIGHTING = new DiffuseLightingStateShard(false);
     protected static final CullStateShard CULL = new CullStateShard(true);
     protected static final CullStateShard NO_CULL = new CullStateShard(false);
     protected static final DepthTestStateShard NO_DEPTH_TEST = new DepthTestStateShard("always", 519);
@@ -103,20 +142,14 @@ public abstract class RenderStateShard {
         RenderSystem.disablePolygonOffset();
     });
     protected static final LayeringStateShard VIEW_OFFSET_Z_LAYERING = new LayeringStateShard("view_offset_z_layering", () -> {
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(0.99975586f, 0.99975586f, 0.99975586f);
-    }, RenderSystem::popMatrix);
-    protected static final FogStateShard NO_FOG = new FogStateShard("no_fog", () -> {}, () -> {});
-    protected static final FogStateShard FOG = new FogStateShard("fog", () -> {
-        FogRenderer.levelFogColor();
-        RenderSystem.enableFog();
-    }, () -> RenderSystem.disableFog());
-    protected static final FogStateShard BLACK_FOG = new FogStateShard("black_fog", () -> {
-        RenderSystem.fog(2918, 0.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.enableFog();
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.scale(0.99975586f, 0.99975586f, 0.99975586f);
+        RenderSystem.applyModelViewMatrix();
     }, () -> {
-        FogRenderer.levelFogColor();
-        RenderSystem.disableFog();
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     });
     protected static final OutputStateShard MAIN_TARGET = new OutputStateShard("main_target", () -> {}, () -> {});
     protected static final OutputStateShard OUTLINE_TARGET = new OutputStateShard("outline_target", () -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false), () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
@@ -192,6 +225,10 @@ public abstract class RenderStateShard {
         return this.name.equals(renderStateShard.name);
     }
 
+    protected boolean valueEquals(RenderStateShard renderStateShard) {
+        return this.name.equals(renderStateShard.name);
+    }
+
     public int hashCode() {
         return this.name.hashCode();
     }
@@ -201,16 +238,13 @@ public abstract class RenderStateShard {
     }
 
     private static void setupGlintTexturing(float f) {
-        RenderSystem.matrixMode(5890);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
         long l = Util.getMillis() * 8L;
         float g = (float)(l % 110000L) / 110000.0f;
         float h = (float)(l % 30000L) / 30000.0f;
-        RenderSystem.translatef(-g, h, 0.0f);
-        RenderSystem.rotatef(10.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.scalef(f, f, f);
-        RenderSystem.matrixMode(5888);
+        Matrix4f matrix4f = Matrix4f.createTranslateMatrix(-g, h, 0.0f);
+        matrix4f.multiply(Vector3f.ZP.rotationDegrees(10.0f));
+        matrix4f.multiply(Matrix4f.createScaleMatrix(f, f, f));
+        RenderSystem.setTextureMatrix(matrix4f);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -264,14 +298,6 @@ public abstract class RenderStateShard {
     public static class OutputStateShard
     extends RenderStateShard {
         public OutputStateShard(String string, Runnable runnable, Runnable runnable2) {
-            super(string, runnable, runnable2);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class FogStateShard
-    extends RenderStateShard {
-        public FogStateShard(String string, Runnable runnable, Runnable runnable2) {
             super(string, runnable, runnable2);
         }
     }
@@ -395,22 +421,6 @@ public abstract class RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class DiffuseLightingStateShard
-    extends BooleanStateShard {
-        public DiffuseLightingStateShard(boolean bl) {
-            super("diffuse_lighting", () -> {
-                if (bl) {
-                    Lighting.turnBackOn();
-                }
-            }, () -> {
-                if (bl) {
-                    Lighting.turnOff();
-                }
-            }, bl);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static class OverlayStateShard
     extends BooleanStateShard {
         public OverlayStateShard(boolean bl) {
@@ -476,68 +486,13 @@ public abstract class RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class PortalTexturingStateShard
-    extends TexturingStateShard {
-        private final int iteration;
-
-        public PortalTexturingStateShard(int i) {
-            super("portal_texturing", () -> {
-                RenderSystem.matrixMode(5890);
-                RenderSystem.pushMatrix();
-                RenderSystem.loadIdentity();
-                RenderSystem.translatef(0.5f, 0.5f, 0.0f);
-                RenderSystem.scalef(0.5f, 0.5f, 1.0f);
-                RenderSystem.translatef(17.0f / (float)i, (2.0f + (float)i / 1.5f) * ((float)(Util.getMillis() % 800000L) / 800000.0f), 0.0f);
-                RenderSystem.rotatef(((float)(i * i) * 4321.0f + (float)i * 9.0f) * 2.0f, 0.0f, 0.0f, 1.0f);
-                RenderSystem.scalef(4.5f - (float)i / 4.0f, 4.5f - (float)i / 4.0f, 1.0f);
-                RenderSystem.mulTextureByProjModelView();
-                RenderSystem.matrixMode(5888);
-                RenderSystem.setupEndPortalTexGen();
-            }, () -> {
-                RenderSystem.matrixMode(5890);
-                RenderSystem.popMatrix();
-                RenderSystem.matrixMode(5888);
-                RenderSystem.clearTexGen();
-            });
-            this.iteration = i;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            PortalTexturingStateShard portalTexturingStateShard = (PortalTexturingStateShard)object;
-            return this.iteration == portalTexturingStateShard.iteration;
-        }
-
-        @Override
-        public int hashCode() {
-            return Integer.hashCode(this.iteration);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static final class OffsetTexturingStateShard
     extends TexturingStateShard {
         private final float uOffset;
         private final float vOffset;
 
         public OffsetTexturingStateShard(float f, float g) {
-            super("offset_texturing", () -> {
-                RenderSystem.matrixMode(5890);
-                RenderSystem.pushMatrix();
-                RenderSystem.loadIdentity();
-                RenderSystem.translatef(f, g, 0.0f);
-                RenderSystem.matrixMode(5888);
-            }, () -> {
-                RenderSystem.matrixMode(5890);
-                RenderSystem.popMatrix();
-                RenderSystem.matrixMode(5888);
-            });
+            super("offset_texturing", () -> RenderSystem.setTextureMatrix(Matrix4f.createTranslateMatrix(f, g, 0.0f)), () -> RenderSystem.resetTextureMatrix());
             this.uOffset = f;
             this.vOffset = g;
         }
@@ -570,28 +525,21 @@ public abstract class RenderStateShard {
 
     @Environment(value=EnvType.CLIENT)
     public static class TextureStateShard
-    extends RenderStateShard {
+    extends EmptyTextureStateShard {
         private final Optional<ResourceLocation> texture;
         private final boolean blur;
         private final boolean mipmap;
 
         public TextureStateShard(ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-            super("texture", () -> {
+            super(() -> {
                 RenderSystem.enableTexture();
                 TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-                textureManager.bind(resourceLocation);
                 textureManager.getTexture(resourceLocation).setFilter(bl, bl2);
+                RenderSystem.setShaderTexture(0, resourceLocation);
             }, () -> {});
             this.texture = Optional.of(resourceLocation);
             this.blur = bl;
             this.mipmap = bl2;
-        }
-
-        public TextureStateShard() {
-            super("texture", () -> RenderSystem.disableTexture(), () -> RenderSystem.enableTexture());
-            this.texture = Optional.empty();
-            this.blur = false;
-            this.mipmap = false;
         }
 
         @Override
@@ -616,19 +564,82 @@ public abstract class RenderStateShard {
             return this.name + '[' + this.texture + "(blur=" + this.blur + ", mipmap=" + this.mipmap + ")]";
         }
 
-        protected Optional<ResourceLocation> texture() {
+        @Override
+        protected Optional<ResourceLocation> cutoutTexture() {
             return this.texture;
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class ShadeModelStateShard
-    extends RenderStateShard {
-        private final boolean smooth;
+    public static class MultiTextureStateShard
+    extends EmptyTextureStateShard {
+        private final Optional<ResourceLocation> cutoutTexture;
 
-        public ShadeModelStateShard(boolean bl) {
-            super("shade_model", () -> RenderSystem.shadeModel(bl ? 7425 : 7424), () -> RenderSystem.shadeModel(7424));
-            this.smooth = bl;
+        private MultiTextureStateShard(ImmutableList<Triple<ResourceLocation, Boolean, Boolean>> immutableList) {
+            super(() -> {
+                int i = 0;
+                for (Triple triple : immutableList) {
+                    TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+                    textureManager.getTexture((ResourceLocation)triple.getLeft()).setFilter((Boolean)triple.getMiddle(), (Boolean)triple.getRight());
+                    RenderSystem.setShaderTexture(i++, (ResourceLocation)triple.getLeft());
+                }
+            }, () -> {});
+            this.cutoutTexture = immutableList.stream().findFirst().map(Triple::getLeft);
+        }
+
+        @Override
+        protected Optional<ResourceLocation> cutoutTexture() {
+            return this.cutoutTexture;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public static final class Builder {
+            private final ImmutableList.Builder<Triple<ResourceLocation, Boolean, Boolean>> builder = new ImmutableList.Builder();
+
+            public Builder add(ResourceLocation resourceLocation, boolean bl, boolean bl2) {
+                this.builder.add((Object)Triple.of(resourceLocation, bl, bl2));
+                return this;
+            }
+
+            public MultiTextureStateShard build() {
+                return new MultiTextureStateShard((ImmutableList)this.builder.build());
+            }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class EmptyTextureStateShard
+    extends RenderStateShard {
+        public EmptyTextureStateShard(Runnable runnable, Runnable runnable2) {
+            super("texture", runnable, runnable2);
+        }
+
+        private EmptyTextureStateShard() {
+            super("texture", () -> {}, () -> {});
+        }
+
+        protected Optional<ResourceLocation> cutoutTexture() {
+            return Optional.empty();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ShaderStateShard
+    extends RenderStateShard {
+        private final Optional<Supplier<ShaderInstance>> shader;
+
+        public ShaderStateShard(Supplier<ShaderInstance> supplier) {
+            super("shader", () -> RenderSystem.setShader(supplier), () -> {});
+            this.shader = Optional.of(supplier);
+        }
+
+        public ShaderStateShard() {
+            super("shader", () -> RenderSystem.setShader(() -> null), () -> {});
+            this.shader = Optional.empty();
         }
 
         @Override
@@ -639,63 +650,18 @@ public abstract class RenderStateShard {
             if (object == null || this.getClass() != object.getClass()) {
                 return false;
             }
-            ShadeModelStateShard shadeModelStateShard = (ShadeModelStateShard)object;
-            return this.smooth == shadeModelStateShard.smooth;
+            ShaderStateShard shaderStateShard = (ShaderStateShard)object;
+            return this.shader.equals(shaderStateShard.shader);
         }
 
         @Override
         public int hashCode() {
-            return Boolean.hashCode(this.smooth);
+            return this.shader.hashCode();
         }
 
         @Override
         public String toString() {
-            return this.name + '[' + (this.smooth ? "smooth" : "flat") + ']';
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class AlphaStateShard
-    extends RenderStateShard {
-        private final float cutoff;
-
-        public AlphaStateShard(float f) {
-            super("alpha", () -> {
-                if (f > 0.0f) {
-                    RenderSystem.enableAlphaTest();
-                    RenderSystem.alphaFunc(516, f);
-                } else {
-                    RenderSystem.disableAlphaTest();
-                }
-            }, () -> {
-                RenderSystem.disableAlphaTest();
-                RenderSystem.defaultAlphaFunc();
-            });
-            this.cutoff = f;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            if (!super.equals(object)) {
-                return false;
-            }
-            return this.cutoff == ((AlphaStateShard)object).cutoff;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), Float.valueOf(this.cutoff));
-        }
-
-        @Override
-        public String toString() {
-            return this.name + '[' + this.cutoff + ']';
+            return this.name + '[' + this.shader + "]";
         }
     }
 

@@ -331,10 +331,10 @@ extends RealmsScreen {
 
         private void drawImage(PoseStack poseStack, int i, int j, int k, int l, WorldTemplate worldTemplate) {
             RealmsTextureManager.bindWorldTemplate(worldTemplate.id, worldTemplate.image);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, i + 1, j + 1, 0.0f, 0.0f, 38, 38, 38, 38);
-            RealmsSelectWorldTemplateScreen.this.minecraft.getTextureManager().bind(SLOT_FRAME_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 40, 40, 40, 40);
         }
 
@@ -358,23 +358,17 @@ extends RealmsScreen {
                 }
             }
             if (!bl3) {
-                RealmsSelectWorldTemplateScreen.this.minecraft.getTextureManager().bind(LINK_ICON);
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                RenderSystem.pushMatrix();
-                RenderSystem.scalef(1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, LINK_ICON);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 15.0f : 0.0f;
                 GuiComponent.blit(poseStack, i + m, j, f, 0.0f, 15, 15, 30, 15);
-                RenderSystem.popMatrix();
             }
             if (!"".equals(string2)) {
-                RealmsSelectWorldTemplateScreen.this.minecraft.getTextureManager().bind(TRAILER_ICON);
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                RenderSystem.pushMatrix();
-                RenderSystem.scalef(1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, TRAILER_ICON);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 int n = i + m + (bl3 ? 0 : 17);
                 float g = bl2 ? 15.0f : 0.0f;
                 GuiComponent.blit(poseStack, n, j, g, 0.0f, 15, 15, 30, 15);
-                RenderSystem.popMatrix();
             }
             if (bl) {
                 RealmsSelectWorldTemplateScreen.this.toolTip = PUBLISHER_LINK_TOOLTIP;

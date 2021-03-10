@@ -33,7 +33,7 @@ extends AbstractContainerMenu {
 
     protected abstract boolean mayPickup(Player var1, boolean var2);
 
-    protected abstract ItemStack onTake(Player var1, ItemStack var2);
+    protected abstract void onTake(Player var1, ItemStack var2);
 
     protected abstract boolean isValidBlock(BlockState var1);
 
@@ -57,8 +57,8 @@ extends AbstractContainerMenu {
             }
 
             @Override
-            public ItemStack onTake(Player player, ItemStack itemStack) {
-                return ItemCombinerMenu.this.onTake(player, itemStack);
+            public void onTake(Player player, ItemStack itemStack) {
+                ItemCombinerMenu.this.onTake(player, itemStack);
             }
         });
         for (j = 0; j < 3; ++j) {

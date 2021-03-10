@@ -4,7 +4,7 @@
 package com.mojang.blaze3d.shaders;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.shaders.Effect;
+import com.mojang.blaze3d.shaders.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import net.fabricmc.api.EnvType;
@@ -21,11 +21,11 @@ public class ProgramManager {
         GlStateManager._glUseProgram(i);
     }
 
-    public static void releaseProgram(Effect effect) {
+    public static void releaseProgram(Shader shader) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        effect.getFragmentProgram().close();
-        effect.getVertexProgram().close();
-        GlStateManager.glDeleteProgram(effect.getId());
+        shader.getFragmentProgram().close();
+        shader.getVertexProgram().close();
+        GlStateManager.glDeleteProgram(shader.getId());
     }
 
     public static int createProgram() throws IOException {
@@ -37,15 +37,14 @@ public class ProgramManager {
         return i;
     }
 
-    public static void linkProgram(Effect effect) {
+    public static void linkShader(Shader shader) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        effect.getFragmentProgram().attachToEffect(effect);
-        effect.getVertexProgram().attachToEffect(effect);
-        GlStateManager.glLinkProgram(effect.getId());
-        int i = GlStateManager.glGetProgrami(effect.getId(), 35714);
+        shader.attachToProgram();
+        GlStateManager.glLinkProgram(shader.getId());
+        int i = GlStateManager.glGetProgrami(shader.getId(), 35714);
         if (i == 0) {
-            LOGGER.warn("Error encountered when linking program containing VS {} and FS {}. Log output:", (Object)effect.getVertexProgram().getName(), (Object)effect.getFragmentProgram().getName());
-            LOGGER.warn(GlStateManager.glGetProgramInfoLog(effect.getId(), 32768));
+            LOGGER.warn("Error encountered when linking program containing VS {} and FS {}. Log output:", (Object)shader.getVertexProgram().getName(), (Object)shader.getFragmentProgram().getName());
+            LOGGER.warn(GlStateManager.glGetProgramInfoLog(shader.getId(), 32768));
         }
     }
 }

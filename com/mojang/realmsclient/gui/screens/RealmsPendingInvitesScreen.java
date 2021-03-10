@@ -210,7 +210,7 @@ extends RealmsScreen {
             RealmsPendingInvitesScreen.this.font.draw(poseStack, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), (float)(i + 38), (float)(j + 24), 0x6C6C6C);
             RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
             RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 GuiComponent.blit(poseStack, i, j, 32, 32, 8.0f, 8.0f, 8, 8, 64, 64);
                 GuiComponent.blit(poseStack, i, j, 32, 32, 40.0f, 8.0f, 8, 8, 64, 64);
             });
@@ -225,8 +225,8 @@ extends RealmsScreen {
 
             @Override
             protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
-                RealmsPendingInvitesScreen.this.minecraft.getTextureManager().bind(REJECT_ICON_LOCATION);
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, REJECT_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 19.0f : 0.0f;
                 GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
                 if (bl) {
@@ -249,8 +249,8 @@ extends RealmsScreen {
 
             @Override
             protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
-                RealmsPendingInvitesScreen.this.minecraft.getTextureManager().bind(ACCEPT_ICON_LOCATION);
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, ACCEPT_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 19.0f : 0.0f;
                 GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
                 if (bl) {

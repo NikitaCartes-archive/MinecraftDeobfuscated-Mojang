@@ -80,16 +80,17 @@ implements Enemy {
     }
 
     protected void setSize(int i, boolean bl) {
-        this.entityData.set(ID_SIZE, i);
+        int j = Mth.clamp(i, 1, 127);
+        this.entityData.set(ID_SIZE, j);
         this.reapplyPosition();
         this.refreshDimensions();
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(i * i);
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(i);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(j * j);
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)j);
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(j);
         if (bl) {
             this.setHealth(this.getMaxHealth());
         }
-        this.xpReward = i;
+        this.xpReward = j;
     }
 
     public int getSize() {
@@ -105,11 +106,7 @@ implements Enemy {
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
-        int i = compoundTag.getInt("Size");
-        if (i < 0) {
-            i = 0;
-        }
-        this.setSize(i + 1, false);
+        this.setSize(compoundTag.getInt("Size") + 1, false);
         super.readAdditionalSaveData(compoundTag);
         this.wasOnGround = compoundTag.getBoolean("wasOnGround");
     }

@@ -4,7 +4,6 @@
 package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import java.util.function.IntConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
@@ -20,12 +19,10 @@ public class VertexFormatElement {
     private final int byteSize;
 
     public VertexFormatElement(int i, Type type, Usage usage, int j) {
-        if (this.supportsUsage(i, usage)) {
-            this.usage = usage;
-        } else {
-            LOGGER.warn("Multiple vertex elements of the same type other than UVs are not supported. Forcing type to UV.");
-            this.usage = Usage.UV;
+        if (!this.supportsUsage(i, usage)) {
+            throw new IllegalStateException("Multiple vertex elements of the same type other than UVs are not supported");
         }
+        this.usage = usage;
         this.type = type;
         this.index = i;
         this.count = j;
@@ -42,6 +39,10 @@ public class VertexFormatElement {
 
     public final Usage getUsage() {
         return this.usage;
+    }
+
+    public final int getCount() {
+        return this.count;
     }
 
     public final int getIndex() {
@@ -84,12 +85,12 @@ public class VertexFormatElement {
         return i;
     }
 
-    public void setupBufferState(long l, int i) {
-        this.usage.setupBufferState(this.count, this.type.getGlType(), i, l, this.index);
+    public void setupBufferState(int i, long l, int j) {
+        this.usage.setupBufferState(this.count, this.type.getGlType(), j, l, this.index, i);
     }
 
-    public void clearBufferState() {
-        this.usage.clearBufferState(this.index);
+    public void clearBufferState(int i) {
+        this.usage.clearBufferState(this.index, i);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -127,62 +128,64 @@ public class VertexFormatElement {
 
     @Environment(value=EnvType.CLIENT)
     public static enum Usage {
-        POSITION("Position", (i, j, k, l, m) -> {
-            GlStateManager._vertexPointer(i, j, k, l);
-            GlStateManager._enableClientState(32884);
-        }, i -> GlStateManager._disableClientState(32884)),
-        NORMAL("Normal", (i, j, k, l, m) -> {
-            GlStateManager._normalPointer(j, k, l);
-            GlStateManager._enableClientState(32885);
-        }, i -> GlStateManager._disableClientState(32885)),
-        COLOR("Vertex Color", (i, j, k, l, m) -> {
-            GlStateManager._colorPointer(i, j, k, l);
-            GlStateManager._enableClientState(32886);
-        }, i -> {
-            GlStateManager._disableClientState(32886);
-            GlStateManager._clearCurrentColor();
-        }),
-        UV("UV", (i, j, k, l, m) -> {
-            GlStateManager._glClientActiveTexture(33984 + m);
-            GlStateManager._texCoordPointer(i, j, k, l);
-            GlStateManager._enableClientState(32888);
-            GlStateManager._glClientActiveTexture(33984);
-        }, i -> {
-            GlStateManager._glClientActiveTexture(33984 + i);
-            GlStateManager._disableClientState(32888);
-            GlStateManager._glClientActiveTexture(33984);
-        }),
-        PADDING("Padding", (i, j, k, l, m) -> {}, i -> {}),
-        GENERIC("Generic", (i, j, k, l, m) -> {
-            GlStateManager._enableVertexAttribArray(m);
-            GlStateManager._vertexAttribPointer(m, i, j, false, k, l);
-        }, GlStateManager::_disableVertexAttribArray);
+        POSITION("Position", (i, j, k, l, m, n) -> {
+            GlStateManager._enableVertexAttribArray(n);
+            GlStateManager._vertexAttribPointer(n, i, j, false, k, l);
+        }, (i, j) -> GlStateManager._disableVertexAttribArray(j)),
+        NORMAL("Normal", (i, j, k, l, m, n) -> {
+            GlStateManager._enableVertexAttribArray(n);
+            GlStateManager._vertexAttribPointer(n, i, j, true, k, l);
+        }, (i, j) -> GlStateManager._disableVertexAttribArray(j)),
+        COLOR("Vertex Color", (i, j, k, l, m, n) -> {
+            GlStateManager._enableVertexAttribArray(n);
+            GlStateManager._vertexAttribPointer(n, i, j, true, k, l);
+        }, (i, j) -> GlStateManager._disableVertexAttribArray(j)),
+        UV("UV", (i, j, k, l, m, n) -> {
+            GlStateManager._enableVertexAttribArray(n);
+            if (j == 5126) {
+                GlStateManager._vertexAttribPointer(n, i, j, false, k, l);
+            } else {
+                GlStateManager._vertexAttribIPointer(n, i, j, k, l);
+            }
+        }, (i, j) -> GlStateManager._disableVertexAttribArray(j)),
+        PADDING("Padding", (i, j, k, l, m, n) -> {}, (i, j) -> {}),
+        GENERIC("Generic", (i, j, k, l, m, n) -> {
+            GlStateManager._enableVertexAttribArray(n);
+            GlStateManager._vertexAttribPointer(n, i, j, false, k, l);
+        }, (i, j) -> GlStateManager._disableVertexAttribArray(j));
 
         private final String name;
         private final SetupState setupState;
-        private final IntConsumer clearState;
+        private final ClearState clearState;
 
-        private Usage(String string2, SetupState setupState, IntConsumer intConsumer) {
+        private Usage(String string2, SetupState setupState, ClearState clearState) {
             this.name = string2;
             this.setupState = setupState;
-            this.clearState = intConsumer;
+            this.clearState = clearState;
         }
 
-        private void setupBufferState(int i, int j, int k, long l, int m) {
-            this.setupState.setupBufferState(i, j, k, l, m);
+        private void setupBufferState(int i, int j, int k, long l, int m, int n) {
+            this.setupState.setupBufferState(i, j, k, l, m, n);
         }
 
-        public void clearBufferState(int i) {
-            this.clearState.accept(i);
+        public void clearBufferState(int i, int j) {
+            this.clearState.clearBufferState(i, j);
         }
 
         public String getName() {
             return this.name;
         }
 
+        @FunctionalInterface
+        @Environment(value=EnvType.CLIENT)
+        static interface ClearState {
+            public void clearBufferState(int var1, int var2);
+        }
+
+        @FunctionalInterface
         @Environment(value=EnvType.CLIENT)
         static interface SetupState {
-            public void setupBufferState(int var1, int var2, int var3, long var4, int var6);
+            public void setupBufferState(int var1, int var2, int var3, long var4, int var6, int var7);
         }
     }
 }

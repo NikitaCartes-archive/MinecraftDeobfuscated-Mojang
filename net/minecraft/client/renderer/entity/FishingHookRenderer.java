@@ -95,12 +95,11 @@ extends EntityRenderer<FishingHook> {
         float v = (float)(o - s);
         float w = (float)(p - t) + r;
         float x = (float)(q - u);
-        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lines());
-        Matrix4f matrix4f2 = poseStack.last().pose();
+        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lineStrip());
+        PoseStack.Pose pose2 = poseStack.last();
         int y = 16;
-        for (int z = 0; z < 16; ++z) {
-            FishingHookRenderer.stringVertex(v, w, x, vertexConsumer2, matrix4f2, FishingHookRenderer.fraction(z, 16));
-            FishingHookRenderer.stringVertex(v, w, x, vertexConsumer2, matrix4f2, FishingHookRenderer.fraction(z + 1, 16));
+        for (int z = 0; z <= 16; ++z) {
+            FishingHookRenderer.stringVertex(v, w, x, vertexConsumer2, pose2, FishingHookRenderer.fraction(z, 16), FishingHookRenderer.fraction(z + 1, 17));
         }
         poseStack.popPose();
         super.render(fishingHook, f, g, poseStack, multiBufferSource, i);
@@ -114,8 +113,15 @@ extends EntityRenderer<FishingHook> {
         vertexConsumer.vertex(matrix4f, f - 0.5f, (float)j - 0.5f, 0.0f).color(255, 255, 255, 255).uv(k, l).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(i).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
     }
 
-    private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, Matrix4f matrix4f, float i) {
-        vertexConsumer.vertex(matrix4f, f * i, g * (i * i + i) * 0.5f + 0.25f, h * i).color(0, 0, 0, 255).endVertex();
+    private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, PoseStack.Pose pose, float i, float j) {
+        float k = f * i;
+        float l = g * (i * i + i) * 0.5f + 0.25f;
+        float m = h * i;
+        float n = f * j - k;
+        float o = g * (j * j + j) * 0.5f + 0.25f - l;
+        float p = h * j - m;
+        float q = Mth.sqrt(n * n + o * o + p * p);
+        vertexConsumer.vertex(pose.pose(), k, l, m).color(0, 0, 0, 255).normal(pose.normal(), n /= q, o /= q, p /= q).endVertex();
     }
 
     @Override

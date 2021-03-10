@@ -9,7 +9,8 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
@@ -35,9 +36,13 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class MineShaftPieces {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private static MineShaftPiece createRandomShaftPiece(List<StructurePiece> list, Random random, int i, int j, int k, @Nullable Direction direction, int l, MineshaftFeature.Type type) {
         int m = random.nextInt(100);
         if (m >= 80) {
@@ -655,10 +660,7 @@ public class MineShaftPieces {
 
         public MineShaftRoom(StructureManager structureManager, CompoundTag compoundTag) {
             super(StructurePieceType.MINE_SHAFT_ROOM, compoundTag);
-            ListTag listTag = compoundTag.getList("Entrances", 11);
-            for (int i = 0; i < listTag.size(); ++i) {
-                this.childEntranceBoxes.add(new BoundingBox(listTag.getIntArray(i)));
-            }
+            BoundingBox.CODEC.listOf().parse(NbtOps.INSTANCE, compoundTag.getList("Entrances", 11)).resultOrPartial(LOGGER::error).ifPresent(this.childEntranceBoxes::addAll);
         }
 
         @Override
@@ -722,11 +724,7 @@ public class MineShaftPieces {
         @Override
         protected void addAdditionalSaveData(CompoundTag compoundTag) {
             super.addAdditionalSaveData(compoundTag);
-            ListTag listTag = new ListTag();
-            for (BoundingBox boundingBox : this.childEntranceBoxes) {
-                listTag.add(boundingBox.createTag());
-            }
-            compoundTag.put("Entrances", listTag);
+            BoundingBox.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.childEntranceBoxes).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Entrances", (Tag)tag));
         }
     }
 

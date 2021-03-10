@@ -30,6 +30,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestListener;
@@ -74,7 +75,7 @@ public class TestCommand {
         ServerLevel serverLevel = commandSourceStack.getLevel();
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3);
-        StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new BlockPos(i, j, k), Rotation.NONE, serverLevel);
+        StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
         for (int l = 0; l < i; ++l) {
             for (int m = 0; m < k; ++m) {
                 BlockPos blockPos3 = new BlockPos(blockPos2.getX() + l, blockPos2.getY() + 1, blockPos2.getZ() + m);

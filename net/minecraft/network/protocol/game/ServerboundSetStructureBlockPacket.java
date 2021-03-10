@@ -6,6 +6,7 @@ package net.minecraft.network.protocol.game;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -22,7 +23,7 @@ implements Packet<ServerGamePacketListener> {
     private final StructureMode mode;
     private final String name;
     private final BlockPos offset;
-    private final BlockPos size;
+    private final Vec3i size;
     private final Mirror mirror;
     private final Rotation rotation;
     private final String data;
@@ -33,13 +34,13 @@ implements Packet<ServerGamePacketListener> {
     private final long seed;
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundSetStructureBlockPacket(BlockPos blockPos, StructureBlockEntity.UpdateType updateType, StructureMode structureMode, String string, BlockPos blockPos2, BlockPos blockPos3, Mirror mirror, Rotation rotation, String string2, boolean bl, boolean bl2, boolean bl3, float f, long l) {
+    public ServerboundSetStructureBlockPacket(BlockPos blockPos, StructureBlockEntity.UpdateType updateType, StructureMode structureMode, String string, BlockPos blockPos2, Vec3i vec3i, Mirror mirror, Rotation rotation, String string2, boolean bl, boolean bl2, boolean bl3, float f, long l) {
         this.pos = blockPos;
         this.updateType = updateType;
         this.mode = structureMode;
         this.name = string;
         this.offset = blockPos2;
-        this.size = blockPos3;
+        this.size = vec3i;
         this.mirror = mirror;
         this.rotation = rotation;
         this.data = string2;
@@ -58,7 +59,7 @@ implements Packet<ServerGamePacketListener> {
         int i = 48;
         this.offset = new BlockPos(Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48));
         int j = 48;
-        this.size = new BlockPos(Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48));
+        this.size = new Vec3i(Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48));
         this.mirror = friendlyByteBuf.readEnum(Mirror.class);
         this.rotation = friendlyByteBuf.readEnum(Rotation.class);
         this.data = friendlyByteBuf.readUtf(12);
@@ -125,7 +126,7 @@ implements Packet<ServerGamePacketListener> {
         return this.offset;
     }
 
-    public BlockPos getSize() {
+    public Vec3i getSize() {
         return this.size;
     }
 

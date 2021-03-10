@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
@@ -59,8 +58,6 @@ extends PacketListener {
     public void handleClientCommand(ServerboundClientCommandPacket var1);
 
     public void handleClientInformation(ServerboundClientInformationPacket var1);
-
-    public void handleContainerAck(ServerboundContainerAckPacket var1);
 
     public void handleContainerButtonClick(ServerboundContainerButtonClickPacket var1);
 

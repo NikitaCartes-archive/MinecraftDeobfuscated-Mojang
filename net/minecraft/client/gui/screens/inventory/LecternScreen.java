@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -26,17 +25,12 @@ implements MenuAccess<LecternMenu> {
     private final ContainerListener listener = new ContainerListener(){
 
         @Override
-        public void refreshContainer(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList) {
-            LecternScreen.this.bookChanged();
-        }
-
-        @Override
         public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
             LecternScreen.this.bookChanged();
         }
 
         @Override
-        public void setContainerData(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+        public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
             if (i == 0) {
                 LecternScreen.this.pageChanged();
             }
@@ -115,6 +109,11 @@ implements MenuAccess<LecternMenu> {
 
     private void pageChanged() {
         this.setPage(this.menu.getPage());
+    }
+
+    @Override
+    protected void closeScreen() {
+        this.minecraft.player.closeContainer();
     }
 
     @Override

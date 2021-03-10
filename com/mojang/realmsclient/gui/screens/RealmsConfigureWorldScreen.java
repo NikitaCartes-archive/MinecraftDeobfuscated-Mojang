@@ -323,8 +323,8 @@ extends RealmsScreen {
     }
 
     private void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
-        this.minecraft.getTextureManager().bind(EXPIRED_ICON_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, EXPIRED_ICON_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = SERVER_EXPIRED_TOOLTIP;
@@ -332,8 +332,8 @@ extends RealmsScreen {
     }
 
     private void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
-        this.minecraft.getTextureManager().bind(EXPIRES_SOON_ICON_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, EXPIRES_SOON_ICON_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.animTick % 20 < 10) {
             GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 20, 28);
         } else {
@@ -345,8 +345,8 @@ extends RealmsScreen {
     }
 
     private void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
-        this.minecraft.getTextureManager().bind(ON_ICON_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, ON_ICON_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = SERVER_OPEN_TOOLTIP;
@@ -354,8 +354,8 @@ extends RealmsScreen {
     }
 
     private void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
-        this.minecraft.getTextureManager().bind(OFF_ICON_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, OFF_ICON_LOCATION);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = SERVER_CLOSED_TOOLTIP;

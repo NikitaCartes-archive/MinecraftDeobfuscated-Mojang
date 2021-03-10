@@ -19,6 +19,7 @@ import java.util.Optional;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -78,7 +79,7 @@ public class StructureUtils {
         BlockPos blockPos = structureBlockEntity.getBlockPos();
         BlockPos blockPos2 = blockPos.offset(structureBlockEntity.getStructureSize().offset(-1, -1, -1));
         BlockPos blockPos3 = StructureTemplate.transform(blockPos2, Mirror.NONE, structureBlockEntity.getRotation(), blockPos);
-        return new BoundingBox(blockPos, blockPos3);
+        return BoundingBox.createProper(blockPos, blockPos3);
     }
 
     public static void addCommandBlockAndButtonToStartTest(BlockPos blockPos, BlockPos blockPos2, Rotation rotation, ServerLevel serverLevel) {
@@ -90,36 +91,36 @@ public class StructureUtils {
         serverLevel.setBlockAndUpdate(blockPos4, Blocks.STONE_BUTTON.defaultBlockState().rotate(rotation));
     }
 
-    public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, ServerLevel serverLevel) {
-        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, blockPos2, rotation);
+    public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, Vec3i vec3i, Rotation rotation, ServerLevel serverLevel) {
+        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, vec3i, rotation);
         StructureUtils.clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
         serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
         structureBlockEntity.setIgnoreEntities(false);
         structureBlockEntity.setStructureName(new ResourceLocation(string));
-        structureBlockEntity.setStructureSize(blockPos2);
+        structureBlockEntity.setStructureSize(vec3i);
         structureBlockEntity.setMode(StructureMode.SAVE);
         structureBlockEntity.setShowBoundingBox(true);
     }
 
     public static StructureBlockEntity spawnStructure(String string, BlockPos blockPos, Rotation rotation, int i, ServerLevel serverLevel, boolean bl) {
-        BlockPos blockPos3;
-        BlockPos blockPos2 = StructureUtils.getStructureTemplate(string, serverLevel).getSize();
-        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, blockPos2, rotation);
+        BlockPos blockPos2;
+        Vec3i vec3i = StructureUtils.getStructureTemplate(string, serverLevel).getSize();
+        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, vec3i, rotation);
         if (rotation == Rotation.NONE) {
-            blockPos3 = blockPos;
+            blockPos2 = blockPos;
         } else if (rotation == Rotation.CLOCKWISE_90) {
-            blockPos3 = blockPos.offset(blockPos2.getZ() - 1, 0, 0);
+            blockPos2 = blockPos.offset(vec3i.getZ() - 1, 0, 0);
         } else if (rotation == Rotation.CLOCKWISE_180) {
-            blockPos3 = blockPos.offset(blockPos2.getX() - 1, 0, blockPos2.getZ() - 1);
+            blockPos2 = blockPos.offset(vec3i.getX() - 1, 0, vec3i.getZ() - 1);
         } else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
-            blockPos3 = blockPos.offset(0, 0, blockPos2.getX() - 1);
+            blockPos2 = blockPos.offset(0, 0, vec3i.getX() - 1);
         } else {
             throw new IllegalArgumentException("Invalid rotation: " + (Object)((Object)rotation));
         }
         StructureUtils.forceLoadChunks(blockPos, serverLevel);
         StructureUtils.clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
-        StructureBlockEntity structureBlockEntity = StructureUtils.createStructureBlock(string, blockPos3, rotation, serverLevel, bl);
+        StructureBlockEntity structureBlockEntity = StructureUtils.createStructureBlock(string, blockPos2, rotation, serverLevel, bl);
         ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox, true, false);
         serverLevel.clearBlockEvents(boundingBox);
         return structureBlockEntity;
@@ -146,15 +147,13 @@ public class StructureUtils {
         list.forEach(Entity::discard);
     }
 
-    public static BoundingBox getStructureBoundingBox(BlockPos blockPos, BlockPos blockPos2, Rotation rotation) {
-        BlockPos blockPos3 = blockPos.offset(blockPos2).offset(-1, -1, -1);
-        BlockPos blockPos4 = StructureTemplate.transform(blockPos3, Mirror.NONE, rotation, blockPos);
-        BoundingBox boundingBox = BoundingBox.createProper(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos4.getX(), blockPos4.getY(), blockPos4.getZ());
+    public static BoundingBox getStructureBoundingBox(BlockPos blockPos, Vec3i vec3i, Rotation rotation) {
+        BlockPos blockPos2 = blockPos.offset(vec3i).offset(-1, -1, -1);
+        BlockPos blockPos3 = StructureTemplate.transform(blockPos2, Mirror.NONE, rotation, blockPos);
+        BoundingBox boundingBox = BoundingBox.createProper(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos3.getX(), blockPos3.getY(), blockPos3.getZ());
         int i = Math.min(boundingBox.x0, boundingBox.x1);
         int j = Math.min(boundingBox.z0, boundingBox.z1);
-        BlockPos blockPos5 = new BlockPos(blockPos.getX() - i, 0, blockPos.getZ() - j);
-        boundingBox.move(blockPos5);
-        return boundingBox;
+        return boundingBox.move(blockPos.getX() - i, 0, blockPos.getZ() - j);
     }
 
     public static Optional<BlockPos> findStructureBlockContainingPos(BlockPos blockPos, int i, ServerLevel serverLevel) {
@@ -209,12 +208,12 @@ public class StructureUtils {
         structureBlockEntity.setIgnoreEntities(false);
         structureBlockEntity.setStructureName(new ResourceLocation(string));
         structureBlockEntity.loadStructure(serverLevel, bl);
-        if (structureBlockEntity.getStructureSize() != BlockPos.ZERO) {
+        if (structureBlockEntity.getStructureSize() != Vec3i.ZERO) {
             return structureBlockEntity;
         }
         StructureTemplate structureTemplate = StructureUtils.getStructureTemplate(string, serverLevel);
         structureBlockEntity.loadStructure(serverLevel, bl, structureTemplate);
-        if (structureBlockEntity.getStructureSize() == BlockPos.ZERO) {
+        if (structureBlockEntity.getStructureSize() == Vec3i.ZERO) {
             throw new RuntimeException("Failed to load structure " + string);
         }
         return structureBlockEntity;

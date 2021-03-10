@@ -40,7 +40,6 @@ Nameable {
     private final List<NonNullList<ItemStack>> compartments = ImmutableList.of(this.items, this.armor, this.offhand);
     public int selected;
     public final Player player;
-    private ItemStack carried = ItemStack.EMPTY;
     private int timesChanged;
 
     public Inventory(Player player) {
@@ -156,9 +155,10 @@ Nameable {
         boolean bl = i == 0;
         j += ContainerHelper.clearOrCountMatchingItems(this, predicate, i - j, bl);
         j += ContainerHelper.clearOrCountMatchingItems(container, predicate, i - j, bl);
-        j += ContainerHelper.clearOrCountMatchingItems(this.carried, predicate, i - j, bl);
-        if (this.carried.isEmpty()) {
-            this.carried = ItemStack.EMPTY;
+        ItemStack itemStack = this.player.containerMenu.getCarried();
+        j += ContainerHelper.clearOrCountMatchingItems(itemStack, predicate, i - j, bl);
+        if (itemStack.isEmpty()) {
+            this.player.containerMenu.setCarried(ItemStack.EMPTY);
         }
         return j;
     }
@@ -483,14 +483,6 @@ Nameable {
     @Environment(value=EnvType.CLIENT)
     public int getTimesChanged() {
         return this.timesChanged;
-    }
-
-    public void setCarried(ItemStack itemStack) {
-        this.carried = itemStack;
-    }
-
-    public ItemStack getCarried() {
-        return this.carried;
     }
 
     @Override

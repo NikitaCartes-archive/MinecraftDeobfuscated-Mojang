@@ -23,7 +23,6 @@ import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
@@ -143,8 +142,6 @@ extends PacketListener {
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket var1);
 
     public void handleMapItemData(ClientboundMapItemDataPacket var1);
-
-    public void handleContainerAck(ClientboundContainerAckPacket var1);
 
     public void handleContainerClose(ClientboundContainerClosePacket var1);
 

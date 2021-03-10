@@ -6,6 +6,8 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
@@ -16,16 +18,26 @@ extends Feature<SimpleBlockConfiguration> {
         super(codec);
     }
 
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     @Override
     public boolean place(FeaturePlaceContext<SimpleBlockConfiguration> featurePlaceContext) {
-        BlockPos blockPos;
+        BlockState blockState;
         SimpleBlockConfiguration simpleBlockConfiguration = featurePlaceContext.config();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        if (simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState((blockPos = featurePlaceContext.origin()).below())) && simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos)) && simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above()))) {
-            worldGenLevel.setBlock(blockPos, simpleBlockConfiguration.toPlace, 2);
+        BlockPos blockPos = featurePlaceContext.origin();
+        if (!simpleBlockConfiguration.placeOn.isEmpty() && !simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState(blockPos.below())) || !simpleBlockConfiguration.placeIn.isEmpty() && !simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos)) || !simpleBlockConfiguration.placeUnder.isEmpty() && !simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above())) || !(blockState = simpleBlockConfiguration.toPlace.getState(featurePlaceContext.random(), blockPos)).canSurvive(worldGenLevel, blockPos)) return false;
+        if (blockState.getBlock() instanceof DoublePlantBlock) {
+            if (!worldGenLevel.isEmptyBlock(blockPos.above())) return false;
+            DoublePlantBlock doublePlantBlock = (DoublePlantBlock)blockState.getBlock();
+            doublePlantBlock.placeAt(worldGenLevel, blockPos, 2);
             return true;
+        } else {
+            worldGenLevel.setBlock(blockPos, blockState, 2);
         }
-        return false;
+        return true;
     }
 }
 

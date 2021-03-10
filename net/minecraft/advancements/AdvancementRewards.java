@@ -57,7 +57,7 @@ public class AdvancementRewards {
             }
         }
         if (bl) {
-            serverPlayer.inventoryMenu.broadcastChanges();
+            serverPlayer.containerMenu.broadcastChanges();
         }
         if (this.recipes.length > 0) {
             serverPlayer.awardRecipesByKey(this.recipes);

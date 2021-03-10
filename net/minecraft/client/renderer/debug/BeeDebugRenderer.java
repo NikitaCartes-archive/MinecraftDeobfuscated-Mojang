@@ -61,7 +61,6 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
-        RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableTexture();
@@ -70,7 +69,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         this.doRender();
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
-        RenderSystem.popMatrix();
         if (!this.minecraft.player.isSpectator()) {
             this.updateLastLookedAtUuid();
         }

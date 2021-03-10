@@ -166,18 +166,18 @@ extends RealmsScreen {
     }
 
     private void drawFrame(PoseStack poseStack, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-        this.minecraft.getTextureManager().bind(resourceLocation);
+        RenderSystem.setShaderTexture(0, resourceLocation);
         if (bl) {
-            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
         } else {
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
         GuiComponent.blit(poseStack, i + 2, j + 14, 0.0f, 0.0f, 56, 56, 56, 56);
-        this.minecraft.getTextureManager().bind(SLOT_FRAME_LOCATION);
+        RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
         if (bl) {
-            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
         } else {
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
         GuiComponent.blit(poseStack, i, j + 12, 0.0f, 0.0f, 60, 60, 60, 60);
         int k = bl ? 0xA0A0A0 : 0xFFFFFF;

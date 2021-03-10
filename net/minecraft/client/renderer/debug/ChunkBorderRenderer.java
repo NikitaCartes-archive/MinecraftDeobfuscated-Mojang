@@ -30,9 +30,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         int k;
         RenderSystem.enableDepthTest();
-        RenderSystem.shadeModel(7425);
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
         Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -44,7 +41,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         double i = (double)chunkPos.getMinBlockX() - d;
         double j = (double)chunkPos.getMinBlockZ() - f;
         RenderSystem.lineWidth(1.0f);
-        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (k = -16; k <= 32; k += 16) {
             for (int l = -16; l <= 32; l += 16) {
                 bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(1.0f, 0.0f, 0.0f, 0.0f).endVertex();
@@ -85,7 +82,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
         tesselator.end();
         RenderSystem.lineWidth(2.0f);
-        bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (k = 0; k <= 16; k += 16) {
             for (int l = 0; l <= 16; l += 16) {
                 bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(0.25f, 0.25f, 1.0f, 0.0f).endVertex();
@@ -108,7 +105,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         RenderSystem.lineWidth(1.0f);
         RenderSystem.enableBlend();
         RenderSystem.enableTexture();
-        RenderSystem.shadeModel(7424);
     }
 }
 

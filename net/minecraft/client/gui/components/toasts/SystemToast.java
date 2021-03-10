@@ -63,8 +63,8 @@ implements Toast {
             this.lastChanged = l;
             this.changed = false;
         }
-        toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-        RenderSystem.color3f(1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f);
         int i = this.width();
         int j = 12;
         if (i == 160 && this.messageLines.size() <= 1) {

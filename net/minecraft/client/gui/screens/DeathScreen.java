@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -85,10 +84,10 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.fillGradient(poseStack, 0, 0, this.width, this.height, 0x60500000, -1602211792);
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(2.0f, 2.0f, 2.0f);
+        poseStack.pushPose();
+        poseStack.scale(2.0f, 2.0f, 2.0f);
         DeathScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 0xFFFFFF);
-        RenderSystem.popMatrix();
+        poseStack.popPose();
         if (this.causeOfDeath != null) {
             DeathScreen.drawCenteredString(poseStack, this.font, this.causeOfDeath, this.width / 2, 85, 0xFFFFFF);
         }

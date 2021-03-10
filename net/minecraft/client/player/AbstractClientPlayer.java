@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
@@ -88,14 +89,13 @@ extends Player {
         return playerInfo == null ? null : playerInfo.getElytraLocation();
     }
 
-    public static HttpTexture registerSkinTexture(ResourceLocation resourceLocation, String string) {
+    public static void registerSkinTexture(ResourceLocation resourceLocation, String string) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
-        if (abstractTexture == null) {
+        AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
+        if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
             abstractTexture = new HttpTexture(null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
             textureManager.register(resourceLocation, abstractTexture);
         }
-        return (HttpTexture)abstractTexture;
     }
 
     public static ResourceLocation getSkinLocation(String string) {

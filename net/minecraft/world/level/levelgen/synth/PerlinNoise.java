@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.ints.IntBidirectionalIterator;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.List;
+import java.util.function.LongFunction;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.RandomSource;
@@ -58,10 +59,18 @@ implements SurfaceNoise {
     }
 
     private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet) {
-        this(randomSource, PerlinNoise.makeAmplitudes(intSortedSet));
+        this(randomSource, intSortedSet, WorldgenRandom::new);
     }
 
-    private PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
+    private PerlinNoise(RandomSource randomSource, IntSortedSet intSortedSet, LongFunction<RandomSource> longFunction) {
+        this(randomSource, PerlinNoise.makeAmplitudes(intSortedSet), longFunction);
+    }
+
+    protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair) {
+        this(randomSource, pair, WorldgenRandom::new);
+    }
+
+    protected PerlinNoise(RandomSource randomSource, Pair<Integer, DoubleList> pair, LongFunction<RandomSource> longFunction) {
         double d;
         int i = pair.getFirst();
         this.amplitudes = pair.getSecond();
@@ -79,29 +88,20 @@ implements SurfaceNoise {
                     this.noiseLevels[l] = new ImprovedNoise(randomSource);
                     continue;
                 }
-                randomSource.consumeCount(262);
+                PerlinNoise.skipOctave(randomSource);
                 continue;
             }
-            randomSource.consumeCount(262);
+            PerlinNoise.skipOctave(randomSource);
         }
         if (k < j - 1) {
-            long m = (long)(improvedNoise.noise(0.0, 0.0, 0.0) * 9.223372036854776E18);
-            WorldgenRandom randomSource2 = new WorldgenRandom(m);
-            for (int n = k + 1; n < j; ++n) {
-                if (n >= 0) {
-                    double f = this.amplitudes.getDouble(n);
-                    if (f != 0.0) {
-                        this.noiseLevels[n] = new ImprovedNoise(randomSource2);
-                        continue;
-                    }
-                    randomSource2.consumeCount(262);
-                    continue;
-                }
-                randomSource2.consumeCount(262);
-            }
+            throw new IllegalArgumentException("Positive octaves are temporarily disabled");
         }
         this.lowestFreqInputFactor = Math.pow(2.0, -k);
         this.lowestFreqValueFactor = Math.pow(2.0, j - 1) / (Math.pow(2.0, j) - 1.0);
+    }
+
+    private static void skipOctave(RandomSource randomSource) {
+        randomSource.consumeCount(262);
     }
 
     public double getValue(double d, double e, double f) {
@@ -116,7 +116,8 @@ implements SurfaceNoise {
         for (int l = 0; l < this.noiseLevels.length; ++l) {
             ImprovedNoise improvedNoise = this.noiseLevels[l];
             if (improvedNoise != null) {
-                i += this.amplitudes.getDouble(l) * improvedNoise.noise(PerlinNoise.wrap(d * j), bl ? -improvedNoise.yo : PerlinNoise.wrap(e * j), PerlinNoise.wrap(f * j), g * j, h * j) * k;
+                double m = improvedNoise.noise(PerlinNoise.wrap(d * j), bl ? -improvedNoise.yo : PerlinNoise.wrap(e * j), PerlinNoise.wrap(f * j), g * j, h * j);
+                i += this.amplitudes.getDouble(l) * m * k;
             }
             j *= 2.0;
             k /= 2.0;

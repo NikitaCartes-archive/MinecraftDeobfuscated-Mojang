@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.GlowItemFrame;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.Painting;
@@ -45,7 +46,7 @@ extends Item {
         } else if (this.type == EntityType.ITEM_FRAME) {
             hangingEntity = new ItemFrame(level, blockPos2, direction);
         } else if (this.type == EntityType.GLOW_ITEM_FRAME) {
-            hangingEntity = new ItemFrame(EntityType.GLOW_ITEM_FRAME, level, blockPos2, direction);
+            hangingEntity = new GlowItemFrame(level, blockPos2, direction);
         } else {
             return InteractionResult.sidedSuccess(level.isClientSide);
         }

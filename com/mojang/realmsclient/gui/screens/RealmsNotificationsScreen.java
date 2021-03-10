@@ -107,23 +107,23 @@ extends RealmsScreen {
         int o = m + 48 + 2;
         int p = 0;
         if (hasUnreadNews) {
-            this.minecraft.getTextureManager().bind(NEWS_ICON_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.4f, 0.4f, 0.4f);
+            RenderSystem.setShaderTexture(0, NEWS_ICON_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            poseStack.pushPose();
+            poseStack.scale(0.4f, 0.4f, 0.4f);
             GuiComponent.blit(poseStack, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0f, 0.0f, 40, 40, 40, 40);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             p += 14;
         }
         if (k != 0) {
-            this.minecraft.getTextureManager().bind(INVITE_ICON_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderTexture(0, INVITE_ICON_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, n - p, o - 6, 0.0f, 0.0f, 15, 25, 31, 25);
             p += 16;
         }
         if (trialAvailable) {
-            this.minecraft.getTextureManager().bind(TRIAL_ICON_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             int q = 0;
             if ((Util.getMillis() / 800L & 1L) == 1L) {
                 q = 8;

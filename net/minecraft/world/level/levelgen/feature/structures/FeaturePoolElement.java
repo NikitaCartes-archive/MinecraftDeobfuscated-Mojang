@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -56,8 +57,8 @@ extends StructurePoolElement {
         return compoundTag;
     }
 
-    public BlockPos getSize(StructureManager structureManager, Rotation rotation) {
-        return BlockPos.ZERO;
+    public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
+        return Vec3i.ZERO;
     }
 
     @Override
@@ -69,8 +70,8 @@ extends StructurePoolElement {
 
     @Override
     public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-        BlockPos blockPos2 = this.getSize(structureManager, rotation);
-        return new BoundingBox(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + blockPos2.getX(), blockPos.getY() + blockPos2.getY(), blockPos.getZ() + blockPos2.getZ());
+        Vec3i vec3i = this.getSize(structureManager, rotation);
+        return new BoundingBox(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + vec3i.getX(), blockPos.getY() + vec3i.getY(), blockPos.getZ() + vec3i.getZ());
     }
 
     @Override

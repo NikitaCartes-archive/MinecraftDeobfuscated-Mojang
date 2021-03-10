@@ -36,7 +36,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel levelAccessor = this.minecraft.level;
-        RenderSystem.pushMatrix();
         RenderSystem.disableBlend();
         RenderSystem.disableTexture();
         RenderSystem.enableDepthTest();
@@ -64,7 +63,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
         tesselator.end();
         RenderSystem.enableTexture();
-        RenderSystem.popMatrix();
     }
 
     private Vector3f getColor(Heightmap.Types types) {

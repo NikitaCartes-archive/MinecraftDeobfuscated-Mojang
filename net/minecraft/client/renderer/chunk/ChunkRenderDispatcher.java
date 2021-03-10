@@ -64,6 +64,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChunkRenderDispatcher {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final VertexFormat VERTEX_FORMAT = DefaultVertexFormat.BLOCK;
     private final PriorityQueue<RenderChunk.ChunkCompileTask> toBatch = Queues.newPriorityQueue();
     private final Queue<ChunkBufferBuilderPack> freeBuffers;
     private final Queue<Runnable> toUpload = Queues.newConcurrentLinkedQueue();

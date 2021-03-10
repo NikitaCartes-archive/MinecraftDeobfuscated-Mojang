@@ -103,10 +103,13 @@ extends GuiComponent {
             if (this.visibility == Toast.Visibility.SHOW && l - this.animationTime <= 600L) {
                 this.visibleTime = l;
             }
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)i - (float)this.toast.width() * this.getVisibility(l), j * this.toast.height(), 800 + j);
+            PoseStack poseStack2 = RenderSystem.getModelViewStack();
+            poseStack2.pushPose();
+            poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), j * this.toast.height(), 800 + j);
+            RenderSystem.applyModelViewMatrix();
             Toast.Visibility visibility = this.toast.render(poseStack, this.field_2245, l - this.visibleTime);
-            RenderSystem.popMatrix();
+            poseStack2.popPose();
+            RenderSystem.applyModelViewMatrix();
             if (visibility != this.visibility) {
                 this.animationTime = l - (long)((int)((1.0f - this.getVisibility(l)) * 600.0f));
                 this.visibility = visibility;

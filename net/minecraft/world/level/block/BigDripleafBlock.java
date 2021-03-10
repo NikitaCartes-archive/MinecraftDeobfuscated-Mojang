@@ -22,6 +22,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BigDripleafStemBlock;
 import net.minecraft.world.level.block.Block;
@@ -79,29 +80,29 @@ SimpleWaterloggedBlock {
         return LEAF_SHAPES.get(blockState.getValue(TILT));
     }
 
-    protected static void placeWithRandomHeight(Level level, Random random, BlockPos blockPos) {
+    public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
         int j;
         int i = 1 + random.nextInt(5);
         Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        for (j = 0; j < i && BigDripleafBlock.canPlaceAt(level, mutableBlockPos, level.getBlockState(mutableBlockPos)); ++j) {
+        for (j = 0; j < i && BigDripleafBlock.canPlaceAt(levelAccessor, mutableBlockPos, levelAccessor.getBlockState(mutableBlockPos)); ++j) {
             mutableBlockPos.move(Direction.UP);
         }
         int k = blockPos.getY() + j - 1;
         mutableBlockPos.setY(blockPos.getY());
         while (mutableBlockPos.getY() < k) {
-            BigDripleafStemBlock.place(level, mutableBlockPos, level.getFluidState(mutableBlockPos), direction);
+            BigDripleafStemBlock.place(levelAccessor, mutableBlockPos, levelAccessor.getFluidState(mutableBlockPos), direction);
             mutableBlockPos.move(Direction.UP);
         }
-        BigDripleafBlock.place(level, mutableBlockPos, level.getFluidState(mutableBlockPos), direction);
+        BigDripleafBlock.place(levelAccessor, mutableBlockPos, levelAccessor.getFluidState(mutableBlockPos), direction);
     }
 
     private static boolean canReplace(BlockState blockState) {
         return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.SMALL_DRIPLEAF);
     }
 
-    private static boolean canPlaceAt(Level level, BlockPos blockPos, BlockState blockState) {
-        return level.isInWorldBounds(blockPos) && BigDripleafBlock.canReplace(blockState);
+    private static boolean canPlaceAt(LevelHeightAccessor levelHeightAccessor, BlockPos blockPos, BlockState blockState) {
+        return !levelHeightAccessor.isOutsideBuildHeight(blockPos) && BigDripleafBlock.canReplace(blockState);
     }
 
     protected static boolean place(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState, Direction direction) {

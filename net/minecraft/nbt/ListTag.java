@@ -15,7 +15,6 @@ import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.ShortTag;
@@ -147,14 +146,6 @@ extends CollectionTag<Tag> {
             return ((IntTag)tag).getAsInt();
         }
         return 0;
-    }
-
-    public int[] getIntArray(int i) {
-        Tag tag;
-        if (i >= 0 && i < this.list.size() && (tag = this.list.get(i)).getId() == 11) {
-            return ((IntArrayTag)tag).getAsIntArray();
-        }
-        return new int[0];
     }
 
     public double getDouble(int i) {

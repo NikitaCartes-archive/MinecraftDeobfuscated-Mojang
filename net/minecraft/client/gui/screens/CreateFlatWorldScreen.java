@@ -195,16 +195,14 @@ extends Screen {
 
             private void blitSlot(PoseStack poseStack, int i, int j, ItemStack itemStack) {
                 this.blitSlotBg(poseStack, i + 1, j + 1);
-                RenderSystem.enableRescaleNormal();
                 if (!itemStack.isEmpty()) {
                     CreateFlatWorldScreen.this.itemRenderer.renderGuiItem(itemStack, i + 2, j + 2);
                 }
-                RenderSystem.disableRescaleNormal();
             }
 
             private void blitSlotBg(PoseStack poseStack, int i, int j) {
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                DetailsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(poseStack, i, j, CreateFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }
         }
