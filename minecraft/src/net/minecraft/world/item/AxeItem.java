@@ -1,8 +1,10 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
@@ -14,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
@@ -33,7 +36,7 @@ public class AxeItem extends DiggerItem {
 		Blocks.CRIMSON_BUTTON,
 		Blocks.WARPED_BUTTON
 	);
-	protected static final Map<Block, Block> STRIPABLES = new Builder<Block, Block>()
+	protected static final Map<Block, Block> STRIPPABLES = new Builder<Block, Block>()
 		.put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
 		.put(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG)
 		.put(Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD)
@@ -66,21 +69,40 @@ public class AxeItem extends DiggerItem {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
+		Player player = useOnContext.getPlayer();
 		BlockState blockState = level.getBlockState(blockPos);
-		Block block = (Block)STRIPABLES.get(blockState.getBlock());
-		if (block != null) {
-			Player player = useOnContext.getPlayer();
+		Optional<BlockState> optional = this.getStripped(blockState);
+		Optional<BlockState> optional2 = WeatheringCopper.getPrevious(blockState);
+		Optional<BlockState> optional3 = Optional.ofNullable(((BiMap)HoneycombItem.WAX_OFF_BY_BLOCK.get()).get(blockState.getBlock()))
+			.map(block -> block.withPropertiesOf(blockState));
+		Optional<BlockState> optional4 = Optional.empty();
+		if (optional.isPresent()) {
 			level.playSound(player, blockPos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
-			if (!level.isClientSide) {
-				level.setBlock(blockPos, block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, blockState.getValue(RotatedPillarBlock.AXIS)), 11);
-				if (player != null) {
-					useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
-				}
+			optional4 = optional;
+		} else if (optional2.isPresent()) {
+			level.playSound(player, blockPos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.levelEvent(player, 3005, blockPos, 0);
+			optional4 = optional2;
+		} else if (optional3.isPresent()) {
+			level.playSound(player, blockPos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.levelEvent(player, 3004, blockPos, 0);
+			optional4 = optional3;
+		}
+
+		if (optional4.isPresent()) {
+			level.setBlock(blockPos, (BlockState)optional4.get(), 11);
+			if (player != null) {
+				useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
+	}
+
+	private Optional<BlockState> getStripped(BlockState blockState) {
+		return Optional.ofNullable(STRIPPABLES.get(blockState.getBlock()))
+			.map(block -> block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, blockState.getValue(RotatedPillarBlock.AXIS)));
 	}
 }

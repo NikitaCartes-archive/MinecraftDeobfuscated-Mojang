@@ -88,9 +88,8 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		return (VoxelShape)LEAF_SHAPES.get(blockState.getValue(TILT));
 	}
 
-	public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
+	public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos, Direction direction) {
 		int i = 1 + random.nextInt(5);
-		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		int j = 0;
 
@@ -114,7 +113,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.SMALL_DRIPLEAF);
 	}
 
-	private static boolean canPlaceAt(LevelHeightAccessor levelHeightAccessor, BlockPos blockPos, BlockState blockState) {
+	protected static boolean canPlaceAt(LevelHeightAccessor levelHeightAccessor, BlockPos blockPos, BlockState blockState) {
 		return !levelHeightAccessor.isOutsideBuildHeight(blockPos) && canReplace(blockState);
 	}
 

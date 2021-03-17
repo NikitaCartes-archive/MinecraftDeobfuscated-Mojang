@@ -40,7 +40,7 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 
 	public static ClientboundSetPlayerTeamPacket createPlayerPacket(PlayerTeam playerTeam, String string, ClientboundSetPlayerTeamPacket.Action action) {
 		return new ClientboundSetPlayerTeamPacket(
-			playerTeam.getName(), action == ClientboundSetPlayerTeamPacket.Action.ADD ? 3 : 1, Optional.empty(), ImmutableList.<String>of(string)
+			playerTeam.getName(), action == ClientboundSetPlayerTeamPacket.Action.ADD ? 3 : 4, Optional.empty(), ImmutableList.<String>of(string)
 		);
 	}
 

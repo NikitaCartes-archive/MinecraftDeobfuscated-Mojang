@@ -173,7 +173,11 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.FALLING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaFallProvider::new);
 		this.register(ParticleTypes.VIBRATION, VibrationSignalParticle.Provider::new);
 		this.register(ParticleTypes.GLOW_SQUID_INK, SquidInkParticle.GlowInkProvider::new);
-		this.register(ParticleTypes.GLOW, GlowParticle.Provider::new);
+		this.register(ParticleTypes.GLOW, GlowParticle.GlowSquidProvider::new);
+		this.register(ParticleTypes.WAX_ON, GlowParticle.WaxOnProvider::new);
+		this.register(ParticleTypes.WAX_OFF, GlowParticle.WaxOffProvider::new);
+		this.register(ParticleTypes.ELECTRIC_SPARK, GlowParticle.ElectricSparkProvider::new);
+		this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

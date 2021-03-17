@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.net.Proxy;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -48,6 +49,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -104,6 +106,10 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.profiling.ActiveClientMetricsLogger;
+import net.minecraft.client.profiling.ClientMetricsLogger;
+import net.minecraft.client.profiling.InactiveClientMetricsLogger;
+import net.minecraft.client.profiling.storage.MetricsPersister;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -331,7 +337,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	public Screen screen;
 	@Nullable
-	public Overlay overlay;
+	private Overlay overlay;
 	private boolean connectedToRealms;
 	private Thread gameThread;
 	private volatile boolean running = true;
@@ -353,6 +359,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final ContinuousProfiler fpsPieProfiler = new ContinuousProfiler(Util.timeSource, () -> this.fpsPieRenderTicks);
 	@Nullable
 	private ProfileResults fpsPieResults;
+	private ClientMetricsLogger clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
 	private String debugPath = "root";
 
 	public Minecraft(GameConfig gameConfig) {
@@ -607,9 +614,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				try {
 					SingleTickProfiler singleTickProfiler = SingleTickProfiler.createTickProfiler("Renderer");
 					boolean bl2 = this.shouldRenderFpsPie();
-					this.startProfilers(bl2, singleTickProfiler);
+					this.profiler = this.constructProfiler(bl2, singleTickProfiler);
 					this.profiler.startTick();
+					this.clientMetricsLogger.startTick();
 					this.runTick(!bl);
+					this.clientMetricsLogger.endTick();
 					this.profiler.endTick();
 					this.finishProfilers(bl2, singleTickProfiler);
 				} catch (OutOfMemoryError var4) {
@@ -953,10 +962,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		poseStack.pushPose();
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.clear(16640, ON_OSX);
-		this.mainRenderTarget.clearChannels[0] = 0.1F;
-		this.mainRenderTarget.clearChannels[1] = 0.2F;
-		this.mainRenderTarget.clearChannels[2] = 0.3F;
-		this.mainRenderTarget.clear(ON_OSX);
 		this.mainRenderTarget.bindWrite(true);
 		FogRenderer.setupNoFog();
 		this.profiler.push("display");
@@ -1041,19 +1046,27 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.options.renderDebug && this.options.renderDebugCharts && !this.options.hideGui;
 	}
 
-	private void startProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
-		if (bl) {
+	private ProfilerFiller constructProfiler(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
+		if (!bl && !this.clientMetricsLogger.isRecording()) {
+			return (ProfilerFiller)(singleTickProfiler == null ? InactiveProfiler.INSTANCE : singleTickProfiler.startTick());
+		} else if (bl) {
 			if (!this.fpsPieProfiler.isEnabled()) {
 				this.fpsPieRenderTicks = 0;
 				this.fpsPieProfiler.enable();
 			}
 
 			this.fpsPieRenderTicks++;
+			ProfilerFiller profilerFiller = this.clientMetricsLogger.isRecording()
+				? ProfilerFiller.tee(this.fpsPieProfiler.getFiller(), this.clientMetricsLogger.getProfiler())
+				: this.fpsPieProfiler.getFiller();
+			return SingleTickProfiler.decorateFiller(profilerFiller, singleTickProfiler);
 		} else {
-			this.fpsPieProfiler.disable();
-		}
+			if (this.fpsPieProfiler.isEnabled()) {
+				this.fpsPieProfiler.disable();
+			}
 
-		this.profiler = SingleTickProfiler.decorateFiller(this.fpsPieProfiler.getFiller(), singleTickProfiler);
+			return SingleTickProfiler.decorateFiller(this.clientMetricsLogger.getProfiler(), singleTickProfiler);
+		}
 	}
 
 	private void finishProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
@@ -1113,6 +1126,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		System.gc();
 	}
 
+	void debugClientMetricsKeyPressed(Runnable runnable, Consumer<Path> consumer) {
+		if (this.clientMetricsLogger.isRecording()) {
+			this.clientMetricsLogger.end();
+		} else {
+			Runnable runnable2 = () -> this.clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
+			this.clientMetricsLogger = ActiveClientMetricsLogger.createStarted(Util.timeSource, Util.ioPool(), new MetricsPersister(), runnable2, consumer);
+			runnable.run();
+		}
+	}
+
 	void debugFpsMeterKeyPress(int i) {
 		if (this.fpsPieResults != null) {
 			List<ResultField> list = this.fpsPieResults.getTimes(this.debugPath);
@@ -1143,6 +1166,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		List<ResultField> list = profileResults.getTimes(this.debugPath);
 		ResultField resultField = (ResultField)list.remove(0);
 		RenderSystem.clear(256, ON_OSX);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float)this.window.getWidth(), 0.0F, (float)this.window.getHeight(), 1000.0F, 3000.0F);
 		RenderSystem.setProjectionMatrix(matrix4f);
 		PoseStack poseStack2 = RenderSystem.getModelViewStack();

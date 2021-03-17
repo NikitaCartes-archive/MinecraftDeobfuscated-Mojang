@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -306,12 +307,12 @@ public class EndCityPieces {
 			this.loadTemplate(structureManager);
 		}
 
-		public EndCityPiece(StructureManager structureManager, CompoundTag compoundTag) {
+		public EndCityPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.END_CITY_PIECE, compoundTag);
 			this.templateName = compoundTag.getString("Template");
 			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
 			this.overwrite = compoundTag.getBoolean("OW");
-			this.loadTemplate(structureManager);
+			this.loadTemplate(serverLevel.getStructureManager());
 		}
 
 		private void loadTemplate(StructureManager structureManager) {
@@ -321,8 +322,8 @@ public class EndCityPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putString("Template", this.templateName);
 			compoundTag.putString("Rot", this.rotation.name());
 			compoundTag.putBoolean("OW", this.overwrite);

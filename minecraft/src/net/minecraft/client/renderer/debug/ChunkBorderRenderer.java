@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -24,6 +25,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		RenderSystem.enableDepthTest();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();

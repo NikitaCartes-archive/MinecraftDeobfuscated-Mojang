@@ -1,5 +1,6 @@
 package net.minecraft.data.recipes;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -33,6 +34,7 @@ import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -709,73 +711,19 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4)
 			.requires(Blocks.COPPER_BLOCK)
-			.group("copper_ingot")
-			.unlockedBy("has_copper_block", has(Blocks.COPPER_BLOCK))
-			.save(consumer, "copper_ingot_from_copper_block");
+			.group(getBlockName(Items.COPPER_INGOT))
+			.unlockedBy(getHasName(Blocks.COPPER_BLOCK), has(Blocks.COPPER_BLOCK))
+			.save(consumer, getFromName(Items.COPPER_INGOT, Blocks.COPPER_BLOCK));
+		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4)
+			.requires(Blocks.WAXED_COPPER_BLOCK)
+			.group(getBlockName(Items.COPPER_INGOT))
+			.unlockedBy(getHasName(Blocks.WAXED_COPPER_BLOCK), has(Blocks.WAXED_COPPER_BLOCK))
+			.save(consumer, getFromName(Items.COPPER_INGOT, Blocks.WAXED_COPPER_BLOCK));
 		cut(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
 		cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
 		cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
 		cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_COPPER)
-			.requires(Items.COPPER_BLOCK)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_copper_block", has(Items.COPPER_BLOCK))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_COPPER)
-			.requires(Items.WEATHERED_COPPER_BLOCK)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_weathered_copper_block", has(Items.WEATHERED_COPPER_BLOCK))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_COPPER)
-			.requires(Items.EXPOSED_COPPER_BLOCK)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_exposed_copper_block", has(Items.EXPOSED_COPPER_BLOCK))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER)
-			.requires(Items.CUT_COPPER)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_cut_copper", has(Items.CUT_COPPER))
-			.save(consumer, "waxed_cut_copper_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER)
-			.requires(Items.WEATHERED_CUT_COPPER)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_weathered_cut_copper", has(Items.WEATHERED_CUT_COPPER))
-			.save(consumer, "waxed_weathered_cut_copper_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER)
-			.requires(Items.EXPOSED_CUT_COPPER)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_exposed_cut_copper", has(Items.EXPOSED_CUT_COPPER))
-			.save(consumer, "waxed_exposed_cut_copper_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_STAIRS)
-			.requires(Items.CUT_COPPER_STAIRS)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_copper_cut_stairs", has(Items.CUT_COPPER_STAIRS))
-			.save(consumer, "waxed_copper_cut_stairs_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS)
-			.requires(Items.WEATHERED_CUT_COPPER_STAIRS)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_weathered_cut_copper_stairs", has(Items.WEATHERED_CUT_COPPER_STAIRS))
-			.save(consumer, "waxed_weathered_cut_copper_stairs_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS)
-			.requires(Items.EXPOSED_CUT_COPPER_STAIRS)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_exposed_cut_copper_stairs", has(Items.EXPOSED_CUT_COPPER_STAIRS))
-			.save(consumer, "waxed_exposed_cut_copper_stairs_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_SLAB)
-			.requires(Items.CUT_COPPER_SLAB)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_copper_cut_slab", has(Items.CUT_COPPER_SLAB))
-			.save(consumer, "waxed_copper_cut_slab_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_SLAB)
-			.requires(Items.WEATHERED_CUT_COPPER_SLAB)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_weathered_cut_copper_slab", has(Items.WEATHERED_CUT_COPPER_SLAB))
-			.save(consumer, "waxed_weathered_cut_copper_slab_from_honeycomb");
-		ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_SLAB)
-			.requires(Items.EXPOSED_CUT_COPPER_SLAB)
-			.requires(Items.HONEYCOMB)
-			.unlockedBy("has_exposed_cut_copper_slab", has(Items.EXPOSED_CUT_COPPER_SLAB))
-			.save(consumer, "waxed_exposed_cut_copper_slab_from_honeycomb");
+		waxRecipes(consumer);
 		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
 		cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
 		cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
@@ -1536,12 +1484,22 @@ public class RecipeProvider implements DataProvider {
 			.requires(Blocks.COBBLESTONE)
 			.requires(Blocks.VINE)
 			.unlockedBy("has_vine", has(Blocks.VINE))
-			.save(consumer);
+			.save(consumer, getFromName(Blocks.MOSSY_COBBLESTONE, Blocks.VINE));
 		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS)
 			.requires(Blocks.STONE_BRICKS)
 			.requires(Blocks.VINE)
 			.unlockedBy("has_mossy_cobblestone", has(Blocks.MOSSY_COBBLESTONE))
-			.save(consumer);
+			.save(consumer, getFromName(Blocks.MOSSY_STONE_BRICKS, Blocks.VINE));
+		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE)
+			.requires(Blocks.COBBLESTONE)
+			.requires(Blocks.MOSS_BLOCK)
+			.unlockedBy("has_moss_block", has(Blocks.MOSS_BLOCK))
+			.save(consumer, getFromName(Blocks.MOSSY_COBBLESTONE, Blocks.MOSS_BLOCK));
+		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS)
+			.requires(Blocks.STONE_BRICKS)
+			.requires(Blocks.MOSS_BLOCK)
+			.unlockedBy("has_mossy_cobblestone", has(Blocks.MOSSY_COBBLESTONE))
+			.save(consumer, getFromName(Blocks.MOSSY_STONE_BRICKS, Blocks.MOSS_BLOCK));
 		ShapelessRecipeBuilder.shapeless(Items.MUSHROOM_STEW)
 			.requires(Blocks.BROWN_MUSHROOM)
 			.requires(Blocks.RED_MUSHROOM)
@@ -3329,6 +3287,17 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.cooking(Ingredient.of(Items.RABBIT), Items.COOKED_RABBIT, 0.35F, i, simpleCookingSerializer)
 			.unlockedBy("has_rabbit", has(Items.RABBIT))
 			.save(consumer, "cooked_rabbit_from_" + string);
+	}
+
+	private static void waxRecipes(Consumer<FinishedRecipe> consumer) {
+		((BiMap)HoneycombItem.WAXABLES.get())
+			.forEach(
+				(block, block2) -> ShapelessRecipeBuilder.shapeless(block2)
+						.requires(block)
+						.requires(Items.HONEYCOMB)
+						.unlockedBy(getHasName(block), has(block))
+						.save(consumer, getFromName(block2, Items.HONEYCOMB))
+			);
 	}
 
 	private static void generateRecipes(Consumer<FinishedRecipe> consumer, BlockFamily blockFamily) {

@@ -19,6 +19,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPickItemPacket;
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -303,12 +304,12 @@ public class MultiPlayerGameMode {
 			return InteractionResult.PASS;
 		} else {
 			this.ensureHasSentCarriedItem();
+			this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, player.isOnGround()));
 			this.connection.send(new ServerboundUseItemPacket(interactionHand));
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				return InteractionResult.PASS;
 			} else {
-				int i = itemStack.getCount();
 				InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
 				ItemStack itemStack2 = interactionResultHolder.getObject();
 				if (itemStack2 != itemStack) {

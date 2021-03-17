@@ -140,6 +140,18 @@ public class ChunkRenderDispatcher {
 		return String.format("pC: %03d, pU: %02d, aB: %02d", this.toBatchCount, this.toUpload.size(), this.freeBufferCount);
 	}
 
+	public int getToBatchCount() {
+		return this.toBatchCount;
+	}
+
+	public int getToUpload() {
+		return this.toUpload.size();
+	}
+
+	public int getFreeBufferCount() {
+		return this.freeBufferCount;
+	}
+
 	public void setCamera(Vec3 vec3) {
 		this.camera = vec3;
 	}
@@ -245,6 +257,7 @@ public class ChunkRenderDispatcher {
 
 	@Environment(EnvType.CLIENT)
 	public class RenderChunk {
+		public final int index;
 		public final AtomicReference<ChunkRenderDispatcher.CompiledChunk> compiled = new AtomicReference(ChunkRenderDispatcher.CompiledChunk.UNCOMPILED);
 		@Nullable
 		private ChunkRenderDispatcher.RenderChunk.RebuildTask lastRebuildTask;
@@ -259,11 +272,15 @@ public class ChunkRenderDispatcher {
 		private boolean dirty = true;
 		private final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
 		private final BlockPos.MutableBlockPos[] relativeOrigins = Util.make(new BlockPos.MutableBlockPos[6], mutableBlockPoss -> {
-			for (int i = 0; i < mutableBlockPoss.length; i++) {
-				mutableBlockPoss[i] = new BlockPos.MutableBlockPos();
+			for (int ix = 0; ix < mutableBlockPoss.length; ix++) {
+				mutableBlockPoss[ix] = new BlockPos.MutableBlockPos();
 			}
 		});
 		private boolean playerChanged;
+
+		public RenderChunk(int i) {
+			this.index = i;
+		}
 
 		private boolean doesChunkExistAt(BlockPos blockPos) {
 			return ChunkRenderDispatcher.this.level

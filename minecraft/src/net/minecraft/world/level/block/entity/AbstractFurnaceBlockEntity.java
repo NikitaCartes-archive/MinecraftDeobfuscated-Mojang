@@ -161,6 +161,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Blocks.FLETCHING_TABLE, 300);
 		add(map, Blocks.SMITHING_TABLE, 300);
 		add(map, Blocks.COMPOSTER, 300);
+		add(map, Blocks.AZALEA, 100);
+		add(map, Blocks.FLOWERING_AZALEA, 100);
 		return map;
 	}
 

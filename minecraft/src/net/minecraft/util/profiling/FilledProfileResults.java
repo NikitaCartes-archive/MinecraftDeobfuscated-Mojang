@@ -5,11 +5,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -161,17 +160,17 @@ public class FilledProfileResults implements ProfileResults {
 	}
 
 	@Override
-	public boolean saveResults(File file) {
-		file.getParentFile().mkdirs();
+	public boolean saveResults(Path path) {
 		Writer writer = null;
 
 		boolean var4;
 		try {
-			writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
+			Files.createDirectories(path.getParent());
+			writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
 			writer.write(this.getProfilerResults(this.getNanoDuration(), this.getTickDuration()));
 			return true;
 		} catch (Throwable var8) {
-			LOGGER.error("Could not save profiler results to {}", file, var8);
+			LOGGER.error("Could not save profiler results to {}", path, var8);
 			var4 = false;
 		} finally {
 			IOUtils.closeQuietly(writer);

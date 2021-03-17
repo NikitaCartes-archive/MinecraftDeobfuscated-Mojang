@@ -82,7 +82,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVinesBlock;
+import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -889,7 +889,7 @@ public class Fox extends Animal {
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
 			BlockState blockState = levelReader.getBlockState(blockPos);
-			return blockState.is(Blocks.SWEET_BERRY_BUSH) && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2 || CaveVinesBlock.hasGlowBerries(blockState);
+			return blockState.is(Blocks.SWEET_BERRY_BUSH) && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2 || CaveVines.hasGlowBerries(blockState);
 		}
 
 		@Override
@@ -912,14 +912,14 @@ public class Fox extends Animal {
 				BlockState blockState = Fox.this.level.getBlockState(this.blockPos);
 				if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 					this.pickSweetBerries(blockState);
-				} else if (CaveVinesBlock.hasGlowBerries(blockState)) {
+				} else if (CaveVines.hasGlowBerries(blockState)) {
 					this.pickGlowBerry(blockState);
 				}
 			}
 		}
 
 		private void pickGlowBerry(BlockState blockState) {
-			CaveVinesBlock.use(blockState, Fox.this.level, this.blockPos);
+			CaveVines.use(blockState, Fox.this.level, this.blockPos);
 		}
 
 		private void pickSweetBerries(BlockState blockState) {

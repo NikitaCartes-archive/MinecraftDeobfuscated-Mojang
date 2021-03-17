@@ -27,7 +27,7 @@ public class AdvancementToast implements Toast {
 	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, TEXTURE);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		DisplayInfo displayInfo = this.advancement.getDisplay();
 		toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {

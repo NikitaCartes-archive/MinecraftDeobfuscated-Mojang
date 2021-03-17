@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -36,7 +37,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag compoundTag) {
+	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 		compoundTag.putInt("Width", this.width);
 		compoundTag.putInt("Height", this.height);
 		compoundTag.putInt("Depth", this.depth);

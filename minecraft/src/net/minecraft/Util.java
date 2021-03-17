@@ -2,10 +2,12 @@ package net.minecraft;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash.Strategy;
 import java.io.File;
@@ -40,8 +42,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
@@ -580,6 +584,36 @@ public class Util {
 			.chars()
 			.mapToObj(i -> charPredicate.test((char)i) ? Character.toString((char)i) : "_")
 			.collect(Collectors.joining());
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static <T, R> Function<T, R> memoize(Function<T, R> function) {
+		return new Function<T, R>() {
+			private final Map<T, R> cache = Maps.<T, R>newHashMap();
+
+			public R apply(T object) {
+				return (R)this.cache.computeIfAbsent(object, function);
+			}
+
+			public String toString() {
+				return "memoize/1[function=" + function + ", size=" + this.cache.size() + "]";
+			}
+		};
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static <T, U, R> BiFunction<T, U, R> memoize(BiFunction<T, U, R> biFunction) {
+		return new BiFunction<T, U, R>() {
+			private final Map<Pair<T, U>, R> cache = Maps.<Pair<T, U>, R>newHashMap();
+
+			public R apply(T object, U object2) {
+				return (R)this.cache.computeIfAbsent(Pair.of(object, object2), pair -> biFunction.apply(pair.getFirst(), pair.getSecond()));
+			}
+
+			public String toString() {
+				return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
+			}
+		};
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

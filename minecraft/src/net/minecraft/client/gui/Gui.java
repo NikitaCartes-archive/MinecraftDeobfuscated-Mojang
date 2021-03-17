@@ -483,6 +483,7 @@ public class Gui extends GuiComponent {
 			}
 
 			list.forEach(Runnable::run);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 	}
 
@@ -948,6 +949,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, resourceLocation);
 		Tesselator tesselator = Tesselator.getInstance();
@@ -967,6 +969,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, SPYGLASS_SCOPE_LOCATION);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -1034,9 +1037,12 @@ public class Gui extends GuiComponent {
 			GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
 		if (f > 0.0F) {
+			f = Mth.clamp(f, 0.0F, 1.0F);
 			RenderSystem.setShaderColor(0.0F, f, f, 1.0F);
 		} else {
-			RenderSystem.setShaderColor(this.vignetteBrightness, this.vignetteBrightness, this.vignetteBrightness, 1.0F);
+			float g = this.vignetteBrightness;
+			g = Mth.clamp(g, 0.0F, 1.0F);
+			RenderSystem.setShaderColor(g, g, g, 1.0F);
 		}
 
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -1067,6 +1073,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
 		float g = textureAtlasSprite.getU0();
 		float h = textureAtlasSprite.getV0();

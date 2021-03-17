@@ -80,6 +80,12 @@ public abstract class Particle {
 		return this;
 	}
 
+	public void setParticleSpeed(double d, double e, double f) {
+		this.xd = d;
+		this.yd = e;
+		this.zd = f;
+	}
+
 	public Particle scale(float f) {
 		this.setSize(0.2F * f, 0.2F * f);
 		return this;

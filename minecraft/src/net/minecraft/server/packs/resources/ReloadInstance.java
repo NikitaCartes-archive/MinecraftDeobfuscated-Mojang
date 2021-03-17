@@ -12,9 +12,6 @@ public interface ReloadInstance {
 	float getActualProgress();
 
 	@Environment(EnvType.CLIENT)
-	boolean isApplying();
-
-	@Environment(EnvType.CLIENT)
 	boolean isDone();
 
 	@Environment(EnvType.CLIENT)

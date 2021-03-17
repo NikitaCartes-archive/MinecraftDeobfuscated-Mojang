@@ -326,7 +326,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 			String string2 = uniform.getName();
 			int k = Uniform.glGetUniformLocation(this.programId, string2);
 			if (k == -1) {
-				LOGGER.warn("Could not find uniform named {} in the specified shader program.", string2);
+				LOGGER.warn("Shader {} could not find uniform named {} in the specified shader program.", this.name, string2);
 			} else {
 				this.uniformLocations.add(k);
 				uniform.setLocation(k);

@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -216,14 +217,14 @@ public class OceanRuinPieces {
 			this.loadTemplate(structureManager);
 		}
 
-		public OceanRuinPiece(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanRuinPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_RUIN, compoundTag);
 			this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
 			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
 			this.integrity = compoundTag.getFloat("Integrity");
 			this.biomeType = OceanRuinFeature.Type.valueOf(compoundTag.getString("BiomeType"));
 			this.isLarge = compoundTag.getBoolean("IsLarge");
-			this.loadTemplate(structureManager);
+			this.loadTemplate(serverLevel.getStructureManager());
 		}
 
 		private void loadTemplate(StructureManager structureManager) {
@@ -236,8 +237,8 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putString("Template", this.templateLocation.toString());
 			compoundTag.putString("Rot", this.rotation.name());
 			compoundTag.putFloat("Integrity", this.integrity);

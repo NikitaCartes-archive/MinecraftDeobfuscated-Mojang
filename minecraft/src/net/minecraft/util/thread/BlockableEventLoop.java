@@ -1,6 +1,8 @@
 package net.minecraft.util.thread;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -9,10 +11,15 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.profiling.registry.MeasuredMetric;
+import net.minecraft.util.profiling.registry.MeasurementCategory;
+import net.minecraft.util.profiling.registry.MeasurementRegistry;
+import net.minecraft.util.profiling.registry.Metric;
+import net.minecraft.util.profiling.registry.ProfilerMeasured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class BlockableEventLoop<R extends Runnable> implements ProcessorHandle<R>, Executor {
+public abstract class BlockableEventLoop<R extends Runnable> implements ProfilerMeasured, ProcessorHandle<R>, Executor {
 	private final String name;
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Queue<R> pendingRunnables = Queues.<R>newConcurrentLinkedQueue();
@@ -20,6 +27,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Processo
 
 	protected BlockableEventLoop(String string) {
 		this.name = string;
+		MeasurementRegistry.INSTANCE.add(this);
 	}
 
 	protected abstract R wrapRunnable(Runnable runnable);
@@ -134,5 +142,11 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Processo
 		} catch (Exception var3) {
 			LOGGER.fatal("Error executing task on {}", this.name(), var3);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public List<MeasuredMetric> metrics() {
+		return ImmutableList.of(new MeasuredMetric(new Metric(this.name + "-tasks-pending"), this::getPendingTasksCount, MeasurementCategory.EVENT_LOOP));
 	}
 }

@@ -51,7 +51,7 @@ public class LoadingOverlay extends Overlay {
 		int k = this.minecraft.getWindow().getGuiScaledWidth();
 		int l = this.minecraft.getWindow().getGuiScaledHeight();
 		long m = Util.getMillis();
-		if (this.fadeIn && (this.reload.isApplying() || this.minecraft.screen != null) && this.fadeInStart == -1L) {
+		if (this.fadeIn && this.fadeInStart == -1L) {
 			this.fadeInStart = m;
 		}
 

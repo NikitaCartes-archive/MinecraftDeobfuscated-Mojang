@@ -702,8 +702,6 @@ public abstract class AbstractMinecart extends Entity {
 						e *= g;
 						d *= 0.1F;
 						e *= 0.1F;
-						d *= (double)(1.0F - this.pushthrough);
-						e *= (double)(1.0F - this.pushthrough);
 						d *= 0.5;
 						e *= 0.5;
 						if (entity instanceof AbstractMinecart) {

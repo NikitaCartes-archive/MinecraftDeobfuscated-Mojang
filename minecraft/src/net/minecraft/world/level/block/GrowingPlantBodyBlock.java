@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -54,7 +55,7 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
 
 	@Override
 	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-		Optional<BlockPos> optional = this.getHeadPos(blockGetter, blockPos, blockState);
+		Optional<BlockPos> optional = this.getHeadPos(blockGetter, blockPos, blockState.getBlock());
 		return optional.isPresent() && this.getHeadBlock().canGrowInto(blockGetter.getBlockState(((BlockPos)optional.get()).relative(this.growthDirection)));
 	}
 
@@ -65,23 +66,15 @@ public abstract class GrowingPlantBodyBlock extends GrowingPlantBlock implements
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-		Optional<BlockPos> optional = this.getHeadPos(serverLevel, blockPos, blockState);
+		Optional<BlockPos> optional = this.getHeadPos(serverLevel, blockPos, blockState.getBlock());
 		if (optional.isPresent()) {
 			BlockState blockState2 = serverLevel.getBlockState((BlockPos)optional.get());
 			((GrowingPlantHeadBlock)blockState2.getBlock()).performBonemeal(serverLevel, random, (BlockPos)optional.get(), blockState2);
 		}
 	}
 
-	private Optional<BlockPos> getHeadPos(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		BlockPos blockPos2 = blockPos;
-
-		BlockState blockState2;
-		do {
-			blockPos2 = blockPos2.relative(this.growthDirection);
-			blockState2 = blockGetter.getBlockState(blockPos2);
-		} while (blockState2.is(blockState.getBlock()));
-
-		return blockState2.is(this.getHeadBlock()) ? Optional.of(blockPos2) : Optional.empty();
+	private Optional<BlockPos> getHeadPos(BlockGetter blockGetter, BlockPos blockPos, Block block) {
+		return BlockUtil.getTopConnectedBlock(blockGetter, blockPos, block, this.growthDirection, this.getHeadBlock());
 	}
 
 	@Override

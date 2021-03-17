@@ -458,7 +458,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			if (this.isRainingAt(blockPos)) {
 				DifficultyInstance difficultyInstance = this.getCurrentDifficultyAt(blockPos);
 				boolean bl2 = this.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)
-					&& this.random.nextDouble() < (double)difficultyInstance.getEffectiveDifficulty() * 0.01;
+					&& this.random.nextDouble() < (double)difficultyInstance.getEffectiveDifficulty() * 0.01
+					&& !this.getBlockState(blockPos.below()).is(Blocks.LIGHTNING_ROD);
 				if (bl2) {
 					SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this);
 					skeletonHorse.setTrap(true);
@@ -527,21 +528,15 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	private Optional<BlockPos> findLightningRod(BlockPos blockPos) {
-		Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos, 128, PoiManager.Occupancy.ANY);
-		if (optional.isPresent()) {
-			BlockPos blockPos2 = (BlockPos)optional.get();
-			int i = this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX(), blockPos2.getZ()) - 1;
-			if (blockPos2.getY() == i) {
-				return Optional.of(blockPos2.above(1));
-			}
-
-			BlockPos blockPos3 = new BlockPos(blockPos2.getX(), i, blockPos2.getZ());
-			if (this.getLevel().getBlockState(blockPos3).is(Blocks.LIGHTNING_ROD)) {
-				return Optional.of(blockPos3.above(1));
-			}
-		}
-
-		return Optional.empty();
+		Optional<BlockPos> optional = this.getPoiManager()
+			.findClosest(
+				poiType -> poiType == PoiType.LIGHTNING_ROD,
+				blockPosx -> blockPosx.getY() == this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPosx.getX(), blockPosx.getZ()) - 1,
+				blockPos,
+				128,
+				PoiManager.Occupancy.ANY
+			);
+		return optional.map(blockPosx -> blockPosx.above(1));
 	}
 
 	protected BlockPos findLightningTargetAround(BlockPos blockPos) {

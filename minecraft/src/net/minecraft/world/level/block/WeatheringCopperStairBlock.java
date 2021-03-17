@@ -8,18 +8,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class WeatheringCopperStairBlock extends StairBlock implements WeatheringCopper {
 	private final WeatheringCopper.WeatherState weatherState;
-	private final Block changeTo;
 
-	public WeatheringCopperStairBlock(BlockState blockState, BlockBehaviour.Properties properties) {
-		super(blockState, properties);
-		this.weatherState = WeatheringCopper.WeatherState.values()[WeatheringCopper.WeatherState.values().length - 1];
-		this.changeTo = this;
-	}
-
-	public WeatheringCopperStairBlock(BlockState blockState, BlockBehaviour.Properties properties, WeatheringCopper.WeatherState weatherState, Block block) {
+	public WeatheringCopperStairBlock(WeatheringCopper.WeatherState weatherState, BlockState blockState, BlockBehaviour.Properties properties) {
 		super(blockState, properties);
 		this.weatherState = weatherState;
-		this.changeTo = block;
 	}
 
 	@Override
@@ -29,20 +21,10 @@ public class WeatheringCopperStairBlock extends StairBlock implements Weathering
 
 	@Override
 	public boolean isRandomlyTicking(BlockState blockState) {
-		return this.changeTo != this;
+		return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
 	}
 
 	public WeatheringCopper.WeatherState getAge() {
 		return this.weatherState;
-	}
-
-	@Override
-	public BlockState getChangeTo(BlockState blockState) {
-		return this.changeTo
-			.defaultBlockState()
-			.setValue(FACING, blockState.getValue(FACING))
-			.setValue(HALF, blockState.getValue(HALF))
-			.setValue(SHAPE, blockState.getValue(SHAPE))
-			.setValue(WATERLOGGED, blockState.getValue(WATERLOGGED));
 	}
 }

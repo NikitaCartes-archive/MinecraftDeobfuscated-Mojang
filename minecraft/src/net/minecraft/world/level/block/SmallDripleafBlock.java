@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -25,11 +26,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SmallDripleafBlock extends DoublePlantBlock implements BonemealableBlock, SimpleWaterloggedBlock {
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 13.0, 14.0);
 
 	public SmallDripleafBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(WATERLOGGED, Boolean.valueOf(false)));
+		this.registerDefaultState(
+			this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, Direction.NORTH)
+		);
 	}
 
 	@Override
@@ -48,7 +52,8 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 		BlockState blockState = super.getStateForPlacement(blockPlaceContext);
 		if (blockState != null) {
 			FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-			return blockState.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER));
+			return blockState.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER))
+				.setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
 		} else {
 			return null;
 		}
@@ -56,9 +61,13 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
+		Direction direction = blockState.getValue(FACING);
 		level.setBlock(
 			blockPos.above(),
-			this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER).setValue(WATERLOGGED, Boolean.valueOf(level.isWaterAt(blockPos.above()))),
+			this.defaultBlockState()
+				.setValue(HALF, DoubleBlockHalf.UPPER)
+				.setValue(WATERLOGGED, Boolean.valueOf(level.isWaterAt(blockPos.above())))
+				.setValue(FACING, direction),
 			3
 		);
 	}
@@ -93,7 +102,7 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(HALF, WATERLOGGED);
+		builder.add(HALF, WATERLOGGED, FACING);
 	}
 
 	@Override
@@ -109,10 +118,20 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		if (blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER) {
-			BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos);
+			BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos, blockState.getValue(FACING));
 		} else {
 			BlockPos blockPos2 = blockPos.below();
 			this.performBonemeal(serverLevel, random, blockPos2, serverLevel.getBlockState(blockPos2));
 		}
+	}
+
+	@Override
+	public BlockState rotate(BlockState blockState, Rotation rotation) {
+		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState blockState, Mirror mirror) {
+		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 }

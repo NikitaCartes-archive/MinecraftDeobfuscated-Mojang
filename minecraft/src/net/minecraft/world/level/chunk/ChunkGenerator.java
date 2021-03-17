@@ -217,7 +217,7 @@ public abstract class ChunkGenerator {
 		return this.settings;
 	}
 
-	public int getSpawnHeight() {
+	public int getSpawnHeight(LevelHeightAccessor levelHeightAccessor) {
 		return 64;
 	}
 

@@ -72,7 +72,7 @@ public class AreaEffectCloud extends Entity {
 
 	public void setRadius(float f) {
 		if (!this.level.isClientSide) {
-			this.getEntityData().set(DATA_RADIUS, f);
+			this.getEntityData().set(DATA_RADIUS, Mth.clamp(f, 0.0F, 32.0F));
 		}
 	}
 

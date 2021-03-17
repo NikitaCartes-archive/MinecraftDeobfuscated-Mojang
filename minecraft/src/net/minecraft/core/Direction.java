@@ -341,7 +341,7 @@ public enum Direction implements StringRepresentable {
 			}
 		};
 
-		private static final Direction.Axis[] VALUES = values();
+		public static final Direction.Axis[] VALUES = values();
 		public static final Codec<Direction.Axis> CODEC = StringRepresentable.fromEnum(Direction.Axis::values, Direction.Axis::byName);
 		private static final Map<String, Direction.Axis> BY_NAME = (Map<String, Direction.Axis>)Arrays.stream(VALUES)
 			.collect(Collectors.toMap(Direction.Axis::getName, axis -> axis));

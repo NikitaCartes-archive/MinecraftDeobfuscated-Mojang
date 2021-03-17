@@ -9,6 +9,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.ElderGuardian;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class OceanMonumentPieces {
 	static class FitDoubleXRoom implements OceanMonumentPieces.MonumentRoomFitter {
@@ -231,7 +231,7 @@ public class OceanMonumentPieces {
 			this.childPieces.add(new OceanMonumentPieces.OceanMonumentPenthouse(direction2, boundingBox3));
 		}
 
-		public MonumentBuilding(StructureManager structureManager, CompoundTag compoundTag) {
+		public MonumentBuilding(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_BUILDING, compoundTag);
 		}
 
@@ -739,7 +739,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_CORE_ROOM, 1, direction, roomDefinition, 2, 2, 2);
 		}
 
-		public OceanMonumentCoreRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentCoreRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_CORE_ROOM, compoundTag);
 		}
 
@@ -826,7 +826,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, 1, direction, roomDefinition, 2, 1, 1);
 		}
 
-		public OceanMonumentDoubleXRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentDoubleXRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, compoundTag);
 		}
 
@@ -905,7 +905,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, 1, direction, roomDefinition, 2, 2, 1);
 		}
 
-		public OceanMonumentDoubleXYRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentDoubleXYRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, compoundTag);
 		}
 
@@ -1028,7 +1028,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, 1, direction, roomDefinition, 1, 2, 1);
 		}
 
-		public OceanMonumentDoubleYRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentDoubleYRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, compoundTag);
 		}
 
@@ -1118,7 +1118,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, 1, direction, roomDefinition, 1, 2, 2);
 		}
 
-		public OceanMonumentDoubleYZRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentDoubleYZRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, compoundTag);
 		}
 
@@ -1239,7 +1239,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, 1, direction, roomDefinition, 1, 1, 2);
 		}
 
-		public OceanMonumentDoubleZRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentDoubleZRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, compoundTag);
 		}
 
@@ -1337,7 +1337,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, 1, direction, roomDefinition, 1, 1, 1);
 		}
 
-		public OceanMonumentEntryRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentEntryRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, compoundTag);
 		}
 
@@ -1381,7 +1381,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, direction, boundingBox);
 		}
 
-		public OceanMonumentPenthouse(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentPenthouse(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, compoundTag);
 		}
 
@@ -1509,7 +1509,7 @@ public class OceanMonumentPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 		}
 
 		protected void generateWaterBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
@@ -1589,7 +1589,7 @@ public class OceanMonumentPieces {
 			this.mainDesign = random.nextInt(3);
 		}
 
-		public OceanMonumentSimpleRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentSimpleRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_ROOM, compoundTag);
 		}
 
@@ -1765,7 +1765,7 @@ public class OceanMonumentPieces {
 			super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, 1, direction, roomDefinition, 1, 1, 1);
 		}
 
-		public OceanMonumentSimpleTopRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentSimpleTopRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, compoundTag);
 		}
 
@@ -1829,7 +1829,7 @@ public class OceanMonumentPieces {
 			this.mainDesign = i & 1;
 		}
 
-		public OceanMonumentWingRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public OceanMonumentWingRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.OCEAN_MONUMENT_WING_ROOM, compoundTag);
 		}
 

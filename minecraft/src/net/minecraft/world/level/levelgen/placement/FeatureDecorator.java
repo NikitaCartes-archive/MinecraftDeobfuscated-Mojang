@@ -51,7 +51,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = register(
-		"heightmap_with_water_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC)
+		"water_depth_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<CaveDecoratorConfiguration> CAVE_SURFACE = register(
 		"cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC)

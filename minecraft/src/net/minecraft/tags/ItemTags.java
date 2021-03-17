@@ -73,6 +73,7 @@ public final class ItemTags {
 	public static final Tag.Named<Item> FREEZE_IMMUNE_WEARABLES = bind("freeze_immune_wearables");
 	public static final Tag.Named<Item> AXOLOTL_TEMPT_ITEMS = bind("axolotl_tempt_items");
 	public static final Tag.Named<Item> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
+	public static final Tag.Named<Item> CLUSTER_MAX_HARVESTABLES = bind("cluster_max_harvestables");
 
 	private static Tag.Named<Item> bind(String string) {
 		return HELPER.bind(string);

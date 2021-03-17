@@ -36,6 +36,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
@@ -491,6 +492,7 @@ public class DebugScreenOverlay extends GuiComponent {
 
 		int t = this.minecraft.getWindow().getGuiScaledHeight();
 		fill(poseStack, i, t - 60, i + p, t, -1873784752);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();

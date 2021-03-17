@@ -21,7 +21,9 @@ public class PlayerRespawnLogic {
 			return null;
 		} else {
 			LevelChunk levelChunk = serverLevel.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j));
-			int k = bl2 ? serverLevel.getChunkSource().getGenerator().getSpawnHeight() : levelChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i & 15, j & 15);
+			int k = bl2
+				? serverLevel.getChunkSource().getGenerator().getSpawnHeight(serverLevel)
+				: levelChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i & 15, j & 15);
 			if (k < serverLevel.getMinBuildHeight()) {
 				return null;
 			} else {

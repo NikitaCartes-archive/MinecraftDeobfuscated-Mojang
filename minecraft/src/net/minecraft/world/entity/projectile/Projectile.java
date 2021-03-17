@@ -21,7 +21,6 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class Projectile extends Entity {
 	private UUID ownerUUID;
-	private int ownerNetworkId;
 	private boolean leftOwner;
 	private boolean hasBeenShot;
 
@@ -32,17 +31,12 @@ public abstract class Projectile extends Entity {
 	public void setOwner(@Nullable Entity entity) {
 		if (entity != null) {
 			this.ownerUUID = entity.getUUID();
-			this.ownerNetworkId = entity.getId();
 		}
 	}
 
 	@Nullable
 	public Entity getOwner() {
-		if (this.ownerUUID != null && this.level instanceof ServerLevel) {
-			return ((ServerLevel)this.level).getEntity(this.ownerUUID);
-		} else {
-			return this.ownerNetworkId != 0 ? this.level.getEntity(this.ownerNetworkId) : null;
-		}
+		return this.ownerUUID != null && this.level instanceof ServerLevel ? ((ServerLevel)this.level).getEntity(this.ownerUUID) : null;
 	}
 
 	@Override
@@ -56,6 +50,10 @@ public abstract class Projectile extends Entity {
 		}
 
 		compoundTag.putBoolean("HasBeenShot", this.hasBeenShot);
+	}
+
+	protected boolean ownedBy(Entity entity) {
+		return entity.getUUID().equals(this.ownerUUID);
 	}
 
 	@Override

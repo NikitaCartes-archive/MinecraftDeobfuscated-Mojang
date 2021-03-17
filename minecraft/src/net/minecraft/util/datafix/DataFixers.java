@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.util.datafix.fixes.AbstractArrowPickupFix;
 import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
@@ -129,6 +130,7 @@ import net.minecraft.util.datafix.fixes.RenameBiomesFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFix;
 import net.minecraft.util.datafix.fixes.ReorganizePoi;
+import net.minecraft.util.datafix.fixes.SavedDataFeaturePoolElementFix;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
@@ -733,6 +735,18 @@ public class DataFixers {
 			.build();
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema133, "Renamed grimstone block items to deepslate", createRenamer(immutableMap3)));
 		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema133, "Renamed grimstone blocks to deepslate", createRenamer(immutableMap3)));
+		Schema schema134 = dataFixerBuilder.addSchema(2700, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			BlockRenameFixWithJigsaw.create(
+				schema134,
+				"Renamed cave vines blocks",
+				createRenamer(ImmutableMap.of("minecraft:cave_vines_head", "minecraft:cave_vines", "minecraft:cave_vines_body", "minecraft:cave_vines_plant"))
+			)
+		);
+		Schema schema135 = dataFixerBuilder.addSchema(2701, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new SavedDataFeaturePoolElementFix(schema135));
+		Schema schema136 = dataFixerBuilder.addSchema(2702, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new AbstractArrowPickupFix(schema136));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

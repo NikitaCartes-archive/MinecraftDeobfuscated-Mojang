@@ -448,7 +448,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		RenderSystem.setShaderColor(0.0F, 0.0F, 255.0F, 255.0F);
+		RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
 		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
@@ -458,6 +458,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		bufferBuilder.vertex((double)k, (double)j, 0.0).endVertex();
 		bufferBuilder.vertex((double)i, (double)j, 0.0).endVertex();
 		tesselator.end();
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableColorLogicOp();
 		RenderSystem.enableTexture();
 	}

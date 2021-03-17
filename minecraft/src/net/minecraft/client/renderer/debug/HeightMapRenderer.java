@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -34,6 +35,7 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.disableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.enableDepthTest();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BlockPos blockPos = new BlockPos(d, 0.0, f);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();

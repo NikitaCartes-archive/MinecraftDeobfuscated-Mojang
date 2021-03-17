@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -39,7 +40,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LavaSubmerged
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.apache.logging.log4j.LogManager;
@@ -73,20 +73,20 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		this.loadTemplate(structureTemplate, blockPos2);
 	}
 
-	public RuinedPortalPiece(StructureManager structureManager, CompoundTag compoundTag) {
+	public RuinedPortalPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 		super(StructurePieceType.RUINED_PORTAL, compoundTag);
 		this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
 		this.rotation = Rotation.valueOf(compoundTag.getString("Rotation"));
 		this.mirror = Mirror.valueOf(compoundTag.getString("Mirror"));
 		this.verticalPlacement = RuinedPortalPiece.VerticalPlacement.byName(compoundTag.getString("VerticalPlacement"));
 		this.properties = RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error);
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.templateLocation);
+		StructureTemplate structureTemplate = serverLevel.getStructureManager().getOrCreate(this.templateLocation);
 		this.loadTemplate(structureTemplate, new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2));
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag compoundTag) {
-		super.addAdditionalSaveData(compoundTag);
+	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+		super.addAdditionalSaveData(serverLevel, compoundTag);
 		compoundTag.putString("Template", this.templateLocation.toString());
 		compoundTag.putString("Rotation", this.rotation.name());
 		compoundTag.putString("Mirror", this.mirror.name());

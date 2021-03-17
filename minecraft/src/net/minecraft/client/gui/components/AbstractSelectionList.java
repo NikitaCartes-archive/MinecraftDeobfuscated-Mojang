@@ -176,8 +176,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		int l = k + 6;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		if (this.renderBackground) {
-			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			float g = 32.0F;
@@ -241,24 +241,24 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
 			RenderSystem.disableTexture();
-			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-			RenderSystem.setShaderTexture(0, WHITE_TEXTURE_LOCATION);
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			int p = 4;
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).color(0, 0, 0, 0).endVertex();
 			tesselator.end();
 		}
 
 		int q = this.getMaxScroll();
 		if (q > 0) {
 			RenderSystem.disableTexture();
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
 			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
 			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
@@ -266,19 +266,19 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				p = this.y0;
 			}
 
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(p + o), 0.0).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)(p + o), 0.0).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)p, 0.0).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)p, 0.0).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(p + o - 1), 0.0).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)(p + o - 1), 0.0).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)p, 0.0).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)p, 0.0).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(p + o), 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)(p + o), 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)p, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)p, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(p + o - 1), 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)(p + o - 1), 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)p, 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)p, 0.0).color(192, 192, 192, 255).endVertex();
 			tesselator.end();
 		}
 

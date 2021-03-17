@@ -149,13 +149,17 @@ public class ActiveProfiler implements ProfileCollector {
 		return new FilledProfileResults(this.entries, this.startTimeNano, this.startTimeTicks, this.getRealTime.getAsLong(), this.getTickTime.getAsInt());
 	}
 
-	static class PathEntry implements ProfilerPathEntry {
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ActiveProfiler.PathEntry getEntry(String string) {
+		return (ActiveProfiler.PathEntry)this.entries.get(string);
+	}
+
+	public static class PathEntry implements ProfilerPathEntry {
 		private long duration;
 		private long count;
 		private final Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap<>();
-
-		private PathEntry() {
-		}
 
 		@Override
 		public long getDuration() {

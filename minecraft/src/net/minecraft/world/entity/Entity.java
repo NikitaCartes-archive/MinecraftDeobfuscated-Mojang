@@ -156,7 +156,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public double zOld;
 	public float maxUpStep;
 	public boolean noPhysics;
-	public float pushthrough;
 	protected final Random random = new Random();
 	public int tickCount;
 	private int remainingFireTicks = -this.getFireImmuneTicks();
@@ -1269,8 +1268,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					e *= g;
 					d *= 0.05F;
 					e *= 0.05F;
-					d *= (double)(1.0F - this.pushthrough);
-					e *= (double)(1.0F - this.pushthrough);
 					if (!this.isVehicle()) {
 						this.push(-d, 0.0, -e);
 					}
@@ -2813,11 +2810,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		AABB aABB = this.getBoundingBox().inflate(1.0);
 		int i = Mth.floor(aABB.minX);
 		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		return !this.level.hasChunksAt(i, k, m, j, l, n);
+		int k = Mth.floor(aABB.minZ);
+		int l = Mth.ceil(aABB.maxZ);
+		return !this.level.hasChunksAt(i, k, j, l);
 	}
 
 	public double getFluidHeight(Tag<Fluid> tag) {

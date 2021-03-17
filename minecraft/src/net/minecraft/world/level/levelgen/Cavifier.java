@@ -44,20 +44,22 @@ public class Cavifier {
 	}
 
 	public double cavify(int i, int j, int k, double d) {
-		boolean bl = d < 375.0;
+		boolean bl = d < 170.0;
 		double e = this.spaghettiRoughness(i, j, k);
 		double f = this.getSpaghetti3d(i, j, k);
 		if (bl) {
-			return Math.min(d, (f + e) * 128.0 * 64.0);
+			return Math.min(d, (f + e) * 128.0 * 5.0);
 		} else {
-			double g = this.cheeseNoiseSource.getValue((double)i, (double)((float)j / 2.0F), (double)k);
+			double g = this.cheeseNoiseSource.getValue((double)i, (double)j, (double)k);
 			double h = Mth.clamp(g + 0.25, -1.0, 1.0);
-			double l = this.getLayerizedCaverns(i, j, k);
-			double m = this.getSpaghetti2d(i, j, k);
-			double n = h + l;
-			double o = Math.min(n, Math.min(f, m) + e);
-			double p = Math.max(o, this.getPillars(i, j, k));
-			return 128.0 * Mth.clamp(p, -1.0, 1.0);
+			double l = (d - 170.0) / 100.0;
+			double m = h + Mth.clampedLerp(0.5, 0.0, l);
+			double n = this.getLayerizedCaverns(i, j, k);
+			double o = this.getSpaghetti2d(i, j, k);
+			double p = m + n;
+			double q = Math.min(p, Math.min(f, o) + e);
+			double r = Math.max(q, this.getPillars(i, j, k));
+			return 128.0 * Mth.clamp(r, -1.0, 1.0);
 		}
 	}
 

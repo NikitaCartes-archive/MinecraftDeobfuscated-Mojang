@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
 public class Carvers {
 	public static final ConfiguredWorldCarver<CarverConfiguration> CAVE = register(
-		"cave", WorldCarver.CAVE.configured(new CarverConfiguration(0.25F, CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState())))
+		"cave", WorldCarver.CAVE.configured(new CarverConfiguration(0.33333334F, CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState())))
 	);
 	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> CANYON = register(
 		"canyon",
@@ -37,7 +37,7 @@ public class Carvers {
 			)
 	);
 	public static final ConfiguredWorldCarver<CarverConfiguration> OCEAN_CAVE = register(
-		"ocean_cave", WorldCarver.CAVE.configured(new CarverConfiguration(0.125F, CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState())))
+		"ocean_cave", WorldCarver.CAVE.configured(new CarverConfiguration(0.14285715F, CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState())))
 	);
 	public static final ConfiguredWorldCarver<CarverConfiguration> NETHER_CAVE = register(
 		"nether_cave", WorldCarver.NETHER_CAVE.configured(new CarverConfiguration(0.2F))

@@ -232,8 +232,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.LARGE_AMETHYST_BUD, renderType3);
 		hashMap.put(Blocks.AMETHYST_CLUSTER, renderType3);
 		hashMap.put(Blocks.LIGHTNING_ROD, renderType3);
-		hashMap.put(Blocks.CAVE_VINES_HEAD, renderType3);
-		hashMap.put(Blocks.CAVE_VINES_BODY, renderType3);
+		hashMap.put(Blocks.CAVE_VINES, renderType3);
+		hashMap.put(Blocks.CAVE_VINES_PLANT, renderType3);
 		hashMap.put(Blocks.SPORE_BLOSSOM, renderType3);
 		hashMap.put(Blocks.FLOWERING_AZALEA, renderType3);
 		hashMap.put(Blocks.AZALEA, renderType3);

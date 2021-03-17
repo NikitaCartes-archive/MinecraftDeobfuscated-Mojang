@@ -1,6 +1,6 @@
 package net.minecraft.util.profiling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -19,7 +19,7 @@ public class EmptyProfileResults implements ProfileResults {
 	}
 
 	@Override
-	public boolean saveResults(File file) {
+	public boolean saveResults(Path path) {
 		return false;
 	}
 

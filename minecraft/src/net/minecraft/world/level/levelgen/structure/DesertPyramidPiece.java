@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class DesertPyramidPiece extends ScatteredFeaturePiece {
@@ -22,7 +22,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, random, i, 64, j, 21, 15, 21);
 	}
 
-	public DesertPyramidPiece(StructureManager structureManager, CompoundTag compoundTag) {
+	public DesertPyramidPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, compoundTag);
 		this.hasPlacedChest[0] = compoundTag.getBoolean("hasPlacedChest0");
 		this.hasPlacedChest[1] = compoundTag.getBoolean("hasPlacedChest1");
@@ -31,8 +31,8 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag compoundTag) {
-		super.addAdditionalSaveData(compoundTag);
+	protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+		super.addAdditionalSaveData(serverLevel, compoundTag);
 		compoundTag.putBoolean("hasPlacedChest0", this.hasPlacedChest[0]);
 		compoundTag.putBoolean("hasPlacedChest1", this.hasPlacedChest[1]);
 		compoundTag.putBoolean("hasPlacedChest2", this.hasPlacedChest[2]);

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -88,17 +89,17 @@ public class ShipwreckPieces {
 			this.loadTemplate(structureManager);
 		}
 
-		public ShipwreckPiece(StructureManager structureManager, CompoundTag compoundTag) {
+		public ShipwreckPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.SHIPWRECK_PIECE, compoundTag);
 			this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
 			this.isBeached = compoundTag.getBoolean("isBeached");
 			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-			this.loadTemplate(structureManager);
+			this.loadTemplate(serverLevel.getStructureManager());
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putString("Template", this.templateLocation.toString());
 			compoundTag.putBoolean("isBeached", this.isBeached);
 			compoundTag.putString("Rot", this.rotation.name());

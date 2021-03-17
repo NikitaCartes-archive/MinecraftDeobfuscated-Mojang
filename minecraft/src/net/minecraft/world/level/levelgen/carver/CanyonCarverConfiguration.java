@@ -14,7 +14,7 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
 					VerticalAnchor.CODEC.fieldOf("bottom_inclusive").forGetter(CanyonCarverConfiguration::getBottomInclusive),
 					VerticalAnchor.CODEC.fieldOf("top_inclusive").forGetter(CanyonCarverConfiguration::getTopInclusive),
 					UniformInt.CODEC.fieldOf("y_scale").forGetter(CanyonCarverConfiguration::getYScale),
-					FloatProvider.codec(0.0F, 1.0F).fieldOf("distanceFactor").forGetter(CanyonCarverConfiguration::getDistanceFactor),
+					FloatProvider.codec(0.0F, 1.0F).fieldOf("distance_factor").forGetter(CanyonCarverConfiguration::getDistanceFactor),
 					FloatProvider.CODEC.fieldOf("vertical_rotation").forGetter(CanyonCarverConfiguration::getVerticalRotation),
 					FloatProvider.CODEC.fieldOf("thickness").forGetter(CanyonCarverConfiguration::getThickness),
 					Codec.intRange(0, Integer.MAX_VALUE).fieldOf("width_smoothness").forGetter(CanyonCarverConfiguration::getWidthSmoothness),

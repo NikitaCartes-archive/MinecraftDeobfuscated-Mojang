@@ -70,9 +70,9 @@ public class DoublePlantBlock extends BushBlock {
 		}
 	}
 
-	public void placeAt(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		levelAccessor.setBlock(blockPos, this.defaultBlockState().setValue(HALF, DoubleBlockHalf.LOWER), i);
-		levelAccessor.setBlock(blockPos.above(), this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER), i);
+	public void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
+		levelAccessor.setBlock(blockPos, blockState.setValue(HALF, DoubleBlockHalf.LOWER), i);
+		levelAccessor.setBlock(blockPos.above(), blockState.setValue(HALF, DoubleBlockHalf.UPPER), i);
 	}
 
 	@Override

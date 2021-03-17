@@ -18,35 +18,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class CaveVinesHeadBlock extends GrowingPlantHeadBlock implements BonemealableBlock, CaveVinesBlock {
-	public CaveVinesHeadBlock(BlockBehaviour.Properties properties) {
-		super(properties, Direction.DOWN, SHAPE, false, 0.1);
-		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)).setValue(BERRIES, Boolean.valueOf(false)));
+public class CaveVinesPlantBlock extends GrowingPlantBodyBlock implements BonemealableBlock, CaveVines {
+	public CaveVinesPlantBlock(BlockBehaviour.Properties properties) {
+		super(properties, Direction.DOWN, SHAPE, false);
+		this.registerDefaultState(this.stateDefinition.any().setValue(BERRIES, Boolean.valueOf(false)));
 	}
 
 	@Override
-	protected int getBlocksToGrowWhenBonemealed(Random random) {
-		return 1;
+	protected GrowingPlantHeadBlock getHeadBlock() {
+		return (GrowingPlantHeadBlock)Blocks.CAVE_VINES;
 	}
 
 	@Override
-	protected boolean canGrowInto(BlockState blockState) {
-		return blockState.isAir();
-	}
-
-	@Override
-	protected Block getBodyBlock() {
-		return Blocks.CAVE_VINES_BODY;
-	}
-
-	@Override
-	protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
+	protected BlockState updateHeadAfterConvertedFromBody(BlockState blockState, BlockState blockState2) {
 		return blockState2.setValue(BERRIES, blockState.getValue(BERRIES));
-	}
-
-	@Override
-	protected BlockState getGrowIntoState(BlockState blockState, Random random) {
-		return super.getGrowIntoState(blockState, random).setValue(BERRIES, Boolean.valueOf(random.nextFloat() < 0.11F));
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -59,12 +44,11 @@ public class CaveVinesHeadBlock extends GrowingPlantHeadBlock implements Bonemea
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		return CaveVinesBlock.use(blockState, level, blockPos);
+		return CaveVines.use(blockState, level, blockPos);
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		super.createBlockStateDefinition(builder);
 		builder.add(BERRIES);
 	}
 

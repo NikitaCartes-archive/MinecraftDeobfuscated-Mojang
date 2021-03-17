@@ -104,12 +104,6 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public boolean isApplying() {
-		return this.allPreparations.isDone();
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
 	public boolean isDone() {
 		return this.allDone.isDone();
 	}

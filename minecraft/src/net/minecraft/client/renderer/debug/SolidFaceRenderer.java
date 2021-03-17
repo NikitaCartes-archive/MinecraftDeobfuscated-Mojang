@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +35,7 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.lineWidth(2.0F);
 		RenderSystem.disableTexture();
 		RenderSystem.depthMask(false);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BlockPos blockPos = new BlockPos(d, e, f);
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-6, -6, -6), blockPos.offset(6, 6, 6))) {

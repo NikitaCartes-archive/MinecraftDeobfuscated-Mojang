@@ -21,9 +21,4 @@ public class TridentChannelingEnchantment extends Enchantment {
 	public int getMaxLevel() {
 		return 1;
 	}
-
-	@Override
-	public boolean checkCompatibility(Enchantment enchantment) {
-		return super.checkCompatibility(enchantment);
-	}
 }

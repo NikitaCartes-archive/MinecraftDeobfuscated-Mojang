@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +19,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.resources.RegistryLookupCodec;
-import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.Biomes;
@@ -39,7 +37,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatur
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
+public class FlatLevelGeneratorSettings {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
@@ -78,7 +76,7 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 	private final StructureSettings structureSettings;
 	private final List<FlatLayerInfo> layersInfo = Lists.<FlatLayerInfo>newArrayList();
 	private Supplier<Biome> biome;
-	private final BlockState[] layers;
+	private final List<BlockState> layers;
 	private boolean voidGen;
 	private boolean decoration;
 	private boolean addLakes;
@@ -116,7 +114,7 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 		this.biomes = registry;
 		this.structureSettings = structureSettings;
 		this.biome = () -> registry.getOrThrow(Biomes.PLAINS);
-		this.layers = new BlockState[this.getHeight()];
+		this.layers = Lists.<BlockState>newArrayList();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -179,14 +177,13 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 			}
 		}
 
-		BlockState[] blockStates = this.getLayers();
+		List<BlockState> list = this.getLayers();
 
-		for (int ix = 0; ix < blockStates.length; ix++) {
-			BlockState blockState = blockStates[ix];
-			if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
-				this.layers[ix] = null;
-				int j = this.getMinBuildHeight() + ix;
-				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(j, blockState)));
+		for (int ix = 0; ix < list.size(); ix++) {
+			BlockState blockState = (BlockState)list.get(ix);
+			if (!Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
+				list.set(ix, null);
+				builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(ix, blockState)));
 			}
 		}
 
@@ -220,30 +217,20 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 		return this.layersInfo;
 	}
 
-	public BlockState[] getLayers() {
+	public List<BlockState> getLayers() {
 		return this.layers;
 	}
 
 	public void updateLayers() {
-		Arrays.fill(this.layers, 0, this.layers.length, null);
-		int i = this.getMinBuildHeight();
+		this.layers.clear();
 
 		for (FlatLayerInfo flatLayerInfo : this.layersInfo) {
-			flatLayerInfo.setStart(i);
-			i += flatLayerInfo.getHeight();
-		}
-
-		this.voidGen = true;
-
-		for (FlatLayerInfo flatLayerInfo2 : this.layersInfo) {
-			for (int j = flatLayerInfo2.getStart(); j < flatLayerInfo2.getStart() + flatLayerInfo2.getHeight(); j++) {
-				BlockState blockState = flatLayerInfo2.getBlockState();
-				if (!blockState.is(Blocks.AIR)) {
-					this.voidGen = false;
-					this.layers[this.getLayerIndex(j)] = blockState;
-				}
+			for (int i = 0; i < flatLayerInfo.getHeight(); i++) {
+				this.layers.add(flatLayerInfo.getBlockState());
 			}
 		}
+
+		this.voidGen = this.layers.stream().anyMatch(blockState -> !blockState.is(Blocks.AIR));
 	}
 
 	public static FlatLevelGeneratorSettings getDefault(Registry<Biome> registry) {
@@ -260,19 +247,5 @@ public class FlatLevelGeneratorSettings implements LevelHeightAccessor {
 		flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.GRASS_BLOCK));
 		flatLevelGeneratorSettings.updateLayers();
 		return flatLevelGeneratorSettings;
-	}
-
-	public int getLayerIndex(int i) {
-		return i - this.getMinBuildHeight();
-	}
-
-	@Override
-	public int getMinBuildHeight() {
-		return 0;
-	}
-
-	@Override
-	public int getHeight() {
-		return 256;
 	}
 }

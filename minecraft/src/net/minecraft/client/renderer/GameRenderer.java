@@ -716,13 +716,13 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				this.minecraft.getProfiler().pop();
 			}
 
-			if (this.minecraft.overlay != null) {
+			if (this.minecraft.getOverlay() != null) {
 				try {
-					this.minecraft.overlay.render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.getOverlay().render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var15) {
 					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
-					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.overlay.getClass().getCanonicalName()));
+					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
 				}
 			} else if (this.minecraft.screen != null) {
@@ -937,6 +937,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		RenderSystem.setShaderColor(g, h, k, 1.0F);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, NAUSEA_LOCATION);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();

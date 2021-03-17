@@ -872,8 +872,8 @@ public class ClientLevel extends Level {
 			this.difficultyLocked = bl;
 		}
 
-		public double getHorizonHeight() {
-			return this.isFlat ? 0.0 : 63.0;
+		public double getHorizonHeight(LevelHeightAccessor levelHeightAccessor) {
+			return this.isFlat ? (double)levelHeightAccessor.getMinBuildHeight() : 63.0;
 		}
 
 		public double getClearColorScale() {

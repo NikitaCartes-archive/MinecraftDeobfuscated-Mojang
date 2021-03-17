@@ -354,7 +354,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 
 	public void renderBackground(PoseStack poseStack, int i) {
 		if (this.minecraft.level != null) {
-			this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+			this.fillGradient(poseStack, 0, 0, this.width, this.height, -2146430960, -1609560048);
 		} else {
 			this.renderDirtBackground(i);
 		}

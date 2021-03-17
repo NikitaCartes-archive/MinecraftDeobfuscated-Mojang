@@ -4,7 +4,9 @@ import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.ClipboardManager;
 import com.mojang.blaze3d.platform.InputConstants;
+import java.nio.file.Path;
 import java.util.Locale;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -149,6 +151,11 @@ public class KeyboardHandler {
 					}
 
 					return true;
+				case 76:
+					Runnable runnable = () -> this.debugFeedbackTranslated("debug.profiling.start", 10);
+					Consumer<Path> consumer = path -> this.debugFeedbackTranslated("debug.profiling.stop", path.toAbsolutePath());
+					this.minecraft.debugClientMetricsKeyPressed(runnable, consumer);
+					return true;
 				case 78:
 					if (!this.minecraft.player.hasPermissions(2)) {
 						this.debugFeedbackTranslated("debug.creative_spectator.error");
@@ -179,6 +186,7 @@ public class KeyboardHandler {
 					chatComponent.addMessage(new TranslatableComponent("debug.pause_focus.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
+					chatComponent.addMessage(new TranslatableComponent("debug.profiling.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
 					return true;

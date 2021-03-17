@@ -8,7 +8,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class LayerConfiguration implements FeatureConfiguration {
 	public static final Codec<LayerConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y).fieldOf("height").forGetter(layerConfiguration -> layerConfiguration.height),
+					Codec.intRange(0, DimensionType.Y_SIZE).fieldOf("height").forGetter(layerConfiguration -> layerConfiguration.height),
 					BlockState.CODEC.fieldOf("state").forGetter(layerConfiguration -> layerConfiguration.state)
 				)
 				.apply(instance, LayerConfiguration::new)

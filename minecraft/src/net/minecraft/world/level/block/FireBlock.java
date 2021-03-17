@@ -439,8 +439,8 @@ public class FireBlock extends BaseFireBlock {
 		fireBlock.setFlammable(Blocks.BEE_NEST, 30, 20);
 		fireBlock.setFlammable(Blocks.AZALEA_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.AZALEA_LEAVES_FLOWERS, 30, 60);
-		fireBlock.setFlammable(Blocks.CAVE_VINES_HEAD, 15, 60);
-		fireBlock.setFlammable(Blocks.CAVE_VINES_BODY, 15, 60);
+		fireBlock.setFlammable(Blocks.CAVE_VINES, 15, 60);
+		fireBlock.setFlammable(Blocks.CAVE_VINES_PLANT, 15, 60);
 		fireBlock.setFlammable(Blocks.SPORE_BLOSSOM, 60, 100);
 		fireBlock.setFlammable(Blocks.AZALEA, 30, 60);
 		fireBlock.setFlammable(Blocks.FLOWERING_AZALEA, 30, 60);
@@ -448,5 +448,6 @@ public class FireBlock extends BaseFireBlock {
 		fireBlock.setFlammable(Blocks.BIG_DRIPLEAF_STEM, 60, 100);
 		fireBlock.setFlammable(Blocks.SMALL_DRIPLEAF, 60, 100);
 		fireBlock.setFlammable(Blocks.HANGING_ROOTS, 30, 60);
+		fireBlock.setFlammable(Blocks.GLOW_LICHEN, 15, 100);
 	}
 }

@@ -233,6 +233,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			float g = 0.42F;
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
+			poseStack2.translate(0.0, 0.0, 125.0);
 			poseStack2.scale(0.42F, 0.42F, 1.0F);
 			RenderSystem.applyModelViewMatrix();
 

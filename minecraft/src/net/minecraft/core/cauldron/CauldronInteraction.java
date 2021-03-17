@@ -132,9 +132,7 @@ public interface CauldronInteraction {
 	InteractionResult interact(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack);
 
 	static void bootStrap() {
-		EMPTY.put(Items.WATER_BUCKET, FILL_WATER);
-		EMPTY.put(Items.LAVA_BUCKET, FILL_LAVA);
-		EMPTY.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+		addDefaultInteractions(EMPTY);
 		EMPTY.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
 				return InteractionResult.PASS;
@@ -150,9 +148,7 @@ public interface CauldronInteraction {
 				return InteractionResult.sidedSuccess(level.isClientSide);
 			}
 		});
-		WATER.put(Items.LAVA_BUCKET, FILL_LAVA);
-		WATER.put(Items.WATER_BUCKET, FILL_WATER);
-		WATER.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+		addDefaultInteractions(WATER);
 		WATER.put(
 			Items.BUCKET,
 			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
@@ -236,8 +232,7 @@ public interface CauldronInteraction {
 					blockState, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.LAVA_BUCKET), blockStatex -> true, SoundEvents.BUCKET_FILL_LAVA
 				)
 		);
-		LAVA.put(Items.WATER_BUCKET, FILL_WATER);
-		LAVA.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+		addDefaultInteractions(LAVA);
 		POWDER_SNOW.put(
 			Items.BUCKET,
 			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
@@ -252,8 +247,13 @@ public interface CauldronInteraction {
 					SoundEvents.BUCKET_FILL_POWDER_SNOW
 				)
 		);
-		POWDER_SNOW.put(Items.WATER_BUCKET, FILL_WATER);
-		POWDER_SNOW.put(Items.LAVA_BUCKET, FILL_LAVA);
+		addDefaultInteractions(POWDER_SNOW);
+	}
+
+	static void addDefaultInteractions(Map<Item, CauldronInteraction> map) {
+		map.put(Items.LAVA_BUCKET, FILL_LAVA);
+		map.put(Items.WATER_BUCKET, FILL_WATER);
+		map.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
 	}
 
 	static InteractionResult fillBucket(

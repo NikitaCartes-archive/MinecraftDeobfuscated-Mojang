@@ -3129,13 +3129,7 @@ public class Blocks {
 		new AmethystClusterBlock(
 			7,
 			3,
-			BlockBehaviour.Properties.of(Material.AMETHYST)
-				.noOcclusion()
-				.requiresCorrectToolForDrops()
-				.randomTicks()
-				.sound(SoundType.AMETHYST_CLUSTER)
-				.strength(1.5F)
-				.lightLevel(litBlockEmission(5))
+			BlockBehaviour.Properties.of(Material.AMETHYST).noOcclusion().randomTicks().sound(SoundType.AMETHYST_CLUSTER).strength(1.5F).lightLevel(litBlockEmission(5))
 		)
 	);
 	public static final Block LARGE_AMETHYST_BUD = register(
@@ -3160,7 +3154,18 @@ public class Blocks {
 		"calcite",
 		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_WHITE).sound(SoundType.CALCITE).requiresCorrectToolForDrops().strength(0.75F))
 	);
-	public static final Block TINTED_GLASS = register("tinted_glass", new TintedGlassBlock(BlockBehaviour.Properties.copy(GLASS).color(MaterialColor.COLOR_GRAY)));
+	public static final Block TINTED_GLASS = register(
+		"tinted_glass",
+		new TintedGlassBlock(
+			BlockBehaviour.Properties.copy(GLASS)
+				.color(MaterialColor.COLOR_GRAY)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.isRedstoneConductor(Blocks::never)
+				.isSuffocating(Blocks::never)
+				.isViewBlocking(Blocks::never)
+		)
+	);
 	public static final Block POWDER_SNOW = register(
 		"powder_snow", new PowderSnowBlock(BlockBehaviour.Properties.of(Material.POWDER_SNOW).strength(0.1F).sound(SoundType.POWDER_SNOW).dynamicShape())
 	);
@@ -3178,93 +3183,82 @@ public class Blocks {
 	public static final Block OXIDIZED_COPPER = register(
 		"oxidized_copper",
 		new WeatheringCopperFullBlock(
+			WeatheringCopper.WeatherState.OXIDIZED,
 			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
 		)
 	);
 	public static final Block WEATHERED_COPPER = register(
 		"weathered_copper",
 		new WeatheringCopperFullBlock(
-			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.WARPED_STEM).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER),
 			WeatheringCopper.WeatherState.WEATHERED,
-			OXIDIZED_COPPER
+			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.WARPED_STEM).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
 		)
 	);
 	public static final Block EXPOSED_COPPER = register(
 		"exposed_copper",
 		new WeatheringCopperFullBlock(
-			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER),
 			WeatheringCopper.WeatherState.EXPOSED,
-			WEATHERED_COPPER
+			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
 		)
 	);
 	public static final Block COPPER_BLOCK = register(
 		"copper_block",
 		new WeatheringCopperFullBlock(
-			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER),
 			WeatheringCopper.WeatherState.UNAFFECTED,
-			EXPOSED_COPPER
+			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
 		)
 	);
 	public static final Block COPPER_ORE = register("copper_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE)));
 	public static final Block DEEPSLATE_COPPER_ORE = register(
 		"deepslate_copper_ore", new OreBlock(BlockBehaviour.Properties.copy(COPPER_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
-	public static final Block OXIDIZED_CUT_COPPER = register("oxidized_cut_copper", new WeatheringCopperFullBlock(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
+	public static final Block OXIDIZED_CUT_COPPER = register(
+		"oxidized_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_COPPER))
+	);
 	public static final Block WEATHERED_CUT_COPPER = register(
-		"weathered_cut_copper",
-		new WeatheringCopperFullBlock(BlockBehaviour.Properties.copy(WEATHERED_COPPER), WeatheringCopper.WeatherState.WEATHERED, OXIDIZED_CUT_COPPER)
+		"weathered_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(WEATHERED_COPPER))
 	);
 	public static final Block EXPOSED_CUT_COPPER = register(
-		"exposed_cut_copper",
-		new WeatheringCopperFullBlock(BlockBehaviour.Properties.copy(EXPOSED_COPPER), WeatheringCopper.WeatherState.EXPOSED, WEATHERED_CUT_COPPER)
+		"exposed_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(EXPOSED_COPPER))
 	);
 	public static final Block CUT_COPPER = register(
-		"cut_copper", new WeatheringCopperFullBlock(BlockBehaviour.Properties.copy(COPPER_BLOCK), WeatheringCopper.WeatherState.UNAFFECTED, EXPOSED_CUT_COPPER)
+		"cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.copy(COPPER_BLOCK))
 	);
 	public static final Block OXIDIZED_CUT_COPPER_STAIRS = register(
-		"oxidized_cut_copper_stairs", new WeatheringCopperStairBlock(OXIDIZED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER))
+		"oxidized_cut_copper_stairs",
+		new WeatheringCopperStairBlock(
+			WeatheringCopper.WeatherState.OXIDIZED, OXIDIZED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER)
+		)
 	);
 	public static final Block WEATHERED_CUT_COPPER_STAIRS = register(
 		"weathered_cut_copper_stairs",
 		new WeatheringCopperStairBlock(
-			WEATHERED_CUT_COPPER.defaultBlockState(),
-			BlockBehaviour.Properties.copy(WEATHERED_COPPER),
-			WeatheringCopper.WeatherState.WEATHERED,
-			OXIDIZED_CUT_COPPER_STAIRS
+			WeatheringCopper.WeatherState.WEATHERED, WEATHERED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(WEATHERED_COPPER)
 		)
 	);
 	public static final Block EXPOSED_CUT_COPPER_STAIRS = register(
 		"exposed_cut_copper_stairs",
-		new WeatheringCopperStairBlock(
-			EXPOSED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(EXPOSED_COPPER), WeatheringCopper.WeatherState.EXPOSED, WEATHERED_CUT_COPPER_STAIRS
-		)
+		new WeatheringCopperStairBlock(WeatheringCopper.WeatherState.EXPOSED, EXPOSED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(EXPOSED_COPPER))
 	);
 	public static final Block CUT_COPPER_STAIRS = register(
 		"cut_copper_stairs",
-		new WeatheringCopperStairBlock(
-			CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(COPPER_BLOCK), WeatheringCopper.WeatherState.UNAFFECTED, EXPOSED_CUT_COPPER_STAIRS
-		)
+		new WeatheringCopperStairBlock(WeatheringCopper.WeatherState.UNAFFECTED, CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(COPPER_BLOCK))
 	);
 	public static final Block OXIDIZED_CUT_COPPER_SLAB = register(
-		"oxidized_cut_copper_slab", new WeatheringCopperSlabBlock(BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops())
+		"oxidized_cut_copper_slab",
+		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block WEATHERED_CUT_COPPER_SLAB = register(
 		"weathered_cut_copper_slab",
-		new WeatheringCopperSlabBlock(
-			BlockBehaviour.Properties.copy(WEATHERED_CUT_COPPER).requiresCorrectToolForDrops(), WeatheringCopper.WeatherState.WEATHERED, OXIDIZED_CUT_COPPER_SLAB
-		)
+		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(WEATHERED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block EXPOSED_CUT_COPPER_SLAB = register(
 		"exposed_cut_copper_slab",
-		new WeatheringCopperSlabBlock(
-			BlockBehaviour.Properties.copy(EXPOSED_CUT_COPPER).requiresCorrectToolForDrops(), WeatheringCopper.WeatherState.EXPOSED, WEATHERED_CUT_COPPER_SLAB
-		)
+		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(EXPOSED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block CUT_COPPER_SLAB = register(
 		"cut_copper_slab",
-		new WeatheringCopperSlabBlock(
-			BlockBehaviour.Properties.copy(CUT_COPPER).requiresCorrectToolForDrops(), WeatheringCopper.WeatherState.UNAFFECTED, EXPOSED_CUT_COPPER_SLAB
-		)
+		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.copy(CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block WAXED_COPPER_BLOCK = register("waxed_copper_block", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
 	public static final Block WAXED_WEATHERED_COPPER = register("waxed_weathered_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
@@ -3319,15 +3313,15 @@ public class Blocks {
 				.strength(1.5F, 1.0F)
 		)
 	);
-	public static final Block CAVE_VINES_HEAD = register(
-		"cave_vines_head",
-		new CaveVinesHeadBlock(
-			BlockBehaviour.Properties.of(Material.PLANT).randomTicks().noCollission().lightLevel(glowBerryBlockEmission(10)).instabreak().sound(SoundType.CAVE_VINES)
+	public static final Block CAVE_VINES = register(
+		"cave_vines",
+		new CaveVinesBlock(
+			BlockBehaviour.Properties.of(Material.PLANT).randomTicks().noCollission().lightLevel(glowBerryBlockEmission(14)).instabreak().sound(SoundType.CAVE_VINES)
 		)
 	);
-	public static final Block CAVE_VINES_BODY = register(
-		"cave_vines_body",
-		new CaveVinesBodyBlock(
+	public static final Block CAVE_VINES_PLANT = register(
+		"cave_vines_plant",
+		new CaveVinesPlantBlock(
 			BlockBehaviour.Properties.of(Material.PLANT).noCollission().lightLevel(glowBerryBlockEmission(14)).instabreak().sound(SoundType.CAVE_VINES)
 		)
 	);
@@ -3354,14 +3348,14 @@ public class Blocks {
 		"small_dripleaf",
 		new SmallDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT).strength(0.1F).noCollission().instabreak().sound(SoundType.SMALL_DRIPLEAF))
 	);
-	public static final Block ROOTED_DIRT = register(
-		"rooted_dirt", new Block(BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.DIRT).strength(0.1F).sound(SoundType.ROOTED_DIRT))
-	);
 	public static final Block HANGING_ROOTS = register(
 		"hanging_roots",
 		new HangingRootsBlock(
-			BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.DIRT).noCollission().instabreak().strength(0.1F).sound(SoundType.HANGING_ROOTS)
+			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.DIRT).noCollission().instabreak().strength(0.1F).sound(SoundType.HANGING_ROOTS)
 		)
+	);
+	public static final Block ROOTED_DIRT = register(
+		"rooted_dirt", new RootedDirtBlock(BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.DIRT).strength(0.1F).sound(SoundType.ROOTED_DIRT))
 	);
 	public static final Block DEEPSLATE = register(
 		"deepslate",

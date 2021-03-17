@@ -6,6 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -54,11 +55,11 @@ public class NetherFossilPieces {
 			this.loadTemplate(structureManager);
 		}
 
-		public NetherFossilPiece(StructureManager structureManager, CompoundTag compoundTag) {
+		public NetherFossilPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.NETHER_FOSSIL, compoundTag);
 			this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
 			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-			this.loadTemplate(structureManager);
+			this.loadTemplate(serverLevel.getStructureManager());
 		}
 
 		private void loadTemplate(StructureManager structureManager) {
@@ -71,8 +72,8 @@ public class NetherFossilPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putString("Template", this.templateLocation.toString());
 			compoundTag.putString("Rot", this.rotation.name());
 		}

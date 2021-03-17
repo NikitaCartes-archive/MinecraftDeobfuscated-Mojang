@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
@@ -55,28 +55,19 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public int getSpawnHeight() {
-		BlockState[] blockStates = this.settings.getLayers();
-
-		for (int i = 0; i < blockStates.length; i++) {
-			BlockState blockState = blockStates[i] == null ? Blocks.AIR.defaultBlockState() : blockStates[i];
-			if (!Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
-				return this.settings.getMinBuildHeight() + i - 1;
-			}
-		}
-
-		return this.settings.getMinBuildHeight() + blockStates.length;
+	public int getSpawnHeight(LevelHeightAccessor levelHeightAccessor) {
+		return levelHeightAccessor.getMinBuildHeight() + Math.min(levelHeightAccessor.getHeight(), this.settings.getLayers().size());
 	}
 
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-		BlockState[] blockStates = this.settings.getLayers();
+		List<BlockState> list = this.settings.getLayers();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
 		Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
 
-		for (int i = 0; i < blockStates.length; i++) {
-			BlockState blockState = blockStates[i];
+		for (int i = 0; i < Math.min(chunkAccess.getHeight(), list.size()); i++) {
+			BlockState blockState = (BlockState)list.get(i);
 			if (blockState != null) {
 				int j = chunkAccess.getMinBuildHeight() + i;
 
@@ -95,10 +86,10 @@ public class FlatLevelSource extends ChunkGenerator {
 
 	@Override
 	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
-		BlockState[] blockStates = this.settings.getLayers();
+		List<BlockState> list = this.settings.getLayers();
 
-		for (int k = blockStates.length - 1; k >= 0; k--) {
-			BlockState blockState = blockStates[k];
+		for (int k = Math.min(list.size(), levelHeightAccessor.getMaxBuildHeight()) - 1; k >= 0; k--) {
+			BlockState blockState = (BlockState)list.get(k);
 			if (blockState != null && types.isOpaque().test(blockState)) {
 				return levelHeightAccessor.getMinBuildHeight() + k + 1;
 			}
@@ -110,8 +101,11 @@ public class FlatLevelSource extends ChunkGenerator {
 	@Override
 	public NoiseColumn getBaseColumn(int i, int j, LevelHeightAccessor levelHeightAccessor) {
 		return new NoiseColumn(
-			0,
-			(BlockState[])Arrays.stream(this.settings.getLayers())
+			levelHeightAccessor.getMinBuildHeight(),
+			(BlockState[])this.settings
+				.getLayers()
+				.stream()
+				.limit((long)levelHeightAccessor.getHeight())
 				.map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState)
 				.toArray(BlockState[]::new)
 		);

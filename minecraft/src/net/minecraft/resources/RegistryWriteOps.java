@@ -9,7 +9,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 
 public class RegistryWriteOps<T> extends DelegatingOps<T> {
-	private final RegistryAccess registryHolder;
+	private final RegistryAccess registryAccess;
 
 	public static <T> RegistryWriteOps<T> create(DynamicOps<T> dynamicOps, RegistryAccess registryAccess) {
 		return new RegistryWriteOps<>(dynamicOps, registryAccess);
@@ -17,11 +17,11 @@ public class RegistryWriteOps<T> extends DelegatingOps<T> {
 
 	private RegistryWriteOps(DynamicOps<T> dynamicOps, RegistryAccess registryAccess) {
 		super(dynamicOps);
-		this.registryHolder = registryAccess;
+		this.registryAccess = registryAccess;
 	}
 
 	protected <E> DataResult<T> encode(E object, T object2, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
-		Optional<WritableRegistry<E>> optional = this.registryHolder.ownedRegistry(resourceKey);
+		Optional<WritableRegistry<E>> optional = this.registryAccess.ownedRegistry(resourceKey);
 		if (optional.isPresent()) {
 			WritableRegistry<E> writableRegistry = (WritableRegistry<E>)optional.get();
 			Optional<ResourceKey<E>> optional2 = writableRegistry.getResourceKey(object);

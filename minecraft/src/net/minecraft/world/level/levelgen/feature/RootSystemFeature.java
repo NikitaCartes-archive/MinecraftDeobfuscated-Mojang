@@ -115,8 +115,12 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 
 		for (int k = 0; k < rootSystemConfiguration.hangingRootPlacementAttempts; k++) {
 			mutableBlockPos.setWithOffset(blockPos, random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
-			if (worldGenLevel.isEmptyBlock(mutableBlockPos) && worldGenLevel.getBlockState(mutableBlockPos.above()).getMaterial().isSolid()) {
-				worldGenLevel.setBlock(mutableBlockPos, rootSystemConfiguration.hangingRootStateProvider.getState(random, mutableBlockPos), 2);
+			if (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
+				BlockState blockState = rootSystemConfiguration.hangingRootStateProvider.getState(random, mutableBlockPos);
+				if (blockState.canSurvive(worldGenLevel, mutableBlockPos)
+					&& worldGenLevel.getBlockState(mutableBlockPos.above()).isFaceSturdy(worldGenLevel, mutableBlockPos, Direction.DOWN)) {
+					worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
+				}
 			}
 		}
 	}

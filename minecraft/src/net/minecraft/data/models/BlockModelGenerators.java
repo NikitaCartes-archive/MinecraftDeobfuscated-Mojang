@@ -1314,12 +1314,15 @@ public class BlockModelGenerators {
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_top");
 		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SMALL_DRIPLEAF, "_bottom");
 		this.delegateItemModel(Blocks.SMALL_DRIPLEAF, resourceLocation);
-		List<Variant> list = Arrays.asList(createRotatedVariants(resourceLocation));
-		List<Variant> list2 = Arrays.asList(createRotatedVariants(resourceLocation2));
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(Blocks.SMALL_DRIPLEAF)
-					.with(PropertyDispatch.property(BlockStateProperties.DOUBLE_BLOCK_HALF).select(DoubleBlockHalf.LOWER, list2).select(DoubleBlockHalf.UPPER, list))
+					.with(createHorizontalFacingDispatch())
+					.with(
+						PropertyDispatch.property(BlockStateProperties.DOUBLE_BLOCK_HALF)
+							.select(DoubleBlockHalf.LOWER, Variant.variant().with(VariantProperties.MODEL, resourceLocation2))
+							.select(DoubleBlockHalf.UPPER, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+					)
 			);
 	}
 
@@ -2500,6 +2503,18 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createLightningRod() {
+		Block block = Blocks.LIGHTNING_ROD;
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block, "_on");
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(block);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block)))
+					.with(this.createColumnWithFacing())
+					.with(createBooleanModelDispatch(BlockStateProperties.POWERED, resourceLocation, resourceLocation2))
+			);
+	}
+
 	private void createFarmland() {
 		TextureMapping textureMapping = new TextureMapping()
 			.put(TextureSlot.DIRT, TextureMapping.getBlockTexture(Blocks.DIRT))
@@ -3014,18 +3029,17 @@ public class BlockModelGenerators {
 	}
 
 	private void createCaveVines() {
-		ResourceLocation resourceLocation = this.createSuffixedVariant(Blocks.CAVE_VINES_HEAD, "", ModelTemplates.CROSS, TextureMapping::cross);
-		ResourceLocation resourceLocation2 = this.createSuffixedVariant(Blocks.CAVE_VINES_HEAD, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation = this.createSuffixedVariant(Blocks.CAVE_VINES, "", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation2 = this.createSuffixedVariant(Blocks.CAVE_VINES, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
 		this.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES_HEAD)
-					.with(createBooleanModelDispatch(BlockStateProperties.BERRIES, resourceLocation2, resourceLocation))
+				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES).with(createBooleanModelDispatch(BlockStateProperties.BERRIES, resourceLocation2, resourceLocation))
 			);
-		ResourceLocation resourceLocation3 = this.createSuffixedVariant(Blocks.CAVE_VINES_BODY, "", ModelTemplates.CROSS, TextureMapping::cross);
-		ResourceLocation resourceLocation4 = this.createSuffixedVariant(Blocks.CAVE_VINES_BODY, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation3 = this.createSuffixedVariant(Blocks.CAVE_VINES_PLANT, "", ModelTemplates.CROSS, TextureMapping::cross);
+		ResourceLocation resourceLocation4 = this.createSuffixedVariant(Blocks.CAVE_VINES_PLANT, "_lit", ModelTemplates.CROSS, TextureMapping::cross);
 		this.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES_BODY)
+				MultiVariantGenerator.multiVariant(Blocks.CAVE_VINES_PLANT)
 					.with(createBooleanModelDispatch(BlockStateProperties.BERRIES, resourceLocation4, resourceLocation3))
 			);
 	}
@@ -3757,7 +3771,7 @@ public class BlockModelGenerators {
 		this.createDaylightDetector();
 		this.createEndPortalFrame();
 		this.createRotatableColumn(Blocks.END_ROD);
-		this.createRotatableColumn(Blocks.LIGHTNING_ROD);
+		this.createLightningRod();
 		this.createFarmland();
 		this.createFire();
 		this.createSoulFire();
@@ -4074,7 +4088,7 @@ public class BlockModelGenerators {
 		this.skipAutoItemBlock(Blocks.KELP_PLANT);
 		this.createCrossBlock(Blocks.HANGING_ROOTS, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createSimpleFlatItemModel(Blocks.HANGING_ROOTS);
-		this.skipAutoItemBlock(Blocks.CAVE_VINES_BODY);
+		this.skipAutoItemBlock(Blocks.CAVE_VINES_PLANT);
 		this.createGrowingPlant(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createGrowingPlant(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createSimpleFlatItemModel(Blocks.WEEPING_VINES, "_plant");

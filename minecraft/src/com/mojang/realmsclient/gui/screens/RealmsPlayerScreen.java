@@ -18,6 +18,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -222,6 +223,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		int k = row(12) + 20;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, OPTIONS_BACKGROUND);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float g = 32.0F;

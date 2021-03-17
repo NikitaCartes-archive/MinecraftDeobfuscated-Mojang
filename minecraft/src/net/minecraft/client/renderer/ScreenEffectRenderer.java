@@ -32,7 +32,7 @@ public class ScreenEffectRenderer {
 		if (!player.noPhysics) {
 			BlockState blockState = getViewBlockingState(player);
 			if (blockState != null) {
-				renderTex(minecraft, minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
+				renderTex(minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
 			}
 		}
 
@@ -65,8 +65,9 @@ public class ScreenEffectRenderer {
 		return null;
 	}
 
-	private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
+	private static void renderTex(TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
 		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		float f = 0.1F;
 		float g = -1.0F;

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -29,7 +30,6 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class StrongholdPieces {
@@ -192,14 +192,14 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public ChestCorridor(StructureManager structureManager, CompoundTag compoundTag) {
+		public ChestCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, compoundTag);
 			this.hasPlacedChest = compoundTag.getBoolean("Chest");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("Chest", this.hasPlacedChest);
 		}
 
@@ -257,14 +257,14 @@ public class StrongholdPieces {
 			this.steps = direction != Direction.NORTH && direction != Direction.SOUTH ? boundingBox.getXSpan() : boundingBox.getZSpan();
 		}
 
-		public FillerCorridor(StructureManager structureManager, CompoundTag compoundTag) {
+		public FillerCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, compoundTag);
 			this.steps = compoundTag.getInt("Steps");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putInt("Steps", this.steps);
 		}
 
@@ -341,7 +341,7 @@ public class StrongholdPieces {
 			this.rightHigh = random.nextInt(3) > 0;
 		}
 
-		public FiveCrossing(StructureManager structureManager, CompoundTag compoundTag) {
+		public FiveCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, compoundTag);
 			this.leftLow = compoundTag.getBoolean("leftLow");
 			this.leftHigh = compoundTag.getBoolean("leftHigh");
@@ -350,8 +350,8 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("leftLow", this.leftLow);
 			compoundTag.putBoolean("leftHigh", this.leftHigh);
 			compoundTag.putBoolean("rightLow", this.rightLow);
@@ -472,7 +472,7 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public LeftTurn(StructureManager structureManager, CompoundTag compoundTag) {
+		public LeftTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_LEFT_TURN, compoundTag);
 		}
 
@@ -527,14 +527,14 @@ public class StrongholdPieces {
 			this.isTall = boundingBox.getYSpan() > 6;
 		}
 
-		public Library(StructureManager structureManager, CompoundTag compoundTag) {
+		public Library(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_LIBRARY, compoundTag);
 			this.isTall = compoundTag.getBoolean("Tall");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("Tall", this.isTall);
 		}
 
@@ -739,14 +739,14 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public PortalRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public PortalRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, compoundTag);
 			this.hasPlacedSpawner = compoundTag.getBoolean("Mob");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("Mob", this.hasPlacedSpawner);
 		}
 
@@ -878,7 +878,7 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public PrisonHall(StructureManager structureManager, CompoundTag compoundTag) {
+		public PrisonHall(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_PRISON_HALL, compoundTag);
 		}
 
@@ -1001,7 +1001,7 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public RightTurn(StructureManager structureManager, CompoundTag compoundTag) {
+		public RightTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_RIGHT_TURN, compoundTag);
 		}
 
@@ -1056,14 +1056,14 @@ public class StrongholdPieces {
 			this.type = random.nextInt(5);
 		}
 
-		public RoomCrossing(StructureManager structureManager, CompoundTag compoundTag) {
+		public RoomCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, compoundTag);
 			this.type = compoundTag.getInt("Type");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putInt("Type", this.type);
 		}
 
@@ -1231,13 +1231,13 @@ public class StrongholdPieces {
 			this.isSource = compoundTag.getBoolean("Source");
 		}
 
-		public StairsDown(StructureManager structureManager, CompoundTag compoundTag) {
+		public StairsDown(ServerLevel serverLevel, CompoundTag compoundTag) {
 			this(StructurePieceType.STRONGHOLD_STAIRS_DOWN, compoundTag);
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("Source", this.isSource);
 		}
 
@@ -1301,7 +1301,7 @@ public class StrongholdPieces {
 			super(StructurePieceType.STRONGHOLD_START, 0, random, i, j);
 		}
 
-		public StartPiece(StructureManager structureManager, CompoundTag compoundTag) {
+		public StartPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_START, compoundTag);
 		}
 	}
@@ -1319,15 +1319,15 @@ public class StrongholdPieces {
 			this.rightChild = random.nextInt(2) == 0;
 		}
 
-		public Straight(StructureManager structureManager, CompoundTag compoundTag) {
+		public Straight(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_STRAIGHT, compoundTag);
 			this.leftChild = compoundTag.getBoolean("Left");
 			this.rightChild = compoundTag.getBoolean("Right");
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("Left", this.leftChild);
 			compoundTag.putBoolean("Right", this.rightChild);
 		}
@@ -1390,7 +1390,7 @@ public class StrongholdPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public StraightStairsDown(StructureManager structureManager, CompoundTag compoundTag) {
+		public StraightStairsDown(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, compoundTag);
 		}
 
@@ -1454,7 +1454,7 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 			compoundTag.putString("EntryDoor", this.entryDoor.name());
 		}
 

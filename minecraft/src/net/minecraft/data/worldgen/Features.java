@@ -14,10 +14,12 @@ import net.minecraft.util.ClampedNormalFloat;
 import net.minecraft.util.UniformFloat;
 import net.minecraft.util.UniformInt;
 import net.minecraft.world.entity.ai.behavior.WeightedList;
+import net.minecraft.world.level.block.BigDripleafBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVinesBodyBlock;
-import net.minecraft.world.level.block.CaveVinesHeadBlock;
+import net.minecraft.world.level.block.CaveVinesBlock;
+import net.minecraft.world.level.block.CaveVinesPlantBlock;
 import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.SmallDripleafBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,7 +33,6 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
-import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.blockplacers.ColumnPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.DoublePlantPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.SimpleBlockPlacer;
@@ -898,7 +899,7 @@ public class Features {
 		"ore_redstone_lower", Feature.ORE.configured(ORE_REDSTONE_CONFIG).depthAverage(VerticalAnchor.bottom(), 32).squared().count(8)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_DIAMOND = register(
-		"ore_diamond", Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5F)).depthAverage(VerticalAnchor.bottom(), 80).squared().count(5)
+		"ore_diamond", Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5F)).depthAverage(VerticalAnchor.bottom(), 80).squared().count(6)
 	);
 	public static final ConfiguredFeature<?, ?> ORE_LAPIS = register(
 		"ore_lapis", Feature.ORE.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7)).depthAverage(VerticalAnchor.absolute(0), 32).squared().count(2)
@@ -1641,13 +1642,13 @@ public class Features {
 			.rarity(2)
 	);
 	private static final WeightedStateProvider CAVE_VINES_BODY_PROVIDER = new WeightedStateProvider()
-		.add(Blocks.CAVE_VINES_BODY.defaultBlockState(), 4)
-		.add(Blocks.CAVE_VINES_BODY.defaultBlockState().setValue(CaveVinesBodyBlock.BERRIES, Boolean.valueOf(true)), 1);
+		.add(Blocks.CAVE_VINES_PLANT.defaultBlockState(), 4)
+		.add(Blocks.CAVE_VINES_PLANT.defaultBlockState().setValue(CaveVinesPlantBlock.BERRIES, Boolean.valueOf(true)), 1);
 	private static final RandomizedIntStateProvider CAVE_VINES_HEAD_PROVIDER = new RandomizedIntStateProvider(
 		new WeightedStateProvider()
-			.add(Blocks.CAVE_VINES_HEAD.defaultBlockState(), 4)
-			.add(Blocks.CAVE_VINES_HEAD.defaultBlockState().setValue(CaveVinesBodyBlock.BERRIES, Boolean.valueOf(true)), 1),
-		CaveVinesHeadBlock.AGE,
+			.add(Blocks.CAVE_VINES.defaultBlockState(), 4)
+			.add(Blocks.CAVE_VINES.defaultBlockState().setValue(CaveVinesPlantBlock.BERRIES, Boolean.valueOf(true)), 1),
+		CaveVinesBlock.AGE,
 		UniformInt.of(17, 8)
 	);
 	public static final ConfiguredFeature<GrowingPlantConfiguration, ?> CAVE_VINE = register(
@@ -1740,20 +1741,18 @@ public class Features {
 			.squared()
 			.count(40)
 	);
-	public static final ConfiguredFeature<RandomFeatureConfiguration, ?> DRIPLEAF = register(
+	public static final ConfiguredFeature<SimpleRandomFeatureConfiguration, ?> DRIPLEAF = register(
 		"dripleaf",
-		Feature.RANDOM_SELECTOR
+		Feature.SIMPLE_RANDOM_SELECTOR
 			.configured(
-				new RandomFeatureConfiguration(
+				new SimpleRandomFeatureConfiguration(
 					ImmutableList.of(
-						new WeightedConfiguredFeature(
-							Feature.SIMPLE_BLOCK.configured(new SimpleBlockConfiguration(new SimpleStateProvider(Blocks.SMALL_DRIPLEAF.defaultBlockState()))), 0.5F
-						),
-						new WeightedConfiguredFeature(makeDripleaf(Direction.EAST), 0.25F),
-						new WeightedConfiguredFeature(makeDripleaf(Direction.SOUTH), 0.33333334F),
-						new WeightedConfiguredFeature(makeDripleaf(Direction.WEST), 0.5F)
-					),
-					makeDripleaf(Direction.NORTH)
+						Features::makeSmallDripleaf,
+						() -> makeDripleaf(Direction.EAST),
+						() -> makeDripleaf(Direction.WEST),
+						() -> makeDripleaf(Direction.SOUTH),
+						() -> makeDripleaf(Direction.NORTH)
+					)
 				)
 			)
 	);
@@ -1879,7 +1878,7 @@ public class Features {
 			.rarity(30)
 	);
 
-	private static final ConfiguredFeature<GrowingPlantConfiguration, ?> makeDripleaf(Direction direction) {
+	private static ConfiguredFeature<GrowingPlantConfiguration, ?> makeDripleaf(Direction direction) {
 		return Feature.GROWING_PLANT
 			.configured(
 				new GrowingPlantConfiguration(
@@ -1888,6 +1887,19 @@ public class Features {
 					new SimpleStateProvider(Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction)),
 					new SimpleStateProvider(Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction)),
 					true
+				)
+			);
+	}
+
+	private static ConfiguredFeature<SimpleBlockConfiguration, ?> makeSmallDripleaf() {
+		return Feature.SIMPLE_BLOCK
+			.configured(
+				new SimpleBlockConfiguration(
+					new WeightedStateProvider()
+						.add(Features.States.SMALL_DRIPLEAF_EAST, 1)
+						.add(Features.States.SMALL_DRIPLEAF_WEST, 1)
+						.add(Features.States.SMALL_DRIPLEAF_NORTH, 1)
+						.add(Features.States.SMALL_DRIPLEAF_SOUTH, 1)
 				)
 			);
 	}
@@ -2103,5 +2115,13 @@ public class Features {
 		protected static final BlockState SMOOTH_BASALT = Blocks.SMOOTH_BASALT.defaultBlockState();
 		protected static final BlockState TUFF = Blocks.TUFF.defaultBlockState();
 		protected static final BlockState SPORE_BLOSSOM = Blocks.SPORE_BLOSSOM.defaultBlockState();
+		protected static final BlockState SMALL_DRIPLEAF_EAST = Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.EAST);
+		protected static final BlockState SMALL_DRIPLEAF_WEST = Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.WEST);
+		protected static final BlockState SMALL_DRIPLEAF_NORTH = Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.NORTH);
+		protected static final BlockState SMALL_DRIPLEAF_SOUTH = Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.SOUTH);
+		protected static final BlockState BIG_DRIPLEAF_EAST = Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.EAST);
+		protected static final BlockState BIG_DRIPLEAF_WEST = Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.WEST);
+		protected static final BlockState BIG_DRIPLEAF_NORTH = Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.NORTH);
+		protected static final BlockState BIG_DRIPLEAF_SOUTH = Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.SOUTH);
 	}
 }

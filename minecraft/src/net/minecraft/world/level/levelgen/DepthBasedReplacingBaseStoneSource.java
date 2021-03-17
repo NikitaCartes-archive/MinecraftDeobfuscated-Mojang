@@ -20,9 +20,13 @@ public class DepthBasedReplacingBaseStoneSource implements BaseStoneSource {
 	public BlockState getBaseStone(int i, int j, int k, NoiseGeneratorSettings noiseGeneratorSettings) {
 		if (!noiseGeneratorSettings.isDeepslateEnabled()) {
 			return this.normalBlock;
+		} else if (j < -8) {
+			return this.replacementBlock;
+		} else if (j > 0) {
+			return this.normalBlock;
 		} else {
+			double d = Mth.map((double)j, -8.0, 0.0, 1.0, 0.0);
 			this.random.setBaseStoneSeed(this.seed, i, j, k);
-			double d = Mth.clampedMap((double)j, -8.0, 0.0, 1.0, 0.0);
 			return (double)this.random.nextFloat() < d ? this.replacementBlock : this.normalBlock;
 		}
 	}

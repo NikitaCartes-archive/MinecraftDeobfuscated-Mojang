@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.level.BlockGetter;
@@ -29,7 +30,6 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,7 +86,7 @@ public class MineShaftPieces {
 		private boolean hasPlacedSpider;
 		private final int numSections;
 
-		public MineShaftCorridor(StructureManager structureManager, CompoundTag compoundTag) {
+		public MineShaftCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.MINE_SHAFT_CORRIDOR, compoundTag);
 			this.hasRails = compoundTag.getBoolean("hr");
 			this.spiderCorridor = compoundTag.getBoolean("sc");
@@ -95,8 +95,8 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("hr", this.hasRails);
 			compoundTag.putBoolean("sc", this.spiderCorridor);
 			compoundTag.putBoolean("hps", this.hasPlacedSpider);
@@ -465,15 +465,15 @@ public class MineShaftPieces {
 		private final Direction direction;
 		private final boolean isTwoFloored;
 
-		public MineShaftCrossing(StructureManager structureManager, CompoundTag compoundTag) {
+		public MineShaftCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.MINE_SHAFT_CROSSING, compoundTag);
 			this.isTwoFloored = compoundTag.getBoolean("tf");
 			this.direction = Direction.from2DDataValue(compoundTag.getInt("D"));
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			compoundTag.putBoolean("tf", this.isTwoFloored);
 			compoundTag.putInt("D", this.direction.get2DDataValue());
 		}
@@ -737,7 +737,7 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 			compoundTag.putInt("MST", this.type.ordinal());
 		}
 
@@ -819,7 +819,7 @@ public class MineShaftPieces {
 			this.boundingBox = new BoundingBox(j, 50, k, j + 7 + random.nextInt(6), 54 + random.nextInt(6), k + 7 + random.nextInt(6));
 		}
 
-		public MineShaftRoom(StructureManager structureManager, CompoundTag compoundTag) {
+		public MineShaftRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.MINE_SHAFT_ROOM, compoundTag);
 			BoundingBox.CODEC
 				.listOf()
@@ -995,8 +995,8 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		protected void addAdditionalSaveData(CompoundTag compoundTag) {
-			super.addAdditionalSaveData(compoundTag);
+		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+			super.addAdditionalSaveData(serverLevel, compoundTag);
 			BoundingBox.CODEC
 				.listOf()
 				.encodeStart(NbtOps.INSTANCE, this.childEntranceBoxes)
@@ -1012,7 +1012,7 @@ public class MineShaftPieces {
 			this.boundingBox = boundingBox;
 		}
 
-		public MineShaftStairs(StructureManager structureManager, CompoundTag compoundTag) {
+		public MineShaftStairs(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.MINE_SHAFT_STAIRS, compoundTag);
 		}
 

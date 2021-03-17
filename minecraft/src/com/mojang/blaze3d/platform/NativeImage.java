@@ -257,6 +257,11 @@ public final class NativeImage implements AutoCloseable {
 		GlStateManager._pixelStore(3315, m);
 		this.format.setUnpackPixelStoreState();
 		GlStateManager._texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
+		if (bl2) {
+			GlStateManager._texParameter(3553, 10242, 33071);
+			GlStateManager._texParameter(3553, 10242, 33071);
+		}
+
 		if (bl4) {
 			this.close();
 		}

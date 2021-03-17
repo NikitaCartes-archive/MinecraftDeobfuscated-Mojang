@@ -133,19 +133,15 @@ public abstract class RegistryAccess {
 		}
 	}
 
-	public static void load(RegistryAccess.RegistryHolder registryHolder, RegistryReadOps<?> registryReadOps) {
+	public static void load(RegistryAccess registryAccess, RegistryReadOps<?> registryReadOps) {
 		for (RegistryAccess.RegistryData<?> registryData : REGISTRIES.values()) {
-			readRegistry(registryReadOps, registryHolder, registryData);
+			readRegistry(registryReadOps, registryAccess, registryData);
 		}
 	}
 
-	private static <E> void readRegistry(
-		RegistryReadOps<?> registryReadOps, RegistryAccess.RegistryHolder registryHolder, RegistryAccess.RegistryData<E> registryData
-	) {
+	private static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryAccess registryAccess, RegistryAccess.RegistryData<E> registryData) {
 		ResourceKey<? extends Registry<E>> resourceKey = registryData.key();
-		MappedRegistry<E> mappedRegistry = (MappedRegistry<E>)Optional.ofNullable(registryHolder.registries.get(resourceKey))
-			.map(mappedRegistryx -> mappedRegistryx)
-			.orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
+		MappedRegistry<E> mappedRegistry = (MappedRegistry<E>)registryAccess.<E>ownedRegistryOrThrow(resourceKey);
 		DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry, registryData.key(), registryData.codec());
 		dataResult.error().ifPresent(partialResult -> LOGGER.error("Error loading registry data: {}", partialResult.message()));
 	}

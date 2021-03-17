@@ -110,7 +110,7 @@ public class Main {
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
 			MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
 			LevelSummary levelSummary = levelStorageAccess.getSummary();
-			if (levelSummary != null && levelSummary.isPreWorldheight()) {
+			if (levelSummary != null && levelSummary.isIncompatibleWorldHeight()) {
 				LOGGER.info("Loading of old worlds is temporarily disabled.");
 				return;
 			}

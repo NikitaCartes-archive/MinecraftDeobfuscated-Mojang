@@ -179,12 +179,7 @@ public class PickaxeItem extends DiggerItem {
 				Blocks.GOLD_ORE,
 				Blocks.DEEPSLATE_GOLD_ORE,
 				Blocks.REDSTONE_ORE,
-				Blocks.DEEPSLATE_REDSTONE_ORE,
-				Blocks.AMETHYST_BLOCK,
-				Blocks.AMETHYST_CLUSTER,
-				Blocks.SMALL_AMETHYST_BUD,
-				Blocks.MEDIUM_AMETHYST_BUD,
-				Blocks.LARGE_AMETHYST_BUD
+				Blocks.DEEPSLATE_REDSTONE_ORE
 			)) {
 				object2IntOpenHashMap.put(block, 2);
 			}

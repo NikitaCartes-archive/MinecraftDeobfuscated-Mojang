@@ -7,6 +7,8 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public interface StrictQueue<T, F> {
 	@Nullable
@@ -15,6 +17,9 @@ public interface StrictQueue<T, F> {
 	boolean push(T object);
 
 	boolean isEmpty();
+
+	@Environment(EnvType.CLIENT)
+	int size();
 
 	public static final class FixedPriorityQueue implements StrictQueue<StrictQueue.IntRunnable, Runnable> {
 		private final List<Queue<Runnable>> queueList;
@@ -44,6 +49,18 @@ public interface StrictQueue<T, F> {
 		@Override
 		public boolean isEmpty() {
 			return this.queueList.stream().allMatch(Collection::isEmpty);
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public int size() {
+			int i = 0;
+
+			for (Queue<Runnable> queue : this.queueList) {
+				i += queue.size();
+			}
+
+			return i;
 		}
 	}
 
@@ -86,6 +103,12 @@ public interface StrictQueue<T, F> {
 		@Override
 		public boolean isEmpty() {
 			return this.queue.isEmpty();
+		}
+
+		@Environment(EnvType.CLIENT)
+		@Override
+		public int size() {
+			return this.queue.size();
 		}
 	}
 }

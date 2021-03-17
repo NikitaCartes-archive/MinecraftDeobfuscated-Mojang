@@ -162,12 +162,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 
 		@Environment(EnvType.CLIENT)
 		@Override
-		public boolean isApplying() {
-			return false;
-		}
-
-		@Environment(EnvType.CLIENT)
-		@Override
 		public boolean isDone() {
 			return true;
 		}

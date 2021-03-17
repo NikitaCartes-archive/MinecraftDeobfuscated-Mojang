@@ -1,6 +1,7 @@
 package net.minecraft.util.profiling;
 
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -50,5 +51,12 @@ public class InactiveProfiler implements ProfileCollector {
 	@Override
 	public ProfileResults getResults() {
 		return EmptyProfileResults.EMPTY;
+	}
+
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ActiveProfiler.PathEntry getEntry(String string) {
+		return null;
 	}
 }

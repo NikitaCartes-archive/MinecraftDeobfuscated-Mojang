@@ -237,7 +237,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 					if (bl2) {
 						this.screen.setToolTip(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
 					}
-				} else if (this.summary.isPreWorldheight()) {
+				} else if (this.summary.isIncompatibleWorldHeight()) {
 					GuiComponent.blit(poseStack, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
 					if (bl2) {
 						this.screen.setToolTip(this.minecraft.font.split(WorldSelectionList.WORLD_PRE_WORLDHEIGHT_TOOLTIP, 175));
