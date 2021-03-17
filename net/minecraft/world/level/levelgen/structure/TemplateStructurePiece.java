@@ -11,6 +11,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -53,7 +54,7 @@ extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compoundTag) {
+    protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
         compoundTag.putInt("TPX", this.templatePosition.getX());
         compoundTag.putInt("TPY", this.templatePosition.getY());
         compoundTag.putInt("TPZ", this.templatePosition.getZ());

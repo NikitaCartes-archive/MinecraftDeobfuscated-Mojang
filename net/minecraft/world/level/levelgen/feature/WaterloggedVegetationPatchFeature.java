@@ -40,7 +40,7 @@ extends VegetationPatchFeature {
     }
 
     private static boolean isExposed(WorldGenLevel worldGenLevel, Set<BlockPos> set, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos) {
-        return WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.NORTH) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.EAST) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.SOUTH) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.WEST);
+        return WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.NORTH) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.EAST) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.SOUTH) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.WEST) || WaterloggedVegetationPatchFeature.isExposedDirection(worldGenLevel, blockPos, mutableBlockPos, Direction.DOWN);
     }
 
     private static boolean isExposedDirection(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos, Direction direction) {

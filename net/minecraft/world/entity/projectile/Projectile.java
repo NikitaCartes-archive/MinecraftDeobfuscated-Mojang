@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Projectile
 extends Entity {
     private UUID ownerUUID;
-    private int ownerNetworkId;
     private boolean leftOwner;
     private boolean hasBeenShot;
 
@@ -36,7 +35,6 @@ extends Entity {
     public void setOwner(@Nullable Entity entity) {
         if (entity != null) {
             this.ownerUUID = entity.getUUID();
-            this.ownerNetworkId = entity.getId();
         }
     }
 
@@ -44,9 +42,6 @@ extends Entity {
     public Entity getOwner() {
         if (this.ownerUUID != null && this.level instanceof ServerLevel) {
             return ((ServerLevel)this.level).getEntity(this.ownerUUID);
-        }
-        if (this.ownerNetworkId != 0) {
-            return this.level.getEntity(this.ownerNetworkId);
         }
         return null;
     }
@@ -60,6 +55,10 @@ extends Entity {
             compoundTag.putBoolean("LeftOwner", true);
         }
         compoundTag.putBoolean("HasBeenShot", this.hasBeenShot);
+    }
+
+    protected boolean ownedBy(Entity entity) {
+        return entity.getUUID().equals(this.ownerUUID);
     }
 
     @Override

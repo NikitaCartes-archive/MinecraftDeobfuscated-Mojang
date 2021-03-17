@@ -8,11 +8,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -155,18 +156,18 @@ implements ProfileResults {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    public boolean saveResults(File file) {
+    public boolean saveResults(Path path) {
         boolean bl;
-        file.getParentFile().mkdirs();
-        OutputStreamWriter writer = null;
+        BufferedWriter writer = null;
         try {
-            writer = new OutputStreamWriter((OutputStream)new FileOutputStream(file), StandardCharsets.UTF_8);
+            Files.createDirectories(path.getParent(), new FileAttribute[0]);
+            writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, new OpenOption[0]);
             writer.write(this.getProfilerResults(this.getNanoDuration(), this.getTickDuration()));
             bl = true;
         } catch (Throwable throwable) {
             boolean bl2;
             try {
-                LOGGER.error("Could not save profiler results to {}", (Object)file, (Object)throwable);
+                LOGGER.error("Could not save profiler results to {}", (Object)path, (Object)throwable);
                 bl2 = false;
             } catch (Throwable throwable2) {
                 IOUtils.closeQuietly(writer);

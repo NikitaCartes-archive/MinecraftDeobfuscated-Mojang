@@ -85,7 +85,7 @@ extends Feature<VegetationPatchConfiguration> {
     }
 
     protected boolean placeVegetation(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-        return vegetationPatchConfiguration.vegetationFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos.above());
+        return vegetationPatchConfiguration.vegetationFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos.relative(vegetationPatchConfiguration.surface.getDirection().getOpposite()));
     }
 
     protected boolean placeGround(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Predicate<BlockState> predicate, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i) {

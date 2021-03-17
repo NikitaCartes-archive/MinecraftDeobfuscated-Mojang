@@ -19,12 +19,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -37,11 +40,12 @@ extends DoublePlantBlock
 implements BonemealableBlock,
 SimpleWaterloggedBlock {
     private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 13.0, 14.0);
 
     public SmallDripleafBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(HALF, DoubleBlockHalf.LOWER)).setValue(WATERLOGGED, false));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(HALF, DoubleBlockHalf.LOWER)).setValue(WATERLOGGED, false)).setValue(FACING, Direction.NORTH));
     }
 
     @Override
@@ -60,14 +64,15 @@ SimpleWaterloggedBlock {
         BlockState blockState = super.getStateForPlacement(blockPlaceContext);
         if (blockState != null) {
             FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-            return (BlockState)blockState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+            return (BlockState)((BlockState)blockState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)).setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
         }
         return null;
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        level.setBlock(blockPos.above(), (BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(WATERLOGGED, level.isWaterAt(blockPos.above())), 3);
+        Direction direction = blockState.getValue(FACING);
+        level.setBlock(blockPos.above(), (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER)).setValue(WATERLOGGED, level.isWaterAt(blockPos.above()))).setValue(FACING, direction), 3);
     }
 
     @Override
@@ -98,7 +103,7 @@ SimpleWaterloggedBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HALF, WATERLOGGED);
+        builder.add(HALF, WATERLOGGED, FACING);
     }
 
     @Override
@@ -114,11 +119,21 @@ SimpleWaterloggedBlock {
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
         if (blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER) {
-            BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos);
+            BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos, blockState.getValue(FACING));
         } else {
             BlockPos blockPos2 = blockPos.below();
             this.performBonemeal(serverLevel, random, blockPos2, serverLevel.getBlockState(blockPos2));
         }
+    }
+
+    @Override
+    public BlockState rotate(BlockState blockState, Rotation rotation) {
+        return (BlockState)blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
+    }
+
+    @Override
+    public BlockState mirror(BlockState blockState, Mirror mirror) {
+        return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
     }
 }
 

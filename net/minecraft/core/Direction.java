@@ -451,7 +451,7 @@ public enum Direction implements StringRepresentable
             }
         };
 
-        private static final Axis[] VALUES;
+        public static final Axis[] VALUES;
         public static final Codec<Axis> CODEC;
         private static final Map<String, Axis> BY_NAME;
         private final String name;

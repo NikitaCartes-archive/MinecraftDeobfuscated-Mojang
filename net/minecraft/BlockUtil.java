@@ -6,9 +6,13 @@ package net.minecraft;
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockUtil {
     public static FoundRectangle getLargestRectangleAround(BlockPos blockPos, Direction.Axis axis, int i, Direction.Axis axis2, int j, Predicate<BlockPos> predicate) {
@@ -95,6 +99,18 @@ public class BlockUtil {
             intStack.push(l);
         }
         return new Pair<IntBounds, Integer>(new IntBounds(i, j - 1), k);
+    }
+
+    public static Optional<BlockPos> getTopConnectedBlock(BlockGetter blockGetter, BlockPos blockPos, Block block, Direction direction, Block block2) {
+        BlockState blockState;
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        do {
+            mutableBlockPos.move(direction);
+        } while ((blockState = blockGetter.getBlockState(mutableBlockPos)).is(block));
+        if (blockState.is(block2)) {
+            return Optional.of(mutableBlockPos);
+        }
+        return Optional.empty();
     }
 
     public static class FoundRectangle {

@@ -73,9 +73,9 @@ extends BushBlock {
         return super.canSurvive(blockState, levelReader, blockPos);
     }
 
-    public void placeAt(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-        levelAccessor.setBlock(blockPos, (BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.LOWER), i);
-        levelAccessor.setBlock(blockPos.above(), (BlockState)this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER), i);
+    public void placeAt(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, int i) {
+        levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HALF, DoubleBlockHalf.LOWER), i);
+        levelAccessor.setBlock(blockPos.above(), (BlockState)blockState.setValue(HALF, DoubleBlockHalf.UPPER), i);
     }
 
     @Override

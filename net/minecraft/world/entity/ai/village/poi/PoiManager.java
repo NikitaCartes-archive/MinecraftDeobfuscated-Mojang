@@ -96,6 +96,10 @@ extends SectionStorage<PoiSection> {
         return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).min(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos)));
     }
 
+    public Optional<BlockPos> findClosest(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, Occupancy occupancy) {
+        return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).filter(predicate2).min(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos)));
+    }
+
     public Optional<BlockPos> take(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i) {
         return this.getInRange(predicate, blockPos, i, Occupancy.HAS_SPACE).filter(poiRecord -> predicate2.test(poiRecord.getPos())).findFirst().map(poiRecord -> {
             poiRecord.acquireTicket();

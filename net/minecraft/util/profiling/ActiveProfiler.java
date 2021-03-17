@@ -156,14 +156,18 @@ implements ProfileCollector {
         return new FilledProfileResults(this.entries, this.startTimeNano, this.startTimeTicks, this.getRealTime.getAsLong(), this.getTickTime.getAsInt());
     }
 
-    static class PathEntry
+    @Override
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    public PathEntry getEntry(String string) {
+        return this.entries.get(string);
+    }
+
+    public static class PathEntry
     implements ProfilerPathEntry {
         private long duration;
         private long count;
         private final Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap();
-
-        private PathEntry() {
-        }
 
         @Override
         public long getDuration() {

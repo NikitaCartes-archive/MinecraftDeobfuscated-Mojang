@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -96,7 +97,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public CompoundTag createTag(ChunkPos chunkPos) {
+    public CompoundTag createTag(ServerLevel serverLevel, ChunkPos chunkPos) {
         CompoundTag compoundTag = new CompoundTag();
         if (!this.isValid()) {
             compoundTag.putString("id", "INVALID");
@@ -111,7 +112,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
         List<StructurePiece> list = this.pieces;
         synchronized (list) {
             for (StructurePiece structurePiece : this.pieces) {
-                listTag.add(structurePiece.createTag());
+                listTag.add(structurePiece.createTag(serverLevel));
             }
         }
         compoundTag.put("Children", listTag);

@@ -141,7 +141,7 @@ public class ChunkSerializer {
         }
         Heightmap.primeHeightmaps(chunkAccess, enumSet);
         CompoundTag compoundTag3 = compoundTag2.getCompound("Structures");
-        chunkAccess.setAllStarts(ChunkSerializer.unpackStructureStart(structureManager, compoundTag3, serverLevel.getSeed()));
+        chunkAccess.setAllStarts(ChunkSerializer.unpackStructureStart(serverLevel, compoundTag3, serverLevel.getSeed()));
         chunkAccess.setAllReferences(ChunkSerializer.unpackStructureReferences(chunkPos, compoundTag3));
         if (compoundTag2.getBoolean("shouldSave")) {
             chunkAccess.setUnsaved(true);
@@ -272,7 +272,7 @@ public class ChunkSerializer {
             compoundTag4.put(((Heightmap.Types)entry.getKey()).getSerializationKey(), new LongArrayTag(((Heightmap)entry.getValue()).getRawData()));
         }
         compoundTag2.put("Heightmaps", compoundTag4);
-        compoundTag2.put("Structures", ChunkSerializer.packStructureData(chunkPos, chunkAccess.getAllStarts(), chunkAccess.getAllReferences()));
+        compoundTag2.put("Structures", ChunkSerializer.packStructureData(serverLevel, chunkPos, chunkAccess.getAllStarts(), chunkAccess.getAllReferences()));
         return compoundTag;
     }
 
@@ -304,11 +304,11 @@ public class ChunkSerializer {
         }
     }
 
-    private static CompoundTag packStructureData(ChunkPos chunkPos, Map<StructureFeature<?>, StructureStart<?>> map, Map<StructureFeature<?>, LongSet> map2) {
+    private static CompoundTag packStructureData(ServerLevel serverLevel, ChunkPos chunkPos, Map<StructureFeature<?>, StructureStart<?>> map, Map<StructureFeature<?>, LongSet> map2) {
         CompoundTag compoundTag = new CompoundTag();
         CompoundTag compoundTag2 = new CompoundTag();
         for (Map.Entry<StructureFeature<?>, StructureStart<?>> entry : map.entrySet()) {
-            compoundTag2.put(entry.getKey().getFeatureName(), entry.getValue().createTag(chunkPos));
+            compoundTag2.put(entry.getKey().getFeatureName(), entry.getValue().createTag(serverLevel, chunkPos));
         }
         compoundTag.put("Starts", compoundTag2);
         CompoundTag compoundTag3 = new CompoundTag();
@@ -319,7 +319,7 @@ public class ChunkSerializer {
         return compoundTag;
     }
 
-    private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
+    private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(ServerLevel serverLevel, CompoundTag compoundTag, long l) {
         HashMap<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
         CompoundTag compoundTag2 = compoundTag.getCompound("Starts");
         for (String string : compoundTag2.getAllKeys()) {
@@ -329,7 +329,7 @@ public class ChunkSerializer {
                 LOGGER.error("Unknown structure start: {}", (Object)string2);
                 continue;
             }
-            StructureStart<?> structureStart = StructureFeature.loadStaticStart(structureManager, compoundTag2.getCompound(string), l);
+            StructureStart<?> structureStart = StructureFeature.loadStaticStart(serverLevel, compoundTag2.getCompound(string), l);
             if (structureStart == null) continue;
             map.put(structureFeature, structureStart);
         }

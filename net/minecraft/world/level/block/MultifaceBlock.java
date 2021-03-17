@@ -6,14 +6,17 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -56,7 +59,7 @@ extends Block {
         enumMap.put(Direction.UP, UP_AABB);
         enumMap.put(Direction.DOWN, DOWN_AABB);
     });
-    private static final Direction[] DIRECTIONS = Direction.values();
+    protected static final Direction[] DIRECTIONS = Direction.values();
     private final ImmutableMap<BlockState, VoxelShape> shapesCache;
     private final boolean canRotate;
     private final boolean canMirrorX;
@@ -125,7 +128,7 @@ extends Block {
     }
 
     @Nullable
-    public BlockState getStateForPlacement(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction) {
+    public BlockState getStateForPlacement(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
         BlockState blockState2;
         if (!this.isFaceSupported(direction)) {
             return null;
@@ -139,7 +142,7 @@ extends Block {
             blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true) : this.defaultBlockState();
         }
         BlockPos blockPos2 = blockPos.relative(direction);
-        if (MultifaceBlock.canAttachTo(levelAccessor, direction, blockPos2, levelAccessor.getBlockState(blockPos2))) {
+        if (MultifaceBlock.canAttachTo(blockGetter, direction, blockPos2, blockGetter.getBlockState(blockPos2))) {
             return (BlockState)blockState2.setValue(MultifaceBlock.getFaceProperty(direction), true);
         }
         return null;
@@ -186,23 +189,48 @@ extends Block {
     }
 
     public boolean spreadFromFaceTowardDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Direction direction2) {
+        Optional<Pair<BlockPos, Direction>> optional = this.getSpreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, direction2);
+        if (optional.isPresent()) {
+            Pair<BlockPos, Direction> pair = optional.get();
+            return this.spreadToFace(levelAccessor, pair.getFirst(), pair.getSecond());
+        }
+        return false;
+    }
+
+    protected boolean canSpread(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        return Stream.of(DIRECTIONS).anyMatch(direction2 -> this.getSpreadFromFaceTowardDirection(blockState, blockGetter, blockPos, direction, (Direction)direction2).isPresent());
+    }
+
+    private Optional<Pair<BlockPos, Direction>> getSpreadFromFaceTowardDirection(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, Direction direction2) {
+        Direction direction3;
         if (direction2.getAxis() == direction.getAxis() || !MultifaceBlock.hasFace(blockState, direction) || MultifaceBlock.hasFace(blockState, direction2)) {
+            return Optional.empty();
+        }
+        if (this.canSpreadToFace(blockGetter, blockPos, direction2)) {
+            return Optional.of(Pair.of(blockPos, direction2));
+        }
+        BlockPos blockPos2 = blockPos.relative(direction2);
+        if (this.canSpreadToFace(blockGetter, blockPos2, direction)) {
+            return Optional.of(Pair.of(blockPos2, direction));
+        }
+        BlockPos blockPos3 = blockPos2.relative(direction);
+        if (this.canSpreadToFace(blockGetter, blockPos3, direction3 = direction2.getOpposite())) {
+            return Optional.of(Pair.of(blockPos3, direction3));
+        }
+        return Optional.empty();
+    }
+
+    private boolean canSpreadToFace(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        BlockState blockState = blockGetter.getBlockState(blockPos);
+        if (!this.canSpreadInto(blockState)) {
             return false;
         }
-        if (this.spreadToFace(levelAccessor, blockPos, direction2)) {
-            return true;
-        }
-        if (this.spreadToFace(levelAccessor, blockPos.relative(direction2), direction)) {
-            return true;
-        }
-        return this.spreadToFace(levelAccessor, blockPos.relative(direction2).relative(direction), direction2.getOpposite());
+        BlockState blockState2 = this.getStateForPlacement(blockState, blockGetter, blockPos, direction);
+        return blockState2 != null;
     }
 
     private boolean spreadToFace(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction) {
         BlockState blockState = levelAccessor.getBlockState(blockPos);
-        if (!this.canSpreadInto(blockState)) {
-            return false;
-        }
         BlockState blockState2 = this.getStateForPlacement(blockState, levelAccessor, blockPos, direction);
         if (blockState2 != null) {
             return levelAccessor.setBlock(blockPos, blockState2, 2);

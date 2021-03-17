@@ -39,7 +39,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public static ClientboundSetPlayerTeamPacket createPlayerPacket(PlayerTeam playerTeam, String string, Action action) {
-        return new ClientboundSetPlayerTeamPacket(playerTeam.getName(), action == Action.ADD ? 3 : 1, Optional.empty(), ImmutableList.of(string));
+        return new ClientboundSetPlayerTeamPacket(playerTeam.getName(), action == Action.ADD ? 3 : 4, Optional.empty(), ImmutableList.of(string));
     }
 
     public ClientboundSetPlayerTeamPacket(FriendlyByteBuf friendlyByteBuf) {

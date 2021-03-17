@@ -40,30 +40,30 @@ public class RegistryReadOps<T>
 extends DelegatingOps<T> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ResourceAccess resources;
-    private final RegistryAccess.RegistryHolder registryHolder;
+    private final RegistryAccess registryAccess;
     private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache;
     private final RegistryReadOps<JsonElement> jsonOps;
 
-    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess.RegistryHolder registryHolder) {
-        return RegistryReadOps.create(dynamicOps, ResourceAccess.forResourceManager(resourceManager), registryHolder);
+    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess registryAccess) {
+        return RegistryReadOps.create(dynamicOps, ResourceAccess.forResourceManager(resourceManager), registryAccess);
     }
 
-    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess.RegistryHolder registryHolder) {
-        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceAccess, registryHolder, Maps.newIdentityHashMap());
-        RegistryAccess.load(registryHolder, registryReadOps);
+    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess registryAccess) {
+        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceAccess, registryAccess, Maps.newIdentityHashMap());
+        RegistryAccess.load(registryAccess, registryReadOps);
         return registryReadOps;
     }
 
-    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess.RegistryHolder registryHolder, IdentityHashMap<ResourceKey<? extends Registry<?>>, ReadCache<?>> identityHashMap) {
+    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess registryAccess, IdentityHashMap<ResourceKey<? extends Registry<?>>, ReadCache<?>> identityHashMap) {
         super(dynamicOps);
         this.resources = resourceAccess;
-        this.registryHolder = registryHolder;
+        this.registryAccess = registryAccess;
         this.readCache = identityHashMap;
-        this.jsonOps = dynamicOps == JsonOps.INSTANCE ? this : new RegistryReadOps<JsonElement>(JsonOps.INSTANCE, resourceAccess, registryHolder, identityHashMap);
+        this.jsonOps = dynamicOps == JsonOps.INSTANCE ? this : new RegistryReadOps<JsonElement>(JsonOps.INSTANCE, resourceAccess, registryAccess, identityHashMap);
     }
 
     protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
-        Optional optional = this.registryHolder.ownedRegistry(resourceKey);
+        Optional optional = this.registryAccess.ownedRegistry(resourceKey);
         if (!optional.isPresent()) {
             return DataResult.error("Unknown registry: " + resourceKey);
         }
@@ -132,7 +132,7 @@ extends DelegatingOps<T> {
     }
 
     protected <E> DataResult<Registry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey) {
-        return this.registryHolder.ownedRegistry(resourceKey).map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
+        return this.registryAccess.ownedRegistry(resourceKey).map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
     }
 
     public static interface ResourceAccess {

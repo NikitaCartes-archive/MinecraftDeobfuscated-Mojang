@@ -82,7 +82,7 @@ extends Entity {
 
     public void setRadius(float f) {
         if (!this.level.isClientSide) {
-            this.getEntityData().set(DATA_RADIUS, Float.valueOf(f));
+            this.getEntityData().set(DATA_RADIUS, Float.valueOf(Mth.clamp(f, 0.0f, 32.0f)));
         }
     }
 

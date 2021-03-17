@@ -432,6 +432,7 @@ extends Screen {
     private void renderHighlight(Rect2i[] rect2is) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionShader);
         RenderSystem.setShaderColor(0.0f, 0.0f, 255.0f, 255.0f);
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();

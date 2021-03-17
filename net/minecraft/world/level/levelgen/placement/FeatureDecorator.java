@@ -68,7 +68,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<CountConfiguration> GLOWSTONE = FeatureDecorator.register("glowstone", new GlowstoneDecorator(CountConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = FeatureDecorator.register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = FeatureDecorator.register("heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC));
-    public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = FeatureDecorator.register("heightmap_with_water_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC));
+    public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = FeatureDecorator.register("water_depth_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC));
     public static final FeatureDecorator<CaveDecoratorConfiguration> CAVE_SURFACE = FeatureDecorator.register("cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = FeatureDecorator.register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_BIASED_TO_BOTTOM = FeatureDecorator.register("range_biased_to_bottom", new RangeBiasedToBottomDecorator(BiasedRangeDecoratorConfiguration.CODEC));

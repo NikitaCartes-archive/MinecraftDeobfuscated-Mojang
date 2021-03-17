@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -23,7 +24,6 @@ import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.SwamplandHutPiece;
 import net.minecraft.world.level.levelgen.structure.WoodlandMansionPieces;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public interface StructurePieceType {
     public static final StructurePieceType MINE_SHAFT_CORRIDOR = StructurePieceType.setPieceId(MineShaftPieces.MineShaftCorridor::new, "MSCorridor");
@@ -83,7 +83,7 @@ public interface StructurePieceType {
     public static final StructurePieceType NETHER_FOSSIL = StructurePieceType.setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
     public static final StructurePieceType JIGSAW = StructurePieceType.setPieceId(PoolElementStructurePiece::new, "jigsaw");
 
-    public StructurePiece load(StructureManager var1, CompoundTag var2);
+    public StructurePiece load(ServerLevel var1, CompoundTag var2);
 
     public static StructurePieceType setPieceId(StructurePieceType structurePieceType, String string) {
         return Registry.register(Registry.STRUCTURE_PIECE, string.toLowerCase(Locale.ROOT), structurePieceType);

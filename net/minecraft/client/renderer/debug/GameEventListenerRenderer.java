@@ -20,6 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -75,6 +76,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(i, j, k, l, m, n)), -d, -e, -f, vector3f.x(), vector3f.y(), vector3f.z(), 0.35f);
             });
         }
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);

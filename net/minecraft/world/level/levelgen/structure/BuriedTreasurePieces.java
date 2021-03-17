@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -17,7 +18,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class BuriedTreasurePieces {
@@ -29,12 +29,12 @@ public class BuriedTreasurePieces {
             this.boundingBox = new BoundingBox(blockPos);
         }
 
-        public BuriedTreasurePiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public BuriedTreasurePiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.BURIED_TREASURE_PIECE, compoundTag);
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
         }
 
         @Override

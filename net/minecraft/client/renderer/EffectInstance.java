@@ -291,7 +291,7 @@ AutoCloseable {
             String string2 = uniform.getName();
             int k = Uniform.glGetUniformLocation(this.programId, string2);
             if (k == -1) {
-                LOGGER.warn("Could not find uniform named {} in the specified shader program.", (Object)string2);
+                LOGGER.warn("Shader {} could not find uniform named {} in the specified shader program.", (Object)this.name, (Object)string2);
                 continue;
             }
             this.uniformLocations.add(k);

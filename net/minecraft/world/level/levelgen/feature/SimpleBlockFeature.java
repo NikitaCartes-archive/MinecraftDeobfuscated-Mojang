@@ -32,7 +32,7 @@ extends Feature<SimpleBlockConfiguration> {
         if (blockState.getBlock() instanceof DoublePlantBlock) {
             if (!worldGenLevel.isEmptyBlock(blockPos.above())) return false;
             DoublePlantBlock doublePlantBlock = (DoublePlantBlock)blockState.getBlock();
-            doublePlantBlock.placeAt(worldGenLevel, blockPos, 2);
+            doublePlantBlock.placeAt(worldGenLevel, blockState, blockPos, 2);
             return true;
         } else {
             worldGenLevel.setBlock(blockPos, blockState, 2);

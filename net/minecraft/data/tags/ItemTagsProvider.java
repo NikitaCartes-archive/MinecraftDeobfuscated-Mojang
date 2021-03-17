@@ -95,6 +95,7 @@ extends TagsProvider<Item> {
         this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE});
         this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES).add((Item[])new Item[]{Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET});
         this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add((Item[])new Item[]{Items.TROPICAL_FISH, Items.TROPICAL_FISH_BUCKET});
+        this.tag(ItemTags.CLUSTER_MAX_HARVESTABLES).add((Item[])new Item[]{Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE});
     }
 
     protected void copy(Tag.Named<Block> named, Tag.Named<Item> named2) {

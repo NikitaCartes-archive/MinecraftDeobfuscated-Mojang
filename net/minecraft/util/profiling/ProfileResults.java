@@ -3,7 +3,7 @@
  */
 package net.minecraft.util.profiling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +13,7 @@ public interface ProfileResults {
     @Environment(value=EnvType.CLIENT)
     public List<ResultField> getTimes(String var1);
 
-    public boolean saveResults(File var1);
+    public boolean saveResults(Path var1);
 
     public long getStartTimeNano();
 

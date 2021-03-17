@@ -94,12 +94,6 @@ implements ReloadInstance {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public boolean isApplying() {
-        return this.allPreparations.isDone();
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean isDone() {
         return this.allDone.isDone();
     }

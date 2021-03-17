@@ -100,6 +100,10 @@ public class ParticleTypes {
     public static final SimpleParticleType FALLING_DRIPSTONE_WATER = ParticleTypes.register("falling_dripstone_water", false);
     public static final SimpleParticleType GLOW_SQUID_INK = ParticleTypes.register("glow_squid_ink", true);
     public static final SimpleParticleType GLOW = ParticleTypes.register("glow", true);
+    public static final SimpleParticleType WAX_ON = ParticleTypes.register("wax_on", true);
+    public static final SimpleParticleType WAX_OFF = ParticleTypes.register("wax_off", true);
+    public static final SimpleParticleType ELECTRIC_SPARK = ParticleTypes.register("electric_spark", true);
+    public static final SimpleParticleType SCRAPE = ParticleTypes.register("scrape", true);
     public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
     private static SimpleParticleType register(String string, boolean bl) {

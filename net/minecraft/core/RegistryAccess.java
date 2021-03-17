@@ -88,7 +88,7 @@ public abstract class RegistryAccess {
         for (RegistryData<?> registryData : REGISTRIES.values()) {
             RegistryAccess.addBuiltinElements(registryHolder, memoryMap, registryData);
         }
-        RegistryReadOps.create(JsonOps.INSTANCE, memoryMap, registryHolder);
+        RegistryReadOps.create(JsonOps.INSTANCE, memoryMap, (RegistryAccess)registryHolder);
         return registryHolder;
     }
 
@@ -122,16 +122,16 @@ public abstract class RegistryAccess {
         }
     }
 
-    public static void load(RegistryHolder registryHolder, RegistryReadOps<?> registryReadOps) {
+    public static void load(RegistryAccess registryAccess, RegistryReadOps<?> registryReadOps) {
         for (RegistryData<?> registryData : REGISTRIES.values()) {
-            RegistryAccess.readRegistry(registryReadOps, registryHolder, registryData);
+            RegistryAccess.readRegistry(registryReadOps, registryAccess, registryData);
         }
     }
 
-    private static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryHolder registryHolder, RegistryData<E> registryData) {
-        ResourceKey resourceKey = registryData.key();
-        MappedRegistry mappedRegistry2 = Optional.ofNullable(registryHolder.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
-        DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry2, registryData.key(), registryData.codec());
+    private static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryAccess registryAccess, RegistryData<E> registryData) {
+        ResourceKey<Registry<E>> resourceKey = registryData.key();
+        MappedRegistry mappedRegistry = (MappedRegistry)registryAccess.ownedRegistryOrThrow(resourceKey);
+        DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry, registryData.key(), registryData.codec());
         dataResult.error().ifPresent(partialResult -> LOGGER.error("Error loading registry data: {}", (Object)partialResult.message()));
     }
 

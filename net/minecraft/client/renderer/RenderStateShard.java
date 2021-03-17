@@ -23,7 +23,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class RenderStateShard {
@@ -214,25 +213,6 @@ public abstract class RenderStateShard {
         this.clearState.run();
     }
 
-    public boolean equals(@Nullable Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        RenderStateShard renderStateShard = (RenderStateShard)object;
-        return this.name.equals(renderStateShard.name);
-    }
-
-    protected boolean valueEquals(RenderStateShard renderStateShard) {
-        return this.name.equals(renderStateShard.name);
-    }
-
-    public int hashCode() {
-        return this.name.hashCode();
-    }
-
     public String toString() {
         return this.name;
     }
@@ -267,25 +247,6 @@ public abstract class RenderStateShard {
                 }
             });
             this.width = optionalDouble;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            if (!super.equals(object)) {
-                return false;
-            }
-            return Objects.equals(this.width, ((LineStateShard)object).width);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), this.width);
         }
 
         @Override
@@ -337,23 +298,6 @@ public abstract class RenderStateShard {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            WriteMaskStateShard writeMaskStateShard = (WriteMaskStateShard)object;
-            return this.writeColor == writeMaskStateShard.writeColor && this.writeDepth == writeMaskStateShard.writeDepth;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.writeColor, this.writeDepth);
-        }
-
-        @Override
         public String toString() {
             return this.name + "[writeColor=" + this.writeColor + ", writeDepth=" + this.writeDepth + ']';
         }
@@ -363,7 +307,6 @@ public abstract class RenderStateShard {
     public static class DepthTestStateShard
     extends RenderStateShard {
         private final String functionName;
-        private final int function;
 
         public DepthTestStateShard(String string, int i) {
             super("depth_test", () -> {
@@ -378,24 +321,6 @@ public abstract class RenderStateShard {
                 }
             });
             this.functionName = string;
-            this.function = i;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            DepthTestStateShard depthTestStateShard = (DepthTestStateShard)object;
-            return this.function == depthTestStateShard.function;
-        }
-
-        @Override
-        public int hashCode() {
-            return Integer.hashCode(this.function);
         }
 
         @Override
@@ -463,23 +388,6 @@ public abstract class RenderStateShard {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            BooleanStateShard booleanStateShard = (BooleanStateShard)object;
-            return this.enabled == booleanStateShard.enabled;
-        }
-
-        @Override
-        public int hashCode() {
-            return Boolean.hashCode(this.enabled);
-        }
-
-        @Override
         public String toString() {
             return this.name + '[' + this.enabled + ']';
         }
@@ -488,30 +396,8 @@ public abstract class RenderStateShard {
     @Environment(value=EnvType.CLIENT)
     public static final class OffsetTexturingStateShard
     extends TexturingStateShard {
-        private final float uOffset;
-        private final float vOffset;
-
         public OffsetTexturingStateShard(float f, float g) {
             super("offset_texturing", () -> RenderSystem.setTextureMatrix(Matrix4f.createTranslateMatrix(f, g, 0.0f)), () -> RenderSystem.resetTextureMatrix());
-            this.uOffset = f;
-            this.vOffset = g;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            OffsetTexturingStateShard offsetTexturingStateShard = (OffsetTexturingStateShard)object;
-            return Float.compare(offsetTexturingStateShard.uOffset, this.uOffset) == 0 && Float.compare(offsetTexturingStateShard.vOffset, this.vOffset) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(Float.valueOf(this.uOffset), Float.valueOf(this.vOffset));
         }
     }
 
@@ -540,23 +426,6 @@ public abstract class RenderStateShard {
             this.texture = Optional.of(resourceLocation);
             this.blur = bl;
             this.mipmap = bl2;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            TextureStateShard textureStateShard = (TextureStateShard)object;
-            return this.texture.equals(textureStateShard.texture) && this.blur == textureStateShard.blur && this.mipmap == textureStateShard.mipmap;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.texture.hashCode();
         }
 
         @Override
@@ -640,23 +509,6 @@ public abstract class RenderStateShard {
         public ShaderStateShard() {
             super("shader", () -> RenderSystem.setShader(() -> null), () -> {});
             this.shader = Optional.empty();
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            ShaderStateShard shaderStateShard = (ShaderStateShard)object;
-            return this.shader.equals(shaderStateShard.shader);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.shader.hashCode();
         }
 
         @Override

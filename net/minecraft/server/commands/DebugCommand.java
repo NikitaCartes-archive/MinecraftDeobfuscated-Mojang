@@ -57,7 +57,7 @@ public class DebugCommand {
         }
         ProfileResults profileResults = minecraftServer.finishProfiling();
         File file = new File(minecraftServer.getFile("debug"), "profile-results-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + ".txt");
-        profileResults.saveResults(file);
+        profileResults.saveResults(file.toPath());
         float f = (float)profileResults.getNanoDuration() / 1.0E9f;
         float g = (float)profileResults.getTickDuration() / f;
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", Float.valueOf(f)), profileResults.getTickDuration(), String.format("%.2f", Float.valueOf(g))), true);

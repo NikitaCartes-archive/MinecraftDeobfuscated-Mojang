@@ -95,9 +95,10 @@ extends Feature<RootSystemConfiguration> {
         int i = rootSystemConfiguration.hangingRootRadius;
         int j = rootSystemConfiguration.hangingRootsVerticalSpan;
         for (int k = 0; k < rootSystemConfiguration.hangingRootPlacementAttempts; ++k) {
+            BlockState blockState;
             mutableBlockPos.setWithOffset(blockPos, random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
-            if (!worldGenLevel.isEmptyBlock(mutableBlockPos) || !worldGenLevel.getBlockState((BlockPos)mutableBlockPos.above()).getMaterial().isSolid()) continue;
-            worldGenLevel.setBlock(mutableBlockPos, rootSystemConfiguration.hangingRootStateProvider.getState(random, mutableBlockPos), 2);
+            if (!worldGenLevel.isEmptyBlock(mutableBlockPos) || !(blockState = rootSystemConfiguration.hangingRootStateProvider.getState(random, mutableBlockPos)).canSurvive(worldGenLevel, mutableBlockPos) || !worldGenLevel.getBlockState((BlockPos)mutableBlockPos.above()).isFaceSturdy(worldGenLevel, mutableBlockPos, Direction.DOWN)) continue;
+            worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
         }
     }
 }

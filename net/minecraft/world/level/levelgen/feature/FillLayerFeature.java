@@ -26,7 +26,7 @@ extends Feature<LayerConfiguration> {
             for (int j = 0; j < 16; ++j) {
                 int k = blockPos.getX() + i;
                 int l = blockPos.getZ() + j;
-                int m = layerConfiguration.height;
+                int m = worldGenLevel.getMinBuildHeight() + layerConfiguration.height;
                 mutableBlockPos.set(k, m, l);
                 if (!worldGenLevel.getBlockState(mutableBlockPos).isAir()) continue;
                 worldGenLevel.setBlock(mutableBlockPos, layerConfiguration.state, 2);

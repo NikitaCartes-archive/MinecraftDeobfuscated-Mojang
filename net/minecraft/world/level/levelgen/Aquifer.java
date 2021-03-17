@@ -120,7 +120,7 @@ public class Aquifer {
         double f = this.similarity(p, q);
         this.lastWaterLevel = u;
         boolean bl = this.shouldScheduleWaterUpdate = d > 0.0;
-        if (this.lastWaterLevel >= j && j <= 9) {
+        if (this.lastWaterLevel >= j && j - this.noiseGeneratorSettings.noiseSettings().minY() <= 9) {
             this.lastBarrierDensity = 1.0;
         } else if (d > -1.0) {
             double g = 1.0 + (this.barrierNoise.getValue(i, j, k) + 0.1) / 4.0;

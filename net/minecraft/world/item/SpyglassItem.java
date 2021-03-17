@@ -4,6 +4,7 @@
 package net.minecraft.world.item;
 
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,6 +34,7 @@ extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         player.playSound(SoundEvents.SPYGLASS_USE, 1.0f, 1.0f);
+        player.awardStat(Stats.ITEM_USED.get(this));
         return ItemUtils.startUsingInstantly(level, player, interactionHand);
     }
 

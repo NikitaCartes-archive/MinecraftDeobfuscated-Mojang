@@ -433,7 +433,7 @@ GuiEventListener {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionShader);
-        RenderSystem.setShaderColor(0.0f, 0.0f, 255.0f, 255.0f);
+        RenderSystem.setShaderColor(0.0f, 0.0f, 1.0f, 1.0f);
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
@@ -443,6 +443,7 @@ GuiEventListener {
         bufferBuilder.vertex(k, j, 0.0).endVertex();
         bufferBuilder.vertex(i, j, 0.0).endVertex();
         tesselator.end();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableColorLogicOp();
         RenderSystem.enableTexture();
     }

@@ -404,7 +404,7 @@ implements WorldGenLevel {
         if (bl && this.isThundering() && this.random.nextInt(100000) == 0 && this.isRainingAt(blockPos = this.findLightningTargetAround(this.getBlockRandomPos(j, 0, k, 15)))) {
             boolean bl2;
             DifficultyInstance difficultyInstance = this.getCurrentDifficultyAt(blockPos);
-            boolean bl3 = bl2 = this.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && this.random.nextDouble() < (double)difficultyInstance.getEffectiveDifficulty() * 0.01;
+            boolean bl3 = bl2 = this.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && this.random.nextDouble() < (double)difficultyInstance.getEffectiveDifficulty() * 0.01 && !this.getBlockState(blockPos.below()).is(Blocks.LIGHTNING_ROD);
             if (bl2) {
                 SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this);
                 skeletonHorse.setTrap(true);
@@ -460,20 +460,9 @@ implements WorldGenLevel {
         profilerFiller.pop();
     }
 
-    private Optional<BlockPos> findLightningRod(BlockPos blockPos) {
-        Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos, 128, PoiManager.Occupancy.ANY);
-        if (optional.isPresent()) {
-            BlockPos blockPos2 = optional.get();
-            int i = this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX(), blockPos2.getZ()) - 1;
-            if (blockPos2.getY() == i) {
-                return Optional.of(blockPos2.above(1));
-            }
-            BlockPos blockPos3 = new BlockPos(blockPos2.getX(), i, blockPos2.getZ());
-            if (this.getLevel().getBlockState(blockPos3).is(Blocks.LIGHTNING_ROD)) {
-                return Optional.of(blockPos3.above(1));
-            }
-        }
-        return Optional.empty();
+    private Optional<BlockPos> findLightningRod(BlockPos blockPos2) {
+        Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos -> blockPos.getY() == this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ()) - 1, blockPos2, 128, PoiManager.Occupancy.ANY);
+        return optional.map(blockPos -> blockPos.above(1));
     }
 
     protected BlockPos findLightningTargetAround(BlockPos blockPos) {

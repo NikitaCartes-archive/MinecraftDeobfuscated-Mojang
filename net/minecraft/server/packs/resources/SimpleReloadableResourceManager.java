@@ -173,12 +173,6 @@ implements ReloadableResourceManager {
 
         @Override
         @Environment(value=EnvType.CLIENT)
-        public boolean isApplying() {
-            return false;
-        }
-
-        @Override
-        @Environment(value=EnvType.CLIENT)
         public boolean isDone() {
             return true;
         }

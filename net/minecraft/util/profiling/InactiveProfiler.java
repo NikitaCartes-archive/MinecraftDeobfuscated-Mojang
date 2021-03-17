@@ -6,9 +6,11 @@ package net.minecraft.util.profiling;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileCollector;
 import net.minecraft.util.profiling.ProfileResults;
+import org.jetbrains.annotations.Nullable;
 
 public class InactiveProfiler
 implements ProfileCollector {
@@ -57,6 +59,13 @@ implements ProfileCollector {
     @Override
     public ProfileResults getResults() {
         return EmptyProfileResults.EMPTY;
+    }
+
+    @Override
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    public ActiveProfiler.PathEntry getEntry(String string) {
+        return null;
     }
 }
 

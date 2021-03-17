@@ -45,11 +45,11 @@ extends ThrowableItemProjectile {
     @Override
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
-        Entity entity = this.getOwner();
         for (int i = 0; i < 32; ++i) {
             this.level.addParticle(ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0, this.getZ(), this.random.nextGaussian(), 0.0, this.random.nextGaussian());
         }
         if (!this.level.isClientSide && !this.isRemoved()) {
+            Entity entity = this.getOwner();
             if (entity instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer)entity;
                 if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {

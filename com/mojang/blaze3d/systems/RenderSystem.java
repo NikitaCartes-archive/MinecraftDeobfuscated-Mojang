@@ -409,10 +409,6 @@ public class RenderSystem {
         }
     }
 
-    public static void setShaderColor(float f, float g, float h) {
-        RenderSystem.setShaderColor(f, g, h, 1.0f);
-    }
-
     private static void _setShaderColor(float f, float g, float h, float i) {
         RenderSystem.shaderColor[0] = f;
         RenderSystem.shaderColor[1] = g;

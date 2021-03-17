@@ -657,13 +657,13 @@ AutoCloseable {
             }
             this.minecraft.getProfiler().pop();
         }
-        if (this.minecraft.overlay != null) {
+        if (this.minecraft.getOverlay() != null) {
             try {
-                this.minecraft.overlay.render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
+                this.minecraft.getOverlay().render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering overlay");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
-                crashReportCategory.setDetail("Overlay name", () -> this.minecraft.overlay.getClass().getCanonicalName());
+                crashReportCategory.setDetail("Overlay name", () -> this.minecraft.getOverlay().getClass().getCanonicalName());
                 throw new ReportedException(crashReport);
             }
         }
@@ -839,6 +839,7 @@ AutoCloseable {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         RenderSystem.setShaderColor(g, h, k, 1.0f);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, NAUSEA_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();

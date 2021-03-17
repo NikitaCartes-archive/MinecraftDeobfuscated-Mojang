@@ -19,11 +19,13 @@ import net.minecraft.util.ClampedNormalFloat;
 import net.minecraft.util.UniformFloat;
 import net.minecraft.util.UniformInt;
 import net.minecraft.world.entity.ai.behavior.WeightedList;
+import net.minecraft.world.level.block.BigDripleafBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVinesBodyBlock;
-import net.minecraft.world.level.block.CaveVinesHeadBlock;
+import net.minecraft.world.level.block.CaveVinesBlock;
+import net.minecraft.world.level.block.CaveVinesPlantBlock;
 import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.SmallDripleafBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -38,7 +40,6 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
-import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.blockplacers.ColumnPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.DoublePlantPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.SimpleBlockPlacer;
@@ -263,7 +264,7 @@ public class Features {
     public static final ConfiguredFeature<?, ?> ORE_GOLD = Features.register("ore_gold", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(ORE_GOLD_TARGET_LIST, 9, 0.5f)).depthAverage(VerticalAnchor.absolute(-16), 48)).squared()).count(4));
     public static final ConfiguredFeature<?, ?> ORE_REDSTONE = Features.register("ore_redstone", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(ORE_REDSTONE_CONFIG).range(VerticalAnchor.bottom(), VerticalAnchor.absolute(15))).squared()).count(4));
     public static final ConfiguredFeature<?, ?> ORE_REDSTONE_LOWER = Features.register("ore_redstone_lower", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(ORE_REDSTONE_CONFIG).depthAverage(VerticalAnchor.bottom(), 32)).squared()).count(8));
-    public static final ConfiguredFeature<?, ?> ORE_DIAMOND = Features.register("ore_diamond", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5f)).depthAverage(VerticalAnchor.bottom(), 80)).squared()).count(5));
+    public static final ConfiguredFeature<?, ?> ORE_DIAMOND = Features.register("ore_diamond", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5f)).depthAverage(VerticalAnchor.bottom(), 80)).squared()).count(6));
     public static final ConfiguredFeature<?, ?> ORE_LAPIS = Features.register("ore_lapis", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7)).depthAverage(VerticalAnchor.absolute(0), 32)).squared()).count(2));
     public static final ConfiguredFeature<?, ?> ORE_LAPIS_BURIED = Features.register("ore_lapis_buried", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.SCATTERED_ORE.configured(new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7, 1.0f)).range(VerticalAnchor.bottom(), VerticalAnchor.absolute(64))).squared()).count(4));
     public static final ConfiguredFeature<?, ?> ORE_INFESTED = Features.register("ore_infested", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ORE.configured(new OreConfiguration(ORE_INFESTED_TARGET_LIST, 9)).range(VerticalAnchor.bottom(), VerticalAnchor.absolute(63))).squared()).count(14));
@@ -341,8 +342,8 @@ public class Features {
     public static final ConfiguredFeature<?, ?> BAMBOO_VEGETATION = Features.register("bamboo_vegetation", ((ConfiguredFeature)Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(FANCY_OAK.weighted(0.05f), JUNGLE_BUSH.weighted(0.15f), MEGA_JUNGLE_TREE.weighted(0.7f)), Feature.RANDOM_PATCH.configured(Configs.JUNGLE_GRASS_CONFIG))).decorated((ConfiguredDecorator)Decorators.HEIGHTMAP_WITH_TREE_THRESHOLD_SQUARED)).decorated((ConfiguredDecorator)FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(30, 0.1f, 1))));
     public static final ConfiguredFeature<?, ?> MUSHROOM_FIELD_VEGETATION = Features.register("mushroom_field_vegetation", Feature.RANDOM_BOOLEAN_SELECTOR.configured(new RandomBooleanFeatureConfiguration(() -> HUGE_RED_MUSHROOM, () -> HUGE_BROWN_MUSHROOM)).decorated((ConfiguredDecorator)Decorators.HEIGHTMAP_SQUARE));
     public static final ConfiguredFeature<?, ?> ROOTED_AZALEA_TREES = Features.register("rooted_azalea_trees", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.ROOT_SYSTEM.configured(new RootSystemConfiguration(() -> AZALEA_TREE, 3, 3, BlockTags.LUSH_GROUND_REPLACEABLE.getName(), new SimpleStateProvider(Blocks.ROOTED_DIRT.defaultBlockState()), 20, 100, 3, 2, new SimpleStateProvider(Blocks.HANGING_ROOTS.defaultBlockState()), 20)).decorated((ConfiguredDecorator)FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12))).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).rarity(2));
-    private static final WeightedStateProvider CAVE_VINES_BODY_PROVIDER = new WeightedStateProvider().add(Blocks.CAVE_VINES_BODY.defaultBlockState(), 4).add((BlockState)Blocks.CAVE_VINES_BODY.defaultBlockState().setValue(CaveVinesBodyBlock.BERRIES, true), 1);
-    private static final RandomizedIntStateProvider CAVE_VINES_HEAD_PROVIDER = new RandomizedIntStateProvider((BlockStateProvider)new WeightedStateProvider().add(Blocks.CAVE_VINES_HEAD.defaultBlockState(), 4).add((BlockState)Blocks.CAVE_VINES_HEAD.defaultBlockState().setValue(CaveVinesBodyBlock.BERRIES, true), 1), CaveVinesHeadBlock.AGE, UniformInt.of(17, 8));
+    private static final WeightedStateProvider CAVE_VINES_BODY_PROVIDER = new WeightedStateProvider().add(Blocks.CAVE_VINES_PLANT.defaultBlockState(), 4).add((BlockState)Blocks.CAVE_VINES_PLANT.defaultBlockState().setValue(CaveVinesPlantBlock.BERRIES, true), 1);
+    private static final RandomizedIntStateProvider CAVE_VINES_HEAD_PROVIDER = new RandomizedIntStateProvider((BlockStateProvider)new WeightedStateProvider().add(Blocks.CAVE_VINES.defaultBlockState(), 4).add((BlockState)Blocks.CAVE_VINES.defaultBlockState().setValue(CaveVinesPlantBlock.BERRIES, true), 1), CaveVinesBlock.AGE, UniformInt.of(17, 8));
     public static final ConfiguredFeature<GrowingPlantConfiguration, ?> CAVE_VINE = Features.register("cave_vine", Feature.GROWING_PLANT.configured(new GrowingPlantConfiguration(new WeightedList<UniformInt>().add(UniformInt.of(1, 19), 2).add(UniformInt.of(1, 2), 3).add(UniformInt.of(1, 6), 10), Direction.DOWN, CAVE_VINES_BODY_PROVIDER, CAVE_VINES_HEAD_PROVIDER, false)));
     public static final ConfiguredFeature<GrowingPlantConfiguration, ?> CAVE_VINE_IN_MOSS = Features.register("cave_vine_in_moss", Feature.GROWING_PLANT.configured(new GrowingPlantConfiguration(new WeightedList<UniformInt>().add(UniformInt.of(1, 3), 5).add(UniformInt.of(2, 6), 1), Direction.DOWN, CAVE_VINES_BODY_PROVIDER, CAVE_VINES_HEAD_PROVIDER, false)));
     public static final ConfiguredFeature<?, ?> CAVE_VINES = Features.register("cave_vines", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)CAVE_VINE.decorated((ConfiguredDecorator)FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12))).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).count(60));
@@ -350,7 +351,7 @@ public class Features {
     public static final ConfiguredFeature<VegetationPatchConfiguration, ?> MOSS_PATCH = Features.register("moss_patch", Feature.VEGETATION_PATCH.configured(new VegetationPatchConfiguration(BlockTags.LUSH_PLANTS_REPLACEABLE.getName(), new SimpleStateProvider(Blocks.MOSS_BLOCK.defaultBlockState()), () -> MOSS_VEGETATION, CaveSurface.FLOOR, UniformInt.fixed(1), 0.0f, 5, 0.8f, UniformInt.of(4, 3), 0.3f)));
     public static final ConfiguredFeature<VegetationPatchConfiguration, ?> MOSS_PATCH_BONEMEAL = Features.register("moss_patch_bonemeal", Feature.VEGETATION_PATCH.configured(new VegetationPatchConfiguration(BlockTags.LUSH_PLANTS_REPLACEABLE.getName(), new SimpleStateProvider(Blocks.MOSS_BLOCK.defaultBlockState()), () -> MOSS_VEGETATION, CaveSurface.FLOOR, UniformInt.fixed(1), 0.0f, 5, 0.8f, UniformInt.of(1, 2), 0.0f)));
     public static final ConfiguredFeature<?, ?> LUSH_CAVES_VEGETATION = Features.register("lush_caves_vegetation", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)MOSS_PATCH.decorated((ConfiguredDecorator)FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12))).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).count(40));
-    public static final ConfiguredFeature<RandomFeatureConfiguration, ?> DRIPLEAF = Features.register("dripleaf", Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(new WeightedConfiguredFeature(Feature.SIMPLE_BLOCK.configured(new SimpleBlockConfiguration(new SimpleStateProvider(Blocks.SMALL_DRIPLEAF.defaultBlockState()))), 0.5f), new WeightedConfiguredFeature(Features.makeDripleaf(Direction.EAST), 0.25f), new WeightedConfiguredFeature(Features.makeDripleaf(Direction.SOUTH), 0.33333334f), new WeightedConfiguredFeature(Features.makeDripleaf(Direction.WEST), 0.5f)), Features.makeDripleaf(Direction.NORTH))));
+    public static final ConfiguredFeature<SimpleRandomFeatureConfiguration, ?> DRIPLEAF = Features.register("dripleaf", Feature.SIMPLE_RANDOM_SELECTOR.configured(new SimpleRandomFeatureConfiguration(ImmutableList.of(Features::makeSmallDripleaf, () -> Features.makeDripleaf(Direction.EAST), () -> Features.makeDripleaf(Direction.WEST), () -> Features.makeDripleaf(Direction.SOUTH), () -> Features.makeDripleaf(Direction.NORTH)))));
     public static final ConfiguredFeature<?, ?> CLAY_WITH_DRIPLEAVES = Features.register("clay_with_dripleaves", Feature.VEGETATION_PATCH.configured(new VegetationPatchConfiguration(BlockTags.LUSH_GROUND_REPLACEABLE.getName(), new SimpleStateProvider(Blocks.CLAY.defaultBlockState()), () -> DRIPLEAF, CaveSurface.FLOOR, UniformInt.fixed(3), 0.8f, 2, 0.05f, UniformInt.of(4, 3), 0.7f)));
     public static final ConfiguredFeature<?, ?> CLAY_POOL_WITH_DRIPLEAVES = Features.register("clay_pool_with_dripleaves", Feature.WATERLOGGED_VEGETATION_PATCH.configured(new VegetationPatchConfiguration(BlockTags.LUSH_GROUND_REPLACEABLE.getName(), new SimpleStateProvider(Blocks.CLAY.defaultBlockState()), () -> DRIPLEAF, CaveSurface.FLOOR, UniformInt.fixed(3), 0.8f, 5, 0.1f, UniformInt.of(4, 3), 0.7f)));
     public static final ConfiguredFeature<?, ?> LUSH_CAVES_CLAY = Features.register("lush_caves_clay", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.RANDOM_BOOLEAN_SELECTOR.configured(new RandomBooleanFeatureConfiguration(() -> CLAY_WITH_DRIPLEAVES, () -> CLAY_POOL_WITH_DRIPLEAVES)).decorated((ConfiguredDecorator)FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.FLOOR, 12))).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).count(20));
@@ -360,8 +361,12 @@ public class Features {
     public static final ConfiguredFeature<?, ?> CLASSIC_VINES_CAVE_FEATURE = Features.register("classic_vines_cave_feature", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.VINES.configured(FeatureConfiguration.NONE).range(Decorators.RANGE_BOTTOM_TO_60)).squared()).count(127));
     public static final ConfiguredFeature<?, ?> AMETHYST_GEODE = Features.register("amethyst_geode", (ConfiguredFeature)((ConfiguredFeature)((ConfiguredFeature)Feature.GEODE.configured(new GeodeConfiguration(new GeodeBlockSettings(new SimpleStateProvider(States.AIR), new SimpleStateProvider(States.AMETHYST_BLOCK), new SimpleStateProvider(States.BUDDING_AMETHYST), new SimpleStateProvider(States.CALCITE), new SimpleStateProvider(States.SMOOTH_BASALT), ImmutableList.of(Blocks.SMALL_AMETHYST_BUD.defaultBlockState(), Blocks.MEDIUM_AMETHYST_BUD.defaultBlockState(), Blocks.LARGE_AMETHYST_BUD.defaultBlockState(), Blocks.AMETHYST_CLUSTER.defaultBlockState())), new GeodeLayerSettings(1.7, 2.2, 3.2, 4.2), new GeodeCrackSettings(0.95, 2.0, 2), 0.35, 0.083, true, 4, 7, 3, 5, 1, 3, -16, 16, 0.05, 1)).range(VerticalAnchor.aboveBottom(6), VerticalAnchor.absolute(46))).squared()).rarity(30));
 
-    private static final ConfiguredFeature<GrowingPlantConfiguration, ?> makeDripleaf(Direction direction) {
+    private static ConfiguredFeature<GrowingPlantConfiguration, ?> makeDripleaf(Direction direction) {
         return Feature.GROWING_PLANT.configured(new GrowingPlantConfiguration(new WeightedList<UniformInt>().add(UniformInt.of(1, 4), 2).add(UniformInt.fixed(1), 1), Direction.UP, new SimpleStateProvider((BlockState)Blocks.BIG_DRIPLEAF_STEM.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction)), new SimpleStateProvider((BlockState)Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction)), true));
+    }
+
+    private static ConfiguredFeature<SimpleBlockConfiguration, ?> makeSmallDripleaf() {
+        return Feature.SIMPLE_BLOCK.configured(new SimpleBlockConfiguration(new WeightedStateProvider().add(States.SMALL_DRIPLEAF_EAST, 1).add(States.SMALL_DRIPLEAF_WEST, 1).add(States.SMALL_DRIPLEAF_NORTH, 1).add(States.SMALL_DRIPLEAF_SOUTH, 1)));
     }
 
     private static <FC extends FeatureConfiguration> ConfiguredFeature<FC, ?> register(String string, ConfiguredFeature<FC, ?> configuredFeature) {
@@ -483,6 +488,14 @@ public class Features {
         protected static final BlockState SMOOTH_BASALT = Blocks.SMOOTH_BASALT.defaultBlockState();
         protected static final BlockState TUFF = Blocks.TUFF.defaultBlockState();
         protected static final BlockState SPORE_BLOSSOM = Blocks.SPORE_BLOSSOM.defaultBlockState();
+        protected static final BlockState SMALL_DRIPLEAF_EAST = (BlockState)Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.EAST);
+        protected static final BlockState SMALL_DRIPLEAF_WEST = (BlockState)Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.WEST);
+        protected static final BlockState SMALL_DRIPLEAF_NORTH = (BlockState)Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.NORTH);
+        protected static final BlockState SMALL_DRIPLEAF_SOUTH = (BlockState)Blocks.SMALL_DRIPLEAF.defaultBlockState().setValue(SmallDripleafBlock.FACING, Direction.SOUTH);
+        protected static final BlockState BIG_DRIPLEAF_EAST = (BlockState)Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.EAST);
+        protected static final BlockState BIG_DRIPLEAF_WEST = (BlockState)Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.WEST);
+        protected static final BlockState BIG_DRIPLEAF_NORTH = (BlockState)Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.NORTH);
+        protected static final BlockState BIG_DRIPLEAF_SOUTH = (BlockState)Blocks.BIG_DRIPLEAF.defaultBlockState().setValue(BigDripleafBlock.FACING, Direction.SOUTH);
     }
 
     public static final class Decorators {

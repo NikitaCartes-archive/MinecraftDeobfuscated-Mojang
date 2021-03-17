@@ -236,10 +236,10 @@ public class StructureUtils {
         BlockState blockState = null;
         FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY));
         if (flatLevelGeneratorSettings instanceof FlatLevelGeneratorSettings) {
-            BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
-            int j = flatLevelGeneratorSettings.getLayerIndex(blockPos.getY());
-            if (blockPos.getY() < i && j > 0 && j <= blockStates.length) {
-                blockState = blockStates[j - 1];
+            List<BlockState> list = flatLevelGeneratorSettings.getLayers();
+            int j = blockPos.getY() - serverLevel.getMinBuildHeight();
+            if (blockPos.getY() < i && j > 0 && j <= list.size()) {
+                blockState = list.get(j - 1);
             }
         } else if (blockPos.getY() == i - 1) {
             blockState = serverLevel.getBiome(blockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();

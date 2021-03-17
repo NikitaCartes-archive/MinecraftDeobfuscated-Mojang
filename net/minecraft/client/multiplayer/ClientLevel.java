@@ -912,9 +912,9 @@ extends Level {
             this.difficultyLocked = bl;
         }
 
-        public double getHorizonHeight() {
+        public double getHorizonHeight(LevelHeightAccessor levelHeightAccessor) {
             if (this.isFlat) {
-                return 0.0;
+                return levelHeightAccessor.getMinBuildHeight();
             }
             return 63.0;
         }

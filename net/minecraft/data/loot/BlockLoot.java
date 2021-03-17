@@ -22,6 +22,7 @@ import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -34,7 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CarrotBlock;
-import net.minecraft.world.level.block.CaveVinesBlock;
+import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.CropBlock;
@@ -192,7 +193,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
     }
 
     private static LootTable.Builder createCaveVinesDrop(Block block) {
-        return LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.GLOW_BERRIES)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CaveVinesBlock.BERRIES, true))));
+        return LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.GLOW_BERRIES)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CaveVines.BERRIES, true))));
     }
 
     private static LootTable.Builder createOreDrop(Block block, Item item) {
@@ -720,6 +721,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropOther(Blocks.WATER_CAULDRON, Blocks.CAULDRON);
         this.dropOther(Blocks.LAVA_CAULDRON, Blocks.CAULDRON);
         this.dropOther(Blocks.POWDER_SNOW_CAULDRON, Blocks.CAULDRON);
+        this.dropOther(Blocks.BIG_DRIPLEAF_STEM, Blocks.BIG_DRIPLEAF);
         this.add(Blocks.STONE, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.COBBLESTONE));
         this.add(Blocks.DEEPSLATE, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.COBBLED_DEEPSLATE));
         this.add(Blocks.GRASS_BLOCK, (Block block) -> BlockLoot.createSingleItemTableWithSilkTouch(block, Blocks.DIRT));
@@ -850,8 +852,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.COCOA, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.COCOA_BEANS).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(3.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CocoaBlock.AGE, 2))))))));
         this.add(Blocks.SEA_PICKLE, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(Blocks.SEA_PICKLE, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(2.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 2))))).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(3.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 3))))).apply((LootItemFunction.Builder)SetItemCountFunction.setCount(ConstantValue.exactly(4.0f)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SeaPickleBlock.PICKLES, 4))))))));
         this.add(Blocks.COMPOSTER, (Block block) -> LootTable.lootTable().withPool(LootPool.lootPool().add((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.COMPOSTER)))).withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.BONE_MEAL)).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(ComposterBlock.LEVEL, 8)))));
-        this.add(Blocks.CAVE_VINES_HEAD, BlockLoot::createCaveVinesDrop);
-        this.add(Blocks.CAVE_VINES_BODY, BlockLoot::createCaveVinesDrop);
+        this.add(Blocks.CAVE_VINES, BlockLoot::createCaveVinesDrop);
+        this.add(Blocks.CAVE_VINES_PLANT, BlockLoot::createCaveVinesDrop);
         this.add(Blocks.CANDLE, BlockLoot::createCandleDrops);
         this.add(Blocks.WHITE_CANDLE, BlockLoot::createCandleDrops);
         this.add(Blocks.ORANGE_CANDLE, BlockLoot::createCandleDrops);
@@ -984,7 +986,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.CAMPFIRE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.CHARCOAL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0f))))));
         this.add(Blocks.GILDED_BLACKSTONE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, BlockLoot.applyExplosionCondition(block, ((LootPoolSingletonContainer.Builder)((LootPoolEntryContainer.Builder)LootItem.lootTableItem(Items.GOLD_NUGGET).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 5.0f)))).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.1f, 0.14285715f, 0.25f, 1.0f))).otherwise(LootItem.lootTableItem(block)))));
         this.add(Blocks.SOUL_CAMPFIRE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.SOUL_SOIL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))))));
-        this.add(Blocks.AMETHYST_CLUSTER, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
+        this.add(Blocks.AMETHYST_CLUSTER, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, ((LootPoolSingletonContainer.Builder)((LootPoolEntryContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))).when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.CLUSTER_MAX_HARVESTABLES)))).otherwise((LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0f)))))));
         this.dropWhenSilkTouch(Blocks.SMALL_AMETHYST_BUD);
         this.dropWhenSilkTouch(Blocks.MEDIUM_AMETHYST_BUD);
         this.dropWhenSilkTouch(Blocks.LARGE_AMETHYST_BUD);
@@ -1081,7 +1083,6 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.NETHER_PORTAL, BlockLoot.noDrop());
         this.add(Blocks.BUDDING_AMETHYST, BlockLoot.noDrop());
         this.add(Blocks.POWDER_SNOW, BlockLoot.noDrop());
-        this.add(Blocks.BIG_DRIPLEAF_STEM, BlockLoot.noDrop());
         HashSet<ResourceLocation> set = Sets.newHashSet();
         for (Block block2 : Registry.BLOCK) {
             ResourceLocation resourceLocation = block2.getLootTable();

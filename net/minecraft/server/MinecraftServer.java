@@ -100,6 +100,7 @@ import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
@@ -404,7 +405,7 @@ AutoCloseable {
             bl3 = true;
             break;
         }
-        if ((i = chunkGenerator.getSpawnHeight()) < serverLevel.getMinBuildHeight()) {
+        if ((i = chunkGenerator.getSpawnHeight(serverLevel)) < serverLevel.getMinBuildHeight()) {
             BlockPos blockPos2 = chunkPos.getWorldPosition();
             i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
         }
@@ -1496,6 +1497,10 @@ AutoCloseable {
     @Nullable
     public GameType getForcedGameType() {
         return null;
+    }
+
+    public ResourceManager getResourceManager() {
+        return this.resources.getResourceManager();
     }
 
     @Override

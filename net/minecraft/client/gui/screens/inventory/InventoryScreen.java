@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
@@ -135,6 +136,7 @@ implements RecipeUpdateListener {
         livingEntity.xRot = -l * 20.0f;
         livingEntity.yHeadRot = livingEntity.yRot;
         livingEntity.yHeadRotO = livingEntity.yRot;
+        Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         quaternion2.conj();
         entityRenderDispatcher.overrideCameraOrientation(quaternion2);
@@ -150,6 +152,7 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRot = q;
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
+        Lighting.setupFor3DItems();
     }
 
     @Override

@@ -5,10 +5,12 @@ package net.minecraft;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash;
 import java.io.File;
@@ -46,8 +48,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
@@ -585,6 +589,38 @@ public class Util {
     @Environment(value=EnvType.CLIENT)
     public static String sanitizeName(String string, CharPredicate charPredicate) {
         return string.toLowerCase(Locale.ROOT).chars().mapToObj(i -> charPredicate.test((char)i) ? Character.toString((char)i) : "_").collect(Collectors.joining());
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static <T, R> Function<T, R> memoize(final Function<T, R> function) {
+        return new Function<T, R>(){
+            private final Map<T, R> cache = Maps.newHashMap();
+
+            @Override
+            public R apply(T object) {
+                return this.cache.computeIfAbsent(object, function);
+            }
+
+            public String toString() {
+                return "memoize/1[function=" + function + ", size=" + this.cache.size() + "]";
+            }
+        };
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static <T, U, R> BiFunction<T, U, R> memoize(final BiFunction<T, U, R> biFunction) {
+        return new BiFunction<T, U, R>(){
+            private final Map<Pair<T, U>, R> cache = Maps.newHashMap();
+
+            @Override
+            public R apply(T object, U object2) {
+                return this.cache.computeIfAbsent(Pair.of(object, object2), pair -> biFunction.apply(pair.getFirst(), pair.getSecond()));
+            }
+
+            public String toString() {
+                return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
+            }
+        };
     }
 
     static enum IdentityStrategy implements Hash.Strategy<Object>

@@ -35,7 +35,9 @@ public class ViewArea {
             for (int k = 0; k < this.chunkGridSizeY; ++k) {
                 for (int l = 0; l < this.chunkGridSizeZ; ++l) {
                     int m = this.getChunkIndex(j, k, l);
-                    this.chunks[m] = new ChunkRenderDispatcher.RenderChunk(chunkRenderDispatcher);
+                    ChunkRenderDispatcher chunkRenderDispatcher2 = chunkRenderDispatcher;
+                    chunkRenderDispatcher2.getClass();
+                    this.chunks[m] = new ChunkRenderDispatcher.RenderChunk(chunkRenderDispatcher2, m);
                     this.chunks[m].setOrigin(j * 16, k * 16, l * 16);
                 }
             }

@@ -3,37 +3,93 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Random;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.CaveVines;
+import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
 
-public interface CaveVinesBlock {
-    public static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
-    public static final BooleanProperty BERRIES = BlockStateProperties.BERRIES;
-
-    public static InteractionResult use(BlockState blockState, Level level, BlockPos blockPos) {
-        if (blockState.getValue(BERRIES).booleanValue()) {
-            Block.popResource(level, blockPos, new ItemStack(Items.GLOW_BERRIES, 1));
-            float f = Mth.randomBetween(level.random, 0.8f, 1.2f);
-            level.playSound(null, blockPos, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0f, f);
-            level.setBlock(blockPos, (BlockState)blockState.setValue(BERRIES, false), 2);
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        }
-        return InteractionResult.PASS;
+public class CaveVinesBlock
+extends GrowingPlantHeadBlock
+implements BonemealableBlock,
+CaveVines {
+    public CaveVinesBlock(BlockBehaviour.Properties properties) {
+        super(properties, Direction.DOWN, SHAPE, false, 0.1);
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0)).setValue(BERRIES, false));
     }
 
-    public static boolean hasGlowBerries(BlockState blockState) {
-        return blockState.hasProperty(BERRIES) && blockState.getValue(BERRIES) != false;
+    @Override
+    protected int getBlocksToGrowWhenBonemealed(Random random) {
+        return 1;
+    }
+
+    @Override
+    protected boolean canGrowInto(BlockState blockState) {
+        return blockState.isAir();
+    }
+
+    @Override
+    protected Block getBodyBlock() {
+        return Blocks.CAVE_VINES_PLANT;
+    }
+
+    @Override
+    protected BlockState updateBodyAfterConvertedFromHead(BlockState blockState, BlockState blockState2) {
+        return (BlockState)blockState2.setValue(BERRIES, blockState.getValue(BERRIES));
+    }
+
+    @Override
+    protected BlockState getGrowIntoState(BlockState blockState, Random random) {
+        return (BlockState)super.getGrowIntoState(blockState, random).setValue(BERRIES, random.nextFloat() < 0.11f);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+        return new ItemStack(Items.GLOW_BERRIES);
+    }
+
+    @Override
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        return CaveVines.use(blockState, level, blockPos);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(BERRIES);
+    }
+
+    @Override
+    public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
+        return blockState.getValue(BERRIES) == false;
+    }
+
+    @Override
+    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+        serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(BERRIES, true), 2);
     }
 }
 

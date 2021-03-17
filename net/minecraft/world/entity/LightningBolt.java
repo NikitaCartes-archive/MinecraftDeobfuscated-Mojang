@@ -4,6 +4,7 @@
 package net.minecraft.world.entity;
 
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
@@ -69,12 +71,13 @@ extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (this.life == 2) {
+        if (this.life == 2 && !this.level.isClientSide) {
             Difficulty difficulty = this.level.getDifficulty();
             if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
                 this.spawnFire(4);
             }
             this.powerLightningRod();
+            LightningBolt.clearCopperOnLightningStrike(this.level, this.blockPosition().below());
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0f, 0.8f + this.random.nextFloat() * 0.2f);
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0f, 0.5f + this.random.nextFloat() * 0.2f);
             this.gameEvent(GameEvent.LIGHTNING_STRIKE);
@@ -121,6 +124,48 @@ extends Entity {
             if (!this.level.getBlockState(blockPos2).isAir() || !blockState.canSurvive(this.level, blockPos2)) continue;
             this.level.setBlockAndUpdate(blockPos2, blockState);
         }
+    }
+
+    private static void clearCopperOnLightningStrike(Level level, BlockPos blockPos) {
+        BlockState blockState2;
+        BlockPos blockPos2;
+        BlockState blockState = level.getBlockState(blockPos);
+        if (blockState.is(Blocks.LIGHTNING_ROD)) {
+            blockPos2 = blockPos.relative(blockState.getValue(LightningRodBlock.FACING).getOpposite());
+            blockState2 = level.getBlockState(blockPos2);
+        } else {
+            blockPos2 = blockPos;
+            blockState2 = blockState;
+        }
+        if (!(blockState2.getBlock() instanceof WeatheringCopper)) {
+            return;
+        }
+        level.setBlockAndUpdate(blockPos2, WeatheringCopper.getFirst(level.getBlockState(blockPos2)));
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        int i = level.random.nextInt(3) + 3;
+        for (int j = 0; j < i; ++j) {
+            int k = level.random.nextInt(8) + 1;
+            LightningBolt.randomWalkCleaningCopper(level, blockPos2, mutableBlockPos, k);
+        }
+    }
+
+    private static void randomWalkCleaningCopper(Level level, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos, int i) {
+        Optional<BlockPos> optional;
+        mutableBlockPos.set(blockPos);
+        for (int j = 0; j < i && (optional = LightningBolt.randomStepCleaningCopper(level, mutableBlockPos)).isPresent(); ++j) {
+            mutableBlockPos.set(optional.get());
+        }
+    }
+
+    private static Optional<BlockPos> randomStepCleaningCopper(Level level, BlockPos blockPos) {
+        for (BlockPos blockPos2 : BlockPos.randomInCube(level.random, 10, blockPos, 1)) {
+            BlockState blockState2 = level.getBlockState(blockPos2);
+            if (!(blockState2.getBlock() instanceof WeatheringCopper)) continue;
+            WeatheringCopper.getPrevious(blockState2).ifPresent(blockState -> level.setBlockAndUpdate(blockPos2, (BlockState)blockState));
+            level.levelEvent(3002, blockPos2, -1);
+            return Optional.of(blockPos2);
+        }
+        return Optional.empty();
     }
 
     @Override

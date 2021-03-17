@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ChangeOverTimeBlock<T extends Enum<T>> {
-    public BlockState getChangeTo(BlockState var1);
+    public Optional<BlockState> getNext(BlockState var1);
 
     public float getChanceModifier();
 
@@ -24,7 +25,7 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
 
     public T getAge();
 
-    default public void applyChangeOverTime(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    default public void applyChangeOverTime(BlockState blockState2, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BlockPos blockPos2;
         int l;
         int i = ((Enum)this.getAge()).ordinal();
@@ -32,9 +33,9 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
         int k = 0;
         Iterator<BlockPos> iterator = BlockPos.withinManhattan(blockPos, 4, 4, 4).iterator();
         while (iterator.hasNext() && (l = (blockPos2 = iterator.next()).distManhattan(blockPos)) <= 4) {
-            BlockState blockState2;
+            BlockState blockState22;
             Block block;
-            if (blockPos2.equals(blockPos) || !((block = (blockState2 = serverLevel.getBlockState(blockPos2)).getBlock()) instanceof ChangeOverTimeBlock)) continue;
+            if (blockPos2.equals(blockPos) || !((block = (blockState22 = serverLevel.getBlockState(blockPos2)).getBlock()) instanceof ChangeOverTimeBlock)) continue;
             T enum_ = ((ChangeOverTimeBlock)((Object)block)).getAge();
             if (this.getAge().getClass() != enum_.getClass()) continue;
             int m = ((Enum)enum_).ordinal();
@@ -50,7 +51,7 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
         float f = (float)(k + 1) / (float)(k + j + 1);
         float g = f * f * this.getChanceModifier();
         if (random.nextFloat() < g) {
-            serverLevel.setBlockAndUpdate(blockPos, this.getChangeTo(blockState));
+            this.getNext(blockState2).ifPresent(blockState -> serverLevel.setBlockAndUpdate(blockPos, (BlockState)blockState));
         }
     }
 }

@@ -64,7 +64,7 @@ implements Toast {
             this.changed = false;
         }
         RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.width();
         int j = 12;
         if (i == 160 && this.messageLines.size() <= 1) {

@@ -170,21 +170,25 @@ public class FogRenderer {
         FogType fogType = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
         if (fogType == FogType.WATER) {
-            float g = 1.0f;
-            g = 0.05f;
+            float g = f;
+            LocalPlayer localPlayer = (LocalPlayer)entity;
             if (entity instanceof LocalPlayer) {
-                LocalPlayer localPlayer = (LocalPlayer)entity;
-                g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03f;
+                g *= Math.max(0.25f, localPlayer.getWaterVision());
                 Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
                 if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
-                    g += 0.005f;
+                    g *= 0.85f;
                 }
             }
+            RenderSystem.setShaderFogStart(-8.0f);
+            RenderSystem.setShaderFogEnd(g * 0.5f);
         } else {
             float h;
             float g;
             if (fogType == FogType.LAVA) {
-                if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
+                if (entity.isSpectator()) {
+                    g = -8.0f;
+                    h = f * 0.5f;
+                } else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
                     g = 0.0f;
                     h = 3.0f;
                 } else {
@@ -202,8 +206,13 @@ public class FogRenderer {
                     h = j;
                 }
             } else if (fogType == FogType.POWDER_SNOW) {
-                g = 0.0f;
-                h = 2.0f;
+                if (entity.isSpectator()) {
+                    g = -8.0f;
+                    h = f * 0.5f;
+                } else {
+                    g = 0.0f;
+                    h = 2.0f;
+                }
             } else if (bl) {
                 g = f * 0.05f;
                 h = Math.min(f, 192.0f) * 0.5f;

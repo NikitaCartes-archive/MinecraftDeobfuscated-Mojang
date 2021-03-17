@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.util.datafix.fixes.AbstractArrowPickupFix;
 import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
@@ -132,6 +133,7 @@ import net.minecraft.util.datafix.fixes.RenameBiomesFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFix;
 import net.minecraft.util.datafix.fixes.ReorganizePoi;
+import net.minecraft.util.datafix.fixes.SavedDataFeaturePoolElementFix;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
@@ -561,6 +563,12 @@ public class DataFixers {
         ImmutableMap<String, String> immutableMap3 = ImmutableMap.builder().put("minecraft:grimstone", "minecraft:deepslate").put("minecraft:grimstone_slab", "minecraft:cobbled_deepslate_slab").put("minecraft:grimstone_stairs", "minecraft:cobbled_deepslate_stairs").put("minecraft:grimstone_wall", "minecraft:cobbled_deepslate_wall").put("minecraft:polished_grimstone", "minecraft:polished_deepslate").put("minecraft:polished_grimstone_slab", "minecraft:polished_deepslate_slab").put("minecraft:polished_grimstone_stairs", "minecraft:polished_deepslate_stairs").put("minecraft:polished_grimstone_wall", "minecraft:polished_deepslate_wall").put("minecraft:grimstone_tiles", "minecraft:deepslate_tiles").put("minecraft:grimstone_tile_slab", "minecraft:deepslate_tile_slab").put("minecraft:grimstone_tile_stairs", "minecraft:deepslate_tile_stairs").put("minecraft:grimstone_tile_wall", "minecraft:deepslate_tile_wall").put("minecraft:grimstone_bricks", "minecraft:deepslate_bricks").put("minecraft:grimstone_brick_slab", "minecraft:deepslate_brick_slab").put("minecraft:grimstone_brick_stairs", "minecraft:deepslate_brick_stairs").put("minecraft:grimstone_brick_wall", "minecraft:deepslate_brick_wall").put("minecraft:chiseled_grimstone", "minecraft:chiseled_deepslate").build();
         dataFixerBuilder.addFixer(ItemRenameFix.create(schema133, "Renamed grimstone block items to deepslate", DataFixers.createRenamer(immutableMap3)));
         dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema133, "Renamed grimstone blocks to deepslate", DataFixers.createRenamer(immutableMap3)));
+        Schema schema134 = dataFixerBuilder.addSchema(2700, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema134, "Renamed cave vines blocks", DataFixers.createRenamer(ImmutableMap.of("minecraft:cave_vines_head", "minecraft:cave_vines", "minecraft:cave_vines_body", "minecraft:cave_vines_plant"))));
+        Schema schema135 = dataFixerBuilder.addSchema(2701, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new SavedDataFeaturePoolElementFix(schema135));
+        Schema schema136 = dataFixerBuilder.addSchema(2702, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new AbstractArrowPickupFix(schema136));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {

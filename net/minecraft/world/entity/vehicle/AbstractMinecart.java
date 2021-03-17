@@ -689,8 +689,6 @@ extends Entity {
             e *= g;
             d *= (double)0.1f;
             e *= (double)0.1f;
-            d *= (double)(1.0f - this.pushthrough);
-            e *= (double)(1.0f - this.pushthrough);
             d *= 0.5;
             e *= 0.5;
             if (entity instanceof AbstractMinecart) {

@@ -227,6 +227,7 @@ GuiEventListener {
             float g = 0.42f;
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
+            poseStack2.translate(0.0, 0.0, 125.0);
             poseStack2.scale(0.42f, 0.42f, 1.0f);
             RenderSystem.applyModelViewMatrix();
             for (Pos pos : this.ingredientPos) {

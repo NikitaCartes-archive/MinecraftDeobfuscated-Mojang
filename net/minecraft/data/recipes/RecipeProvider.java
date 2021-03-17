@@ -44,6 +44,7 @@ import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -388,23 +389,13 @@ implements DataProvider {
         RecipeProvider.chiseledBuilder(Blocks.CHISELED_RED_SANDSTONE, Ingredient.of(Blocks.RED_SANDSTONE_SLAB)).unlockedBy("has_red_sandstone", RecipeProvider.has(Blocks.RED_SANDSTONE)).unlockedBy("has_chiseled_red_sandstone", RecipeProvider.has(Blocks.CHISELED_RED_SANDSTONE)).unlockedBy("has_cut_red_sandstone", RecipeProvider.has(Blocks.CUT_RED_SANDSTONE)).save(consumer);
         RecipeProvider.chiseled(consumer, Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE_SLAB);
         ShapedRecipeBuilder.shaped(Blocks.COPPER_BLOCK).define(Character.valueOf('#'), Items.COPPER_INGOT).pattern("##").pattern("##").unlockedBy("has_copper_ingot", RecipeProvider.has(Items.COPPER_INGOT)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4).requires(Blocks.COPPER_BLOCK).group("copper_ingot").unlockedBy("has_copper_block", RecipeProvider.has(Blocks.COPPER_BLOCK)).save(consumer, "copper_ingot_from_copper_block");
+        ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4).requires(Blocks.COPPER_BLOCK).group(RecipeProvider.getBlockName(Items.COPPER_INGOT)).unlockedBy(RecipeProvider.getHasName(Blocks.COPPER_BLOCK), RecipeProvider.has(Blocks.COPPER_BLOCK)).save(consumer, RecipeProvider.getFromName(Items.COPPER_INGOT, Blocks.COPPER_BLOCK));
+        ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4).requires(Blocks.WAXED_COPPER_BLOCK).group(RecipeProvider.getBlockName(Items.COPPER_INGOT)).unlockedBy(RecipeProvider.getHasName(Blocks.WAXED_COPPER_BLOCK), RecipeProvider.has(Blocks.WAXED_COPPER_BLOCK)).save(consumer, RecipeProvider.getFromName(Items.COPPER_INGOT, Blocks.WAXED_COPPER_BLOCK));
         RecipeProvider.cut(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
         RecipeProvider.cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
         RecipeProvider.cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
         RecipeProvider.cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_COPPER).requires(Items.COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_copper_block", RecipeProvider.has(Items.COPPER_BLOCK)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_COPPER).requires(Items.WEATHERED_COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_weathered_copper_block", RecipeProvider.has(Items.WEATHERED_COPPER_BLOCK)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_COPPER).requires(Items.EXPOSED_COPPER_BLOCK).requires(Items.HONEYCOMB).unlockedBy("has_exposed_copper_block", RecipeProvider.has(Items.EXPOSED_COPPER_BLOCK)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER).requires(Items.CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_cut_copper", RecipeProvider.has(Items.CUT_COPPER)).save(consumer, "waxed_cut_copper_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER).requires(Items.WEATHERED_CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_weathered_cut_copper", RecipeProvider.has(Items.WEATHERED_CUT_COPPER)).save(consumer, "waxed_weathered_cut_copper_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER).requires(Items.EXPOSED_CUT_COPPER).requires(Items.HONEYCOMB).unlockedBy("has_exposed_cut_copper", RecipeProvider.has(Items.EXPOSED_CUT_COPPER)).save(consumer, "waxed_exposed_cut_copper_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_STAIRS).requires(Items.CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_copper_cut_stairs", RecipeProvider.has(Items.CUT_COPPER_STAIRS)).save(consumer, "waxed_copper_cut_stairs_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_STAIRS).requires(Items.WEATHERED_CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_weathered_cut_copper_stairs", RecipeProvider.has(Items.WEATHERED_CUT_COPPER_STAIRS)).save(consumer, "waxed_weathered_cut_copper_stairs_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_STAIRS).requires(Items.EXPOSED_CUT_COPPER_STAIRS).requires(Items.HONEYCOMB).unlockedBy("has_exposed_cut_copper_stairs", RecipeProvider.has(Items.EXPOSED_CUT_COPPER_STAIRS)).save(consumer, "waxed_exposed_cut_copper_stairs_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_CUT_COPPER_SLAB).requires(Items.CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_copper_cut_slab", RecipeProvider.has(Items.CUT_COPPER_SLAB)).save(consumer, "waxed_copper_cut_slab_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_WEATHERED_CUT_COPPER_SLAB).requires(Items.WEATHERED_CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_weathered_cut_copper_slab", RecipeProvider.has(Items.WEATHERED_CUT_COPPER_SLAB)).save(consumer, "waxed_weathered_cut_copper_slab_from_honeycomb");
-        ShapelessRecipeBuilder.shapeless(Items.WAXED_EXPOSED_CUT_COPPER_SLAB).requires(Items.EXPOSED_CUT_COPPER_SLAB).requires(Items.HONEYCOMB).unlockedBy("has_exposed_cut_copper_slab", RecipeProvider.has(Items.EXPOSED_CUT_COPPER_SLAB)).save(consumer, "waxed_exposed_cut_copper_slab_from_honeycomb");
+        RecipeProvider.waxRecipes(consumer);
         RecipeProvider.cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
         RecipeProvider.cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
         RecipeProvider.cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
@@ -526,8 +517,10 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.MELON).define(Character.valueOf('M'), Items.MELON_SLICE).pattern("MMM").pattern("MMM").pattern("MMM").unlockedBy("has_melon", RecipeProvider.has(Items.MELON_SLICE)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.MELON_SEEDS).requires(Items.MELON_SLICE).unlockedBy("has_melon", RecipeProvider.has(Items.MELON_SLICE)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.MINECART).define(Character.valueOf('#'), Items.IRON_INGOT).pattern("# #").pattern("###").unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE).requires(Blocks.COBBLESTONE).requires(Blocks.VINE).unlockedBy("has_vine", RecipeProvider.has(Blocks.VINE)).save(consumer);
-        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS).requires(Blocks.STONE_BRICKS).requires(Blocks.VINE).unlockedBy("has_mossy_cobblestone", RecipeProvider.has(Blocks.MOSSY_COBBLESTONE)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE).requires(Blocks.COBBLESTONE).requires(Blocks.VINE).unlockedBy("has_vine", RecipeProvider.has(Blocks.VINE)).save(consumer, RecipeProvider.getFromName(Blocks.MOSSY_COBBLESTONE, Blocks.VINE));
+        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS).requires(Blocks.STONE_BRICKS).requires(Blocks.VINE).unlockedBy("has_mossy_cobblestone", RecipeProvider.has(Blocks.MOSSY_COBBLESTONE)).save(consumer, RecipeProvider.getFromName(Blocks.MOSSY_STONE_BRICKS, Blocks.VINE));
+        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE).requires(Blocks.COBBLESTONE).requires(Blocks.MOSS_BLOCK).unlockedBy("has_moss_block", RecipeProvider.has(Blocks.MOSS_BLOCK)).save(consumer, RecipeProvider.getFromName(Blocks.MOSSY_COBBLESTONE, Blocks.MOSS_BLOCK));
+        ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS).requires(Blocks.STONE_BRICKS).requires(Blocks.MOSS_BLOCK).unlockedBy("has_mossy_cobblestone", RecipeProvider.has(Blocks.MOSSY_COBBLESTONE)).save(consumer, RecipeProvider.getFromName(Blocks.MOSSY_STONE_BRICKS, Blocks.MOSS_BLOCK));
         ShapelessRecipeBuilder.shapeless(Items.MUSHROOM_STEW).requires(Blocks.BROWN_MUSHROOM).requires(Blocks.RED_MUSHROOM).requires(Items.BOWL).unlockedBy("has_mushroom_stew", RecipeProvider.has(Items.MUSHROOM_STEW)).unlockedBy("has_bowl", RecipeProvider.has(Items.BOWL)).unlockedBy("has_brown_mushroom", RecipeProvider.has(Blocks.BROWN_MUSHROOM)).unlockedBy("has_red_mushroom", RecipeProvider.has(Blocks.RED_MUSHROOM)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.NETHER_BRICKS).define(Character.valueOf('N'), Items.NETHER_BRICK).pattern("NN").pattern("NN").unlockedBy("has_netherbrick", RecipeProvider.has(Items.NETHER_BRICK)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.NETHER_WART_BLOCK).define(Character.valueOf('#'), Items.NETHER_WART).pattern("###").pattern("###").pattern("###").unlockedBy("has_nether_wart", RecipeProvider.has(Items.NETHER_WART)).save(consumer);
@@ -1106,6 +1099,10 @@ implements DataProvider {
         SimpleCookingRecipeBuilder.cooking(Ingredient.of(Items.PORKCHOP), Items.COOKED_PORKCHOP, 0.35f, i, simpleCookingSerializer).unlockedBy("has_porkchop", RecipeProvider.has(Items.PORKCHOP)).save(consumer, "cooked_porkchop_from_" + string);
         SimpleCookingRecipeBuilder.cooking(Ingredient.of(Items.POTATO), Items.BAKED_POTATO, 0.35f, i, simpleCookingSerializer).unlockedBy("has_potato", RecipeProvider.has(Items.POTATO)).save(consumer, "baked_potato_from_" + string);
         SimpleCookingRecipeBuilder.cooking(Ingredient.of(Items.RABBIT), Items.COOKED_RABBIT, 0.35f, i, simpleCookingSerializer).unlockedBy("has_rabbit", RecipeProvider.has(Items.RABBIT)).save(consumer, "cooked_rabbit_from_" + string);
+    }
+
+    private static void waxRecipes(Consumer<FinishedRecipe> consumer) {
+        HoneycombItem.WAXABLES.get().forEach((block, block2) -> ShapelessRecipeBuilder.shapeless(block2).requires((ItemLike)block).requires(Items.HONEYCOMB).unlockedBy(RecipeProvider.getHasName(block), RecipeProvider.has(block)).save(consumer, RecipeProvider.getFromName(block2, Items.HONEYCOMB)));
     }
 
     private static void generateRecipes(Consumer<FinishedRecipe> consumer, BlockFamily blockFamily) {

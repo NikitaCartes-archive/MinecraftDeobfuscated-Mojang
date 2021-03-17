@@ -9,6 +9,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -23,7 +24,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +73,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleCorridorTBalconyPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleCorridorTBalconyPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_T_BALCONY, compoundTag);
         }
 
@@ -138,7 +138,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleCorridorStairsPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleCorridorStairsPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_STAIRS, compoundTag);
         }
 
@@ -196,14 +196,14 @@ public class NetherBridgePieces {
             this.isNeedingChest = random.nextInt(3) == 0;
         }
 
-        public CastleSmallCorridorLeftTurnPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleSmallCorridorLeftTurnPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_LEFT_TURN, compoundTag);
             this.isNeedingChest = compoundTag.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
-            super.addAdditionalSaveData(compoundTag);
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(serverLevel, compoundTag);
             compoundTag.putBoolean("Chest", this.isNeedingChest);
         }
 
@@ -258,14 +258,14 @@ public class NetherBridgePieces {
             this.isNeedingChest = random.nextInt(3) == 0;
         }
 
-        public CastleSmallCorridorRightTurnPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleSmallCorridorRightTurnPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_RIGHT_TURN, compoundTag);
             this.isNeedingChest = compoundTag.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
-            super.addAdditionalSaveData(compoundTag);
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(serverLevel, compoundTag);
             compoundTag.putBoolean("Chest", this.isNeedingChest);
         }
 
@@ -317,7 +317,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleSmallCorridorCrossingPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleSmallCorridorCrossingPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_CROSSING, compoundTag);
         }
 
@@ -362,7 +362,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleSmallCorridorPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleSmallCorridorPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR, compoundTag);
         }
 
@@ -408,7 +408,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleStalkRoom(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleStalkRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_STALK_ROOM, compoundTag);
         }
 
@@ -540,7 +540,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public CastleEntrance(StructureManager structureManager, CompoundTag compoundTag) {
+        public CastleEntrance(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_ENTRANCE, compoundTag);
         }
 
@@ -638,14 +638,14 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public MonsterThrone(StructureManager structureManager, CompoundTag compoundTag) {
+        public MonsterThrone(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_MONSTER_THRONE, compoundTag);
             this.hasPlacedSpawner = compoundTag.getBoolean("Mob");
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
-            super.addAdditionalSaveData(compoundTag);
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(serverLevel, compoundTag);
             compoundTag.putBoolean("Mob", this.hasPlacedSpawner);
         }
 
@@ -714,7 +714,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public StairsRoom(StructureManager structureManager, CompoundTag compoundTag) {
+        public StairsRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_STAIRS_ROOM, compoundTag);
         }
 
@@ -771,7 +771,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public RoomCrossing(StructureManager structureManager, CompoundTag compoundTag) {
+        public RoomCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_ROOM_CROSSING, compoundTag);
         }
 
@@ -839,7 +839,7 @@ public class NetherBridgePieces {
             super(structurePieceType, compoundTag);
         }
 
-        public BridgeCrossing(StructureManager structureManager, CompoundTag compoundTag) {
+        public BridgeCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
             this(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, compoundTag);
         }
 
@@ -909,7 +909,7 @@ public class NetherBridgePieces {
             this.selfSeed = random.nextInt();
         }
 
-        public BridgeEndFiller(StructureManager structureManager, CompoundTag compoundTag) {
+        public BridgeEndFiller(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_END_FILLER, compoundTag);
             this.selfSeed = compoundTag.getInt("Seed");
         }
@@ -923,8 +923,8 @@ public class NetherBridgePieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
-            super.addAdditionalSaveData(compoundTag);
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
+            super.addAdditionalSaveData(serverLevel, compoundTag);
             compoundTag.putInt("Seed", this.selfSeed);
         }
 
@@ -966,7 +966,7 @@ public class NetherBridgePieces {
             this.boundingBox = boundingBox;
         }
 
-        public BridgeStraight(StructureManager structureManager, CompoundTag compoundTag) {
+        public BridgeStraight(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_STRAIGHT, compoundTag);
         }
 
@@ -1035,7 +1035,7 @@ public class NetherBridgePieces {
             }
         }
 
-        public StartPiece(StructureManager structureManager, CompoundTag compoundTag) {
+        public StartPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
             super(StructurePieceType.NETHER_FORTRESS_START, compoundTag);
         }
     }
@@ -1051,7 +1051,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(CompoundTag compoundTag) {
+        protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
         }
 
         private int updatePieceWeight(List<PieceWeight> list) {

@@ -40,6 +40,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
@@ -83,7 +84,7 @@ extends Screen {
         } else {
             j = 1;
         }
-        int k = Math.min(i + j, 256);
+        int k = Math.min(i + j, DimensionType.Y_SIZE);
         int l = k - i;
         String string2 = strings[strings.length - 1];
         try {
@@ -96,9 +97,7 @@ extends Screen {
             LOGGER.error("Error while parsing flat world string => Unknown block, {}", (Object)string2);
             return null;
         }
-        FlatLayerInfo flatLayerInfo = new FlatLayerInfo(l, block);
-        flatLayerInfo.setStart(i);
-        return flatLayerInfo;
+        return new FlatLayerInfo(l, block);
     }
 
     private static List<FlatLayerInfo> getLayersInfoFromString(String string) {

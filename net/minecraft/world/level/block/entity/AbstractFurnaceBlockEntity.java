@@ -179,6 +179,8 @@ StackedContentsCompatible {
         AbstractFurnaceBlockEntity.add(map, Blocks.FLETCHING_TABLE, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.SMITHING_TABLE, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.COMPOSTER, 300);
+        AbstractFurnaceBlockEntity.add(map, Blocks.AZALEA, 100);
+        AbstractFurnaceBlockEntity.add(map, Blocks.FLOWERING_AZALEA, 100);
         return map;
     }
 

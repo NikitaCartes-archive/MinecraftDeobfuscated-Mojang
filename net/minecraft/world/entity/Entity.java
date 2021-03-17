@@ -171,7 +171,6 @@ CommandSource {
     public double zOld;
     public float maxUpStep;
     public boolean noPhysics;
-    public float pushthrough;
     protected final Random random = new Random();
     public int tickCount;
     private int remainingFireTicks = -this.getFireImmuneTicks();
@@ -1207,8 +1206,6 @@ CommandSource {
             e *= g;
             d *= (double)0.05f;
             e *= (double)0.05f;
-            d *= (double)(1.0f - this.pushthrough);
-            e *= (double)(1.0f - this.pushthrough);
             if (!this.isVehicle()) {
                 this.push(-d, 0.0, -e);
             }
@@ -2644,14 +2641,12 @@ CommandSource {
     }
 
     public boolean touchingUnloadedChunk() {
-        int n;
+        int l;
         AABB aABB = this.getBoundingBox().inflate(1.0);
         int i = Mth.floor(aABB.minX);
         int j = Mth.ceil(aABB.maxX);
-        int k = Mth.floor(aABB.minY);
-        int l = Mth.ceil(aABB.maxY);
-        int m = Mth.floor(aABB.minZ);
-        return !this.level.hasChunksAt(i, k, m, j, l, n = Mth.ceil(aABB.maxZ));
+        int k = Mth.floor(aABB.minZ);
+        return !this.level.hasChunksAt(i, k, j, l = Mth.ceil(aABB.maxZ));
     }
 
     public double getFluidHeight(Tag<Fluid> tag) {

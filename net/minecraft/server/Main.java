@@ -117,7 +117,7 @@ public class Main {
             LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
             MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
             LevelSummary levelSummary = levelStorageAccess.getSummary();
-            if (levelSummary != null && levelSummary.isPreWorldheight()) {
+            if (levelSummary != null && levelSummary.isIncompatibleWorldHeight()) {
                 LOGGER.info("Loading of old worlds is temporarily disabled.");
                 return;
             }
@@ -137,7 +137,7 @@ public class Main {
                 return;
             }
             serverResources.updateGlobals();
-            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
+            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
             WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
             if (worldData == null) {
                 WorldGenSettings worldGenSettings;

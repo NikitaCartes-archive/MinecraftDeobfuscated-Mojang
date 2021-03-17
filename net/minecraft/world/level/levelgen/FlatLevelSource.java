@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
@@ -53,25 +53,18 @@ extends ChunkGenerator {
     }
 
     @Override
-    public int getSpawnHeight() {
-        BlockState[] blockStates = this.settings.getLayers();
-        for (int i = 0; i < blockStates.length; ++i) {
-            BlockState blockState;
-            BlockState blockState2 = blockState = blockStates[i] == null ? Blocks.AIR.defaultBlockState() : blockStates[i];
-            if (Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
-            return this.settings.getMinBuildHeight() + i - 1;
-        }
-        return this.settings.getMinBuildHeight() + blockStates.length;
+    public int getSpawnHeight(LevelHeightAccessor levelHeightAccessor) {
+        return levelHeightAccessor.getMinBuildHeight() + Math.min(levelHeightAccessor.getHeight(), this.settings.getLayers().size());
     }
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-        BlockState[] blockStates = this.settings.getLayers();
+        List<BlockState> list = this.settings.getLayers();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
         Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-        for (int i = 0; i < blockStates.length; ++i) {
-            BlockState blockState = blockStates[i];
+        for (int i = 0; i < Math.min(chunkAccess.getHeight(), list.size()); ++i) {
+            BlockState blockState = list.get(i);
             if (blockState == null) continue;
             int j = chunkAccess.getMinBuildHeight() + i;
             for (int k = 0; k < 16; ++k) {
@@ -87,9 +80,9 @@ extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
-        BlockState[] blockStates = this.settings.getLayers();
-        for (int k = blockStates.length - 1; k >= 0; --k) {
-            BlockState blockState = blockStates[k];
+        List<BlockState> list = this.settings.getLayers();
+        for (int k = Math.min(list.size(), levelHeightAccessor.getMaxBuildHeight()) - 1; k >= 0; --k) {
+            BlockState blockState = list.get(k);
             if (blockState == null || !types.isOpaque().test(blockState)) continue;
             return levelHeightAccessor.getMinBuildHeight() + k + 1;
         }
@@ -98,7 +91,7 @@ extends ChunkGenerator {
 
     @Override
     public NoiseColumn getBaseColumn(int i, int j, LevelHeightAccessor levelHeightAccessor) {
-        return new NoiseColumn(0, (BlockState[])Arrays.stream(this.settings.getLayers()).map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState).toArray(BlockState[]::new));
+        return new NoiseColumn(levelHeightAccessor.getMinBuildHeight(), (BlockState[])this.settings.getLayers().stream().limit(levelHeightAccessor.getHeight()).map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState).toArray(BlockState[]::new));
     }
 }
 

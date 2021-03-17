@@ -36,7 +36,7 @@ public class ScreenEffectRenderer {
         BlockState blockState;
         LocalPlayer player = minecraft.player;
         if (!player.noPhysics && (blockState = ScreenEffectRenderer.getViewBlockingState(player)) != null) {
-            ScreenEffectRenderer.renderTex(minecraft, minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
+            ScreenEffectRenderer.renderTex(minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
         }
         if (!minecraft.player.isSpectator()) {
             if (minecraft.player.isEyeInFluid(FluidTags.WATER)) {
@@ -63,8 +63,9 @@ public class ScreenEffectRenderer {
         return null;
     }
 
-    private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
+    private static void renderTex(TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
         RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         float f = 0.1f;
         float g = -1.0f;

@@ -98,6 +98,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.5f, Items.WEEPING_VINES);
         ComposterBlock.add(0.5f, Items.TWISTING_VINES);
         ComposterBlock.add(0.5f, Items.MELON_SLICE);
+        ComposterBlock.add(0.5f, Items.GLOW_LICHEN);
         ComposterBlock.add(0.65f, Items.SEA_PICKLE);
         ComposterBlock.add(0.65f, Items.LILY_PAD);
         ComposterBlock.add(0.65f, Items.PUMPKIN);

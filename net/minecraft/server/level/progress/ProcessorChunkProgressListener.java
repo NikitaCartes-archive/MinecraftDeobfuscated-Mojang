@@ -17,7 +17,6 @@ public class ProcessorChunkProgressListener
 implements ChunkProgressListener {
     private final ChunkProgressListener delegate;
     private final ProcessorMailbox<Runnable> mailbox;
-    private volatile boolean isRunning;
 
     private ProcessorChunkProgressListener(ChunkProgressListener chunkProgressListener, Executor executor) {
         this.delegate = chunkProgressListener;
@@ -32,35 +31,21 @@ implements ChunkProgressListener {
 
     @Override
     public void updateSpawnPos(ChunkPos chunkPos) {
-        if (!this.isRunning) {
-            return;
-        }
         this.mailbox.tell(() -> this.delegate.updateSpawnPos(chunkPos));
     }
 
     @Override
     public void onStatusChange(ChunkPos chunkPos, @Nullable ChunkStatus chunkStatus) {
-        if (!this.isRunning) {
-            return;
-        }
         this.mailbox.tell(() -> this.delegate.onStatusChange(chunkPos, chunkStatus));
     }
 
     @Override
     public void start() {
-        if (this.isRunning) {
-            return;
-        }
-        this.isRunning = true;
         this.mailbox.tell(this.delegate::start);
     }
 
     @Override
     public void stop() {
-        if (!this.isRunning) {
-            return;
-        }
-        this.isRunning = false;
         this.mailbox.tell(this.delegate::stop);
     }
 }

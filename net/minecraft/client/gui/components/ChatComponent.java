@@ -64,7 +64,7 @@ extends GuiComponent {
         float f = (float)this.getScale();
         int l = Mth.ceil((float)this.getWidth() / f);
         poseStack.pushPose();
-        poseStack.translate(2.0, 8.0, 0.0);
+        poseStack.translate(4.0, 8.0, 0.0);
         poseStack.scale(f, f, 1.0f);
         double d = this.minecraft.options.chatOpacity * (double)0.9f + (double)0.1f;
         double e = this.minecraft.options.textBackgroundOpacity;
@@ -83,7 +83,7 @@ extends GuiComponent {
             double t = (double)(-n) * g;
             poseStack.pushPose();
             poseStack.translate(0.0, 0.0, 50.0);
-            ChatComponent.fill(poseStack, -2, (int)(t - g), 0 + l + 4, (int)t, r << 24);
+            ChatComponent.fill(poseStack, -4, (int)(t - g), 0 + l + 4, (int)t, r << 24);
             RenderSystem.enableBlend();
             poseStack.translate(0.0, 0.0, 50.0);
             this.minecraft.font.drawShadow(poseStack, guiMessage.getMessage(), 0.0f, (float)((int)(t + h)), 0xFFFFFF + (q << 24));
@@ -104,13 +104,14 @@ extends GuiComponent {
         }
         if (bl) {
             n = this.minecraft.font.lineHeight;
-            int u = k * n + k;
-            o = m * n + m;
+            int u = k * n;
+            o = m * n;
             int v = this.chatScrollbarPos * o / k;
             int w = o * o / u;
             if (u != o) {
                 q = v > 0 ? 170 : 96;
                 r = this.newMessageSinceScroll ? 0xCC3333 : 0x3333AA;
+                poseStack.translate(-4.0, 0.0, 0.0);
                 ChatComponent.fill(poseStack, 0, -v, 2, -v - w, r + (q << 24));
                 ChatComponent.fill(poseStack, 2, -v, 1, -v - w, 0xCCCCCC + (q << 24));
             }

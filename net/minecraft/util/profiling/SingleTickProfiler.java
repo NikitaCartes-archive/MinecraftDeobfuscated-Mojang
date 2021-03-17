@@ -38,7 +38,7 @@ public class SingleTickProfiler {
         this.profiler = InactiveProfiler.INSTANCE;
         if (profileResults.getNanoDuration() >= this.saveThreshold) {
             File file = new File(this.location, "tick-results-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + ".txt");
-            profileResults.saveResults(file);
+            profileResults.saveResults(file.toPath());
             LOGGER.info("Recorded long tick -- wrote info to: {}", (Object)file.getAbsolutePath());
         }
     }

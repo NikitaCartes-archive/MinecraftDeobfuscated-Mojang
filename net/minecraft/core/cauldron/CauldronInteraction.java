@@ -102,9 +102,7 @@ public interface CauldronInteraction {
     public InteractionResult interact(BlockState var1, Level var2, BlockPos var3, Player var4, InteractionHand var5, ItemStack var6);
 
     public static void bootStrap() {
-        EMPTY.put(Items.WATER_BUCKET, FILL_WATER);
-        EMPTY.put(Items.LAVA_BUCKET, FILL_LAVA);
-        EMPTY.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+        CauldronInteraction.addDefaultInteractions(EMPTY);
         EMPTY.put(Items.POTION, (blockState, level, blockPos, player, interactionHand, itemStack) -> {
             if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
                 return InteractionResult.PASS;
@@ -118,9 +116,7 @@ public interface CauldronInteraction {
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         });
-        WATER.put(Items.LAVA_BUCKET, FILL_LAVA);
-        WATER.put(Items.WATER_BUCKET, FILL_WATER);
-        WATER.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+        CauldronInteraction.addDefaultInteractions(WATER);
         WATER.put(Items.BUCKET, (blockState2, level, blockPos, player, interactionHand, itemStack) -> CauldronInteraction.fillBucket(blockState2, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.WATER_BUCKET), blockState -> blockState.getValue(LayeredCauldronBlock.LEVEL) == 3, SoundEvents.BUCKET_FILL));
         WATER.put(Items.GLASS_BOTTLE, (blockState, level, blockPos, player, interactionHand, itemStack) -> {
             if (!level.isClientSide) {
@@ -183,11 +179,15 @@ public interface CauldronInteraction {
         WATER.put(Items.RED_SHULKER_BOX, SHULKER_BOX);
         WATER.put(Items.YELLOW_SHULKER_BOX, SHULKER_BOX);
         LAVA.put(Items.BUCKET, (blockState2, level, blockPos, player, interactionHand, itemStack) -> CauldronInteraction.fillBucket(blockState2, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.LAVA_BUCKET), blockState -> true, SoundEvents.BUCKET_FILL_LAVA));
-        LAVA.put(Items.WATER_BUCKET, FILL_WATER);
-        LAVA.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
+        CauldronInteraction.addDefaultInteractions(LAVA);
         POWDER_SNOW.put(Items.BUCKET, (blockState2, level, blockPos, player, interactionHand, itemStack) -> CauldronInteraction.fillBucket(blockState2, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.POWDER_SNOW_BUCKET), blockState -> blockState.getValue(LayeredCauldronBlock.LEVEL) == 3, SoundEvents.BUCKET_FILL_POWDER_SNOW));
-        POWDER_SNOW.put(Items.WATER_BUCKET, FILL_WATER);
-        POWDER_SNOW.put(Items.LAVA_BUCKET, FILL_LAVA);
+        CauldronInteraction.addDefaultInteractions(POWDER_SNOW);
+    }
+
+    public static void addDefaultInteractions(Map<Item, CauldronInteraction> map) {
+        map.put(Items.LAVA_BUCKET, FILL_LAVA);
+        map.put(Items.WATER_BUCKET, FILL_WATER);
+        map.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
     }
 
     public static InteractionResult fillBucket(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack, ItemStack itemStack2, Predicate<BlockState> predicate, SoundEvent soundEvent) {

@@ -41,7 +41,7 @@ implements Toast {
         }
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
         toastComponent.getMinecraft().font.draw(poseStack, TITLE_TEXT, 30.0f, 7.0f, -11534256);
         toastComponent.getMinecraft().font.draw(poseStack, DESCRIPTION_TEXT, 30.0f, 18.0f, -16777216);
