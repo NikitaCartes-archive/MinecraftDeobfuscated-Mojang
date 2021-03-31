@@ -18,6 +18,11 @@ public class LavaCauldronBlock extends AbstractCauldronBlock {
 	}
 
 	@Override
+	public boolean isFull(BlockState blockState) {
+		return true;
+	}
+
+	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (this.isEntityInsideContent(blockState, blockPos, entity)) {
 			entity.lavaHurt();

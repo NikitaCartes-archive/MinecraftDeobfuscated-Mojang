@@ -14,8 +14,6 @@ import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -113,6 +111,16 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 
 public abstract class Player extends LivingEntity {
+	public static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
+	public static final int MAX_NAME_LENGTH = 16;
+	public static final int MAX_HEALTH = 20;
+	public static final int SLEEP_DURATION = 100;
+	public static final int WAKE_UP_DURATION = 10;
+	public static final int ENDER_SLOT_OFFSET = 200;
+	public static final float CROUCH_BB_HEIGHT = 1.5F;
+	public static final float SWIMMING_BB_WIDTH = 0.6F;
+	public static final float SWIMMING_BB_HEIGHT = 0.6F;
+	public static final float DEFAULT_EYE_HEIGHT = 1.62F;
 	public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F);
 	private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.<Pose, EntityDimensions>builder()
 		.put(Pose.STANDING, STANDING_DIMENSIONS)
@@ -123,6 +131,7 @@ public abstract class Player extends LivingEntity {
 		.put(Pose.CROUCHING, EntityDimensions.scalable(0.6F, 1.5F))
 		.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F))
 		.build();
+	private static final int FLY_ACHIEVEMENT_SPEED = 25;
 	private static final EntityDataAccessor<Float> DATA_PLAYER_ABSORPTION_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
@@ -155,7 +164,6 @@ public abstract class Player extends LivingEntity {
 	protected final float defaultFlySpeed = 0.02F;
 	private int lastLevelUpTime;
 	private final GameProfile gameProfile;
-	@Environment(EnvType.CLIENT)
 	private boolean reducedDebugInfo;
 	private ItemStack lastItemInMainHand = ItemStack.EMPTY;
 	private final ItemCooldowns cooldowns = this.createItemCooldowns();
@@ -421,7 +429,6 @@ public abstract class Player extends LivingEntity {
 		return 20;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 9) {
@@ -437,7 +444,6 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void addParticlesAroundSelf(ParticleOptions particleOptions) {
 		for (int i = 0; i < 5; i++) {
 			double d = this.random.nextGaussian() * 0.02;
@@ -1268,7 +1274,6 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void respawn() {
 	}
 
@@ -1681,7 +1686,6 @@ public abstract class Player extends LivingEntity {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldShowName() {
 		return true;
@@ -1862,7 +1866,6 @@ public abstract class Player extends LivingEntity {
 		return UUID.nameUUIDFromBytes(("OfflinePlayer:" + string).getBytes(StandardCharsets.UTF_8));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isModelPartShown(PlayerModelPart playerModelPart) {
 		return (this.getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION) & playerModelPart.getMask()) == playerModelPart.getMask();
 	}
@@ -1877,12 +1880,10 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isReducedDebugInfo() {
 		return this.reducedDebugInfo;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setReducedDebugInfo(boolean bl) {
 		this.reducedDebugInfo = bl;
 	}
@@ -2003,7 +2004,6 @@ public abstract class Player extends LivingEntity {
 		return this.abilities.flying || super.shouldRemoveSoulSpeed(blockState);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		double d = 0.22 * (this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0);
@@ -2038,7 +2038,6 @@ public abstract class Player extends LivingEntity {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isScoping() {
 		return this.isUsingItem() && this.getUseItem().is(Items.SPYGLASS);
 	}

@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -10,6 +8,9 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketListener> {
+	public static final int METHOD_ADD = 0;
+	public static final int METHOD_REMOVE = 1;
+	public static final int METHOD_CHANGE = 2;
 	private final String objectiveName;
 	private final Component displayName;
 	private final ObjectiveCriteria.RenderType renderType;
@@ -48,22 +49,18 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 		clientGamePacketListener.handleAddObjective(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getObjectiveName() {
 		return this.objectiveName;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getDisplayName() {
 		return this.displayName;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getMethod() {
 		return this.method;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ObjectiveCriteria.RenderType getRenderType() {
 		return this.renderType;
 	}

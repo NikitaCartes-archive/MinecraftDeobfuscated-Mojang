@@ -2,8 +2,6 @@ package net.minecraft.world.entity.player;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public enum ChatVisiblity {
@@ -26,12 +24,10 @@ public enum ChatVisiblity {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getKey() {
 		return this.key;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static ChatVisiblity byId(int i) {
 		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
 	}

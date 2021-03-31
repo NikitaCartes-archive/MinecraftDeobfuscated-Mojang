@@ -1,10 +1,22 @@
 package net.minecraft;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.Objects;
 
 @FunctionalInterface
-@Environment(EnvType.CLIENT)
 public interface CharPredicate {
 	boolean test(char c);
+
+	default CharPredicate and(CharPredicate charPredicate) {
+		Objects.requireNonNull(charPredicate);
+		return c -> this.test(c) && charPredicate.test(c);
+	}
+
+	default CharPredicate negate() {
+		return c -> !this.test(c);
+	}
+
+	default CharPredicate or(CharPredicate charPredicate) {
+		Objects.requireNonNull(charPredicate);
+		return c -> this.test(c) || charPredicate.test(c);
+	}
 }

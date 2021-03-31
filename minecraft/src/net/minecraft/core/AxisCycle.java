@@ -8,6 +8,11 @@ public enum AxisCycle {
 		}
 
 		@Override
+		public double cycle(double d, double e, double f, Direction.Axis axis) {
+			return axis.choose(d, e, f);
+		}
+
+		@Override
 		public Direction.Axis cycle(Direction.Axis axis) {
 			return axis;
 		}
@@ -24,6 +29,11 @@ public enum AxisCycle {
 		}
 
 		@Override
+		public double cycle(double d, double e, double f, Direction.Axis axis) {
+			return axis.choose(f, d, e);
+		}
+
+		@Override
 		public Direction.Axis cycle(Direction.Axis axis) {
 			return AXIS_VALUES[Math.floorMod(axis.ordinal() + 1, 3)];
 		}
@@ -37,6 +47,11 @@ public enum AxisCycle {
 		@Override
 		public int cycle(int i, int j, int k, Direction.Axis axis) {
 			return axis.choose(j, k, i);
+		}
+
+		@Override
+		public double cycle(double d, double e, double f, Direction.Axis axis) {
+			return axis.choose(e, f, d);
 		}
 
 		@Override
@@ -57,6 +72,8 @@ public enum AxisCycle {
 	}
 
 	public abstract int cycle(int i, int j, int k, Direction.Axis axis);
+
+	public abstract double cycle(double d, double e, double f, Direction.Axis axis);
 
 	public abstract Direction.Axis cycle(Direction.Axis axis);
 

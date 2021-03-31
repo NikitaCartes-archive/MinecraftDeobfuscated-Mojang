@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
@@ -96,7 +94,6 @@ public class BrewingStandBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		double d = (double)blockPos.getX() + 0.4 + (double)random.nextFloat() * 0.2;

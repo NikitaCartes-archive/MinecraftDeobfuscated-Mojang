@@ -5,19 +5,12 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public abstract class NoiseAffectingStructureStart<C extends FeatureConfiguration> extends StructureStart<C> {
-	public NoiseAffectingStructureStart(StructureFeature<C> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-		super(structureFeature, chunkPos, boundingBox, i, l);
+	public NoiseAffectingStructureStart(StructureFeature<C> structureFeature, ChunkPos chunkPos, int i, long l) {
+		super(structureFeature, chunkPos, i, l);
 	}
 
 	@Override
-	protected void calculateBoundingBox() {
-		super.calculateBoundingBox();
-		int i = 12;
-		this.boundingBox.x0 -= 12;
-		this.boundingBox.y0 -= 12;
-		this.boundingBox.z0 -= 12;
-		this.boundingBox.x1 += 12;
-		this.boundingBox.y1 += 12;
-		this.boundingBox.z1 += 12;
+	public BoundingBox getBoundingBox() {
+		return super.getBoundingBox().inflate(12);
 	}
 }

@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class KnowledgeBookItem extends Item {
+	private static final String RECIPE_TAG = "Recipes";
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public KnowledgeBookItem(Item.Properties properties) {

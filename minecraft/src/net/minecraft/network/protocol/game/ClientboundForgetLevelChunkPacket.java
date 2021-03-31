@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -29,12 +27,10 @@ public class ClientboundForgetLevelChunkPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleForgetLevelChunk(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getX() {
 		return this.x;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getZ() {
 		return this.z;
 	}

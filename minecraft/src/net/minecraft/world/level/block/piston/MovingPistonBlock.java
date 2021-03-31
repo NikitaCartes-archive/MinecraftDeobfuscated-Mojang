@@ -3,8 +3,6 @@ package net.minecraft.world.level.block.piston;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -114,7 +112,6 @@ public class MovingPistonBlock extends BaseEntityBlock {
 		return blockEntity instanceof PistonMovingBlockEntity ? (PistonMovingBlockEntity)blockEntity : null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return ItemStack.EMPTY;

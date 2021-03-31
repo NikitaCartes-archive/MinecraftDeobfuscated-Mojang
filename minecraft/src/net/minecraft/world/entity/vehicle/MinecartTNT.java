@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.vehicle;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
 public class MinecartTNT extends AbstractMinecart {
+	private static final byte EVENT_PRIME = 10;
 	private int fuse = -1;
 
 	public MinecartTNT(EntityType<? extends MinecartTNT> entityType, Level level) {
@@ -117,7 +116,6 @@ public class MinecartTNT extends AbstractMinecart {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 10) {
@@ -137,7 +135,6 @@ public class MinecartTNT extends AbstractMinecart {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFuse() {
 		return this.fuse;
 	}

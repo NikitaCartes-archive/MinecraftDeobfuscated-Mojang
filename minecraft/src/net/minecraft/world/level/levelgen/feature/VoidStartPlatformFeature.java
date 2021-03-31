@@ -10,6 +10,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> {
 	private static final BlockPos PLATFORM_OFFSET = new BlockPos(8, 3, 8);
 	private static final ChunkPos PLATFORM_ORIGIN_CHUNK = new ChunkPos(PLATFORM_OFFSET);
+	private static final int PLATFORM_RADIUS = 16;
+	private static final int PLATFORM_RADIUS_CHUNKS = 1;
 
 	public VoidStartPlatformFeature(Codec<NoneFeatureConfiguration> codec) {
 		super(codec);

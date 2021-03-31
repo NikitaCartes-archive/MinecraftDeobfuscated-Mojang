@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 
 @Environment(EnvType.CLIENT)
 public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
+	private static final float PADDING = 0.02F;
 	private final Map<BlockPos, GameTestDebugRenderer.Marker> markers = Maps.<BlockPos, GameTestDebugRenderer.Marker>newHashMap();
 
 	public void addMarker(BlockPos blockPos, int i, String string, int j) {

@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.util.GsonHelper;
@@ -45,7 +43,6 @@ public abstract class AbstractPackResources implements PackResources {
 
 	protected abstract InputStream getResource(String string) throws IOException;
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public InputStream getRootResource(String string) throws IOException {
 		if (!string.contains("/") && !string.contains("\\")) {

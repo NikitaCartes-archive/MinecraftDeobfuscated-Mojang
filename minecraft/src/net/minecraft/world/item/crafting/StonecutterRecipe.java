@@ -1,7 +1,5 @@
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +16,6 @@ public class StonecutterRecipe extends SingleItemRecipe {
 		return this.ingredient.test(container.getItem(0));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getToastSymbol() {
 		return new ItemStack(Blocks.STONECUTTER);

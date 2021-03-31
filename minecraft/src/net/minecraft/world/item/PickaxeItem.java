@@ -159,6 +159,7 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.DEEPSLATE_BRICK_WALL,
 		Blocks.CHISELED_DEEPSLATE
 	);
+	private static final int MISSING_LEVEL = -1;
 	private static final Object2IntMap<Block> MIN_LEVEL_FOR_DROPS = Util.make(
 		new Object2IntOpenHashMap<>(),
 		object2IntOpenHashMap -> {
@@ -225,7 +226,7 @@ public class PickaxeItem extends DiggerItem {
 				object2IntOpenHashMap.put(block, 1);
 			}
 
-			for (Block block : ImmutableList.of(Blocks.NETHER_GOLD_ORE)) {
+			for (Block block : ImmutableList.of(Blocks.NETHER_GOLD_ORE, Blocks.AMETHYST_BLOCK)) {
 				object2IntOpenHashMap.put(block, 0);
 			}
 		}

@@ -15,6 +15,7 @@ import java.util.Optional;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ItemPotionFix extends DataFix {
+	private static final int SPLASH = 16384;
 	private static final String[] POTIONS = DataFixUtils.make(new String[128], strings -> {
 		strings[0] = "minecraft:water";
 		strings[1] = "minecraft:regeneration";
@@ -145,6 +146,7 @@ public class ItemPotionFix extends DataFix {
 		strings[126] = "minecraft:long_invisibility";
 		strings[127] = null;
 	});
+	public static final String DEFAULT = "minecraft:water";
 
 	public ItemPotionFix(Schema schema, boolean bl) {
 		super(schema, bl);

@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -33,17 +31,14 @@ public class ClientboundContainerSetDataPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleContainerSetData(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getContainerId() {
 		return this.containerId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getValue() {
 		return this.value;
 	}

@@ -20,18 +20,19 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> implements 
 	}
 
 	public void render(T theEndPortalBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-		float g = this.getOffset();
 		Matrix4f matrix4f = poseStack.last().pose();
-		this.renderCube(theEndPortalBlockEntity, g, matrix4f, multiBufferSource.getBuffer(this.renderType()));
+		this.renderCube(theEndPortalBlockEntity, matrix4f, multiBufferSource.getBuffer(this.renderType()));
 	}
 
-	private void renderCube(T theEndPortalBlockEntity, float f, Matrix4f matrix4f, VertexConsumer vertexConsumer) {
+	private void renderCube(T theEndPortalBlockEntity, Matrix4f matrix4f, VertexConsumer vertexConsumer) {
+		float f = this.getOffsetDown();
+		float g = this.getOffsetUp();
 		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, Direction.SOUTH);
 		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, Direction.NORTH);
 		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, Direction.EAST);
 		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 1.0F, 1.0F, 0.0F, Direction.WEST);
-		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, Direction.DOWN);
-		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, f, f, 1.0F, 1.0F, 0.0F, 0.0F, Direction.UP);
+		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, f, f, 0.0F, 0.0F, 1.0F, 1.0F, Direction.DOWN);
+		this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0F, 1.0F, g, g, 1.0F, 1.0F, 0.0F, 0.0F, Direction.UP);
 	}
 
 	private void renderFace(
@@ -56,8 +57,12 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> implements 
 		}
 	}
 
-	protected float getOffset() {
+	protected float getOffsetUp() {
 		return 0.75F;
+	}
+
+	protected float getOffsetDown() {
+		return 0.375F;
 	}
 
 	protected RenderType renderType() {

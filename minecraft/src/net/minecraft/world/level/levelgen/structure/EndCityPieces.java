@@ -21,14 +21,10 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class EndCityPieces {
-	private static final StructurePlaceSettings OVERWRITE = new StructurePlaceSettings()
-		.setIgnoreEntities(true)
-		.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-	private static final StructurePlaceSettings INSERT = new StructurePlaceSettings().setIgnoreEntities(true).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
+	private static final int MAX_GEN_DEPTH = 8;
 	private static final EndCityPieces.SectionGenerator HOUSE_TOWER_GENERATOR = new EndCityPieces.SectionGenerator() {
 		@Override
 		public void init() {
@@ -276,7 +272,7 @@ public class EndCityPieces {
 
 				for (StructurePiece structurePiece : list2) {
 					structurePiece.genDepth = j;
-					StructurePiece structurePiece2 = StructurePiece.findCollisionPiece(list, structurePiece.getBoundingBox());
+					StructurePiece structurePiece2 = StructureStart.findCollisionPiece(list, structurePiece.getBoundingBox());
 					if (structurePiece2 != null && structurePiece2.genDepth != endCityPiece.genDepth) {
 						bl = true;
 						break;
@@ -294,39 +290,38 @@ public class EndCityPieces {
 	}
 
 	public static class EndCityPiece extends TemplateStructurePiece {
-		private final String templateName;
-		private final Rotation rotation;
-		private final boolean overwrite;
-
 		public EndCityPiece(StructureManager structureManager, String string, BlockPos blockPos, Rotation rotation, boolean bl) {
-			super(StructurePieceType.END_CITY_PIECE, 0);
-			this.templateName = string;
-			this.templatePosition = blockPos;
-			this.rotation = rotation;
-			this.overwrite = bl;
-			this.loadTemplate(structureManager);
+			super(StructurePieceType.END_CITY_PIECE, 0, structureManager, makeResourceLocation(string), string, makeSettings(bl, rotation), blockPos);
 		}
 
 		public EndCityPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super(StructurePieceType.END_CITY_PIECE, compoundTag);
-			this.templateName = compoundTag.getString("Template");
-			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-			this.overwrite = compoundTag.getBoolean("OW");
-			this.loadTemplate(serverLevel.getStructureManager());
+			super(
+				StructurePieceType.END_CITY_PIECE,
+				compoundTag,
+				serverLevel,
+				resourceLocation -> makeSettings(compoundTag.getBoolean("OW"), Rotation.valueOf(compoundTag.getString("Rot")))
+			);
 		}
 
-		private void loadTemplate(StructureManager structureManager) {
-			StructureTemplate structureTemplate = structureManager.getOrCreate(new ResourceLocation("end_city/" + this.templateName));
-			StructurePlaceSettings structurePlaceSettings = (this.overwrite ? EndCityPieces.OVERWRITE : EndCityPieces.INSERT).copy().setRotation(this.rotation);
-			this.setup(structureTemplate, this.templatePosition, structurePlaceSettings);
+		private static StructurePlaceSettings makeSettings(boolean bl, Rotation rotation) {
+			BlockIgnoreProcessor blockIgnoreProcessor = bl ? BlockIgnoreProcessor.STRUCTURE_BLOCK : BlockIgnoreProcessor.STRUCTURE_AND_AIR;
+			return new StructurePlaceSettings().setIgnoreEntities(true).addProcessor(blockIgnoreProcessor).setRotation(rotation);
+		}
+
+		@Override
+		protected ResourceLocation makeTemplateLocation() {
+			return makeResourceLocation(this.templateName);
+		}
+
+		private static ResourceLocation makeResourceLocation(String string) {
+			return new ResourceLocation("end_city/" + string);
 		}
 
 		@Override
 		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super.addAdditionalSaveData(serverLevel, compoundTag);
-			compoundTag.putString("Template", this.templateName);
-			compoundTag.putString("Rot", this.rotation.name());
-			compoundTag.putBoolean("OW", this.overwrite);
+			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
+			compoundTag.putBoolean("OW", this.placeSettings.getProcessors().get(0) == BlockIgnoreProcessor.STRUCTURE_BLOCK);
 		}
 
 		@Override
@@ -341,7 +336,7 @@ public class EndCityPieces {
 				shulker.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
 				serverLevelAccessor.addFreshEntity(shulker);
 			} else if (string.startsWith("Elytra")) {
-				ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.rotation.rotate(Direction.SOUTH));
+				ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.placeSettings.getRotation().rotate(Direction.SOUTH));
 				itemFrame.setItem(new ItemStack(Items.ELYTRA), false);
 				serverLevelAccessor.addFreshEntity(itemFrame);
 			}

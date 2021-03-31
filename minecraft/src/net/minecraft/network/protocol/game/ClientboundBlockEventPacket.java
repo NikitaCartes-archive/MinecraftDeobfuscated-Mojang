@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,22 +38,18 @@ public class ClientboundBlockEventPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleBlockEvent(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getPos() {
 		return this.pos;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getB0() {
 		return this.b0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getB1() {
 		return this.b1;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Block getBlock() {
 		return this.block;
 	}

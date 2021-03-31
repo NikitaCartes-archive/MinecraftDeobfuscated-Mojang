@@ -31,6 +31,7 @@ public interface RawGlyph extends GlyphInfo {
 		return this.getUp() + (float)this.getPixelHeight() / this.getOversample();
 	}
 
+	@Override
 	default float getBearingY() {
 		return 3.0F;
 	}

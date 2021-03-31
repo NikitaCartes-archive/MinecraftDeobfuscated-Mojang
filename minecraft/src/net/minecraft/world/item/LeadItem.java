@@ -47,6 +47,7 @@ public class LeadItem extends Item {
 			if (mob.getLeashHolder() == player) {
 				if (leashFenceKnotEntity == null) {
 					leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
+					leashFenceKnotEntity.playPlacementSound();
 				}
 
 				mob.setLeashedTo(leashFenceKnotEntity, true);

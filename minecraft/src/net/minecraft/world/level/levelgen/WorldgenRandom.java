@@ -12,6 +12,10 @@ public class WorldgenRandom extends Random implements RandomSource {
 		super(l);
 	}
 
+	public int getCount() {
+		return this.count;
+	}
+
 	public int next(int i) {
 		this.count++;
 		return super.next(i);

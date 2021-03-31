@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(EnvType.CLIENT)
 public class ModelLayers {
+	private static final String DEFAULT_LAYER = "main";
 	private static final Set<ModelLayerLocation> ALL_MODELS = Sets.<ModelLayerLocation>newHashSet();
 	public static final ModelLayerLocation ARMOR_STAND = register("armor_stand");
 	public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = registerInnerArmor("armor_stand");
@@ -64,6 +65,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation GIANT_INNER_ARMOR = registerInnerArmor("giant");
 	public static final ModelLayerLocation GIANT_OUTER_ARMOR = registerOuterArmor("giant");
 	public static final ModelLayerLocation GLOW_SQUID = register("glow_squid");
+	public static final ModelLayerLocation GOAT = register("goat");
 	public static final ModelLayerLocation GUARDIAN = register("guardian");
 	public static final ModelLayerLocation HOGLIN = register("hoglin");
 	public static final ModelLayerLocation HOPPER_MINECART = register("hopper_minecart");

@@ -1,17 +1,16 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundPlayerInputPacket implements Packet<ServerGamePacketListener> {
+	private static final int FLAG_JUMPING = 1;
+	private static final int FLAG_SHIFT_KEY_DOWN = 2;
 	private final float xxa;
 	private final float zza;
 	private final boolean isJumping;
 	private final boolean isShiftKeyDown;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundPlayerInputPacket(float f, float g, boolean bl, boolean bl2) {
 		this.xxa = f;
 		this.zza = g;

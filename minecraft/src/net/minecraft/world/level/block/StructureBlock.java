@@ -8,7 +8,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -25,6 +24,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 
 	protected StructureBlock(BlockBehaviour.Properties properties) {
 		super(properties);
+		this.registerDefaultState(this.stateDefinition.any().setValue(MODE, StructureMode.LOAD));
 	}
 
 	@Override
@@ -59,11 +59,6 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	@Override
 	public RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
-	}
-
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return this.defaultBlockState().setValue(MODE, StructureMode.LOAD);
 	}
 
 	@Override

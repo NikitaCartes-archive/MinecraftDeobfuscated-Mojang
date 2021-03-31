@@ -10,6 +10,24 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class SectionPos extends Vec3i {
+	public static final int SECTION_BITS = 4;
+	public static final int SECTION_SIZE = 16;
+	private static final int SECTION_MASK = 15;
+	public static final int SECTION_HALF_SIZE = 8;
+	public static final int SECTION_MAX_INDEX = 15;
+	private static final int PACKED_X_LENGTH = 22;
+	private static final int PACKED_Y_LENGTH = 20;
+	private static final int PACKED_Z_LENGTH = 22;
+	private static final long PACKED_X_MASK = 4194303L;
+	private static final long PACKED_Y_MASK = 1048575L;
+	private static final long PACKED_Z_MASK = 4194303L;
+	private static final int Y_OFFSET = 0;
+	private static final int Z_OFFSET = 20;
+	private static final int X_OFFSET = 42;
+	private static final int RELATIVE_X_SHIFT = 8;
+	private static final int RELATIVE_Y_SHIFT = 0;
+	private static final int RELATIVE_Z_SHIFT = 4;
+
 	private SectionPos(int i, int j, int k) {
 		super(i, j, k);
 	}

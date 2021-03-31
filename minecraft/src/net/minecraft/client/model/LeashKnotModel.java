@@ -12,6 +12,7 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class LeashKnotModel<T extends Entity> extends HierarchicalModel<T> {
+	private static final String KNOT = "knot";
 	private final ModelPart root;
 	private final ModelPart knot;
 

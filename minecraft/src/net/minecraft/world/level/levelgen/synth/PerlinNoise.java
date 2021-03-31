@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 public class PerlinNoise implements SurfaceNoise {
+	private static final int ROUND_OFF = 33554432;
 	private final ImprovedNoise[] noiseLevels;
 	private final DoubleList amplitudes;
 	private final double lowestFreqValueFactor;
@@ -27,6 +28,10 @@ public class PerlinNoise implements SurfaceNoise {
 
 	public PerlinNoise(RandomSource randomSource, List<Integer> list) {
 		this(randomSource, new IntRBTreeSet(list));
+	}
+
+	public static PerlinNoise create(RandomSource randomSource, int i, double... ds) {
+		return create(randomSource, i, new DoubleArrayList(ds));
 	}
 
 	public static PerlinNoise create(RandomSource randomSource, int i, DoubleList doubleList) {

@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -10,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import org.apache.commons.lang3.Validate;
 
 public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> {
+	public static final float LOCATION_ACCURACY = 8.0F;
 	private final SoundEvent sound;
 	private final SoundSource source;
 	private final int x;
@@ -50,37 +49,30 @@ public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> 
 		friendlyByteBuf.writeFloat(this.pitch);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundEvent getSound() {
 		return this.sound;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundSource getSource() {
 		return this.source;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getX() {
 		return (double)((float)this.x / 8.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getY() {
 		return (double)((float)this.y / 8.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getZ() {
 		return (double)((float)this.z / 8.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getVolume() {
 		return this.volume;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getPitch() {
 		return this.pitch;
 	}

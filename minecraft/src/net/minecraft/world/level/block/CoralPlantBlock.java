@@ -15,6 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CoralPlantBlock extends BaseCoralPlantTypeBlock {
 	private final Block deadBlock;
+	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 15.0, 14.0);
 
 	protected CoralPlantBlock(Block block, BlockBehaviour.Properties properties) {

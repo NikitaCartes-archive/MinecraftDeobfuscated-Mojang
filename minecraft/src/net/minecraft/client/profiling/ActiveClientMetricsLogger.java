@@ -32,6 +32,7 @@ import net.minecraft.util.profiling.registry.MeasurementRegistry;
 
 @Environment(EnvType.CLIENT)
 public class ActiveClientMetricsLogger implements ClientMetricsLogger {
+	public static final int PROFILING_MAX_DURATION_SECONDS = 10;
 	@Nullable
 	private static Consumer<Path> globalOnReportFinished = null;
 	private final List<SamplerCategory> samplerCategories = new ObjectArrayList<>();
@@ -207,5 +208,9 @@ public class ActiveClientMetricsLogger implements ClientMetricsLogger {
 			this.taskProfiler.disable();
 			this.onReportFinished.accept(path);
 		});
+	}
+
+	public static void registerGlobalCompletionCallback(Consumer<Path> consumer) {
+		globalOnReportFinished = consumer;
 	}
 }

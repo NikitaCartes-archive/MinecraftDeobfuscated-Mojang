@@ -204,6 +204,21 @@ public interface SharedSuggestionProvider {
 		return suggestionsBuilder.buildFuture();
 	}
 
+	static <T> CompletableFuture<Suggestions> suggest(
+		Iterable<T> iterable, SuggestionsBuilder suggestionsBuilder, Function<T, String> function, Function<T, Message> function2
+	) {
+		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+
+		for (T object : iterable) {
+			String string2 = (String)function.apply(object);
+			if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
+				suggestionsBuilder.suggest(string2, (Message)function2.apply(object));
+			}
+		}
+
+		return suggestionsBuilder.buildFuture();
+	}
+
 	static boolean matchesSubStr(String string, String string2) {
 		for (int i = 0; !string2.startsWith(string, i); i++) {
 			i = string2.indexOf(95, i);

@@ -1,11 +1,16 @@
 package net.minecraft.advancements.critereon;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.GsonHelper;
 
 public class WrappedMinMaxBounds {
 	public static final WrappedMinMaxBounds ANY = new WrappedMinMaxBounds(null, null);
@@ -18,6 +23,38 @@ public class WrappedMinMaxBounds {
 		this.max = float2;
 	}
 
+	public static WrappedMinMaxBounds exactly(float f) {
+		return new WrappedMinMaxBounds(f, f);
+	}
+
+	public static WrappedMinMaxBounds between(float f, float g) {
+		return new WrappedMinMaxBounds(f, g);
+	}
+
+	public static WrappedMinMaxBounds atLeast(float f) {
+		return new WrappedMinMaxBounds(f, null);
+	}
+
+	public static WrappedMinMaxBounds atMost(float f) {
+		return new WrappedMinMaxBounds(null, f);
+	}
+
+	public boolean matches(float f) {
+		if (this.min != null && this.max != null && this.min > this.max && this.min > f && this.max < f) {
+			return false;
+		} else {
+			return this.min != null && this.min > f ? false : this.max == null || !(this.max < f);
+		}
+	}
+
+	public boolean matchesSqr(double d) {
+		if (this.min != null && this.max != null && this.min > this.max && (double)(this.min * this.min) > d && (double)(this.max * this.max) < d) {
+			return false;
+		} else {
+			return this.min != null && (double)(this.min * this.min) > d ? false : this.max == null || !((double)(this.max * this.max) < d);
+		}
+	}
+
 	@Nullable
 	public Float getMin() {
 		return this.min;
@@ -26,6 +63,43 @@ public class WrappedMinMaxBounds {
 	@Nullable
 	public Float getMax() {
 		return this.max;
+	}
+
+	public JsonElement serializeToJson() {
+		if (this == ANY) {
+			return JsonNull.INSTANCE;
+		} else if (this.min != null && this.max != null && this.min.equals(this.max)) {
+			return new JsonPrimitive(this.min);
+		} else {
+			JsonObject jsonObject = new JsonObject();
+			if (this.min != null) {
+				jsonObject.addProperty("min", this.min);
+			}
+
+			if (this.max != null) {
+				jsonObject.addProperty("max", this.min);
+			}
+
+			return jsonObject;
+		}
+	}
+
+	public static WrappedMinMaxBounds fromJson(@Nullable JsonElement jsonElement) {
+		if (jsonElement == null || jsonElement.isJsonNull()) {
+			return ANY;
+		} else if (GsonHelper.isNumberValue(jsonElement)) {
+			float f = GsonHelper.convertToFloat(jsonElement, "value");
+			return new WrappedMinMaxBounds(f, f);
+		} else {
+			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "value");
+			Float float_ = jsonObject.has("min") ? GsonHelper.getAsFloat(jsonObject, "min") : null;
+			Float float2 = jsonObject.has("max") ? GsonHelper.getAsFloat(jsonObject, "max") : null;
+			return new WrappedMinMaxBounds(float_, float2);
+		}
+	}
+
+	public static WrappedMinMaxBounds fromReader(StringReader stringReader, boolean bl) throws CommandSyntaxException {
+		return fromReader(stringReader, bl, float_ -> float_);
 	}
 
 	public static WrappedMinMaxBounds fromReader(StringReader stringReader, boolean bl, Function<Float, Float> function) throws CommandSyntaxException {

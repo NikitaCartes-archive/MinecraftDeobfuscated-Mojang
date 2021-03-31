@@ -99,6 +99,14 @@ public class WorldCoordinates implements Coordinates {
 		}
 	}
 
+	public static WorldCoordinates absolute(double d, double e, double f) {
+		return new WorldCoordinates(new WorldCoordinate(false, d), new WorldCoordinate(false, e), new WorldCoordinate(false, f));
+	}
+
+	public static WorldCoordinates absolute(Vec2 vec2) {
+		return new WorldCoordinates(new WorldCoordinate(false, (double)vec2.x), new WorldCoordinate(false, (double)vec2.y), new WorldCoordinate(true, 0.0));
+	}
+
 	public static WorldCoordinates current() {
 		return new WorldCoordinates(new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0));
 	}

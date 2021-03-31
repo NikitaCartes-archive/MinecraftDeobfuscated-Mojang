@@ -1,7 +1,5 @@
 package com.mojang.math;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public final class Quaternion {
@@ -30,7 +28,6 @@ public final class Quaternion {
 		this.r = cos(f / 2.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Quaternion(float f, float g, float h, boolean bl) {
 		if (bl) {
 			f *= (float) (Math.PI / 180.0);
@@ -55,6 +52,74 @@ public final class Quaternion {
 		this.j = quaternion.j;
 		this.k = quaternion.k;
 		this.r = quaternion.r;
+	}
+
+	public static Quaternion fromYXZ(float f, float g, float h) {
+		Quaternion quaternion = ONE.copy();
+		quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(f / 2.0F)), 0.0F, (float)Math.cos((double)(f / 2.0F))));
+		quaternion.mul(new Quaternion((float)Math.sin((double)(g / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(g / 2.0F))));
+		quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(h / 2.0F)), (float)Math.cos((double)(h / 2.0F))));
+		return quaternion;
+	}
+
+	public static Quaternion fromXYZDegrees(Vector3f vector3f) {
+		return fromXYZ((float)Math.toRadians((double)vector3f.x()), (float)Math.toRadians((double)vector3f.y()), (float)Math.toRadians((double)vector3f.z()));
+	}
+
+	public static Quaternion fromXYZ(Vector3f vector3f) {
+		return fromXYZ(vector3f.x(), vector3f.y(), vector3f.z());
+	}
+
+	public static Quaternion fromXYZ(float f, float g, float h) {
+		Quaternion quaternion = ONE.copy();
+		quaternion.mul(new Quaternion((float)Math.sin((double)(f / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(f / 2.0F))));
+		quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(g / 2.0F)), 0.0F, (float)Math.cos((double)(g / 2.0F))));
+		quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(h / 2.0F)), (float)Math.cos((double)(h / 2.0F))));
+		return quaternion;
+	}
+
+	public Vector3f toXYZ() {
+		float f = this.r() * this.r();
+		float g = this.i() * this.i();
+		float h = this.j() * this.j();
+		float i = this.k() * this.k();
+		float j = f + g + h + i;
+		float k = 2.0F * this.r() * this.i() - 2.0F * this.j() * this.k();
+		float l = (float)Math.asin((double)(k / j));
+		return Math.abs(k) > 0.999F * j
+			? new Vector3f(2.0F * (float)Math.atan2((double)this.i(), (double)this.r()), l, 0.0F)
+			: new Vector3f(
+				(float)Math.atan2((double)(2.0F * this.j() * this.k() + 2.0F * this.i() * this.r()), (double)(f - g - h + i)),
+				l,
+				(float)Math.atan2((double)(2.0F * this.i() * this.j() + 2.0F * this.r() * this.k()), (double)(f + g - h - i))
+			);
+	}
+
+	public Vector3f toXYZDegrees() {
+		Vector3f vector3f = this.toXYZ();
+		return new Vector3f((float)Math.toDegrees((double)vector3f.x()), (float)Math.toDegrees((double)vector3f.y()), (float)Math.toDegrees((double)vector3f.z()));
+	}
+
+	public Vector3f toYXZ() {
+		float f = this.r() * this.r();
+		float g = this.i() * this.i();
+		float h = this.j() * this.j();
+		float i = this.k() * this.k();
+		float j = f + g + h + i;
+		float k = 2.0F * this.r() * this.i() - 2.0F * this.j() * this.k();
+		float l = (float)Math.asin((double)(k / j));
+		return Math.abs(k) > 0.999F * j
+			? new Vector3f(l, 2.0F * (float)Math.atan2((double)this.j(), (double)this.r()), 0.0F)
+			: new Vector3f(
+				l,
+				(float)Math.atan2((double)(2.0F * this.i() * this.k() + 2.0F * this.j() * this.r()), (double)(f - g - h + i)),
+				(float)Math.atan2((double)(2.0F * this.i() * this.j() + 2.0F * this.r() * this.k()), (double)(f - g + h - i))
+			);
+	}
+
+	public Vector3f toYXZDegrees() {
+		Vector3f vector3f = this.toYXZ();
+		return new Vector3f((float)Math.toDegrees((double)vector3f.x()), (float)Math.toDegrees((double)vector3f.y()), (float)Math.toDegrees((double)vector3f.z()));
 	}
 
 	public boolean equals(Object object) {
@@ -121,7 +186,6 @@ public final class Quaternion {
 		this.r = i * m - f * j - g * k - h * l;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void mul(float f) {
 		this.i *= f;
 		this.j *= f;
@@ -135,7 +199,6 @@ public final class Quaternion {
 		this.k = -this.k;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void set(float f, float g, float h, float i) {
 		this.i = f;
 		this.j = g;
@@ -151,7 +214,6 @@ public final class Quaternion {
 		return (float)Math.sin((double)f);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void normalize() {
 		float f = this.i() * this.i() + this.j() * this.j() + this.k() * this.k() + this.r() * this.r();
 		if (f > 1.0E-6F) {
@@ -168,7 +230,10 @@ public final class Quaternion {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
+	public void slerp(Quaternion quaternion, float f) {
+		throw new UnsupportedOperationException();
+	}
+
 	public Quaternion copy() {
 		return new Quaternion(this);
 	}

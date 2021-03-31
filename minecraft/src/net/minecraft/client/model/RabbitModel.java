@@ -16,6 +16,10 @@ import net.minecraft.world.entity.animal.Rabbit;
 
 @Environment(EnvType.CLIENT)
 public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
+	private static final float REAR_JUMP_ANGLE = 50.0F;
+	private static final float FRONT_JUMP_ANGLE = -40.0F;
+	private static final String LEFT_HAUNCH = "left_haunch";
+	private static final String RIGHT_HAUNCH = "right_haunch";
 	private final ModelPart leftRearFoot;
 	private final ModelPart rightRearFoot;
 	private final ModelPart leftHaunch;
@@ -29,6 +33,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 	private final ModelPart tail;
 	private final ModelPart nose;
 	private float jumpRotation;
+	private static final float NEW_SCALE = 0.6F;
 
 	public RabbitModel(ModelPart modelPart) {
 		this.leftRearFoot = modelPart.getChild("left_hind_foot");

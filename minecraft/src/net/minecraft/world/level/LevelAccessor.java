@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -30,6 +31,9 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 
 	DifficultyInstance getCurrentDifficultyAt(BlockPos blockPos);
 
+	@Nullable
+	MinecraftServer getServer();
+
 	default Difficulty getDifficulty() {
 		return this.getLevelData().getDifficulty();
 	}
@@ -51,6 +55,10 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 	void addParticle(ParticleOptions particleOptions, double d, double e, double f, double g, double h, double i);
 
 	void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j);
+
+	default int getLogicalHeight() {
+		return this.dimensionType().logicalHeight();
+	}
 
 	default void levelEvent(int i, BlockPos blockPos, int j) {
 		this.levelEvent(null, i, blockPos, j);

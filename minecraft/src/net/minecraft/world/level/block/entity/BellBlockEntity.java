@@ -19,6 +19,14 @@ import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class BellBlockEntity extends BlockEntity {
+	private static final int DURATION = 50;
+	private static final int GLOW_DURATION = 60;
+	private static final int MIN_TICKS_BETWEEN_SEARCHES = 60;
+	private static final int MAX_RESONATION_TICKS = 40;
+	private static final int TICKS_BEFORE_RESONATION = 5;
+	private static final int SEARCH_RADIUS = 48;
+	private static final int HEAR_BELL_RADIUS = 32;
+	private static final int HIGHLIGHT_RAIDERS_RADIUS = 48;
 	private long lastRingTimestamp;
 	public int ticks;
 	public boolean shaking;

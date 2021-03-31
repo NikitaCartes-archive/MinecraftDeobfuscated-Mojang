@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.border.WorldBorder;
@@ -34,17 +32,14 @@ public class ClientboundSetBorderLerpSizePacket implements Packet<ClientGamePack
 		clientGamePacketListener.handleSetBorderLerpSize(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getOldSize() {
 		return this.oldSize;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewSize() {
 		return this.newSize;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long getLerpTime() {
 		return this.lerpTime;
 	}

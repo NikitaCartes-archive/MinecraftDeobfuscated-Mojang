@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -39,12 +37,10 @@ public class ClientboundSetEntityDataPacket implements Packet<ClientGamePacketLi
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public List<SynchedEntityData.DataItem<?>> getUnpackedData() {
 		return this.packedItems;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}

@@ -1,7 +1,5 @@
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -15,6 +13,16 @@ import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionUtils;
 
 public class BrewingStandMenu extends AbstractContainerMenu {
+	private static final int BOTTLE_SLOT_START = 0;
+	private static final int BOTTLE_SLOT_END = 2;
+	private static final int INGREDIENT_SLOT = 3;
+	private static final int FUEL_SLOT = 4;
+	private static final int SLOT_COUNT = 5;
+	private static final int DATA_COUNT = 2;
+	private static final int INV_SLOT_START = 5;
+	private static final int INV_SLOT_END = 32;
+	private static final int USE_ROW_SLOT_START = 32;
+	private static final int USE_ROW_SLOT_END = 41;
 	private final Container brewingStand;
 	private final ContainerData brewingStandData;
 	private final Slot ingredientSlot;
@@ -107,12 +115,10 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		return itemStack;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFuel() {
 		return this.brewingStandData.get(1);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBrewingTicks() {
 		return this.brewingStandData.get(0);
 	}

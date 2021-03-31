@@ -2,8 +2,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.List;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -178,7 +176,6 @@ public class Witch extends Raider implements RangedAttackMob {
 		return SoundEvents.WITCH_CELEBRATE;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 15) {

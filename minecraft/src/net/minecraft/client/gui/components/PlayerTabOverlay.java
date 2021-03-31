@@ -33,6 +33,15 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 @Environment(EnvType.CLIENT)
 public class PlayerTabOverlay extends GuiComponent {
 	private static final Ordering<PlayerInfo> PLAYER_ORDERING = Ordering.from(new PlayerTabOverlay.PlayerInfoComparator());
+	public static final int MAX_ROWS_PER_COL = 20;
+	public static final int HEART_EMPTY_CONTAINER = 16;
+	public static final int HEART_EMPTY_CONTAINER_BLINKING = 25;
+	public static final int HEART_FULL = 52;
+	public static final int HEART_HALF_FULL = 61;
+	public static final int HEART_GOLDEN_FULL = 160;
+	public static final int HEART_GOLDEN_HALF_FULL = 169;
+	public static final int HEART_GHOST_FULL = 70;
+	public static final int HEART_GHOST_HALF_FULL = 79;
 	private final Minecraft minecraft;
 	private final Gui gui;
 	private Component footer;

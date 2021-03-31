@@ -7,11 +7,15 @@ import net.minecraft.Util;
 
 @Environment(EnvType.CLIENT)
 public class MipmapGenerator {
+	private static final int ALPHA_CUTOUT_CUTOFF = 96;
 	private static final float[] POW22 = Util.make(new float[256], fs -> {
 		for (int i = 0; i < fs.length; i++) {
 			fs[i] = (float)Math.pow((double)((float)i / 255.0F), 2.2);
 		}
 	});
+
+	private MipmapGenerator() {
+	}
 
 	public static NativeImage[] generateMipLevels(NativeImage nativeImage, int i) {
 		NativeImage[] nativeImages = new NativeImage[i + 1];

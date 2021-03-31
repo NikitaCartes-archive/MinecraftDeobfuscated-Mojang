@@ -13,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class HoneyBottleItem extends Item {
+	private static final int DRINK_DURATION = 40;
+
 	public HoneyBottleItem(Item.Properties properties) {
 		super(properties);
 	}

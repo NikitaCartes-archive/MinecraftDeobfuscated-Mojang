@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -9,7 +7,6 @@ public class ServerboundEntityTagQuery implements Packet<ServerGamePacketListene
 	private final int transactionId;
 	private final int entityId;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundEntityTagQuery(int i, int j) {
 		this.transactionId = i;
 		this.entityId = j;

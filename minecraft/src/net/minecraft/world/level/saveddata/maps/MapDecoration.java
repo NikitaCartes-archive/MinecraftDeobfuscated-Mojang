@@ -2,8 +2,6 @@ package net.minecraft.world.level.saveddata.maps;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -23,7 +21,6 @@ public class MapDecoration {
 		this.name = component;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public byte getImage() {
 		return this.type.getIcon();
 	}
@@ -44,7 +41,6 @@ public class MapDecoration {
 		return this.rot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean renderOnFrame() {
 		return this.type.isRenderedOnFrame();
 	}
@@ -123,7 +119,6 @@ public class MapDecoration {
 			return this.icon;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public boolean isRenderedOnFrame() {
 			return this.renderedOnFrame;
 		}

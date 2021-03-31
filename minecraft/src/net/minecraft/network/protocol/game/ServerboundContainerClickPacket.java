@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.inventory.ClickType;
@@ -18,7 +16,6 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 	private final ItemStack carriedItem;
 	private final Int2ObjectMap<ItemStack> changedSlots;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundContainerClickPacket(int i, int j, int k, ClickType clickType, ItemStack itemStack, Int2ObjectMap<ItemStack> int2ObjectMap) {
 		this.containerId = i;
 		this.slotNum = j;

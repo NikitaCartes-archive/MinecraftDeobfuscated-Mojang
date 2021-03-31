@@ -32,7 +32,7 @@ public class JunglePyramidPiece extends ScatteredFeaturePiece {
 	private static final JunglePyramidPiece.MossStoneSelector STONE_SELECTOR = new JunglePyramidPiece.MossStoneSelector();
 
 	public JunglePyramidPiece(Random random, int i, int j) {
-		super(StructurePieceType.JUNGLE_PYRAMID_PIECE, random, i, 64, j, 12, 10, 15);
+		super(StructurePieceType.JUNGLE_PYRAMID_PIECE, i, 64, j, 12, 10, 15, getRandomHorizontalDirection(random));
 	}
 
 	public JunglePyramidPiece(ServerLevel serverLevel, CompoundTag compoundTag) {

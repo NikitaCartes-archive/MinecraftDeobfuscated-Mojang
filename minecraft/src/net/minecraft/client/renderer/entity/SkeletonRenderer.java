@@ -29,4 +29,8 @@ public class SkeletonRenderer extends HumanoidMobRenderer<AbstractSkeleton, Skel
 	public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
 		return SKELETON_LOCATION;
 	}
+
+	protected boolean isShaking(AbstractSkeleton abstractSkeleton) {
+		return abstractSkeleton.isShaking();
+	}
 }

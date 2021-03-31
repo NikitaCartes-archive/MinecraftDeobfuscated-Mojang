@@ -45,6 +45,20 @@ import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class VillagerTrades {
+	private static final int DEFAULT_SUPPLY = 12;
+	private static final int COMMON_ITEMS_SUPPLY = 16;
+	private static final int UNCOMMON_ITEMS_SUPPLY = 3;
+	private static final int XP_LEVEL_1_SELL = 1;
+	private static final int XP_LEVEL_1_BUY = 2;
+	private static final int XP_LEVEL_2_SELL = 5;
+	private static final int XP_LEVEL_2_BUY = 10;
+	private static final int XP_LEVEL_3_SELL = 10;
+	private static final int XP_LEVEL_3_BUY = 20;
+	private static final int XP_LEVEL_4_SELL = 15;
+	private static final int XP_LEVEL_4_BUY = 30;
+	private static final int XP_LEVEL_5_TRADE = 30;
+	private static final float LOW_TIER_PRICE_MULTIPLIER = 0.05F;
+	private static final float HIGH_TIER_PRICE_MULTIPLIER = 0.2F;
 	public static final Map<VillagerProfession, Int2ObjectMap<VillagerTrades.ItemListing[]>> TRADES = Util.make(
 		Maps.<VillagerProfession, Int2ObjectMap<VillagerTrades.ItemListing[]>>newHashMap(),
 		hashMap -> {
@@ -552,6 +566,7 @@ public class VillagerTrades {
 							new VillagerTrades.EmeraldForItems(Blocks.GRANITE, 16, 16, 20),
 							new VillagerTrades.EmeraldForItems(Blocks.ANDESITE, 16, 16, 20),
 							new VillagerTrades.EmeraldForItems(Blocks.DIORITE, 16, 16, 20),
+							new VillagerTrades.ItemsForEmeralds(Blocks.DRIPSTONE_BLOCK, 1, 4, 16, 10),
 							new VillagerTrades.ItemsForEmeralds(Blocks.POLISHED_ANDESITE, 1, 4, 16, 10),
 							new VillagerTrades.ItemsForEmeralds(Blocks.POLISHED_DIORITE, 1, 4, 16, 10),
 							new VillagerTrades.ItemsForEmeralds(Blocks.POLISHED_GRANITE, 1, 4, 16, 10)
@@ -663,7 +678,10 @@ public class VillagerTrades {
 				new VillagerTrades.ItemsForEmeralds(Items.LILY_PAD, 1, 2, 5, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.SMALL_DRIPLEAF, 1, 2, 5, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.SAND, 1, 8, 8, 1),
-				new VillagerTrades.ItemsForEmeralds(Items.RED_SAND, 1, 4, 6, 1)
+				new VillagerTrades.ItemsForEmeralds(Items.RED_SAND, 1, 4, 6, 1),
+				new VillagerTrades.ItemsForEmeralds(Items.POINTED_DRIPSTONE, 1, 2, 5, 1),
+				new VillagerTrades.ItemsForEmeralds(Items.ROOTED_DIRT, 1, 2, 5, 1),
+				new VillagerTrades.ItemsForEmeralds(Items.MOSS_BLOCK, 1, 2, 5, 1)
 			},
 			2,
 			new VillagerTrades.ItemListing[]{

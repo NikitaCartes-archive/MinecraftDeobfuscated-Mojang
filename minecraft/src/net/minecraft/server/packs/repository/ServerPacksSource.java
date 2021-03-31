@@ -11,6 +11,7 @@ public class ServerPacksSource implements RepositorySource {
 	public static final PackMetadataSection BUILT_IN_METADATA = new PackMetadataSection(
 		new TranslatableComponent("dataPack.vanilla.description"), PackType.SERVER_DATA.getVersion(SharedConstants.getCurrentVersion())
 	);
+	public static final String VANILLA_ID = "vanilla";
 	private final VanillaPackResources vanillaPack = new VanillaPackResources(BUILT_IN_METADATA, "minecraft");
 
 	@Override

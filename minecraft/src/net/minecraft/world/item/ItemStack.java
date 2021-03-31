@@ -21,8 +21,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -90,6 +88,20 @@ public final class ItemStack {
 	public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(
 		new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT))
 	);
+	public static final String TAG_ENCH = "Enchantments";
+	public static final String TAG_ENCH_ID = "id";
+	public static final String TAG_ENCH_LEVEL = "lvl";
+	public static final String TAG_DISPLAY = "display";
+	public static final String TAG_DISPLAY_NAME = "Name";
+	public static final String TAG_LORE = "Lore";
+	public static final String TAG_DAMAGE = "Damage";
+	public static final String TAG_COLOR = "color";
+	private static final String TAG_UNBREAKABLE = "Unbreakable";
+	private static final String TAG_REPAIR_COST = "RepairCost";
+	private static final String TAG_CAN_DESTROY_BLOCK_LIST = "CanDestroy";
+	private static final String TAG_CAN_PLACE_ON_BLOCK_LIST = "CanPlaceOn";
+	private static final String TAG_HIDE_FLAGS = "HideFlags";
+	private static final int DONT_HIDE_TOOLTIP = 0;
 	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
 	private int count;
 	private int popTime;
@@ -103,7 +115,6 @@ public final class ItemStack {
 	private BlockInWorld cachedPlaceBlock;
 	private boolean cachedPlaceBlockResult;
 
-	@Environment(EnvType.CLIENT)
 	public Optional<TooltipComponent> getTooltipImage() {
 		return this.getItem().getTooltipImage(this);
 	}
@@ -304,17 +315,14 @@ public final class ItemStack {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isBarVisible() {
 		return this.item.isBarVisible(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBarWidth() {
 		return this.item.getBarWidth(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBarColor() {
 		return this.item.getBarColor(this);
 	}
@@ -558,7 +566,6 @@ public final class ItemStack {
 		return compoundTag != null && compoundTag.contains("Name", 8);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
 		List<Component> list = Lists.<Component>newArrayList();
 		MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName()).withStyle(this.getRarity().color);
@@ -726,12 +733,10 @@ public final class ItemStack {
 		return list;
 	}
 
-	@Environment(EnvType.CLIENT)
 	private static boolean shouldShowInTooltip(int i, ItemStack.TooltipPart tooltipPart) {
 		return (i & tooltipPart.getMask()) == 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	private int getHideFlags() {
 		return this.hasTag() && this.tag.contains("HideFlags", 99) ? this.tag.getInt("HideFlags") : 0;
 	}
@@ -741,7 +746,6 @@ public final class ItemStack {
 		compoundTag.putInt("HideFlags", compoundTag.getInt("HideFlags") | tooltipPart.getMask());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static void appendEnchantmentNames(List<Component> list, ListTag listTag) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
@@ -751,7 +755,6 @@ public final class ItemStack {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	private static Collection<Component> expandBlockState(String string) {
 		try {
 			BlockStateParser blockStateParser = new BlockStateParser(new StringReader(string), true).parse(true);

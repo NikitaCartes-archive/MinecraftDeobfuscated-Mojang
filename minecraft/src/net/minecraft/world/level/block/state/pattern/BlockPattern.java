@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.state.pattern;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -43,6 +44,18 @@ public class BlockPattern {
 
 	public int getWidth() {
 		return this.width;
+	}
+
+	@VisibleForTesting
+	public Predicate<BlockInWorld>[][][] getPattern() {
+		return this.pattern;
+	}
+
+	@Nullable
+	@VisibleForTesting
+	public BlockPattern.BlockPatternMatch matches(LevelReader levelReader, BlockPos blockPos, Direction direction, Direction direction2) {
+		LoadingCache<BlockPos, BlockInWorld> loadingCache = createLevelCache(levelReader, false);
+		return this.matches(blockPos, direction, direction2, loadingCache);
 	}
 
 	@Nullable
@@ -143,6 +156,18 @@ public class BlockPattern {
 
 		public Direction getUp() {
 			return this.up;
+		}
+
+		public int getWidth() {
+			return this.width;
+		}
+
+		public int getHeight() {
+			return this.height;
+		}
+
+		public int getDepth() {
+			return this.depth;
 		}
 
 		public BlockInWorld getBlock(int i, int j, int k) {

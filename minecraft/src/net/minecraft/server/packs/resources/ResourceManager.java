@@ -9,29 +9,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 
 public interface ResourceManager extends ResourceProvider {
-	@Environment(EnvType.CLIENT)
 	Set<String> getNamespaces();
 
-	@Environment(EnvType.CLIENT)
 	boolean hasResource(ResourceLocation resourceLocation);
 
 	List<Resource> getResources(ResourceLocation resourceLocation) throws IOException;
 
 	Collection<ResourceLocation> listResources(String string, Predicate<String> predicate);
 
-	@Environment(EnvType.CLIENT)
 	Stream<PackResources> listPacks();
 
 	public static enum Empty implements ResourceManager {
 		INSTANCE;
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public Set<String> getNamespaces() {
 			return ImmutableSet.of();
@@ -42,7 +36,6 @@ public interface ResourceManager extends ResourceProvider {
 			throw new FileNotFoundException(resourceLocation.toString());
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public boolean hasResource(ResourceLocation resourceLocation) {
 			return false;
@@ -58,7 +51,6 @@ public interface ResourceManager extends ResourceProvider {
 			return ImmutableSet.<ResourceLocation>of();
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public Stream<PackResources> listPacks() {
 			return Stream.of();

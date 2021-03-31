@@ -42,6 +42,10 @@ public interface VertexConsumer {
 		this.endVertex();
 	}
 
+	void defaultColor(int i, int j, int k, int l);
+
+	void unsetDefaultColor();
+
 	default VertexConsumer color(float f, float g, float h, float i) {
 		return this.color((int)(f * 255.0F), (int)(g * 255.0F), (int)(h * 255.0F), (int)(i * 255.0F));
 	}

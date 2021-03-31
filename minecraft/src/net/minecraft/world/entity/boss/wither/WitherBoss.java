@@ -5,10 +5,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -56,16 +52,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = PowerableMob.class
-	)})
 public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob {
 	private static final EntityDataAccessor<Integer> DATA_TARGET_A = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_TARGET_B = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_TARGET_C = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final List<EntityDataAccessor<Integer>> DATA_TARGETS = ImmutableList.of(DATA_TARGET_A, DATA_TARGET_B, DATA_TARGET_C);
 	private static final EntityDataAccessor<Integer> DATA_ID_INV = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
+	private static final int INVULNERABLE_TICKS = 220;
 	private final float[] xRotHeads = new float[2];
 	private final float[] yRotHeads = new float[2];
 	private final float[] xRotOHeads = new float[2];
@@ -516,12 +509,10 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			.add(Attributes.ARMOR, 4.0);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHeadYRot(int i) {
 		return this.yRotHeads[i];
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHeadXRot(int i) {
 		return this.xRotHeads[i];
 	}

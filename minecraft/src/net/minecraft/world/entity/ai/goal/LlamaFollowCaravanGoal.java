@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 public class LlamaFollowCaravanGoal extends Goal {
 	public final Llama llama;
 	private double speedModifier;
+	private static final int CARAVAN_LIMIT = 8;
 	private int distCheckCounter;
 
 	public LlamaFollowCaravanGoal(Llama llama, double d) {

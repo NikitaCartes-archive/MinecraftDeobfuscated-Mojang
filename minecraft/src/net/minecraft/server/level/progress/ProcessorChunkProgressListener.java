@@ -2,13 +2,10 @@ package net.minecraft.server.level.progress;
 
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkStatus;
 
-@Environment(EnvType.CLIENT)
 public class ProcessorChunkProgressListener implements ChunkProgressListener {
 	private final ChunkProgressListener delegate;
 	private final ProcessorMailbox<Runnable> mailbox;

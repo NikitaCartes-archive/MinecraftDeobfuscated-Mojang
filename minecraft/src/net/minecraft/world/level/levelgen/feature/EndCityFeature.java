@@ -1,6 +1,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
+import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -13,12 +15,14 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
+	private static final int RANDOM_SALT = 10387313;
+
 	public EndCityFeature(Codec<NoneFeatureConfiguration> codec) {
 		super(codec);
 	}
@@ -71,8 +75,8 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 	}
 
 	public static class EndCityStart extends StructureStart<NoneFeatureConfiguration> {
-		public EndCityStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public EndCityStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -88,8 +92,9 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 			int i = EndCityFeature.getYPositionForFeature(chunkPos, chunkGenerator, levelHeightAccessor);
 			if (i >= 60) {
 				BlockPos blockPos = chunkPos.getMiddleBlockPosition(i);
-				EndCityPieces.startHouseTower(structureManager, blockPos, rotation, this.pieces, this.random);
-				this.calculateBoundingBox();
+				List<StructurePiece> list = Lists.<StructurePiece>newArrayList();
+				EndCityPieces.startHouseTower(structureManager, blockPos, rotation, list, this.random);
+				list.forEach(this::addPiece);
 			}
 		}
 	}

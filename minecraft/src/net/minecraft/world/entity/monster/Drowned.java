@@ -55,6 +55,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class Drowned extends Zombie implements RangedAttackMob {
+	public static final float NAUTILUS_SHELL_CHANCE = 0.03F;
 	private boolean searchingForLand;
 	protected final WaterBoundPathNavigation waterNavigation;
 	protected final GroundPathNavigation groundNavigation;

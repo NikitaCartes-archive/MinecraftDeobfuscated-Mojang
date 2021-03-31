@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -31,12 +29,10 @@ public class ClientboundRotateHeadPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleRotateMob(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Entity getEntity(Level level) {
 		return level.getEntity(this.entityId);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public byte getYHeadRot() {
 		return this.yHeadRot;
 	}

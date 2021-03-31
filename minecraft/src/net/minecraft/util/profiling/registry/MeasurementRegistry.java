@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public class MeasurementRegistry {
 	public static final MeasurementRegistry INSTANCE = new MeasurementRegistry();
@@ -19,7 +17,6 @@ public class MeasurementRegistry {
 		this.measuredInstances.put(profilerMeasured, null);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Map<MeasurementCategory, List<MeasuredMetric>> getMetricsByCategories() {
 		return (Map<MeasurementCategory, List<MeasuredMetric>>)this.measuredInstances
 			.keySet()

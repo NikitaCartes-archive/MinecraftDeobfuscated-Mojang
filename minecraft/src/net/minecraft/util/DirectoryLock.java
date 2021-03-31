@@ -11,10 +11,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public class DirectoryLock implements AutoCloseable {
+	public static final String LOCK_FILE = "session.lock";
 	private final FileChannel lockFile;
 	private final FileLock lock;
 	private static final ByteBuffer DUMMY;
@@ -68,7 +67,6 @@ public class DirectoryLock implements AutoCloseable {
 		return this.lock.isValid();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean isLocked(Path path) throws IOException {
 		Path path2 = path.resolve("session.lock");
 

@@ -12,6 +12,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class FullscreenResolutionProgressOption extends ProgressOption {
+	private static final double CURRENT_MODE = -1.0;
+
 	public FullscreenResolutionProgressOption(Window window) {
 		this(window, window.findBestMonitor());
 	}

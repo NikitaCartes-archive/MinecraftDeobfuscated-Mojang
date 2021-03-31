@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final int FAKE_PROTOCOL_VERSION = 127;
 	private final ServerConnectionListener serverConnectionListener;
 
 	public LegacyQueryHandler(ServerConnectionListener serverConnectionListener) {

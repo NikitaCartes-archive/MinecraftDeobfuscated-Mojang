@@ -18,6 +18,13 @@ public class KeyMapping implements Comparable<KeyMapping> {
 	private static final Map<String, KeyMapping> ALL = Maps.<String, KeyMapping>newHashMap();
 	private static final Map<InputConstants.Key, KeyMapping> MAP = Maps.<InputConstants.Key, KeyMapping>newHashMap();
 	private static final Set<String> CATEGORIES = Sets.<String>newHashSet();
+	public static final String CATEGORY_MOVEMENT = "key.categories.movement";
+	public static final String CATEGORY_MISC = "key.categories.misc";
+	public static final String CATEGORY_MULTIPLAYER = "key.categories.multiplayer";
+	public static final String CATEGORY_GAMEPLAY = "key.categories.gameplay";
+	public static final String CATEGORY_INVENTORY = "key.categories.inventory";
+	public static final String CATEGORY_INTERFACE = "key.categories.ui";
+	public static final String CATEGORY_CREATIVE = "key.categories.creative";
 	private static final Map<String, Integer> CATEGORY_SORT_ORDER = Util.make(Maps.<String, Integer>newHashMap(), hashMap -> {
 		hashMap.put("key.categories.movement", 1);
 		hashMap.put("key.categories.gameplay", 2);

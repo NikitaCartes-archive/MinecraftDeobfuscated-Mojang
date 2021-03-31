@@ -3,12 +3,9 @@ package com.mojang.math;
 import com.mojang.datafixers.util.Pair;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import org.apache.commons.lang3.tuple.Triple;
 
-@Environment(EnvType.CLIENT)
 public final class Transformation {
 	private final Matrix4f matrix;
 	private boolean decomposed;
@@ -112,9 +109,24 @@ public final class Transformation {
 		return this.matrix.copy();
 	}
 
+	public Vector3f getTranslation() {
+		this.ensureDecomposed();
+		return this.translation.copy();
+	}
+
 	public Quaternion getLeftRotation() {
 		this.ensureDecomposed();
 		return this.leftRotation.copy();
+	}
+
+	public Vector3f getScale() {
+		this.ensureDecomposed();
+		return this.scale.copy();
+	}
+
+	public Quaternion getRightRotation() {
+		this.ensureDecomposed();
+		return this.rightRotation.copy();
 	}
 
 	public boolean equals(Object object) {
@@ -130,5 +142,17 @@ public final class Transformation {
 
 	public int hashCode() {
 		return Objects.hash(new Object[]{this.matrix});
+	}
+
+	public Transformation slerp(Transformation transformation, float f) {
+		Vector3f vector3f = this.getTranslation();
+		Quaternion quaternion = this.getLeftRotation();
+		Vector3f vector3f2 = this.getScale();
+		Quaternion quaternion2 = this.getRightRotation();
+		vector3f.lerp(transformation.getTranslation(), f);
+		quaternion.slerp(transformation.getLeftRotation(), f);
+		vector3f2.lerp(transformation.getScale(), f);
+		quaternion2.slerp(transformation.getRightRotation(), f);
+		return new Transformation(vector3f, quaternion, vector3f2, quaternion2);
 	}
 }

@@ -9,6 +9,9 @@ import net.minecraft.locale.Language;
 public class I18n {
 	private static volatile Language language = Language.getInstance();
 
+	private I18n() {
+	}
+
 	static void setLanguage(Language language) {
 		I18n.language = language;
 	}

@@ -31,6 +31,7 @@ public class Items {
 	public static final Item DIRT = registerBlock(Blocks.DIRT, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item COARSE_DIRT = registerBlock(Blocks.COARSE_DIRT, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item PODZOL = registerBlock(Blocks.PODZOL, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item ROOTED_DIRT = registerBlock(Blocks.ROOTED_DIRT, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CRIMSON_NYLIUM = registerBlock(Blocks.CRIMSON_NYLIUM, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WARPED_NYLIUM = registerBlock(Blocks.WARPED_NYLIUM, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item COBBLESTONE = registerBlock(Blocks.COBBLESTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -164,7 +165,6 @@ public class Items {
 	public static final Item KELP = registerBlock(Blocks.KELP, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MOSS_CARPET = registerBlock(Blocks.MOSS_CARPET, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MOSS_BLOCK = registerBlock(Blocks.MOSS_BLOCK, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item ROOTED_DIRT = registerBlock(Blocks.ROOTED_DIRT, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item HANGING_ROOTS = registerBlock(Blocks.HANGING_ROOTS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BIG_DRIPLEAF = registerBlock(Blocks.BIG_DRIPLEAF, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SMALL_DRIPLEAF = registerBlock(Blocks.SMALL_DRIPLEAF, CreativeModeTab.TAB_DECORATIONS);
@@ -352,6 +352,7 @@ public class Items {
 	public static final Item RED_TERRACOTTA = registerBlock(Blocks.RED_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item BLACK_TERRACOTTA = registerBlock(Blocks.BLACK_TERRACOTTA, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item BARRIER = registerBlock(Blocks.BARRIER);
+	public static final Item LIGHT = registerBlock(Blocks.LIGHT);
 	public static final Item HAY_BLOCK = registerBlock(Blocks.HAY_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WHITE_CARPET = registerBlock(Blocks.WHITE_CARPET, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ORANGE_CARPET = registerBlock(Blocks.ORANGE_CARPET, CreativeModeTab.TAB_DECORATIONS);
@@ -1052,7 +1053,9 @@ public class Items {
 	public static final Item BLAZE_POWDER = registerItem("blaze_powder", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
 	public static final Item MAGMA_CREAM = registerItem("magma_cream", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
 	public static final Item BREWING_STAND = registerBlock(Blocks.BREWING_STAND, CreativeModeTab.TAB_BREWING);
-	public static final Item CAULDRON = registerBlock(Blocks.CAULDRON, CreativeModeTab.TAB_BREWING);
+	public static final Item CAULDRON = registerBlock(
+		Blocks.CAULDRON, CreativeModeTab.TAB_BREWING, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON
+	);
 	public static final Item ENDER_EYE = registerItem("ender_eye", new EnderEyeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item GLISTERING_MELON_SLICE = registerItem("glistering_melon_slice", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
 	public static final Item AXOLOTL_SPAWN_EGG = registerItem(
@@ -1114,6 +1117,9 @@ public class Items {
 	);
 	public static final Item GLOW_SQUID_SPAWN_EGG = registerItem(
 		"glow_squid_spawn_egg", new SpawnEggItem(EntityType.GLOW_SQUID, 611926, 8778172, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
+	public static final Item GOAT_SPAWN_EGG = registerItem(
+		"goat_spawn_egg", new SpawnEggItem(EntityType.GOAT, 10851452, 5589310, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item GUARDIAN_SPAWN_EGG = registerItem(
 		"guardian_spawn_egg", new SpawnEggItem(EntityType.GUARDIAN, 5931634, 15826224, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
@@ -1642,6 +1648,16 @@ public class Items {
 
 	private static Item registerBlock(Block block, CreativeModeTab creativeModeTab) {
 		return registerBlock(new BlockItem(block, new Item.Properties().tab(creativeModeTab)));
+	}
+
+	private static Item registerBlock(Block block, CreativeModeTab creativeModeTab, Block... blocks) {
+		BlockItem blockItem = new BlockItem(block, new Item.Properties().tab(creativeModeTab));
+
+		for (Block block2 : blocks) {
+			Item.BY_BLOCK.put(block2, blockItem);
+		}
+
+		return registerBlock(blockItem);
 	}
 
 	private static Item registerBlock(BlockItem blockItem) {

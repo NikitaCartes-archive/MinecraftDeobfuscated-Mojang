@@ -92,6 +92,11 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
+	public BlockPos getHeighestPosition(Heightmap.Types types) {
+		return this.wrapped.getHeighestPosition(this.fixType(types));
+	}
+
+	@Override
 	public ChunkPos getPos() {
 		return this.wrapped.getPos();
 	}

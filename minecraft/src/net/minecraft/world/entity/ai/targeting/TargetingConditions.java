@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Mob;
 
 public class TargetingConditions {
 	public static final TargetingConditions DEFAULT = new TargetingConditions();
+	private static final double MIN_VISIBILITY_DISTANCE_FOR_INVISIBLE_TARGET = 2.0;
 	private double range = -1.0;
 	private boolean allowInvulnerable;
 	private boolean allowSameTeam;

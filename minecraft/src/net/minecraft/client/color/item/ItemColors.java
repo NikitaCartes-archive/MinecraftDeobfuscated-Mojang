@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class ItemColors {
+	private static final int DEFAULT = -1;
 	private final IdMapper<ItemColor> itemColors = new IdMapper<>(32);
 
 	public static ItemColors createDefault(BlockColors blockColors) {

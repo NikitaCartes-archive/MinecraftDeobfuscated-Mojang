@@ -7,4 +7,8 @@ public class NoiseUtils {
 		double i = normalNoise.getValue(d, e, f);
 		return Mth.map(i, -1.0, 1.0, g, h);
 	}
+
+	public static double biasTowardsExtreme(double d, double e) {
+		return d + Math.sin(Math.PI * d) * e / Math.PI;
+	}
 }

@@ -2,6 +2,7 @@ package net.minecraft.core;
 
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.util.Mth;
 
 public class Rotations {
 	protected final float x;
@@ -45,5 +46,17 @@ public class Rotations {
 
 	public float getZ() {
 		return this.z;
+	}
+
+	public float getWrappedX() {
+		return Mth.wrapDegrees(this.x);
+	}
+
+	public float getWrappedY() {
+		return Mth.wrapDegrees(this.y);
+	}
+
+	public float getWrappedZ() {
+		return Mth.wrapDegrees(this.z);
 	}
 }

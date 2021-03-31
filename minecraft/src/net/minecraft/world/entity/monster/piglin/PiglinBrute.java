@@ -3,8 +3,6 @@ package net.minecraft.world.entity.monster.piglin;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -31,6 +29,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class PiglinBrute extends AbstractPiglin {
+	private static final int MAX_HEALTH = 50;
+	private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.35F;
+	private static final int ATTACK_DAMAGE = 7;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super PiglinBrute>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_BRUTE_SPECIFIC_SENSOR
 	);
@@ -119,7 +120,6 @@ public class PiglinBrute extends AbstractPiglin {
 		super.customServerAiStep();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public PiglinArmPose getArmPose() {
 		return this.isAggressive() && this.isHoldingMeleeWeapon() ? PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON : PiglinArmPose.DEFAULT;

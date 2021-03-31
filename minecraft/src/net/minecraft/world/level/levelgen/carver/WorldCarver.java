@@ -23,8 +23,8 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
-	public static final WorldCarver<CarverConfiguration> CAVE = register("cave", new CaveWorldCarver(CarverConfiguration.CODEC));
-	public static final WorldCarver<CarverConfiguration> NETHER_CAVE = register("nether_cave", new NetherWorldCarver(CarverConfiguration.CODEC));
+	public static final WorldCarver<CaveCarverConfiguration> CAVE = register("cave", new CaveWorldCarver(CaveCarverConfiguration.CODEC));
+	public static final WorldCarver<CaveCarverConfiguration> NETHER_CAVE = register("nether_cave", new NetherWorldCarver(CaveCarverConfiguration.CODEC));
 	public static final WorldCarver<CanyonCarverConfiguration> CANYON = register("canyon", new CanyonWorldCarver(CanyonCarverConfiguration.CODEC));
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
@@ -180,7 +180,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		if (!this.canReplaceBlock(blockState, blockState2) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
-			if (mutableBlockPos.getY() < carvingContext.getMinGenY() + 9 && !isDebugEnabled(carverConfiguration)) {
+			if (mutableBlockPos.getY() < carverConfiguration.lavaLevel.resolveY(carvingContext) && !isDebugEnabled(carverConfiguration)) {
 				chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
 			} else {
 				chunkAccess.setBlockState(mutableBlockPos, getCaveAirState(carverConfiguration), false);
@@ -199,7 +199,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	}
 
 	private static BlockState getCaveAirState(CarverConfiguration carverConfiguration) {
-		return isDebugEnabled(carverConfiguration) ? carverConfiguration.getDebugSettings().getAirState() : CAVE_AIR;
+		return isDebugEnabled(carverConfiguration) ? carverConfiguration.debugSettings.getAirState() : CAVE_AIR;
 	}
 
 	public abstract boolean carve(
@@ -262,7 +262,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	}
 
 	private static boolean isDebugEnabled(CarverConfiguration carverConfiguration) {
-		return carverConfiguration.getDebugSettings().isDebugMode();
+		return carverConfiguration.debugSettings.isDebugMode();
 	}
 
 	public interface CarveSkipChecker {

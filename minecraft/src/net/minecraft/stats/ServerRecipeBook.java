@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ServerRecipeBook extends RecipeBook {
+	public static final String RECIPE_BOOK_TAG = "recipeBook";
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public int addRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {

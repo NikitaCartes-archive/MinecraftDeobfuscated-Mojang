@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,6 +31,9 @@ import org.apache.logging.log4j.Logger;
 
 public class MapItemSavedData extends SavedData {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int MAP_SIZE = 128;
+	private static final int HALF_MAP_SIZE = 64;
+	public static final int MAX_SCALE = 4;
 	public final int x;
 	public final int z;
 	public final ResourceKey<Level> dimension;
@@ -67,7 +68,6 @@ public class MapItemSavedData extends SavedData {
 		return new MapItemSavedData(l, m, b, bl, bl2, false, resourceKey);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static MapItemSavedData createForClient(byte b, boolean bl, ResourceKey<Level> resourceKey) {
 		return new MapItemSavedData(0, 0, b, false, false, bl, resourceKey);
 	}
@@ -389,6 +389,10 @@ public class MapItemSavedData extends SavedData {
 		}
 	}
 
+	public Collection<MapBanner> getBanners() {
+		return this.bannerMarkers.values();
+	}
+
 	public void removedFromFrame(BlockPos blockPos, int i) {
 		this.removeDecoration("frame-" + i);
 		this.frameMarkers.remove(MapFrame.frameId(blockPos));
@@ -419,7 +423,6 @@ public class MapItemSavedData extends SavedData {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void addClientSideDecorations(List<MapDecoration> list) {
 		this.decorations.clear();
 
@@ -429,7 +432,6 @@ public class MapItemSavedData extends SavedData {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Iterable<MapDecoration> getDecorations() {
 		return this.decorations.values();
 	}
@@ -523,7 +525,6 @@ public class MapItemSavedData extends SavedData {
 			this.mapColors = bs;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public void applyToMap(MapItemSavedData mapItemSavedData) {
 			for (int i = 0; i < this.width; i++) {
 				for (int j = 0; j < this.height; j++) {

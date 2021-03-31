@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.monster;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
@@ -23,12 +21,10 @@ public abstract class AbstractIllager extends Raider {
 		return MobType.ILLAGER;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public AbstractIllager.IllagerArmPose getArmPose() {
 		return AbstractIllager.IllagerArmPose.CROSSED;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static enum IllagerArmPose {
 		CROSSED,
 		ATTACKING,

@@ -2,103 +2,76 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.FloatProvider;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 
 public class CanyonCarverConfiguration extends CarverConfiguration {
 	public static final Codec<CanyonCarverConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.floatRange(0.0F, 1.0F).fieldOf("probability").forGetter(canyonCarverConfiguration -> canyonCarverConfiguration.probability),
-					CarverDebugSettings.CODEC.optionalFieldOf("debug_settings", CarverDebugSettings.DEFAULT).forGetter(CarverConfiguration::getDebugSettings),
-					VerticalAnchor.CODEC.fieldOf("bottom_inclusive").forGetter(CanyonCarverConfiguration::getBottomInclusive),
-					VerticalAnchor.CODEC.fieldOf("top_inclusive").forGetter(CanyonCarverConfiguration::getTopInclusive),
-					UniformInt.CODEC.fieldOf("y_scale").forGetter(CanyonCarverConfiguration::getYScale),
-					FloatProvider.codec(0.0F, 1.0F).fieldOf("distance_factor").forGetter(CanyonCarverConfiguration::getDistanceFactor),
-					FloatProvider.CODEC.fieldOf("vertical_rotation").forGetter(CanyonCarverConfiguration::getVerticalRotation),
-					FloatProvider.CODEC.fieldOf("thickness").forGetter(CanyonCarverConfiguration::getThickness),
-					Codec.intRange(0, Integer.MAX_VALUE).fieldOf("width_smoothness").forGetter(CanyonCarverConfiguration::getWidthSmoothness),
-					FloatProvider.CODEC.fieldOf("horizontal_radius_factor").forGetter(CanyonCarverConfiguration::getHorizontalRadiusFactor),
-					Codec.FLOAT.fieldOf("vertical_radius_default_factor").forGetter(CanyonCarverConfiguration::getVerticalRadiusDefaultFactor),
-					Codec.FLOAT.fieldOf("vertical_radius_center_factor").forGetter(CanyonCarverConfiguration::getVerticalRadiusCenterFactor)
+					CarverConfiguration.CODEC.forGetter(canyonCarverConfiguration -> canyonCarverConfiguration),
+					FloatProvider.CODEC.fieldOf("vertical_rotation").forGetter(canyonCarverConfiguration -> canyonCarverConfiguration.verticalRotation),
+					CanyonCarverConfiguration.CanyonShapeConfiguration.CODEC.fieldOf("shape").forGetter(canyonCarverConfiguration -> canyonCarverConfiguration.shape)
 				)
 				.apply(instance, CanyonCarverConfiguration::new)
 	);
-	private final VerticalAnchor bottomInclusive;
-	private final VerticalAnchor topInclusive;
-	private final UniformInt yScale;
-	private final FloatProvider distanceFactor;
-	private final FloatProvider verticalRotation;
-	private final FloatProvider thickness;
-	private final int widthSmoothness;
-	private final FloatProvider horizontalRadiusFactor;
-	private final float verticalRadiusDefaultFactor;
-	private final float verticalRadiusCenterFactor;
+	public final FloatProvider verticalRotation;
+	public final CanyonCarverConfiguration.CanyonShapeConfiguration shape;
 
 	public CanyonCarverConfiguration(
 		float f,
-		CarverDebugSettings carverDebugSettings,
-		VerticalAnchor verticalAnchor,
-		VerticalAnchor verticalAnchor2,
-		UniformInt uniformInt,
+		HeightProvider heightProvider,
 		FloatProvider floatProvider,
+		VerticalAnchor verticalAnchor,
+		CarverDebugSettings carverDebugSettings,
 		FloatProvider floatProvider2,
-		FloatProvider floatProvider3,
-		int i,
-		FloatProvider floatProvider4,
-		float g,
-		float h
+		CanyonCarverConfiguration.CanyonShapeConfiguration canyonShapeConfiguration
 	) {
-		super(f, carverDebugSettings);
-		this.bottomInclusive = verticalAnchor;
-		this.topInclusive = verticalAnchor2;
-		this.yScale = uniformInt;
-		this.distanceFactor = floatProvider;
+		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
 		this.verticalRotation = floatProvider2;
-		this.thickness = floatProvider3;
-		this.widthSmoothness = i;
-		this.horizontalRadiusFactor = floatProvider4;
-		this.verticalRadiusDefaultFactor = g;
-		this.verticalRadiusCenterFactor = h;
+		this.shape = canyonShapeConfiguration;
 	}
 
-	public VerticalAnchor getBottomInclusive() {
-		return this.bottomInclusive;
+	public CanyonCarverConfiguration(
+		CarverConfiguration carverConfiguration, FloatProvider floatProvider, CanyonCarverConfiguration.CanyonShapeConfiguration canyonShapeConfiguration
+	) {
+		this(
+			carverConfiguration.probability,
+			carverConfiguration.y,
+			carverConfiguration.yScale,
+			carverConfiguration.lavaLevel,
+			carverConfiguration.debugSettings,
+			floatProvider,
+			canyonShapeConfiguration
+		);
 	}
 
-	public VerticalAnchor getTopInclusive() {
-		return this.topInclusive;
-	}
+	public static class CanyonShapeConfiguration {
+		public static final Codec<CanyonCarverConfiguration.CanyonShapeConfiguration> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						FloatProvider.CODEC.fieldOf("distance_factor").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.distanceFactor),
+						FloatProvider.CODEC.fieldOf("thickness").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.thickness),
+						Codec.intRange(0, Integer.MAX_VALUE).fieldOf("width_smoothness").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.widthSmoothness),
+						FloatProvider.CODEC.fieldOf("horizontal_radius_factor").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.horizontalRadiusFactor),
+						Codec.FLOAT.fieldOf("vertical_radius_default_factor").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.verticalRadiusDefaultFactor),
+						Codec.FLOAT.fieldOf("vertical_radius_center_factor").forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.verticalRadiusCenterFactor)
+					)
+					.apply(instance, CanyonCarverConfiguration.CanyonShapeConfiguration::new)
+		);
+		public final FloatProvider distanceFactor;
+		public final FloatProvider thickness;
+		public final int widthSmoothness;
+		public final FloatProvider horizontalRadiusFactor;
+		public final float verticalRadiusDefaultFactor;
+		public final float verticalRadiusCenterFactor;
 
-	public UniformInt getYScale() {
-		return this.yScale;
-	}
-
-	public FloatProvider getDistanceFactor() {
-		return this.distanceFactor;
-	}
-
-	public FloatProvider getVerticalRotation() {
-		return this.verticalRotation;
-	}
-
-	public FloatProvider getThickness() {
-		return this.thickness;
-	}
-
-	public int getWidthSmoothness() {
-		return this.widthSmoothness;
-	}
-
-	public FloatProvider getHorizontalRadiusFactor() {
-		return this.horizontalRadiusFactor;
-	}
-
-	public float getVerticalRadiusDefaultFactor() {
-		return this.verticalRadiusDefaultFactor;
-	}
-
-	public float getVerticalRadiusCenterFactor() {
-		return this.verticalRadiusCenterFactor;
+		public CanyonShapeConfiguration(FloatProvider floatProvider, FloatProvider floatProvider2, int i, FloatProvider floatProvider3, float f, float g) {
+			this.widthSmoothness = i;
+			this.horizontalRadiusFactor = floatProvider3;
+			this.verticalRadiusDefaultFactor = f;
+			this.verticalRadiusCenterFactor = g;
+			this.distanceFactor = floatProvider;
+			this.thickness = floatProvider2;
+		}
 	}
 }

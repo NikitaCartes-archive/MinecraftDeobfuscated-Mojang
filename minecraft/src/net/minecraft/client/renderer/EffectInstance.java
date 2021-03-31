@@ -37,8 +37,10 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class EffectInstance implements Effect, AutoCloseable {
+	private static final String EFFECT_SHADER_PATH = "shaders/program/";
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
+	private static final boolean ALWAYS_REAPPLY = true;
 	private static EffectInstance lastAppliedEffect;
 	private static int lastProgramId = -1;
 	private final Map<String, IntSupplier> samplerMap = Maps.<String, IntSupplier>newHashMap();
@@ -414,6 +416,10 @@ public class EffectInstance implements Effect, AutoCloseable {
 	public void attachToProgram() {
 		this.fragmentProgram.attachToEffect(this);
 		this.vertexProgram.attachToEffect(this);
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	@Override

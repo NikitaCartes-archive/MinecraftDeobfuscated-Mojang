@@ -27,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 
 public class EntityStorage implements EntityPersistentStorage<Entity> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String ENTITIES_TAG = "Entities";
+	private static final String POSITION_TAG = "Position";
 	private final ServerLevel level;
 	private final IOWorker worker;
 	private final LongSet emptyChunks = new LongOpenHashSet();

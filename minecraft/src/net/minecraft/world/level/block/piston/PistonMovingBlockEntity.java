@@ -2,8 +2,6 @@ package net.minecraft.world.level.block.piston;
 
 import java.util.Iterator;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +26,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PistonMovingBlockEntity extends BlockEntity {
+	private static final int TICKS_TO_EXTEND = 2;
+	private static final double PUSH_OFFSET = 0.01;
+	public static final double TICK_MOVEMENT = 0.51;
 	private BlockState movedState;
 	private Direction direction;
 	private boolean extending;
@@ -75,17 +76,14 @@ public class PistonMovingBlockEntity extends BlockEntity {
 		return Mth.lerp(f, this.progressO, this.progress);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getXOff(float f) {
 		return (float)this.direction.getStepX() * this.getExtendedProgress(this.getProgress(f));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getYOff(float f) {
 		return (float)this.direction.getStepY() * this.getExtendedProgress(this.getProgress(f));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getZOff(float f) {
 		return (float)this.direction.getStepZ() * this.getExtendedProgress(this.getProgress(f));
 	}

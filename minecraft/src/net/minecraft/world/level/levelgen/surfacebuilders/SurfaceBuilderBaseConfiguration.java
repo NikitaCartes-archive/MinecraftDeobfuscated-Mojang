@@ -33,6 +33,7 @@ public class SurfaceBuilderBaseConfiguration implements SurfaceBuilderConfigurat
 		return this.underMaterial;
 	}
 
+	@Override
 	public BlockState getUnderwaterMaterial() {
 		return this.underwaterMaterial;
 	}

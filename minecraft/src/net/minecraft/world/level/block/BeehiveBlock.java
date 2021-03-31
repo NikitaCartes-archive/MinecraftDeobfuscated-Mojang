@@ -3,8 +3,6 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -57,6 +55,8 @@ public class BeehiveBlock extends BaseEntityBlock {
 	private static final Direction[] SPAWN_DIRECTIONS = new Direction[]{Direction.WEST, Direction.EAST, Direction.SOUTH};
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final IntegerProperty HONEY_LEVEL = BlockStateProperties.LEVEL_HONEY;
+	public static final int MAX_HONEY_LEVELS = 5;
+	private static final int SHEARED_HONEYCOMB_COUNT = 3;
 
 	public BeehiveBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -176,7 +176,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 		level.setBlock(blockPos, blockState.setValue(HONEY_LEVEL, Integer.valueOf(0)), 3);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Integer)blockState.getValue(HONEY_LEVEL) >= 5) {
@@ -186,7 +185,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void trySpawnDripParticles(Level level, BlockPos blockPos, BlockState blockState) {
 		if (blockState.getFluidState().isEmpty() && !(level.random.nextFloat() < 0.3F)) {
 			VoxelShape voxelShape = blockState.getCollisionShape(level, blockPos);
@@ -208,7 +206,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void spawnParticle(Level level, BlockPos blockPos, VoxelShape voxelShape, double d) {
 		this.spawnFluidParticle(
 			level,
@@ -220,7 +217,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 		);
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void spawnFluidParticle(Level level, double d, double e, double f, double g, double h) {
 		level.addParticle(ParticleTypes.DRIPPING_HONEY, Mth.lerp(level.random.nextDouble(), d, e), h, Mth.lerp(level.random.nextDouble(), f, g), 0.0, 0.0, 0.0);
 	}

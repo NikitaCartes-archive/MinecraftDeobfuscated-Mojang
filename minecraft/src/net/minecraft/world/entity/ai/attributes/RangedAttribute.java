@@ -19,6 +19,14 @@ public class RangedAttribute extends Attribute {
 		}
 	}
 
+	public double getMinValue() {
+		return this.minValue;
+	}
+
+	public double getMaxValue() {
+		return this.maxValue;
+	}
+
 	@Override
 	public double sanitizeValue(double d) {
 		return Mth.clamp(d, this.minValue, this.maxValue);

@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerWatchdog implements Runnable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final long MAX_SHUTDOWN_TIME = 10000L;
+	private static final int SHUTDOWN_STATUS = 1;
 	private final DedicatedServer server;
 	private final long maxTickTime;
 

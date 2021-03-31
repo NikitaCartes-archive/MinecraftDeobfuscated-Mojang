@@ -29,8 +29,11 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ModelBlockRenderer {
+	private static final int FACE_CUBIC = 0;
+	private static final int FACE_PARTIAL = 1;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private final BlockColors blockColors;
+	private static final int CACHE_SIZE = 100;
 	private static final ThreadLocal<ModelBlockRenderer.Cache> CACHE = ThreadLocal.withInitial(() -> new ModelBlockRenderer.Cache());
 
 	public ModelBlockRenderer(BlockColors blockColors) {

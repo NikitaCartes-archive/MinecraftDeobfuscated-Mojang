@@ -19,6 +19,9 @@ import org.apache.logging.log4j.Logger;
 
 public class TimerQueue<T> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String CALLBACK_DATA_TAG = "Callback";
+	private static final String TIMER_NAME_TAG = "Name";
+	private static final String TIMER_TRIGGER_TIME_TAG = "TriggerTime";
 	private final TimerCallbacks<T> callbacksRegistry;
 	private final Queue<TimerQueue.Event<T>> queue = new PriorityQueue(createComparator());
 	private UnsignedLong sequentialId = UnsignedLong.ZERO;

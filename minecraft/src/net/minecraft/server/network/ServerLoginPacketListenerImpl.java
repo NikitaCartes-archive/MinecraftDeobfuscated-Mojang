@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int MAX_TICKS_BEFORE_LOGIN = 600;
 	private static final Random RANDOM = new Random();
 	private final byte[] nonce = new byte[4];
 	private final MinecraftServer server;

@@ -5,34 +5,34 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class BendingTrunkPlacer extends TrunkPlacer {
 	public static final Codec<BendingTrunkPlacer> CODEC = RecordCodecBuilder.create(
 		instance -> trunkPlacerParts(instance)
-				.<Integer, UniformInt>and(
+				.<Integer, IntProvider>and(
 					instance.group(
 						Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("min_height_for_leaves", 1).forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.minHeightForLeaves),
-						UniformInt.codec(1, 32, 32).fieldOf("bend_length").forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.bendLength)
+						IntProvider.codec(1, 64).fieldOf("bend_length").forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.bendLength)
 					)
 				)
 				.apply(instance, BendingTrunkPlacer::new)
 	);
 	private final int minHeightForLeaves;
-	private final UniformInt bendLength;
+	private final IntProvider bendLength;
 
-	public BendingTrunkPlacer(int i, int j, int k, int l, UniformInt uniformInt) {
+	public BendingTrunkPlacer(int i, int j, int k, int l, IntProvider intProvider) {
 		super(i, j, k);
 		this.minHeightForLeaves = l;
-		this.bendLength = uniformInt;
+		this.bendLength = intProvider;
 	}
 
 	@Override
@@ -42,13 +42,18 @@ public class BendingTrunkPlacer extends TrunkPlacer {
 
 	@Override
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
-		LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		Random random,
+		int i,
+		BlockPos blockPos,
+		TreeConfiguration treeConfiguration
 	) {
 		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		int j = i - 1;
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		BlockPos blockPos2 = mutableBlockPos.below();
-		setDirtAt(levelSimulatedRW, random, blockPos2, treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2, treeConfiguration);
 		List<FoliagePlacer.FoliageAttachment> list = Lists.<FoliagePlacer.FoliageAttachment>newArrayList();
 
 		for (int k = 0; k <= j; k++) {
@@ -56,8 +61,8 @@ public class BendingTrunkPlacer extends TrunkPlacer {
 				mutableBlockPos.move(direction);
 			}
 
-			if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
-				placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration);
+			if (TreeFeature.validTreePos(levelSimulatedReader, mutableBlockPos)) {
+				placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
 			}
 
 			if (k >= this.minHeightForLeaves) {
@@ -70,8 +75,8 @@ public class BendingTrunkPlacer extends TrunkPlacer {
 		int k = this.bendLength.sample(random);
 
 		for (int l = 0; l <= k; l++) {
-			if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
-				placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration);
+			if (TreeFeature.validTreePos(levelSimulatedReader, mutableBlockPos)) {
+				placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
 			}
 
 			list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));

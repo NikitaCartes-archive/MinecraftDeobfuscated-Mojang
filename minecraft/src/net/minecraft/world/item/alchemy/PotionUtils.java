@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +24,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 
 public class PotionUtils {
+	public static final String TAG_CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+	public static final String TAG_CUSTOM_POTION_COLOR = "CustomPotionColor";
+	public static final String TAG_POTION = "Potion";
+	private static final int EMPTY_COLOR = 16253176;
 	private static final Component NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
 
 	public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
@@ -150,7 +152,6 @@ public class PotionUtils {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
 		List<MobEffectInstance> list2 = getMobEffects(itemStack);
 		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();

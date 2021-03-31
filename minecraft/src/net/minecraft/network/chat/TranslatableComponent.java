@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.world.entity.Entity;
@@ -119,7 +117,6 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 		return new TranslatableComponent(this.key, this.args);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		this.decompose();

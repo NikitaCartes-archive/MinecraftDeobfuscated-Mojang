@@ -2,8 +2,6 @@ package net.minecraft.world.entity.decoration;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +24,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class LeashFenceKnotEntity extends HangingEntity {
+	public static final double OFFSET_Y = 0.375;
+
 	public LeashFenceKnotEntity(EntityType<? extends LeashFenceKnotEntity> entityType, Level level) {
 		super(entityType, level);
 	}
@@ -62,7 +62,6 @@ public class LeashFenceKnotEntity extends HangingEntity {
 		return 0.0625F;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		return d < 1024.0;
@@ -133,7 +132,6 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 		LeashFenceKnotEntity leashFenceKnotEntity2 = new LeashFenceKnotEntity(level, blockPos);
 		level.addFreshEntity(leashFenceKnotEntity2);
-		leashFenceKnotEntity2.playPlacementSound();
 		return leashFenceKnotEntity2;
 	}
 
@@ -147,13 +145,11 @@ public class LeashFenceKnotEntity extends HangingEntity {
 		return new ClientboundAddEntityPacket(this, this.getType(), 0, this.getPos());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		return this.getPosition(f).add(0.0, 0.2, 0.0);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getPickResult() {
 		return new ItemStack(Items.LEAD);

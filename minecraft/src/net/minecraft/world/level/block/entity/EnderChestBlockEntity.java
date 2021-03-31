@@ -1,9 +1,5 @@
 package net.minecraft.world.level.block.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -12,10 +8,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = LidBlockEntity.class
-	)})
 public class EnderChestBlockEntity extends BlockEntity implements LidBlockEntity {
 	private final ChestLidController chestLidController = new ChestLidController();
 	private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
@@ -98,7 +90,6 @@ public class EnderChestBlockEntity extends BlockEntity implements LidBlockEntity
 		this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getOpenNess(float f) {
 		return this.chestLidController.getOpenness(f);

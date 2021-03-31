@@ -16,6 +16,7 @@ import net.minecraft.world.phys.AABB;
 
 public class HurtByTargetGoal extends TargetGoal {
 	private static final TargetingConditions HURT_BY_TARGETING = new TargetingConditions().allowUnseeable().ignoreInvisibilityTesting();
+	private static final int ALERT_RANGE_Y = 10;
 	private boolean alertSameType;
 	private int timestamp;
 	private final Class<?>[] toIgnoreDamage;

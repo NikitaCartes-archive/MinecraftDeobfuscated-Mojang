@@ -27,12 +27,20 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BambooBlock extends Block implements BonemealableBlock {
+	protected static final float SMALL_LEAVES_AABB_OFFSET = 3.0F;
+	protected static final float LARGE_LEAVES_AABB_OFFSET = 5.0F;
+	protected static final float COLLISION_AABB_OFFSET = 1.5F;
 	protected static final VoxelShape SMALL_SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 16.0, 11.0);
 	protected static final VoxelShape LARGE_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 16.0, 13.0);
 	protected static final VoxelShape COLLISION_SHAPE = Block.box(6.5, 0.0, 6.5, 9.5, 16.0, 9.5);
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_1;
 	public static final EnumProperty<BambooLeaves> LEAVES = BlockStateProperties.BAMBOO_LEAVES;
 	public static final IntegerProperty STAGE = BlockStateProperties.STAGE;
+	public static final int MAX_HEIGHT = 16;
+	public static final int STAGE_GROWING = 0;
+	public static final int STAGE_DONE_GROWING = 1;
+	public static final int AGE_THIN_BAMBOO = 0;
+	public static final int AGE_THICK_BAMBOO = 1;
 
 	public BambooBlock(BlockBehaviour.Properties properties) {
 		super(properties);

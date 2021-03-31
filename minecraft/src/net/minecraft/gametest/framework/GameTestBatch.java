@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 
 public class GameTestBatch {
+	public static final String DEFAULT_BATCH_NAME = "defaultBatch";
 	private final String name;
 	private final Collection<TestFunction> testFunctions;
 	@Nullable

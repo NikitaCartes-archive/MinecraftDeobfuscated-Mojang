@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -51,7 +49,6 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(false)));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
 		return DoubleBlockCombiner.Combiner::acceptNone;
@@ -111,7 +108,6 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 		return level.isClientSide ? createTickerHelper(blockEntityType, BlockEntityType.ENDER_CHEST, EnderChestBlockEntity::lidAnimateTick) : null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		for (int i = 0; i < 3; i++) {

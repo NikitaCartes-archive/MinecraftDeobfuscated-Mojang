@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class EntityRenderers {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final String DEFAULT_PLAYER_MODEL = "default";
 	private static final Map<EntityType<?>, EntityRendererProvider<?>> PROVIDERS = Maps.<EntityType<?>, EntityRendererProvider<?>>newHashMap();
 	private static final Map<String, EntityRendererProvider<AbstractClientPlayer>> PLAYER_PROVIDERS = ImmutableMap.of(
 		"default", context -> new PlayerRenderer(context, false), "slim", context -> new PlayerRenderer(context, true)
@@ -109,6 +110,7 @@ public class EntityRenderers {
 		register(EntityType.GIANT, context -> new GiantMobRenderer(context, 6.0F));
 		register(EntityType.GLOW_ITEM_FRAME, ItemFrameRenderer::new);
 		register(EntityType.GLOW_SQUID, context -> new GlowSquidRenderer(context, new SquidModel<>(context.bakeLayer(ModelLayers.GLOW_SQUID))));
+		register(EntityType.GOAT, GoatRenderer::new);
 		register(EntityType.GUARDIAN, GuardianRenderer::new);
 		register(EntityType.HOGLIN, HoglinRenderer::new);
 		register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.HOPPER_MINECART));

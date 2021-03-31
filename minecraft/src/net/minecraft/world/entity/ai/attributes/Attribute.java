@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.attributes;
 
 public class Attribute {
+	public static final int MAX_NAME_LENGTH = 64;
 	private final double defaultValue;
 	private boolean syncable;
 	private final String descriptionId;

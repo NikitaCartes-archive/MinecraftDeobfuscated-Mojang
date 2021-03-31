@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerScoreboard;
@@ -52,23 +50,19 @@ public class ClientboundSetScorePacket implements Packet<ClientGamePacketListene
 		clientGamePacketListener.handleSetScore(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getOwner() {
 		return this.owner;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public String getObjectiveName() {
 		return this.objectiveName;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getScore() {
 		return this.score;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ServerScoreboard.Method getMethod() {
 		return this.method;
 	}

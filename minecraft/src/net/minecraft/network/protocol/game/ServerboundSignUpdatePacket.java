@@ -1,16 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundSignUpdatePacket implements Packet<ServerGamePacketListener> {
+	private static final int MAX_STRING_LENGTH = 384;
 	private final BlockPos pos;
 	private final String[] lines;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundSignUpdatePacket(BlockPos blockPos, String string, String string2, String string3, String string4) {
 		this.pos = blockPos;
 		this.lines = new String[]{string, string2, string3, string4};

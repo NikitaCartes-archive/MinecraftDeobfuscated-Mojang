@@ -19,7 +19,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.WoodlandMansionPieces;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -60,8 +59,8 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 	}
 
 	public static class WoodlandMansionStart extends StructureStart<NoneFeatureConfiguration> {
-		public WoodlandMansionStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public WoodlandMansionStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -96,8 +95,7 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 				BlockPos blockPos = new BlockPos(chunkPos.getBlockX(8), q + 1, chunkPos.getBlockZ(8));
 				List<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.<WoodlandMansionPieces.WoodlandMansionPiece>newLinkedList();
 				WoodlandMansionPieces.generateMansion(structureManager, blockPos, rotation, list, this.random);
-				this.pieces.addAll(list);
-				this.calculateBoundingBox();
+				list.forEach(this::addPiece);
 			}
 		}
 
@@ -111,30 +109,20 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 			ChunkPos chunkPos
 		) {
 			super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
-			int i = this.boundingBox.y0;
+			BoundingBox boundingBox2 = this.getBoundingBox();
+			int i = boundingBox2.minY();
 
-			for (int j = boundingBox.x0; j <= boundingBox.x1; j++) {
-				for (int k = boundingBox.z0; k <= boundingBox.z1; k++) {
+			for (int j = boundingBox.minX(); j <= boundingBox.maxX(); j++) {
+				for (int k = boundingBox.minZ(); k <= boundingBox.maxZ(); k++) {
 					BlockPos blockPos = new BlockPos(j, i, k);
-					if (!worldGenLevel.isEmptyBlock(blockPos) && this.boundingBox.isInside(blockPos)) {
-						boolean bl = false;
-
-						for (StructurePiece structurePiece : this.pieces) {
-							if (structurePiece.getBoundingBox().isInside(blockPos)) {
-								bl = true;
+					if (!worldGenLevel.isEmptyBlock(blockPos) && boundingBox2.isInside(blockPos) && this.isInsidePiece(blockPos)) {
+						for (int l = i - 1; l > 1; l--) {
+							BlockPos blockPos2 = new BlockPos(j, l, k);
+							if (!worldGenLevel.isEmptyBlock(blockPos2) && !worldGenLevel.getBlockState(blockPos2).getMaterial().isLiquid()) {
 								break;
 							}
-						}
 
-						if (bl) {
-							for (int l = i - 1; l > 1; l--) {
-								BlockPos blockPos2 = new BlockPos(j, l, k);
-								if (!worldGenLevel.isEmptyBlock(blockPos2) && !worldGenLevel.getBlockState(blockPos2).getMaterial().isLiquid()) {
-									break;
-								}
-
-								worldGenLevel.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
-							}
+							worldGenLevel.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
 						}
 					}
 				}

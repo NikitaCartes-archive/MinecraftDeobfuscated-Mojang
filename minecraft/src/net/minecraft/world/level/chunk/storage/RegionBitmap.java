@@ -1,5 +1,9 @@
 package net.minecraft.world.level.chunk.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.BitSet;
 
 public class RegionBitmap {
@@ -26,5 +30,10 @@ public class RegionBitmap {
 
 			j = l;
 		}
+	}
+
+	@VisibleForTesting
+	public IntSet getUsed() {
+		return (IntSet)this.used.stream().collect(IntArraySet::new, IntCollection::add, IntCollection::addAll);
 	}
 }

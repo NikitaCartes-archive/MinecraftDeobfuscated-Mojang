@@ -14,6 +14,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -39,6 +41,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +55,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
+public class Piglin extends AbstractPiglin implements CrossbowAttackMob, InventoryCarrier {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IS_DANCING = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
@@ -60,6 +63,15 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	private static final AttributeModifier SPEED_MODIFIER_BABY = new AttributeModifier(
 		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.2F, AttributeModifier.Operation.MULTIPLY_BASE
 	);
+	private static final int MAX_HEALTH = 16;
+	private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.35F;
+	private static final int ATTACK_DAMAGE = 5;
+	private static final float CROSSBOW_POWER = 1.6F;
+	private static final float CHANCE_OF_WEARING_EACH_ARMOUR_ITEM = 0.1F;
+	private static final int MAX_PASSENGERS_ON_ONE_HOGLIN = 3;
+	private static final float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2F;
+	private static final float BABY_EYE_HEIGHT_ADJUSTMENT = 0.81F;
+	private static final double PROBABILITY_OF_SPAWNING_WITH_CROSSBOW_INSTEAD_OF_SWORD = 0.5;
 	private final SimpleContainer inventory = new SimpleContainer(8);
 	private boolean cannotHunt;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(
@@ -131,6 +143,12 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 		this.setBaby(compoundTag.getBoolean("IsBaby"));
 		this.setCannotHunt(compoundTag.getBoolean("CannotHunt"));
 		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+	}
+
+	@VisibleForDebug
+	@Override
+	public Container getInventory() {
+		return this.inventory;
 	}
 
 	@Override

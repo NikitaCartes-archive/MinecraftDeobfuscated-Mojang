@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SleepInBed extends Behavior<LivingEntity> {
+	public static final int COOLDOWN_AFTER_BEING_WOKEN = 100;
 	private long nextOkStartTime;
 
 	public SleepInBed() {

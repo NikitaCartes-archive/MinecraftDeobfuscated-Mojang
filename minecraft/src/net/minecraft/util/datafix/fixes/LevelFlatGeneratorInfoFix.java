@@ -15,6 +15,9 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class LevelFlatGeneratorInfoFix extends DataFix {
+	private static final String GENERATOR_OPTIONS = "generatorOptions";
+	@VisibleForTesting
+	static final String DEFAULT = "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;1;village";
 	private static final Splitter SPLITTER = Splitter.on(';').limit(5);
 	private static final Splitter LAYER_SPLITTER = Splitter.on(',');
 	private static final Splitter OLD_AMOUNT_SPLITTER = Splitter.on('x').limit(2);

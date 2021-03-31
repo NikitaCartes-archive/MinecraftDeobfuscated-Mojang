@@ -16,6 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SoulSandBlock extends Block {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0);
+	private static final int BUBBLE_COLUMN_CHECK_DELAY = 20;
 
 	public SoulSandBlock(BlockBehaviour.Properties properties) {
 		super(properties);

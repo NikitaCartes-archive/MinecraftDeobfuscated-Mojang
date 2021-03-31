@@ -39,7 +39,7 @@ public class VanillaBiomes {
 		if (bl) {
 			BiomeDefaultFeatures.commonSpawns(builder);
 		} else {
-			BiomeDefaultFeatures.ambientSpawns(builder);
+			BiomeDefaultFeatures.caveSpawns(builder);
 			BiomeDefaultFeatures.monsters(builder, 100, 25, 100);
 		}
 
@@ -248,6 +248,7 @@ public class VanillaBiomes {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 5, 4, 6));
+		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GOAT, 10, 4, 6));
 		BiomeDefaultFeatures.commonSpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(configuredSurfaceBuilder);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);

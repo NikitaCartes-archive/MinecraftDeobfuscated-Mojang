@@ -1,10 +1,10 @@
 package net.minecraft.util.profiling;
 
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public interface ProfilerFiller {
+	String ROOT = "root";
+
 	void startTick();
 
 	void endTick();
@@ -17,7 +17,6 @@ public interface ProfilerFiller {
 
 	void popPush(String string);
 
-	@Environment(EnvType.CLIENT)
 	void popPush(Supplier<String> supplier);
 
 	void incrementCounter(String string);
@@ -65,7 +64,6 @@ public interface ProfilerFiller {
 					profilerFiller2.popPush(string);
 				}
 
-				@Environment(EnvType.CLIENT)
 				@Override
 				public void popPush(Supplier<String> supplier) {
 					profilerFiller.popPush(supplier);

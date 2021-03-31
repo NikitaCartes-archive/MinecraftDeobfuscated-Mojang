@@ -14,8 +14,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.lang.reflect.Type;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.GsonHelper;
@@ -24,6 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 public class ResourceLocation implements Comparable<ResourceLocation> {
 	public static final Codec<ResourceLocation> CODEC = Codec.STRING.<ResourceLocation>comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
 	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
+	public static final char NAMESPACE_SEPARATOR = ':';
+	public static final String DEFAULT_NAMESPACE = "minecraft";
+	public static final String REALMS_NAMESPACE = "realms";
 	protected final String namespace;
 	protected final String path;
 
@@ -115,6 +116,10 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		return i;
 	}
 
+	public String toDebugFileName() {
+		return this.toString().replace('/', '_').replace(':', '_');
+	}
+
 	public static ResourceLocation read(StringReader stringReader) throws CommandSyntaxException {
 		int i = stringReader.getCursor();
 
@@ -164,7 +169,6 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '.';
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean isValidResourceLocation(String string) {
 		String[] strings = decompose(string, ':');
 		return isValidNamespace(StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0]) && isValidPath(strings[1]);

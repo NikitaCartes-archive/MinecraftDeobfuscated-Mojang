@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +33,6 @@ public class EndGatewayBlock extends BaseEntityBlock {
 		);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
@@ -63,7 +60,6 @@ public class EndGatewayBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return ItemStack.EMPTY;

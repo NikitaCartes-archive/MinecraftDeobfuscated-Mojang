@@ -28,6 +28,10 @@ public class VariantProperty<T> {
 			this.value = object;
 		}
 
+		public VariantProperty<T> getKey() {
+			return VariantProperty.this;
+		}
+
 		public void addToVariant(JsonObject jsonObject) {
 			jsonObject.add(VariantProperty.this.key, (JsonElement)VariantProperty.this.serializer.apply(this.value));
 		}

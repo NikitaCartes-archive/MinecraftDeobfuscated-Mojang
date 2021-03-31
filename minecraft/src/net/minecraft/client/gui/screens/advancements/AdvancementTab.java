@@ -55,12 +55,24 @@ public class AdvancementTab extends GuiComponent {
 		this.addWidget(this.root, advancement);
 	}
 
+	public AdvancementTabType getType() {
+		return this.type;
+	}
+
+	public int getIndex() {
+		return this.index;
+	}
+
 	public Advancement getAdvancement() {
 		return this.advancement;
 	}
 
 	public Component getTitle() {
 		return this.title;
+	}
+
+	public DisplayInfo getDisplay() {
+		return this.display;
 	}
 
 	public void drawTab(PoseStack poseStack, int i, int j, boolean bl) {

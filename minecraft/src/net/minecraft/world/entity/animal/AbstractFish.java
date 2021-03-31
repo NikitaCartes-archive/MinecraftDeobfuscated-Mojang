@@ -29,7 +29,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -80,6 +79,7 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 		this.entityData.define(FROM_BUCKET, false);
 	}
 
+	@Override
 	public boolean fromBucket() {
 		return this.entityData.get(FROM_BUCKET);
 	}
@@ -144,20 +144,23 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-		return (InteractionResult)ItemUtils.bucketMobPickup(player, interactionHand, this, SoundEvents.BUCKET_FILL_FISH, () -> {
-			ItemStack itemStack = this.getBucketItemStack();
-			this.saveToBucketTag(itemStack);
-			return itemStack;
-		}).orElse(super.mobInteract(player, interactionHand));
+		return (InteractionResult)Bucketable.bucketMobPickup(player, interactionHand, this).orElse(super.mobInteract(player, interactionHand));
 	}
 
-	protected void saveToBucketTag(ItemStack itemStack) {
-		if (this.hasCustomName()) {
-			itemStack.setHoverName(this.getCustomName());
-		}
+	@Override
+	public void saveToBucketTag(ItemStack itemStack) {
+		Bucketable.saveDefaultDataToBucketTag(this, itemStack);
 	}
 
-	protected abstract ItemStack getBucketItemStack();
+	@Override
+	public void loadFromBucketTag(CompoundTag compoundTag) {
+		Bucketable.loadDefaultDataFromBucketTag(this, compoundTag);
+	}
+
+	@Override
+	public SoundEvent getPickupSound() {
+		return SoundEvents.BUCKET_FILL_FISH;
+	}
 
 	protected boolean canRandomSwim() {
 		return true;

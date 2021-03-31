@@ -1,8 +1,6 @@
 package net.minecraft.server.level.progress;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -42,7 +40,6 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void start() {
 	}

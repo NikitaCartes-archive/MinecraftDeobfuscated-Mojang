@@ -47,6 +47,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class Slime extends Mob implements Enemy {
 	private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Slime.class, EntityDataSerializers.INT);
+	public static final int MIN_SIZE = 1;
+	public static final int MAX_SIZE = 127;
 	public float targetSquish;
 	public float squish;
 	public float oSquish;

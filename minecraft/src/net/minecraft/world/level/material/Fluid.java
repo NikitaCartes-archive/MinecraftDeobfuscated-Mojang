@@ -3,8 +3,6 @@ package net.minecraft.world.level.material;
 import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.IdMapper;
@@ -49,7 +47,6 @@ public abstract class Fluid {
 
 	public abstract Item getBucket();
 
-	@Environment(EnvType.CLIENT)
 	protected void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
 	}
 
@@ -60,7 +57,6 @@ public abstract class Fluid {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	protected ParticleOptions getDripParticle() {
 		return null;
 	}

@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public abstract class LivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements RenderLayerParent<T, M> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final float EYE_BED_OFFSET = 0.1F;
 	protected M model;
 	protected final List<RenderLayer<T, M>> layers = Lists.<RenderLayer<T, M>>newArrayList();
 
@@ -164,7 +165,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	}
 
 	protected boolean isShaking(T livingEntity) {
-		return false;
+		return livingEntity.isFullyFrozen();
 	}
 
 	protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {

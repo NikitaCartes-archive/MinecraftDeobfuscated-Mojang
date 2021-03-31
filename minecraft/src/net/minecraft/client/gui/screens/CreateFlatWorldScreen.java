@@ -26,6 +26,13 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 @Environment(EnvType.CLIENT)
 public class CreateFlatWorldScreen extends Screen {
+	private static final int SLOT_TEX_SIZE = 128;
+	private static final int SLOT_BG_SIZE = 18;
+	private static final int SLOT_STAT_HEIGHT = 20;
+	private static final int SLOT_BG_X = 1;
+	private static final int SLOT_BG_Y = 1;
+	private static final int SLOT_FG_X = 2;
+	private static final int SLOT_FG_Y = 2;
 	protected final CreateWorldScreen parent;
 	private final Consumer<FlatLevelGeneratorSettings> applySettings;
 	private FlatLevelGeneratorSettings generator;

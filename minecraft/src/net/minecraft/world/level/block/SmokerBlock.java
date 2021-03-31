@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
@@ -44,7 +42,6 @@ public class SmokerBlock extends AbstractFurnaceBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(LIT)) {

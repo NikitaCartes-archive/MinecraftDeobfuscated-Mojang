@@ -3,7 +3,7 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.IntRange;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -13,14 +13,16 @@ public class CopyMemoryWithExpiry<E extends Mob, T> extends Behavior<E> {
 	private final Predicate<E> predicate;
 	private final MemoryModuleType<? extends T> sourceMemory;
 	private final MemoryModuleType<T> targetMemory;
-	private final IntRange durationOfCopy;
+	private final UniformInt durationOfCopy;
 
-	public CopyMemoryWithExpiry(Predicate<E> predicate, MemoryModuleType<? extends T> memoryModuleType, MemoryModuleType<T> memoryModuleType2, IntRange intRange) {
+	public CopyMemoryWithExpiry(
+		Predicate<E> predicate, MemoryModuleType<? extends T> memoryModuleType, MemoryModuleType<T> memoryModuleType2, UniformInt uniformInt
+	) {
 		super(ImmutableMap.of(memoryModuleType, MemoryStatus.VALUE_PRESENT, memoryModuleType2, MemoryStatus.VALUE_ABSENT));
 		this.predicate = predicate;
 		this.sourceMemory = memoryModuleType;
 		this.targetMemory = memoryModuleType2;
-		this.durationOfCopy = intRange;
+		this.durationOfCopy = uniformInt;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
@@ -29,6 +31,6 @@ public class CopyMemoryWithExpiry<E extends Mob, T> extends Behavior<E> {
 
 	protected void start(ServerLevel serverLevel, E mob, long l) {
 		Brain<?> brain = mob.getBrain();
-		brain.setMemoryWithExpiry(this.targetMemory, (T)brain.getMemory(this.sourceMemory).get(), (long)this.durationOfCopy.randomValue(serverLevel.random));
+		brain.setMemoryWithExpiry(this.targetMemory, (T)brain.getMemory(this.sourceMemory).get(), (long)this.durationOfCopy.sample(serverLevel.random));
 	}
 }

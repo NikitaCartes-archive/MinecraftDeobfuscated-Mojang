@@ -18,6 +18,9 @@ public class BlockAgeProcessor extends StructureProcessor {
 		.fieldOf("mossiness")
 		.<BlockAgeProcessor>xmap(BlockAgeProcessor::new, blockAgeProcessor -> blockAgeProcessor.mossiness)
 		.codec();
+	private static final float PROBABILITY_OF_REPLACING_FULL_BLOCK = 0.5F;
+	private static final float PROBABILITY_OF_REPLACING_STAIRS = 0.5F;
+	private static final float PROBABILITY_OF_REPLACING_OBSIDIAN = 0.15F;
 	private static final BlockState[] NON_MOSSY_REPLACEMENTS = new BlockState[]{
 		Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()
 	};

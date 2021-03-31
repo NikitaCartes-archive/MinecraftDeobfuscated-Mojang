@@ -301,7 +301,7 @@ public class Turtle extends Animal {
 		if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0) {
 			BlockPos blockPos = this.blockPosition();
 			if (TurtleEggBlock.onSand(this.level, blockPos)) {
-				this.level.levelEvent(2001, blockPos, Block.getId(Blocks.SAND.defaultBlockState()));
+				this.level.levelEvent(2001, blockPos, Block.getId(this.level.getBlockState(blockPos.below())));
 			}
 		}
 	}
@@ -378,6 +378,7 @@ public class Turtle extends Animal {
 		private final double speedModifier;
 		private boolean stuck;
 		private int closeToHomeTryTicks;
+		private static final int GIVE_UP_TICKS = 600;
 
 		TurtleGoHomeGoal(Turtle turtle, double d) {
 			this.turtle = turtle;
@@ -442,6 +443,7 @@ public class Turtle extends Animal {
 	}
 
 	static class TurtleGoToWaterGoal extends MoveToBlockGoal {
+		private static final int GIVE_UP_TICKS = 1200;
 		private final Turtle turtle;
 
 		private TurtleGoToWaterGoal(Turtle turtle, double d) {

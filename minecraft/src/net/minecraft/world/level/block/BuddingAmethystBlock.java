@@ -10,6 +10,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 
 public class BuddingAmethystBlock extends AmethystBlock {
+	public static final int GROWTH_CHANCE = 5;
 	private static final Direction[] DIRECTIONS = Direction.values();
 
 	public BuddingAmethystBlock(BlockBehaviour.Properties properties) {

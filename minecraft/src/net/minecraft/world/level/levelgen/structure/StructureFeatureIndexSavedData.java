@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class StructureFeatureIndexSavedData extends SavedData {
+	private static final String TAG_REMAINING_INDEXES = "Remaining";
+	private static final String TAG_All_INDEXES = "All";
 	private final LongSet all;
 	private final LongSet remaining;
 

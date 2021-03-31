@@ -1,14 +1,11 @@
 package net.minecraft.server.network;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
 import net.minecraft.server.MinecraftServer;
 
-@Environment(EnvType.CLIENT)
 public class MemoryServerHandshakePacketListenerImpl implements ServerHandshakePacketListener {
 	private final MinecraftServer server;
 	private final Connection connection;

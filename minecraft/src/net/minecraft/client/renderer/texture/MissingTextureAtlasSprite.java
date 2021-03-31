@@ -13,6 +13,9 @@ import net.minecraft.util.LazyLoadedValue;
 
 @Environment(EnvType.CLIENT)
 public final class MissingTextureAtlasSprite extends TextureAtlasSprite {
+	private static final int MISSING_IMAGE_WIDTH = 16;
+	private static final int MISSING_IMAGE_HEIGHT = 16;
+	private static final String MISSING_TEXTURE_NAME = "missingno";
 	private static final ResourceLocation MISSING_TEXTURE_LOCATION = new ResourceLocation("missingno");
 	@Nullable
 	private static DynamicTexture missingTexture;

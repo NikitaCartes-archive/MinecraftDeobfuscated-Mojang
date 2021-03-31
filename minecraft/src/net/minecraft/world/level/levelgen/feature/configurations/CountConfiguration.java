@@ -1,24 +1,25 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProvider;
 
 public class CountConfiguration implements DecoratorConfiguration, FeatureConfiguration {
-	public static final Codec<CountConfiguration> CODEC = UniformInt.codec(-10, 128, 128)
+	public static final Codec<CountConfiguration> CODEC = IntProvider.codec(-10, 256)
 		.fieldOf("count")
 		.<CountConfiguration>xmap(CountConfiguration::new, CountConfiguration::count)
 		.codec();
-	private final UniformInt count;
+	private final IntProvider count;
 
 	public CountConfiguration(int i) {
-		this.count = UniformInt.fixed(i);
+		this.count = ConstantInt.of(i);
 	}
 
-	public CountConfiguration(UniformInt uniformInt) {
-		this.count = uniformInt;
+	public CountConfiguration(IntProvider intProvider) {
+		this.count = intProvider;
 	}
 
-	public UniformInt count() {
+	public IntProvider count() {
 		return this.count;
 	}
 }

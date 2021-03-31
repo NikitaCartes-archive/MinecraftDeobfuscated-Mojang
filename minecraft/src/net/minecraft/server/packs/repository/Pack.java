@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -94,12 +92,10 @@ public class Pack implements AutoCloseable {
 		);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getTitle() {
 		return this.title;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getDescription() {
 		return this.description;
 	}
@@ -137,7 +133,6 @@ public class Pack implements AutoCloseable {
 		return this.defaultPosition;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public PackSource getPackSource() {
 		return this.packSource;
 	}

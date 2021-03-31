@@ -3,30 +3,30 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class RandomSpreadFoliagePlacer extends FoliagePlacer {
 	public static final Codec<RandomSpreadFoliagePlacer> CODEC = RecordCodecBuilder.create(
 		instance -> foliagePlacerParts(instance)
-				.<UniformInt, Integer>and(
+				.<IntProvider, Integer>and(
 					instance.group(
-						UniformInt.codec(1, 256, 256).fieldOf("foliage_height").forGetter(randomSpreadFoliagePlacer -> randomSpreadFoliagePlacer.foliageHeight),
+						IntProvider.codec(1, 512).fieldOf("foliage_height").forGetter(randomSpreadFoliagePlacer -> randomSpreadFoliagePlacer.foliageHeight),
 						Codec.intRange(0, 256).fieldOf("leaf_placement_attempts").forGetter(randomSpreadFoliagePlacer -> randomSpreadFoliagePlacer.leafPlacementAttempts)
 					)
 				)
 				.apply(instance, RandomSpreadFoliagePlacer::new)
 	);
-	private final UniformInt foliageHeight;
+	private final IntProvider foliageHeight;
 	private final int leafPlacementAttempts;
 
-	public RandomSpreadFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3, int i) {
-		super(uniformInt, uniformInt2);
-		this.foliageHeight = uniformInt3;
+	public RandomSpreadFoliagePlacer(IntProvider intProvider, IntProvider intProvider2, IntProvider intProvider3, int i) {
+		super(intProvider, intProvider2);
+		this.foliageHeight = intProvider3;
 		this.leafPlacementAttempts = i;
 	}
 
@@ -37,23 +37,22 @@ public class RandomSpreadFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	protected void createFoliage(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k,
-		Set<BlockPos> set,
-		int l,
-		BoundingBox boundingBox
+		int l
 	) {
-		BlockPos blockPos = foliageAttachment.foliagePos();
+		BlockPos blockPos = foliageAttachment.pos();
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int m = 0; m < this.leafPlacementAttempts; m++) {
 			mutableBlockPos.setWithOffset(blockPos, random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k));
-			this.tryPlaceLeaf(levelSimulatedRW, random, treeConfiguration, set, boundingBox, mutableBlockPos);
+			tryPlaceLeaf(levelSimulatedReader, biConsumer, random, treeConfiguration, mutableBlockPos);
 		}
 	}
 

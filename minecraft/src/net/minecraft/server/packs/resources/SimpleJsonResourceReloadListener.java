@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class SimpleJsonResourceReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String PATH_SUFFIX = ".json";
 	private static final int PATH_SUFFIX_LENGTH = ".json".length();
 	private final Gson gson;
 	private final String directory;

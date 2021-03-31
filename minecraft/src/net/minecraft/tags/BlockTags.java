@@ -56,6 +56,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> COPPER_ORES = bind("copper_ores");
 	public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag.Named<Block> CANDLES = bind("candles");
+	public static final Tag.Named<Block> DIRT = bind("dirt");
 	public static final Tag.Named<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag.Named<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag.Named<Block> ICE = bind("ice");
@@ -110,6 +111,10 @@ public final class BlockTags {
 	public static final Tag.Named<Block> CAVE_VINES = bind("cave_vines");
 	public static final Tag.Named<Block> LUSH_PLANTS_REPLACEABLE = bind("lush_plants_replaceable");
 	public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
+	public static final Tag.Named<Block> SNOW = bind("snow");
+
+	private BlockTags() {
+	}
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

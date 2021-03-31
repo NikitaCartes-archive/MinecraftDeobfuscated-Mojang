@@ -14,11 +14,15 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public class Crypt {
-	@Environment(EnvType.CLIENT)
+	private static final String SYMMETRIC_ALGORITHM = "AES";
+	private static final int SYMMETRIC_BITS = 128;
+	private static final String ASYMMETRIC_ALGORITHM = "RSA";
+	private static final int ASYMMETRIC_BITS = 1024;
+	private static final String BYTE_ENCODING = "ISO_8859_1";
+	private static final String HASH_ALGORITHM = "SHA-1";
+
 	public static SecretKey generateSecretKey() throws CryptException {
 		try {
 			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -57,7 +61,6 @@ public class Crypt {
 		return messageDigest.digest();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static PublicKey byteToPublicKey(byte[] bs) throws CryptException {
 		try {
 			EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bs);
@@ -78,7 +81,6 @@ public class Crypt {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static byte[] encryptUsingKey(Key key, byte[] bs) throws CryptException {
 		return cipherData(1, key, bs);
 	}

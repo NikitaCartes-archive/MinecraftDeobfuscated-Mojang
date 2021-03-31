@@ -3,17 +3,18 @@ package com.mojang.blaze3d.shaders;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.GlslPreprocessor;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class Program {
+	private static final int MAX_LOG_LENGTH = 32768;
 	private final Program.Type type;
 	private final String name;
 	private final int id;
@@ -62,6 +63,10 @@ public class Program {
 				return i;
 			}
 		}
+	}
+
+	private static Program createProgram(Program.Type type, String string, int i) {
+		return new Program(type, i, string);
 	}
 
 	protected int getId() {

@@ -3,9 +3,15 @@ package net.minecraft.gametest.framework;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class MultipleTestTracker {
+	private static final char NOT_STARTED_TEST_CHAR = ' ';
+	private static final char ONGOING_TEST_CHAR = '_';
+	private static final char SUCCESSFUL_TEST_CHAR = '+';
+	private static final char FAILED_OPTIONAL_TEST_CHAR = 'x';
+	private static final char FAILED_REQUIRED_TEST_CHAR = 'X';
 	private final Collection<GameTestInfo> tests = Lists.<GameTestInfo>newArrayList();
 	@Nullable
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
@@ -62,6 +68,14 @@ public class MultipleTestTracker {
 
 	public boolean hasFailedOptional() {
 		return this.getFailedOptionalCount() > 0;
+	}
+
+	public Collection<GameTestInfo> getFailedRequired() {
+		return (Collection<GameTestInfo>)this.tests.stream().filter(GameTestInfo::hasFailed).filter(GameTestInfo::isRequired).collect(Collectors.toList());
+	}
+
+	public Collection<GameTestInfo> getFailedOptional() {
+		return (Collection<GameTestInfo>)this.tests.stream().filter(GameTestInfo::hasFailed).filter(GameTestInfo::isOptional).collect(Collectors.toList());
 	}
 
 	public int getTotalCount() {

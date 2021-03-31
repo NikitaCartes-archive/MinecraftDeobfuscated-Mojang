@@ -14,6 +14,8 @@ import net.minecraft.util.GsonHelper;
 
 @Environment(EnvType.CLIENT)
 public class LanguageMetadataSectionSerializer implements MetadataSectionSerializer<LanguageMetadataSection> {
+	private static final int MAX_LANGUAGE_LENGTH = 16;
+
 	public LanguageMetadataSection fromJson(JsonObject jsonObject) {
 		Set<LanguageInfo> set = Sets.<LanguageInfo>newHashSet();
 

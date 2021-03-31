@@ -26,6 +26,10 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		Blocks.CHEST,
 		Blocks.SPAWNER
 	);
+	private static final int CLUSTERED_REACH = 5;
+	private static final int CLUSTERED_SIZE = 50;
+	private static final int UNCLUSTERED_REACH = 8;
+	private static final int UNCLUSTERED_SIZE = 15;
 
 	public BasaltColumnsFeature(Codec<ColumnFeatureConfiguration> codec) {
 		super(codec);

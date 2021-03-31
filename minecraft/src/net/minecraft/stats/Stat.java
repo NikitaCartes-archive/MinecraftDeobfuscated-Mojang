@@ -2,8 +2,6 @@ package net.minecraft.stats;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -36,7 +34,6 @@ public class Stat<T> extends ObjectiveCriteria {
 		return this.value;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String format(int i) {
 		return this.formatter.format(i);
 	}

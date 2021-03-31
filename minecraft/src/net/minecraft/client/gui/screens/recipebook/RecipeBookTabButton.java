@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.Recipe;
 @Environment(EnvType.CLIENT)
 public class RecipeBookTabButton extends StateSwitchingButton {
 	private final RecipeBookCategories category;
+	private static final float ANIMATION_TIME = 15.0F;
 	private float animationTime;
 
 	public RecipeBookTabButton(RecipeBookCategories recipeBookCategories) {

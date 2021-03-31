@@ -12,8 +12,6 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -26,6 +24,8 @@ import org.apache.logging.log4j.Logger;
 public class SynchedEntityData {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<>();
+	private static final int EOF_MARKER = 255;
+	private static final int MAX_ID_VALUE = 254;
 	private final Entity entity;
 	private final Int2ObjectMap<SynchedEntityData.DataItem<?>> itemsById = new Int2ObjectOpenHashMap<>();
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -219,7 +219,6 @@ public class SynchedEntityData {
 		return new SynchedEntityData.DataItem<>(entityDataSerializer.createAccessor(i), entityDataSerializer.read(friendlyByteBuf));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void assignValues(List<SynchedEntityData.DataItem<?>> list) {
 		this.lock.writeLock().lock();
 
@@ -235,7 +234,6 @@ public class SynchedEntityData {
 		this.isDirty = true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	private <T> void assignValue(SynchedEntityData.DataItem<T> dataItem, SynchedEntityData.DataItem<?> dataItem2) {
 		if (!Objects.equals(dataItem2.accessor.getSerializer(), dataItem.accessor.getSerializer())) {
 			throw new IllegalStateException(

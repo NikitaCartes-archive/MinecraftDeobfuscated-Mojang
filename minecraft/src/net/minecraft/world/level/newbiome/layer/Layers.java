@@ -11,7 +11,13 @@ import net.minecraft.world.level.newbiome.context.BigContext;
 import net.minecraft.world.level.newbiome.context.LazyAreaContext;
 import net.minecraft.world.level.newbiome.layer.traits.AreaTransformer1;
 
-public class Layers {
+public class Layers implements LayerBiomes {
+	protected static final int WARM_ID = 1;
+	protected static final int MEDIUM_ID = 2;
+	protected static final int COLD_ID = 3;
+	protected static final int ICE_ID = 4;
+	protected static final int SPECIAL_MASK = 3840;
+	protected static final int SPECIAL_SHIFT = 8;
 	private static final Int2IntMap CATEGORIES = Util.make(new Int2IntOpenHashMap(), int2IntOpenHashMap -> {
 		register(int2IntOpenHashMap, Layers.Category.BEACH, 16);
 		register(int2IntOpenHashMap, Layers.Category.BEACH, 26);

@@ -19,8 +19,6 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -176,7 +174,6 @@ public class WorldGenSettings {
 		return this.overworld() instanceof FlatLevelSource;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isOldCustomizedWorld() {
 		return this.legacyCustomOptions.isPresent();
 	}
@@ -185,12 +182,10 @@ public class WorldGenSettings {
 		return new WorldGenSettings(this.seed, this.generateFeatures, true, this.dimensions, this.legacyCustomOptions);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public WorldGenSettings withFeaturesToggled() {
 		return new WorldGenSettings(this.seed, !this.generateFeatures, this.generateBonusChest, this.dimensions);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public WorldGenSettings withBonusChestToggled() {
 		return new WorldGenSettings(this.seed, this.generateFeatures, !this.generateBonusChest, this.dimensions);
 	}
@@ -270,7 +265,6 @@ public class WorldGenSettings {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {
 		long l = optionalLong.orElse(this.seed);
 		MappedRegistry<LevelStem> mappedRegistry;

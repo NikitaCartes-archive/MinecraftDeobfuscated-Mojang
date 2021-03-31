@@ -34,6 +34,11 @@ public class SelectorComponent extends BaseComponent implements ContextAwareComp
 		return this.pattern;
 	}
 
+	@Nullable
+	public EntitySelector getSelector() {
+		return this.selector;
+	}
+
 	@Override
 	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		return (MutableComponent)(commandSourceStack != null && this.selector != null

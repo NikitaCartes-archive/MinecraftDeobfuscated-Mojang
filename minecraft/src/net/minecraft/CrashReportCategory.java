@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -22,7 +20,6 @@ public class CrashReportCategory {
 		this.title = string;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static String formatLocation(LevelHeightAccessor levelHeightAccessor, double d, double e, double f) {
 		return String.format(Locale.ROOT, "%.2f,%.2f,%.2f - %s", d, e, f, formatLocation(levelHeightAccessor, new BlockPos(d, e, f)));
 	}

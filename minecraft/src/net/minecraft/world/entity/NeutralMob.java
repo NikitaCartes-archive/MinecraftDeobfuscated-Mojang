@@ -10,6 +10,9 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
 public interface NeutralMob {
+	String TAG_ANGER_TIME = "AngerTime";
+	String TAG_ANGRY_AT = "AngryAt";
+
 	int getRemainingPersistentAngerTime();
 
 	void setRemainingPersistentAngerTime(int i);
@@ -107,6 +110,9 @@ public interface NeutralMob {
 		this.setTarget(null);
 		this.setRemainingPersistentAngerTime(0);
 	}
+
+	@Nullable
+	LivingEntity getLastHurtByMob();
 
 	void setLastHurtByMob(@Nullable LivingEntity livingEntity);
 

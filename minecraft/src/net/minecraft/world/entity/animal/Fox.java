@@ -11,8 +11,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -91,6 +89,13 @@ import net.minecraft.world.phys.Vec3;
 public class Fox extends Animal {
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.BYTE);
+	private static final int FLAG_SITTING = 1;
+	public static final int FLAG_CROUCHING = 4;
+	public static final int FLAG_INTERESTED = 8;
+	public static final int FLAG_POUNCING = 16;
+	private static final int FLAG_SLEEPING = 32;
+	private static final int FLAG_FACEPLANTED = 64;
+	private static final int FLAG_DEFENDING = 128;
 	private static final EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_0 = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.OPTIONAL_UUID);
 	private static final EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_1 = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.OPTIONAL_UUID);
 	private static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive();
@@ -104,6 +109,7 @@ public class Fox extends Animal {
 	};
 	private static final Predicate<Entity> STALKABLE_PREY = entity -> entity instanceof Chicken || entity instanceof Rabbit;
 	private static final Predicate<Entity> AVOID_PLAYERS = entity -> !entity.isDiscrete() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity);
+	private static final int MIN_TICKS_BEFORE_EAT = 600;
 	private Goal landTargetGoal;
 	private Goal turtleEggTargetGoal;
 	private Goal fishTargetGoal;
@@ -250,7 +256,6 @@ public class Fox extends Animal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 45) {
@@ -559,6 +564,10 @@ public class Fox extends Animal {
 		this.setFlag(16, bl);
 	}
 
+	public boolean isJumping() {
+		return this.jumping;
+	}
+
 	public boolean isFullyCrouched() {
 		return this.crouchAmount == 3.0F;
 	}
@@ -580,12 +589,10 @@ public class Fox extends Animal {
 		return this.getFlag(8);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHeadRollAngle(float f) {
 		return Mth.lerp(f, this.interestedAngleO, this.interestedAngle) * 0.11F * (float) Math.PI;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getCrouchAmount(float f) {
 		return Mth.lerp(f, this.crouchAmountO, this.crouchAmount);
 	}
@@ -695,7 +702,6 @@ public class Fox extends Animal {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.55F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
@@ -870,6 +876,7 @@ public class Fox extends Animal {
 	}
 
 	public class FoxEatBerriesGoal extends MoveToBlockGoal {
+		private static final int WAIT_TICKS = 40;
 		protected int ticksWaited;
 
 		public FoxEatBerriesGoal(double d, int i, int j) {
@@ -1339,6 +1346,7 @@ public class Fox extends Animal {
 	}
 
 	class SleepGoal extends Fox.FoxBehaviorGoal {
+		private static final int WAIT_TIME_BEFORE_SLEEP = 140;
 		private int countdown = Fox.this.random.nextInt(140);
 
 		public SleepGoal() {

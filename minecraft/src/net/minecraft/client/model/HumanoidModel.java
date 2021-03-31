@@ -20,6 +20,11 @@ import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
+	public static final float OVERLAY_SCALE = 0.25F;
+	public static final float HAT_OVERLAY_SCALE = 0.5F;
+	private static final float SPYGLASS_ARM_ROT_Y = (float) (Math.PI / 12);
+	private static final float SPYGLASS_ARM_ROT_X = 1.9198622F;
+	private static final float SPYGLASS_ARM_CROUCH_ROT_X = (float) (Math.PI / 12);
 	public final ModelPart head;
 	public final ModelPart hat;
 	public final ModelPart body;
@@ -153,13 +158,22 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		this.rightArm.yRot = 0.0F;
 		this.leftArm.yRot = 0.0F;
 		boolean bl3 = livingEntity.getMainArm() == HumanoidArm.RIGHT;
-		boolean bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
-		if (bl3 != bl4) {
-			this.poseLeftArm(livingEntity);
-			this.poseRightArm(livingEntity);
+		if (livingEntity.isUsingItem()) {
+			boolean bl4 = livingEntity.getUsedItemHand() == InteractionHand.MAIN_HAND;
+			if (bl4 == bl3) {
+				this.poseRightArm(livingEntity);
+			} else {
+				this.poseLeftArm(livingEntity);
+			}
 		} else {
-			this.poseRightArm(livingEntity);
-			this.poseLeftArm(livingEntity);
+			boolean bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
+			if (bl3 != bl4) {
+				this.poseLeftArm(livingEntity);
+				this.poseRightArm(livingEntity);
+			} else {
+				this.poseRightArm(livingEntity);
+				this.poseLeftArm(livingEntity);
+			}
 		}
 
 		this.setupAttackAnimation(livingEntity, h);

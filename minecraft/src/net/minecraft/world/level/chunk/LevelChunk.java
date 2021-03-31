@@ -19,8 +19,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
@@ -350,6 +348,25 @@ public class LevelChunk implements ChunkAccess {
 		return ((Heightmap)this.heightmaps.get(types)).getFirstAvailable(i & 15, j & 15) - 1;
 	}
 
+	@Override
+	public BlockPos getHeighestPosition(Heightmap.Types types) {
+		ChunkPos chunkPos = this.getPos();
+		int i = this.getMinBuildHeight();
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int j = chunkPos.getMinBlockX(); j <= chunkPos.getMaxBlockX(); j++) {
+			for (int k = chunkPos.getMinBlockZ(); k <= chunkPos.getMaxBlockZ(); k++) {
+				int l = this.getHeight(types, j & 15, k & 15);
+				if (l > i) {
+					i = l;
+					mutableBlockPos.set(j, l, k);
+				}
+			}
+		}
+
+		return mutableBlockPos.immutable();
+	}
+
 	@Nullable
 	private BlockEntity createBlockEntity(BlockPos blockPos) {
 		BlockState blockState = this.getBlockState(blockPos);
@@ -502,7 +519,6 @@ public class LevelChunk implements ChunkAccess {
 		return this.chunkPos;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void replaceWithPacketData(@Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, BitSet bitSet) {
 		boolean bl = chunkBiomeContainer != null;
 		if (bl) {

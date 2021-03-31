@@ -4,8 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -60,24 +58,20 @@ public class RecordItem extends Item {
 		return this.analogOutput;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		list.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getDisplayName() {
 		return new TranslatableComponent(this.getDescriptionId() + ".desc");
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static RecordItem getBySound(SoundEvent soundEvent) {
 		return (RecordItem)BY_NAME.get(soundEvent);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundEvent getSound() {
 		return this.sound;
 	}

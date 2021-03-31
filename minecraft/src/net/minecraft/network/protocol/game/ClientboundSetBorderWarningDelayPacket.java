@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.border.WorldBorder;
@@ -26,7 +24,6 @@ public class ClientboundSetBorderWarningDelayPacket implements Packet<ClientGame
 		clientGamePacketListener.handleSetBorderWarningDelay(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getWarningDelay() {
 		return this.warningDelay;
 	}

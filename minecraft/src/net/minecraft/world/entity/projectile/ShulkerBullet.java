@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,6 +28,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class ShulkerBullet extends Projectile {
+	private static final double SPEED = 0.15;
 	private Entity finalTarget;
 	@Nullable
 	private Direction currentMoveDirection;
@@ -98,6 +97,11 @@ public class ShulkerBullet extends Projectile {
 
 	@Override
 	protected void defineSynchedData() {
+	}
+
+	@Nullable
+	private Direction getMoveDirection() {
+		return this.currentMoveDirection;
 	}
 
 	private void setMoveDirection(@Nullable Direction direction) {
@@ -255,7 +259,6 @@ public class ShulkerBullet extends Projectile {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		return d < 16384.0;
@@ -310,7 +313,6 @@ public class ShulkerBullet extends Projectile {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);

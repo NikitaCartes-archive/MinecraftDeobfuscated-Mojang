@@ -5,8 +5,6 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -49,6 +47,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Vindicator extends AbstractIllager {
+	private static final String TAG_JOHNNY = "Johnny";
 	private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD;
 	private boolean isJohnny;
 
@@ -100,7 +99,6 @@ public class Vindicator extends AbstractIllager {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public AbstractIllager.IllagerArmPose getArmPose() {
 		if (this.isAggressive()) {

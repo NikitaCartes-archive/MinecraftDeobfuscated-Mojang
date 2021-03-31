@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
@@ -31,24 +29,20 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		}
 	};
 
-	@Environment(EnvType.CLIENT)
 	private ServerboundInteractPacket(int i, boolean bl, ServerboundInteractPacket.Action action) {
 		this.entityId = i;
 		this.action = action;
 		this.usingSecondaryAction = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static ServerboundInteractPacket createAttackPacket(Entity entity, boolean bl) {
 		return new ServerboundInteractPacket(entity.getId(), bl, ATTACK_ACTION);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand) {
 		return new ServerboundInteractPacket(entity.getId(), bl, new ServerboundInteractPacket.InteractionAction(interactionHand));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand, Vec3 vec3) {
 		return new ServerboundInteractPacket(entity.getId(), bl, new ServerboundInteractPacket.InteractionAtLocationAction(interactionHand, vec3));
 	}
@@ -116,7 +110,6 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	static class InteractionAction implements ServerboundInteractPacket.Action {
 		private final InteractionHand hand;
 
-		@Environment(EnvType.CLIENT)
 		private InteractionAction(InteractionHand interactionHand) {
 			this.hand = interactionHand;
 		}
@@ -145,7 +138,6 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		private final InteractionHand hand;
 		private final Vec3 location;
 
-		@Environment(EnvType.CLIENT)
 		private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
 			this.hand = interactionHand;
 			this.location = vec3;

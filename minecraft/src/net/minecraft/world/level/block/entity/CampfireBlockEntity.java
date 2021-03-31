@@ -23,6 +23,8 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CampfireBlockEntity extends BlockEntity implements Clearable {
+	private static final int BURN_COOL_SPEED = 2;
+	private static final int NUM_SLOTS = 4;
 	private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
 	private final int[] cookingProgress = new int[4];
 	private final int[] cookingTime = new int[4];

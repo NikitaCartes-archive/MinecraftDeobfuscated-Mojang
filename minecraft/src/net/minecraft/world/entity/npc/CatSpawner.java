@@ -18,6 +18,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.phys.AABB;
 
 public class CatSpawner implements CustomSpawner {
+	private static final int TICK_DELAY = 1200;
 	private int nextTick;
 
 	@Override

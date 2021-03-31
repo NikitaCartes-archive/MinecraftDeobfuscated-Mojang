@@ -3,8 +3,6 @@ package net.minecraft.world.entity.animal;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -14,9 +12,9 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -73,13 +71,15 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		EntityType<?> entityType = livingEntity.getType();
 		return entityType == EntityType.SHEEP || entityType == EntityType.RABBIT || entityType == EntityType.FOX;
 	};
+	private static final float START_HEALTH = 8.0F;
+	private static final float TAME_HEALTH = 20.0F;
 	private float interestedAngle;
 	private float interestedAngleO;
 	private boolean isWet;
 	private boolean isShaking;
 	private float shakeAnim;
 	private float shakeAnimO;
-	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private UUID persistentAngerTarget;
 
 	public Wolf(EntityType<? extends Wolf> entityType, Level level) {
@@ -247,17 +247,14 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		super.die(damageSource);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isWet() {
 		return this.isWet;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getWetShade(float f) {
 		return Math.min(0.5F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.5F, 1.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getBodyRollAngle(float f, float g) {
 		float h = (Mth.lerp(f, this.shakeAnimO, this.shakeAnim) + g) / 1.8F;
 		if (h < 0.0F) {
@@ -269,7 +266,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		return Mth.sin(h * (float) Math.PI) * Mth.sin(h * (float) Math.PI * 11.0F) * 0.15F * (float) Math.PI;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHeadRollAngle(float f) {
 		return Mth.lerp(f, this.interestedAngleO, this.interestedAngle) * 0.15F * (float) Math.PI;
 	}
@@ -385,7 +381,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 8) {
@@ -399,7 +394,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getTailAngle() {
 		if (this.isAngry()) {
 			return 1.5393804F;
@@ -431,7 +425,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 	@Override
 	public void startPersistentAngerTimer() {
-		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
 	}
 
 	@Nullable
@@ -511,7 +505,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		return !this.isAngry() && super.canBeLeashed(player);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));

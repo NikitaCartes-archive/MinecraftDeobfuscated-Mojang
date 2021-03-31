@@ -3,8 +3,6 @@ package net.minecraft.network.chat;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public class KeybindComponent extends BaseComponent {
 	private static Function<String, Supplier<Component>> keyResolver = string -> () -> new TextComponent(string);
@@ -15,7 +13,6 @@ public class KeybindComponent extends BaseComponent {
 		this.name = string;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static void setKeyResolver(Function<String, Supplier<Component>> function) {
 		keyResolver = function;
 	}
@@ -33,7 +30,6 @@ public class KeybindComponent extends BaseComponent {
 		return this.getNestedComponent().visit(contentConsumer);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		return this.getNestedComponent().visit(styledContentConsumer, style);

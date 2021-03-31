@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class FontManager implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String FONTS_PATH = "fonts.json";
 	public static final ResourceLocation MISSING_FONT = new ResourceLocation("minecraft", "missing");
 	private final FontSet missingFontSet;
 	private final Map<ResourceLocation, FontSet> fontSets = Maps.<ResourceLocation, FontSet>newHashMap();

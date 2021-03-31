@@ -35,6 +35,9 @@ import net.minecraft.world.item.WrittenBookItem;
 
 @Environment(EnvType.CLIENT)
 public class BookViewScreen extends Screen {
+	public static final int PAGE_INDICATOR_TEXT_Y_OFFSET = 16;
+	public static final int PAGE_TEXT_X_OFFSET = 36;
+	public static final int PAGE_TEXT_Y_OFFSET = 30;
 	public static final BookViewScreen.BookAccess EMPTY_ACCESS = new BookViewScreen.BookAccess() {
 		@Override
 		public int getPageCount() {
@@ -47,6 +50,10 @@ public class BookViewScreen extends Screen {
 		}
 	};
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
+	protected static final int TEXT_WIDTH = 114;
+	protected static final int TEXT_HEIGHT = 128;
+	protected static final int IMAGE_WIDTH = 192;
+	protected static final int IMAGE_HEIGHT = 192;
 	private BookViewScreen.BookAccess bookAccess;
 	private int currentPage;
 	private List<FormattedCharSequence> cachedPageComponents = Collections.emptyList();

@@ -50,6 +50,18 @@ import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 public class StructureTemplate {
+	public static final String PALETTE_TAG = "palette";
+	public static final String PALETTE_LIST_TAG = "palettes";
+	public static final String ENTITIES_TAG = "entities";
+	public static final String BLOCKS_TAG = "blocks";
+	public static final String BLOCK_TAG_POS = "pos";
+	public static final String BLOCK_TAG_STATE = "state";
+	public static final String BLOCK_TAG_NBT = "nbt";
+	public static final String ENTITY_TAG_POS = "pos";
+	public static final String ENTITY_TAG_BLOCKPOS = "blockPos";
+	public static final String ENTITY_TAG_NBT = "nbt";
+	public static final String SIZE_TAG = "size";
+	static final int CHUNK_SIZE = 16;
 	private final List<StructureTemplate.Palette> palettes = Lists.<StructureTemplate.Palette>newArrayList();
 	private final List<StructureTemplate.StructureEntityInfo> entityInfoList = Lists.<StructureTemplate.StructureEntityInfo>newArrayList();
 	private Vec3i size = Vec3i.ZERO;
@@ -557,7 +569,7 @@ public class StructureTemplate {
 		Vec3i vec3i2 = vec3i.offset(-1, -1, -1);
 		BlockPos blockPos3 = transform(BlockPos.ZERO, mirror, rotation, blockPos2);
 		BlockPos blockPos4 = transform(BlockPos.ZERO.offset(vec3i2), mirror, rotation, blockPos2);
-		return BoundingBox.createProper(blockPos3, blockPos4).move(blockPos);
+		return BoundingBox.fromCorners(blockPos3, blockPos4).move(blockPos);
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {

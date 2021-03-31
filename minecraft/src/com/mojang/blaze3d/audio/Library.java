@@ -20,7 +20,9 @@ import org.lwjgl.system.MemoryStack;
 
 @Environment(EnvType.CLIENT)
 public class Library {
+	private static final int NUM_OPEN_DEVICE_RETRIES = 3;
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int DEFAULT_CHANNEL_COUNT = 30;
 	private long device;
 	private long context;
 	private static final Library.ChannelPool EMPTY = new Library.ChannelPool() {

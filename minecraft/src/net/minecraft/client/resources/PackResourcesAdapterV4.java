@@ -89,7 +89,11 @@ public class PackResourcesAdapterV4 implements PackResources {
 		.collect(Collectors.toSet());
 	public static final ResourceLocation SHIELD_BASE = new ResourceLocation("textures/entity/shield_base.png");
 	public static final ResourceLocation BANNER_BASE = new ResourceLocation("textures/entity/banner_base.png");
+	public static final int DEFAULT_CHEST_SIZE = 64;
+	public static final int DEFAULT_SHIELD_SIZE = 64;
+	public static final int DEFAULT_BANNER_SIZE = 64;
 	public static final ResourceLocation OLD_IRON_GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem.png");
+	public static final String NEW_IRON_GOLEM_PATH = "textures/entity/iron_golem/iron_golem.png";
 	private final PackResources pack;
 
 	public PackResourcesAdapterV4(PackResources packResources) {

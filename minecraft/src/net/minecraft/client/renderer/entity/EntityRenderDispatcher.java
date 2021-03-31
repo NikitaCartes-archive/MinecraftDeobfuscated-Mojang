@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.entity;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -206,10 +207,14 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 
 		Vec3 vec3 = entity.getViewVector(f);
 		Matrix4f matrix4f = poseStack.last().pose();
-		vertexConsumer.vertex(matrix4f, 0.0F, entity.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal((float)vec3.x, (float)vec3.y, (float)vec3.z).endVertex();
+		Matrix3f matrix3f = poseStack.last().normal();
+		vertexConsumer.vertex(matrix4f, 0.0F, entity.getEyeHeight(), 0.0F)
+			.color(0, 0, 255, 255)
+			.normal(matrix3f, (float)vec3.x, (float)vec3.y, (float)vec3.z)
+			.endVertex();
 		vertexConsumer.vertex(matrix4f, (float)(vec3.x * 2.0), (float)((double)entity.getEyeHeight() + vec3.y * 2.0), (float)(vec3.z * 2.0))
 			.color(0, 0, 255, 255)
-			.normal((float)vec3.x, (float)vec3.y, (float)vec3.z)
+			.normal(matrix3f, (float)vec3.x, (float)vec3.y, (float)vec3.z)
 			.endVertex();
 	}
 

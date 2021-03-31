@@ -11,6 +11,8 @@ public enum Unit {
 	MB,
 	GB;
 
+	private static final int BASE_UNIT = 1024;
+
 	public static Unit getLargest(long l) {
 		if (l < 1024L) {
 			return B;

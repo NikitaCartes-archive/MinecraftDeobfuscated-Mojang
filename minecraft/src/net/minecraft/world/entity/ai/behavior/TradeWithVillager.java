@@ -17,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class TradeWithVillager extends Behavior<Villager> {
+	private static final int INTERACT_DIST_SQR = 5;
+	private static final float SPEED_MODIFIER = 0.5F;
 	private Set<Item> trades = ImmutableSet.of();
 
 	public TradeWithVillager() {

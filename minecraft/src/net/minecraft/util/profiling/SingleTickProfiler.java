@@ -14,7 +14,13 @@ public class SingleTickProfiler {
 	private final long saveThreshold;
 	private int tick;
 	private final File location;
-	private ProfileCollector profiler;
+	private ProfileCollector profiler = InactiveProfiler.INSTANCE;
+
+	public SingleTickProfiler(LongSupplier longSupplier, String string, long l) {
+		this.realTime = longSupplier;
+		this.location = new File("debug", string);
+		this.saveThreshold = l;
+	}
 
 	public ProfilerFiller startTick() {
 		this.profiler = new ActiveProfiler(this.realTime, () -> this.tick, false);

@@ -277,6 +277,10 @@ public class BitStorage {
 		return this.size;
 	}
 
+	public int getBits() {
+		return this.bits;
+	}
+
 	public void getAll(IntConsumer intConsumer) {
 		int i = 0;
 

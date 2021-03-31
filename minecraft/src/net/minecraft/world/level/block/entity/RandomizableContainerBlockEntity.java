@@ -23,6 +23,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class RandomizableContainerBlockEntity extends BaseContainerBlockEntity {
+	public static final String LOOT_TABLE_TAG = "LootTable";
+	public static final String LOOT_TABLE_SEED_TAG = "LootTableSeed";
 	@Nullable
 	protected ResourceLocation lootTable;
 	protected long lootTableSeed;

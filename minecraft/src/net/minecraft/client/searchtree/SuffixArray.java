@@ -22,6 +22,8 @@ public class SuffixArray<T> {
 	private static final boolean DEBUG_COMPARISONS = Boolean.parseBoolean(System.getProperty("SuffixArray.printComparisons", "false"));
 	private static final boolean DEBUG_ARRAY = Boolean.parseBoolean(System.getProperty("SuffixArray.printArray", "false"));
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int END_OF_TEXT_MARKER = -1;
+	private static final int END_OF_DATA = -2;
 	protected final List<T> list = Lists.<T>newArrayList();
 	private final IntList chars = new IntArrayList();
 	private final IntList wordStarts = new IntArrayList();

@@ -15,6 +15,29 @@ public class TestFunction {
 	private final long setupTicks;
 	private final Rotation rotation;
 
+	public TestFunction(String string, String string2, String string3, int i, long l, boolean bl, Consumer<GameTestHelper> consumer) {
+		this(string, string2, string3, Rotation.NONE, i, l, bl, 1, 1, consumer);
+	}
+
+	public TestFunction(String string, String string2, String string3, Rotation rotation, int i, long l, boolean bl, Consumer<GameTestHelper> consumer) {
+		this(string, string2, string3, rotation, i, l, bl, 1, 1, consumer);
+	}
+
+	public TestFunction(
+		String string, String string2, String string3, Rotation rotation, int i, long l, boolean bl, int j, int k, Consumer<GameTestHelper> consumer
+	) {
+		this.batchName = string;
+		this.testName = string2;
+		this.structureName = string3;
+		this.rotation = rotation;
+		this.maxTicks = i;
+		this.required = bl;
+		this.requiredSuccesses = j;
+		this.maxAttempts = k;
+		this.function = consumer;
+		this.setupTicks = l;
+	}
+
 	public void run(GameTestHelper gameTestHelper) {
 		this.function.accept(gameTestHelper);
 	}

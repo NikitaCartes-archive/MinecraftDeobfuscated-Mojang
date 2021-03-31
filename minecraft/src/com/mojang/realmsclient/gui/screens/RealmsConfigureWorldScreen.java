@@ -42,6 +42,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	private static final Component SERVER_EXPIRING_IN_DAY_TOOLTIP = new TranslatableComponent("mco.selectServer.expires.day");
 	private static final Component SERVER_OPEN_TOOLTIP = new TranslatableComponent("mco.selectServer.open");
 	private static final Component SERVER_CLOSED_TOOLTIP = new TranslatableComponent("mco.selectServer.closed");
+	private static final int DEFAULT_BUTTON_WIDTH = 80;
+	private static final int DEFAULT_BUTTON_OFFSET = 5;
 	@Nullable
 	private Component toolTip;
 	private final RealmsMainScreen lastScreen;

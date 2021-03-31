@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.player;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 
 public class Abilities {
@@ -47,7 +45,6 @@ public class Abilities {
 		return this.flyingSpeed;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setFlyingSpeed(float f) {
 		this.flyingSpeed = f;
 	}
@@ -56,7 +53,6 @@ public class Abilities {
 		return this.walkingSpeed;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setWalkingSpeed(float f) {
 		this.walkingSpeed = f;
 	}

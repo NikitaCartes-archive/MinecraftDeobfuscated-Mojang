@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -11,6 +9,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class StructureVoidBlock extends Block {
+	private static final double SIZE = 5.0;
 	private static final VoxelShape SHAPE = Block.box(5.0, 5.0, 5.0, 11.0, 11.0, 11.0);
 
 	protected StructureVoidBlock(BlockBehaviour.Properties properties) {
@@ -27,7 +26,6 @@ public class StructureVoidBlock extends Block {
 		return SHAPE;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 1.0F;

@@ -12,6 +12,8 @@ import net.minecraft.core.BlockPos;
 
 @Environment(EnvType.CLIENT)
 public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
+	private static final int MAX_RENDER_DIST = 160;
+	private static final float TEXT_SCALE = 0.04F;
 	private final Minecraft minecraft;
 	private Collection<BlockPos> raidCenters = Lists.<BlockPos>newArrayList();
 

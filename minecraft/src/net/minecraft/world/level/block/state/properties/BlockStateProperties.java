@@ -71,6 +71,13 @@ public class BlockStateProperties {
 				&& railShape != RailShape.SOUTH_EAST
 				&& railShape != RailShape.SOUTH_WEST)
 	);
+	public static final int MAX_AGE_1 = 1;
+	public static final int MAX_AGE_2 = 2;
+	public static final int MAX_AGE_3 = 3;
+	public static final int MAX_AGE_5 = 5;
+	public static final int MAX_AGE_7 = 7;
+	public static final int MAX_AGE_15 = 15;
+	public static final int MAX_AGE_25 = 25;
 	public static final IntegerProperty AGE_1 = IntegerProperty.create("age", 0, 1);
 	public static final IntegerProperty AGE_2 = IntegerProperty.create("age", 0, 2);
 	public static final IntegerProperty AGE_3 = IntegerProperty.create("age", 0, 3);
@@ -81,10 +88,15 @@ public class BlockStateProperties {
 	public static final IntegerProperty BITES = IntegerProperty.create("bites", 0, 6);
 	public static final IntegerProperty CANDLES = IntegerProperty.create("candles", 1, 4);
 	public static final IntegerProperty DELAY = IntegerProperty.create("delay", 1, 4);
+	public static final int MAX_DISTANCE = 7;
 	public static final IntegerProperty DISTANCE = IntegerProperty.create("distance", 1, 7);
 	public static final IntegerProperty EGGS = IntegerProperty.create("eggs", 1, 4);
 	public static final IntegerProperty HATCH = IntegerProperty.create("hatch", 0, 2);
 	public static final IntegerProperty LAYERS = IntegerProperty.create("layers", 1, 8);
+	public static final int MIN_LEVEL = 0;
+	public static final int MIN_LEVEL_CAULDRON = 1;
+	public static final int MAX_LEVEL_3 = 3;
+	public static final int MAX_LEVEL_8 = 8;
 	public static final IntegerProperty LEVEL_CAULDRON = IntegerProperty.create("level", 1, 3);
 	public static final IntegerProperty LEVEL_COMPOSTER = IntegerProperty.create("level", 0, 8);
 	public static final IntegerProperty LEVEL_FLOWING = IntegerProperty.create("level", 1, 8);
@@ -95,8 +107,12 @@ public class BlockStateProperties {
 	public static final IntegerProperty PICKLES = IntegerProperty.create("pickles", 1, 4);
 	public static final IntegerProperty POWER = IntegerProperty.create("power", 0, 15);
 	public static final IntegerProperty STAGE = IntegerProperty.create("stage", 0, 1);
+	public static final int STABILITY_MAX_DISTANCE = 7;
 	public static final IntegerProperty STABILITY_DISTANCE = IntegerProperty.create("distance", 0, 7);
+	public static final int MIN_RESPAWN_ANCHOR_CHARGES = 0;
+	public static final int MAX_RESPAWN_ANCHOR_CHARGES = 4;
 	public static final IntegerProperty RESPAWN_ANCHOR_CHARGES = IntegerProperty.create("charges", 0, 4);
+	public static final int MAX_ROTATIONS_16 = 15;
 	public static final IntegerProperty ROTATION_16 = IntegerProperty.create("rotation", 0, 15);
 	public static final EnumProperty<BedPart> BED_PART = EnumProperty.create("part", BedPart.class);
 	public static final EnumProperty<ChestType> CHEST_TYPE = EnumProperty.create("type", ChestType.class);

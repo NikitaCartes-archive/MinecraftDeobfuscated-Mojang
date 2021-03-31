@@ -42,6 +42,7 @@ public class EntityTheRenameningFix extends SimplestEntityRenameFix {
 		.put("minecraft:evocation_illager_spawn_egg", "minecraft:evoker_spawn_egg")
 		.put("minecraft:vindication_illager_spawn_egg", "minecraft:vindicator_spawn_egg")
 		.build();
+	private static final String MINECRAFT_BRED = "minecraft:bred_";
 
 	public EntityTheRenameningFix(Schema schema, boolean bl) {
 		super("EntityTheRenameningBlock", schema, bl);

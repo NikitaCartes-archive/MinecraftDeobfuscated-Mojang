@@ -19,6 +19,8 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
+	public static final int LEASH_RENDER_STEPS = 24;
+
 	public MobRenderer(EntityRendererProvider.Context context, M entityModel, float f) {
 		super(context, entityModel, f);
 	}

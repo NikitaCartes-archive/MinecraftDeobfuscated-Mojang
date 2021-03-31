@@ -13,6 +13,8 @@ import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class AgeableMob extends PathfinderMob {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(AgeableMob.class, EntityDataSerializers.BOOLEAN);
+	public static final int BABY_START_AGE = -24000;
+	private static final int FORCED_AGE_PARTICLE_TICKS = 40;
 	protected int age;
 	protected int forcedAge;
 	protected int forcedAgeTimer;

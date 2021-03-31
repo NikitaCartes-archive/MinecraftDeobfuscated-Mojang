@@ -17,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class UploadInfo extends ValueObject {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String DEFAULT_SCHEMA = "http://";
+	private static final int DEFAULT_PORT = 8080;
 	private static final Pattern URI_SCHEMA_PATTERN = Pattern.compile("^[a-zA-Z][-a-zA-Z0-9+.]+:");
 	private final boolean worldClosed;
 	@Nullable

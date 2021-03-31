@@ -1,7 +1,5 @@
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -99,7 +97,6 @@ public class BookCloningRecipe extends CustomRecipe {
 		return RecipeSerializer.BOOK_CLONING;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean canCraftInDimensions(int i, int j) {
 		return i >= 3 && j >= 3;

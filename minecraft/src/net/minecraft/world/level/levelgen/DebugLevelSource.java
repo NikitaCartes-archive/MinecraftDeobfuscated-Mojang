@@ -6,8 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -32,6 +30,7 @@ public class DebugLevelSource extends ChunkGenerator {
 		.<DebugLevelSource>xmap(DebugLevelSource::new, DebugLevelSource::biomes)
 		.stable()
 		.codec();
+	private static final int BLOCK_MARGIN = 2;
 	private static final List<BlockState> ALL_BLOCKS = (List<BlockState>)StreamSupport.stream(Registry.BLOCK.spliterator(), false)
 		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
 		.collect(Collectors.toList());
@@ -39,6 +38,8 @@ public class DebugLevelSource extends ChunkGenerator {
 	private static final int GRID_HEIGHT = Mth.ceil((float)ALL_BLOCKS.size() / (float)GRID_WIDTH);
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState BARRIER = Blocks.BARRIER.defaultBlockState();
+	public static final int HEIGHT = 70;
+	public static final int BARRIER_HEIGHT = 60;
 	private final Registry<Biome> biomes;
 
 	public DebugLevelSource(Registry<Biome> registry) {
@@ -55,7 +56,6 @@ public class DebugLevelSource extends ChunkGenerator {
 		return CODEC;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ChunkGenerator withSeed(long l) {
 		return this;

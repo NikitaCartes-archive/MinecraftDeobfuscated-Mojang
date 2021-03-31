@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 public class UpgradeData {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final UpgradeData EMPTY = new UpgradeData(EmptyBlockGetter.INSTANCE);
+	private static final String TAG_INDICES = "Indices";
 	private static final Direction8[] DIRECTIONS = Direction8.values();
 	private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
 	private final int[][] index;

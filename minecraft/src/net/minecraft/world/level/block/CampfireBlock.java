@@ -3,8 +3,6 @@ package net.minecraft.world.level.block;
 import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -56,6 +54,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
+	private static final int SMOKE_DISTANCE = 5;
 	private final boolean spawnParticles;
 	private final int fireDamage;
 
@@ -159,7 +158,6 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		return RenderShape.MODEL;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(LIT)) {
@@ -255,9 +253,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		if (bl2) {
 			level.addParticle(
 				ParticleTypes.SMOKE,
-				(double)blockPos.getX() + 0.25 + random.nextDouble() / 2.0 * (double)(random.nextBoolean() ? 1 : -1),
+				(double)blockPos.getX() + 0.5 + random.nextDouble() / 4.0 * (double)(random.nextBoolean() ? 1 : -1),
 				(double)blockPos.getY() + 0.4,
-				(double)blockPos.getZ() + 0.25 + random.nextDouble() / 2.0 * (double)(random.nextBoolean() ? 1 : -1),
+				(double)blockPos.getZ() + 0.5 + random.nextDouble() / 4.0 * (double)(random.nextBoolean() ? 1 : -1),
 				0.0,
 				0.005,
 				0.0

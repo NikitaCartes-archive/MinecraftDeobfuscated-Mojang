@@ -24,6 +24,15 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class WorldGenSettingsFix extends DataFix {
+	private static final String VILLAGE = "minecraft:village";
+	private static final String DESERT_PYRAMID = "minecraft:desert_pyramid";
+	private static final String IGLOO = "minecraft:igloo";
+	private static final String JUNGLE_TEMPLE = "minecraft:jungle_pyramid";
+	private static final String SWAMP_HUT = "minecraft:swamp_hut";
+	private static final String PILLAGER_OUTPOST = "minecraft:pillager_outpost";
+	private static final String END_CITY = "minecraft:endcity";
+	private static final String WOODLAND_MANSION = "minecraft:mansion";
+	private static final String OCEAN_MONUMENT = "minecraft:monument";
 	private static final ImmutableMap<String, WorldGenSettingsFix.StructureFeatureConfiguration> DEFAULTS = ImmutableMap.<String, WorldGenSettingsFix.StructureFeatureConfiguration>builder()
 		.put("minecraft:village", new WorldGenSettingsFix.StructureFeatureConfiguration(32, 8, 10387312))
 		.put("minecraft:desert_pyramid", new WorldGenSettingsFix.StructureFeatureConfiguration(32, 8, 14357617))

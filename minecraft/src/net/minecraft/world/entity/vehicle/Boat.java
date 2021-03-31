@@ -3,8 +3,6 @@ package net.minecraft.world.entity.vehicle;
 import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -58,6 +56,12 @@ public class Boat extends Entity {
 	private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
+	public static final int PADDLE_LEFT = 0;
+	public static final int PADDLE_RIGHT = 1;
+	private static final int TIME_TO_EJECT = 60;
+	private static final double PADDLE_SPEED = (float) (Math.PI / 8);
+	public static final double PADDLE_SOUND_TIME = (float) (Math.PI / 4);
+	public static final int BUBBLE_TIME = 60;
 	private final float[] paddlePositions = new float[2];
 	private float invFriction;
 	private float outOfControlTicks;
@@ -222,7 +226,6 @@ public class Boat extends Entity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateHurt() {
 		this.setHurtDir(-this.getHurtDir());
@@ -235,7 +238,6 @@ public class Boat extends Entity {
 		return !this.isRemoved();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
 		this.lerpX = d;
@@ -414,7 +416,6 @@ public class Boat extends Entity {
 		this.entityData.set(DATA_ID_PADDLE_RIGHT, bl2);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getRowingTime(int i, float f) {
 		return this.getPaddleState(i)
 			? (float)Mth.clampedLerp((double)this.paddlePositions[i] - (float) (Math.PI / 8), (double)this.paddlePositions[i], (double)f)
@@ -716,7 +717,6 @@ public class Boat extends Entity {
 		entity.setYHeadRot(entity.yRot);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void onPassengerTurned(Entity entity) {
 		this.clampRotation(entity);
@@ -810,7 +810,6 @@ public class Boat extends Entity {
 		return this.entityData.get(DATA_ID_BUBBLE_TIME);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getBubbleAngle(float f) {
 		return Mth.lerp(f, this.bubbleAngleO, this.bubbleAngle);
 	}
@@ -842,7 +841,6 @@ public class Boat extends Entity {
 		return this.getFirstPassenger();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setInput(boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		this.inputLeft = bl;
 		this.inputRight = bl2;
@@ -860,7 +858,6 @@ public class Boat extends Entity {
 		return this.status == Boat.Status.UNDER_WATER || this.status == Boat.Status.UNDER_FLOWING_WATER;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getPickResult() {
 		return new ItemStack(this.getDropItem());

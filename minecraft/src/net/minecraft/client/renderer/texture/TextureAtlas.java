@@ -42,6 +42,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 	public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
 	@Deprecated
 	public static final ResourceLocation LOCATION_PARTICLES = new ResourceLocation("textures/atlas/particles.png");
+	private static final String FILE_EXTENSION = ".png";
 	private final List<Tickable> animatedTextures = Lists.<Tickable>newArrayList();
 	private final Set<ResourceLocation> sprites = Sets.<ResourceLocation>newHashSet();
 	private final Map<ResourceLocation, TextureAtlasSprite> texturesByName = Maps.<ResourceLocation, TextureAtlasSprite>newHashMap();

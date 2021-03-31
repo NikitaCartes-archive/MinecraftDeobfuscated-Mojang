@@ -14,6 +14,23 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
 @Environment(EnvType.CLIENT)
 public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
+	private static final float DEG_125 = 2.1816616F;
+	private static final float DEG_60 = (float) (Math.PI / 3);
+	private static final float DEG_45 = (float) (Math.PI / 4);
+	private static final float DEG_30 = (float) (Math.PI / 6);
+	private static final float DEG_15 = (float) (Math.PI / 12);
+	protected static final String HEAD_PARTS = "head_parts";
+	private static final String LEFT_HIND_BABY_LEG = "left_hind_baby_leg";
+	private static final String RIGHT_HIND_BABY_LEG = "right_hind_baby_leg";
+	private static final String LEFT_FRONT_BABY_LEG = "left_front_baby_leg";
+	private static final String RIGHT_FRONT_BABY_LEG = "right_front_baby_leg";
+	private static final String SADDLE = "saddle";
+	private static final String LEFT_SADDLE_MOUTH = "left_saddle_mouth";
+	private static final String LEFT_SADDLE_LINE = "left_saddle_line";
+	private static final String RIGHT_SADDLE_MOUTH = "right_saddle_mouth";
+	private static final String RIGHT_SADDLE_LINE = "right_saddle_line";
+	private static final String HEAD_SADDLE = "head_saddle";
+	private static final String MOUTH_SADDLE_WRAP = "mouth_saddle_wrap";
 	protected final ModelPart body;
 	protected final ModelPart headParts;
 	private final ModelPart rightHindLeg;

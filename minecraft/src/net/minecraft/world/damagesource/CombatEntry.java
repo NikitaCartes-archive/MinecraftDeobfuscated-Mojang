@@ -2,6 +2,7 @@ package net.minecraft.world.damagesource;
 
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 public class CombatEntry {
@@ -25,8 +26,20 @@ public class CombatEntry {
 		return this.source;
 	}
 
+	public int getTime() {
+		return this.time;
+	}
+
 	public float getDamage() {
 		return this.damage;
+	}
+
+	public float getHealthBeforeDamage() {
+		return this.health;
+	}
+
+	public float getHealthAfterDamage() {
+		return this.health - this.damage;
 	}
 
 	public boolean isCombatRelated() {
@@ -41,6 +54,11 @@ public class CombatEntry {
 	@Nullable
 	public Component getAttackerName() {
 		return this.getSource().getEntity() == null ? null : this.getSource().getEntity().getDisplayName();
+	}
+
+	@Nullable
+	public Entity getAttacker() {
+		return this.getSource().getEntity();
 	}
 
 	public float getFallDistance() {

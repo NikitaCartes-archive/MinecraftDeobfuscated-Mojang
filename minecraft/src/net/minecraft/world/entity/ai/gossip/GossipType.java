@@ -13,6 +13,9 @@ public enum GossipType {
 	MAJOR_POSITIVE("major_positive", 5, 100, 0, 100),
 	TRADING("trading", 1, 25, 2, 20);
 
+	public static final int REPUTATION_CHANGE_PER_EVENT = 25;
+	public static final int REPUTATION_CHANGE_PER_EVERLASTING_MEMORY = 20;
+	public static final int REPUTATION_CHANGE_PER_TRADE = 2;
 	public final String id;
 	public final int weight;
 	public final int max;

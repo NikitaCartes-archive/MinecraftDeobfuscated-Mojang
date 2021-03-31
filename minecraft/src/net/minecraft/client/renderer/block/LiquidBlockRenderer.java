@@ -27,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class LiquidBlockRenderer {
+	private static final float MAX_FLUID_HEIGHT = 0.8888889F;
 	private final TextureAtlasSprite[] lavaIcons = new TextureAtlasSprite[2];
 	private final TextureAtlasSprite[] waterIcons = new TextureAtlasSprite[2];
 	private TextureAtlasSprite waterOverlay;

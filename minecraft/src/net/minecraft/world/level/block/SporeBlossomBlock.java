@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,6 +16,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SporeBlossomBlock extends Block {
 	private static final VoxelShape SHAPE = Block.box(2.0, 13.0, 2.0, 14.0, 16.0, 14.0);
+	private static final int ADD_PARTICLE_ATTEMPTS = 14;
+	private static final int PARTICLE_XZ_RADIUS = 10;
+	private static final int PARTICLE_Y_MAX = 10;
 
 	public SporeBlossomBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -37,7 +38,6 @@ public class SporeBlossomBlock extends Block {
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		int i = blockPos.getX();

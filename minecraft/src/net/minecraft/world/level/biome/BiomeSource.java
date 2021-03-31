@@ -13,8 +13,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
@@ -37,7 +35,6 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 
 	protected abstract Codec<? extends BiomeSource> codec();
 
-	@Environment(EnvType.CLIENT)
 	public abstract BiomeSource withSeed(long l);
 
 	public List<Biome> possibleBiomes() {

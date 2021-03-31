@@ -24,6 +24,9 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int UNICODE_SHEETS = 256;
+	private static final int CHARS_PER_SHEET = 256;
+	private static final int TEXTURE_SIZE = 256;
 	private final ResourceManager resourceManager;
 	private final byte[] sizes;
 	private final String texturePattern;

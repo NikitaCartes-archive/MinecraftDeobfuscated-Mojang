@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class ForcedChunksSavedData extends SavedData {
+	public static final String FILE_ID = "chunks";
+	private static final String TAG_FORCED = "Forced";
 	private final LongSet chunks;
 
 	private ForcedChunksSavedData(LongSet longSet) {

@@ -3,8 +3,6 @@ package net.minecraft.stats;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.RecipeBookType;
@@ -41,7 +39,6 @@ public class RecipeBook {
 		return this.known.contains(resourceLocation);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void remove(Recipe<?> recipe) {
 		this.remove(recipe.getId());
 	}
@@ -51,7 +48,6 @@ public class RecipeBook {
 		this.highlight.remove(resourceLocation);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean willHighlight(Recipe<?> recipe) {
 		return this.highlight.contains(recipe.getId());
 	}
@@ -68,27 +64,22 @@ public class RecipeBook {
 		this.highlight.add(resourceLocation);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isOpen(RecipeBookType recipeBookType) {
 		return this.bookSettings.isOpen(recipeBookType);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setOpen(RecipeBookType recipeBookType, boolean bl) {
 		this.bookSettings.setOpen(recipeBookType, bl);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFiltering(RecipeBookMenu<?> recipeBookMenu) {
 		return this.isFiltering(recipeBookMenu.getRecipeBookType());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFiltering(RecipeBookType recipeBookType) {
 		return this.bookSettings.isFiltering(recipeBookType);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setFiltering(RecipeBookType recipeBookType, boolean bl) {
 		this.bookSettings.setFiltering(recipeBookType, bl);
 	}

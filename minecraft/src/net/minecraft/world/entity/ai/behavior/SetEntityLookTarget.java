@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.Tag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -14,6 +15,10 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 public class SetEntityLookTarget extends Behavior<LivingEntity> {
 	private final Predicate<LivingEntity> predicate;
 	private final float maxDistSqr;
+
+	public SetEntityLookTarget(Tag<EntityType<?>> tag, float f) {
+		this(livingEntity -> livingEntity.getType().is(tag), f);
+	}
 
 	public SetEntityLookTarget(MobCategory mobCategory, float f) {
 		this(livingEntity -> mobCategory.equals(livingEntity.getType().getCategory()), f);

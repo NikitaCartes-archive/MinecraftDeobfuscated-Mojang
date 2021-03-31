@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -28,6 +26,20 @@ import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WrittenBookItem extends Item {
+	public static final int TITLE_LENGTH = 16;
+	public static final int TITLE_MAX_LENGTH = 32;
+	public static final int PAGE_EDIT_LENGTH = 1024;
+	public static final int PAGE_LENGTH = 32767;
+	public static final int MAX_PAGES = 100;
+	public static final int MAX_GENERATION = 2;
+	public static final String TAG_TITLE = "title";
+	public static final String TAG_FILTERED_TITLE = "filtered_title";
+	public static final String TAG_AUTHOR = "author";
+	public static final String TAG_PAGES = "pages";
+	public static final String TAG_FILTERED_PAGES = "filtered_pages";
+	public static final String TAG_GENERATION = "generation";
+	public static final String TAG_RESOLVED = "resolved";
+
 	public WrittenBookItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -65,7 +77,6 @@ public class WrittenBookItem extends Item {
 		return super.getName(itemStack);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		if (itemStack.hasTag()) {

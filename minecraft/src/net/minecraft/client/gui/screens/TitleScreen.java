@@ -42,6 +42,8 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class TitleScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String DEMO_LEVEL_ID = "Demo_World";
+	public static final String COPYRIGHT_TEXT = "Copyright Mojang AB. Do not distribute!";
 	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
 	private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");

@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
+import net.minecraft.world.entity.animal.goat.GoatAi;
 
 public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<DummySensor> DUMMY = register("dummy", DummySensor::new);
@@ -22,8 +23,9 @@ public class SensorType<U extends Sensor<?>> {
 	);
 	public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = register("hoglin_specific_sensor", HoglinSpecificSensor::new);
 	public static final SensorType<AdultSensor> NEAREST_ADULT = register("nearest_adult", AdultSensor::new);
-	public static final SensorType<AxolotlHostileSensor> AXOLOTL_HOSTILES = register("axolotl_hostiles", AxolotlHostileSensor::new);
+	public static final SensorType<AxolotlAttackablesSensor> AXOLOTL_ATTACKABLES = register("axolotl_attackables", AxolotlAttackablesSensor::new);
 	public static final SensorType<TemptingSensor> AXOLOTL_TEMPTATIONS = register("axolotl_temptations", () -> new TemptingSensor(AxolotlAi.getTemptations()));
+	public static final SensorType<TemptingSensor> GOAT_TEMPTATIONS = register("goat_temptations", () -> new TemptingSensor(GoatAi.getTemptations()));
 	private final Supplier<U> factory;
 
 	private SensorType(Supplier<U> supplier) {

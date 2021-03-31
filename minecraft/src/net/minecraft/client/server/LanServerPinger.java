@@ -16,6 +16,9 @@ import org.apache.logging.log4j.Logger;
 public class LanServerPinger extends Thread {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final String MULTICAST_GROUP = "224.0.2.60";
+	public static final int PING_PORT = 4445;
+	private static final long PING_INTERVAL = 1500L;
 	private final String motd;
 	private final DatagramSocket socket;
 	private boolean isRunning = true;

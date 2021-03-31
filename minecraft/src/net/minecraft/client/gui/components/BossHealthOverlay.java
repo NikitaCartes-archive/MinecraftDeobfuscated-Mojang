@@ -17,6 +17,9 @@ import net.minecraft.world.BossEvent;
 @Environment(EnvType.CLIENT)
 public class BossHealthOverlay extends GuiComponent {
 	private static final ResourceLocation GUI_BARS_LOCATION = new ResourceLocation("textures/gui/bars.png");
+	private static final int BAR_WIDTH = 182;
+	private static final int BAR_HEIGHT = 5;
+	private static final int OVERLAY_OFFSET = 80;
 	private final Minecraft minecraft;
 	private final Map<UUID, LerpingBossEvent> events = Maps.<UUID, LerpingBossEvent>newLinkedHashMap();
 

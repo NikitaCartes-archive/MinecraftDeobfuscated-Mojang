@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Mth;
@@ -48,22 +46,18 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		clientGamePacketListener.handleSetEntityMotion(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getXa() {
 		return this.xa;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getYa() {
 		return this.ya;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getZa() {
 		return this.za;
 	}

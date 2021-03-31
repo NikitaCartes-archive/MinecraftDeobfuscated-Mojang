@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,6 +18,10 @@ import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BannerBlockEntity extends BlockEntity implements Nameable {
+	public static final int MAX_PATTERNS = 6;
+	public static final String TAG_PATTERNS = "Patterns";
+	public static final String TAG_PATTERN = "Pattern";
+	public static final String TAG_COLOR = "Color";
 	@Nullable
 	private Component name;
 	private DyeColor baseColor;
@@ -40,7 +42,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static ListTag getItemPatterns(ItemStack itemStack) {
 		ListTag listTag = null;
 		CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
@@ -51,7 +52,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return listTag;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void fromItem(ItemStack itemStack, DyeColor dyeColor) {
 		this.itemPatterns = getItemPatterns(itemStack);
 		this.baseColor = dyeColor;
@@ -117,7 +117,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return compoundTag != null && compoundTag.contains("Patterns") ? compoundTag.getList("Patterns", 10).size() : 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<Pair<BannerPattern, DyeColor>> getPatterns() {
 		if (this.patterns == null && this.receivedData) {
 			this.patterns = createPatterns(this.baseColor, this.itemPatterns);
@@ -126,7 +125,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return this.patterns;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static List<Pair<BannerPattern, DyeColor>> createPatterns(DyeColor dyeColor, @Nullable ListTag listTag) {
 		List<Pair<BannerPattern, DyeColor>> list = Lists.<Pair<BannerPattern, DyeColor>>newArrayList();
 		list.add(Pair.of(BannerPattern.BASE, dyeColor));
@@ -157,7 +155,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ItemStack getItem() {
 		ItemStack itemStack = new ItemStack(BannerBlock.byColor(this.baseColor));
 		if (this.itemPatterns != null && !this.itemPatterns.isEmpty()) {

@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -35,7 +33,6 @@ public class ClientboundUpdateTagsPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleUpdateTags(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> getTags() {
 		return this.tags;
 	}

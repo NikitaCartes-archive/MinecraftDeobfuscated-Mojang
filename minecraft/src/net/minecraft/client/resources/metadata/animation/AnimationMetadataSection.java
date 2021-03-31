@@ -9,6 +9,9 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class AnimationMetadataSection {
 	public static final AnimationMetadataSectionSerializer SERIALIZER = new AnimationMetadataSectionSerializer();
+	public static final String SECTION_NAME = "animation";
+	public static final int DEFAULT_FRAME_TIME = 1;
+	public static final int UNKNOWN_SIZE = -1;
 	public static final AnimationMetadataSection EMPTY = new AnimationMetadataSection(Lists.newArrayList(), -1, -1, 1, false) {
 		@Override
 		public Pair<Integer, Integer> getFrameSize(int i, int j) {

@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -50,22 +48,18 @@ public class ClientboundRecipePacket implements Packet<ClientGamePacketListener>
 		clientGamePacketListener.handleAddOrRemoveRecipes(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<ResourceLocation> getRecipes() {
 		return this.recipes;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<ResourceLocation> getHighlights() {
 		return this.toHighlight;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public RecipeBookSettings getBookSettings() {
 		return this.bookSettings;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ClientboundRecipePacket.State getState() {
 		return this.state;
 	}

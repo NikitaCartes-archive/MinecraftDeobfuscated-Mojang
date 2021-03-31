@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,7 +18,6 @@ public abstract class AbstractGlassBlock extends HalfTransparentBlock {
 		return Shapes.empty();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 1.0F;

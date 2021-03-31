@@ -14,6 +14,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 
 @Environment(EnvType.CLIENT)
 public class LevelLoadingScreen extends Screen {
+	private static final long NARRATION_DELAY_MS = 2000L;
 	private final StoringChunkProgressListener progressListener;
 	private long lastNarration = -1L;
 	private static final Object2IntMap<ChunkStatus> COLORS = Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {

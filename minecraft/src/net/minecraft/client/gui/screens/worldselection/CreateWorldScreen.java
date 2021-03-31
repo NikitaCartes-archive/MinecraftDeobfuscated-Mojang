@@ -58,6 +58,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class CreateWorldScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String TEMP_WORLD_PREFIX = "mcworld-";
 	private static final Component GAME_MODEL_LABEL = new TranslatableComponent("selectWorld.gameMode");
 	private static final Component SEED_LABEL = new TranslatableComponent("selectWorld.enterSeed");
 	private static final Component SEED_INFO = new TranslatableComponent("selectWorld.seedInfo");

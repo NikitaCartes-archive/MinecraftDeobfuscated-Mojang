@@ -13,6 +13,8 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class SocializeAtBell extends Behavior<LivingEntity> {
+	private static final float SPEED_MODIFIER = 0.3F;
+
 	public SocializeAtBell() {
 		super(
 			ImmutableMap.of(

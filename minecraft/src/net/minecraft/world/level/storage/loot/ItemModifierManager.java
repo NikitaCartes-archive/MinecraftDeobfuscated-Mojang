@@ -39,6 +39,10 @@ public class ItemModifierManager extends SimpleJsonResourceReloadListener {
 		return (LootItemFunction)this.functions.get(resourceLocation);
 	}
 
+	public LootItemFunction get(ResourceLocation resourceLocation, LootItemFunction lootItemFunction) {
+		return (LootItemFunction)this.functions.getOrDefault(resourceLocation, lootItemFunction);
+	}
+
 	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		Builder<ResourceLocation, LootItemFunction> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonElement) -> {

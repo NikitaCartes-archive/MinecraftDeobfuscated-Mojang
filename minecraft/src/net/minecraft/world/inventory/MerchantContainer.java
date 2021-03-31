@@ -1,8 +1,6 @@
 package net.minecraft.world.inventory;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -144,7 +142,6 @@ public class MerchantContainer implements Container {
 		this.itemStacks.clear();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFutureXp() {
 		return this.futureXp;
 	}

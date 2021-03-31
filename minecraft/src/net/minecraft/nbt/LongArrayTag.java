@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class LongArrayTag extends CollectionTag<LongTag> {
+	private static final int SELF_SIZE_IN_BITS = 192;
 	public static final TagType<LongArrayTag> TYPE = new TagType<LongArrayTag>() {
 		public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);

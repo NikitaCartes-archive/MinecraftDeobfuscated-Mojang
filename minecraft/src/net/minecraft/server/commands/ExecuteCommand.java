@@ -69,6 +69,7 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 
 public class ExecuteCommand {
+	private static final int MAX_TEST_AREA = 32768;
 	private static final Dynamic2CommandExceptionType ERROR_AREA_TOO_LARGE = new Dynamic2CommandExceptionType(
 		(object, object2) -> new TranslatableComponent("commands.execute.blocks.toobig", object, object2)
 	);
@@ -676,18 +677,20 @@ public class ExecuteCommand {
 	}
 
 	private static OptionalInt checkRegions(ServerLevel serverLevel, BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, boolean bl) throws CommandSyntaxException {
-		BoundingBox boundingBox = BoundingBox.createProper(blockPos, blockPos2);
-		BoundingBox boundingBox2 = BoundingBox.createProper(blockPos3, blockPos3.offset(boundingBox.getLength()));
-		BlockPos blockPos4 = new BlockPos(boundingBox2.x0 - boundingBox.x0, boundingBox2.y0 - boundingBox.y0, boundingBox2.z0 - boundingBox.z0);
+		BoundingBox boundingBox = BoundingBox.fromCorners(blockPos, blockPos2);
+		BoundingBox boundingBox2 = BoundingBox.fromCorners(blockPos3, blockPos3.offset(boundingBox.getLength()));
+		BlockPos blockPos4 = new BlockPos(
+			boundingBox2.minX() - boundingBox.minX(), boundingBox2.minY() - boundingBox.minY(), boundingBox2.minZ() - boundingBox.minZ()
+		);
 		int i = boundingBox.getXSpan() * boundingBox.getYSpan() * boundingBox.getZSpan();
 		if (i > 32768) {
 			throw ERROR_AREA_TOO_LARGE.create(32768, i);
 		} else {
 			int j = 0;
 
-			for (int k = boundingBox.z0; k <= boundingBox.z1; k++) {
-				for (int l = boundingBox.y0; l <= boundingBox.y1; l++) {
-					for (int m = boundingBox.x0; m <= boundingBox.x1; m++) {
+			for (int k = boundingBox.minZ(); k <= boundingBox.maxZ(); k++) {
+				for (int l = boundingBox.minY(); l <= boundingBox.maxY(); l++) {
+					for (int m = boundingBox.minX(); m <= boundingBox.maxX(); m++) {
 						BlockPos blockPos5 = new BlockPos(m, l, k);
 						BlockPos blockPos6 = blockPos5.offset(blockPos4);
 						BlockState blockState = serverLevel.getBlockState(blockPos5);

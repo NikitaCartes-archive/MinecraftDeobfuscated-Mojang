@@ -14,9 +14,9 @@ import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -29,22 +29,32 @@ public class GsonHelper {
 		return !isValidPrimitive(jsonObject, string) ? false : jsonObject.getAsJsonPrimitive(string).isString();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean isStringValue(JsonElement jsonElement) {
 		return !jsonElement.isJsonPrimitive() ? false : jsonElement.getAsJsonPrimitive().isString();
+	}
+
+	public static boolean isNumberValue(JsonObject jsonObject, String string) {
+		return !isValidPrimitive(jsonObject, string) ? false : jsonObject.getAsJsonPrimitive(string).isNumber();
 	}
 
 	public static boolean isNumberValue(JsonElement jsonElement) {
 		return !jsonElement.isJsonPrimitive() ? false : jsonElement.getAsJsonPrimitive().isNumber();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean isBooleanValue(JsonObject jsonObject, String string) {
 		return !isValidPrimitive(jsonObject, string) ? false : jsonObject.getAsJsonPrimitive(string).isBoolean();
 	}
 
+	public static boolean isBooleanValue(JsonElement jsonElement) {
+		return !jsonElement.isJsonPrimitive() ? false : jsonElement.getAsJsonPrimitive().isBoolean();
+	}
+
 	public static boolean isArrayNode(JsonObject jsonObject, String string) {
 		return !isValidNode(jsonObject, string) ? false : jsonObject.get(string).isJsonArray();
+	}
+
+	public static boolean isObjectNode(JsonObject jsonObject, String string) {
+		return !isValidNode(jsonObject, string) ? false : jsonObject.get(string).isJsonObject();
 	}
 
 	public static boolean isValidPrimitive(JsonObject jsonObject, String string) {
@@ -94,6 +104,10 @@ public class GsonHelper {
 		}
 	}
 
+	public static Item getAsItem(JsonObject jsonObject, String string, Item item) {
+		return jsonObject.has(string) ? convertToItem(jsonObject.get(string), string) : item;
+	}
+
 	public static boolean convertToBoolean(JsonElement jsonElement, String string) {
 		if (jsonElement.isJsonPrimitive()) {
 			return jsonElement.getAsBoolean();
@@ -112,6 +126,26 @@ public class GsonHelper {
 
 	public static boolean getAsBoolean(JsonObject jsonObject, String string, boolean bl) {
 		return jsonObject.has(string) ? convertToBoolean(jsonObject.get(string), string) : bl;
+	}
+
+	public static double convertToDouble(JsonElement jsonElement, String string) {
+		if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+			return jsonElement.getAsDouble();
+		} else {
+			throw new JsonSyntaxException("Expected " + string + " to be a Double, was " + getType(jsonElement));
+		}
+	}
+
+	public static double getAsDouble(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToDouble(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a Double");
+		}
+	}
+
+	public static double getAsDouble(JsonObject jsonObject, String string, double d) {
+		return jsonObject.has(string) ? convertToDouble(jsonObject.get(string), string) : d;
 	}
 
 	public static float convertToFloat(JsonElement jsonElement, String string) {
@@ -182,8 +216,96 @@ public class GsonHelper {
 		}
 	}
 
+	public static byte getAsByte(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToByte(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a Byte");
+		}
+	}
+
 	public static byte getAsByte(JsonObject jsonObject, String string, byte b) {
 		return jsonObject.has(string) ? convertToByte(jsonObject.get(string), string) : b;
+	}
+
+	public static char convertToCharacter(JsonElement jsonElement, String string) {
+		if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+			return jsonElement.getAsCharacter();
+		} else {
+			throw new JsonSyntaxException("Expected " + string + " to be a Character, was " + getType(jsonElement));
+		}
+	}
+
+	public static char getAsCharacter(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToCharacter(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a Character");
+		}
+	}
+
+	public static char getAsCharacter(JsonObject jsonObject, String string, char c) {
+		return jsonObject.has(string) ? convertToCharacter(jsonObject.get(string), string) : c;
+	}
+
+	public static BigDecimal convertToBigDecimal(JsonElement jsonElement, String string) {
+		if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+			return jsonElement.getAsBigDecimal();
+		} else {
+			throw new JsonSyntaxException("Expected " + string + " to be a BigDecimal, was " + getType(jsonElement));
+		}
+	}
+
+	public static BigDecimal getAsBigDecimal(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToBigDecimal(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a BigDecimal");
+		}
+	}
+
+	public static BigDecimal getAsBigDecimal(JsonObject jsonObject, String string, BigDecimal bigDecimal) {
+		return jsonObject.has(string) ? convertToBigDecimal(jsonObject.get(string), string) : bigDecimal;
+	}
+
+	public static BigInteger convertToBigInteger(JsonElement jsonElement, String string) {
+		if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+			return jsonElement.getAsBigInteger();
+		} else {
+			throw new JsonSyntaxException("Expected " + string + " to be a BigInteger, was " + getType(jsonElement));
+		}
+	}
+
+	public static BigInteger getAsBigInteger(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToBigInteger(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a BigInteger");
+		}
+	}
+
+	public static BigInteger getAsBigInteger(JsonObject jsonObject, String string, BigInteger bigInteger) {
+		return jsonObject.has(string) ? convertToBigInteger(jsonObject.get(string), string) : bigInteger;
+	}
+
+	public static short convertToShort(JsonElement jsonElement, String string) {
+		if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+			return jsonElement.getAsShort();
+		} else {
+			throw new JsonSyntaxException("Expected " + string + " to be a Short, was " + getType(jsonElement));
+		}
+	}
+
+	public static short getAsShort(JsonObject jsonObject, String string) {
+		if (jsonObject.has(string)) {
+			return convertToShort(jsonObject.get(string), string);
+		} else {
+			throw new JsonSyntaxException("Missing " + string + ", expected to find a Short");
+		}
+	}
+
+	public static short getAsShort(JsonObject jsonObject, String string, short s) {
+		return jsonObject.has(string) ? convertToShort(jsonObject.get(string), string) : s;
 	}
 
 	public static JsonObject convertToJsonObject(JsonElement jsonElement, String string) {
@@ -289,7 +411,6 @@ public class GsonHelper {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
 		try {
 			JsonReader jsonReader = new JsonReader(reader);
@@ -301,7 +422,6 @@ public class GsonHelper {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken, boolean bl) {
 		return fromJson(gson, new StringReader(string), typeToken, bl);
 	}
@@ -312,13 +432,11 @@ public class GsonHelper {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken) {
 		return fromJson(gson, reader, typeToken, false);
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken) {
 		return fromJson(gson, string, typeToken, false);
 	}

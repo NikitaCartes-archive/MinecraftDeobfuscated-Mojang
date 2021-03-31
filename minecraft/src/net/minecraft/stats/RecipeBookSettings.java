@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -36,7 +34,6 @@ public final class RecipeBookSettings {
 		}));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isOpen(RecipeBookType recipeBookType) {
 		return ((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).open;
 	}
@@ -45,7 +42,6 @@ public final class RecipeBookSettings {
 		((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).open = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFiltering(RecipeBookType recipeBookType) {
 		return ((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).filtering;
 	}

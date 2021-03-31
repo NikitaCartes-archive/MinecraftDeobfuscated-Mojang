@@ -15,6 +15,11 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.Vec3;
 
 public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
+	private static final int POI_SECTION_SCAN_RADIUS = 2;
+	private static final int VILLAGER_SCAN_RADIUS = 32;
+	private static final int RANDOM_POS_XY_DISTANCE = 10;
+	private static final int RANDOM_POS_Y_DISTANCE = 7;
+
 	public GolemRandomStrollInVillageGoal(PathfinderMob pathfinderMob, double d) {
 		super(pathfinderMob, d, 240, false);
 	}

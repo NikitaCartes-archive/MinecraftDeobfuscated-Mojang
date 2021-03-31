@@ -25,6 +25,17 @@ public class RealmsWorldOptions extends ValueObject {
 	@Nullable
 	public String templateImage;
 	public boolean empty;
+	private static final boolean DEFAULT_FORCE_GAME_MODE = false;
+	private static final boolean DEFAULT_PVP = true;
+	private static final boolean DEFAULT_SPAWN_ANIMALS = true;
+	private static final boolean DEFAULT_SPAWN_MONSTERS = true;
+	private static final boolean DEFAULT_SPAWN_NPCS = true;
+	private static final int DEFAULT_SPAWN_PROTECTION = 0;
+	private static final boolean DEFAULT_COMMAND_BLOCKS = false;
+	private static final int DEFAULT_DIFFICULTY = 2;
+	private static final int DEFAULT_GAME_MODE = 0;
+	private static final String DEFAULT_SLOT_NAME = "";
+	private static final long DEFAULT_TEMPLATE_ID = -1L;
 	private static final String DEFAULT_TEMPLATE_IMAGE = null;
 
 	public RealmsWorldOptions(boolean bl, boolean bl2, boolean bl3, boolean bl4, int i, boolean bl5, int j, int k, boolean bl6, @Nullable String string) {

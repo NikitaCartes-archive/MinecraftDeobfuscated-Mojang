@@ -20,6 +20,7 @@ public class MeleeAttackGoal extends Goal {
 	private int ticksUntilNextAttack;
 	private final int attackInterval = 20;
 	private long lastCanUseCheck;
+	private static final long COOLDOWN_BETWEEN_CAN_USE_CHECKS = 20L;
 
 	public MeleeAttackGoal(PathfinderMob pathfinderMob, double d, boolean bl) {
 		this.mob = pathfinderMob;

@@ -5,8 +5,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -47,12 +45,28 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	public static final DirectionProperty TIP_DIRECTION = BlockStateProperties.VERTICAL_DIRECTION;
 	public static final EnumProperty<DripstoneThickness> THICKNESS = BlockStateProperties.DRIPSTONE_THICKNESS;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	private static final int MAX_SEARCH_LENGTH_WHEN_CHECKING_DRIP_TYPE = 10;
+	private static final int MAX_SEARCH_LENGTH_WHEN_LOOKING_FOR_TIP_OF_FALLING_STALACTITE = Integer.MAX_VALUE;
+	private static final int DELAY_BEFORE_FALLING = 2;
+	private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK = 0.02F;
+	private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK_IF_UNDER_LIQUID_SOURCE = 0.12F;
+	private static final int MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON = 10;
+	private static final float WATER_CAULDRON_FILL_PROBABILITY_PER_RANDOM_TICK = 0.17578125F;
+	private static final float LAVA_CAULDRON_FILL_PROBABILITY_PER_RANDOM_TICK = 0.05859375F;
+	private static final double MIN_TRIDENT_VELOCITY_TO_BREAK_DRIPSTONE = 0.6;
+	private static final float STALACTITE_DAMAGE_PER_FALL_DISTANCE_AND_SIZE = 1.0F;
+	private static final int STALACTITE_MAX_DAMAGE = 40;
+	private static final int MAX_STALACTITE_HEIGHT_FOR_DAMAGE_CALCULATION = 6;
+	private static final float STALAGMITE_FALL_DISTANCE_OFFSET = 2.0F;
+	private static final int STALAGMITE_FALL_DAMAGE_MODIFIER = 2;
+	private static final float STALACTITE_DRIP_START_PIXEL = 0.6875F;
 	private static final VoxelShape TIP_MERGE_SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 16.0, 11.0);
 	private static final VoxelShape TIP_SHAPE_UP = Block.box(5.0, 0.0, 5.0, 11.0, 11.0, 11.0);
 	private static final VoxelShape TIP_SHAPE_DOWN = Block.box(5.0, 5.0, 5.0, 11.0, 16.0, 11.0);
 	private static final VoxelShape FRUSTUM_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 	private static final VoxelShape MIDDLE_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 16.0, 13.0);
 	private static final VoxelShape BASE_SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
+	private static final float MAX_HORIZONTAL_OFFSET = 0.125F;
 
 	public PointedDripstoneBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -81,25 +95,24 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 		if (direction != Direction.UP && direction != Direction.DOWN) {
 			return blockState;
-		} else if (levelAccessor.getBlockTicks().hasScheduledTick(blockPos, this)) {
-			return blockState;
 		} else {
 			Direction direction2 = blockState.getValue(TIP_DIRECTION);
-			if (direction != direction2.getOpposite() || isValidPointedDripstonePlacement(levelAccessor, blockPos, direction2)) {
-				boolean bl = blockState.getValue(THICKNESS) == DripstoneThickness.TIP_MERGE;
-				DripstoneThickness dripstoneThickness = calculateDripstoneThickness(levelAccessor, blockPos, direction2, bl);
-				return dripstoneThickness == null ? getAirOrWater(blockState) : blockState.setValue(THICKNESS, dripstoneThickness);
-			} else if (direction2 == Direction.DOWN) {
-				this.scheduleStalactiteFallTicks(blockState, levelAccessor, blockPos);
+			if (direction2 == Direction.DOWN && levelAccessor.getBlockTicks().hasScheduledTick(blockPos, this)) {
+				return blockState;
+			} else if (direction == direction2.getOpposite() && !this.canSurvive(blockState, levelAccessor, blockPos)) {
+				if (direction2 == Direction.DOWN) {
+					this.scheduleStalactiteFallTicks(blockState, levelAccessor, blockPos);
+				} else {
+					levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
+				}
+
 				return blockState;
 			} else {
-				return getAirOrWater(blockState);
+				boolean bl = blockState.getValue(THICKNESS) == DripstoneThickness.TIP_MERGE;
+				DripstoneThickness dripstoneThickness = calculateDripstoneThickness(levelAccessor, blockPos, direction2, bl);
+				return blockState.setValue(THICKNESS, dripstoneThickness);
 			}
 		}
-	}
-
-	private static BlockState getAirOrWater(BlockState blockState) {
-		return blockState.getValue(WATERLOGGED) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
@@ -119,7 +132,6 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if (canDrip(blockState)) {
@@ -134,7 +146,11 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		spawnFallingStalactite(blockState, serverLevel, blockPos);
+		if (isStalagmite(blockState) && !this.canSurvive(blockState, serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
+		} else {
+			spawnFallingStalactite(blockState, serverLevel, blockPos);
+		}
 	}
 
 	@Override
@@ -298,12 +314,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		serverLevel.addFreshEntity(fallingBlockEntity);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static void spawnDripParticle(Level level, BlockPos blockPos, BlockState blockState) {
 		getFluidAboveStalactite(level, blockPos, blockState).ifPresent(fluid -> spawnDripParticle(level, blockPos, blockState, fluid));
 	}
 
-	@Environment(EnvType.CLIENT)
 	private static void spawnDripParticle(Level level, BlockPos blockPos, BlockState blockState, Fluid fluid) {
 		Vec3 vec3 = blockState.getOffset(level, blockPos);
 		double d = 0.0625;
@@ -342,7 +356,6 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return direction2;
 	}
 
-	@Nullable
 	private static DripstoneThickness calculateDripstoneThickness(LevelReader levelReader, BlockPos blockPos, Direction direction, boolean bl) {
 		Direction direction2 = direction.getOpposite();
 		BlockState blockState = levelReader.getBlockState(blockPos.relative(direction));
@@ -390,6 +403,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return isPointedDripstoneWithDirection(blockState, Direction.DOWN);
 	}
 
+	private static boolean isStalagmite(BlockState blockState) {
+		return isPointedDripstoneWithDirection(blockState, Direction.UP);
+	}
+
 	private static boolean isStalactiteStartPos(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return isStalactite(blockState) && !levelReader.getBlockState(blockPos.above()).is(Blocks.POINTED_DRIPSTONE);
 	}
@@ -430,7 +447,6 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return fluid == Fluids.LAVA || fluid == Fluids.WATER;
 	}
 
-	@Environment(EnvType.CLIENT)
 	private static Fluid getDripFluid(Level level, Fluid fluid) {
 		if (fluid.isSame(Fluids.EMPTY)) {
 			return level.dimensionType().ultraWarm() ? Fluids.LAVA : Fluids.WATER;

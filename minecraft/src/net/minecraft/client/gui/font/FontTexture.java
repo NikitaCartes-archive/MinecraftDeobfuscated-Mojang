@@ -14,6 +14,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
 public class FontTexture extends AbstractTexture {
+	private static final int SIZE = 256;
 	private final ResourceLocation name;
 	private final RenderType normalType;
 	private final RenderType seeThroughType;

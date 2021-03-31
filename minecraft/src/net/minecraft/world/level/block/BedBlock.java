@@ -3,8 +3,6 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -48,7 +46,9 @@ import org.apache.commons.lang3.ArrayUtils;
 public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock {
 	public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
 	public static final BooleanProperty OCCUPIED = BlockStateProperties.OCCUPIED;
+	protected static final int HEIGHT = 9;
 	protected static final VoxelShape BASE = Block.box(0.0, 3.0, 0.0, 16.0, 9.0, 16.0);
+	private static final int LEG_WIDTH = 3;
 	protected static final VoxelShape LEG_NORTH_WEST = Block.box(0.0, 0.0, 0.0, 3.0, 3.0, 3.0);
 	protected static final VoxelShape LEG_SOUTH_WEST = Block.box(0.0, 0.0, 13.0, 3.0, 3.0, 16.0);
 	protected static final VoxelShape LEG_NORTH_EAST = Block.box(13.0, 0.0, 0.0, 16.0, 3.0, 3.0);
@@ -66,7 +66,6 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static Direction getBedOrientation(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockState blockState = blockGetter.getBlockState(blockPos);
 		return blockState.getBlock() instanceof BedBlock ? blockState.getValue(FACING) : null;
@@ -222,7 +221,6 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		return blockState.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static DoubleBlockCombiner.BlockType getBlockType(BlockState blockState) {
 		BedPart bedPart = blockState.getValue(PART);
 		return bedPart == BedPart.HEAD ? DoubleBlockCombiner.BlockType.FIRST : DoubleBlockCombiner.BlockType.SECOND;
@@ -324,7 +322,6 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		return this.color;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public long getSeed(BlockState blockState, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING), blockState.getValue(PART) == BedPart.HEAD ? 0 : 1);

@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 public class CsvOutput {
+	private static final String LINE_SEPARATOR = "\r\n";
+	private static final String FIELD_SEPARATOR = ",";
 	private final Writer output;
 	private final int columnCount;
 

@@ -17,6 +17,8 @@ public interface EntityAccess {
 
 	void setLevelCallback(EntityInLevelCallback entityInLevelCallback);
 
+	Stream<? extends EntityAccess> getSelfAndPassengers();
+
 	Stream<? extends EntityAccess> getPassengersAndSelf();
 
 	void setRemoved(Entity.RemovalReason removalReason);

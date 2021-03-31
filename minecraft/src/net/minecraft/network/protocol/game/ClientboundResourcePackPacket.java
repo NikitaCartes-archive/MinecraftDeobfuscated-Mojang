@@ -1,11 +1,10 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundResourcePackPacket implements Packet<ClientGamePacketListener> {
+	public static final int MAX_HASH_LENGTH = 40;
 	private final String url;
 	private final String hash;
 	private final boolean required;
@@ -37,17 +36,14 @@ public class ClientboundResourcePackPacket implements Packet<ClientGamePacketLis
 		clientGamePacketListener.handleResourcePack(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getUrl() {
 		return this.url;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getHash() {
 		return this.hash;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isRequired() {
 		return this.required;
 	}

@@ -3,8 +3,6 @@ package net.minecraft.world.level.chunk;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -58,7 +56,6 @@ public class HashMapPalette<T> implements Palette<T> {
 		return this.values.byId(i);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) {
 		this.values.clear();
@@ -90,6 +87,7 @@ public class HashMapPalette<T> implements Palette<T> {
 		return i;
 	}
 
+	@Override
 	public int getSize() {
 		return this.values.size();
 	}

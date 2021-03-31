@@ -16,6 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FungusBlock extends BushBlock implements BonemealableBlock {
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
+	private static final double BONEMEAL_SUCCESS_PROBABILITY = 0.4;
 	private final Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> feature;
 
 	protected FungusBlock(BlockBehaviour.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {

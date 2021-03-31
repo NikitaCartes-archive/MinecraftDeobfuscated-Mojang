@@ -3,12 +3,9 @@ package com.mojang.blaze3d.vertex;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class VertexFormatElement {
-	private static final Logger LOGGER = LogManager.getLogger();
 	private final VertexFormatElement.Type type;
 	private final VertexFormatElement.Usage usage;
 	private final int index;
@@ -53,6 +50,10 @@ public class VertexFormatElement {
 
 	public final int getByteSize() {
 		return this.byteSize;
+	}
+
+	public final boolean isPosition() {
+		return this.usage == VertexFormatElement.Usage.POSITION;
 	}
 
 	public boolean equals(Object object) {

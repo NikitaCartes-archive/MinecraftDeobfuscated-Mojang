@@ -54,6 +54,9 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_ANDESITE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_TUFF);
 		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Features.GLOW_LICHEN);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_DEEPSLATE);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Features.RARE_DRIPSTONE_CLUSTER_FEATURE);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Features.RARE_SMALL_DRIPSTONE_FEATURE);
 	}
 
 	public static void addDripstone(BiomeGenerationSettings.Builder builder) {
@@ -72,6 +75,7 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_REDSTONE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_REDSTONE_LOWER);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_DIAMOND);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_DIAMOND_LARGE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_LAPIS);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_LAPIS_BURIED);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, Features.ORE_COPPER);
@@ -370,13 +374,19 @@ public class BiomeDefaultFeatures {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.COW, 8, 4, 4));
 	}
 
-	public static void ambientSpawns(MobSpawnSettings.Builder builder) {
+	public static void caveSpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8));
+		caveWaterSpawns(builder);
 	}
 
 	public static void commonSpawns(MobSpawnSettings.Builder builder) {
-		ambientSpawns(builder);
+		caveSpawns(builder);
 		monsters(builder, 95, 5, 100);
+	}
+
+	public static void caveWaterSpawns(MobSpawnSettings.Builder builder) {
+		builder.addSpawn(MobCategory.UNDERGROUND_WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 10, 4, 6));
+		builder.addSpawn(MobCategory.UNDERGROUND_WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.AXOLOTL, 10, 4, 6));
 	}
 
 	public static void oceanSpawns(MobSpawnSettings.Builder builder, int i, int j, int k) {
@@ -403,14 +413,14 @@ public class BiomeDefaultFeatures {
 	public static void snowySpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 10, 2, 3));
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.POLAR_BEAR, 1, 1, 2));
-		ambientSpawns(builder);
+		caveSpawns(builder);
 		monsters(builder, 95, 5, 20);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.STRAY, 80, 4, 4));
 	}
 
 	public static void desertSpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
-		ambientSpawns(builder);
+		caveSpawns(builder);
 		monsters(builder, 19, 1, 100);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.HUSK, 80, 4, 4));
 	}
@@ -428,7 +438,7 @@ public class BiomeDefaultFeatures {
 
 	public static void mooshroomSpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.MOOSHROOM, 8, 4, 8));
-		ambientSpawns(builder);
+		caveSpawns(builder);
 	}
 
 	public static void baseJungleSpawns(MobSpawnSettings.Builder builder) {

@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ValidateNearbyPoi extends Behavior<LivingEntity> {
+	private static final int MAX_DISTANCE = 16;
 	private final MemoryModuleType<GlobalPos> memoryType;
 	private final Predicate<PoiType> poiPredicate;
 

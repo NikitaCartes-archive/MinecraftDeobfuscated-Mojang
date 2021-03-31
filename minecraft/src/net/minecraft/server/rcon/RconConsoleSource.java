@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class RconConsoleSource implements CommandSource {
+	private static final String RCON = "Rcon";
 	private static final Component RCON_COMPONENT = new TextComponent("Rcon");
 	private final StringBuffer buffer = new StringBuffer();
 	private final MinecraftServer server;

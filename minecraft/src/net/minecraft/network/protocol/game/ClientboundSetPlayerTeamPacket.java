@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -13,6 +11,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.scores.PlayerTeam;
 
 public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketListener> {
+	private static final int METHOD_ADD = 0;
+	private static final int METHOD_REMOVE = 1;
+	private static final int METHOD_CHANGE = 2;
+	private static final int METHOD_JOIN = 3;
+	private static final int METHOD_LEAVE = 4;
+	private static final int MAX_VISIBILITY_LENGTH = 40;
+	private static final int MAX_COLLISION_LENGTH = 40;
 	private final int method;
 	private final String name;
 	private final Collection<String> players;
@@ -84,7 +89,6 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public ClientboundSetPlayerTeamPacket.Action getPlayerAction() {
 		switch (this.method) {
 			case 0:
@@ -100,7 +104,6 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public ClientboundSetPlayerTeamPacket.Action getTeamAction() {
 		switch (this.method) {
 			case 0:
@@ -116,17 +119,14 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleSetPlayerTeamPacket(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getName() {
 		return this.name;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Collection<String> getPlayers() {
 		return this.players;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<ClientboundSetPlayerTeamPacket.Parameters> getParameters() {
 		return this.parameters;
 	}
@@ -165,37 +165,30 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 			this.playerSuffix = friendlyByteBuf.readComponent();
 		}
 
-		@Environment(EnvType.CLIENT)
 		public Component getDisplayName() {
 			return this.displayName;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public int getOptions() {
 			return this.options;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public ChatFormatting getColor() {
 			return this.color;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public String getNametagVisibility() {
 			return this.nametagVisibility;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public String getCollisionRule() {
 			return this.collisionRule;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public Component getPlayerPrefix() {
 			return this.playerPrefix;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public Component getPlayerSuffix() {
 			return this.playerSuffix;
 		}

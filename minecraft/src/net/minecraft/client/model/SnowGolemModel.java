@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class SnowGolemModel<T extends Entity> extends HierarchicalModel<T> {
+	private static final String UPPER_BODY = "upper_body";
 	private final ModelPart root;
 	private final ModelPart upperBody;
 	private final ModelPart head;

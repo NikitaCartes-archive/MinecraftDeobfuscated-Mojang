@@ -22,4 +22,8 @@ public class ClientboundPongResponsePacket implements Packet<ClientStatusPacketL
 	public void handle(ClientStatusPacketListener clientStatusPacketListener) {
 		clientStatusPacketListener.handlePongResponse(this);
 	}
+
+	public long getTime() {
+		return this.time;
+	}
 }

@@ -6,11 +6,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 
 public final class TextColor {
+	private static final String CUSTOM_COLOR_PREFIX = "#";
 	private static final Map<ChatFormatting, TextColor> LEGACY_FORMAT_TO_COLOR = (Map<ChatFormatting, TextColor>)Stream.of(ChatFormatting.values())
 		.filter(ChatFormatting::isColor)
 		.collect(ImmutableMap.toImmutableMap(Function.identity(), chatFormatting -> new TextColor(chatFormatting.getColor(), chatFormatting.getName())));
@@ -31,7 +30,6 @@ public final class TextColor {
 		this.name = null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getValue() {
 		return this.value;
 	}

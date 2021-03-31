@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.FloatProvider;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.util.valueproviders.IntProvider;
 
 public class LargeDripstoneConfiguration implements FeatureConfiguration {
 	public static final Codec<LargeDripstoneConfiguration> CODEC = RecordCodecBuilder.create(
@@ -12,7 +12,7 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 						.fieldOf("floor_to_ceiling_search_range")
 						.orElse(30)
 						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.floorToCeilingSearchRange),
-					UniformInt.codec(1, 30, 30).fieldOf("column_radius").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.columnRadius),
+					IntProvider.codec(1, 60).fieldOf("column_radius").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.columnRadius),
 					FloatProvider.codec(0.0F, 20.0F).fieldOf("height_scale").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.heightScale),
 					Codec.floatRange(0.1F, 1.0F)
 						.fieldOf("max_column_radius_to_cave_height_ratio")
@@ -26,7 +26,7 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 				.apply(instance, LargeDripstoneConfiguration::new)
 	);
 	public final int floorToCeilingSearchRange;
-	public final UniformInt columnRadius;
+	public final IntProvider columnRadius;
 	public final FloatProvider heightScale;
 	public final float maxColumnRadiusToCaveHeightRatio;
 	public final FloatProvider stalactiteBluntness;
@@ -37,7 +37,7 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 
 	public LargeDripstoneConfiguration(
 		int i,
-		UniformInt uniformInt,
+		IntProvider intProvider,
 		FloatProvider floatProvider,
 		float f,
 		FloatProvider floatProvider2,
@@ -47,7 +47,7 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 		float g
 	) {
 		this.floorToCeilingSearchRange = i;
-		this.columnRadius = uniformInt;
+		this.columnRadius = intProvider;
 		this.heightScale = floatProvider;
 		this.maxColumnRadiusToCaveHeightRatio = f;
 		this.stalactiteBluntness = floatProvider2;

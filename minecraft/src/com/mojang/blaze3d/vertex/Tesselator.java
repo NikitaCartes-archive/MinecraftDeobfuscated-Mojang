@@ -6,6 +6,8 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class Tesselator {
+	private static final int MAX_MEMORY_USE = 8388608;
+	private static final int MAX_FLOATS = 2097152;
 	private final BufferBuilder builder;
 	private static final Tesselator INSTANCE = new Tesselator();
 

@@ -15,6 +15,7 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 
 public class ScoreComponent extends BaseComponent implements ContextAwareComponent {
+	private static final String SCORER_PLACEHOLDER = "*";
 	private final String name;
 	@Nullable
 	private final EntitySelector selector;
@@ -41,6 +42,11 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 
 	public String getName() {
 		return this.name;
+	}
+
+	@Nullable
+	public EntitySelector getSelector() {
+		return this.selector;
 	}
 
 	public String getObjective() {

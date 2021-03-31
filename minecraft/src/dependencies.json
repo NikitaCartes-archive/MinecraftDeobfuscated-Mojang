@@ -8,9 +8,9 @@
 		"url": "https://libraries.minecraft.net/com/mojang/authlib/2.1.28/authlib-2.1.28.jar"
 	},
 	{
-		"sha1sum": "c6b7dc51dd44379cc751b7504816006e9be4b1e6",
-		"name": "brigadier-1.0.17.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/brigadier/1.0.17/brigadier-1.0.17.jar"
+		"sha1sum": "c1ef1234282716483c92183f49bef47b1a89bfa9",
+		"name": "brigadier-1.0.18.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/brigadier/1.0.18/brigadier-1.0.18.jar"
 	},
 	{
 		"sha1sum": "4b95f4897fa13f2cd904aee711aeafc0c5295cd8",

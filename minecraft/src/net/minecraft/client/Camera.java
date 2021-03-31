@@ -36,6 +36,7 @@ public class Camera {
 	private boolean detached;
 	private float eyeHeight;
 	private float eyeHeightOld;
+	public static final float FOG_DISTANCE_SCALE = 0.083333336F;
 
 	public void setup(BlockGetter blockGetter, Entity entity, boolean bl, boolean bl2, float f) {
 		this.initialized = true;
@@ -203,6 +204,10 @@ public class Camera {
 
 	public final Vector3f getUpVector() {
 		return this.up;
+	}
+
+	public final Vector3f getLeftVector() {
+		return this.left;
 	}
 
 	public void reset() {

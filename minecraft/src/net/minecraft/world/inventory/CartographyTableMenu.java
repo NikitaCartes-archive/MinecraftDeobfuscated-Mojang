@@ -13,6 +13,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class CartographyTableMenu extends AbstractContainerMenu {
+	public static final int MAP_SLOT = 0;
+	public static final int ADDITIONAL_SLOT = 1;
+	public static final int RESULT_SLOT = 2;
+	private static final int INV_SLOT_START = 3;
+	private static final int INV_SLOT_END = 30;
+	private static final int USE_ROW_SLOT_START = 30;
+	private static final int USE_ROW_SLOT_END = 39;
 	private final ContainerLevelAccess access;
 	private long lastSoundTime;
 	public final Container container = new SimpleContainer(2) {

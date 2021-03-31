@@ -35,6 +35,7 @@ public class BlockPos extends Vec3i {
 	private static final long PACKED_X_MASK = (1L << PACKED_X_LENGTH) - 1L;
 	private static final long PACKED_Y_MASK = (1L << PACKED_Y_LENGTH) - 1L;
 	private static final long PACKED_Z_MASK = (1L << PACKED_Z_LENGTH) - 1L;
+	private static final int Y_OFFSET = 0;
 	private static final int Z_OFFSET = PACKED_Y_LENGTH;
 	private static final int X_OFFSET = PACKED_Y_LENGTH + PACKED_Z_LENGTH;
 
@@ -111,6 +112,14 @@ public class BlockPos extends Vec3i {
 
 	public BlockPos subtract(Vec3i vec3i) {
 		return this.offset(-vec3i.getX(), -vec3i.getY(), -vec3i.getZ());
+	}
+
+	public BlockPos multiply(int i) {
+		if (i == 1) {
+			return this;
+		} else {
+			return i == 0 ? ZERO : new BlockPos(this.getX() * i, this.getY() * i, this.getZ() * i);
+		}
 	}
 
 	public BlockPos above() {
@@ -318,12 +327,12 @@ public class BlockPos extends Vec3i {
 
 	public static Stream<BlockPos> betweenClosedStream(BoundingBox boundingBox) {
 		return betweenClosedStream(
-			Math.min(boundingBox.x0, boundingBox.x1),
-			Math.min(boundingBox.y0, boundingBox.y1),
-			Math.min(boundingBox.z0, boundingBox.z1),
-			Math.max(boundingBox.x0, boundingBox.x1),
-			Math.max(boundingBox.y0, boundingBox.y1),
-			Math.max(boundingBox.z0, boundingBox.z1)
+			Math.min(boundingBox.minX(), boundingBox.maxX()),
+			Math.min(boundingBox.minY(), boundingBox.maxY()),
+			Math.min(boundingBox.minZ(), boundingBox.maxZ()),
+			Math.max(boundingBox.minX(), boundingBox.maxX()),
+			Math.max(boundingBox.minY(), boundingBox.maxY()),
+			Math.max(boundingBox.minZ(), boundingBox.maxZ())
 		);
 	}
 
@@ -417,6 +426,11 @@ public class BlockPos extends Vec3i {
 		}
 
 		@Override
+		public BlockPos multiply(int i) {
+			return super.multiply(i).immutable();
+		}
+
+		@Override
 		public BlockPos relative(Direction direction, int i) {
 			return super.relative(direction, i).immutable();
 		}
@@ -460,6 +474,10 @@ public class BlockPos extends Vec3i {
 
 		public BlockPos.MutableBlockPos setWithOffset(Vec3i vec3i, int i, int j, int k) {
 			return this.set(vec3i.getX() + i, vec3i.getY() + j, vec3i.getZ() + k);
+		}
+
+		public BlockPos.MutableBlockPos setWithOffset(Vec3i vec3i, Vec3i vec3i2) {
+			return this.set(vec3i.getX() + vec3i2.getX(), vec3i.getY() + vec3i2.getY(), vec3i.getZ() + vec3i2.getZ());
 		}
 
 		public BlockPos.MutableBlockPos move(Direction direction) {

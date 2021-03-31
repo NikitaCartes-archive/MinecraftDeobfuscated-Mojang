@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.border.WorldBorder;
@@ -54,42 +52,34 @@ public class ClientboundInitializeBorderPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleInitializeBorder(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewCenterX() {
 		return this.newCenterX;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewCenterZ() {
 		return this.newCenterZ;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewSize() {
 		return this.newSize;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getOldSize() {
 		return this.oldSize;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long getLerpTime() {
 		return this.lerpTime;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getNewAbsoluteMaxSize() {
 		return this.newAbsoluteMaxSize;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getWarningTime() {
 		return this.warningTime;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getWarningBlocks() {
 		return this.warningBlocks;
 	}

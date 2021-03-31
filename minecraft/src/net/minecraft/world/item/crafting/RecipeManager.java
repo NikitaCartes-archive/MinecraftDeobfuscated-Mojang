@@ -19,8 +19,6 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -64,6 +62,10 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 			.stream()
 			.collect(ImmutableMap.toImmutableMap(Entry::getKey, entryx -> ((Builder)entryx.getValue()).build()));
 		LOGGER.info("Loaded {} recipes", map2.size());
+	}
+
+	public boolean hadErrorsLoading() {
+		return this.hasErrors;
 	}
 
 	public <C extends Container, T extends Recipe<C>> Optional<T> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
@@ -122,7 +124,6 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 			.fromJson(resourceLocation, jsonObject);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void replaceRecipes(Iterable<Recipe<?>> iterable) {
 		this.hasErrors = false;
 		Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> map = Maps.<RecipeType<?>, Map<ResourceLocation, Recipe<?>>>newHashMap();

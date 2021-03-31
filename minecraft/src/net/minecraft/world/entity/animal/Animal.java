@@ -3,8 +3,6 @@ package net.minecraft.world.entity.animal;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,6 +29,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public abstract class Animal extends AgeableMob {
+	static final int PARENT_AGE_AFTER_BREEDING = 6000;
 	private int inLove;
 	private UUID loveCause;
 
@@ -235,7 +234,6 @@ public abstract class Animal extends AgeableMob {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 18) {

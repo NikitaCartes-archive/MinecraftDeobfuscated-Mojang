@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,13 +14,14 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 import org.apache.commons.lang3.Validate;
 
 public class BannerItem extends StandingAndWallBlockItem {
+	private static final String PATTERN_PREFIX = "block.minecraft.banner.";
+
 	public BannerItem(Block block, Block block2, Item.Properties properties) {
 		super(block, block2, properties);
 		Validate.isInstanceOf(AbstractBannerBlock.class, block);
 		Validate.isInstanceOf(AbstractBannerBlock.class, block2);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static void appendHoverTextFromBannerBlockEntityTag(ItemStack itemStack, List<Component> list) {
 		CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
 		if (compoundTag != null && compoundTag.contains("Patterns")) {
@@ -43,7 +42,6 @@ public class BannerItem extends StandingAndWallBlockItem {
 		return ((AbstractBannerBlock)this.getBlock()).getColor();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		appendHoverTextFromBannerBlockEntityTag(itemStack, list);

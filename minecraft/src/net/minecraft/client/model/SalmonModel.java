@@ -13,6 +13,8 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class SalmonModel<T extends Entity> extends HierarchicalModel<T> {
+	private static final String BODY_FRONT = "body_front";
+	private static final String BODY_BACK = "body_back";
 	private final ModelPart root;
 	private final ModelPart bodyBack;
 

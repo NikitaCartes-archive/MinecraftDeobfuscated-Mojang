@@ -24,6 +24,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 		EntityType.PIGLIN_BRUTE,
 		new ResourceLocation("textures/entity/piglin/piglin_brute.png")
 	);
+	private static final float PIGLIN_CUSTOM_HEAD_SCALE = 1.0019531F;
 
 	public PiglinRenderer(
 		EntityRendererProvider.Context context,
@@ -58,6 +59,6 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 	}
 
 	protected boolean isShaking(Mob mob) {
-		return mob instanceof AbstractPiglin && ((AbstractPiglin)mob).isConverting();
+		return super.isShaking(mob) || mob instanceof AbstractPiglin && ((AbstractPiglin)mob).isConverting();
 	}
 }

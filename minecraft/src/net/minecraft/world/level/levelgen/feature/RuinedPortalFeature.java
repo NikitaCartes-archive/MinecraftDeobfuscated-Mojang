@@ -45,6 +45,13 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{
 		"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"
 	};
+	private static final float PROBABILITY_OF_GIANT_PORTAL = 0.05F;
+	private static final float PROBABILITY_OF_AIR_POCKET = 0.5F;
+	private static final float PROBABILITY_OF_UNDERGROUND = 0.5F;
+	private static final float UNDERWATER_MOSSINESS = 0.8F;
+	private static final float JUNGLE_MOSSINESS = 0.8F;
+	private static final float SWAMP_MOSSINESS = 0.5F;
+	private static final int MIN_Y = 15;
 
 	public RuinedPortalFeature(Codec<RuinedPortalConfiguration> codec) {
 		super(codec);
@@ -91,10 +98,10 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		}
 
 		List<BlockPos> list = ImmutableList.of(
-			new BlockPos(boundingBox.x0, 0, boundingBox.z0),
-			new BlockPos(boundingBox.x1, 0, boundingBox.z0),
-			new BlockPos(boundingBox.x0, 0, boundingBox.z1),
-			new BlockPos(boundingBox.x1, 0, boundingBox.z1)
+			new BlockPos(boundingBox.minX(), 0, boundingBox.minZ()),
+			new BlockPos(boundingBox.maxX(), 0, boundingBox.minZ()),
+			new BlockPos(boundingBox.minX(), 0, boundingBox.maxZ()),
+			new BlockPos(boundingBox.maxX(), 0, boundingBox.maxZ())
 		);
 		List<NoiseColumn> list2 = (List<NoiseColumn>)list.stream()
 			.map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ(), levelHeightAccessor))
@@ -127,8 +134,8 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 	}
 
 	public static class FeatureStart extends StructureStart<RuinedPortalConfiguration> {
-		protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -207,8 +214,9 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 				properties.cold = RuinedPortalFeature.isCold(blockPos4, biome);
 			}
 
-			this.pieces.add(new RuinedPortalPiece(blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos));
-			this.calculateBoundingBox();
+			this.addPiece(
+				new RuinedPortalPiece(structureManager, blockPos4, verticalPlacement, properties, resourceLocation, structureTemplate, rotation, mirror, blockPos)
+			);
 		}
 	}
 

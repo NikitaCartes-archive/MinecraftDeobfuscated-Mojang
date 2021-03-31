@@ -3,7 +3,11 @@ package net.minecraft.client;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +28,12 @@ import org.apache.logging.log4j.Logger;
 public class Screenshot {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
+	private int rowHeight;
+	private final DataOutputStream outputStream;
+	private final byte[] bytes;
+	private final int width;
+	private final int height;
+	private File file;
 
 	public static void grab(File file, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
 		grab(file, null, i, j, renderTarget, consumer);
@@ -89,5 +99,59 @@ public class Screenshot {
 
 			i++;
 		}
+	}
+
+	public Screenshot(File file, int i, int j, int k) throws IOException {
+		this.width = i;
+		this.height = j;
+		this.rowHeight = k;
+		File file2 = new File(file, "screenshots");
+		file2.mkdir();
+		String string = "huge_" + DATE_FORMAT.format(new Date());
+		int l = 1;
+
+		while ((this.file = new File(file2, string + (l == 1 ? "" : "_" + l) + ".tga")).exists()) {
+			l++;
+		}
+
+		byte[] bs = new byte[18];
+		bs[2] = 2;
+		bs[12] = (byte)(i % 256);
+		bs[13] = (byte)(i / 256);
+		bs[14] = (byte)(j % 256);
+		bs[15] = (byte)(j / 256);
+		bs[16] = 24;
+		this.bytes = new byte[i * k * 3];
+		this.outputStream = new DataOutputStream(new FileOutputStream(this.file));
+		this.outputStream.write(bs);
+	}
+
+	public void addRegion(ByteBuffer byteBuffer, int i, int j, int k, int l) {
+		int m = k;
+		int n = l;
+		if (k > this.width - i) {
+			m = this.width - i;
+		}
+
+		if (l > this.height - j) {
+			n = this.height - j;
+		}
+
+		this.rowHeight = n;
+
+		for (int o = 0; o < n; o++) {
+			byteBuffer.position((l - n) * k * 3 + o * k * 3);
+			int p = (i + o * this.width) * 3;
+			byteBuffer.get(this.bytes, p, m * 3);
+		}
+	}
+
+	public void saveRow() throws IOException {
+		this.outputStream.write(this.bytes, 0, this.width * 3 * this.rowHeight);
+	}
+
+	public File close() throws IOException {
+		this.outputStream.close();
+		return this.file;
 	}
 }

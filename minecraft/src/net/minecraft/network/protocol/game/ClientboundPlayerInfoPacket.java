@@ -8,8 +8,6 @@ import com.mojang.authlib.properties.PropertyMap;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -63,12 +61,10 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handlePlayerInfo(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<ClientboundPlayerInfoPacket.PlayerUpdate> getEntries() {
 		return this.entries;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ClientboundPlayerInfoPacket.Action getAction() {
 		return this.action;
 	}

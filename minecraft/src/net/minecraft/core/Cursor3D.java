@@ -1,6 +1,10 @@
 package net.minecraft.core;
 
 public class Cursor3D {
+	public static final int TYPE_INSIDE = 0;
+	public static final int TYPE_FACE = 1;
+	public static final int TYPE_EDGE = 2;
+	public static final int TYPE_CORNER = 3;
 	private final int originX;
 	private final int originY;
 	private final int originZ;

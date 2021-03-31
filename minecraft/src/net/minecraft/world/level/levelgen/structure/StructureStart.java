@@ -4,12 +4,12 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -25,11 +25,10 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class StructureStart<C extends FeatureConfiguration> {
+public abstract class StructureStart<C extends FeatureConfiguration> implements StructurePieceAccessor {
 	private static final Logger LOGGER = LogManager.getLogger();
-	public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(
-		StructureFeature.MINESHAFT, new ChunkPos(0, 0), BoundingBox.getUnknownBox(), 0, 0L
-	) {
+	public static final String INVALID_START_ID = "INVALID";
+	public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(null, new ChunkPos(0, 0), 0, 0L) {
 		public void generatePieces(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,
@@ -40,21 +39,26 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 			LevelHeightAccessor levelHeightAccessor
 		) {
 		}
+
+		@Override
+		public boolean isValid() {
+			return false;
+		}
 	};
 	private final StructureFeature<C> feature;
 	protected final List<StructurePiece> pieces = Lists.<StructurePiece>newArrayList();
-	protected BoundingBox boundingBox;
 	private final ChunkPos chunkPos;
 	private int references;
 	protected final WorldgenRandom random;
+	@Nullable
+	private BoundingBox cachedBoundingBox;
 
-	public StructureStart(StructureFeature<C> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
+	public StructureStart(StructureFeature<C> structureFeature, ChunkPos chunkPos, int i, long l) {
 		this.feature = structureFeature;
 		this.chunkPos = chunkPos;
 		this.references = i;
 		this.random = new WorldgenRandom();
 		this.random.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
-		this.boundingBox = boundingBox;
 	}
 
 	public abstract void generatePieces(
@@ -68,7 +72,14 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 	);
 
 	public BoundingBox getBoundingBox() {
-		return this.boundingBox;
+		if (this.cachedBoundingBox == null) {
+			synchronized (this.pieces) {
+				this.cachedBoundingBox = (BoundingBox)BoundingBox.encapsulatingBoxes(this.pieces.stream().map(StructurePiece::getBoundingBox)::iterator)
+					.orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox without pieces"));
+			}
+		}
+
+		return this.cachedBoundingBox;
 	}
 
 	public List<StructurePiece> getPieces() {
@@ -87,7 +98,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 			if (!this.pieces.isEmpty()) {
 				BoundingBox boundingBox2 = ((StructurePiece)this.pieces.get(0)).boundingBox;
 				BlockPos blockPos = boundingBox2.getCenter();
-				BlockPos blockPos2 = new BlockPos(blockPos.getX(), boundingBox2.y0, blockPos.getZ());
+				BlockPos blockPos2 = new BlockPos(blockPos.getX(), boundingBox2.minY(), blockPos.getZ());
 				Iterator<StructurePiece> iterator = this.pieces.iterator();
 
 				while (iterator.hasNext()) {
@@ -97,17 +108,7 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 						iterator.remove();
 					}
 				}
-
-				this.calculateBoundingBox();
 			}
-		}
-	}
-
-	protected void calculateBoundingBox() {
-		this.boundingBox = BoundingBox.getUnknownBox();
-
-		for (StructurePiece structurePiece : this.pieces) {
-			this.boundingBox.expand(structurePiece.getBoundingBox());
 		}
 	}
 
@@ -118,7 +119,6 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 			compoundTag.putInt("ChunkX", chunkPos.x);
 			compoundTag.putInt("ChunkZ", chunkPos.z);
 			compoundTag.putInt("references", this.references);
-			BoundingBox.CODEC.encodeStart(NbtOps.INSTANCE, this.boundingBox).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("BB", tag));
 			ListTag listTag = new ListTag();
 			synchronized (this.pieces) {
 				for (StructurePiece structurePiece : this.pieces) {
@@ -136,21 +136,19 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 
 	protected void moveBelowSeaLevel(int i, int j, Random random, int k) {
 		int l = i - k;
-		int m = this.boundingBox.getYSpan() + j + 1;
+		BoundingBox boundingBox = this.getBoundingBox();
+		int m = boundingBox.getYSpan() + j + 1;
 		if (m < l) {
 			m += random.nextInt(l - m);
 		}
 
-		int n = m - this.boundingBox.y1;
-		this.boundingBox.move(0, n, 0);
-
-		for (StructurePiece structurePiece : this.pieces) {
-			structurePiece.move(0, n, 0);
-		}
+		int n = m - boundingBox.maxY();
+		this.offsetPiecesVertically(n);
 	}
 
 	protected void moveInsideHeights(Random random, int i, int j) {
-		int k = j - i + 1 - this.boundingBox.getYSpan();
+		BoundingBox boundingBox = this.getBoundingBox();
+		int k = j - i + 1 - boundingBox.getYSpan();
 		int l;
 		if (k > 1) {
 			l = i + random.nextInt(k);
@@ -158,12 +156,20 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 			l = i;
 		}
 
-		int m = l - this.boundingBox.y0;
-		this.boundingBox.move(0, m, 0);
+		int m = l - boundingBox.minY();
+		this.offsetPiecesVertically(m);
+	}
 
+	protected void offsetPiecesVertically(int i) {
 		for (StructurePiece structurePiece : this.pieces) {
-			structurePiece.move(0, m, 0);
+			structurePiece.move(0, i, 0);
 		}
+
+		this.invalidateCache();
+	}
+
+	private void invalidateCache() {
+		this.cachedBoundingBox = null;
 	}
 
 	public boolean isValid() {
@@ -196,5 +202,47 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 
 	public StructureFeature<?> getFeature() {
 		return this.feature;
+	}
+
+	@Override
+	public void addPiece(StructurePiece structurePiece) {
+		this.pieces.add(structurePiece);
+		this.invalidateCache();
+	}
+
+	@Nullable
+	@Override
+	public StructurePiece findCollisionPiece(BoundingBox boundingBox) {
+		return findCollisionPiece(this.pieces, boundingBox);
+	}
+
+	public void clearPieces() {
+		this.pieces.clear();
+		this.invalidateCache();
+	}
+
+	public boolean hasNoPieces() {
+		return this.pieces.isEmpty();
+	}
+
+	@Nullable
+	public static StructurePiece findCollisionPiece(List<StructurePiece> list, BoundingBox boundingBox) {
+		for (StructurePiece structurePiece : list) {
+			if (structurePiece.getBoundingBox().intersects(boundingBox)) {
+				return structurePiece;
+			}
+		}
+
+		return null;
+	}
+
+	protected boolean isInsidePiece(BlockPos blockPos) {
+		for (StructurePiece structurePiece : this.pieces) {
+			if (structurePiece.getBoundingBox().isInside(blockPos)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

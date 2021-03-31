@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,6 +22,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class FireworkRocketItem extends Item {
+	public static final String TAG_FIREWORKS = "Fireworks";
+	public static final String TAG_EXPLOSION = "Explosion";
+	public static final String TAG_EXPLOSIONS = "Explosions";
+	public static final String TAG_FLIGHT = "Flight";
+	public static final String TAG_EXPLOSION_TYPE = "Type";
+	public static final String TAG_EXPLOSION_TRAIL = "Trail";
+	public static final String TAG_EXPLOSION_FLICKER = "Flicker";
+	public static final String TAG_EXPLOSION_COLORS = "Colors";
+	public static final String TAG_EXPLOSION_FADECOLORS = "FadeColors";
+	public static final double ROCKET_PLACEMENT_OFFSET = 0.15;
+
 	public FireworkRocketItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -68,7 +77,6 @@ public class FireworkRocketItem extends Item {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		CompoundTag compoundTag = itemStack.getTagElement("Fireworks");
@@ -129,12 +137,10 @@ public class FireworkRocketItem extends Item {
 			return this.id;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public String getName() {
 			return this.name;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public static FireworkRocketItem.Shape byId(int i) {
 			return i >= 0 && i < BY_ID.length ? BY_ID[i] : SMALL_BALL;
 		}

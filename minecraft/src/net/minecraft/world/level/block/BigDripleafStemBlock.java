@@ -6,6 +6,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,10 +23,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements BonemealableBlock, SimpleWaterloggedBlock {
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-	private static final VoxelShape NORTH_SHAPE = Block.box(5.0, 0.0, 8.0, 11.0, 16.0, 14.0);
-	private static final VoxelShape SOUTH_SHAPE = Block.box(5.0, 0.0, 2.0, 11.0, 16.0, 8.0);
-	private static final VoxelShape EAST_SHAPE = Block.box(2.0, 0.0, 5.0, 8.0, 16.0, 11.0);
-	private static final VoxelShape WEST_SHAPE = Block.box(8.0, 0.0, 5.0, 14.0, 16.0, 11.0);
+	private static final int STEM_WIDTH = 6;
+	protected static final VoxelShape NORTH_SHAPE = Block.box(5.0, 0.0, 9.0, 11.0, 16.0, 15.0);
+	protected static final VoxelShape SOUTH_SHAPE = Block.box(5.0, 0.0, 1.0, 11.0, 16.0, 7.0);
+	protected static final VoxelShape EAST_SHAPE = Block.box(1.0, 0.0, 5.0, 7.0, 16.0, 11.0);
+	protected static final VoxelShape WEST_SHAPE = Block.box(9.0, 0.0, 5.0, 15.0, 16.0, 11.0);
 
 	protected BigDripleafStemBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -122,5 +124,10 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 			place(serverLevel, blockPos2, blockState.getFluidState(), direction);
 			BigDripleafBlock.place(serverLevel, blockPos3, fluidState, direction);
 		}
+	}
+
+	@Override
+	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		return new ItemStack(Blocks.BIG_DRIPLEAF);
 	}
 }

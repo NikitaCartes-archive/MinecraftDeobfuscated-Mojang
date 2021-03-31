@@ -3,8 +3,6 @@ package net.minecraft.core.particles;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,7 +47,6 @@ public class BlockParticleOption implements ParticleOptions {
 		return this.type;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockState getState() {
 		return this.state;
 	}

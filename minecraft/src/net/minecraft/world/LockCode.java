@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 @Immutable
 public class LockCode {
 	public static final LockCode NO_LOCK = new LockCode("");
+	public static final String TAG_LOCK = "Lock";
 	private final String key;
 
 	public LockCode(String string) {

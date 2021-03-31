@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 public class StackedContents {
+	private static final int EMPTY = 0;
 	public final Int2IntMap contents = new Int2IntOpenHashMap();
 
 	public void accountSimpleStack(ItemStack itemStack) {

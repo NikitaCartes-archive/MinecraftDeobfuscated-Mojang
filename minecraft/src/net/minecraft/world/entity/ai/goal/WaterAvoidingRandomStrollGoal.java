@@ -6,6 +6,7 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class WaterAvoidingRandomStrollGoal extends RandomStrollGoal {
+	public static final float PROBABILITY = 0.001F;
 	protected final float probability;
 
 	public WaterAvoidingRandomStrollGoal(PathfinderMob pathfinderMob, double d) {

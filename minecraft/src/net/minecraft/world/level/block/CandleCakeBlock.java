@@ -3,8 +3,6 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -30,6 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CandleCakeBlock extends AbstractCandleBlock {
 	public static final BooleanProperty LIT = AbstractCandleBlock.LIT;
+	protected static final float AABB_OFFSET = 1.0F;
 	protected static final VoxelShape CAKE_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 8.0, 15.0);
 	protected static final VoxelShape CANDLE_SHAPE = Block.box(7.0, 8.0, 7.0, 9.0, 14.0, 9.0);
 	protected static final VoxelShape SHAPE = Shapes.or(CAKE_SHAPE, CANDLE_SHAPE);
@@ -42,7 +41,6 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 		BY_CANDLE.put(block, this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	protected Iterable<Vec3> getParticleOffsets(BlockState blockState) {
 		return PARTICLE_OFFSETS;
@@ -82,7 +80,6 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 		builder.add(LIT);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Blocks.CAKE);

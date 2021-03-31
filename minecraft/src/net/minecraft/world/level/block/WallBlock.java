@@ -35,6 +35,12 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private final Map<BlockState, VoxelShape> shapeByIndex;
 	private final Map<BlockState, VoxelShape> collisionShapeByIndex;
+	private static final int WALL_WIDTH = 3;
+	private static final int WALL_HEIGHT = 14;
+	private static final int POST_WIDTH = 4;
+	private static final int POST_COVER_WIDTH = 1;
+	private static final int WALL_COVER_START = 7;
+	private static final int WALL_COVER_END = 9;
 	private static final VoxelShape POST_TEST = Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0);
 	private static final VoxelShape NORTH_TEST = Block.box(7.0, 0.0, 0.0, 9.0, 16.0, 9.0);
 	private static final VoxelShape SOUTH_TEST = Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 16.0);

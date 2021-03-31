@@ -20,6 +20,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SeagrassBlock extends BushBlock implements BonemealableBlock, LiquidBlockContainer {
+	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0);
 
 	protected SeagrassBlock(BlockBehaviour.Properties properties) {

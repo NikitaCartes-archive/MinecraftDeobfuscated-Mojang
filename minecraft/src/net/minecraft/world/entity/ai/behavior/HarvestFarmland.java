@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HarvestFarmland extends Behavior<Villager> {
+	private static final int HARVEST_DURATION = 200;
+	public static final float SPEED_MODIFIER = 0.5F;
 	@Nullable
 	private BlockPos aboveFarmlandPos;
 	private long nextOkStartTime;

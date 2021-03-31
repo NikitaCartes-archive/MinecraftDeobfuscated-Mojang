@@ -8,6 +8,10 @@ import net.minecraft.world.entity.monster.Guardian;
 
 @Environment(EnvType.CLIENT)
 public class GuardianAttackSoundInstance extends AbstractTickableSoundInstance {
+	private static final float VOLUME_MIN = 0.0F;
+	private static final float VOLUME_SCALE = 1.0F;
+	private static final float PITCH_MIN = 0.7F;
+	private static final float PITCH_SCALE = 0.5F;
 	private final Guardian guardian;
 
 	public GuardianAttackSoundInstance(Guardian guardian) {

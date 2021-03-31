@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ToastComponent extends GuiComponent {
+	private static final int VISIBLE_TOASTS = 5;
 	private final Minecraft minecraft;
 	private final ToastComponent.ToastInstance<?>[] visible = new ToastComponent.ToastInstance[5];
 	private final Deque<Toast> queued = Queues.<Toast>newArrayDeque();
@@ -70,6 +71,7 @@ public class ToastComponent extends GuiComponent {
 
 	@Environment(EnvType.CLIENT)
 	class ToastInstance<T extends Toast> {
+		private static final long ANIMATION_TIME = 600L;
 		private final T toast;
 		private long animationTime = -1L;
 		private long visibleTime = -1L;

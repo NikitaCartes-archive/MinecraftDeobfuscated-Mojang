@@ -125,6 +125,14 @@ public enum OctahedralGroup implements StringRepresentable {
 		return cayleyTable[this.ordinal()][octahedralGroup.ordinal()];
 	}
 
+	public OctahedralGroup inverse() {
+		return inverseTable[this.ordinal()];
+	}
+
+	public Matrix3f transformation() {
+		return this.transformation.copy();
+	}
+
 	public String toString() {
 		return this.name;
 	}

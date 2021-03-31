@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 
 @Environment(EnvType.CLIENT)
 public class RealmsPersistence {
+	private static final String FILE_NAME = "realms_persistence.json";
 	private static final GuardedSerializer GSON = new GuardedSerializer();
 
 	public RealmsPersistence.RealmsPersistenceData read() {

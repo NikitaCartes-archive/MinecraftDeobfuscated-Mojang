@@ -88,6 +88,12 @@ public class Gui extends GuiComponent {
 	private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
 	private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = new ResourceLocation("textures/misc/powder_snow_outline.png");
 	private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
+	private static final int COLOR_WHITE = 16777215;
+	private static final float MIN_CROSSHAIR_ATTACK_SPEED = 5.0F;
+	private static final int NUM_HEARTS_PER_ROW = 10;
+	private static final int LINE_HEIGHT = 10;
+	private static final String SPACER = ": ";
+	private static final float PORTAL_OVERLAY_ALPHA_MIN = 0.2F;
 	private final Random random = new Random();
 	private final Minecraft minecraft;
 	private final ItemRenderer itemRenderer;
@@ -160,6 +166,7 @@ public class Gui extends GuiComponent {
 			this.renderVignette(this.minecraft.getCameraEntity());
 		} else {
 			RenderSystem.enableDepthTest();
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.defaultBlendFunc();
 		}
 

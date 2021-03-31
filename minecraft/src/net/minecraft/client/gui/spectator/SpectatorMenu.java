@@ -20,6 +20,7 @@ public class SpectatorMenu {
 	private static final SpectatorMenuItem SCROLL_LEFT = new SpectatorMenu.ScrollMenuItem(-1, true);
 	private static final SpectatorMenuItem SCROLL_RIGHT_ENABLED = new SpectatorMenu.ScrollMenuItem(1, true);
 	private static final SpectatorMenuItem SCROLL_RIGHT_DISABLED = new SpectatorMenu.ScrollMenuItem(1, false);
+	private static final int MAX_PER_PAGE = 8;
 	private static final Component CLOSE_MENU_TEXT = new TranslatableComponent("spectatorMenu.close");
 	private static final Component PREVIOUS_PAGE_TEXT = new TranslatableComponent("spectatorMenu.previous_page");
 	private static final Component NEXT_PAGE_TEXT = new TranslatableComponent("spectatorMenu.next_page");

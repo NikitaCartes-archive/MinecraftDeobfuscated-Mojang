@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -22,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class PotionItem extends Item {
+	private static final int DRINK_DURATION = 32;
+
 	public PotionItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -89,7 +89,6 @@ public class PotionItem extends Item {
 		return PotionUtils.getPotion(itemStack).getName(this.getDescriptionId() + ".effect.");
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		PotionUtils.addPotionTooltip(itemStack, list, 1.0F);

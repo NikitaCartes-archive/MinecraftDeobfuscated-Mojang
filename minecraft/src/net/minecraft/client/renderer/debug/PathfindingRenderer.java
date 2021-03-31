@@ -25,6 +25,14 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Map<Integer, Path> pathMap = Maps.<Integer, Path>newHashMap();
 	private final Map<Integer, Float> pathMaxDist = Maps.<Integer, Float>newHashMap();
 	private final Map<Integer, Long> creationMap = Maps.<Integer, Long>newHashMap();
+	private static final long TIMEOUT = 5000L;
+	private static final float MAX_RENDER_DIST = 80.0F;
+	private static final boolean SHOW_OPEN_CLOSED = true;
+	private static final boolean SHOW_OPEN_CLOSED_COST_MALUS = false;
+	private static final boolean SHOW_OPEN_CLOSED_NODE_TYPE_WITH_TEXT = false;
+	private static final boolean SHOW_OPEN_CLOSED_NODE_TYPE_WITH_BOX = true;
+	private static final boolean SHOW_GROUND_LABELS = true;
+	private static final float TEXT_SCALE = 0.02F;
 
 	public void addPath(int i, Path path, float f) {
 		this.pathMap.put(i, path);

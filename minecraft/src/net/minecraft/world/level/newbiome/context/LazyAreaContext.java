@@ -8,6 +8,7 @@ import net.minecraft.world.level.newbiome.area.LazyArea;
 import net.minecraft.world.level.newbiome.layer.traits.PixelTransformer;
 
 public class LazyAreaContext implements BigContext<LazyArea> {
+	private static final int MAX_CACHE = 1024;
 	private final Long2IntLinkedOpenHashMap cache;
 	private final int maxCache;
 	private final ImprovedNoise biomeNoise;

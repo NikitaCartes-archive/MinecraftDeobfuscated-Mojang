@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ChangeOverTimeBlock<T extends Enum<T>> {
+	int SCAN_DISTANCE = 4;
+
 	Optional<BlockState> getNext(BlockState blockState);
 
 	float getChanceModifier();

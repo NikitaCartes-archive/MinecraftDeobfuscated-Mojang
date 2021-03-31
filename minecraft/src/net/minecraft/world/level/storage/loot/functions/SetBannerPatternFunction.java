@@ -1,7 +1,6 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
@@ -49,6 +48,33 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 	@Override
 	public LootItemFunctionType getType() {
 		return LootItemFunctions.SET_BANNER_PATTERN;
+	}
+
+	public static SetBannerPatternFunction.Builder setBannerPattern(boolean bl) {
+		return new SetBannerPatternFunction.Builder(bl);
+	}
+
+	public static class Builder extends LootItemConditionalFunction.Builder<SetBannerPatternFunction.Builder> {
+		private final ImmutableList.Builder<Pair<BannerPattern, DyeColor>> patterns = ImmutableList.builder();
+		private final boolean append;
+
+		private Builder(boolean bl) {
+			this.append = bl;
+		}
+
+		protected SetBannerPatternFunction.Builder getThis() {
+			return this;
+		}
+
+		@Override
+		public LootItemFunction build() {
+			return new SetBannerPatternFunction(this.getConditions(), this.patterns.build(), this.append);
+		}
+
+		public SetBannerPatternFunction.Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
+			this.patterns.add(Pair.of(bannerPattern, dyeColor));
+			return this;
+		}
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetBannerPatternFunction> {

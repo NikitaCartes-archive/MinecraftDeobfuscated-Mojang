@@ -14,6 +14,7 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSettingsScreen extends RealmsScreen {
+	private static final int COMPONENT_WIDTH = 212;
 	private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.name");
 	private static final Component DESCRIPTION_LABEL = new TranslatableComponent("mco.configure.world.description");
 	private final RealmsConfigureWorldScreen configureWorldScreen;

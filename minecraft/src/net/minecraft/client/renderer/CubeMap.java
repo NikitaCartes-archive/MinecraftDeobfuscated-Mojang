@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class CubeMap {
+	private static final int SIDES = 6;
 	private final ResourceLocation[] images = new ResourceLocation[6];
 
 	public CubeMap(ResourceLocation resourceLocation) {

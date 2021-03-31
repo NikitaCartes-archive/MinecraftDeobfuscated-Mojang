@@ -4,8 +4,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 
 public interface StatFormatter {
@@ -40,6 +38,5 @@ public interface StatFormatter {
 		}
 	};
 
-	@Environment(EnvType.CLIENT)
 	String format(int i);
 }

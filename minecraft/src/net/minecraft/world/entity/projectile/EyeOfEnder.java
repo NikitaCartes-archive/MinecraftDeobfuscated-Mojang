@@ -1,9 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,10 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = ItemSupplier.class
-	)})
 public class EyeOfEnder extends Entity implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(EyeOfEnder.class, EntityDataSerializers.ITEM_STACK);
 	private double tx;
@@ -65,7 +57,6 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = this.getBoundingBox().getSize() * 4.0;
@@ -98,7 +89,6 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		this.surviveAfterDeath = this.random.nextInt(5) > 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpMotion(double d, double e, double f) {
 		this.setDeltaMovement(d, e, f);

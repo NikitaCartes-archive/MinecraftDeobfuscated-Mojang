@@ -307,6 +307,24 @@ public class ProtoChunk implements ChunkAccess {
 	}
 
 	@Override
+	public BlockPos getHeighestPosition(Heightmap.Types types) {
+		int i = this.getMinBuildHeight();
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int j = this.chunkPos.getMinBlockX(); j <= this.chunkPos.getMaxBlockX(); j++) {
+			for (int k = this.chunkPos.getMinBlockZ(); k <= this.chunkPos.getMaxBlockZ(); k++) {
+				int l = this.getHeight(types, j & 15, k & 15);
+				if (l > i) {
+					i = l;
+					mutableBlockPos.set(j, l, k);
+				}
+			}
+		}
+
+		return mutableBlockPos.immutable();
+	}
+
+	@Override
 	public ChunkPos getPos() {
 		return this.chunkPos;
 	}

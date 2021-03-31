@@ -14,8 +14,6 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -119,7 +117,6 @@ public class ActiveProfiler implements ProfileCollector {
 		this.push(string);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void popPush(Supplier<String> supplier) {
 		this.pop();
@@ -150,7 +147,6 @@ public class ActiveProfiler implements ProfileCollector {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ActiveProfiler.PathEntry getEntry(String string) {
 		return (ActiveProfiler.PathEntry)this.entries.get(string);

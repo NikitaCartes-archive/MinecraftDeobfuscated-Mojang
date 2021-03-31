@@ -20,6 +20,9 @@ import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
 public class PlayerItemInHandLayer<T extends Player, M extends EntityModel<T> & ArmedModel & HeadedModel> extends ItemInHandLayer<T, M> {
+	private static final float X_ROT_MIN = (float) (-Math.PI / 6);
+	private static final float X_ROT_MAX = (float) (Math.PI / 2);
+
 	public PlayerItemInHandLayer(RenderLayerParent<T, M> renderLayerParent) {
 		super(renderLayerParent);
 	}

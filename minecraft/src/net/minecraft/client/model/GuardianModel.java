@@ -22,6 +22,10 @@ public class GuardianModel extends HierarchicalModel<Guardian> {
 	private static final float[] SPIKE_X = new float[]{0.0F, 0.0F, 8.0F, -8.0F, -8.0F, 8.0F, 8.0F, -8.0F, 0.0F, 0.0F, 8.0F, -8.0F};
 	private static final float[] SPIKE_Y = new float[]{-8.0F, -8.0F, -8.0F, -8.0F, 0.0F, 0.0F, 0.0F, 0.0F, 8.0F, 8.0F, 8.0F, 8.0F};
 	private static final float[] SPIKE_Z = new float[]{8.0F, -8.0F, 0.0F, 0.0F, -8.0F, -8.0F, 8.0F, 8.0F, 8.0F, -8.0F, 0.0F, 0.0F};
+	private static final String EYE = "eye";
+	private static final String TAIL_0 = "tail0";
+	private static final String TAIL_1 = "tail1";
+	private static final String TAIL_2 = "tail2";
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart eye;

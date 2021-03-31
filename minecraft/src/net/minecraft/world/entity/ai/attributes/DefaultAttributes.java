@@ -30,6 +30,7 @@ import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -97,6 +98,7 @@ public class DefaultAttributes {
 		.put(EntityType.GHAST, Ghast.createAttributes().build())
 		.put(EntityType.GIANT, Giant.createAttributes().build())
 		.put(EntityType.GLOW_SQUID, GlowSquid.createAttributes().build())
+		.put(EntityType.GOAT, Goat.createAttributes().build())
 		.put(EntityType.GUARDIAN, Guardian.createAttributes().build())
 		.put(EntityType.HOGLIN, Hoglin.createAttributes().build())
 		.put(EntityType.HORSE, AbstractHorse.createBaseHorseAttributes().build())

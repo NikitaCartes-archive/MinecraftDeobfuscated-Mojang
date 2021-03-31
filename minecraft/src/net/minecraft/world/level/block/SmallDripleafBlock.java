@@ -27,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class SmallDripleafBlock extends DoublePlantBlock implements BonemealableBlock, SimpleWaterloggedBlock {
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 13.0, 14.0);
 
 	public SmallDripleafBlock(BlockBehaviour.Properties properties) {
@@ -118,6 +119,7 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		if (blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER) {
+			serverLevel.setBlock(blockPos.above(), Blocks.AIR.defaultBlockState(), 16);
 			BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos, blockState.getValue(FACING));
 		} else {
 			BlockPos blockPos2 = blockPos.below();

@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.function.BiConsumer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePacketListener> {
+	private static final int POS_IN_SECTION_BITS = 12;
 	private final SectionPos sectionPos;
 	private final short[] positions;
 	private final BlockState[] states;
@@ -72,7 +71,6 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean shouldSuppressLightUpdates() {
 		return this.suppressLightUpdates;
 	}

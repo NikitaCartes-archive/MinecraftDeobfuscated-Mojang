@@ -11,6 +11,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.phys.AABB;
 
 public class ResetUniversalAngerTargetGoal<T extends Mob & NeutralMob> extends Goal {
+	private static final int ALERT_RANGE_Y = 10;
 	private final T mob;
 	private final boolean alertOthersOfSameType;
 	private int lastHurtByPlayerTimestamp;

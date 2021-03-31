@@ -1,7 +1,5 @@
 package net.minecraft.world.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public interface LevelTimeAccess extends LevelReader {
@@ -15,7 +13,6 @@ public interface LevelTimeAccess extends LevelReader {
 		return this.dimensionType().timeOfDay(this.dayTime());
 	}
 
-	@Environment(EnvType.CLIENT)
 	default int getMoonPhase() {
 		return this.dimensionType().moonPhase(this.dayTime());
 	}

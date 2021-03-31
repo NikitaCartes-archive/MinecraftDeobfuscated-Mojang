@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -45,7 +43,6 @@ public class BlastFurnaceBlock extends AbstractFurnaceBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(LIT)) {

@@ -14,6 +14,10 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class FollowOwnerGoal extends Goal {
+	public static final int TELEPORT_WHEN_DISTANCE_IS = 12;
+	private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
+	private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
+	private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
 	private final TamableAnimal tamable;
 	private LivingEntity owner;
 	private final LevelReader level;

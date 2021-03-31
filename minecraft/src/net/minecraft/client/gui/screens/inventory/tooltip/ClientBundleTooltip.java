@@ -17,6 +17,11 @@ import net.minecraft.world.item.ItemStack;
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
 	public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/container/bundle.png");
+	private static final int MARGIN_Y = 4;
+	private static final int BORDER_WIDTH = 1;
+	private static final int TEX_SIZE = 128;
+	private static final int SLOT_SIZE_X = 18;
+	private static final int SLOT_SIZE_Y = 20;
 	private final NonNullList<ItemStack> items;
 	private final int weight;
 

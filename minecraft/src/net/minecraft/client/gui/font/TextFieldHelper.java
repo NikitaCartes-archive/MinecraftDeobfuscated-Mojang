@@ -140,9 +140,17 @@ public class TextFieldHelper {
 		}
 	}
 
+	public void moveByChars(int i) {
+		this.moveByChars(i, false);
+	}
+
 	public void moveByChars(int i, boolean bl) {
 		this.cursorPos = Util.offsetByCodepoints((String)this.getMessageFn.get(), this.cursorPos, i);
 		this.resetSelectionIfNeeded(bl);
+	}
+
+	public void moveByWords(int i) {
+		this.moveByWords(i, false);
 	}
 
 	public void moveByWords(int i, boolean bl) {
@@ -208,6 +216,10 @@ public class TextFieldHelper {
 		}
 	}
 
+	public void setCursorToStart() {
+		this.setCursorToStart(false);
+	}
+
 	private void setCursorToStart(boolean bl) {
 		this.cursorPos = 0;
 		this.resetSelectionIfNeeded(bl);
@@ -226,6 +238,10 @@ public class TextFieldHelper {
 		return this.cursorPos;
 	}
 
+	public void setCursorPos(int i) {
+		this.setCursorPos(i, true);
+	}
+
 	public void setCursorPos(int i, boolean bl) {
 		this.cursorPos = this.clampToMsgLength(i);
 		this.resetSelectionIfNeeded(bl);
@@ -233,6 +249,10 @@ public class TextFieldHelper {
 
 	public int getSelectionPos() {
 		return this.selectionPos;
+	}
+
+	public void setSelectionPos(int i) {
+		this.selectionPos = this.clampToMsgLength(i);
 	}
 
 	public void setSelectionRange(int i, int j) {

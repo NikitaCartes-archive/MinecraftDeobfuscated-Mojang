@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -37,18 +35,15 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleOpenScreen(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getContainerId() {
 		return this.containerId;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public MenuType<?> getType() {
 		return Registry.MENU.byId(this.type);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getTitle() {
 		return this.title;
 	}

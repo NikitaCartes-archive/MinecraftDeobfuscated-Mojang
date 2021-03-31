@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -18,9 +16,9 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -57,9 +55,10 @@ import net.minecraft.world.phys.Vec3;
 
 public class IronGolem extends AbstractGolem implements NeutralMob {
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(IronGolem.class, EntityDataSerializers.BYTE);
+	private static final int IRON_INGOT_HEAL_AMOUNT = 25;
 	private int attackAnimationTick;
 	private int offerFlowerTick;
-	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
 	private UUID persistentAngerTarget;
 
@@ -175,7 +174,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 
 	@Override
 	public void startPersistentAngerTimer() {
-		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
 	}
 
 	@Override
@@ -233,7 +232,6 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		return IronGolem.Crackiness.byFraction(this.getHealth() / this.getMaxHealth());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 4) {
@@ -248,7 +246,6 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getAttackAnimationTick() {
 		return this.attackAnimationTick;
 	}
@@ -301,7 +298,6 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.playSound(SoundEvents.IRON_GOLEM_STEP, 1.0F, 1.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getOfferFlowerTick() {
 		return this.offerFlowerTick;
 	}
@@ -347,7 +343,6 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.875F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));

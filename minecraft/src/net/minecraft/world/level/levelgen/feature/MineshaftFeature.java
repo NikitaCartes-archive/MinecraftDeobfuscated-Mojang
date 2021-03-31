@@ -18,7 +18,6 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
-import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
@@ -49,8 +48,8 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 	}
 
 	public static class MineShaftStart extends StructureStart<MineshaftConfiguration> {
-		public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -65,17 +64,13 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 			MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(
 				0, this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2), mineshaftConfiguration.type
 			);
-			this.pieces.add(mineShaftRoom);
-			mineShaftRoom.addChildren(mineShaftRoom, this.pieces, this.random);
-			this.calculateBoundingBox();
+			this.addPiece(mineShaftRoom);
+			mineShaftRoom.addChildren(mineShaftRoom, this, this.random);
 			if (mineshaftConfiguration.type == MineshaftFeature.Type.MESA) {
 				int i = -5;
-				int j = chunkGenerator.getSeaLevel() - this.boundingBox.y1 + this.boundingBox.getYSpan() / 2 - -5;
-				this.boundingBox.move(0, j, 0);
-
-				for (StructurePiece structurePiece : this.pieces) {
-					structurePiece.move(0, j, 0);
-				}
+				BoundingBox boundingBox = this.getBoundingBox();
+				int j = chunkGenerator.getSeaLevel() - boundingBox.maxY() + boundingBox.getYSpan() / 2 - -5;
+				this.offsetPiecesVertically(j);
 			} else {
 				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
 			}

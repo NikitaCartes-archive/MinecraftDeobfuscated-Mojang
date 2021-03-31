@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
@@ -25,6 +26,16 @@ import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BeehiveBlockEntity extends BlockEntity {
+	public static final String TAG_FLOWER_POS = "FlowerPos";
+	public static final String MIN_OCCUPATION_TICKS = "MinOccupationTicks";
+	public static final String ENTITY_DATA = "EntityData";
+	public static final String TICKS_IN_HIVE = "TicksInHive";
+	public static final String HAS_NECTAR = "HasNectar";
+	public static final String BEES = "Bees";
+	public static final int MAX_OCCUPANTS = 3;
+	private static final int MIN_TICKS_BEFORE_REENTERING_HIVE = 400;
+	private static final int MIN_OCCUPATION_TICKS_NECTAR = 2400;
+	public static final int MIN_OCCUPATION_TICKS_NECTARLESS = 600;
 	private final List<BeehiveBlockEntity.BeeData> stored = Lists.<BeehiveBlockEntity.BeeData>newArrayList();
 	@Nullable
 	private BlockPos savedFlowerPos;
@@ -92,6 +103,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		this.addOccupantWithPresetTicks(entity, bl, 0);
 	}
 
+	@VisibleForDebug
 	public int getOccupantCount() {
 		return this.stored.size();
 	}
@@ -100,6 +112,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		return (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
 	}
 
+	@VisibleForDebug
 	public boolean isSedated() {
 		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos());
 	}
@@ -110,7 +123,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 			entity.ejectPassengers();
 			CompoundTag compoundTag = new CompoundTag();
 			entity.save(compoundTag);
-			this.stored.add(new BeehiveBlockEntity.BeeData(compoundTag, i, bl ? 2400 : 600));
+			this.storeBee(compoundTag, i, bl);
 			if (this.level != null) {
 				if (entity instanceof Bee) {
 					Bee bee = (Bee)entity;
@@ -126,6 +139,10 @@ public class BeehiveBlockEntity extends BlockEntity {
 
 			entity.discard();
 		}
+	}
+
+	public void storeBee(CompoundTag compoundTag, int i, boolean bl) {
+		this.stored.add(new BeehiveBlockEntity.BeeData(compoundTag, i, bl ? 2400 : 600));
 	}
 
 	private static boolean releaseOccupant(

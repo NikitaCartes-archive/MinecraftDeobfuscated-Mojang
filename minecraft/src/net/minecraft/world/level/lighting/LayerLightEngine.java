@@ -2,8 +2,6 @@ package net.minecraft.world.level.lighting;
 
 import java.util.Arrays;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -21,12 +19,14 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S extends LayerLightSectionStorage<M>>
 	extends DynamicGraphMinFixedPoint
 	implements LayerLightEventListener {
+	public static final long SELF_SOURCE = Long.MAX_VALUE;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	protected final LightChunkGetter chunkSource;
 	protected final LightLayer layer;
 	protected final S storage;
 	private boolean runningLightUpdates;
 	protected final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+	private static final int CACHE_SIZE = 2;
 	private final long[] lastChunkPos = new long[2];
 	private final BlockGetter[] lastChunk = new BlockGetter[2];
 
@@ -151,10 +151,12 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 		return 0;
 	}
 
+	@Override
 	public boolean hasLightWork() {
 		return this.hasWork() || this.storage.hasWork() || this.storage.hasInconsistencies();
 	}
 
+	@Override
 	public int runUpdates(int i, boolean bl, boolean bl2) {
 		if (!this.runningLightUpdates) {
 			if (this.storage.hasWork()) {
@@ -196,11 +198,11 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 		return this.storage.getLightValue(blockPos.asLong());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getDebugData(long l) {
 		return "" + this.storage.getLevel(l);
 	}
 
+	@Override
 	public void checkBlock(BlockPos blockPos) {
 		long l = blockPos.asLong();
 		this.checkNode(l);
@@ -210,6 +212,7 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 		}
 	}
 
+	@Override
 	public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
 	}
 
@@ -218,6 +221,7 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 		this.storage.updateSectionStatus(sectionPos.asLong(), bl);
 	}
 
+	@Override
 	public void enableLightSources(ChunkPos chunkPos, boolean bl) {
 		long l = SectionPos.getZeroNode(SectionPos.asLong(chunkPos.x, 0, chunkPos.z));
 		this.storage.enableLightSources(l, bl);

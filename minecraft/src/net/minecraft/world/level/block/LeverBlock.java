@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -27,6 +25,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+	protected static final int DEPTH = 6;
+	protected static final int WIDTH = 6;
+	protected static final int HEIGHT = 8;
 	protected static final VoxelShape NORTH_AABB = Block.box(5.0, 4.0, 10.0, 11.0, 12.0, 16.0);
 	protected static final VoxelShape SOUTH_AABB = Block.box(5.0, 4.0, 0.0, 11.0, 12.0, 6.0);
 	protected static final VoxelShape WEST_AABB = Block.box(10.0, 4.0, 5.0, 16.0, 12.0, 11.0);
@@ -114,7 +115,6 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 		levelAccessor.addParticle(new DustParticleOptions(DustParticleOptions.REDSTONE_PARTICLE_COLOR, f), d, e, g, 0.0, 0.0, 0.0);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(POWERED) && random.nextFloat() < 0.25F) {

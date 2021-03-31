@@ -78,5 +78,9 @@ public class TexturedModel {
 		default ResourceLocation createWithSuffix(Block block, String string, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
 			return this.get(block).createWithSuffix(block, string, biConsumer);
 		}
+
+		default TexturedModel.Provider updateTexture(Consumer<TextureMapping> consumer) {
+			return block -> this.get(block).updateTextures(consumer);
+		}
 	}
 }

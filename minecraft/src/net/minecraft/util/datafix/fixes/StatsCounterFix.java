@@ -78,6 +78,8 @@ public class StatsCounterFix extends DataFix {
 		.put("stat.sleepInBed", "minecraft:sleep_in_bed")
 		.put("stat.shulkerBoxOpened", "minecraft:open_shulker_box")
 		.build();
+	private static final String BLOCK_KEY = "stat.mineBlock";
+	private static final String NEW_BLOCK_KEY = "minecraft:mined";
 	private static final Map<String, String> ITEM_KEYS = ImmutableMap.<String, String>builder()
 		.put("stat.craftItem", "minecraft:crafted")
 		.put("stat.useItem", "minecraft:used")
@@ -134,6 +136,7 @@ public class StatsCounterFix extends DataFix {
 		.put("ZombieVillager", "minecraft:zombie_villager")
 		.put("Zombie", "minecraft:zombie")
 		.build();
+	private static final String NEW_CUSTOM_KEY = "minecraft:custom";
 
 	public StatsCounterFix(Schema schema, boolean bl) {
 		super(schema, bl);

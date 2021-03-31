@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -185,7 +183,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
@@ -241,7 +238,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		return AbstractContainerMenu.getRedstoneSignalFromContainer((Container)level.getBlockEntity(blockPos));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
@@ -255,7 +251,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static DyeColor getColorFromItem(Item item) {
 		return getColorFromBlock(Block.byItem(item));
 	}

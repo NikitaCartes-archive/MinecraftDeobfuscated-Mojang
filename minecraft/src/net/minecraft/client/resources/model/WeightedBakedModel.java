@@ -12,25 +12,26 @@ import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class WeightedBakedModel implements BakedModel {
 	private final int totalWeight;
-	private final List<WeightedBakedModel.WeightedModel> list;
+	private final List<WeightedEntry.Wrapper<BakedModel>> list;
 	private final BakedModel wrapped;
 
-	public WeightedBakedModel(List<WeightedBakedModel.WeightedModel> list) {
+	public WeightedBakedModel(List<WeightedEntry.Wrapper<BakedModel>> list) {
 		this.list = list;
-		this.totalWeight = WeighedRandom.getTotalWeight(list);
-		this.wrapped = ((WeightedBakedModel.WeightedModel)list.get(0)).model;
+		this.totalWeight = WeightedRandom.getTotalWeight(list);
+		this.wrapped = (BakedModel)((WeightedEntry.Wrapper)list.get(0)).getData();
 	}
 
 	@Override
 	public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, Random random) {
-		return (List<BakedQuad>)WeighedRandom.getWeightedItem(this.list, Math.abs((int)random.nextLong()) % this.totalWeight)
-			.map(weightedModel -> weightedModel.model.getQuads(blockState, direction, random))
+		return (List<BakedQuad>)WeightedRandom.getWeightedItem(this.list, Math.abs((int)random.nextLong()) % this.totalWeight)
+			.map(wrapper -> ((BakedModel)wrapper.getData()).getQuads(blockState, direction, random))
 			.orElse(Collections.emptyList());
 	}
 
@@ -71,11 +72,11 @@ public class WeightedBakedModel implements BakedModel {
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
-		private final List<WeightedBakedModel.WeightedModel> list = Lists.<WeightedBakedModel.WeightedModel>newArrayList();
+		private final List<WeightedEntry.Wrapper<BakedModel>> list = Lists.<WeightedEntry.Wrapper<BakedModel>>newArrayList();
 
 		public WeightedBakedModel.Builder add(@Nullable BakedModel bakedModel, int i) {
 			if (bakedModel != null) {
-				this.list.add(new WeightedBakedModel.WeightedModel(bakedModel, i));
+				this.list.add(WeightedEntry.wrap(bakedModel, i));
 			}
 
 			return this;
@@ -86,18 +87,8 @@ public class WeightedBakedModel implements BakedModel {
 			if (this.list.isEmpty()) {
 				return null;
 			} else {
-				return (BakedModel)(this.list.size() == 1 ? ((WeightedBakedModel.WeightedModel)this.list.get(0)).model : new WeightedBakedModel(this.list));
+				return (BakedModel)(this.list.size() == 1 ? (BakedModel)((WeightedEntry.Wrapper)this.list.get(0)).getData() : new WeightedBakedModel(this.list));
 			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class WeightedModel extends WeighedRandom.WeighedRandomItem {
-		protected final BakedModel model;
-
-		public WeightedModel(BakedModel bakedModel, int i) {
-			super(i);
-			this.model = bakedModel;
 		}
 	}
 }

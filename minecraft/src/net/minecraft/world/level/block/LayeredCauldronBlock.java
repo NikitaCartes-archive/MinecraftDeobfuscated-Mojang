@@ -17,7 +17,11 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 public class LayeredCauldronBlock extends AbstractCauldronBlock {
+	public static final int MIN_FILL_LEVEL = 1;
+	public static final int MAX_FILL_LEVEL = 3;
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_CAULDRON;
+	private static final int BASE_CONTENT_HEIGHT = 6;
+	private static final double HEIGHT_PER_LEVEL = 3.0;
 	public static final Predicate<Biome.Precipitation> RAIN = precipitation -> precipitation == Biome.Precipitation.RAIN;
 	public static final Predicate<Biome.Precipitation> SNOW = precipitation -> precipitation == Biome.Precipitation.SNOW;
 	private final Predicate<Biome.Precipitation> fillPredicate;
@@ -28,6 +32,7 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
 		this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(1)));
 	}
 
+	@Override
 	public boolean isFull(BlockState blockState) {
 		return (Integer)blockState.getValue(LEVEL) == 3;
 	}

@@ -173,6 +173,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 	@Environment(EnvType.CLIENT)
 	public static class NetworkServerEntry extends ServerSelectionList.Entry {
+		private static final int ICON_WIDTH = 32;
 		private static final Component LAN_SERVER_HEADER = new TranslatableComponent("lanServer.title");
 		private static final Component HIDDEN_ADDRESS_TEXT = new TranslatableComponent("selectServer.hiddenAddress");
 		private final JoinMultiplayerScreen screen;
@@ -215,6 +216,14 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 	@Environment(EnvType.CLIENT)
 	public class OnlineServerEntry extends ServerSelectionList.Entry {
+		private static final int ICON_WIDTH = 32;
+		private static final int ICON_HEIGHT = 32;
+		private static final int ICON_OVERLAY_X_MOVE_RIGHT = 0;
+		private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
+		private static final int ICON_OVERLAY_X_MOVE_DOWN = 64;
+		private static final int ICON_OVERLAY_X_MOVE_UP = 96;
+		private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
+		private static final int ICON_OVERLAY_Y_SELECTED = 32;
 		private final JoinMultiplayerScreen screen;
 		private final Minecraft minecraft;
 		private final ServerData serverData;

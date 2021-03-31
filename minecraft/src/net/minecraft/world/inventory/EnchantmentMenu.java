@@ -2,8 +2,6 @@ package net.minecraft.world.inventory;
 
 import java.util.List;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -227,13 +225,11 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		return list;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getGoldCount() {
 		ItemStack itemStack = this.enchantSlots.getItem(1);
 		return itemStack.isEmpty() ? 0 : itemStack.getCount();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getEnchantmentSeed() {
 		return this.enchantmentSeed.get();
 	}

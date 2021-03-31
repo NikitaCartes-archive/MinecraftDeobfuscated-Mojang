@@ -4,8 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public class ItemCooldowns {
@@ -47,7 +45,6 @@ public class ItemCooldowns {
 		this.onCooldownStarted(item, i);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void removeCooldown(Item item) {
 		this.cooldowns.remove(item);
 		this.onCooldownEnded(item);

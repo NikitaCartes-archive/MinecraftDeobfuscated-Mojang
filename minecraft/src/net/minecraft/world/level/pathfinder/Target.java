@@ -1,7 +1,5 @@
 package net.minecraft.world.level.pathfinder;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class Target extends Node {
@@ -13,7 +11,6 @@ public class Target extends Node {
 		super(node.x, node.y, node.z);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Target(int i, int j, int k) {
 		super(i, j, k);
 	}
@@ -33,7 +30,10 @@ public class Target extends Node {
 		this.reached = true;
 	}
 
-	@Environment(EnvType.CLIENT)
+	public boolean isReached() {
+		return this.reached;
+	}
+
 	public static Target createFromStream(FriendlyByteBuf friendlyByteBuf) {
 		Target target = new Target(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
 		target.walkedDistance = friendlyByteBuf.readFloat();

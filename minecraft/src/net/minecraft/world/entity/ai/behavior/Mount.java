@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
 public class Mount<E extends LivingEntity> extends Behavior<E> {
+	private static final int CLOSE_ENOUGH_TO_START_RIDING_DIST = 1;
 	private final float speedModifier;
 
 	public Mount(float f) {

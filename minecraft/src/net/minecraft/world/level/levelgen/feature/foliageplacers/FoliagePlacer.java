@@ -5,59 +5,57 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class FoliagePlacer {
 	public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
-	protected final UniformInt radius;
-	protected final UniformInt offset;
+	protected final IntProvider radius;
+	protected final IntProvider offset;
 
-	protected static <P extends FoliagePlacer> P2<Mu<P>, UniformInt, UniformInt> foliagePlacerParts(Instance<P> instance) {
+	protected static <P extends FoliagePlacer> P2<Mu<P>, IntProvider, IntProvider> foliagePlacerParts(Instance<P> instance) {
 		return instance.group(
-			UniformInt.codec(0, 8, 8).fieldOf("radius").forGetter(foliagePlacer -> foliagePlacer.radius),
-			UniformInt.codec(0, 8, 8).fieldOf("offset").forGetter(foliagePlacer -> foliagePlacer.offset)
+			IntProvider.codec(0, 16).fieldOf("radius").forGetter(foliagePlacer -> foliagePlacer.radius),
+			IntProvider.codec(0, 16).fieldOf("offset").forGetter(foliagePlacer -> foliagePlacer.offset)
 		);
 	}
 
-	public FoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
-		this.radius = uniformInt;
-		this.offset = uniformInt2;
+	public FoliagePlacer(IntProvider intProvider, IntProvider intProvider2) {
+		this.radius = intProvider;
+		this.offset = intProvider2;
 	}
 
 	protected abstract FoliagePlacerType<?> type();
 
 	public void createFoliage(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
-		int k,
-		Set<BlockPos> set,
-		BoundingBox boundingBox
+		int k
 	) {
-		this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random), boundingBox);
+		this.createFoliage(levelSimulatedReader, biConsumer, random, treeConfiguration, i, foliageAttachment, j, k, this.offset(random));
 	}
 
 	protected abstract void createFoliage(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k,
-		Set<BlockPos> set,
-		int l,
-		BoundingBox boundingBox
+		int l
 	);
 
 	public abstract int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration);
@@ -87,15 +85,14 @@ public abstract class FoliagePlacer {
 	}
 
 	protected void placeLeavesRow(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		BlockPos blockPos,
 		int i,
-		Set<BlockPos> set,
 		int j,
-		boolean bl,
-		BoundingBox boundingBox
+		boolean bl
 	) {
 		int k = bl ? 1 : 0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -104,40 +101,33 @@ public abstract class FoliagePlacer {
 			for (int m = -i; m <= i + k; m++) {
 				if (!this.shouldSkipLocationSigned(random, l, j, m, i, bl)) {
 					mutableBlockPos.setWithOffset(blockPos, l, j, m);
-					this.tryPlaceLeaf(levelSimulatedRW, random, treeConfiguration, set, boundingBox, mutableBlockPos);
+					tryPlaceLeaf(levelSimulatedReader, biConsumer, random, treeConfiguration, mutableBlockPos);
 				}
 			}
 		}
 	}
 
-	protected void tryPlaceLeaf(
-		LevelSimulatedRW levelSimulatedRW,
-		Random random,
-		TreeConfiguration treeConfiguration,
-		Set<BlockPos> set,
-		BoundingBox boundingBox,
-		BlockPos.MutableBlockPos mutableBlockPos
+	protected static void tryPlaceLeaf(
+		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, BlockPos blockPos
 	) {
-		if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
-			levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.foliageProvider.getState(random, mutableBlockPos), 19);
-			boundingBox.expand(new BoundingBox(mutableBlockPos));
-			set.add(mutableBlockPos.immutable());
+		if (TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
+			biConsumer.accept(blockPos, treeConfiguration.foliageProvider.getState(random, blockPos));
 		}
 	}
 
 	public static final class FoliageAttachment {
-		private final BlockPos foliagePos;
+		private final BlockPos pos;
 		private final int radiusOffset;
 		private final boolean doubleTrunk;
 
 		public FoliageAttachment(BlockPos blockPos, int i, boolean bl) {
-			this.foliagePos = blockPos;
+			this.pos = blockPos;
 			this.radiusOffset = i;
 			this.doubleTrunk = bl;
 		}
 
-		public BlockPos foliagePos() {
-			return this.foliagePos;
+		public BlockPos pos() {
+			return this.pos;
 		}
 
 		public int radiusOffset() {

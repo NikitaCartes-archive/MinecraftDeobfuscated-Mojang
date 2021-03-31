@@ -7,13 +7,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -70,13 +71,42 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class PiglinAi {
+	public static final int REPELLENT_DETECTION_RANGE_HORIZONTAL = 8;
+	public static final int REPELLENT_DETECTION_RANGE_VERTICAL = 4;
 	public static final Item BARTERING_ITEM = Items.GOLD_INGOT;
-	private static final IntRange TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
-	private static final IntRange RIDE_START_INTERVAL = TimeUtil.rangeOfSeconds(10, 40);
-	private static final IntRange RIDE_DURATION = TimeUtil.rangeOfSeconds(10, 30);
-	private static final IntRange RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
-	private static final IntRange AVOID_ZOMBIFIED_DURATION = TimeUtil.rangeOfSeconds(5, 7);
-	private static final IntRange BABY_AVOID_NEMESIS_DURATION = TimeUtil.rangeOfSeconds(5, 7);
+	private static final int PLAYER_ANGER_RANGE = 16;
+	private static final int ANGER_DURATION = 600;
+	private static final int ADMIRE_DURATION = 120;
+	private static final int MAX_DISTANCE_TO_WALK_TO_ITEM = 9;
+	private static final int MAX_TIME_TO_WALK_TO_ITEM = 200;
+	private static final int HOW_LONG_TIME_TO_DISABLE_ADMIRE_WALKING_IF_CANT_REACH_ITEM = 200;
+	private static final int CELEBRATION_TIME = 300;
+	private static final UniformInt TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
+	private static final int BABY_FLEE_DURATION_AFTER_GETTING_HIT = 100;
+	private static final int HIT_BY_PLAYER_MEMORY_TIMEOUT = 400;
+	private static final int MAX_WALK_DISTANCE_TO_START_RIDING = 8;
+	private static final UniformInt RIDE_START_INTERVAL = TimeUtil.rangeOfSeconds(10, 40);
+	private static final UniformInt RIDE_DURATION = TimeUtil.rangeOfSeconds(10, 30);
+	private static final UniformInt RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
+	private static final int MELEE_ATTACK_COOLDOWN = 20;
+	private static final int EAT_COOLDOWN = 200;
+	private static final int DESIRED_DISTANCE_FROM_ENTITY_WHEN_AVOIDING = 12;
+	private static final int MAX_LOOK_DIST = 8;
+	private static final int MAX_LOOK_DIST_FOR_PLAYER_HOLDING_LOVED_ITEM = 14;
+	private static final int INTERACTION_RANGE = 8;
+	private static final int MIN_DESIRED_DIST_FROM_TARGET_WHEN_HOLDING_CROSSBOW = 5;
+	private static final float SPEED_WHEN_STRAFING_BACK_FROM_TARGET = 0.75F;
+	private static final int DESIRED_DISTANCE_FROM_ZOMBIFIED = 6;
+	private static final UniformInt AVOID_ZOMBIFIED_DURATION = TimeUtil.rangeOfSeconds(5, 7);
+	private static final UniformInt BABY_AVOID_NEMESIS_DURATION = TimeUtil.rangeOfSeconds(5, 7);
+	private static final float PROBABILITY_OF_CELEBRATION_DANCE = 0.1F;
+	private static final float SPEED_MULTIPLIER_WHEN_AVOIDING = 1.0F;
+	private static final float SPEED_MULTIPLIER_WHEN_RETREATING = 1.0F;
+	private static final float SPEED_MULTIPLIER_WHEN_MOUNTING = 0.8F;
+	private static final float SPEED_MULTIPLIER_WHEN_GOING_TO_WANTED_ITEM = 1.0F;
+	private static final float SPEED_MULTIPLIER_WHEN_GOING_TO_CELEBRATE_LOCATION = 1.0F;
+	private static final float SPEED_MULTIPLIER_WHEN_DANCING = 0.6F;
+	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 0.6F;
 
 	protected static Brain<?> makeBrain(Piglin piglin, Brain<Piglin> brain) {
 		initCoreActivity(brain);
@@ -93,7 +123,7 @@ public class PiglinAi {
 	}
 
 	protected static void initMemories(Piglin piglin) {
-		int i = TIME_BETWEEN_HUNTS.randomValue(piglin.level.random);
+		int i = TIME_BETWEEN_HUNTS.sample(piglin.level.random);
 		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)i);
 	}
 
@@ -137,7 +167,7 @@ public class PiglinAi {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				new StopAttackingIfTargetInvalid<>(livingEntity -> !isNearestValidAttackTarget(piglin, livingEntity)),
+				new StopAttackingIfTargetInvalid<>((Predicate<LivingEntity>)(livingEntity -> !isNearestValidAttackTarget(piglin, livingEntity))),
 				new RunIf(PiglinAi::hasCrossbow, new BackUpIfTooClose<>(5, 0.75F)),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
 				new MeleeAttack(20),
@@ -157,7 +187,7 @@ public class PiglinAi {
 				avoidRepellent(),
 				new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0F),
 				new StartAttacking(AbstractPiglin::isAdult, PiglinAi::findNearestValidAttackTarget),
-				new RunIf(piglin -> !piglin.isDancing(), new GoToCelebrateLocation(2, 1.0F)),
+				new RunIf((Predicate)(piglin -> !piglin.isDancing()), new GoToCelebrateLocation(2, 1.0F)),
 				new RunIf(Piglin::isDancing, new GoToCelebrateLocation(4, 0.6F)),
 				new RunOne(
 					ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0F), 1), Pair.of(new RandomStroll(0.6F, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1))
@@ -722,12 +752,16 @@ public class PiglinAi {
 		piglin.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
 		piglin.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
 		piglin.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, (long)RETREAT_DURATION.randomValue(piglin.level.random));
+		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, (long)RETREAT_DURATION.sample(piglin.level.random));
 		dontKillAnyMoreHoglinsForAWhile(piglin);
 	}
 
 	protected static void dontKillAnyMoreHoglinsForAWhile(AbstractPiglin abstractPiglin) {
-		abstractPiglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)TIME_BETWEEN_HUNTS.randomValue(abstractPiglin.level.random));
+		abstractPiglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)TIME_BETWEEN_HUNTS.sample(abstractPiglin.level.random));
+	}
+
+	private static boolean seesPlayerHoldingWantedItem(Piglin piglin) {
+		return piglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM);
 	}
 
 	private static void eat(Piglin piglin) {

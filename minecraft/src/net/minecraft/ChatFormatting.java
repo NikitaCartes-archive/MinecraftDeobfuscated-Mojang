@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public enum ChatFormatting {
 	BLACK("BLACK", '0', 0, 0),
@@ -36,6 +34,7 @@ public enum ChatFormatting {
 	ITALIC("ITALIC", 'o', true),
 	RESET("RESET", 'r', -1, null);
 
+	public static final char PREFIX_CODE = '§';
 	private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = (Map<String, ChatFormatting>)Arrays.stream(values())
 		.collect(Collectors.toMap(chatFormatting -> cleanName(chatFormatting.name), chatFormatting -> chatFormatting));
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
@@ -66,6 +65,10 @@ public enum ChatFormatting {
 		this.id = j;
 		this.color = integer;
 		this.toString = "§" + c;
+	}
+
+	public char getChar() {
+		return this.code;
 	}
 
 	public int getId() {
@@ -119,7 +122,6 @@ public enum ChatFormatting {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static ChatFormatting getByCode(char c) {
 		char d = Character.toString(c).toLowerCase(Locale.ROOT).charAt(0);
 

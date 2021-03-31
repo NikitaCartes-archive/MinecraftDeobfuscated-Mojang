@@ -35,6 +35,7 @@ import net.minecraft.util.StringDecomposer;
 
 @Environment(EnvType.CLIENT)
 public class Font {
+	private static final float EFFECT_DEPTH = 0.01F;
 	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
 	public final int lineHeight = 9;
 	public final Random random = new Random();

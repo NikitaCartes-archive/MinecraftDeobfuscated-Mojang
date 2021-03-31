@@ -52,6 +52,7 @@ public class BellBlock extends BaseEntityBlock {
 	private static final VoxelShape TO_NORTH = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 0.0, 9.0, 15.0, 13.0));
 	private static final VoxelShape TO_SOUTH = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 3.0, 9.0, 15.0, 16.0));
 	private static final VoxelShape CEILING_SHAPE = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 7.0, 9.0, 16.0, 9.0));
+	public static final int EVENT_BELL_RING = 1;
 
 	public BellBlock(BlockBehaviour.Properties properties) {
 		super(properties);

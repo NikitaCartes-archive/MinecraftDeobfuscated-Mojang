@@ -67,8 +67,16 @@ public interface Tag<T> {
 			return this.add(new Tag.ElementEntry(resourceLocation), string);
 		}
 
+		public Tag.Builder addOptionalElement(ResourceLocation resourceLocation, String string) {
+			return this.add(new Tag.OptionalElementEntry(resourceLocation), string);
+		}
+
 		public Tag.Builder addTag(ResourceLocation resourceLocation, String string) {
 			return this.add(new Tag.TagEntry(resourceLocation), string);
+		}
+
+		public Tag.Builder addOptionalTag(ResourceLocation resourceLocation, String string) {
+			return this.add(new Tag.OptionalTagEntry(resourceLocation), string);
 		}
 
 		public <T> Either<Collection<Tag.BuilderEntry>, Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
@@ -158,6 +166,10 @@ public interface Tag<T> {
 
 		public Tag.Entry getEntry() {
 			return this.entry;
+		}
+
+		public String getSource() {
+			return this.source;
 		}
 
 		public String toString() {

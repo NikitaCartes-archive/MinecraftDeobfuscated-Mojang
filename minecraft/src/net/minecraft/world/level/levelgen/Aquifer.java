@@ -7,6 +7,17 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class Aquifer {
+	private static final int X_RANGE = 10;
+	private static final int Y_RANGE = 9;
+	private static final int Z_RANGE = 10;
+	private static final int X_SEPARATION = 6;
+	private static final int Y_SEPARATION = 3;
+	private static final int Z_SEPARATION = 6;
+	private static final int X_SPACING = 16;
+	private static final int Y_SPACING = 12;
+	private static final int Z_SPACING = 16;
+	private static final int ALWAYS_LAVA_BELOW_Y_INDEX = 9;
+	public static final int ALWAYS_USE_SEA_LEVEL_WHEN_ABOVE = 30;
 	private final NormalNoise barrierNoise;
 	private final NormalNoise waterLevelNoise;
 	private final NoiseGeneratorSettings noiseGeneratorSettings;
@@ -114,10 +125,10 @@ public class Aquifer {
 		double f = this.similarity(p, q);
 		this.lastWaterLevel = u;
 		this.shouldScheduleWaterUpdate = d > 0.0;
-		if (this.lastWaterLevel >= j && j - this.noiseGeneratorSettings.noiseSettings().minY() <= 9) {
+		if (this.lastWaterLevel >= j && isLavaLevel(j - this.noiseGeneratorSettings.noiseSettings().minY() - 1)) {
 			this.lastBarrierDensity = 1.0;
 		} else if (d > -1.0) {
-			double g = 1.0 + (this.barrierNoise.getValue((double)i, (double)j, (double)k) + 0.1) / 4.0;
+			double g = 1.0 + (this.barrierNoise.getValue((double)i, (double)j, (double)k) + 0.05) / 4.0;
 			double h = this.calculatePressure(j, g, u, v);
 			double ah = this.calculatePressure(j, g, u, w);
 			double ai = this.calculatePressure(j, g, v, w);
@@ -131,13 +142,20 @@ public class Aquifer {
 		}
 	}
 
+	public static boolean isLavaLevel(int i) {
+		return i < 9;
+	}
+
 	private double similarity(int i, int j) {
 		double d = 25.0;
 		return 1.0 - (double)Math.abs(j - i) / 25.0;
 	}
 
 	private double calculatePressure(int i, double d, int j, int k) {
-		return 0.5 * (double)Math.abs(j - k) * d - Math.abs(0.5 * (double)(j + k) - (double)i - 0.5);
+		int l = Math.abs(j - k);
+		double e = 0.5 * (double)(j + k);
+		double f = Math.abs(e - (double)i - 0.5);
+		return 0.5 * (double)l * d - f;
 	}
 
 	private int gridX(int i) {

@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -24,6 +22,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CropBlock extends BushBlock implements BonemealableBlock {
+	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
 		Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0),
@@ -161,12 +160,10 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		super.entityInside(blockState, level, blockPos, entity);
 	}
 
-	@Environment(EnvType.CLIENT)
 	protected ItemLike getBaseSeedId() {
 		return Items.WHEAT_SEEDS;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(this.getBaseSeedId());

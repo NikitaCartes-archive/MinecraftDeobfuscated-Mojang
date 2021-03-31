@@ -9,6 +9,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class MovementTutorialStepInstance implements TutorialStepInstance {
+	private static final int MINIMUM_TIME_MOVED = 40;
+	private static final int MINIMUM_TIME_LOOKED = 40;
+	private static final int MOVE_HINT_DELAY = 100;
+	private static final int LOOK_HINT_DELAY = 20;
+	private static final int INCOMPLETE = -1;
 	private static final Component MOVE_TITLE = new TranslatableComponent(
 		"tutorial.move.title", Tutorial.key("forward"), Tutorial.key("left"), Tutorial.key("back"), Tutorial.key("right")
 	);

@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -47,27 +45,22 @@ public class ClientboundAddPaintingPacket implements Packet<ClientGamePacketList
 		clientGamePacketListener.handleAddPainting(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public UUID getUUID() {
 		return this.uuid;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getPos() {
 		return this.pos;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Direction getDirection() {
 		return this.direction;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Motive getMotive() {
 		return Registry.MOTIVE.byId(this.motive);
 	}

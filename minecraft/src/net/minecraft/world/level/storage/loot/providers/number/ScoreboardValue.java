@@ -7,6 +7,7 @@ import java.util.Set;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.providers.score.ContextScoreboardNameProvider;
 import net.minecraft.world.level.storage.loot.providers.score.ScoreboardNameProvider;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
@@ -30,6 +31,14 @@ public class ScoreboardValue implements NumberProvider {
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
 		return this.target.getReferencedContextParams();
+	}
+
+	public static ScoreboardValue fromScoreboard(LootContext.EntityTarget entityTarget, String string) {
+		return fromScoreboard(entityTarget, string, 1.0F);
+	}
+
+	public static ScoreboardValue fromScoreboard(LootContext.EntityTarget entityTarget, String string, float f) {
+		return new ScoreboardValue(ContextScoreboardNameProvider.forTarget(entityTarget), string, f);
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,7 +38,6 @@ public class CommandBlockEntity extends BlockEntity {
 			this.getLevel().sendBlockUpdated(CommandBlockEntity.this.worldPosition, blockState, blockState, 3);
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public Vec3 getPosition() {
 			return Vec3.atCenterOf(CommandBlockEntity.this.worldPosition);

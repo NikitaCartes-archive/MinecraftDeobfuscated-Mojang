@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -46,6 +44,11 @@ public class RedStoneWireBlock extends Block {
 	public static final Map<Direction, EnumProperty<RedstoneSide>> PROPERTY_BY_DIRECTION = Maps.newEnumMap(
 		ImmutableMap.of(Direction.NORTH, NORTH, Direction.EAST, EAST, Direction.SOUTH, SOUTH, Direction.WEST, WEST)
 	);
+	protected static final int H = 1;
+	protected static final int W = 3;
+	protected static final int E = 13;
+	protected static final int N = 3;
+	protected static final int S = 13;
 	private static final VoxelShape SHAPE_DOT = Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 13.0);
 	private static final Map<Direction, VoxelShape> SHAPES_FLOOR = Maps.newEnumMap(
 		ImmutableMap.of(
@@ -81,6 +84,7 @@ public class RedStoneWireBlock extends Block {
 			vec3s[i] = new Vec3((double)g, (double)h, (double)j);
 		}
 	});
+	private static final float PARTICLE_DENSITY = 0.2F;
 	private final BlockState crossState;
 	private boolean shouldSignal = true;
 
@@ -432,13 +436,11 @@ public class RedStoneWireBlock extends Block {
 		return this.shouldSignal;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static int getColorForPower(int i) {
 		Vec3 vec3 = COLORS[i];
 		return Mth.color((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void spawnParticlesAlongLine(Level level, Random random, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g) {
 		float h = g - f;
 		if (!(random.nextFloat() >= 0.2F * h)) {
@@ -453,7 +455,6 @@ public class RedStoneWireBlock extends Block {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		int i = (Integer)blockState.getValue(POWER);

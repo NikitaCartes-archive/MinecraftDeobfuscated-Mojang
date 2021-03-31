@@ -6,8 +6,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -33,6 +31,10 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class StructureBlockEntity extends BlockEntity {
+	private static final int SCAN_CORNER_BLOCKS_RANGE = 5;
+	public static final int MAX_OFFSET_PER_AXIS = 48;
+	public static final int MAX_SIZE_PER_AXIS = 48;
+	public static final String AUTHOR_TAG = "author";
 	private ResourceLocation structureName;
 	private String author = "";
 	private String metaData = "";
@@ -181,7 +183,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.author = livingEntity.getName().getString();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getStructurePos() {
 		return this.structurePos;
 	}
@@ -198,7 +199,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.structureSize = vec3i;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Mirror getMirror() {
 		return this.mirror;
 	}
@@ -215,7 +215,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.rotation = rotation;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getMetaData() {
 		return this.metaData;
 	}
@@ -236,7 +235,6 @@ public class StructureBlockEntity extends BlockEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isIgnoreEntities() {
 		return this.ignoreEntities;
 	}
@@ -245,7 +243,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.ignoreEntities = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getIntegrity() {
 		return this.integrity;
 	}
@@ -254,7 +251,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.integrity = f;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long getSeed() {
 		return this.seed;
 	}
@@ -272,21 +268,27 @@ public class StructureBlockEntity extends BlockEntity {
 			BlockPos blockPos2 = new BlockPos(blockPos.getX() - 80, this.level.getMinBuildHeight(), blockPos.getZ() - 80);
 			BlockPos blockPos3 = new BlockPos(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80);
 			Stream<BlockPos> stream = this.getRelatedCorners(blockPos2, blockPos3);
-			return calculateEnclosingBoundingBox(blockPos, stream).filter(boundingBox -> {
-				int ix = boundingBox.x1 - boundingBox.x0;
-				int j = boundingBox.y1 - boundingBox.y0;
-				int k = boundingBox.z1 - boundingBox.z0;
-				if (ix > 1 && j > 1 && k > 1) {
-					this.structurePos = new BlockPos(boundingBox.x0 - blockPos.getX() + 1, boundingBox.y0 - blockPos.getY() + 1, boundingBox.z0 - blockPos.getZ() + 1);
-					this.structureSize = new Vec3i(ix - 1, j - 1, k - 1);
-					this.setChanged();
-					BlockState blockState = this.level.getBlockState(blockPos);
-					this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
-					return true;
-				} else {
-					return false;
-				}
-			}).isPresent();
+			return calculateEnclosingBoundingBox(blockPos, stream)
+				.filter(
+					boundingBox -> {
+						int ix = boundingBox.maxX() - boundingBox.minX();
+						int j = boundingBox.maxY() - boundingBox.minY();
+						int k = boundingBox.maxZ() - boundingBox.minZ();
+						if (ix > 1 && j > 1 && k > 1) {
+							this.structurePos = new BlockPos(
+								boundingBox.minX() - blockPos.getX() + 1, boundingBox.minY() - blockPos.getY() + 1, boundingBox.minZ() - blockPos.getZ() + 1
+							);
+							this.structureSize = new Vec3i(ix - 1, j - 1, k - 1);
+							this.setChanged();
+							BlockState blockState = this.level.getBlockState(blockPos);
+							this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+							return true;
+						} else {
+							return false;
+						}
+					}
+				)
+				.isPresent();
 		}
 	}
 
@@ -438,7 +440,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.powered = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean getShowAir() {
 		return this.showAir;
 	}
@@ -447,7 +448,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.showAir = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean getShowBoundingBox() {
 		return this.showBoundingBox;
 	}

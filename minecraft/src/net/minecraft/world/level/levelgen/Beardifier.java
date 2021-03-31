@@ -19,6 +19,8 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
 public class Beardifier {
 	public static final Beardifier NO_BEARDS = new Beardifier();
+	public static final int BEARD_KERNEL_RADIUS = 12;
+	private static final int BEARD_KERNEL_SIZE = 24;
 	private static final float[] BEARD_KERNEL = Util.make(new float[13824], fs -> {
 		for (int i = 0; i < 24; i++) {
 			for (int j = 0; j < 24; j++) {
@@ -83,9 +85,10 @@ public class Beardifier {
 		while (this.pieceIterator.hasNext()) {
 			StructurePiece structurePiece = (StructurePiece)this.pieceIterator.next();
 			BoundingBox boundingBox = structurePiece.getBoundingBox();
-			int l = Math.max(0, Math.max(boundingBox.x0 - i, i - boundingBox.x1));
-			int m = j - (boundingBox.y0 + (structurePiece instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece).getGroundLevelDelta() : 0));
-			int n = Math.max(0, Math.max(boundingBox.z0 - k, k - boundingBox.z1));
+			int l = Math.max(0, Math.max(boundingBox.minX() - i, i - boundingBox.maxX()));
+			int m = j
+				- (boundingBox.minY() + (structurePiece instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece).getGroundLevelDelta() : 0));
+			int n = Math.max(0, Math.max(boundingBox.minZ() - k, k - boundingBox.maxZ()));
 			NoiseEffect noiseEffect = structurePiece.getNoiseEffect();
 			if (noiseEffect == NoiseEffect.BURY) {
 				d += getBuryContribution(l, m, n);

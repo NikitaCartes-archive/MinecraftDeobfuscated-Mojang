@@ -67,6 +67,7 @@ public class LecternBlock extends BaseEntityBlock {
 		Block.box(0.0, 14.0, 2.0, 16.0, 18.0, 6.333333),
 		SHAPE_COMMON
 	);
+	private static final int PAGE_CHANGE_IMPULSE_TICKS = 2;
 
 	protected LecternBlock(BlockBehaviour.Properties properties) {
 		super(properties);

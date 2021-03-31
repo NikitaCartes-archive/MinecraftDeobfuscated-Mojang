@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
+import java.util.function.Predicate;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -30,6 +31,17 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
 public class PiglinBruteAi {
+	private static final int ANGER_DURATION = 600;
+	private static final int MELEE_ATTACK_COOLDOWN = 20;
+	private static final double ACTIVITY_SOUND_LIKELIHOOD_PER_TICK = 0.0125;
+	private static final int MAX_LOOK_DIST = 8;
+	private static final int INTERACTION_RANGE = 8;
+	private static final double TARGETING_RANGE = 12.0;
+	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 0.6F;
+	private static final int HOME_CLOSE_ENOUGH_DISTANCE = 2;
+	private static final int HOME_TOO_FAR_DISTANCE = 100;
+	private static final int HOME_STROLL_AROUND_DISTANCE = 5;
+
 	protected static Brain<?> makeBrain(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {
 		initCoreActivity(piglinBrute, brain);
 		initIdleActivity(piglinBrute, brain);
@@ -69,7 +81,7 @@ public class PiglinBruteAi {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				new StopAttackingIfTargetInvalid<>(livingEntity -> !isNearestValidAttackTarget(piglinBrute, livingEntity)),
+				new StopAttackingIfTargetInvalid<>((Predicate<LivingEntity>)(livingEntity -> !isNearestValidAttackTarget(piglinBrute, livingEntity))),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
 				new MeleeAttack(20)
 			),
@@ -142,6 +154,11 @@ public class PiglinBruteAi {
 		if (!(livingEntity instanceof AbstractPiglin)) {
 			PiglinAi.maybeRetaliate(piglinBrute, livingEntity);
 		}
+	}
+
+	protected static void setAngerTarget(PiglinBrute piglinBrute, LivingEntity livingEntity) {
+		piglinBrute.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+		piglinBrute.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, livingEntity.getUUID(), 600L);
 	}
 
 	protected static void maybePlayActivitySound(PiglinBrute piglinBrute) {

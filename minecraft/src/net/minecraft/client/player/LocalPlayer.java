@@ -80,6 +80,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class LocalPlayer extends AbstractClientPlayer {
+	private static final int POSITION_REMINDER_INTERVAL = 20;
+	private static final int WATER_VISION_MAX_TIME = 600;
+	private static final int WATER_VISION_QUICK_TIME = 100;
+	private static final float WATER_VISION_QUICK_PERCENT = 0.6F;
+	private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
 	public final ClientPacketListener connection;
 	private final StatsCounter stats;
 	private final ClientRecipeBook recipeBook;

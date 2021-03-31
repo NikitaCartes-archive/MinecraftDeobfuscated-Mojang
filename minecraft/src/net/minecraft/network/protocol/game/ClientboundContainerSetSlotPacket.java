@@ -1,12 +1,12 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacketListener> {
+	public static final int CARRIED_ITEM = -1;
+	public static final int PLAYER_INVENTORY = -2;
 	private final int containerId;
 	private final int slot;
 	private final ItemStack itemStack;
@@ -34,17 +34,14 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleContainerSetSlot(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getContainerId() {
 		return this.containerId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getSlot() {
 		return this.slot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ItemStack getItem() {
 		return this.itemStack;
 	}

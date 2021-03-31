@@ -62,6 +62,8 @@ import org.apache.logging.log4j.Logger;
 
 public class DedicatedServer extends MinecraftServer implements ServerInterface {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int CONVERSION_RETRY_DELAY_MS = 5000;
+	private static final int CONVERSION_RETRIES = 2;
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
 	private final List<ConsoleInput> consoleInput = Collections.synchronizedList(Lists.newArrayList());
 	private QueryThreadGs4 queryThreadGs4;
@@ -332,6 +334,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		snooper.setDynamicData("whitelist_enabled", this.getPlayerList().isUsingWhitelist());
 		snooper.setDynamicData("whitelist_count", this.getPlayerList().getWhiteListNames().length);
 		super.populateSnooper(snooper);
+	}
+
+	@Override
+	public boolean isSnooperEnabled() {
+		return this.getProperties().snooperEnabled;
 	}
 
 	public void handleConsoleInput(String string, CommandSourceStack commandSourceStack) {

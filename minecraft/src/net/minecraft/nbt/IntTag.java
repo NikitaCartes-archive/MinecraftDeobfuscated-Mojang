@@ -5,6 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class IntTag extends NumericTag {
+	private static final int SELF_SIZE_IN_BITS = 96;
 	public static final TagType<IntTag> TYPE = new TagType<IntTag>() {
 		public IntTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(96L);
@@ -104,7 +105,12 @@ public class IntTag extends NumericTag {
 	}
 
 	static class Cache {
+		private static final int HIGH = 1024;
+		private static final int LOW = -128;
 		static final IntTag[] cache = new IntTag[1153];
+
+		private Cache() {
+		}
 
 		static {
 			for (int i = 0; i < cache.length; i++) {

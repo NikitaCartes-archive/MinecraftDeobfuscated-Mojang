@@ -7,13 +7,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.InactiveProfiler;
 
 public class SimpleReloadInstance<S> implements ReloadInstance {
+	private static final int PREPARATION_PROGRESS_WEIGHT = 2;
+	private static final int EXTRA_RELOAD_PROGRESS_WEIGHT = 2;
+	private static final int LISTENER_PROGRESS_WEIGHT = 1;
 	protected final ResourceManager resourceManager;
 	protected final CompletableFuture<Unit> allPreparations = new CompletableFuture();
 	protected final CompletableFuture<List<S>> allDone;
@@ -93,7 +94,6 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 		return this.allDone.thenApply(list -> Unit.INSTANCE);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getActualProgress() {
 		int i = this.listenerCount - this.preparingListeners.size();
@@ -102,13 +102,11 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 		return f / g;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isDone() {
 		return this.allDone.isDone();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void checkExceptions() {
 		if (this.allDone.isCompletedExceptionally()) {

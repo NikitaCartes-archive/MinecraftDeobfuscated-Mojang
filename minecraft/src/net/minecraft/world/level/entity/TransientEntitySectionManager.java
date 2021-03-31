@@ -2,16 +2,14 @@ package net.minecraft.world.level.entity;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Environment(EnvType.CLIENT)
 public class TransientEntitySectionManager<T extends EntityAccess> {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final LevelCallback<T> callbacks;
@@ -66,6 +64,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		}
 	}
 
+	@VisibleForDebug
 	public int count() {
 		return this.entityStorage.count();
 	}
@@ -76,11 +75,11 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		}
 	}
 
+	@VisibleForDebug
 	public String gatherStats() {
 		return this.entityStorage.count() + "," + this.sectionStorage.count() + "," + this.tickingChunks.size();
 	}
 
-	@Environment(EnvType.CLIENT)
 	class Callback implements EntityInLevelCallback {
 		private final T entity;
 		private long currentSectionKey;

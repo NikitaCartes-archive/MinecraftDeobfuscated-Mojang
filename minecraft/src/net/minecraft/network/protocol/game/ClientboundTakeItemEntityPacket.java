@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -33,17 +31,14 @@ public class ClientboundTakeItemEntityPacket implements Packet<ClientGamePacketL
 		clientGamePacketListener.handleTakeItemEntity(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getItemId() {
 		return this.itemId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getPlayerId() {
 		return this.playerId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getAmount() {
 		return this.amount;
 	}

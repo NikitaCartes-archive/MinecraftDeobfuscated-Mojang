@@ -14,6 +14,10 @@ import net.minecraft.client.renderer.RenderType;
 
 @Environment(EnvType.CLIENT)
 public class ShieldModel extends Model {
+	private static final String PLATE = "plate";
+	private static final String HANDLE = "handle";
+	private static final int SHIELD_WIDTH = 10;
+	private static final int SHIELD_HEIGHT = 20;
 	private final ModelPart root;
 	private final ModelPart plate;
 	private final ModelPart handle;

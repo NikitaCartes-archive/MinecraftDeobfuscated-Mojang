@@ -2,11 +2,10 @@ package net.minecraft.util.profiling;
 
 import java.nio.file.Path;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public interface ProfileResults {
-	@Environment(EnvType.CLIENT)
+	char PATH_SEPARATOR = '\u001e';
+
 	List<ResultField> getTimes(String string);
 
 	boolean saveResults(Path path);
@@ -26,6 +25,8 @@ public interface ProfileResults {
 	default int getTickDuration() {
 		return this.getEndTimeTicks() - this.getStartTimeTicks();
 	}
+
+	String getProfilerResults();
 
 	static String demanglePath(String string) {
 		return string.replace('\u001e', '.');

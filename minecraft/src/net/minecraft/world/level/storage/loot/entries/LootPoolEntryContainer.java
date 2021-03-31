@@ -57,6 +57,14 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 			return new AlternativesEntry.Builder(this, builder);
 		}
 
+		public EntryGroup.Builder append(LootPoolEntryContainer.Builder<?> builder) {
+			return new EntryGroup.Builder(this, builder);
+		}
+
+		public SequentialEntry.Builder then(LootPoolEntryContainer.Builder<?> builder) {
+			return new SequentialEntry.Builder(this, builder);
+		}
+
 		public abstract LootPoolEntryContainer build();
 	}
 

@@ -28,6 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	private static final int SIZE = 3;
 	protected static final VoxelShape SHAPE = Block.box(5.0, 5.0, 5.0, 11.0, 11.0, 11.0);
 
 	public ConduitBlock(BlockBehaviour.Properties properties) {

@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -27,6 +25,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundCommandsPacket implements Packet<ClientGamePacketListener> {
+	private static final byte MASK_TYPE = 3;
+	private static final byte FLAG_EXECUTABLE = 4;
+	private static final byte FLAG_REDIRECT = 8;
+	private static final byte FLAG_CUSTOM_SUGGESTIONS = 16;
+	private static final byte TYPE_ROOT = 0;
+	private static final byte TYPE_LITERAL = 1;
+	private static final byte TYPE_ARGUMENT = 2;
 	private final RootCommandNode<SharedSuggestionProvider> root;
 
 	public ClientboundCommandsPacket(RootCommandNode<SharedSuggestionProvider> rootCommandNode) {
@@ -173,7 +178,6 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
 		clientGamePacketListener.handleCommands(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public RootCommandNode<SharedSuggestionProvider> getRoot() {
 		return this.root;
 	}

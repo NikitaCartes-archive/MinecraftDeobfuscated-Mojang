@@ -1,7 +1,5 @@
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -39,7 +37,6 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 		return this.result.copy();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean canCraftInDimensions(int i, int j) {
 		return true;
@@ -61,7 +58,6 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 		return this.result;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public String getGroup() {
 		return this.group;

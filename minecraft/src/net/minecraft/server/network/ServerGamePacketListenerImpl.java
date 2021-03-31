@@ -1,7 +1,6 @@
 package net.minecraft.server.network;
 
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
@@ -100,6 +99,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.InteractionHand;
@@ -153,6 +153,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerGamePacketListenerImpl implements ServerPlayerConnection, ServerGamePacketListener {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int LATENCY_CHECK_INTERVAL = 15000;
 	public final Connection connection;
 	private final MinecraftServer server;
 	public ServerPlayer player;
@@ -325,30 +326,28 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			);
 	}
 
-	private static boolean containsInvalidValues(ServerboundMovePlayerPacket serverboundMovePlayerPacket) {
-		return Doubles.isFinite(serverboundMovePlayerPacket.getX(0.0))
-				&& Doubles.isFinite(serverboundMovePlayerPacket.getY(0.0))
-				&& Doubles.isFinite(serverboundMovePlayerPacket.getZ(0.0))
-				&& Floats.isFinite(serverboundMovePlayerPacket.getXRot(0.0F))
-				&& Floats.isFinite(serverboundMovePlayerPacket.getYRot(0.0F))
-			? Math.abs(serverboundMovePlayerPacket.getX(0.0)) > 3.0E7
-				|| Math.abs(serverboundMovePlayerPacket.getY(0.0)) > 3.0E7
-				|| Math.abs(serverboundMovePlayerPacket.getZ(0.0)) > 3.0E7
-			: true;
+	private static boolean containsInvalidValues(double d, double e, double f, float g, float h) {
+		return Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f) || !Floats.isFinite(h) || !Floats.isFinite(g);
 	}
 
-	private static boolean containsInvalidValues(ServerboundMoveVehiclePacket serverboundMoveVehiclePacket) {
-		return !Doubles.isFinite(serverboundMoveVehiclePacket.getX())
-			|| !Doubles.isFinite(serverboundMoveVehiclePacket.getY())
-			|| !Doubles.isFinite(serverboundMoveVehiclePacket.getZ())
-			|| !Floats.isFinite(serverboundMoveVehiclePacket.getXRot())
-			|| !Floats.isFinite(serverboundMoveVehiclePacket.getYRot());
+	private static double clampHorizontal(double d) {
+		return Mth.clamp(d, -3.0E7, 3.0E7);
+	}
+
+	private static double clampVertical(double d) {
+		return Mth.clamp(d, -2.0E7, 2.0E7);
 	}
 
 	@Override
 	public void handleMoveVehicle(ServerboundMoveVehiclePacket serverboundMoveVehiclePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundMoveVehiclePacket, this, this.player.getLevel());
-		if (containsInvalidValues(serverboundMoveVehiclePacket)) {
+		if (containsInvalidValues(
+			serverboundMoveVehiclePacket.getX(),
+			serverboundMoveVehiclePacket.getY(),
+			serverboundMoveVehiclePacket.getZ(),
+			serverboundMoveVehiclePacket.getYRot(),
+			serverboundMoveVehiclePacket.getXRot()
+		)) {
 			this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_vehicle_movement"));
 		} else {
 			Entity entity = this.player.getRootVehicle();
@@ -357,11 +356,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				double d = entity.getX();
 				double e = entity.getY();
 				double f = entity.getZ();
-				double g = serverboundMoveVehiclePacket.getX();
-				double h = serverboundMoveVehiclePacket.getY();
-				double i = serverboundMoveVehiclePacket.getZ();
-				float j = serverboundMoveVehiclePacket.getYRot();
-				float k = serverboundMoveVehiclePacket.getXRot();
+				double g = clampHorizontal(serverboundMoveVehiclePacket.getX());
+				double h = clampVertical(serverboundMoveVehiclePacket.getY());
+				double i = clampHorizontal(serverboundMoveVehiclePacket.getZ());
+				float j = Mth.wrapDegrees(serverboundMoveVehiclePacket.getYRot());
+				float k = Mth.wrapDegrees(serverboundMoveVehiclePacket.getXRot());
 				double l = g - this.vehicleFirstGoodX;
 				double m = h - this.vehicleFirstGoodY;
 				double n = i - this.vehicleFirstGoodZ;
@@ -806,7 +805,13 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	@Override
 	public void handleMovePlayer(ServerboundMovePlayerPacket serverboundMovePlayerPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundMovePlayerPacket, this, this.player.getLevel());
-		if (containsInvalidValues(serverboundMovePlayerPacket)) {
+		if (containsInvalidValues(
+			serverboundMovePlayerPacket.getX(0.0),
+			serverboundMovePlayerPacket.getY(0.0),
+			serverboundMovePlayerPacket.getZ(0.0),
+			serverboundMovePlayerPacket.getYRot(0.0F),
+			serverboundMovePlayerPacket.getXRot(0.0F)
+		)) {
 			this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_player_movement"));
 		} else {
 			ServerLevel serverLevel = this.player.getLevel();
@@ -822,40 +827,27 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 					}
 				} else {
 					this.awaitingTeleportTime = this.tickCount;
+					double d = clampHorizontal(serverboundMovePlayerPacket.getX(this.player.getX()));
+					double e = clampVertical(serverboundMovePlayerPacket.getY(this.player.getY()));
+					double f = clampHorizontal(serverboundMovePlayerPacket.getZ(this.player.getZ()));
+					float g = Mth.wrapDegrees(serverboundMovePlayerPacket.getYRot(this.player.yRot));
+					float h = Mth.wrapDegrees(serverboundMovePlayerPacket.getXRot(this.player.xRot));
 					if (this.player.isPassenger()) {
-						this.player
-							.absMoveTo(
-								this.player.getX(),
-								this.player.getY(),
-								this.player.getZ(),
-								serverboundMovePlayerPacket.getYRot(this.player.yRot),
-								serverboundMovePlayerPacket.getXRot(this.player.xRot)
-							);
+						this.player.absMoveTo(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
 						this.player.getLevel().getChunkSource().move(this.player);
 					} else {
-						double d = this.player.getX();
-						double e = this.player.getY();
-						double f = this.player.getZ();
-						double g = this.player.getY();
-						double h = serverboundMovePlayerPacket.getX(this.player.getX());
-						double i = serverboundMovePlayerPacket.getY(this.player.getY());
-						double j = serverboundMovePlayerPacket.getZ(this.player.getZ());
-						float k = serverboundMovePlayerPacket.getYRot(this.player.yRot);
-						float l = serverboundMovePlayerPacket.getXRot(this.player.xRot);
-						double m = h - this.firstGoodX;
-						double n = i - this.firstGoodY;
-						double o = j - this.firstGoodZ;
+						double i = this.player.getX();
+						double j = this.player.getY();
+						double k = this.player.getZ();
+						double l = this.player.getY();
+						double m = d - this.firstGoodX;
+						double n = e - this.firstGoodY;
+						double o = f - this.firstGoodZ;
 						double p = this.player.getDeltaMovement().lengthSqr();
 						double q = m * m + n * n + o * o;
 						if (this.player.isSleeping()) {
 							if (q > 1.0) {
-								this.teleport(
-									this.player.getX(),
-									this.player.getY(),
-									this.player.getZ(),
-									serverboundMovePlayerPacket.getYRot(this.player.yRot),
-									serverboundMovePlayerPacket.getXRot(this.player.xRot)
-								);
+								this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
 							}
 						} else {
 							this.receivedMovePacketCount++;
@@ -876,22 +868,22 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 							}
 
 							AABB aABB = this.player.getBoundingBox();
-							m = h - this.lastGoodX;
-							n = i - this.lastGoodY;
-							o = j - this.lastGoodZ;
+							m = d - this.lastGoodX;
+							n = e - this.lastGoodY;
+							o = f - this.lastGoodZ;
 							boolean bl = n > 0.0;
 							if (this.player.isOnGround() && !serverboundMovePlayerPacket.isOnGround() && bl) {
 								this.player.jumpFromGround();
 							}
 
 							this.player.move(MoverType.PLAYER, new Vec3(m, n, o));
-							m = h - this.player.getX();
-							n = i - this.player.getY();
+							m = d - this.player.getX();
+							n = e - this.player.getY();
 							if (n > -0.5 || n < 0.5) {
 								n = 0.0;
 							}
 
-							o = j - this.player.getZ();
+							o = f - this.player.getZ();
 							q = m * m + n * n + o * o;
 							boolean bl2 = false;
 							if (!this.player.isChangingDimension()
@@ -903,7 +895,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 								LOGGER.warn("{} moved wrongly!", this.player.getName().getString());
 							}
 
-							this.player.absMoveTo(h, i, j, k, l);
+							this.player.absMoveTo(d, e, f, g, h);
 							if (this.player.noPhysics
 								|| this.player.isSleeping()
 								|| (!bl2 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB)) {
@@ -915,18 +907,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 									&& !this.player.isFallFlying()
 									&& this.noBlocksAround(this.player);
 								this.player.getLevel().getChunkSource().move(this.player);
-								this.player.doCheckFallDamage(this.player.getY() - g, serverboundMovePlayerPacket.isOnGround());
+								this.player.doCheckFallDamage(this.player.getY() - l, serverboundMovePlayerPacket.isOnGround());
 								this.player.setOnGround(serverboundMovePlayerPacket.isOnGround());
 								if (bl) {
 									this.player.fallDistance = 0.0F;
 								}
 
-								this.player.checkMovementStatistics(this.player.getX() - d, this.player.getY() - e, this.player.getZ() - f);
+								this.player.checkMovementStatistics(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
 								this.lastGoodX = this.player.getX();
 								this.lastGoodY = this.player.getY();
 								this.lastGoodZ = this.player.getZ();
 							} else {
-								this.teleport(d, e, f, k, l);
+								this.teleport(i, j, k, g, h);
 							}
 						}
 					}
@@ -1036,14 +1028,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				&& serverLevel.mayInteract(this.player, blockPos)) {
 				InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
 				if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
-					Component component = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
+					Component component = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
 					this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
 				} else if (interactionResult.shouldSwing()) {
 					this.player.swing(interactionHand, true);
 				}
 			}
 		} else {
-			Component component2 = new TranslatableComponent("build.tooHigh", i).withStyle(ChatFormatting.RED);
+			Component component2 = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
 			this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
 		}
 

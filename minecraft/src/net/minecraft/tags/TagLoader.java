@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 public class TagLoader<T> {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Gson GSON = new Gson();
+	private static final String PATH_SUFFIX = ".json";
 	private static final int PATH_SUFFIX_LENGTH = ".json".length();
 	private final Function<ResourceLocation, Optional<T>> idToValue;
 	private final String directory;

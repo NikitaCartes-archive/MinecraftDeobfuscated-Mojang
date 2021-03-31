@@ -35,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerStatsCounter extends StatsCounter {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int STAT_REQUEST_COOLDOWN = 300;
 	private final MinecraftServer server;
 	private final File file;
 	private final Set<Stat<?>> dirty = Sets.<Stat<?>>newHashSet();

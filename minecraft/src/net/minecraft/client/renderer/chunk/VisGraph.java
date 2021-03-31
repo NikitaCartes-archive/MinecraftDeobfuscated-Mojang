@@ -13,9 +13,17 @@ import net.minecraft.core.Direction;
 
 @Environment(EnvType.CLIENT)
 public class VisGraph {
+	private static final int SIZE_IN_BITS = 4;
+	private static final int LEN = 16;
+	private static final int MASK = 15;
+	private static final int SIZE = 4096;
+	private static final int X_SHIFT = 0;
+	private static final int Z_SHIFT = 4;
+	private static final int Y_SHIFT = 8;
 	private static final int DX = (int)Math.pow(16.0, 0.0);
 	private static final int DZ = (int)Math.pow(16.0, 1.0);
 	private static final int DY = (int)Math.pow(16.0, 2.0);
+	private static final int INVALID_INDEX = -1;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private final BitSet bitSet = new BitSet(4096);
 	private static final int[] INDEX_OF_EDGES = Util.make(new int[1352], is -> {

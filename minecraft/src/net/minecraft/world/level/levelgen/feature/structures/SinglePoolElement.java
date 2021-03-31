@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -65,6 +66,12 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	public SinglePoolElement(StructureTemplate structureTemplate) {
 		this(Either.right(structureTemplate), () -> ProcessorLists.EMPTY, StructureTemplatePool.Projection.RIGID);
+	}
+
+	@Override
+	public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+		return structureTemplate.getSize(rotation);
 	}
 
 	private StructureTemplate getTemplate(StructureManager structureManager) {

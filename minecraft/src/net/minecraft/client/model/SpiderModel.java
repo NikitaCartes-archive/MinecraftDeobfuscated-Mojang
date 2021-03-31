@@ -13,6 +13,12 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class SpiderModel<T extends Entity> extends HierarchicalModel<T> {
+	private static final String BODY_0 = "body0";
+	private static final String BODY_1 = "body1";
+	private static final String RIGHT_MIDDLE_FRONT_LEG = "right_middle_front_leg";
+	private static final String LEFT_MIDDLE_FRONT_LEG = "left_middle_front_leg";
+	private static final String RIGHT_MIDDLE_HIND_LEG = "right_middle_hind_leg";
+	private static final String LEFT_MIDDLE_HIND_LEG = "left_middle_hind_leg";
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightHindLeg;

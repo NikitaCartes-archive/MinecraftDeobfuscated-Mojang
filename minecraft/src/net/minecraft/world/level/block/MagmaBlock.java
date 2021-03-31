@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MagmaBlock extends Block {
+	private static final int BUBBLE_COLUMN_CHECK_DELAY = 20;
+
 	public MagmaBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

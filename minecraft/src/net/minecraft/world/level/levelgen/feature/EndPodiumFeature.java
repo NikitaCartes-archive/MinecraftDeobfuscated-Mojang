@@ -8,6 +8,10 @@ import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class EndPodiumFeature extends Feature<NoneFeatureConfiguration> {
+	public static final int PODIUM_RADIUS = 4;
+	public static final int PODIUM_PILLAR_HEIGHT = 4;
+	public static final int RIM_RADIUS = 1;
+	public static final float CORNER_ROUNDING = 0.5F;
 	public static final BlockPos END_PODIUM_LOCATION = BlockPos.ZERO;
 	private final boolean active;
 

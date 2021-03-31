@@ -1,8 +1,6 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -33,7 +31,6 @@ public class GlobalPalette<T> implements Palette<T> {
 		return object == null ? this.defaultValue : object;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) {
 	}
@@ -45,6 +42,11 @@ public class GlobalPalette<T> implements Palette<T> {
 	@Override
 	public int getSerializedSize() {
 		return FriendlyByteBuf.getVarIntSize(0);
+	}
+
+	@Override
+	public int getSize() {
+		return this.registry.size();
 	}
 
 	@Override

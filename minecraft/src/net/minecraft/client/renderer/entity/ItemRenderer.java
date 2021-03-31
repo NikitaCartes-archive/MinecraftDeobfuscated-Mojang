@@ -63,6 +63,11 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock;
 public class ItemRenderer implements ResourceManagerReloadListener {
 	public static final ResourceLocation ENCHANT_GLINT_LOCATION = new ResourceLocation("textures/misc/enchanted_item_glint.png");
 	private static final Set<Item> IGNORED = Sets.<Item>newHashSet(Items.AIR);
+	private static final int GUI_SLOT_CENTER_X = 8;
+	private static final int GUI_SLOT_CENTER_Y = 8;
+	public static final int ITEM_COUNT_BLIT_OFFSET = 200;
+	public static final float COMPASS_FOIL_UI_SCALE = 0.5F;
+	public static final float COMPASS_FOIL_FIRST_PERSON_SCALE = 0.75F;
 	public float blitOffset;
 	private final ItemModelShaper itemModelShaper;
 	private final TextureManager textureManager;

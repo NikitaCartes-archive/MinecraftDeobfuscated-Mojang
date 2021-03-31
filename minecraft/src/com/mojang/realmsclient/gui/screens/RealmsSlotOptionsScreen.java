@@ -23,7 +23,9 @@ import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSlotOptionsScreen extends RealmsScreen {
+	private static final int DEFAULT_DIFFICULTY = 2;
 	public static final List<Difficulty> DIFFICULTIES = ImmutableList.of(Difficulty.PEACEFUL, Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD);
+	private static final int DEFAULT_GAME_MODE = 0;
 	public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
 	private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.edit.slot.name");
 	private static final Component SPAWN_PROTECTION_TEXT = new TranslatableComponent("mco.configure.world.spawnProtection");

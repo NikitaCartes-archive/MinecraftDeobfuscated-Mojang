@@ -3,8 +3,6 @@ package net.minecraft.world.entity;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
@@ -22,7 +20,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 
-public abstract class TamableAnimal extends Animal {
+public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(TamableAnimal.class, EntityDataSerializers.BYTE);
 	protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(
 		TamableAnimal.class, EntityDataSerializers.OPTIONAL_UUID
@@ -80,7 +78,6 @@ public abstract class TamableAnimal extends Animal {
 		return !this.isLeashed();
 	}
 
-	@Environment(EnvType.CLIENT)
 	protected void spawnTamingParticles(boolean bl) {
 		ParticleOptions particleOptions = ParticleTypes.HEART;
 		if (!bl) {
@@ -95,7 +92,6 @@ public abstract class TamableAnimal extends Animal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 7) {
@@ -139,6 +135,7 @@ public abstract class TamableAnimal extends Animal {
 	}
 
 	@Nullable
+	@Override
 	public UUID getOwnerUUID() {
 		return (UUID)this.entityData.get(DATA_OWNERUUID_ID).orElse(null);
 	}

@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -32,13 +30,11 @@ public class ClientboundTagQueryPacket implements Packet<ClientGamePacketListene
 		clientGamePacketListener.handleTagQueryPacket(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTransactionId() {
 		return this.transactionId;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public CompoundTag getTag() {
 		return this.tag;
 	}

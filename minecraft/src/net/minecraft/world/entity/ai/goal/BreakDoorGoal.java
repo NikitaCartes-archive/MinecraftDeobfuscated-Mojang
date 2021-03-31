@@ -7,6 +7,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 
 public class BreakDoorGoal extends DoorInteractGoal {
+	private static final int DEFAULT_DOOR_BREAK_TIME = 240;
 	private final Predicate<Difficulty> validDifficulties;
 	protected int breakTime;
 	protected int lastBreakProgress = -1;

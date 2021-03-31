@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class BufferBuilder extends DefaultedVertexConsumer implements BufferVertexConsumer {
+	private static final int GROWTH_SIZE = 2097152;
 	private static final Logger LOGGER = LogManager.getLogger();
 	private ByteBuffer buffer;
 	private final List<BufferBuilder.DrawState> drawStates = Lists.<BufferBuilder.DrawState>newArrayList();

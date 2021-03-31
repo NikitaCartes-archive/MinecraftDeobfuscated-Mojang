@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -21,15 +19,12 @@ public abstract class Team {
 
 	public abstract MutableComponent getFormattedName(Component component);
 
-	@Environment(EnvType.CLIENT)
 	public abstract boolean canSeeFriendlyInvisibles();
 
 	public abstract boolean isAllowFriendlyFire();
 
-	@Environment(EnvType.CLIENT)
 	public abstract Team.Visibility getNameTagVisibility();
 
-	@Environment(EnvType.CLIENT)
 	public abstract ChatFormatting getColor();
 
 	public abstract Collection<String> getPlayers();
@@ -74,6 +69,10 @@ public abstract class Team {
 			.collect(Collectors.toMap(visibility -> visibility.name, visibility -> visibility));
 		public final String name;
 		public final int id;
+
+		public static String[] getAllNames() {
+			return (String[])BY_NAME.keySet().toArray(new String[BY_NAME.size()]);
+		}
 
 		@Nullable
 		public static Team.Visibility byName(String string) {

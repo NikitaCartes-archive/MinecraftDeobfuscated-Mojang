@@ -31,8 +31,6 @@ import java.util.function.BiFunction;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -75,6 +73,7 @@ public class LevelStorageSource {
 		.appendLiteral('-')
 		.appendValue(ChronoField.SECOND_OF_MINUTE, 2)
 		.toFormatter();
+	private static final String ICON_FILENAME = "icon.png";
 	private static final ImmutableList<String> OLD_SETTINGS_KEYS = ImmutableList.of(
 		"RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest"
 	);
@@ -141,7 +140,10 @@ public class LevelStorageSource {
 		return (DataPackConfig)DataPackConfig.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElse(DataPackConfig.DEFAULT);
 	}
 
-	@Environment(EnvType.CLIENT)
+	public String getName() {
+		return "Anvil";
+	}
+
 	public List<LevelSummary> getLevelList() throws LevelStorageException {
 		if (!Files.isDirectory(this.baseDir, new LinkOption[0])) {
 			throw new LevelStorageException(new TranslatableComponent("selectWorld.load_folder_access").getString());
@@ -262,7 +264,6 @@ public class LevelStorageSource {
 		};
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isNewLevelIdAcceptable(String string) {
 		try {
 			Path path = this.baseDir.resolve(string);
@@ -274,17 +275,14 @@ public class LevelStorageSource {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean levelExists(String string) {
 		return Files.isDirectory(this.baseDir.resolve(string), new LinkOption[0]);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Path getBaseDir() {
 		return this.baseDir;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Path getBackupPath() {
 		return this.backupDir;
 	}
@@ -382,7 +380,6 @@ public class LevelStorageSource {
 			return this.levelPath.resolve("icon.png").toFile();
 		}
 
-		@Environment(EnvType.CLIENT)
 		public void deleteLevel() throws IOException {
 			this.checkLock();
 			final Path path = this.levelPath.resolve("session.lock");
@@ -431,7 +428,6 @@ public class LevelStorageSource {
 			}
 		}
 
-		@Environment(EnvType.CLIENT)
 		public void renameLevel(String string) throws IOException {
 			this.checkLock();
 			File file = new File(LevelStorageSource.this.baseDir.toFile(), this.levelId);
@@ -446,7 +442,6 @@ public class LevelStorageSource {
 			}
 		}
 
-		@Environment(EnvType.CLIENT)
 		public long makeWorldBackup() throws IOException {
 			this.checkLock();
 			String string = LocalDateTime.now().format(LevelStorageSource.FORMATTER) + "_" + this.levelId;

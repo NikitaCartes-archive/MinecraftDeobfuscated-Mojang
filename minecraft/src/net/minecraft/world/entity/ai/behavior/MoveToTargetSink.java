@@ -17,6 +17,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveToTargetSink extends Behavior<Mob> {
+	private static final int MAX_COOLDOWN_BEFORE_RETRYING = 40;
 	private int remainingCooldown;
 	@Nullable
 	private Path path;

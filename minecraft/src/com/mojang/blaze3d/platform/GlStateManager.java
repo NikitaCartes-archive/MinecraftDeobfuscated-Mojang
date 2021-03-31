@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -20,7 +21,9 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 @Environment(EnvType.CLIENT)
+@DontObfuscate
 public class GlStateManager {
+	public static final int TEXTURE_COUNT = 12;
 	private static final GlStateManager.BlendState BLEND = new GlStateManager.BlendState();
 	private static final GlStateManager.DepthState DEPTH = new GlStateManager.DepthState();
 	private static final GlStateManager.CullState CULL = new GlStateManager.CullState();
@@ -286,6 +289,11 @@ public class GlStateManager {
 		GL15.glDeleteBuffers(i);
 	}
 
+	public static void _glCopyTexSubImage2D(int i, int j, int k, int l, int m, int n, int o, int p) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL20.glCopyTexSubImage2D(i, j, k, l, m, n, o, p);
+	}
+
 	public static void _glDeleteVertexArrays(int i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		GL30.glDeleteVertexArrays(i);
@@ -301,6 +309,16 @@ public class GlStateManager {
 		GL30.glBlitFramebuffer(i, j, k, l, m, n, o, p, q, r);
 	}
 
+	public static void _glBindRenderbuffer(int i, int j) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL30.glBindRenderbuffer(i, j);
+	}
+
+	public static void _glDeleteRenderbuffers(int i) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL30.glDeleteRenderbuffers(i);
+	}
+
 	public static void _glDeleteFramebuffers(int i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		GL30.glDeleteFramebuffers(i);
@@ -311,6 +329,21 @@ public class GlStateManager {
 		return GL30.glGenFramebuffers();
 	}
 
+	public static int glGenRenderbuffers() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		return GL30.glGenRenderbuffers();
+	}
+
+	public static void _glRenderbufferStorage(int i, int j, int k, int l) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL30.glRenderbufferStorage(i, j, k, l);
+	}
+
+	public static void _glFramebufferRenderbuffer(int i, int j, int k, int l) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL30.glFramebufferRenderbuffer(i, j, k, l);
+	}
+
 	public static int glCheckFramebufferStatus(int i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		return GL30.glCheckFramebufferStatus(i);
@@ -319,6 +352,11 @@ public class GlStateManager {
 	public static void _glFramebufferTexture2D(int i, int j, int k, int l, int m) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		GL30.glFramebufferTexture2D(i, j, k, l, m);
+	}
+
+	public static int getBoundFramebuffer() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		return _getInteger(36006);
 	}
 
 	public static void glActiveTexture(int i) {
@@ -593,6 +631,11 @@ public class GlStateManager {
 		}
 	}
 
+	public static void _glDrawPixels(int i, int j, int k, int l, long m) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		GL11.glDrawPixels(i, j, k, l, m);
+	}
+
 	public static void _vertexAttribPointer(int i, int j, int k, boolean bl, int l, long m) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		GL20.glVertexAttribPointer(i, j, k, bl, l, m);
@@ -626,6 +669,11 @@ public class GlStateManager {
 	public static void _readPixels(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		GL11.glReadPixels(i, j, k, l, m, n, byteBuffer);
+	}
+
+	public static void _readPixels(int i, int j, int k, int l, int m, int n, long o) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		GL11.glReadPixels(i, j, k, l, m, n, o);
 	}
 
 	public static int _getError() {
@@ -725,6 +773,7 @@ public class GlStateManager {
 	}
 
 	@Environment(EnvType.CLIENT)
+	@DontObfuscate
 	public static enum DestFactor {
 		CONSTANT_ALPHA(32771),
 		CONSTANT_COLOR(32769),
@@ -794,6 +843,7 @@ public class GlStateManager {
 	}
 
 	@Environment(EnvType.CLIENT)
+	@DontObfuscate
 	public static enum SourceFactor {
 		CONSTANT_ALPHA(32771),
 		CONSTANT_COLOR(32769),
@@ -857,5 +907,21 @@ public class GlStateManager {
 		protected int y;
 		protected int width;
 		protected int height;
+
+		public static int x() {
+			return INSTANCE.x;
+		}
+
+		public static int y() {
+			return INSTANCE.y;
+		}
+
+		public static int width() {
+			return INSTANCE.width;
+		}
+
+		public static int height() {
+			return INSTANCE.height;
+		}
 	}
 }

@@ -3,8 +3,6 @@ package net.minecraft.stats;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.player.Player;
 
 public class StatsCounter {
@@ -23,7 +21,6 @@ public class StatsCounter {
 		this.stats.put(stat, i);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public <T> int getValue(StatType<T> statType, T object) {
 		return statType.contains(object) ? this.getValue(statType.get(object)) : 0;
 	}

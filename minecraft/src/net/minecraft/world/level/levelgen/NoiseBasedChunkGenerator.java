@@ -14,8 +14,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -23,6 +21,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -123,7 +122,6 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return CODEC;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ChunkGenerator withSeed(long l) {
 		return new NoiseBasedChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
@@ -238,7 +236,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		BlockState blockState;
 		if (e > 0.0) {
 			blockState = baseStoneSource.getBaseStone(i, j, k, (NoiseGeneratorSettings)this.settings.get());
-		} else if (this.aquifersEnabled && j < this.getMinY() + 9) {
+		} else if (this.aquifersEnabled && Aquifer.isLavaLevel(j - this.getMinY())) {
 			blockState = Blocks.LAVA.defaultBlockState();
 		} else {
 			int l = aquifer == null ? this.getSeaLevel() : aquifer.getLastWaterLevel();
@@ -440,7 +438,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	@Override
-	public List<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(
+		Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos
+	) {
 		if (structureFeatureManager.getStructureAt(blockPos, true, StructureFeature.SWAMP_HUT).isValid()) {
 			if (mobCategory == MobCategory.MONSTER) {
 				return StructureFeature.SWAMP_HUT.getSpecialEnemies();

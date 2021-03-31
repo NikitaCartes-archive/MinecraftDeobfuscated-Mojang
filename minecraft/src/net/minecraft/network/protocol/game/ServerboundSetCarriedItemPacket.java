@@ -1,14 +1,11 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundSetCarriedItemPacket implements Packet<ServerGamePacketListener> {
 	private final int slot;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundSetCarriedItemPacket(int i) {
 		this.slot = i;
 	}

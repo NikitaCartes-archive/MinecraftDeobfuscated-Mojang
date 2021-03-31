@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Mth;
@@ -11,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListener> {
+	private static final double TRUNCATION_STEPS = 4096.0;
 	protected final int entityId;
 	protected final short xa;
 	protected final short ya;
@@ -25,12 +24,10 @@ public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePa
 		return Mth.lfloor(d * 4096.0);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static double packetToEntity(long l) {
 		return (double)l / 4096.0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Vec3 updateEntityPosition(Vec3 vec3) {
 		double d = this.xa == 0 ? vec3.x : packetToEntity(entityToPacket(vec3.x) + (long)this.xa);
 		double e = this.ya == 0 ? vec3.y : packetToEntity(entityToPacket(vec3.y) + (long)this.ya);
@@ -63,32 +60,38 @@ public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePa
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public Entity getEntity(Level level) {
 		return level.getEntity(this.entityId);
 	}
 
-	@Environment(EnvType.CLIENT)
+	public short getXa() {
+		return this.xa;
+	}
+
+	public short getYa() {
+		return this.ya;
+	}
+
+	public short getZa() {
+		return this.za;
+	}
+
 	public byte getyRot() {
 		return this.yRot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public byte getxRot() {
 		return this.xRot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean hasRotation() {
 		return this.hasRot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean hasPosition() {
 		return this.hasPos;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isOnGround() {
 		return this.onGround;
 	}

@@ -8,6 +8,14 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class DragonBreathParticle extends TextureSheetParticle {
+	private static final int COLOR_MIN = 11993298;
+	private static final int COLOR_MAX = 14614777;
+	private static final float COLOR_MIN_RED = 0.7176471F;
+	private static final float COLOR_MIN_GREEN = 0.0F;
+	private static final float COLOR_MIN_BLUE = 0.8235294F;
+	private static final float COLOR_MAX_RED = 0.8745098F;
+	private static final float COLOR_MAX_GREEN = 0.0F;
+	private static final float COLOR_MAX_BLUE = 0.9764706F;
 	private boolean hasHitGround;
 	private final SpriteSet sprites;
 

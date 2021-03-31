@@ -76,6 +76,8 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	int getHeight(Heightmap.Types types, int i, int j);
 
+	BlockPos getHeighestPosition(Heightmap.Types types);
+
 	ChunkPos getPos();
 
 	Map<StructureFeature<?>, StructureStart<?>> getAllStarts();

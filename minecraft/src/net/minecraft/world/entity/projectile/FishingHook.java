@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -48,6 +46,7 @@ public class FishingHook extends Projectile {
 	private final Random syncronizedRandom = new Random();
 	private boolean biting;
 	private int outOfWaterTime;
+	private static final int MAX_OUT_OF_WATER_TIME = 10;
 	private static final EntityDataAccessor<Integer> DATA_HOOKED_ENTITY = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_BITING = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.BOOLEAN);
 	private int life;
@@ -122,14 +121,12 @@ public class FishingHook extends Projectile {
 		super.onSyncedDataUpdated(entityDataAccessor);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = 64.0;
 		return d < 4096.0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
 	}
@@ -482,7 +479,6 @@ public class FishingHook extends Projectile {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 31 && this.level.isClientSide && this.hookedIn instanceof Player && ((Player)this.hookedIn).isLocalPlayer()) {
@@ -545,7 +541,6 @@ public class FishingHook extends Projectile {
 		return new ClientboundAddEntityPacket(this, entity == null ? this.getId() : entity.getId());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);

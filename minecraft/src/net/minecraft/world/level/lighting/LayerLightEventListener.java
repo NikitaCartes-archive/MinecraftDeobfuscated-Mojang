@@ -3,6 +3,7 @@ package net.minecraft.world.level.lighting;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.DataLayer;
 
 public interface LayerLightEventListener extends LightEventListener {
@@ -26,7 +27,29 @@ public interface LayerLightEventListener extends LightEventListener {
 		}
 
 		@Override
+		public void checkBlock(BlockPos blockPos) {
+		}
+
+		@Override
+		public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
+		}
+
+		@Override
+		public boolean hasLightWork() {
+			return false;
+		}
+
+		@Override
+		public int runUpdates(int i, boolean bl, boolean bl2) {
+			return i;
+		}
+
+		@Override
 		public void updateSectionStatus(SectionPos sectionPos, boolean bl) {
+		}
+
+		@Override
+		public void enableLightSources(ChunkPos chunkPos, boolean bl) {
 		}
 	}
 }

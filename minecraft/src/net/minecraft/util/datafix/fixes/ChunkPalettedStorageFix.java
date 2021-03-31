@@ -30,6 +30,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ChunkPalettedStorageFix extends DataFix {
+	private static final int NORTH_WEST_MASK = 128;
+	private static final int WEST_MASK = 64;
+	private static final int SOUTH_WEST_MASK = 32;
+	private static final int SOUTH_MASK = 16;
+	private static final int SOUTH_EAST_MASK = 8;
+	private static final int EAST_MASK = 4;
+	private static final int NORTH_EAST_MASK = 2;
+	private static final int NORTH_MASK = 1;
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final BitSet VIRTUAL = new BitSet(256);
 	private static final BitSet FIX = new BitSet(256);
@@ -123,6 +131,7 @@ public class ChunkPalettedStorageFix extends DataFix {
 		}
 	});
 	private static final Dynamic<?> AIR = BlockStateData.getTag(0);
+	private static final int SIZE = 4096;
 
 	public ChunkPalettedStorageFix(Schema schema, boolean bl) {
 		super(schema, bl);
@@ -510,6 +519,8 @@ public class ChunkPalettedStorageFix extends DataFix {
 	}
 
 	static class DataLayer {
+		private static final int SIZE = 2048;
+		private static final int NIBBLE_SIZE = 4;
 		private final byte[] data;
 
 		public DataLayer() {

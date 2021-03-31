@@ -155,15 +155,16 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.OXEYE_DAISY,
 				Blocks.CORNFLOWER,
 				Blocks.LILY_OF_THE_VALLEY,
-				Blocks.WITHER_ROSE
+				Blocks.WITHER_ROSE,
+				Blocks.AZALEA_LEAVES_FLOWERS,
+				Blocks.FLOWERING_AZALEA
 			);
+		this.tag(BlockTags.DIRT).add(Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.PODZOL, Blocks.ROOTED_DIRT);
 		this.tag(BlockTags.ENDERMAN_HOLDABLE)
 			.addTag(BlockTags.SMALL_FLOWERS)
+			.addTag(BlockTags.DIRT)
 			.add(
 				Blocks.GRASS_BLOCK,
-				Blocks.DIRT,
-				Blocks.COARSE_DIRT,
-				Blocks.PODZOL,
 				Blocks.SAND,
 				Blocks.RED_SAND,
 				Blocks.GRAVEL,
@@ -301,7 +302,14 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.COBBLED_DEEPSLATE_STAIRS,
 				Blocks.POLISHED_DEEPSLATE_STAIRS,
 				Blocks.DEEPSLATE_TILE_STAIRS,
-				Blocks.DEEPSLATE_BRICK_STAIRS
+				Blocks.DEEPSLATE_BRICK_STAIRS,
+				Blocks.OXIDIZED_CUT_COPPER_STAIRS,
+				Blocks.WEATHERED_CUT_COPPER_STAIRS,
+				Blocks.EXPOSED_CUT_COPPER_STAIRS,
+				Blocks.CUT_COPPER_STAIRS,
+				Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS,
+				Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS,
+				Blocks.WAXED_CUT_COPPER_STAIRS
 			);
 		this.tag(BlockTags.SLABS)
 			.addTag(BlockTags.WOODEN_SLABS)
@@ -341,7 +349,14 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.COBBLED_DEEPSLATE_SLAB,
 				Blocks.POLISHED_DEEPSLATE_SLAB,
 				Blocks.DEEPSLATE_TILE_SLAB,
-				Blocks.DEEPSLATE_BRICK_SLAB
+				Blocks.DEEPSLATE_BRICK_SLAB,
+				Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB,
+				Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB,
+				Blocks.WAXED_CUT_COPPER_SLAB,
+				Blocks.OXIDIZED_CUT_COPPER_SLAB,
+				Blocks.WEATHERED_CUT_COPPER_SLAB,
+				Blocks.EXPOSED_CUT_COPPER_SLAB,
+				Blocks.CUT_COPPER_SLAB
 			);
 		this.tag(BlockTags.WALLS)
 			.add(
@@ -426,7 +441,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.UNDERWATER_BONEMEALS).add(Blocks.SEAGRASS).addTag(BlockTags.CORALS).addTag(BlockTags.WALL_CORALS);
 		this.tag(BlockTags.BAMBOO_PLANTABLE_ON)
 			.addTag(BlockTags.SAND)
-			.add(Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.GRAVEL, Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM);
+			.addTag(BlockTags.DIRT)
+			.add(Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.GRAVEL, Blocks.GRASS_BLOCK, Blocks.MYCELIUM);
 		this.tag(BlockTags.STANDING_SIGNS)
 			.add(
 				Blocks.OAK_SIGN,
@@ -687,6 +703,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.SAND);
 		this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.LUSH_PLANTS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
 		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
+		this.tag(BlockTags.SNOW).add(Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
 	}
 
 	@Override

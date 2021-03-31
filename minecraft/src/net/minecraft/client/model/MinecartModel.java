@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 @Environment(EnvType.CLIENT)
 public class MinecartModel<T extends Entity> extends HierarchicalModel<T> {
 	private final ModelPart root;
+	private static final String CONTENTS = "contents";
 	private final ModelPart contents;
 
 	public MinecartModel(ModelPart modelPart) {

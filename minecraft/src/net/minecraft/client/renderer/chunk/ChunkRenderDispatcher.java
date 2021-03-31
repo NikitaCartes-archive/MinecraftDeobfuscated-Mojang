@@ -55,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class ChunkRenderDispatcher {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int MAX_WORKERS_32_BIT = 4;
 	private static final VertexFormat VERTEX_FORMAT = DefaultVertexFormat.BLOCK;
 	private final PriorityQueue<ChunkRenderDispatcher.RenderChunk.ChunkCompileTask> toBatch = Queues.newPriorityQueue();
 	private final Queue<ChunkBufferBuilderPack> freeBuffers;
@@ -257,6 +258,7 @@ public class ChunkRenderDispatcher {
 
 	@Environment(EnvType.CLIENT)
 	public class RenderChunk {
+		public static final int SIZE = 16;
 		public final int index;
 		public final AtomicReference<ChunkRenderDispatcher.CompiledChunk> compiled = new AtomicReference(ChunkRenderDispatcher.CompiledChunk.UNCOMPILED);
 		@Nullable

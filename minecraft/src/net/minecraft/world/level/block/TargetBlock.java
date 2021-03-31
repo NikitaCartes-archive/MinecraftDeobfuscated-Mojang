@@ -24,6 +24,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class TargetBlock extends Block {
 	private static final IntegerProperty OUTPUT_POWER = BlockStateProperties.POWER;
+	private static final int ACTIVATION_TICKS_ARROWS = 20;
+	private static final int ACTIVATION_TICKS_OTHER = 8;
 
 	public TargetBlock(BlockBehaviour.Properties properties) {
 		super(properties);

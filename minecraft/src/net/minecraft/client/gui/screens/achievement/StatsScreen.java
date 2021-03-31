@@ -49,6 +49,18 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	@Nullable
 	private ObjectSelectionList<?> activeList;
 	private boolean isLoading = true;
+	private static final int SLOT_TEX_SIZE = 128;
+	private static final int SLOT_BG_SIZE = 18;
+	private static final int SLOT_STAT_HEIGHT = 20;
+	private static final int SLOT_BG_X = 1;
+	private static final int SLOT_BG_Y = 1;
+	private static final int SLOT_FG_X = 2;
+	private static final int SLOT_FG_Y = 2;
+	private static final int SLOT_LEFT_INSERT = 40;
+	private static final int SLOT_TEXT_OFFSET = 5;
+	private static final int SORT_NONE = 0;
+	private static final int SORT_DOWN = -1;
+	private static final int SORT_UP = 1;
 
 	public StatsScreen(Screen screen, StatsCounter statsCounter) {
 		super(new TranslatableComponent("gui.stats"));

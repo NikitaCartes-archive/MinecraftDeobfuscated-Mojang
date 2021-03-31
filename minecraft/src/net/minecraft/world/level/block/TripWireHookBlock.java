@@ -29,6 +29,10 @@ public class TripWireHookBlock extends Block {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty ATTACHED = BlockStateProperties.ATTACHED;
+	protected static final int WIRE_DIST_MIN = 1;
+	protected static final int WIRE_DIST_MAX = 42;
+	private static final int RECHECK_PERIOD = 10;
+	protected static final int AABB_OFFSET = 3;
 	protected static final VoxelShape NORTH_AABB = Block.box(5.0, 0.0, 10.0, 11.0, 10.0, 16.0);
 	protected static final VoxelShape SOUTH_AABB = Block.box(5.0, 0.0, 0.0, 11.0, 10.0, 6.0);
 	protected static final VoxelShape WEST_AABB = Block.box(10.0, 0.0, 5.0, 16.0, 10.0, 11.0);

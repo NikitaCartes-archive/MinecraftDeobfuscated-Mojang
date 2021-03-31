@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +28,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class IglooPieces {
+	public static final int GENERATION_HEIGHT = 90;
 	private static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
 	private static final ResourceLocation STRUCTURE_LOCATION_LADDER = new ResourceLocation("igloo/middle");
 	private static final ResourceLocation STRUCTURE_LOCATION_LABORATORY = new ResourceLocation("igloo/bottom");
@@ -38,54 +39,54 @@ public class IglooPieces {
 		STRUCTURE_LOCATION_IGLOO, BlockPos.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPos(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPos(0, -3, -2)
 	);
 
-	public static void addPieces(StructureManager structureManager, BlockPos blockPos, Rotation rotation, List<StructurePiece> list, Random random) {
+	public static void addPieces(
+		StructureManager structureManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random
+	) {
 		if (random.nextDouble() < 0.5) {
 			int i = random.nextInt(8) + 4;
-			list.add(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_LABORATORY, blockPos, rotation, i * 3));
+			structurePieceAccessor.addPiece(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_LABORATORY, blockPos, rotation, i * 3));
 
 			for (int j = 0; j < i - 1; j++) {
-				list.add(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_LADDER, blockPos, rotation, j * 3));
+				structurePieceAccessor.addPiece(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_LADDER, blockPos, rotation, j * 3));
 			}
 		}
 
-		list.add(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_IGLOO, blockPos, rotation, 0));
+		structurePieceAccessor.addPiece(new IglooPieces.IglooPiece(structureManager, STRUCTURE_LOCATION_IGLOO, blockPos, rotation, 0));
 	}
 
 	public static class IglooPiece extends TemplateStructurePiece {
-		private final ResourceLocation templateLocation;
-		private final Rotation rotation;
-
 		public IglooPiece(StructureManager structureManager, ResourceLocation resourceLocation, BlockPos blockPos, Rotation rotation, int i) {
-			super(StructurePieceType.IGLOO, 0);
-			this.templateLocation = resourceLocation;
-			BlockPos blockPos2 = (BlockPos)IglooPieces.OFFSETS.get(resourceLocation);
-			this.templatePosition = blockPos.offset(blockPos2.getX(), blockPos2.getY() - i, blockPos2.getZ());
-			this.rotation = rotation;
-			this.loadTemplate(structureManager);
+			super(
+				StructurePieceType.IGLOO,
+				0,
+				structureManager,
+				resourceLocation,
+				resourceLocation.toString(),
+				makeSettings(rotation, resourceLocation),
+				makePosition(resourceLocation, blockPos, i)
+			);
 		}
 
 		public IglooPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super(StructurePieceType.IGLOO, compoundTag);
-			this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
-			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-			this.loadTemplate(serverLevel.getStructureManager());
+			super(StructurePieceType.IGLOO, compoundTag, serverLevel, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot")), resourceLocation));
 		}
 
-		private void loadTemplate(StructureManager structureManager) {
-			StructureTemplate structureTemplate = structureManager.getOrCreate(this.templateLocation);
-			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
-				.setRotation(this.rotation)
+		private static StructurePlaceSettings makeSettings(Rotation rotation, ResourceLocation resourceLocation) {
+			return new StructurePlaceSettings()
+				.setRotation(rotation)
 				.setMirror(Mirror.NONE)
-				.setRotationPivot((BlockPos)IglooPieces.PIVOTS.get(this.templateLocation))
+				.setRotationPivot((BlockPos)IglooPieces.PIVOTS.get(resourceLocation))
 				.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-			this.setup(structureTemplate, this.templatePosition, structurePlaceSettings);
+		}
+
+		private static BlockPos makePosition(ResourceLocation resourceLocation, BlockPos blockPos, int i) {
+			return blockPos.offset((Vec3i)IglooPieces.OFFSETS.get(resourceLocation)).below(i);
 		}
 
 		@Override
 		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super.addAdditionalSaveData(serverLevel, compoundTag);
-			compoundTag.putString("Template", this.templateLocation.toString());
-			compoundTag.putString("Rot", this.rotation.name());
+			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
 		}
 
 		@Override
@@ -109,19 +110,16 @@ public class IglooPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
-				.setRotation(this.rotation)
-				.setMirror(Mirror.NONE)
-				.setRotationPivot((BlockPos)IglooPieces.PIVOTS.get(this.templateLocation))
-				.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-			BlockPos blockPos2 = (BlockPos)IglooPieces.OFFSETS.get(this.templateLocation);
+			ResourceLocation resourceLocation = new ResourceLocation(this.templateName);
+			StructurePlaceSettings structurePlaceSettings = makeSettings(this.placeSettings.getRotation(), resourceLocation);
+			BlockPos blockPos2 = (BlockPos)IglooPieces.OFFSETS.get(resourceLocation);
 			BlockPos blockPos3 = this.templatePosition
-				.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos2.getX(), 0, 0 - blockPos2.getZ())));
+				.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos2.getX(), 0, -blockPos2.getZ())));
 			int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
 			BlockPos blockPos4 = this.templatePosition;
 			this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
 			boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
-			if (this.templateLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
+			if (resourceLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
 				BlockState blockState = worldGenLevel.getBlockState(blockPos5.below());
 				if (!blockState.isAir() && !blockState.is(Blocks.LADDER)) {

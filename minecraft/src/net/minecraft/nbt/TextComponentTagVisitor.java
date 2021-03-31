@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public class TextComponentTagVisitor implements TagVisitor {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int INLINE_LIST_THRESHOLD = 8;
 	private static final ByteCollection INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
 	private static final ChatFormatting SYNTAX_HIGHLIGHTING_KEY = ChatFormatting.AQUA;
 	private static final ChatFormatting SYNTAX_HIGHLIGHTING_STRING = ChatFormatting.GREEN;
@@ -27,6 +28,13 @@ public class TextComponentTagVisitor implements TagVisitor {
 	private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
 	private static final String NAME_VALUE_SEPARATOR = String.valueOf(':');
 	private static final String ELEMENT_SEPARATOR = String.valueOf(',');
+	private static final String LIST_OPEN = "[";
+	private static final String LIST_CLOSE = "]";
+	private static final String LIST_TYPE_SEPARATOR = ";";
+	private static final String ELEMENT_SPACING = " ";
+	private static final String STRUCT_OPEN = "{";
+	private static final String STRUCT_CLOSE = "}";
+	private static final String NEWLINE = "\n";
 	private final String indentation;
 	private final int depth;
 	private Component result;

@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +13,8 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 
 public class EnchantedBookItem extends Item {
+	public static final String TAG_STORED_ENCHANTMENTS = "StoredEnchantments";
+
 	public EnchantedBookItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -34,7 +34,6 @@ public class EnchantedBookItem extends Item {
 		return compoundTag != null ? compoundTag.getList("StoredEnchantments", 10) : new ListTag();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, level, list, tooltipFlag);

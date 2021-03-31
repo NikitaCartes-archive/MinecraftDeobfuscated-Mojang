@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -33,17 +31,14 @@ public class ClientboundSetHealthPacket implements Packet<ClientGamePacketListen
 		clientGamePacketListener.handleSetHealth(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHealth() {
 		return this.health;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFood() {
 		return this.food;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getSaturation() {
 		return this.saturation;
 	}

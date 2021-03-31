@@ -101,6 +101,7 @@ public class LevelDataGeneratorOptionsFix extends DataFix {
 		hashMap.put("166", "minecraft:modified_wooded_badlands_plateau");
 		hashMap.put("167", "minecraft:modified_badlands_plateau");
 	});
+	public static final String GENERATOR_OPTIONS = "generatorOptions";
 
 	public LevelDataGeneratorOptionsFix(Schema schema, boolean bl) {
 		super(schema, bl);

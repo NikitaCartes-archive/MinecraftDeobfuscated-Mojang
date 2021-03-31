@@ -27,6 +27,7 @@ import net.minecraft.world.phys.AABB;
 public class DetectorRailBlock extends BaseRailBlock {
 	public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE_STRAIGHT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+	private static final int PRESSED_CHECK_PERIOD = 20;
 
 	public DetectorRailBlock(BlockBehaviour.Properties properties) {
 		super(true, properties);

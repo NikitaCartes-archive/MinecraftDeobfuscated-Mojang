@@ -19,6 +19,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
 public class PortalShape {
+	private static final int MIN_WIDTH = 2;
+	public static final int MAX_WIDTH = 21;
+	private static final int MIN_HEIGHT = 3;
+	public static final int MAX_HEIGHT = 21;
 	private static final BlockBehaviour.StatePredicate FRAME = (blockState, blockGetter, blockPos) -> blockState.is(Blocks.OBSIDIAN);
 	private final LevelAccessor level;
 	private final Direction.Axis axis;

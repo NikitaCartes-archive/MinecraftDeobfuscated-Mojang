@@ -1,18 +1,14 @@
 package net.minecraft.world.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public interface BlockAndTintGetter extends BlockGetter {
-	@Environment(EnvType.CLIENT)
 	float getShade(Direction direction, boolean bl);
 
 	LevelLightEngine getLightEngine();
 
-	@Environment(EnvType.CLIENT)
 	int getBlockTint(BlockPos blockPos, ColorResolver colorResolver);
 
 	default int getBrightness(LightLayer lightLayer, BlockPos blockPos) {

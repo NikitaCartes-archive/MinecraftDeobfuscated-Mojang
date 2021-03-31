@@ -82,6 +82,12 @@ public class StringSplitter {
 		return string.substring(mutableInt.intValue());
 	}
 
+	public int formattedIndexByWidth(String string, int i, Style style) {
+		StringSplitter.WidthLimitedCharSink widthLimitedCharSink = new StringSplitter.WidthLimitedCharSink((float)i);
+		StringDecomposer.iterateFormatted(string, style, widthLimitedCharSink);
+		return widthLimitedCharSink.getPosition();
+	}
+
 	@Nullable
 	public Style componentStyleAtWidth(FormattedText formattedText, int i) {
 		StringSplitter.WidthLimitedCharSink widthLimitedCharSink = new StringSplitter.WidthLimitedCharSink((float)i);
@@ -104,6 +110,10 @@ public class StringSplitter {
 			}
 		});
 		return mutableObject.getValue();
+	}
+
+	public String formattedHeadByWidth(String string, int i, Style style) {
+		return string.substring(0, this.formattedIndexByWidth(string, i, style));
 	}
 
 	public FormattedText headByWidth(FormattedText formattedText, int i, Style style) {
@@ -130,6 +140,12 @@ public class StringSplitter {
 				}
 			}
 		}, style).orElse(formattedText);
+	}
+
+	public int findLineBreak(String string, int i, Style style) {
+		StringSplitter.LineBreakFinder lineBreakFinder = new StringSplitter.LineBreakFinder((float)i);
+		StringDecomposer.iterateFormatted(string, style, lineBreakFinder);
+		return lineBreakFinder.getSplitPosition();
 	}
 
 	public static int getWordPosition(String string, int i, int j, boolean bl) {
@@ -204,6 +220,14 @@ public class StringSplitter {
 	public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style) {
 		List<FormattedText> list = Lists.<FormattedText>newArrayList();
 		this.splitLines(formattedText, i, style, (formattedTextx, boolean_) -> list.add(formattedTextx));
+		return list;
+	}
+
+	public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style, FormattedText formattedText2) {
+		List<FormattedText> list = Lists.<FormattedText>newArrayList();
+		this.splitLines(
+			formattedText, i, style, (formattedText2x, boolean_) -> list.add(boolean_ ? FormattedText.composite(formattedText2, formattedText2x) : formattedText2x)
+		);
 		return list;
 	}
 

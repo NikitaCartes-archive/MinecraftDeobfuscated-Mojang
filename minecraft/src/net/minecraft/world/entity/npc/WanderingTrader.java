@@ -45,6 +45,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class WanderingTrader extends AbstractVillager {
+	private static final int NUMBER_OF_TRADE_OFFERS = 5;
 	@Nullable
 	private BlockPos wanderTarget;
 	private int despawnDelay;

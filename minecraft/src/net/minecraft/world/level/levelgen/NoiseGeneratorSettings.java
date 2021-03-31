@@ -151,7 +151,7 @@ public final class NoiseGeneratorSettings {
 			structureSettings,
 			NoiseSettings.create(
 				bl3 ? -64 : 0,
-				bl3 ? 384 : 128,
+				bl3 ? 384 : 256,
 				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
 				new NoiseSlideSettings(-3000, 64, -46),
 				new NoiseSlideSettings(-30, 7, 1),

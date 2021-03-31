@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -9,6 +7,11 @@ import net.minecraft.network.protocol.Packet;
 public class ClientboundTabListPacket implements Packet<ClientGamePacketListener> {
 	private final Component header;
 	private final Component footer;
+
+	public ClientboundTabListPacket(Component component, Component component2) {
+		this.header = component;
+		this.footer = component2;
+	}
 
 	public ClientboundTabListPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.header = friendlyByteBuf.readComponent();
@@ -25,12 +28,10 @@ public class ClientboundTabListPacket implements Packet<ClientGamePacketListener
 		clientGamePacketListener.handleTabListCustomisation(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getHeader() {
 		return this.header;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getFooter() {
 		return this.footer;
 	}

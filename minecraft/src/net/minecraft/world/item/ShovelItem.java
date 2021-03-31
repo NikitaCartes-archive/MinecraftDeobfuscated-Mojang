@@ -1,8 +1,8 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -50,21 +50,18 @@ public class ShovelItem extends DiggerItem {
 		Blocks.GREEN_CONCRETE_POWDER,
 		Blocks.RED_CONCRETE_POWDER,
 		Blocks.BLACK_CONCRETE_POWDER,
-		Blocks.SOUL_SOIL
+		Blocks.SOUL_SOIL,
+		Blocks.ROOTED_DIRT
 	);
 	protected static final Map<Block, BlockState> FLATTENABLES = Maps.<Block, BlockState>newHashMap(
-		ImmutableMap.of(
-			Blocks.GRASS_BLOCK,
-			Blocks.DIRT_PATH.defaultBlockState(),
-			Blocks.DIRT,
-			Blocks.DIRT_PATH.defaultBlockState(),
-			Blocks.PODZOL,
-			Blocks.DIRT_PATH.defaultBlockState(),
-			Blocks.COARSE_DIRT,
-			Blocks.DIRT_PATH.defaultBlockState(),
-			Blocks.MYCELIUM,
-			Blocks.DIRT_PATH.defaultBlockState()
-		)
+		new Builder()
+			.put(Blocks.GRASS_BLOCK, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.DIRT, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.PODZOL, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.COARSE_DIRT, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.MYCELIUM, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.ROOTED_DIRT, Blocks.DIRT_PATH.defaultBlockState())
+			.build()
 	);
 
 	public ShovelItem(Tier tier, float f, float g, Item.Properties properties) {

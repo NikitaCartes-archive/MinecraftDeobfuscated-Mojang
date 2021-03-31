@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -134,13 +132,11 @@ public class SpawnEggItem extends Item {
 		return Objects.equals(this.getType(compoundTag), entityType);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getColor(int i) {
 		return i == 0 ? this.backgroundColor : this.highlightColor;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static SpawnEggItem byId(@Nullable EntityType<?> entityType) {
 		return (SpawnEggItem)BY_ID.get(entityType);
 	}

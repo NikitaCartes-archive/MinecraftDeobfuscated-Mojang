@@ -23,6 +23,13 @@ public class SnbtPrinterTagVisitor implements TagVisitor {
 	private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
 	private static final String NAME_VALUE_SEPARATOR = String.valueOf(':');
 	private static final String ELEMENT_SEPARATOR = String.valueOf(',');
+	private static final String LIST_OPEN = "[";
+	private static final String LIST_CLOSE = "]";
+	private static final String LIST_TYPE_SEPARATOR = ";";
+	private static final String ELEMENT_SPACING = " ";
+	private static final String STRUCT_OPEN = "{";
+	private static final String STRUCT_CLOSE = "}";
+	private static final String NEWLINE = "\n";
 	private final String indentation;
 	private final int depth;
 	private final List<String> path;

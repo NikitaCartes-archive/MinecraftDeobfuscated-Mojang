@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class LocalCoordinates implements Coordinates {
+	public static final char PREFIX_LOCAL_COORDINATE = '^';
 	private final double left;
 	private final double up;
 	private final double forwards;

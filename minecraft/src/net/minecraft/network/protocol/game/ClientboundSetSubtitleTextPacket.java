@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -26,7 +24,6 @@ public class ClientboundSetSubtitleTextPacket implements Packet<ClientGamePacket
 		clientGamePacketListener.setSubtitleText(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getText() {
 		return this.text;
 	}

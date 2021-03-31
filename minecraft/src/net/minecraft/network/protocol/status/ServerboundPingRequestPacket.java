@@ -1,14 +1,11 @@
 package net.minecraft.network.protocol.status;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundPingRequestPacket implements Packet<ServerStatusPacketListener> {
 	private final long time;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundPingRequestPacket(long l) {
 		this.time = l;
 	}

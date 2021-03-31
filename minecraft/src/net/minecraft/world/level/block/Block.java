@@ -10,8 +10,6 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -72,12 +70,27 @@ public class Block extends BlockBehaviour implements ItemLike {
 				return !Shapes.joinIsNotEmpty(Shapes.block(), voxelShape, BooleanOp.NOT_SAME);
 			}
 		});
+	public static final int UPDATE_NEIGHBORS = 1;
+	public static final int UPDATE_CLIENTS = 2;
+	public static final int UPDATE_INVISIBLE = 4;
+	public static final int UPDATE_IMMEDIATE = 8;
+	public static final int UPDATE_KNOWN_SHAPE = 16;
+	public static final int UPDATE_SUPPRESS_DROPS = 32;
+	public static final int UPDATE_MOVE_BY_PISTON = 64;
+	public static final int UPDATE_SUPPRESS_LIGHT = 128;
+	public static final int UPDATE_NONE = 4;
+	public static final int UPDATE_ALL = 3;
+	public static final int UPDATE_ALL_IMMEDIATE = 11;
+	public static final float INDESTRUCTIBLE = -1.0F;
+	public static final float INSTANT = 0.0F;
+	public static final int UPDATE_LIMIT = 512;
 	protected final StateDefinition<Block, BlockState> stateDefinition;
 	private BlockState defaultBlockState;
 	@Nullable
 	private String descriptionId;
 	@Nullable
 	private Item item;
+	private static final int CACHE_SIZE = 2048;
 	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
 		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
 			@Override
@@ -183,7 +196,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return this.isRandomlyTicking;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
 		BlockState blockState2 = blockGetter.getBlockState(blockPos2);
 		if (blockState.skipRendering(blockState2, direction)) {
@@ -238,7 +250,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return !isShapeFullBlock(blockState.getShape(blockGetter, blockPos)) && blockState.getFluidState().isEmpty();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 	}
 
@@ -264,6 +275,13 @@ public class Block extends BlockBehaviour implements ItemLike {
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, entity)
 			.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity);
 		return blockState.getDrops(builder);
+	}
+
+	public static void dropResources(BlockState blockState, LootContext.Builder builder) {
+		ServerLevel serverLevel = builder.getLevel();
+		BlockPos blockPos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
+		blockState.getDrops(builder).forEach(itemStack -> popResource(serverLevel, blockPos, itemStack));
+		blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY);
 	}
 
 	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos) {
@@ -333,7 +351,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return !this.material.isSolid() && !this.material.isLiquid();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getName() {
 		return new TranslatableComponent(this.getDescriptionId());
 	}
@@ -354,7 +371,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(this);
 	}
@@ -447,7 +463,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return "Block{" + Registry.BLOCK.getKey(this) + "}";
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
 	}
 

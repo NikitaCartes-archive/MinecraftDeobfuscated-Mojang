@@ -2,8 +2,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -137,7 +135,6 @@ public abstract class Projectile extends Entity {
 		blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpMotion(double d, double e, double f) {
 		this.setDeltaMovement(d, e, f);
@@ -185,7 +182,6 @@ public abstract class Projectile extends Entity {
 		return new ClientboundAddEntityPacket(this, entity == null ? 0 : entity.getId());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);

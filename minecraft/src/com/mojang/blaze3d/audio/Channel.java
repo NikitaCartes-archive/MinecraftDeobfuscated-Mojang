@@ -16,6 +16,8 @@ import org.lwjgl.openal.AL10;
 @Environment(EnvType.CLIENT)
 public class Channel {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int QUEUED_BUFFER_COUNT = 4;
+	public static final int BUFFER_DURATION_SECONDS = 1;
 	private final int source;
 	private final AtomicBoolean initialized = new AtomicBoolean(true);
 	private int streamingBufferSize = 16384;
@@ -78,6 +80,10 @@ public class Channel {
 			AL10.alSourceStop(this.source);
 			OpenAlUtil.checkALError("Stop");
 		}
+	}
+
+	public boolean playing() {
+		return this.getState() == 4114;
 	}
 
 	public boolean stopped() {

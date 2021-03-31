@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.scores.Objective;
@@ -36,13 +34,11 @@ public class ClientboundSetDisplayObjectivePacket implements Packet<ClientGamePa
 		clientGamePacketListener.handleSetDisplayObjective(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getSlot() {
 		return this.slot;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public String getObjectiveName() {
 		return Objects.equals(this.objectiveName, "") ? null : this.objectiveName;
 	}

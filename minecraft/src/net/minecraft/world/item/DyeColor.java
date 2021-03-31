@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MaterialColor;
 
@@ -72,7 +70,6 @@ public enum DyeColor implements StringRepresentable {
 		return this.fireworkColor;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTextColor() {
 		return this.textColor;
 	}
@@ -96,7 +93,6 @@ public enum DyeColor implements StringRepresentable {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static DyeColor byFireworkColor(int i) {
 		return BY_FIREWORK_COLOR.get(i);
 	}

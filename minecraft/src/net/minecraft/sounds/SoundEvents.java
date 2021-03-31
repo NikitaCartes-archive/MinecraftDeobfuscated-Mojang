@@ -434,6 +434,17 @@ public class SoundEvents {
 	public static final SoundEvent GLOW_SQUID_DEATH = register("entity.glow_squid.death");
 	public static final SoundEvent GLOW_SQUID_HURT = register("entity.glow_squid.hurt");
 	public static final SoundEvent GLOW_SQUID_SQUIRT = register("entity.glow_squid.squirt");
+	public static final SoundEvent GOAT_AMBIENT = register("entity.goat.ambient");
+	public static final SoundEvent GOAT_DEATH = register("entity.goat.death");
+	public static final SoundEvent GOAT_HURT = register("entity.goat.hurt");
+	public static final SoundEvent GOAT_MILK = register("entity.goat.milk");
+	public static final SoundEvent GOAT_PREPARE_RAM = register("entity.goat.prepare_ram");
+	public static final SoundEvent GOAT_SCREAMING_AMBIENT = register("entity.goat.screaming.ambient");
+	public static final SoundEvent GOAT_SCREAMING_DEATH = register("entity.goat.screaming.death");
+	public static final SoundEvent GOAT_SCREAMING_HURT = register("entity.goat.screaming.hurt");
+	public static final SoundEvent GOAT_SCREAMING_MILK = register("entity.goat.screaming.milk");
+	public static final SoundEvent GOAT_SCREAMING_RAM = register("entity.goat.screaming.ram");
+	public static final SoundEvent GOAT_STEP = register("entity.goat.step");
 	public static final SoundEvent GRASS_BREAK = register("block.grass.break");
 	public static final SoundEvent GRASS_FALL = register("block.grass.fall");
 	public static final SoundEvent GRASS_HIT = register("block.grass.hit");

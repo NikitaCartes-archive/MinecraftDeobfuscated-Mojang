@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ElytraOnPlayerSoundInstance extends AbstractTickableSoundInstance {
+	public static final int DELAY = 20;
 	private final LocalPlayer player;
 	private int time;
 

@@ -14,6 +14,14 @@ public final class ModelLayerLocation {
 		this.layer = string;
 	}
 
+	public ResourceLocation getModel() {
+		return this.model;
+	}
+
+	public String getLayer() {
+		return this.layer;
+	}
+
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;

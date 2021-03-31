@@ -33,6 +33,11 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class StrongholdPieces {
+	private static final int SMALL_DOOR_WIDTH = 3;
+	private static final int SMALL_DOOR_HEIGHT = 3;
+	private static final int MAX_DEPTH = 50;
+	private static final int LOWEST_Y_POSITION = 10;
+	private static final boolean CHECK_AIR = true;
 	private static final StrongholdPieces.PieceWeight[] STRONGHOLD_PIECE_WEIGHTS = new StrongholdPieces.PieceWeight[]{
 		new StrongholdPieces.PieceWeight(StrongholdPieces.Straight.class, 40, 0),
 		new StrongholdPieces.PieceWeight(StrongholdPieces.PrisonHall.class, 5, 5),
@@ -88,44 +93,51 @@ public class StrongholdPieces {
 	}
 
 	private static StrongholdPieces.StrongholdPiece findAndCreatePieceFactory(
-		Class<? extends StrongholdPieces.StrongholdPiece> class_, List<StructurePiece> list, Random random, int i, int j, int k, @Nullable Direction direction, int l
+		Class<? extends StrongholdPieces.StrongholdPiece> class_,
+		StructurePieceAccessor structurePieceAccessor,
+		Random random,
+		int i,
+		int j,
+		int k,
+		@Nullable Direction direction,
+		int l
 	) {
 		StrongholdPieces.StrongholdPiece strongholdPiece = null;
 		if (class_ == StrongholdPieces.Straight.class) {
-			strongholdPiece = StrongholdPieces.Straight.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.Straight.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.PrisonHall.class) {
-			strongholdPiece = StrongholdPieces.PrisonHall.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.PrisonHall.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.LeftTurn.class) {
-			strongholdPiece = StrongholdPieces.LeftTurn.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.LeftTurn.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.RightTurn.class) {
-			strongholdPiece = StrongholdPieces.RightTurn.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.RightTurn.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.RoomCrossing.class) {
-			strongholdPiece = StrongholdPieces.RoomCrossing.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.RoomCrossing.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.StraightStairsDown.class) {
-			strongholdPiece = StrongholdPieces.StraightStairsDown.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.StraightStairsDown.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.StairsDown.class) {
-			strongholdPiece = StrongholdPieces.StairsDown.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.StairsDown.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.FiveCrossing.class) {
-			strongholdPiece = StrongholdPieces.FiveCrossing.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.FiveCrossing.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.ChestCorridor.class) {
-			strongholdPiece = StrongholdPieces.ChestCorridor.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.ChestCorridor.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.Library.class) {
-			strongholdPiece = StrongholdPieces.Library.createPiece(list, random, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.Library.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == StrongholdPieces.PortalRoom.class) {
-			strongholdPiece = StrongholdPieces.PortalRoom.createPiece(list, i, j, k, direction, l);
+			strongholdPiece = StrongholdPieces.PortalRoom.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		}
 
 		return strongholdPiece;
 	}
 
 	private static StrongholdPieces.StrongholdPiece generatePieceFromSmallDoor(
-		StrongholdPieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l
+		StrongholdPieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 	) {
 		if (!updatePieceWeight()) {
 			return null;
 		} else {
 			if (imposedPiece != null) {
-				StrongholdPieces.StrongholdPiece strongholdPiece = findAndCreatePieceFactory(imposedPiece, list, random, i, j, k, direction, l);
+				StrongholdPieces.StrongholdPiece strongholdPiece = findAndCreatePieceFactory(imposedPiece, structurePieceAccessor, random, i, j, k, direction, l);
 				imposedPiece = null;
 				if (strongholdPiece != null) {
 					return strongholdPiece;
@@ -145,7 +157,9 @@ public class StrongholdPieces {
 							break;
 						}
 
-						StrongholdPieces.StrongholdPiece strongholdPiece2 = findAndCreatePieceFactory(pieceWeight.pieceClass, list, random, i, j, k, direction, l);
+						StrongholdPieces.StrongholdPiece strongholdPiece2 = findAndCreatePieceFactory(
+							pieceWeight.pieceClass, structurePieceAccessor, random, i, j, k, direction, l
+						);
 						if (strongholdPiece2 != null) {
 							pieceWeight.placeCount++;
 							startPiece.previousPiece = pieceWeight;
@@ -159,20 +173,27 @@ public class StrongholdPieces {
 				}
 			}
 
-			BoundingBox boundingBox = StrongholdPieces.FillerCorridor.findPieceBox(list, random, i, j, k, direction);
-			return boundingBox != null && boundingBox.y0 > 1 ? new StrongholdPieces.FillerCorridor(l, boundingBox, direction) : null;
+			BoundingBox boundingBox = StrongholdPieces.FillerCorridor.findPieceBox(structurePieceAccessor, random, i, j, k, direction);
+			return boundingBox != null && boundingBox.minY() > 1 ? new StrongholdPieces.FillerCorridor(l, boundingBox, direction) : null;
 		}
 	}
 
 	private static StructurePiece generateAndAddPiece(
-		StrongholdPieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, int k, @Nullable Direction direction, int l
+		StrongholdPieces.StartPiece startPiece,
+		StructurePieceAccessor structurePieceAccessor,
+		Random random,
+		int i,
+		int j,
+		int k,
+		@Nullable Direction direction,
+		int l
 	) {
 		if (l > 50) {
 			return null;
-		} else if (Math.abs(i - startPiece.getBoundingBox().x0) <= 112 && Math.abs(k - startPiece.getBoundingBox().z0) <= 112) {
-			StructurePiece structurePiece = generatePieceFromSmallDoor(startPiece, list, random, i, j, k, direction, l + 1);
+		} else if (Math.abs(i - startPiece.getBoundingBox().minX()) <= 112 && Math.abs(k - startPiece.getBoundingBox().minZ()) <= 112) {
+			StructurePiece structurePiece = generatePieceFromSmallDoor(startPiece, structurePieceAccessor, random, i, j, k, direction, l + 1);
 			if (structurePiece != null) {
-				list.add(structurePiece);
+				structurePieceAccessor.addPiece(structurePiece);
 				startPiece.pendingChildren.add(structurePiece);
 			}
 
@@ -183,13 +204,15 @@ public class StrongholdPieces {
 	}
 
 	public static class ChestCorridor extends StrongholdPieces.StrongholdPiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 5;
+		private static final int DEPTH = 7;
 		private boolean hasPlacedChest;
 
 		public ChestCorridor(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, i);
+			super(StructurePieceType.STRONGHOLD_CHEST_CORRIDOR, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public ChestCorridor(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -204,13 +227,15 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 		}
 
-		public static StrongholdPieces.ChestCorridor createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.ChestCorridor createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, 7, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.ChestCorridor(l, random, boundingBox, direction)
 				: null;
 		}
@@ -238,7 +263,7 @@ public class StrongholdPieces {
 				this.placeBlock(worldGenLevel, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 2, 1, i, boundingBox);
 			}
 
-			if (!this.hasPlacedChest && boundingBox.isInside(new BlockPos(this.getWorldX(3, 3), this.getWorldY(2), this.getWorldZ(3, 3)))) {
+			if (!this.hasPlacedChest && boundingBox.isInside(this.getWorldPos(3, 2, 3))) {
 				this.hasPlacedChest = true;
 				this.createChest(worldGenLevel, boundingBox, random, 3, 2, 3, BuiltInLootTables.STRONGHOLD_CORRIDOR);
 			}
@@ -251,9 +276,8 @@ public class StrongholdPieces {
 		private final int steps;
 
 		public FillerCorridor(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, i);
+			super(StructurePieceType.STRONGHOLD_FILLER_CORRIDOR, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 			this.steps = direction != Direction.NORTH && direction != Direction.SOUTH ? boundingBox.getXSpan() : boundingBox.getZSpan();
 		}
 
@@ -268,14 +292,14 @@ public class StrongholdPieces {
 			compoundTag.putInt("Steps", this.steps);
 		}
 
-		public static BoundingBox findPieceBox(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction) {
+		public static BoundingBox findPieceBox(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction) {
 			int l = 3;
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, 4, direction);
-			StructurePiece structurePiece = StructurePiece.findCollisionPiece(list, boundingBox);
+			StructurePiece structurePiece = structurePieceAccessor.findCollisionPiece(boundingBox);
 			if (structurePiece == null) {
 				return null;
 			} else {
-				if (structurePiece.getBoundingBox().y0 == boundingBox.y0) {
+				if (structurePiece.getBoundingBox().minY() == boundingBox.minY()) {
 					for (int m = 3; m >= 1; m--) {
 						boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, m - 1, direction);
 						if (!structurePiece.getBoundingBox().intersects(boundingBox)) {
@@ -325,16 +349,18 @@ public class StrongholdPieces {
 	}
 
 	public static class FiveCrossing extends StrongholdPieces.StrongholdPiece {
+		protected static final int WIDTH = 10;
+		protected static final int HEIGHT = 9;
+		protected static final int DEPTH = 11;
 		private final boolean leftLow;
 		private final boolean leftHigh;
 		private final boolean rightLow;
 		private final boolean rightHigh;
 
 		public FiveCrossing(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, i);
+			super(StructurePieceType.STRONGHOLD_FIVE_CROSSING, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 			this.leftLow = random.nextBoolean();
 			this.leftHigh = random.nextBoolean();
 			this.rightLow = random.nextBoolean();
@@ -359,7 +385,7 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			int i = 3;
 			int j = 5;
 			Direction direction = this.getOrientation();
@@ -368,27 +394,29 @@ public class StrongholdPieces {
 				j = 8 - j;
 			}
 
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 5, 1);
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 5, 1);
 			if (this.leftLow) {
-				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, i, 1);
+				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, i, 1);
 			}
 
 			if (this.leftHigh) {
-				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, j, 7);
+				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, j, 7);
 			}
 
 			if (this.rightLow) {
-				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, i, 1);
+				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, i, 1);
 			}
 
 			if (this.rightHigh) {
-				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, j, 7);
+				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, j, 7);
 			}
 		}
 
-		public static StrongholdPieces.FiveCrossing createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.FiveCrossing createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -4, -3, 0, 10, 9, 11, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.FiveCrossing(l, random, boundingBox, direction)
 				: null;
 		}
@@ -466,10 +494,9 @@ public class StrongholdPieces {
 
 	public static class LeftTurn extends StrongholdPieces.Turn {
 		public LeftTurn(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_LEFT_TURN, i);
+			super(StructurePieceType.STRONGHOLD_LEFT_TURN, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public LeftTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -477,18 +504,20 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			Direction direction = this.getOrientation();
 			if (direction != Direction.NORTH && direction != Direction.EAST) {
-				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 			} else {
-				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 			}
 		}
 
-		public static StrongholdPieces.LeftTurn createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.LeftTurn createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.LeftTurn(l, random, boundingBox, direction)
 				: null;
 		}
@@ -517,13 +546,16 @@ public class StrongholdPieces {
 	}
 
 	public static class Library extends StrongholdPieces.StrongholdPiece {
+		protected static final int WIDTH = 14;
+		protected static final int HEIGHT = 6;
+		protected static final int TALL_HEIGHT = 11;
+		protected static final int DEPTH = 15;
 		private final boolean isTall;
 
 		public Library(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_LIBRARY, i);
+			super(StructurePieceType.STRONGHOLD_LIBRARY, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 			this.isTall = boundingBox.getYSpan() > 6;
 		}
 
@@ -538,11 +570,13 @@ public class StrongholdPieces {
 			compoundTag.putBoolean("Tall", this.isTall);
 		}
 
-		public static StrongholdPieces.Library createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.Library createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -4, -1, 0, 14, 11, 15, direction);
-			if (!isOkBox(boundingBox) || StructurePiece.findCollisionPiece(list, boundingBox) != null) {
+			if (!isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
 				boundingBox = BoundingBox.orientBox(i, j, k, -4, -1, 0, 14, 6, 15, direction);
-				if (!isOkBox(boundingBox) || StructurePiece.findCollisionPiece(list, boundingBox) != null) {
+				if (!isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
 					return null;
 				}
 			}
@@ -731,12 +765,14 @@ public class StrongholdPieces {
 	}
 
 	public static class PortalRoom extends StrongholdPieces.StrongholdPiece {
+		protected static final int WIDTH = 11;
+		protected static final int HEIGHT = 8;
+		protected static final int DEPTH = 16;
 		private boolean hasPlacedSpawner;
 
 		public PortalRoom(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, i);
+			super(StructurePieceType.STRONGHOLD_PORTAL_ROOM, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public PortalRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -751,15 +787,15 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			if (structurePiece != null) {
 				((StrongholdPieces.StartPiece)structurePiece).portalRoomPiece = this;
 			}
 		}
 
-		public static StrongholdPieces.PortalRoom createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.PortalRoom createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -4, -1, 0, 11, 8, 16, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.PortalRoom(l, boundingBox, direction)
 				: null;
 		}
@@ -854,8 +890,7 @@ public class StrongholdPieces {
 			}
 
 			if (!this.hasPlacedSpawner) {
-				i = this.getWorldY(3);
-				BlockPos blockPos2 = new BlockPos(this.getWorldX(5, 6), i, this.getWorldZ(5, 6));
+				BlockPos blockPos2 = this.getWorldPos(5, 3, 6);
 				if (boundingBox.isInside(blockPos2)) {
 					this.hasPlacedSpawner = true;
 					worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
@@ -871,11 +906,14 @@ public class StrongholdPieces {
 	}
 
 	public static class PrisonHall extends StrongholdPieces.StrongholdPiece {
+		protected static final int WIDTH = 9;
+		protected static final int HEIGHT = 5;
+		protected static final int DEPTH = 11;
+
 		public PrisonHall(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_PRISON_HALL, i);
+			super(StructurePieceType.STRONGHOLD_PRISON_HALL, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public PrisonHall(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -883,13 +921,15 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 		}
 
-		public static StrongholdPieces.PrisonHall createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.PrisonHall createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 9, 5, 11, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.PrisonHall(l, random, boundingBox, direction)
 				: null;
 		}
@@ -995,10 +1035,9 @@ public class StrongholdPieces {
 
 	public static class RightTurn extends StrongholdPieces.Turn {
 		public RightTurn(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_RIGHT_TURN, i);
+			super(StructurePieceType.STRONGHOLD_RIGHT_TURN, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public RightTurn(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1006,18 +1045,20 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			Direction direction = this.getOrientation();
 			if (direction != Direction.NORTH && direction != Direction.EAST) {
-				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 			} else {
-				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 			}
 		}
 
-		public static StrongholdPieces.RightTurn createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.RightTurn createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.RightTurn(l, random, boundingBox, direction)
 				: null;
 		}
@@ -1046,13 +1087,15 @@ public class StrongholdPieces {
 	}
 
 	public static class RoomCrossing extends StrongholdPieces.StrongholdPiece {
+		protected static final int WIDTH = 11;
+		protected static final int HEIGHT = 7;
+		protected static final int DEPTH = 11;
 		protected final int type;
 
 		public RoomCrossing(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, i);
+			super(StructurePieceType.STRONGHOLD_ROOM_CROSSING, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 			this.type = random.nextInt(5);
 		}
 
@@ -1068,15 +1111,17 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 4, 1);
-			this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 4);
-			this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 4);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 4, 1);
+			this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 4);
+			this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 4);
 		}
 
-		public static StrongholdPieces.RoomCrossing createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.RoomCrossing createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -4, -1, 0, 11, 7, 11, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.RoomCrossing(l, random, boundingBox, direction)
 				: null;
 		}
@@ -1204,26 +1249,23 @@ public class StrongholdPieces {
 	}
 
 	public static class StairsDown extends StrongholdPieces.StrongholdPiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 11;
+		private static final int DEPTH = 5;
 		private final boolean isSource;
 
-		public StairsDown(StructurePieceType structurePieceType, int i, Random random, int j, int k) {
-			super(structurePieceType, i);
+		public StairsDown(StructurePieceType structurePieceType, int i, int j, int k, Direction direction) {
+			super(structurePieceType, i, makeBoundingBox(j, 64, k, direction, 5, 11, 5));
 			this.isSource = true;
-			this.setOrientation(Direction.Plane.HORIZONTAL.getRandomDirection(random));
+			this.setOrientation(direction);
 			this.entryDoor = StrongholdPieces.StrongholdPiece.SmallDoorType.OPENING;
-			if (this.getOrientation().getAxis() == Direction.Axis.Z) {
-				this.boundingBox = new BoundingBox(j, 64, k, j + 5 - 1, 74, k + 5 - 1);
-			} else {
-				this.boundingBox = new BoundingBox(j, 64, k, j + 5 - 1, 74, k + 5 - 1);
-			}
 		}
 
 		public StairsDown(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_STAIRS_DOWN, i);
+			super(StructurePieceType.STRONGHOLD_STAIRS_DOWN, i, boundingBox);
 			this.isSource = false;
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public StairsDown(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -1242,17 +1284,19 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			if (this.isSource) {
 				StrongholdPieces.imposedPiece = StrongholdPieces.FiveCrossing.class;
 			}
 
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 		}
 
-		public static StrongholdPieces.StairsDown createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.StairsDown createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -7, 0, 5, 11, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.StairsDown(l, random, boundingBox, direction)
 				: null;
 		}
@@ -1298,23 +1342,30 @@ public class StrongholdPieces {
 		public final List<StructurePiece> pendingChildren = Lists.<StructurePiece>newArrayList();
 
 		public StartPiece(Random random, int i, int j) {
-			super(StructurePieceType.STRONGHOLD_START, 0, random, i, j);
+			super(StructurePieceType.STRONGHOLD_START, 0, i, j, getRandomHorizontalDirection(random));
 		}
 
 		public StartPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super(StructurePieceType.STRONGHOLD_START, compoundTag);
 		}
+
+		@Override
+		public BlockPos getLocatorPosition() {
+			return this.portalRoomPiece != null ? this.portalRoomPiece.getLocatorPosition() : super.getLocatorPosition();
+		}
 	}
 
 	public static class Straight extends StrongholdPieces.StrongholdPiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 5;
+		private static final int DEPTH = 7;
 		private final boolean leftChild;
 		private final boolean rightChild;
 
 		public Straight(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_STRAIGHT, i);
+			super(StructurePieceType.STRONGHOLD_STRAIGHT, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 			this.leftChild = random.nextInt(2) == 0;
 			this.rightChild = random.nextInt(2) == 0;
 		}
@@ -1333,20 +1384,22 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 			if (this.leftChild) {
-				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 2);
+				this.generateSmallDoorChildLeft((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 2);
 			}
 
 			if (this.rightChild) {
-				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 2);
+				this.generateSmallDoorChildRight((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 2);
 			}
 		}
 
-		public static StrongholdPieces.Straight createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.Straight createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -1, 0, 5, 5, 7, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.Straight(l, random, boundingBox, direction)
 				: null;
 		}
@@ -1383,11 +1436,14 @@ public class StrongholdPieces {
 	}
 
 	public static class StraightStairsDown extends StrongholdPieces.StrongholdPiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 11;
+		private static final int DEPTH = 8;
+
 		public StraightStairsDown(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, i);
+			super(StructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, i, boundingBox);
 			this.setOrientation(direction);
 			this.entryDoor = this.randomSmallDoor(random);
-			this.boundingBox = boundingBox;
 		}
 
 		public StraightStairsDown(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1395,13 +1451,15 @@ public class StrongholdPieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, list, random, 1, 1);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateSmallDoorChildForward((StrongholdPieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 1);
 		}
 
-		public static StrongholdPieces.StraightStairsDown createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static StrongholdPieces.StraightStairsDown createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -7, 0, 5, 11, 8, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new StrongholdPieces.StraightStairsDown(l, random, boundingBox, direction)
 				: null;
 		}
@@ -1439,8 +1497,8 @@ public class StrongholdPieces {
 	abstract static class StrongholdPiece extends StructurePiece {
 		protected StrongholdPieces.StrongholdPiece.SmallDoorType entryDoor = StrongholdPieces.StrongholdPiece.SmallDoorType.OPENING;
 
-		protected StrongholdPiece(StructurePieceType structurePieceType, int i) {
-			super(structurePieceType, i);
+		protected StrongholdPiece(StructurePieceType structurePieceType, int i, BoundingBox boundingBox) {
+			super(structurePieceType, i, boundingBox);
 		}
 
 		public StrongholdPiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -1540,25 +1598,55 @@ public class StrongholdPieces {
 		}
 
 		@Nullable
-		protected StructurePiece generateSmallDoorChildForward(StrongholdPieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j) {
+		protected StructurePiece generateSmallDoorChildForward(
+			StrongholdPieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + i, this.boundingBox.y0 + j, this.boundingBox.z0 - 1, direction, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + i,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() - 1,
+							direction,
+							this.getGenDepth()
 						);
 					case SOUTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + i, this.boundingBox.y0 + j, this.boundingBox.z1 + 1, direction, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + i,
+							this.boundingBox.minY() + j,
+							this.boundingBox.maxZ() + 1,
+							direction,
+							this.getGenDepth()
 						);
 					case WEST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + j, this.boundingBox.z0 + i, direction, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() + i,
+							direction,
+							this.getGenDepth()
 						);
 					case EAST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + j, this.boundingBox.z0 + i, direction, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() + i,
+							direction,
+							this.getGenDepth()
 						);
 				}
 			}
@@ -1567,25 +1655,55 @@ public class StrongholdPieces {
 		}
 
 		@Nullable
-		protected StructurePiece generateSmallDoorChildLeft(StrongholdPieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j) {
+		protected StructurePiece generateSmallDoorChildLeft(
+			StrongholdPieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.WEST, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.WEST,
+							this.getGenDepth()
 						);
 					case SOUTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.WEST, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.WEST,
+							this.getGenDepth()
 						);
 					case WEST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z0 - 1, Direction.NORTH, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() - 1,
+							Direction.NORTH,
+							this.getGenDepth()
 						);
 					case EAST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z0 - 1, Direction.NORTH, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() - 1,
+							Direction.NORTH,
+							this.getGenDepth()
 						);
 				}
 			}
@@ -1594,25 +1712,55 @@ public class StrongholdPieces {
 		}
 
 		@Nullable
-		protected StructurePiece generateSmallDoorChildRight(StrongholdPieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j) {
+		protected StructurePiece generateSmallDoorChildRight(
+			StrongholdPieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.EAST, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.EAST,
+							this.getGenDepth()
 						);
 					case SOUTH:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.EAST, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.EAST,
+							this.getGenDepth()
 						);
 					case WEST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z1 + 1, Direction.SOUTH, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.maxZ() + 1,
+							Direction.SOUTH,
+							this.getGenDepth()
 						);
 					case EAST:
 						return StrongholdPieces.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z1 + 1, Direction.SOUTH, this.getGenDepth()
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.maxZ() + 1,
+							Direction.SOUTH,
+							this.getGenDepth()
 						);
 				}
 			}
@@ -1621,7 +1769,7 @@ public class StrongholdPieces {
 		}
 
 		protected static boolean isOkBox(BoundingBox boundingBox) {
-			return boundingBox != null && boundingBox.y0 > 10;
+			return boundingBox != null && boundingBox.minY() > 10;
 		}
 
 		public static enum SmallDoorType {
@@ -1633,8 +1781,12 @@ public class StrongholdPieces {
 	}
 
 	public abstract static class Turn extends StrongholdPieces.StrongholdPiece {
-		protected Turn(StructurePieceType structurePieceType, int i) {
-			super(structurePieceType, i);
+		protected static final int WIDTH = 5;
+		protected static final int HEIGHT = 5;
+		protected static final int DEPTH = 5;
+
+		protected Turn(StructurePieceType structurePieceType, int i, BoundingBox boundingBox) {
+			super(structurePieceType, i, boundingBox);
 		}
 
 		public Turn(StructurePieceType structurePieceType, CompoundTag compoundTag) {

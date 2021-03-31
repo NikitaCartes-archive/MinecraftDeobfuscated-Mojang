@@ -3,8 +3,6 @@ package net.minecraft.world.entity.npc;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
@@ -37,8 +35,10 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class AbstractVillager extends AgeableMob implements Npc, Merchant {
+public abstract class AbstractVillager extends AgeableMob implements InventoryCarrier, Npc, Merchant {
 	private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
+	public static final int VILLAGER_SLOT_OFFSET = 300;
+	private static final int VILLAGER_INVENTORY_SIZE = 8;
 	@Nullable
 	private Player tradingPlayer;
 	@Nullable
@@ -115,7 +115,6 @@ public abstract class AbstractVillager extends AgeableMob implements Npc, Mercha
 		return this.offers;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void overrideOffers(@Nullable MerchantOffers merchantOffers) {
 	}
@@ -200,7 +199,6 @@ public abstract class AbstractVillager extends AgeableMob implements Npc, Mercha
 		this.stopTrading();
 	}
 
-	@Environment(EnvType.CLIENT)
 	protected void addParticlesAroundSelf(ParticleOptions particleOptions) {
 		for (int i = 0; i < 5; i++) {
 			double d = this.random.nextGaussian() * 0.02;
@@ -253,7 +251,6 @@ public abstract class AbstractVillager extends AgeableMob implements Npc, Mercha
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		float g = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * (float) (Math.PI / 180.0);

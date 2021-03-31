@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,7 +20,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class BaseFireBlock extends Block {
+	private static final int SECONDS_ON_FIRE = 8;
 	private final float fireDamage;
+	protected static final float AABB_OFFSET = 1.0F;
 	protected static final VoxelShape DOWN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
 
 	public BaseFireBlock(BlockBehaviour.Properties properties, float f) {
@@ -48,7 +48,6 @@ public abstract class BaseFireBlock extends Block {
 		return DOWN_AABB;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if (random.nextInt(24) == 0) {

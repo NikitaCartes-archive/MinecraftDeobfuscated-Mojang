@@ -30,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WalkNodeEvaluator extends NodeEvaluator {
+	public static final double SPACE_BETWEEN_WALL_POSTS = 0.5;
 	protected float oldWaterCost;
 	private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
 	private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<>();
@@ -505,7 +506,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		Material material = blockState.getMaterial();
 		if (blockState.isAir()) {
 			return BlockPathTypes.OPEN;
-		} else if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
+		} else if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD) || blockState.is(Blocks.POWDER_SNOW)) {
 			return BlockPathTypes.TRAPDOOR;
 		} else if (blockState.is(Blocks.CACTUS)) {
 			return BlockPathTypes.DAMAGE_CACTUS;

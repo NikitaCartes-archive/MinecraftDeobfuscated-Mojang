@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 public class SoundManager extends SimplePreparableReloadListener<SoundManager.Preparations> {
 	public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0F, 1.0F, 1, Sound.Type.FILE, false, false, 16);
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String SOUNDS_PATH = "sounds.json";
 	private static final Gson GSON = new GsonBuilder()
 		.registerTypeHierarchyAdapter(Component.class, new Component.Serializer())
 		.registerTypeAdapter(SoundEventRegistration.class, new SoundEventRegistrationSerializer())

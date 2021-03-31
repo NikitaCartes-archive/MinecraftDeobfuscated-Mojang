@@ -5,8 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -45,8 +43,12 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractArrow extends Projectile {
+	private static final double ARROW_BASE_DAMAGE = 2.0;
 	private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Byte> PIERCE_LEVEL = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
+	private static final int FLAG_CRIT = 1;
+	private static final int FLAG_NOPHYSICS = 2;
+	private static final int FLAG_CROSSBOW = 4;
 	@Nullable
 	private BlockState lastState;
 	protected boolean inGround;
@@ -81,7 +83,6 @@ public abstract class AbstractArrow extends Projectile {
 		this.soundEvent = soundEvent;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = this.getBoundingBox().getSize() * 10.0;
@@ -105,14 +106,12 @@ public abstract class AbstractArrow extends Projectile {
 		this.life = 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
 		this.setPos(d, e, f);
 		this.setRot(g, h);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpMotion(double d, double e, double f) {
 		super.lerpMotion(d, e, f);
@@ -523,6 +522,10 @@ public abstract class AbstractArrow extends Projectile {
 
 	public void setKnockback(int i) {
 		this.knockback = i;
+	}
+
+	public int getKnockback() {
+		return this.knockback;
 	}
 
 	@Override

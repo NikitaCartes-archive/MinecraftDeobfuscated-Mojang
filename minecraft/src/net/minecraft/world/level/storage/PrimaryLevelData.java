@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -41,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 
 public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private static final Logger LOGGER = LogManager.getLogger();
+	protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
 	private LevelSettings settings;
 	private final WorldGenSettings worldGenSettings;
 	private final Lifecycle worldGenSettingsLifecycle;
@@ -520,7 +519,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		return this.worldGenSettings;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Lifecycle worldGenSettingsLifecycle() {
 		return this.worldGenSettingsLifecycle;
@@ -577,6 +575,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.wanderingTraderSpawnChance = i;
 	}
 
+	@Nullable
+	@Override
+	public UUID getWanderingTraderId() {
+		return this.wanderingTraderId;
+	}
+
 	@Override
 	public void setWanderingTraderId(UUID uUID) {
 		this.wanderingTraderId = uUID;
@@ -603,7 +607,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		return this;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public LevelSettings getLevelSettings() {
 		return this.settings.copy();

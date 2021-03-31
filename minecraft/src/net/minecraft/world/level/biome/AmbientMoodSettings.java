@@ -2,8 +2,6 @@ package net.minecraft.world.level.biome;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
@@ -30,22 +28,18 @@ public class AmbientMoodSettings {
 		this.soundPositionOffset = d;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundEvent getSoundEvent() {
 		return this.soundEvent;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTickDelay() {
 		return this.tickDelay;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBlockSearchExtent() {
 		return this.blockSearchExtent;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getSoundPositionOffset() {
 		return this.soundPositionOffset;
 	}

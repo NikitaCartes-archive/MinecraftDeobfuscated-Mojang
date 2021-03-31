@@ -24,6 +24,8 @@ public class CompoundTag implements Tag {
 		Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
 		return tag instanceof CompoundTag ? DataResult.success((CompoundTag)tag) : DataResult.error("Not a compound tag: " + tag);
 	}, compoundTag -> new Dynamic<>(NbtOps.INSTANCE, compoundTag));
+	private static final int SELF_SIZE_IN_BITS = 384;
+	private static final int MAP_ENTRY_SIZE_IN_BITS = 256;
 	public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>() {
 		public CompoundTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(384L);
@@ -142,6 +144,10 @@ public class CompoundTag implements Tag {
 
 	public void putByteArray(String string, byte[] bs) {
 		this.tags.put(string, new ByteArrayTag(bs));
+	}
+
+	public void putByteArray(String string, List<Byte> list) {
+		this.tags.put(string, new ByteArrayTag(list));
 	}
 
 	public void putIntArray(String string, int[] is) {

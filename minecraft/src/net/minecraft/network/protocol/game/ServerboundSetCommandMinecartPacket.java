@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +13,6 @@ public class ServerboundSetCommandMinecartPacket implements Packet<ServerGamePac
 	private final String command;
 	private final boolean trackOutput;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundSetCommandMinecartPacket(int i, String string, boolean bl) {
 		this.entity = i;
 		this.command = string;

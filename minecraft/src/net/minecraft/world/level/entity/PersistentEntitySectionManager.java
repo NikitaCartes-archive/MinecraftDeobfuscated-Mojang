@@ -23,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.util.CsvOutput;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.apache.logging.log4j.LogManager;
@@ -312,6 +313,7 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 		});
 	}
 
+	@VisibleForDebug
 	public String gatherStats() {
 		return this.knownUuids.size()
 			+ ","

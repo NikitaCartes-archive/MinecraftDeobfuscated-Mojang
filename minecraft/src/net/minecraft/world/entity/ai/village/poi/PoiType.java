@@ -49,6 +49,12 @@ public class PoiType {
 		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
 		.filter(blockState -> blockState.getValue(BedBlock.PART) == BedPart.HEAD)
 		.collect(ImmutableSet.toImmutableSet());
+	private static final Set<BlockState> CAULDRONS = (Set<BlockState>)ImmutableList.of(
+			Blocks.CAULDRON, Blocks.LAVA_CAULDRON, Blocks.WATER_CAULDRON, Blocks.POWDER_SNOW_CAULDRON
+		)
+		.stream()
+		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
+		.collect(ImmutableSet.toImmutableSet());
 	private static final Map<BlockState, PoiType> TYPE_BY_STATE = Maps.<BlockState, PoiType>newHashMap();
 	public static final PoiType UNEMPLOYED = register("unemployed", ImmutableSet.of(), 1, ALL_JOBS, 1);
 	public static final PoiType ARMORER = register("armorer", getBlockStates(Blocks.BLAST_FURNACE), 1, 1);
@@ -58,7 +64,7 @@ public class PoiType {
 	public static final PoiType FARMER = register("farmer", getBlockStates(Blocks.COMPOSTER), 1, 1);
 	public static final PoiType FISHERMAN = register("fisherman", getBlockStates(Blocks.BARREL), 1, 1);
 	public static final PoiType FLETCHER = register("fletcher", getBlockStates(Blocks.FLETCHING_TABLE), 1, 1);
-	public static final PoiType LEATHERWORKER = register("leatherworker", getBlockStates(Blocks.CAULDRON), 1, 1);
+	public static final PoiType LEATHERWORKER = register("leatherworker", CAULDRONS, 1, 1);
 	public static final PoiType LIBRARIAN = register("librarian", getBlockStates(Blocks.LECTERN), 1, 1);
 	public static final PoiType MASON = register("mason", getBlockStates(Blocks.STONECUTTER), 1, 1);
 	public static final PoiType NITWIT = register("nitwit", ImmutableSet.of(), 1, 1);
@@ -99,12 +105,20 @@ public class PoiType {
 		this.validRange = j;
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
 	public int getMaxTickets() {
 		return this.maxTickets;
 	}
 
 	public Predicate<PoiType> getPredicate() {
 		return this.predicate;
+	}
+
+	public boolean is(BlockState blockState) {
+		return this.matchingStates.contains(blockState);
 	}
 
 	public int getValidRange() {

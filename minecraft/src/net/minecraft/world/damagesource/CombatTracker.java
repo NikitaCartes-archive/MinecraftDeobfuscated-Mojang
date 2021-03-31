@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CombatTracker {
+	public static final int RESET_DAMAGE_STATUS_TIME = 100;
+	public static final int RESET_COMBAT_STATUS_TIME = 300;
 	private final List<CombatEntry> entries = Lists.<CombatEntry>newArrayList();
 	private final LivingEntity mob;
 	private int lastDamageTime;
@@ -167,6 +169,16 @@ public class CombatTracker {
 		return combatEntry.getLocation() == null ? "generic" : combatEntry.getLocation();
 	}
 
+	public boolean isTakingDamage() {
+		this.recheckStatus();
+		return this.takingDamage;
+	}
+
+	public boolean isInCombat() {
+		this.recheckStatus();
+		return this.inCombat;
+	}
+
 	public int getCombatDuration() {
 		return this.inCombat ? this.mob.tickCount - this.combatStartTime : this.combatEndTime - this.combatStartTime;
 	}
@@ -192,6 +204,11 @@ public class CombatTracker {
 
 	public LivingEntity getMob() {
 		return this.mob;
+	}
+
+	@Nullable
+	public CombatEntry getLastEntry() {
+		return this.entries.isEmpty() ? null : (CombatEntry)this.entries.get(this.entries.size() - 1);
 	}
 
 	public int getKillerId() {

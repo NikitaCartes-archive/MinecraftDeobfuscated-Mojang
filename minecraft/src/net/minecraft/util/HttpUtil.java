@@ -3,24 +3,26 @@ package net.minecraft.util;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.io.FileUtils;
@@ -36,7 +38,79 @@ public class HttpUtil {
 		)
 	);
 
-	@Environment(EnvType.CLIENT)
+	private HttpUtil() {
+	}
+
+	public static String buildQuery(Map<String, Object> map) {
+		StringBuilder stringBuilder = new StringBuilder();
+
+		for (Entry<String, Object> entry : map.entrySet()) {
+			if (stringBuilder.length() > 0) {
+				stringBuilder.append('&');
+			}
+
+			try {
+				stringBuilder.append(URLEncoder.encode((String)entry.getKey(), "UTF-8"));
+			} catch (UnsupportedEncodingException var6) {
+				var6.printStackTrace();
+			}
+
+			if (entry.getValue() != null) {
+				stringBuilder.append('=');
+
+				try {
+					stringBuilder.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+				} catch (UnsupportedEncodingException var5) {
+					var5.printStackTrace();
+				}
+			}
+		}
+
+		return stringBuilder.toString();
+	}
+
+	public static String performPost(URL uRL, Map<String, Object> map, boolean bl, @Nullable Proxy proxy) {
+		return performPost(uRL, buildQuery(map), bl, proxy);
+	}
+
+	private static String performPost(URL uRL, String string, boolean bl, @Nullable Proxy proxy) {
+		try {
+			if (proxy == null) {
+				proxy = Proxy.NO_PROXY;
+			}
+
+			HttpURLConnection httpURLConnection = (HttpURLConnection)uRL.openConnection(proxy);
+			httpURLConnection.setRequestMethod("POST");
+			httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			httpURLConnection.setRequestProperty("Content-Length", "" + string.getBytes().length);
+			httpURLConnection.setRequestProperty("Content-Language", "en-US");
+			httpURLConnection.setUseCaches(false);
+			httpURLConnection.setDoInput(true);
+			httpURLConnection.setDoOutput(true);
+			DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
+			dataOutputStream.writeBytes(string);
+			dataOutputStream.flush();
+			dataOutputStream.close();
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+			StringBuilder stringBuilder = new StringBuilder();
+
+			String string2;
+			while ((string2 = bufferedReader.readLine()) != null) {
+				stringBuilder.append(string2);
+				stringBuilder.append('\r');
+			}
+
+			bufferedReader.close();
+			return stringBuilder.toString();
+		} catch (Exception var9) {
+			if (!bl) {
+				LOGGER.error("Could not post to {}", uRL, var9);
+			}
+
+			return "";
+		}
+	}
+
 	public static CompletableFuture<?> downloadTo(
 		File file, String string, Map<String, String> map, int i, @Nullable ProgressListener progressListener, Proxy proxy
 	) {

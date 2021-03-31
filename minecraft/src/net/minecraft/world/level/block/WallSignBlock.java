@@ -22,6 +22,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WallSignBlock extends SignBlock {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+	protected static final float AABB_THICKNESS = 2.0F;
+	protected static final float AABB_BOTTOM = 4.5F;
+	protected static final float AABB_TOP = 12.5F;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(
 		ImmutableMap.of(
 			Direction.NORTH,

@@ -23,6 +23,13 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ServerLevelData;
 
 public class WanderingTraderSpawner implements CustomSpawner {
+	private static final int DEFAULT_TICK_DELAY = 1200;
+	public static final int DEFAULT_SPAWN_DELAY = 24000;
+	private static final int MIN_SPAWN_CHANCE = 25;
+	private static final int MAX_SPAWN_CHANCE = 75;
+	private static final int SPAWN_CHANCE_INCREASE = 25;
+	private static final int SPAWN_ONE_IN_X_CHANCE = 10;
+	private static final int NUMBER_OF_SPAWN_ATTEMPTS = 10;
 	private final Random random = new Random();
 	private final ServerLevelData serverLevelData;
 	private int tickDelay;

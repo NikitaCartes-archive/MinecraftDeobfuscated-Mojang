@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.login;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -25,7 +23,6 @@ public class ClientboundLoginCompressionPacket implements Packet<ClientLoginPack
 		clientLoginPacketListener.handleCompression(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getCompressionThreshold() {
 		return this.compressionThreshold;
 	}

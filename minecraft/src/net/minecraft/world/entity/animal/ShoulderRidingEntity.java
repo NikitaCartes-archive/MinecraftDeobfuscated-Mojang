@@ -7,6 +7,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.level.Level;
 
 public abstract class ShoulderRidingEntity extends TamableAnimal {
+	private static final int RIDE_COOLDOWN = 100;
 	private int rideCooldownCounter;
 
 	protected ShoulderRidingEntity(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {

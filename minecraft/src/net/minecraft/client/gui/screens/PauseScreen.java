@@ -15,6 +15,9 @@ import net.minecraft.realms.RealmsBridge;
 
 @Environment(EnvType.CLIENT)
 public class PauseScreen extends Screen {
+	private static final String URL_FEEDBACK_SNAPSHOT = "https://aka.ms/snapshotfeedback?ref=game";
+	private static final String URL_FEEDBACK_RELEASE = "https://aka.ms/javafeedback?ref=game";
+	private static final String URL_BUGS = "https://aka.ms/snapshotbugs?ref=game";
 	private final boolean showPauseMenu;
 
 	public PauseScreen(boolean bl) {

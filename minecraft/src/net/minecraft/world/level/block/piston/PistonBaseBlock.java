@@ -37,6 +37,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PistonBaseBlock extends DirectionalBlock {
 	public static final BooleanProperty EXTENDED = BlockStateProperties.EXTENDED;
+	public static final int TRIGGER_EXTEND = 0;
+	public static final int TRIGGER_CONTRACT = 1;
+	public static final int TRIGGER_DROP = 2;
+	public static final float PLATFORM_THICKNESS = 4.0F;
 	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 0.0, 12.0, 16.0, 16.0);
 	protected static final VoxelShape WEST_AABB = Block.box(4.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 12.0);

@@ -19,6 +19,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public class GrindstoneMenu extends AbstractContainerMenu {
+	public static final int MAX_NAME_LENGTH = 35;
+	public static final int INPUT_SLOT = 0;
+	public static final int ADDITIONAL_SLOT = 1;
+	public static final int RESULT_SLOT = 2;
+	private static final int INV_SLOT_START = 3;
+	private static final int INV_SLOT_END = 30;
+	private static final int USE_ROW_SLOT_START = 30;
+	private static final int USE_ROW_SLOT_END = 39;
 	private final Container resultSlots = new ResultContainer();
 	private final Container repairSlots = new SimpleContainer(2) {
 		@Override

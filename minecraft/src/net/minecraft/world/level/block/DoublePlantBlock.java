@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -115,7 +113,6 @@ public class DoublePlantBlock extends BushBlock {
 		return BlockBehaviour.OffsetType.XZ;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public long getSeed(BlockState blockState, BlockPos blockPos) {
 		return Mth.getSeed(blockPos.getX(), blockPos.below(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), blockPos.getZ());

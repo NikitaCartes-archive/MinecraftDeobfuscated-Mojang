@@ -37,6 +37,10 @@ public class EntityTracker implements PositionTracker {
 		}
 	}
 
+	public Entity getEntity() {
+		return this.entity;
+	}
+
 	public String toString() {
 		return "EntityTracker for " + this.entity;
 	}

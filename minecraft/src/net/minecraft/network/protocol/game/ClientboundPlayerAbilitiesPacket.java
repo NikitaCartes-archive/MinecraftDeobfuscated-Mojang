@@ -1,12 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.player.Abilities;
 
 public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacketListener> {
+	private static final int FLAG_INVULNERABLE = 1;
+	private static final int FLAG_FLYING = 2;
+	private static final int FLAG_CAN_FLY = 4;
+	private static final int FLAG_INSTABUILD = 8;
 	private final boolean invulnerable;
 	private final boolean isFlying;
 	private final boolean canFly;
@@ -61,32 +63,26 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
 		clientGamePacketListener.handlePlayerAbilities(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isInvulnerable() {
 		return this.invulnerable;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFlying() {
 		return this.isFlying;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean canFly() {
 		return this.canFly;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean canInstabuild() {
 		return this.instabuild;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getFlyingSpeed() {
 		return this.flyingSpeed;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getWalkingSpeed() {
 		return this.walkingSpeed;
 	}

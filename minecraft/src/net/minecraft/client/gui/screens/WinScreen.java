@@ -36,6 +36,7 @@ public class WinScreen extends Screen {
 	private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/minecraft.png");
 	private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
 	private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
+	private static final String CENTERED_PREFIX = "[C]";
 	private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
 	private final boolean poem;
 	private final Runnable onFinished;

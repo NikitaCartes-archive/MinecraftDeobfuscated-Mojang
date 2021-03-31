@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
@@ -15,6 +16,18 @@ import org.lwjgl.system.MemoryUtil;
 @Environment(EnvType.CLIENT)
 public class Uniform extends AbstractUniform implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final int UT_INT1 = 0;
+	public static final int UT_INT2 = 1;
+	public static final int UT_INT3 = 2;
+	public static final int UT_INT4 = 3;
+	public static final int UT_FLOAT1 = 4;
+	public static final int UT_FLOAT2 = 5;
+	public static final int UT_FLOAT3 = 6;
+	public static final int UT_FLOAT4 = 7;
+	public static final int UT_MAT2 = 8;
+	public static final int UT_MAT3 = 9;
+	public static final int UT_MAT4 = 10;
+	private static final boolean TRANSPOSE_MATRICIES = false;
 	private int location;
 	private final int count;
 	private final int type;
@@ -116,6 +129,12 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 		this.markDirty();
 	}
 
+	public final void set(int i, float f) {
+		this.floatValues.position(0);
+		this.floatValues.put(i, f);
+		this.markDirty();
+	}
+
 	@Override
 	public final void set(float f, float g, float h) {
 		this.floatValues.position(0);
@@ -142,6 +161,16 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 		this.floatValues.put(h);
 		this.floatValues.put(i);
 		this.floatValues.flip();
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(Vector4f vector4f) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, vector4f.x());
+		this.floatValues.put(1, vector4f.y());
+		this.floatValues.put(2, vector4f.z());
+		this.floatValues.put(3, vector4f.w());
 		this.markDirty();
 	}
 
@@ -190,6 +219,40 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	@Override
+	public final void set(int i) {
+		this.intValues.position(0);
+		this.intValues.put(0, i);
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(int i, int j) {
+		this.intValues.position(0);
+		this.intValues.put(0, i);
+		this.intValues.put(1, j);
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(int i, int j, int k) {
+		this.intValues.position(0);
+		this.intValues.put(0, i);
+		this.intValues.put(1, j);
+		this.intValues.put(2, k);
+		this.markDirty();
+	}
+
+	@Override
+	public final void set(int i, int j, int k, int l) {
+		this.intValues.position(0);
+		this.intValues.put(0, i);
+		this.intValues.put(1, j);
+		this.intValues.put(2, k);
+		this.intValues.put(3, l);
+		this.markDirty();
+	}
+
+	@Override
 	public final void set(float[] fs) {
 		if (fs.length < this.count) {
 			LOGGER.warn("Uniform.set called with a too-small value array (expected {}, got {}). Ignoring.", this.count, fs.length);
@@ -199,6 +262,143 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 			this.floatValues.position(0);
 			this.markDirty();
 		}
+	}
+
+	@Override
+	public final void setMat2x2(float f, float g, float h, float i) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat2x3(float f, float g, float h, float i, float j, float k) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat2x4(float f, float g, float h, float i, float j, float k, float l, float m) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat3x2(float f, float g, float h, float i, float j, float k) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat3x3(float f, float g, float h, float i, float j, float k, float l, float m, float n) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.floatValues.put(8, n);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat3x4(float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, float q) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.floatValues.put(8, n);
+		this.floatValues.put(9, o);
+		this.floatValues.put(10, p);
+		this.floatValues.put(11, q);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat4x2(float f, float g, float h, float i, float j, float k, float l, float m) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat4x3(float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, float q) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.floatValues.put(8, n);
+		this.floatValues.put(9, o);
+		this.floatValues.put(10, p);
+		this.floatValues.put(11, q);
+		this.markDirty();
+	}
+
+	@Override
+	public final void setMat4x4(
+		float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, float q, float r, float s, float t, float u
+	) {
+		this.floatValues.position(0);
+		this.floatValues.put(0, f);
+		this.floatValues.put(1, g);
+		this.floatValues.put(2, h);
+		this.floatValues.put(3, i);
+		this.floatValues.put(4, j);
+		this.floatValues.put(5, k);
+		this.floatValues.put(6, l);
+		this.floatValues.put(7, m);
+		this.floatValues.put(8, n);
+		this.floatValues.put(9, o);
+		this.floatValues.put(10, p);
+		this.floatValues.put(11, q);
+		this.floatValues.put(12, r);
+		this.floatValues.put(13, s);
+		this.floatValues.put(14, t);
+		this.floatValues.put(15, u);
+		this.markDirty();
 	}
 
 	@Override
@@ -279,5 +479,25 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 			case 10:
 				RenderSystem.glUniformMatrix4(this.location, false, this.floatValues);
 		}
+	}
+
+	public int getLocation() {
+		return this.location;
+	}
+
+	public int getCount() {
+		return this.count;
+	}
+
+	public int getType() {
+		return this.type;
+	}
+
+	public IntBuffer getIntBuffer() {
+		return this.intValues;
+	}
+
+	public FloatBuffer getFloatBuffer() {
+		return this.floatValues;
 	}
 }

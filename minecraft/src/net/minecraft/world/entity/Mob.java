@@ -7,8 +7,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -73,6 +71,15 @@ import net.minecraft.world.level.storage.loot.LootContext;
 
 public abstract class Mob extends LivingEntity {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
+	private static final int MOB_FLAG_NO_AI = 1;
+	private static final int MOB_FLAG_LEFTHANDED = 2;
+	private static final int MOB_FLAG_AGGRESSIVE = 4;
+	public static final float MAX_WEARING_ARMOR_CHANCE = 0.15F;
+	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
+	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
+	public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25F;
+	public static final String LEASH_TAG = "Leash";
+	private static final int PICKUP_REACH = 1;
 	public int ambientSoundTime;
 	protected int xpReward;
 	protected LookControl lookControl;
@@ -287,7 +294,6 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 20) {
@@ -1098,6 +1104,10 @@ public abstract class Mob extends LivingEntity {
 		return this.restrictRadius;
 	}
 
+	public void clearRestriction() {
+		this.restrictRadius = -1.0F;
+	}
+
 	public boolean hasRestriction() {
 		return this.restrictRadius != -1.0F;
 	}
@@ -1201,7 +1211,6 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setDelayedLeashHolderId(int i) {
 		this.delayedLeashHolderId = i;
 		this.dropLeash(false, false);
@@ -1363,6 +1372,11 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
+	public void removeFreeWill() {
+		this.goalSelector.removeAllGoals();
+		this.getBrain().removeAllBehaviors();
+	}
+
 	@Override
 	protected void removeAfterChangingDimensions() {
 		super.removeAfterChangingDimensions();
@@ -1370,7 +1384,6 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getPickResult() {
 		SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());

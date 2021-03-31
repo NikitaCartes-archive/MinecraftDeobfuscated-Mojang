@@ -14,6 +14,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.material.Material;
 
 public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
+	private static final float HUGE_PROBABILITY = 0.06F;
+
 	public HugeFungusFeature(Codec<HugeFungusConfiguration> codec) {
 		super(codec);
 	}

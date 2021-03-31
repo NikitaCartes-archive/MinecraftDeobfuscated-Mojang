@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerEntity {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int TOLERANCE_LEVEL_ROTATION = 1;
 	private final ServerLevel level;
 	private final Entity entity;
 	private final int updateInterval;

@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class ChickenModel<T extends Entity> extends AgeableListModel<T> {
+	public static final String RED_THING = "red_thing";
 	private final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart rightLeg;

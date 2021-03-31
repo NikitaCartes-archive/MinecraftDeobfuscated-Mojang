@@ -2,11 +2,10 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +21,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class StemBlock extends BushBlock implements BonemealableBlock {
+	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
+	protected static final float AABB_OFFSET = 1.0F;
 	protected static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
 		Block.box(7.0, 0.0, 7.0, 9.0, 2.0, 9.0),
 		Block.box(7.0, 0.0, 7.0, 9.0, 4.0, 9.0),
@@ -67,13 +68,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 					BlockPos blockPos2 = blockPos.relative(direction);
 					BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
 					if (serverLevel.getBlockState(blockPos2).isAir()
-						&& (
-							blockState2.is(Blocks.FARMLAND)
-								|| blockState2.is(Blocks.DIRT)
-								|| blockState2.is(Blocks.COARSE_DIRT)
-								|| blockState2.is(Blocks.PODZOL)
-								|| blockState2.is(Blocks.GRASS_BLOCK)
-						)) {
+						&& (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.GRASS_BLOCK))) {
 						serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
 						serverLevel.setBlockAndUpdate(blockPos, this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
 					}
@@ -82,7 +77,6 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack((ItemLike)this.seedSupplier.get());

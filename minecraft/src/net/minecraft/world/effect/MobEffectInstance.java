@@ -2,8 +2,6 @@ package net.minecraft.world.effect;
 
 import com.google.common.collect.ComparisonChain;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +13,6 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	private int duration;
 	private int amplifier;
 	private boolean ambient;
-	@Environment(EnvType.CLIENT)
 	private boolean noCounter;
 	private boolean visible;
 	private boolean showIcon;
@@ -257,12 +254,10 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		return new MobEffectInstance(mobEffect, j, i < 0 ? 0 : i, bl, bl2, bl3, mobEffectInstance);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setNoCounter(boolean bl) {
 		this.noCounter = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isNoCounter() {
 		return this.noCounter;
 	}

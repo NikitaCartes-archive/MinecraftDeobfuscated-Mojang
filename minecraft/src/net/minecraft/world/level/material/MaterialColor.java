@@ -1,8 +1,5 @@
 package net.minecraft.world.level.material;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 public class MaterialColor {
 	public static final MaterialColor[] MATERIAL_COLORS = new MaterialColor[64];
 	public static final MaterialColor NONE = new MaterialColor(0, 0);
@@ -77,7 +74,6 @@ public class MaterialColor {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int calculateRGBColor(int i) {
 		int j = 220;
 		if (i == 3) {

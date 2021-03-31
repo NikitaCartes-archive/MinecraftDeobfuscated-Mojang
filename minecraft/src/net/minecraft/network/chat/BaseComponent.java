@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.locale.Language;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -13,7 +11,6 @@ public abstract class BaseComponent implements MutableComponent {
 	protected final List<Component> siblings = Lists.<Component>newArrayList();
 	private FormattedCharSequence visualOrderText = FormattedCharSequence.EMPTY;
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	private Language decomposedWith;
 	private Style style = Style.EMPTY;
 
@@ -54,7 +51,6 @@ public abstract class BaseComponent implements MutableComponent {
 		return baseComponent;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public FormattedCharSequence getVisualOrderText() {
 		Language language = Language.getInstance();

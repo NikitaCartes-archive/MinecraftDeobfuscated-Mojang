@@ -33,8 +33,13 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlo
 	}
 
 	@Override
-	protected float getOffset() {
+	protected float getOffsetUp() {
 		return 1.0F;
+	}
+
+	@Override
+	protected float getOffsetDown() {
+		return 0.0F;
 	}
 
 	@Override

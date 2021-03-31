@@ -13,6 +13,12 @@ import net.minecraft.world.entity.monster.Strider;
 
 @Environment(EnvType.CLIENT)
 public class StriderModel<T extends Strider> extends HierarchicalModel<T> {
+	private static final String RIGHT_BOTTOM_BRISTLE = "right_bottom_bristle";
+	private static final String RIGHT_MIDDLE_BRISTLE = "right_middle_bristle";
+	private static final String RIGHT_TOP_BRISTLE = "right_top_bristle";
+	private static final String LEFT_TOP_BRISTLE = "left_top_bristle";
+	private static final String LEFT_MIDDLE_BRISTLE = "left_middle_bristle";
+	private static final String LEFT_BOTTOM_BRISTLE = "left_bottom_bristle";
 	private final ModelPart root;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;

@@ -10,6 +10,9 @@ import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 
 public class BrigadierArgumentSerializers {
+	private static final byte NUMBER_FLAG_MIN = 1;
+	private static final byte NUMBER_FLAG_MAX = 2;
+
 	public static void bootstrap() {
 		ArgumentTypes.register("brigadier:bool", BoolArgumentType.class, new EmptyArgumentSerializer(BoolArgumentType::bool));
 		ArgumentTypes.register("brigadier:float", FloatArgumentType.class, new FloatArgumentSerializer());

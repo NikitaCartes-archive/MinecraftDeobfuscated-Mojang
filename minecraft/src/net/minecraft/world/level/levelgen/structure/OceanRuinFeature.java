@@ -28,8 +28,8 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 	}
 
 	public static class OceanRuinStart extends StructureStart<OceanRuinConfiguration> {
-		public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -43,8 +43,7 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 		) {
 			BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
 			Rotation rotation = Rotation.getRandom(this.random);
-			OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);
-			this.calculateBoundingBox();
+			OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this, this.random, oceanRuinConfiguration);
 		}
 	}
 

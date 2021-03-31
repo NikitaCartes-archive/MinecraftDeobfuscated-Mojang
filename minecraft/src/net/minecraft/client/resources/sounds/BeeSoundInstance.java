@@ -11,6 +11,9 @@ import net.minecraft.world.entity.animal.Bee;
 
 @Environment(EnvType.CLIENT)
 public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
+	private static final float VOLUME_MIN = 0.0F;
+	private static final float VOLUME_MAX = 1.2F;
+	private static final float PITCH_MIN = 0.0F;
 	protected final Bee bee;
 	private boolean hasSwitched;
 

@@ -5,14 +5,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class DarkOakTrunkPlacer extends TrunkPlacer {
 	public static final Codec<DarkOakTrunkPlacer> CODEC = RecordCodecBuilder.create(
@@ -30,14 +30,19 @@ public class DarkOakTrunkPlacer extends TrunkPlacer {
 
 	@Override
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
-		LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		Random random,
+		int i,
+		BlockPos blockPos,
+		TreeConfiguration treeConfiguration
 	) {
 		List<FoliagePlacer.FoliageAttachment> list = Lists.<FoliagePlacer.FoliageAttachment>newArrayList();
 		BlockPos blockPos2 = blockPos.below();
-		setDirtAt(levelSimulatedRW, random, blockPos2, treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.east(), treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.south(), treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.south().east(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2, treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.east(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.south(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.south().east(), treeConfiguration);
 		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		int j = i - random.nextInt(4);
 		int k = 2 - random.nextInt(3);
@@ -57,11 +62,11 @@ public class DarkOakTrunkPlacer extends TrunkPlacer {
 
 			int s = m + r;
 			BlockPos blockPos3 = new BlockPos(o, s, p);
-			if (TreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos3)) {
-				placeLog(levelSimulatedRW, random, blockPos3, set, boundingBox, treeConfiguration);
-				placeLog(levelSimulatedRW, random, blockPos3.east(), set, boundingBox, treeConfiguration);
-				placeLog(levelSimulatedRW, random, blockPos3.south(), set, boundingBox, treeConfiguration);
-				placeLog(levelSimulatedRW, random, blockPos3.east().south(), set, boundingBox, treeConfiguration);
+			if (TreeFeature.isAirOrLeaves(levelSimulatedReader, blockPos3)) {
+				placeLog(levelSimulatedReader, biConsumer, random, blockPos3, treeConfiguration);
+				placeLog(levelSimulatedReader, biConsumer, random, blockPos3.east(), treeConfiguration);
+				placeLog(levelSimulatedReader, biConsumer, random, blockPos3.south(), treeConfiguration);
+				placeLog(levelSimulatedReader, biConsumer, random, blockPos3.east().south(), treeConfiguration);
 			}
 		}
 
@@ -73,7 +78,7 @@ public class DarkOakTrunkPlacer extends TrunkPlacer {
 					int t = random.nextInt(3) + 2;
 
 					for (int u = 0; u < t; u++) {
-						placeLog(levelSimulatedRW, random, new BlockPos(l + r, q - u - 1, n + s), set, boundingBox, treeConfiguration);
+						placeLog(levelSimulatedReader, biConsumer, random, new BlockPos(l + r, q - u - 1, n + s), treeConfiguration);
 					}
 
 					list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(o + r, q, p + s), 0, false));

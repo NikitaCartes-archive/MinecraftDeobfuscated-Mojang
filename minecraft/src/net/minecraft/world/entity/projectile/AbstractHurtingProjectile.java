@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +50,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	protected void defineSynchedData() {
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = this.getBoundingBox().getSize() * 4.0;
@@ -192,7 +189,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);

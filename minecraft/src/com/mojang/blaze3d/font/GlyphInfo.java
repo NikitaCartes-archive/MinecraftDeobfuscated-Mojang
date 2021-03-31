@@ -15,6 +15,10 @@ public interface GlyphInfo {
 		return 0.0F;
 	}
 
+	default float getBearingY() {
+		return 0.0F;
+	}
+
 	default float getBoldOffset() {
 		return 1.0F;
 	}

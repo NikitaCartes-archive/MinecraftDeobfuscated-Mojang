@@ -15,6 +15,7 @@ import com.mojang.realmsclient.dto.RealmsServerList;
 import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.dto.RealmsWorldResetDto;
+import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.dto.WorldDownload;
@@ -41,6 +42,44 @@ public class RealmsClient {
 	private final String sessionId;
 	private final String username;
 	private final Minecraft minecraft;
+	private static final String WORLDS_RESOURCE_PATH = "worlds";
+	private static final String INVITES_RESOURCE_PATH = "invites";
+	private static final String MCO_RESOURCE_PATH = "mco";
+	private static final String SUBSCRIPTION_RESOURCE = "subscriptions";
+	private static final String ACTIVITIES_RESOURCE = "activities";
+	private static final String OPS_RESOURCE = "ops";
+	private static final String REGIONS_RESOURCE = "regions/ping/stat";
+	private static final String TRIALS_RESOURCE = "trial";
+	private static final String PATH_INITIALIZE = "/$WORLD_ID/initialize";
+	private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
+	private static final String PATH_GET_LIVESTATS = "/liveplayerlist";
+	private static final String PATH_GET_SUBSCRIPTION = "/$WORLD_ID";
+	private static final String PATH_OP = "/$WORLD_ID/$PROFILE_UUID";
+	private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
+	private static final String PATH_AVAILABLE = "/available";
+	private static final String PATH_TEMPLATES = "/templates/$WORLD_TYPE";
+	private static final String PATH_WORLD_JOIN = "/v1/$ID/join/pc";
+	private static final String PATH_WORLD_GET = "/$ID";
+	private static final String PATH_WORLD_INVITES = "/$WORLD_ID";
+	private static final String PATH_WORLD_UNINVITE = "/$WORLD_ID/invite/$UUID";
+	private static final String PATH_PENDING_INVITES_COUNT = "/count/pending";
+	private static final String PATH_PENDING_INVITES = "/pending";
+	private static final String PATH_ACCEPT_INVITE = "/accept/$INVITATION_ID";
+	private static final String PATH_REJECT_INVITE = "/reject/$INVITATION_ID";
+	private static final String PATH_UNINVITE_MYSELF = "/$WORLD_ID";
+	private static final String PATH_WORLD_UPDATE = "/$WORLD_ID";
+	private static final String PATH_SLOT = "/$WORLD_ID/slot/$SLOT_ID";
+	private static final String PATH_WORLD_OPEN = "/$WORLD_ID/open";
+	private static final String PATH_WORLD_CLOSE = "/$WORLD_ID/close";
+	private static final String PATH_WORLD_RESET = "/$WORLD_ID/reset";
+	private static final String PATH_DELETE_WORLD = "/$WORLD_ID";
+	private static final String PATH_WORLD_BACKUPS = "/$WORLD_ID/backups";
+	private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/slot/$SLOT_ID/download";
+	private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
+	private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
+	private static final String PATH_TOS_AGREED = "/tos/agreed";
+	private static final String PATH_NEWS = "/v1/news";
+	private static final String PATH_STAGE_AVAILABLE = "/stageAvailable";
 	private static final GuardedSerializer GSON = new GuardedSerializer();
 
 	public static RealmsClient create() {
@@ -95,6 +134,12 @@ public class RealmsClient {
 		String string = this.url("worlds" + "/$ID".replace("$ID", String.valueOf(l)));
 		String string2 = this.execute(Request.get(string));
 		return RealmsServer.parse(string2);
+	}
+
+	public ServerActivityList getActivity(long l) throws RealmsServiceException {
+		String string = this.url("activities" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(l)));
+		String string2 = this.execute(Request.get(string));
+		return ServerActivityList.parse(string2);
 	}
 
 	public RealmsServerPlayerLists getLiveStats() throws RealmsServiceException {

@@ -21,6 +21,12 @@ import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
 public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
+	private static final String EAR = "ear";
+	private static final String CLOAK = "cloak";
+	private static final String LEFT_SLEEVE = "left_sleeve";
+	private static final String RIGHT_SLEEVE = "right_sleeve";
+	private static final String LEFT_PANTS = "left_pants";
+	private static final String RIGHT_PANTS = "right_pants";
 	private final List<ModelPart> parts;
 	public final ModelPart leftSleeve;
 	public final ModelPart rightSleeve;

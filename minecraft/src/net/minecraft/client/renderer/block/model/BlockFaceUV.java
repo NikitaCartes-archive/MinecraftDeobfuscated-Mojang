@@ -56,6 +56,8 @@ public class BlockFaceUV {
 
 	@Environment(EnvType.CLIENT)
 	public static class Deserializer implements JsonDeserializer<BlockFaceUV> {
+		private static final int DEFAULT_ROTATION = 0;
+
 		protected Deserializer() {
 		}
 

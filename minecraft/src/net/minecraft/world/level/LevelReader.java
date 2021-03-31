@@ -2,8 +2,6 @@ package net.minecraft.world.level;
 
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.QuartPos;
@@ -46,7 +44,6 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 		return this.hasChunksAt(i, k, m, j, l, n) ? this.getBlockStates(aABB) : Stream.empty();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	default int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());

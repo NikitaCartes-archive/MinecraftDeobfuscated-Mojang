@@ -1,6 +1,8 @@
 package net.minecraft.client.renderer.block.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -13,6 +15,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -55,6 +58,21 @@ public class BlockModelDefinition {
 		}
 	}
 
+	@VisibleForTesting
+	public boolean hasVariant(String string) {
+		return this.variants.get(string) != null;
+	}
+
+	@VisibleForTesting
+	public MultiVariant getVariant(String string) {
+		MultiVariant multiVariant = (MultiVariant)this.variants.get(string);
+		if (multiVariant == null) {
+			throw new BlockModelDefinition.MissingVariantException();
+		} else {
+			return multiVariant;
+		}
+	}
+
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
@@ -76,6 +94,16 @@ public class BlockModelDefinition {
 
 	public Map<String, MultiVariant> getVariants() {
 		return this.variants;
+	}
+
+	@VisibleForTesting
+	public Set<MultiVariant> getMultiVariants() {
+		Set<MultiVariant> set = Sets.<MultiVariant>newHashSet(this.variants.values());
+		if (this.isMultiPart()) {
+			set.addAll(this.multiPart.getMultiVariants());
+		}
+
+		return set;
 	}
 
 	public boolean isMultiPart() {
@@ -140,6 +168,12 @@ public class BlockModelDefinition {
 				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "multipart");
 				return jsonDeserializationContext.deserialize(jsonArray, MultiPart.class);
 			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public class MissingVariantException extends RuntimeException {
+		protected MissingVariantException() {
 		}
 	}
 }

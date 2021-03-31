@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.decoration;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -42,6 +40,7 @@ public class ItemFrame extends HangingEntity {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Integer> DATA_ROTATION = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.INT);
+	public static final int NUM_ROTATIONS = 8;
 	private float dropChance = 1.0F;
 	private boolean fixed;
 
@@ -187,7 +186,6 @@ public class ItemFrame extends HangingEntity {
 		return 12;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = 16.0;
@@ -408,14 +406,12 @@ public class ItemFrame extends HangingEntity {
 		return new ClientboundAddEntityPacket(this, this.getType(), this.direction.get3DDataValue(), this.getPos());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);
 		this.setDirection(Direction.from3DDataValue(clientboundAddEntityPacket.getData()));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getPickResult() {
 		ItemStack itemStack = this.getItem();

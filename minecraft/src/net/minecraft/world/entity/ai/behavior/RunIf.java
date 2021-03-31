@@ -28,8 +28,16 @@ public class RunIf<E extends LivingEntity> extends Behavior<E> {
 		return map3;
 	}
 
+	public RunIf(Predicate<E> predicate, Behavior<? super E> behavior, boolean bl) {
+		this(ImmutableMap.of(), predicate, behavior, bl);
+	}
+
 	public RunIf(Predicate<E> predicate, Behavior<? super E> behavior) {
 		this(ImmutableMap.of(), predicate, behavior, false);
+	}
+
+	public RunIf(Map<MemoryModuleType<?>, MemoryStatus> map, Behavior<? super E> behavior) {
+		this(map, livingEntity -> true, behavior, false);
 	}
 
 	@Override

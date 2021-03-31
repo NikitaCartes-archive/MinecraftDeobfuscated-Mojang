@@ -59,6 +59,8 @@ public class BlockModel implements UnbakedModel {
 		.registerTypeAdapter(ItemTransforms.class, new ItemTransforms.Deserializer())
 		.registerTypeAdapter(ItemOverride.class, new ItemOverride.Deserializer())
 		.create();
+	private static final char REFERENCE_CHAR = '#';
+	public static final String PARTICLE_TEXTURE_REFERENCE = "particle";
 	private final List<BlockElement> elements;
 	@Nullable
 	private final BlockModel.GuiLight guiLight;
@@ -113,6 +115,10 @@ public class BlockModel implements UnbakedModel {
 		} else {
 			return this.parent != null ? this.parent.getGuiLight() : BlockModel.GuiLight.SIDE;
 		}
+	}
+
+	public boolean isResolved() {
+		return this.parentLocation == null || this.parent != null && this.parent.isResolved();
 	}
 
 	public List<ItemOverride> getOverrides() {
@@ -319,6 +325,8 @@ public class BlockModel implements UnbakedModel {
 
 	@Environment(EnvType.CLIENT)
 	public static class Deserializer implements JsonDeserializer<BlockModel> {
+		private static final boolean DEFAULT_AMBIENT_OCCLUSION = true;
+
 		public BlockModel deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			List<BlockElement> list = this.getElements(jsonDeserializationContext, jsonObject);
@@ -422,6 +430,13 @@ public class BlockModel implements UnbakedModel {
 
 		public boolean lightLikeBlock() {
 			return this == SIDE;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class LoopException extends RuntimeException {
+		public LoopException(String string) {
+			super(string);
 		}
 	}
 }

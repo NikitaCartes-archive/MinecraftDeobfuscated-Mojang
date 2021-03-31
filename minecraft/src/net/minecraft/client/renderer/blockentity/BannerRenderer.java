@@ -31,6 +31,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
+	private static final int BANNER_WIDTH = 20;
+	private static final int BANNER_HEIGHT = 40;
+	private static final int MAX_PATTERNS = 16;
+	public static final String FLAG = "flag";
+	private static final String POLE = "pole";
+	private static final String BAR = "bar";
 	private final ModelPart flag;
 	private final ModelPart pole;
 	private final ModelPart bar;

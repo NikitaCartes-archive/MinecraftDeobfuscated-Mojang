@@ -18,6 +18,9 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
 public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>> extends SectionTracker {
+	protected static final int LIGHT_AND_DATA = 0;
+	protected static final int LIGHT_ONLY = 1;
+	protected static final int EMPTY = 2;
 	protected static final DataLayer EMPTY_DATA = new DataLayer();
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private final LightLayer layer;

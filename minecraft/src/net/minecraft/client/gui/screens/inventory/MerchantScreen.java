@@ -22,6 +22,24 @@ import net.minecraft.world.item.trading.MerchantOffers;
 @Environment(EnvType.CLIENT)
 public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	private static final ResourceLocation VILLAGER_LOCATION = new ResourceLocation("textures/gui/container/villager2.png");
+	private static final int TEXTURE_WIDTH = 512;
+	private static final int TEXTURE_HEIGHT = 256;
+	private static final int MERCHANT_MENU_PART_X = 99;
+	private static final int PROGRESS_BAR_X = 136;
+	private static final int PROGRESS_BAR_Y = 16;
+	private static final int SELL_ITEM_1_X = 5;
+	private static final int SELL_ITEM_2_X = 35;
+	private static final int BUY_ITEM_X = 68;
+	private static final int LABEL_Y = 6;
+	private static final int NUMBER_OF_OFFER_BUTTONS = 7;
+	private static final int TRADE_BUTTON_X = 5;
+	private static final int TRADE_BUTTON_HEIGHT = 20;
+	private static final int TRADE_BUTTON_WIDTH = 89;
+	private static final int SCROLLER_HEIGHT = 27;
+	private static final int SCROLLER_WIDTH = 6;
+	private static final int SCROLL_BAR_HEIGHT = 139;
+	private static final int SCROLL_BAR_TOP_POS_Y = 18;
+	private static final int SCROLL_BAR_START_X = 94;
 	private static final Component TRADES_LABEL = new TranslatableComponent("merchant.trades");
 	private static final Component LEVEL_SEPARATOR = new TextComponent(" - ");
 	private static final Component DEPRECATED_TOOLTIP = new TranslatableComponent("merchant.deprecated");

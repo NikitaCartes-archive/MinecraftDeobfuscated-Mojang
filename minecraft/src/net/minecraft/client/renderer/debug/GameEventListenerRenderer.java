@@ -34,6 +34,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 @Environment(EnvType.CLIENT)
 public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Minecraft minecraft;
+	private static final int LISTENER_RENDER_DIST = 32;
+	private static final float BOX_HEIGHT = 1.0F;
 	private final List<GameEventListenerRenderer.TrackedGameEvent> trackedGameEvents = Lists.<GameEventListenerRenderer.TrackedGameEvent>newArrayList();
 	private final List<GameEventListenerRenderer.TrackedListener> trackedListeners = Lists.<GameEventListenerRenderer.TrackedListener>newArrayList();
 

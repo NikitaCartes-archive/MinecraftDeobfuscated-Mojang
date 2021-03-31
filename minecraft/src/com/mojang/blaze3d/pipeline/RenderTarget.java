@@ -16,6 +16,10 @@ import net.minecraft.client.renderer.ShaderInstance;
 
 @Environment(EnvType.CLIENT)
 public class RenderTarget {
+	private static final int RED_CHANNEL = 0;
+	private static final int GREEN_CHANNEL = 1;
+	private static final int BLUE_CHANNEL = 2;
+	private static final int ALPHA_CHANNEL = 3;
 	public int width;
 	public int height;
 	public int viewWidth;
@@ -103,11 +107,15 @@ public class RenderTarget {
 			GlStateManager._texParameter(3553, 10241, 9728);
 			GlStateManager._texParameter(3553, 10240, 9728);
 			GlStateManager._texParameter(3553, 34892, 0);
+			GlStateManager._texParameter(3553, 10242, 33071);
+			GlStateManager._texParameter(3553, 10243, 33071);
 			GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
 		}
 
 		this.setFilterMode(9728);
 		GlStateManager._bindTexture(this.colorTextureId);
+		GlStateManager._texParameter(3553, 10242, 33071);
+		GlStateManager._texParameter(3553, 10243, 33071);
 		GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
@@ -145,6 +153,11 @@ public class RenderTarget {
 				throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
 			}
 		}
+	}
+
+	public void bindRead() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+		GlStateManager._bindTexture(this.colorTextureId);
 	}
 
 	public void unbindRead() {

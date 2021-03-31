@@ -1,6 +1,7 @@
 package com.mojang.blaze3d.systems;
 
 import com.google.common.collect.Queues;
+import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -36,6 +37,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 
 @Environment(EnvType.CLIENT)
+@DontObfuscate
 public class RenderSystem {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();

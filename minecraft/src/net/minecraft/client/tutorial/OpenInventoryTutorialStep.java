@@ -8,6 +8,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class OpenInventoryTutorialStep implements TutorialStepInstance {
+	private static final int HINT_DELAY = 600;
 	private static final Component TITLE = new TranslatableComponent("tutorial.open_inventory.title");
 	private static final Component DESCRIPTION = new TranslatableComponent("tutorial.open_inventory.description", Tutorial.key("inventory"));
 	private final Tutorial tutorial;

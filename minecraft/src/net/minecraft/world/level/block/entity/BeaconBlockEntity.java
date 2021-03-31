@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -40,10 +38,16 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
+	private static final int MAX_LEVELS = 4;
 	public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{
 		{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}
 	};
 	private static final Set<MobEffect> VALID_EFFECTS = (Set<MobEffect>)Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
+	public static final int DATA_LEVELS = 0;
+	public static final int DATA_PRIMARY = 1;
+	public static final int DATA_SECONDARY = 2;
+	public static final int NUM_DATA_VALUES = 3;
+	private static final int BLOCKS_CHECK_PER_TICK = 10;
 	private List<BeaconBlockEntity.BeaconBeamSection> beamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private List<BeaconBlockEntity.BeaconBeamSection> checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private int levels;
@@ -243,7 +247,6 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 		level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<BeaconBlockEntity.BeaconBeamSection> getBeamSections() {
 		return (List<BeaconBlockEntity.BeaconBeamSection>)(this.levels == 0 ? ImmutableList.of() : this.beamSections);
 	}
@@ -327,12 +330,10 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 			this.height++;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public float[] getColor() {
 			return this.color;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public int getHeight() {
 			return this.height;
 		}

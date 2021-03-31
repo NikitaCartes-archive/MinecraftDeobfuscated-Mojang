@@ -12,4 +12,6 @@ public interface TickList<T> {
 	void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority);
 
 	boolean willTickThisTick(BlockPos blockPos, T object);
+
+	int size();
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 public class CompressionDecoder extends ByteToMessageDecoder {
+	public static final int MAXIMUM_DECOMPRESSED_LENGTH = 2097152;
 	private final Inflater inflater;
 	private int threshold;
 
@@ -42,6 +43,10 @@ public class CompressionDecoder extends ByteToMessageDecoder {
 				this.inflater.reset();
 			}
 		}
+	}
+
+	public int getThreshold() {
+		return this.threshold;
 	}
 
 	public void setThreshold(int i) {

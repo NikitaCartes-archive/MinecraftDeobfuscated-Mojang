@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class HotbarManager {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final int NUM_HOTBAR_GROUPS = 9;
 	private final File optionsFile;
 	private final DataFixer fixerUpper;
 	private final Hotbar[] hotbars = new Hotbar[9];

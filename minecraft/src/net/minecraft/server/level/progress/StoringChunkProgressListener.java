@@ -2,12 +2,9 @@ package net.minecraft.server.level.progress;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkStatus;
 
-@Environment(EnvType.CLIENT)
 public class StoringChunkProgressListener implements ChunkProgressListener {
 	private final LoggerChunkProgressListener delegate;
 	private final Long2ObjectOpenHashMap<ChunkStatus> statuses;

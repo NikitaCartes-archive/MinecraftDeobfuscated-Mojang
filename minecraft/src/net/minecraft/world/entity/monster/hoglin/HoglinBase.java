@@ -1,14 +1,13 @@
 package net.minecraft.world.entity.monster.hoglin;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 public interface HoglinBase {
-	@Environment(EnvType.CLIENT)
+	int ATTACK_ANIMATION_DURATION = 10;
+
 	int getAttackAnimationRemainingTicks();
 
 	static boolean hurtAndThrowTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {

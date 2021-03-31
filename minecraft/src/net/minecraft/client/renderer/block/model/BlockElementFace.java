@@ -14,6 +14,7 @@ import net.minecraft.util.GsonHelper;
 
 @Environment(EnvType.CLIENT)
 public class BlockElementFace {
+	public static final int NO_TINT = -1;
 	public final Direction cullForDirection;
 	public final int tintIndex;
 	public final String texture;
@@ -28,6 +29,8 @@ public class BlockElementFace {
 
 	@Environment(EnvType.CLIENT)
 	public static class Deserializer implements JsonDeserializer<BlockElementFace> {
+		private static final int DEFAULT_TINT_INDEX = -1;
+
 		protected Deserializer() {
 		}
 

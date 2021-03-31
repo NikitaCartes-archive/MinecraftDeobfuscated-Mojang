@@ -18,6 +18,12 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class GameTestRunner {
+	private static final int MAX_TESTS_PER_BATCH = 100;
+	public static final int PADDING_AROUND_EACH_STRUCTURE = 2;
+	public static final int SPACE_BETWEEN_COLUMNS = 5;
+	public static final int SPACE_BETWEEN_ROWS = 6;
+	public static final int DEFAULT_TESTS_PER_ROW = 8;
+
 	public static void runTest(GameTestInfo gameTestInfo, BlockPos blockPos, GameTestTicker gameTestTicker) {
 		gameTestInfo.startExecution();
 		gameTestTicker.add(gameTestInfo);

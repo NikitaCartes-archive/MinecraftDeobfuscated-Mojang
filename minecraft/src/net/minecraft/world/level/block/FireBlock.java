@@ -28,6 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FireBlock extends BaseFireBlock {
+	public static final int MAX_AGE = 15;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
 	public static final BooleanProperty NORTH = PipeBlock.NORTH;
 	public static final BooleanProperty EAST = PipeBlock.EAST;
@@ -45,6 +46,14 @@ public class FireBlock extends BaseFireBlock {
 	private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
 	private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
 	private final Map<BlockState, VoxelShape> shapesCache;
+	private static final int FLAME_INSTANT = 60;
+	private static final int FLAME_EASY = 30;
+	private static final int FLAME_MEDIUM = 15;
+	private static final int FLAME_HARD = 5;
+	private static final int BURN_INSTANT = 100;
+	private static final int BURN_EASY = 60;
+	private static final int BURN_MEDIUM = 20;
+	private static final int BURN_HARD = 5;
 	private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
 

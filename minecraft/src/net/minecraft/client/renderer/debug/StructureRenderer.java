@@ -24,6 +24,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Map<DimensionType, Map<String, BoundingBox>> postMainBoxes = Maps.<DimensionType, Map<String, BoundingBox>>newIdentityHashMap();
 	private final Map<DimensionType, Map<String, BoundingBox>> postPiecesBoxes = Maps.<DimensionType, Map<String, BoundingBox>>newIdentityHashMap();
 	private final Map<DimensionType, Map<String, Boolean>> startPiecesMap = Maps.<DimensionType, Map<String, Boolean>>newIdentityHashMap();
+	private static final int MAX_RENDER_DIST = 500;
 
 	public StructureRenderer(Minecraft minecraft) {
 		this.minecraft = minecraft;
@@ -42,12 +43,12 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 					LevelRenderer.renderLineBox(
 						poseStack,
 						vertexConsumer,
-						(double)boundingBox.x0 - d,
-						(double)boundingBox.y0 - e,
-						(double)boundingBox.z0 - f,
-						(double)(boundingBox.x1 + 1) - d,
-						(double)(boundingBox.y1 + 1) - e,
-						(double)(boundingBox.z1 + 1) - f,
+						(double)boundingBox.minX() - d,
+						(double)boundingBox.minY() - e,
+						(double)boundingBox.minZ() - f,
+						(double)(boundingBox.maxX() + 1) - d,
+						(double)(boundingBox.maxY() + 1) - e,
+						(double)(boundingBox.maxZ() + 1) - f,
 						1.0F,
 						1.0F,
 						1.0F,
@@ -70,12 +71,12 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 						LevelRenderer.renderLineBox(
 							poseStack,
 							vertexConsumer,
-							(double)boundingBox2.x0 - d,
-							(double)boundingBox2.y0 - e,
-							(double)boundingBox2.z0 - f,
-							(double)(boundingBox2.x1 + 1) - d,
-							(double)(boundingBox2.y1 + 1) - e,
-							(double)(boundingBox2.z1 + 1) - f,
+							(double)boundingBox2.minX() - d,
+							(double)boundingBox2.minY() - e,
+							(double)boundingBox2.minZ() - f,
+							(double)(boundingBox2.maxX() + 1) - d,
+							(double)(boundingBox2.maxY() + 1) - e,
+							(double)(boundingBox2.maxZ() + 1) - f,
 							0.0F,
 							1.0F,
 							0.0F,
@@ -88,12 +89,12 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 						LevelRenderer.renderLineBox(
 							poseStack,
 							vertexConsumer,
-							(double)boundingBox2.x0 - d,
-							(double)boundingBox2.y0 - e,
-							(double)boundingBox2.z0 - f,
-							(double)(boundingBox2.x1 + 1) - d,
-							(double)(boundingBox2.y1 + 1) - e,
-							(double)(boundingBox2.z1 + 1) - f,
+							(double)boundingBox2.minX() - d,
+							(double)boundingBox2.minY() - e,
+							(double)boundingBox2.minZ() - f,
+							(double)(boundingBox2.maxX() + 1) - d,
+							(double)(boundingBox2.maxY() + 1) - e,
+							(double)(boundingBox2.maxZ() + 1) - f,
 							0.0F,
 							0.0F,
 							1.0F,

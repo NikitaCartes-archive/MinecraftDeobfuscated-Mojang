@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class ChorusFlowerBlock extends Block {
+	public static final int DEAD_AGE = 5;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_5;
 	private final ChorusPlantBlock plant;
 

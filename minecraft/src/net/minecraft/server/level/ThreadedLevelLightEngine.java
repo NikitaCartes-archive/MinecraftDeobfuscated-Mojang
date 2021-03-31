@@ -122,12 +122,12 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 	}
 
 	private void addTask(int i, int j, IntSupplier intSupplier, ThreadedLevelLightEngine.TaskType taskType, Runnable runnable) {
-		this.sorterMailbox.tell(ChunkTaskPriorityQueueSorter.message(() -> {
+		this.sorterMailbox.tell(ChunkTaskPriorityQueueSorter.message((Runnable)(() -> {
 			this.lightTasks.add(Pair.of(taskType, runnable));
 			if (this.lightTasks.size() >= this.taskPerBatch) {
 				this.runUpdate();
 			}
-		}, ChunkPos.asLong(i, j), intSupplier));
+		}), ChunkPos.asLong(i, j), intSupplier));
 	}
 
 	@Override

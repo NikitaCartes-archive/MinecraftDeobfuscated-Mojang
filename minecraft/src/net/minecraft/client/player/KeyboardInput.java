@@ -7,6 +7,7 @@ import net.minecraft.client.Options;
 @Environment(EnvType.CLIENT)
 public class KeyboardInput extends Input {
 	private final Options options;
+	private static final double MOVING_SLOW_FACTOR = 0.3;
 
 	public KeyboardInput(Options options) {
 		this.options = options;

@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -38,22 +36,18 @@ public class ClientboundLevelEventPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleLevelEvent(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isGlobalEvent() {
 		return this.globalEvent;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getType() {
 		return this.type;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getData() {
 		return this.data;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getPos() {
 		return this.pos;
 	}

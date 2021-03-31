@@ -21,6 +21,9 @@ import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class InteractWithDoor extends Behavior<LivingEntity> {
+	private static final int COOLDOWN_BEFORE_RERUNNING_IN_SAME_NODE = 20;
+	private static final double SKIP_CLOSING_DOOR_IF_FURTHER_AWAY_THAN = 2.0;
+	private static final double MAX_DISTANCE_TO_HOLD_DOOR_OPEN_FOR_OTHER_MOBS = 2.0;
 	@Nullable
 	private Node lastCheckedNode;
 	private int remainingCooldown;

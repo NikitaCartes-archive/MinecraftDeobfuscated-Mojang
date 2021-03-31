@@ -31,6 +31,16 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class EditBox extends AbstractWidget implements Widget, GuiEventListener {
+	public static final int BACKWARDS = -1;
+	public static final int FORWARDS = 1;
+	private static final int CURSOR_INSERT_WIDTH = 1;
+	private static final int CURSOR_INSERT_COLOR = -3092272;
+	private static final String CURSOR_APPEND_CHARACTER = "_";
+	private static final long NARRATE_DELAY_TYPING_MS = 500L;
+	public static final int DEFAULT_TEXT_COLOR = 14737632;
+	private static final int BORDER_COLOR_FOCUSED = -1;
+	private static final int BORDER_COLOR = -6250336;
+	private static final int BACKGROUND_COLOR = -16777216;
 	private final Font font;
 	private String value = "";
 	private int maxLength = 32;

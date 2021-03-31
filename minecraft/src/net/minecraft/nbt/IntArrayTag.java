@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag extends CollectionTag<IntTag> {
+	private static final int SELF_SIZE_IN_BITS = 192;
 	public static final TagType<IntArrayTag> TYPE = new TagType<IntArrayTag>() {
 		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);

@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -111,7 +109,6 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 		return ((StairsShape)blockState.getValue(SHAPE)).ordinal() * 4 + ((Direction)blockState.getValue(FACING)).get2DDataValue();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		this.base.animateTick(blockState, level, blockPos, random);

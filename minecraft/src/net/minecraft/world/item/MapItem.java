@@ -6,8 +6,6 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,6 +33,11 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapItem extends ComplexItem {
+	public static final int IMAGE_WIDTH = 128;
+	public static final int IMAGE_HEIGHT = 128;
+	private static final int DEFAULT_MAP_COLOR = -12173266;
+	private static final String TAG_MAP = "map";
+
 	public MapItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -359,7 +362,6 @@ public class MapItem extends ComplexItem {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		Integer integer = getMapId(itemStack);
@@ -379,7 +381,6 @@ public class MapItem extends ComplexItem {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static int getColor(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTagElement("display");
 		if (compoundTag != null && compoundTag.contains("MapColor", 99)) {

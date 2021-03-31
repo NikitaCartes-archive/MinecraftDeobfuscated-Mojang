@@ -12,6 +12,7 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class LlamaSpitModel<T extends Entity> extends HierarchicalModel<T> {
+	private static final String MAIN = "main";
 	private final ModelPart root;
 
 	public LlamaSpitModel(ModelPart modelPart) {

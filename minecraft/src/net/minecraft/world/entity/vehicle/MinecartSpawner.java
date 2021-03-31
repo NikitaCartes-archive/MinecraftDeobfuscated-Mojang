@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.vehicle;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +56,6 @@ public class MinecartSpawner extends AbstractMinecart {
 		this.spawner.save(this.level, this.blockPosition(), compoundTag);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		this.spawner.onEventTriggered(this.level, b);
@@ -68,6 +65,10 @@ public class MinecartSpawner extends AbstractMinecart {
 	public void tick() {
 		super.tick();
 		this.ticker.run();
+	}
+
+	public BaseSpawner getSpawner() {
+		return this.spawner;
 	}
 
 	@Override

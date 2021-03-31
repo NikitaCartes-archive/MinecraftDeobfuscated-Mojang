@@ -4,4 +4,7 @@ public interface TestReporter {
 	void onTestFailed(GameTestInfo gameTestInfo);
 
 	void onTestSuccess(GameTestInfo gameTestInfo);
+
+	default void finish() {
+	}
 }

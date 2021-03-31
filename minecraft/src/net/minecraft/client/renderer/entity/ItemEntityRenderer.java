@@ -18,6 +18,14 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
+	private static final float ITEM_BUNDLE_OFFSET_SCALE = 0.15F;
+	private static final int ITEM_COUNT_FOR_5_BUNDLE = 48;
+	private static final int ITEM_COUNT_FOR_4_BUNDLE = 32;
+	private static final int ITEM_COUNT_FOR_3_BUNDLE = 16;
+	private static final int ITEM_COUNT_FOR_2_BUNDLE = 1;
+	private static final float FLAT_ITEM_BUNDLE_OFFSET_X = 0.0F;
+	private static final float FLAT_ITEM_BUNDLE_OFFSET_Y = 0.0F;
+	private static final float FLAT_ITEM_BUNDLE_OFFSET_Z = 0.09375F;
 	private final ItemRenderer itemRenderer;
 	private final Random random = new Random();
 

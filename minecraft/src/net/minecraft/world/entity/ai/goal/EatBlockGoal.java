@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class EatBlockGoal extends Goal {
+	private static final int EAT_ANIMATION_TICKS = 40;
 	private static final Predicate<BlockState> IS_TALL_GRASS = BlockStatePredicate.forBlock(Blocks.GRASS);
 	private final Mob mob;
 	private final Level level;

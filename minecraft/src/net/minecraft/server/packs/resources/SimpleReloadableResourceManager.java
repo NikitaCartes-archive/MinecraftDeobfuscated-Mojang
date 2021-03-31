@@ -15,8 +15,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -51,7 +49,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Set<String> getNamespaces() {
 		return this.namespaces;
@@ -67,7 +64,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean hasResource(ResourceLocation resourceLocation) {
 		ResourceManager resourceManager = (ResourceManager)this.namespacedPacks.get(resourceLocation.getNamespace());
@@ -133,7 +129,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 			: SimpleReloadInstance.of(this, Lists.<PreparableReloadListener>newArrayList(this.listeners), executor, executor2, completableFuture));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Stream<PackResources> listPacks() {
 		return this.packs.stream();
@@ -154,19 +149,16 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 			return this.failedFuture;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public float getActualProgress() {
 			return 0.0F;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public boolean isDone() {
 			return true;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void checkExceptions() {
 			throw this.exception;
@@ -181,7 +173,6 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 			this.pack = packResources;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public PackResources getPack() {
 			return this.pack;
 		}

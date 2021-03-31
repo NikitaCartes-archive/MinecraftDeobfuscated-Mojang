@@ -1,5 +1,9 @@
 package net.minecraft.client.multiplayer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BooleanSupplier;
@@ -114,6 +118,7 @@ public class ClientChunkCache extends ChunkSource {
 		}
 	}
 
+	@Override
 	public void tick(BooleanSupplier booleanSupplier) {
 	}
 
@@ -153,6 +158,7 @@ public class ClientChunkCache extends ChunkSource {
 		return this.storage.chunks.length() + ", " + this.getLoadedChunksCount();
 	}
 
+	@Override
 	public int getLoadedChunksCount() {
 		return this.storage.chunkCount;
 	}
@@ -219,6 +225,44 @@ public class ClientChunkCache extends ChunkSource {
 		@Nullable
 		protected LevelChunk getChunk(int i) {
 			return (LevelChunk)this.chunks.get(i);
+		}
+
+		private void dumpChunks(String string) {
+			try {
+				FileOutputStream fileOutputStream = new FileOutputStream(new File(string));
+				Throwable var3 = null;
+
+				try {
+					int i = ClientChunkCache.this.storage.chunkRadius;
+
+					for (int j = this.viewCenterZ - i; j <= this.viewCenterZ + i; j++) {
+						for (int k = this.viewCenterX - i; k <= this.viewCenterX + i; k++) {
+							LevelChunk levelChunk = (LevelChunk)ClientChunkCache.this.storage.chunks.get(ClientChunkCache.this.storage.getIndex(k, j));
+							if (levelChunk != null) {
+								ChunkPos chunkPos = levelChunk.getPos();
+								fileOutputStream.write((chunkPos.x + "\t" + chunkPos.z + "\t" + levelChunk.isEmpty() + "\n").getBytes(StandardCharsets.UTF_8));
+							}
+						}
+					}
+				} catch (Throwable var17) {
+					var3 = var17;
+					throw var17;
+				} finally {
+					if (fileOutputStream != null) {
+						if (var3 != null) {
+							try {
+								fileOutputStream.close();
+							} catch (Throwable var16) {
+								var3.addSuppressed(var16);
+							}
+						} else {
+							fileOutputStream.close();
+						}
+					}
+				}
+			} catch (IOException var19) {
+				ClientChunkCache.LOGGER.error(var19);
+			}
 		}
 	}
 }

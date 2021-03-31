@@ -5,8 +5,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -17,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity {
+	public static final String TAG_SKULL_OWNER = "SkullOwner";
 	@Nullable
 	private static GameProfileCache profileCache;
 	@Nullable
@@ -72,13 +71,11 @@ public class SkullBlockEntity extends BlockEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getMouthAnimation(float f) {
 		return this.isMovingMouth ? (float)this.mouthTickCount + f : (float)this.mouthTickCount;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public GameProfile getOwnerProfile() {
 		return this.owner;
 	}

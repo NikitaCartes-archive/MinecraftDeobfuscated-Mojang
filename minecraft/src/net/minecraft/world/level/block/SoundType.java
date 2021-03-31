@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
@@ -464,7 +462,6 @@ public class SoundType {
 		return this.pitch;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundEvent getBreakSound() {
 		return this.breakSound;
 	}
@@ -477,7 +474,6 @@ public class SoundType {
 		return this.placeSound;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public SoundEvent getHitSound() {
 		return this.hitSound;
 	}

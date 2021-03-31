@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.inventory.RecipeBookType;
@@ -11,7 +9,6 @@ public class ServerboundRecipeBookChangeSettingsPacket implements Packet<ServerG
 	private final boolean isOpen;
 	private final boolean isFiltering;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundRecipeBookChangeSettingsPacket(RecipeBookType recipeBookType, boolean bl, boolean bl2) {
 		this.bookType = recipeBookType;
 		this.isOpen = bl;

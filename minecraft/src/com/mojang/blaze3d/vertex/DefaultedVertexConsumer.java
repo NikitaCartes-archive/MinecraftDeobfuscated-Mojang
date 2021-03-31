@@ -11,11 +11,17 @@ public abstract class DefaultedVertexConsumer implements VertexConsumer {
 	protected int defaultB = 255;
 	protected int defaultA = 255;
 
+	@Override
 	public void defaultColor(int i, int j, int k, int l) {
 		this.defaultR = i;
 		this.defaultG = j;
 		this.defaultB = k;
 		this.defaultA = l;
 		this.defaultColorSet = true;
+	}
+
+	@Override
+	public void unsetDefaultColor() {
+		this.defaultColorSet = false;
 	}
 }

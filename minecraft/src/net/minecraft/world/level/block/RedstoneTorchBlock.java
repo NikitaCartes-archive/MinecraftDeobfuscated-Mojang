@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -22,6 +20,10 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public class RedstoneTorchBlock extends TorchBlock {
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	private static final Map<BlockGetter, List<RedstoneTorchBlock.Toggle>> RECENT_TOGGLES = new WeakHashMap();
+	public static final int RECENT_TOGGLE_TIMER = 60;
+	public static final int MAX_RECENT_TOGGLES = 8;
+	public static final int RESTART_DELAY = 160;
+	private static final int TOGGLE_DELAY = 2;
 
 	protected RedstoneTorchBlock(BlockBehaviour.Properties properties) {
 		super(properties, DustParticleOptions.REDSTONE);
@@ -92,7 +94,6 @@ public class RedstoneTorchBlock extends TorchBlock {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(LIT)) {

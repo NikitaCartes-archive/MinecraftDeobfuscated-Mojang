@@ -7,7 +7,6 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.JunglePyramidPiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -23,8 +22,8 @@ public class JunglePyramidFeature extends StructureFeature<NoneFeatureConfigurat
 	}
 
 	public static class FeatureStart extends StructureStart<NoneFeatureConfiguration> {
-		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 		}
 
 		public void generatePieces(
@@ -37,8 +36,7 @@ public class JunglePyramidFeature extends StructureFeature<NoneFeatureConfigurat
 			LevelHeightAccessor levelHeightAccessor
 		) {
 			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
-			this.pieces.add(junglePyramidPiece);
-			this.calculateBoundingBox();
+			this.addPiece(junglePyramidPiece);
 		}
 	}
 }

@@ -1,13 +1,16 @@
 package net.minecraft.util;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.world.phys.Vec3;
 
 public class CubicSampler {
+	private static final int GAUSSIAN_SAMPLE_RADIUS = 2;
+	private static final int GAUSSIAN_SAMPLE_BREADTH = 6;
 	private static final double[] GAUSSIAN_SAMPLE_KERNEL = new double[]{0.0, 1.0, 4.0, 6.0, 4.0, 1.0, 0.0};
 
-	@Environment(EnvType.CLIENT)
+	private CubicSampler() {
+	}
+
 	public static Vec3 gaussianSampleVec3(Vec3 vec3, CubicSampler.Vec3Fetcher vec3Fetcher) {
 		int i = Mth.floor(vec3.x());
 		int j = Mth.floor(vec3.y());
@@ -39,6 +42,7 @@ public class CubicSampler {
 		return vec32.scale(1.0 / g);
 	}
 
+	@DontObfuscate
 	public interface Vec3Fetcher {
 		Vec3 fetch(int i, int j, int k);
 	}

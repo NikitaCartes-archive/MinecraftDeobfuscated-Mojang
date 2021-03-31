@@ -44,6 +44,9 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	private static final Component SEARCH_HINT = new TranslatableComponent("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
 		.withStyle(ChatFormatting.GRAY);
+	public static final int IMAGE_WIDTH = 147;
+	public static final int IMAGE_HEIGHT = 166;
+	private static final int OFFSET_X_POSITION = 86;
 	private static final Component ONLY_CRAFTABLES_TOOLTIP = new TranslatableComponent("gui.recipebook.toggleRecipes.craftable");
 	private static final Component ALL_RECIPES_TOOLTIP = new TranslatableComponent("gui.recipebook.toggleRecipes.all");
 	private int xOffset;

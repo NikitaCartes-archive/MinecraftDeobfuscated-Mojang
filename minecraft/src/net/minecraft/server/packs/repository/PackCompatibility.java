@@ -1,7 +1,5 @@
 package net.minecraft.server.packs.repository;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
@@ -39,12 +37,10 @@ public enum PackCompatibility {
 		return forFormat(packMetadataSection.getPackFormat(), packType);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getDescription() {
 		return this.description;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getConfirmation() {
 		return this.confirmation;
 	}

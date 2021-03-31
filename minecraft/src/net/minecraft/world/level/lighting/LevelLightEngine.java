@@ -1,8 +1,6 @@
 package net.minecraft.world.level.lighting;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -12,6 +10,8 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
 public class LevelLightEngine implements LightEventListener {
+	public static final int MAX_SOURCE_LEVEL = 15;
+	public static final int LIGHT_SECTION_PADDING = 1;
 	protected final LevelHeightAccessor levelHeightAccessor;
 	@Nullable
 	private final LayerLightEngine<?, ?> blockEngine;
@@ -24,6 +24,7 @@ public class LevelLightEngine implements LightEventListener {
 		this.skyEngine = bl2 ? new SkyLightEngine(lightChunkGetter) : null;
 	}
 
+	@Override
 	public void checkBlock(BlockPos blockPos) {
 		if (this.blockEngine != null) {
 			this.blockEngine.checkBlock(blockPos);
@@ -34,16 +35,19 @@ public class LevelLightEngine implements LightEventListener {
 		}
 	}
 
+	@Override
 	public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
 		if (this.blockEngine != null) {
 			this.blockEngine.onBlockEmissionIncrease(blockPos, i);
 		}
 	}
 
+	@Override
 	public boolean hasLightWork() {
 		return this.skyEngine != null && this.skyEngine.hasLightWork() ? true : this.blockEngine != null && this.blockEngine.hasLightWork();
 	}
 
+	@Override
 	public int runUpdates(int i, boolean bl, boolean bl2) {
 		if (this.blockEngine != null && this.skyEngine != null) {
 			int j = i / 2;
@@ -69,6 +73,7 @@ public class LevelLightEngine implements LightEventListener {
 		}
 	}
 
+	@Override
 	public void enableLightSources(ChunkPos chunkPos, boolean bl) {
 		if (this.blockEngine != null) {
 			this.blockEngine.enableLightSources(chunkPos, bl);
@@ -87,7 +92,6 @@ public class LevelLightEngine implements LightEventListener {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getDebugData(LightLayer lightLayer, SectionPos sectionPos) {
 		if (lightLayer == LightLayer.BLOCK) {
 			if (this.blockEngine != null) {

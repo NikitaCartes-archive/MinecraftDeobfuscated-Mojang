@@ -7,8 +7,6 @@ import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -60,6 +58,9 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<ChestType> TYPE = BlockStateProperties.CHEST_TYPE;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	public static final int EVENT_SET_OPEN_COUNT = 1;
+	protected static final int AABB_OFFSET = 1;
+	protected static final int AABB_HEIGHT = 14;
 	protected static final VoxelShape NORTH_AABB = Block.box(1.0, 0.0, 0.0, 15.0, 14.0, 15.0);
 	protected static final VoxelShape SOUTH_AABB = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 16.0);
 	protected static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 1.0, 15.0, 14.0, 15.0);
@@ -303,7 +304,6 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 		return (MenuProvider)this.combine(blockState, level, blockPos, false).apply(MENU_PROVIDER_COMBINER).orElse(null);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static DoubleBlockCombiner.Combiner<ChestBlockEntity, Float2FloatFunction> opennessCombiner(LidBlockEntity lidBlockEntity) {
 		return new DoubleBlockCombiner.Combiner<ChestBlockEntity, Float2FloatFunction>() {
 			public Float2FloatFunction acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {

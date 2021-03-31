@@ -1,7 +1,5 @@
 package net.minecraft.world.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -15,7 +13,6 @@ public enum HumanoidArm {
 		this.name = component;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public HumanoidArm getOpposite() {
 		return this == LEFT ? RIGHT : LEFT;
 	}
@@ -24,7 +21,6 @@ public enum HumanoidArm {
 		return this.name.getString();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getName() {
 		return this.name;
 	}

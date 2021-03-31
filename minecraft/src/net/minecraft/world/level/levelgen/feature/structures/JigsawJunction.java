@@ -32,6 +32,14 @@ public class JigsawJunction {
 		return this.sourceZ;
 	}
 
+	public int getDeltaY() {
+		return this.deltaY;
+	}
+
+	public StructureTemplatePool.Projection getDestProjection() {
+		return this.destProjection;
+	}
+
 	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
 		Builder<T, T> builder = ImmutableMap.builder();
 		builder.put(dynamicOps.createString("source_x"), dynamicOps.createInt(this.sourceX))

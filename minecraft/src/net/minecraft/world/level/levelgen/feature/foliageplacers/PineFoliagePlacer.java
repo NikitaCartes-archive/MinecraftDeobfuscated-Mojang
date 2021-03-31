@@ -3,24 +3,24 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class PineFoliagePlacer extends FoliagePlacer {
 	public static final Codec<PineFoliagePlacer> CODEC = RecordCodecBuilder.create(
 		instance -> foliagePlacerParts(instance)
-				.and(UniformInt.codec(0, 16, 8).fieldOf("height").forGetter(pineFoliagePlacer -> pineFoliagePlacer.height))
+				.and(IntProvider.codec(0, 24).fieldOf("height").forGetter(pineFoliagePlacer -> pineFoliagePlacer.height))
 				.apply(instance, PineFoliagePlacer::new)
 	);
-	private final UniformInt height;
+	private final IntProvider height;
 
-	public PineFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3) {
-		super(uniformInt, uniformInt2);
-		this.height = uniformInt3;
+	public PineFoliagePlacer(IntProvider intProvider, IntProvider intProvider2, IntProvider intProvider3) {
+		super(intProvider, intProvider2);
+		this.height = intProvider3;
 	}
 
 	@Override
@@ -30,21 +30,20 @@ public class PineFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	protected void createFoliage(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k,
-		Set<BlockPos> set,
-		int l,
-		BoundingBox boundingBox
+		int l
 	) {
 		int m = 0;
 
 		for (int n = l; n >= l - j; n--) {
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, foliageAttachment.foliagePos(), m, set, n, foliageAttachment.doubleTrunk(), boundingBox);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, foliageAttachment.pos(), m, n, foliageAttachment.doubleTrunk());
 			if (m >= 1 && n == l - j + 1) {
 				m--;
 			} else if (m < k + foliageAttachment.radiusOffset()) {

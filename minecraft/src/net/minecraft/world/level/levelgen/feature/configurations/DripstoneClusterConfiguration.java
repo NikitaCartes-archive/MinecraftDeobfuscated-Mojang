@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.FloatProvider;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.util.valueproviders.IntProvider;
 
 public class DripstoneClusterConfiguration implements FeatureConfiguration {
 	public static final Codec<DripstoneClusterConfiguration> CODEC = RecordCodecBuilder.create(
@@ -11,13 +11,13 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 					Codec.intRange(1, 512)
 						.fieldOf("floor_to_ceiling_search_range")
 						.forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.floorToCeilingSearchRange),
-					UniformInt.codec(1, 64, 64).fieldOf("height").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.height),
-					UniformInt.codec(1, 64, 64).fieldOf("radius").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.radius),
+					IntProvider.codec(1, 128).fieldOf("height").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.height),
+					IntProvider.codec(1, 128).fieldOf("radius").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.radius),
 					Codec.intRange(0, 64)
 						.fieldOf("max_stalagmite_stalactite_height_diff")
 						.forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff),
 					Codec.intRange(1, 64).fieldOf("height_deviation").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.heightDeviation),
-					UniformInt.codec(0, 64, 64)
+					IntProvider.codec(0, 128)
 						.fieldOf("dripstone_block_layer_thickness")
 						.forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.dripstoneBlockLayerThickness),
 					FloatProvider.codec(0.0F, 2.0F).fieldOf("density").forGetter(dripstoneClusterConfiguration -> dripstoneClusterConfiguration.density),
@@ -35,11 +35,11 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 				.apply(instance, DripstoneClusterConfiguration::new)
 	);
 	public final int floorToCeilingSearchRange;
-	public final UniformInt height;
-	public final UniformInt radius;
+	public final IntProvider height;
+	public final IntProvider radius;
 	public final int maxStalagmiteStalactiteHeightDiff;
 	public final int heightDeviation;
-	public final UniformInt dripstoneBlockLayerThickness;
+	public final IntProvider dripstoneBlockLayerThickness;
 	public final FloatProvider density;
 	public final FloatProvider wetness;
 	public final float chanceOfDripstoneColumnAtMaxDistanceFromCenter;
@@ -48,11 +48,11 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 
 	public DripstoneClusterConfiguration(
 		int i,
-		UniformInt uniformInt,
-		UniformInt uniformInt2,
+		IntProvider intProvider,
+		IntProvider intProvider2,
 		int j,
 		int k,
-		UniformInt uniformInt3,
+		IntProvider intProvider3,
 		FloatProvider floatProvider,
 		FloatProvider floatProvider2,
 		float f,
@@ -60,11 +60,11 @@ public class DripstoneClusterConfiguration implements FeatureConfiguration {
 		int m
 	) {
 		this.floorToCeilingSearchRange = i;
-		this.height = uniformInt;
-		this.radius = uniformInt2;
+		this.height = intProvider;
+		this.radius = intProvider2;
 		this.maxStalagmiteStalactiteHeightDiff = j;
 		this.heightDeviation = k;
-		this.dripstoneBlockLayerThickness = uniformInt3;
+		this.dripstoneBlockLayerThickness = intProvider3;
 		this.density = floatProvider;
 		this.wetness = floatProvider2;
 		this.chanceOfDripstoneColumnAtMaxDistanceFromCenter = f;

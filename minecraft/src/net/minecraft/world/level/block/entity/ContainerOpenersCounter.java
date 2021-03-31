@@ -9,6 +9,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 
 public abstract class ContainerOpenersCounter {
+	private static final int CHECK_TICK_DELAY = 5;
 	private int openCount;
 
 	protected abstract void onOpen(Level level, BlockPos blockPos, BlockState blockState);

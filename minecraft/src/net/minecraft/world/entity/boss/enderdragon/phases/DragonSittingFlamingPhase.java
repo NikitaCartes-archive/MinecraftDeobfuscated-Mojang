@@ -10,6 +10,9 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.phys.Vec3;
 
 public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
+	private static final int FLAME_DURATION = 200;
+	private static final int SITTING_FLAME_ATTACKS_COUNT = 4;
+	private static final int WARMUP_TIME = 10;
 	private int flameTicks;
 	private int flameCount;
 	private AreaEffectCloud flame;

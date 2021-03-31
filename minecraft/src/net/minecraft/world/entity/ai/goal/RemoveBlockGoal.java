@@ -25,6 +25,7 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 	private final Block blockToRemove;
 	private final Mob removerMob;
 	private int ticksSinceReachedGoal;
+	private static final int WAIT_AFTER_BLOCK_FOUND = 20;
 
 	public RemoveBlockGoal(Block block, PathfinderMob pathfinderMob, double d, int i) {
 		super(pathfinderMob, d, 24, i);

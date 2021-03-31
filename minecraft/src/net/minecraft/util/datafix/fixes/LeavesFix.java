@@ -34,7 +34,18 @@ import javax.annotation.Nullable;
 import net.minecraft.util.datafix.PackedBitStorage;
 
 public class LeavesFix extends DataFix {
+	private static final int NORTH_WEST_MASK = 128;
+	private static final int WEST_MASK = 64;
+	private static final int SOUTH_WEST_MASK = 32;
+	private static final int SOUTH_MASK = 16;
+	private static final int SOUTH_EAST_MASK = 8;
+	private static final int EAST_MASK = 4;
+	private static final int NORTH_EAST_MASK = 2;
+	private static final int NORTH_MASK = 1;
 	private static final int[][] DIRECTIONS = new int[][]{{-1, 0, 0}, {1, 0, 0}, {0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}};
+	private static final int DECAY_DISTANCE = 7;
+	private static final int SIZE_BITS = 12;
+	private static final int SIZE = 4096;
 	private static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
 		object2IntOpenHashMap.put("minecraft:acacia_leaves", 0);
 		object2IntOpenHashMap.put("minecraft:birch_leaves", 1);
@@ -214,6 +225,9 @@ public class LeavesFix extends DataFix {
 	}
 
 	public static final class LeavesSection extends LeavesFix.Section {
+		private static final String PERSISTENT = "persistent";
+		private static final String DECAYABLE = "decayable";
+		private static final String DISTANCE = "distance";
 		@Nullable
 		private IntSet leaveIds;
 		@Nullable
@@ -298,6 +312,9 @@ public class LeavesFix extends DataFix {
 	}
 
 	public abstract static class Section {
+		protected static final String BLOCK_STATES_TAG = "BlockStates";
+		protected static final String NAME_TAG = "Name";
+		protected static final String PROPERTIES_TAG = "Properties";
 		private final Type<Pair<String, Dynamic<?>>> blockStateType = DSL.named(References.BLOCK_STATE.typeName(), DSL.remainderType());
 		protected final OpticFinder<List<Pair<String, Dynamic<?>>>> paletteFinder = DSL.fieldFinder("Palette", DSL.list(this.blockStateType));
 		protected final List<Dynamic<?>> palette;

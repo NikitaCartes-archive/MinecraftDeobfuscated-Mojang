@@ -10,8 +10,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,6 +50,7 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -150,6 +149,8 @@ import org.apache.logging.log4j.Logger;
 
 public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final String ENTITY_TAG = "EntityTag";
+	private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
 	public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = register(
 		"area_effect_cloud",
 		EntityType.Builder.<AreaEffectCloud>of(AreaEffectCloud::new, MobCategory.MISC)
@@ -165,7 +166,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"arrow", EntityType.Builder.<Arrow>of(Arrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20)
 	);
 	public static final EntityType<Axolotl> AXOLOTL = register(
-		"axolotl", EntityType.Builder.of(Axolotl::new, MobCategory.WATER_CREATURE).sized(0.75F, 0.42F).clientTrackingRange(10)
+		"axolotl", EntityType.Builder.of(Axolotl::new, MobCategory.UNDERGROUND_WATER_CREATURE).sized(0.75F, 0.42F).clientTrackingRange(10)
 	);
 	public static final EntityType<Bat> BAT = register("bat", EntityType.Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).clientTrackingRange(5));
 	public static final EntityType<Bee> BEE = register("bee", EntityType.Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7F, 0.6F).clientTrackingRange(8));
@@ -247,8 +248,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		EntityType.Builder.<GlowItemFrame>of(GlowItemFrame::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
 	);
 	public static final EntityType<GlowSquid> GLOW_SQUID = register(
-		"glow_squid", EntityType.Builder.of(GlowSquid::new, MobCategory.WATER_CREATURE).sized(0.8F, 0.8F).clientTrackingRange(10)
+		"glow_squid", EntityType.Builder.of(GlowSquid::new, MobCategory.UNDERGROUND_WATER_CREATURE).sized(0.8F, 0.8F).clientTrackingRange(10)
 	);
+	public static final EntityType<Goat> GOAT = register("goat", EntityType.Builder.of(Goat::new, MobCategory.CREATURE).sized(0.9F, 1.3F).clientTrackingRange(10));
 	public static final EntityType<Guardian> GUARDIAN = register(
 		"guardian", EntityType.Builder.of(Guardian::new, MobCategory.MONSTER).sized(0.85F, 0.85F).clientTrackingRange(8)
 	);
@@ -348,7 +350,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"pillager", EntityType.Builder.of(Pillager::new, MobCategory.MONSTER).canSpawnFarFromPlayer().sized(0.6F, 1.95F).clientTrackingRange(8)
 	);
 	public static final EntityType<PolarBear> POLAR_BEAR = register(
-		"polar_bear", EntityType.Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4F, 1.4F).clientTrackingRange(10)
+		"polar_bear", EntityType.Builder.of(PolarBear::new, MobCategory.CREATURE).immuneTo(Blocks.POWDER_SNOW).sized(1.4F, 1.4F).clientTrackingRange(10)
 	);
 	public static final EntityType<PrimedTnt> TNT = register(
 		"tnt", EntityType.Builder.<PrimedTnt>of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F).clientTrackingRange(10).updateInterval(10)
@@ -391,7 +393,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		EntityType.Builder.<SmallFireball>of(SmallFireball::new, MobCategory.MISC).sized(0.3125F, 0.3125F).clientTrackingRange(4).updateInterval(10)
 	);
 	public static final EntityType<SnowGolem> SNOW_GOLEM = register(
-		"snow_golem", EntityType.Builder.of(SnowGolem::new, MobCategory.MISC).sized(0.7F, 1.9F).clientTrackingRange(8)
+		"snow_golem", EntityType.Builder.of(SnowGolem::new, MobCategory.MISC).immuneTo(Blocks.POWDER_SNOW).sized(0.7F, 1.9F).clientTrackingRange(8)
 	);
 	public static final EntityType<Snowball> SNOWBALL = register(
 		"snowball", EntityType.Builder.<Snowball>of(Snowball::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
@@ -406,7 +408,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"squid", EntityType.Builder.of(Squid::new, MobCategory.WATER_CREATURE).sized(0.8F, 0.8F).clientTrackingRange(8)
 	);
 	public static final EntityType<Stray> STRAY = register(
-		"stray", EntityType.Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6F, 1.99F).clientTrackingRange(8)
+		"stray", EntityType.Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6F, 1.99F).immuneTo(Blocks.POWDER_SNOW).clientTrackingRange(8)
 	);
 	public static final EntityType<Strider> STRIDER = register(
 		"strider", EntityType.Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9F, 1.7F).clientTrackingRange(10)
@@ -680,6 +682,11 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		return this.getDescriptionId();
 	}
 
+	public String toShortString() {
+		int i = this.getDescriptionId().lastIndexOf(46);
+		return i == -1 ? this.getDescriptionId() : this.getDescriptionId().substring(i + 1);
+	}
+
 	public ResourceLocation getDefaultLootTable() {
 		if (this.lootTable == null) {
 			ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(this);
@@ -703,7 +710,6 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static Entity create(int i, Level level) {
 		return create(level, Registry.ENTITY_TYPE.byId(i));
 	}
@@ -717,7 +723,6 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	private static Entity create(Level level, @Nullable EntityType<?> entityType) {
 		return entityType == null ? null : entityType.create(level);
 	}
@@ -733,7 +738,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		} else {
 			return this.fireImmune
 					|| !blockState.is(BlockTags.FIRE) && !blockState.is(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockState) && !blockState.is(Blocks.LAVA)
-				? blockState.is(Blocks.WITHER_ROSE) || blockState.is(Blocks.SWEET_BERRY_BUSH) || blockState.is(Blocks.CACTUS)
+				? blockState.is(Blocks.WITHER_ROSE) || blockState.is(Blocks.SWEET_BERRY_BUSH) || blockState.is(Blocks.CACTUS) || blockState.is(Blocks.POWDER_SNOW)
 				: true;
 		}
 	}

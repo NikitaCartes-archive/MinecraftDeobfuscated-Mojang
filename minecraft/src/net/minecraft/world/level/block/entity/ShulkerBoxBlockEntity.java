@@ -3,8 +3,6 @@ package net.minecraft.world.level.block.entity;
 import java.util.List;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -35,6 +33,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity implements WorldlyContainer {
+	public static final int COLUMNS = 9;
+	public static final int ROWS = 3;
+	public static final int CONTAINER_SIZE = 27;
+	public static final int EVENT_SET_OPEN_COUNT = 1;
+	public static final int OPENING_TICK_LENGTH = 10;
+	public static final float MAX_LID_HEIGHT = 0.5F;
+	public static final float MAX_LID_ROTATION = 270.0F;
+	public static final String ITEMS_TAG = "Items";
 	private static final int[] SLOTS = IntStream.range(0, 27).toArray();
 	private NonNullList<ItemStack> itemStacks = NonNullList.withSize(27, ItemStack.EMPTY);
 	private int openCount;
@@ -263,7 +269,6 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public DyeColor getColor() {
 		return this.color;
 	}

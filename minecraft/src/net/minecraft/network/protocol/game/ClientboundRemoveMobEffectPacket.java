@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.effect.MobEffect;
@@ -34,13 +32,11 @@ public class ClientboundRemoveMobEffectPacket implements Packet<ClientGamePacket
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public Entity getEntity(Level level) {
 		return level.getEntity(this.entityId);
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public MobEffect getEffect() {
 		return this.effect;
 	}

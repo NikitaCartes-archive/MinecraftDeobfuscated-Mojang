@@ -18,6 +18,8 @@ public abstract class Request<T extends Request<T>> {
 	protected HttpURLConnection connection;
 	private boolean connected;
 	protected String url;
+	private static final int DEFAULT_READ_TIMEOUT = 60000;
+	private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
 
 	public Request(String string, int i, int j) {
 		try {
@@ -49,6 +51,11 @@ public abstract class Request<T extends Request<T>> {
 		} else {
 			httpURLConnection.setRequestProperty("Cookie", string3 + ";" + string + "=" + string2);
 		}
+	}
+
+	public T header(String string, String string2) {
+		this.connection.addRequestProperty(string, string2);
+		return (T)this;
 	}
 
 	public int getRetryAfterHeader() {

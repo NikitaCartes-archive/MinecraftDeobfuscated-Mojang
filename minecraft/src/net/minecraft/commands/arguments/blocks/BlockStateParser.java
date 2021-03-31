@@ -51,6 +51,12 @@ public class BlockStateParser {
 	public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_PROPERTIES = new SimpleCommandExceptionType(
 		new TranslatableComponent("argument.block.property.unclosed")
 	);
+	private static final char SYNTAX_START_PROPERTIES = '[';
+	private static final char SYNTAX_START_NBT = '{';
+	private static final char SYNTAX_END_PROPERTIES = ']';
+	private static final char SYNTAX_EQUALS = '=';
+	private static final char SYNTAX_PROPERTY_SEPARATOR = ',';
+	private static final char SYNTAX_TAG = '#';
 	private static final BiFunction<SuggestionsBuilder, TagCollection<Block>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
 	private final StringReader reader;
 	private final boolean forTesting;

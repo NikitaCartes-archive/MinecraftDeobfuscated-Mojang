@@ -1,7 +1,5 @@
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -15,13 +13,21 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 public class MerchantMenu extends AbstractContainerMenu {
+	protected static final int PAYMENT1_SLOT = 0;
+	protected static final int PAYMENT2_SLOT = 1;
+	protected static final int RESULT_SLOT = 2;
+	private static final int INV_SLOT_START = 3;
+	private static final int INV_SLOT_END = 30;
+	private static final int USE_ROW_SLOT_START = 30;
+	private static final int USE_ROW_SLOT_END = 39;
+	private static final int SELLSLOT1_X = 136;
+	private static final int SELLSLOT2_X = 162;
+	private static final int BUYSLOT_X = 220;
+	private static final int ROW_Y = 37;
 	private final Merchant trader;
 	private final MerchantContainer tradeContainer;
-	@Environment(EnvType.CLIENT)
 	private int merchantLevel;
-	@Environment(EnvType.CLIENT)
 	private boolean showProgressBar;
-	@Environment(EnvType.CLIENT)
 	private boolean canRestock;
 
 	public MerchantMenu(int i, Inventory inventory) {
@@ -47,7 +53,6 @@ public class MerchantMenu extends AbstractContainerMenu {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setShowProgressBar(boolean bl) {
 		this.showProgressBar = bl;
 	}
@@ -67,37 +72,30 @@ public class MerchantMenu extends AbstractContainerMenu {
 		return this.trader.getTradingPlayer() == player;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTraderXp() {
 		return this.trader.getVillagerXp();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFutureTraderXp() {
 		return this.tradeContainer.getFutureXp();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setXp(int i) {
 		this.trader.overrideXp(i);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTraderLevel() {
 		return this.merchantLevel;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setMerchantLevel(int i) {
 		this.merchantLevel = i;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setCanRestock(boolean bl) {
 		this.canRestock = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean canRestock() {
 		return this.canRestock;
 	}
@@ -230,7 +228,6 @@ public class MerchantMenu extends AbstractContainerMenu {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setOffers(MerchantOffers merchantOffers) {
 		this.trader.overrideOffers(merchantOffers);
 	}
@@ -239,7 +236,6 @@ public class MerchantMenu extends AbstractContainerMenu {
 		return this.trader.getOffers();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean showProgressBar() {
 		return this.showProgressBar;
 	}

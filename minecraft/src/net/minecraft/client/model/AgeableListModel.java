@@ -13,8 +13,8 @@ import net.minecraft.world.entity.Entity;
 @Environment(EnvType.CLIENT)
 public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> {
 	private final boolean scaleHead;
-	private final float yHeadOffset;
-	private final float zHeadOffset;
+	private final float babyYHeadOffset;
+	private final float babyZHeadOffset;
 	private final float babyHeadScale;
 	private final float babyBodyScale;
 	private final float bodyYOffset;
@@ -30,8 +30,8 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 	protected AgeableListModel(Function<ResourceLocation, RenderType> function, boolean bl, float f, float g, float h, float i, float j) {
 		super(function);
 		this.scaleHead = bl;
-		this.yHeadOffset = f;
-		this.zHeadOffset = g;
+		this.babyYHeadOffset = f;
+		this.babyZHeadOffset = g;
 		this.babyHeadScale = h;
 		this.babyBodyScale = i;
 		this.bodyYOffset = j;
@@ -50,7 +50,7 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 				poseStack.scale(l, l, l);
 			}
 
-			poseStack.translate(0.0, (double)(this.yHeadOffset / 16.0F), (double)(this.zHeadOffset / 16.0F));
+			poseStack.translate(0.0, (double)(this.babyYHeadOffset / 16.0F), (double)(this.babyZHeadOffset / 16.0F));
 			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 			poseStack.popPose();
 			poseStack.pushPose();

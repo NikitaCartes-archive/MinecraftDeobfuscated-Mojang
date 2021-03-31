@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
@@ -42,7 +40,6 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);

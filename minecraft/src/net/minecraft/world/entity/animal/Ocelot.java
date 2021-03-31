@@ -2,8 +2,6 @@ package net.minecraft.world.entity.animal;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -52,6 +50,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class Ocelot extends Animal {
+	public static final double CROUCH_SPEED_MOD = 0.6;
+	public static final double WALK_SPEED_MOD = 0.8;
+	public static final double SPRINT_SPEED_MOD = 1.33;
 	private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
 	private static final EntityDataAccessor<Boolean> DATA_TRUSTING = SynchedEntityData.defineId(Ocelot.class, EntityDataSerializers.BOOLEAN);
 	private Ocelot.OcelotAvoidEntityGoal<Player> ocelotAvoidPlayersGoal;
@@ -189,7 +190,6 @@ public class Ocelot extends Animal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 41) {
@@ -274,7 +274,6 @@ public class Ocelot extends Animal {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));

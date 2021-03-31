@@ -9,6 +9,8 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 public abstract class Sensor<E extends LivingEntity> {
 	private static final Random RANDOM = new Random();
+	private static final int DEFAULT_SCAN_RATE = 20;
+	protected static final int TARGETING_RANGE = 16;
 	private static final TargetingConditions TARGET_CONDITIONS = new TargetingConditions().range(16.0).allowSameTeam().allowNonAttackable();
 	private static final TargetingConditions TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING = new TargetingConditions()
 		.range(16.0)

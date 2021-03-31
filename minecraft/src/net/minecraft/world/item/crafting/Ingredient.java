@@ -17,8 +17,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +38,6 @@ public final class Ingredient implements Predicate<ItemStack> {
 		this.values = (Ingredient.Value[])stream.toArray(Ingredient.Value[]::new);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ItemStack[] getItems() {
 		this.dissolve();
 		return this.itemStacks;
@@ -114,11 +111,14 @@ public final class Ingredient implements Predicate<ItemStack> {
 		return ingredient.values.length == 0 ? EMPTY : ingredient;
 	}
 
+	public static Ingredient of() {
+		return EMPTY;
+	}
+
 	public static Ingredient of(ItemLike... itemLikes) {
 		return of(Arrays.stream(itemLikes).map(ItemStack::new));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static Ingredient of(ItemStack... itemStacks) {
 		return of(Arrays.stream(itemStacks));
 	}
@@ -158,8 +158,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 		if (jsonObject.has("item") && jsonObject.has("tag")) {
 			throw new JsonParseException("An ingredient entry is either a tag or an item, not both");
 		} else if (jsonObject.has("item")) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-			Item item = (Item)Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation + "'"));
+			Item item = ShapedRecipe.itemFromJson(jsonObject);
 			return new Ingredient.ItemValue(new ItemStack(item));
 		} else if (jsonObject.has("tag")) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));

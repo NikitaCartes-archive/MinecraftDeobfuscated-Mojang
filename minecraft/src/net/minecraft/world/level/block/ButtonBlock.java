@@ -29,6 +29,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+	private static final int PRESSED_DEPTH = 1;
+	private static final int UNPRESSED_DEPTH = 2;
+	protected static final int HALF_AABB_HEIGHT = 2;
+	protected static final int HALF_AABB_WIDTH = 3;
 	protected static final VoxelShape CEILING_AABB_X = Block.box(6.0, 14.0, 5.0, 10.0, 16.0, 11.0);
 	protected static final VoxelShape CEILING_AABB_Z = Block.box(5.0, 14.0, 6.0, 11.0, 16.0, 10.0);
 	protected static final VoxelShape FLOOR_AABB_X = Block.box(6.0, 0.0, 5.0, 10.0, 2.0, 11.0);

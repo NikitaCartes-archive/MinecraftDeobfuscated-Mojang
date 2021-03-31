@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -34,17 +32,14 @@ public class ClientboundBlockDestructionPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleBlockDestruction(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getPos() {
 		return this.pos;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getProgress() {
 		return this.progress;
 	}

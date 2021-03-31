@@ -6,8 +6,6 @@ import io.netty.buffer.Unpooled;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map.Entry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
@@ -21,6 +19,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListener> {
+	public static final int TWO_MEGABYTES = 2097152;
 	private final int x;
 	private final int z;
 	private final BitSet availableSections;
@@ -85,7 +84,6 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		clientGamePacketListener.handleLevelChunk(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public FriendlyByteBuf getReadBuffer() {
 		return new FriendlyByteBuf(Unpooled.wrappedBuffer(this.buffer));
 	}
@@ -127,32 +125,26 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		return i;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getX() {
 		return this.x;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getZ() {
 		return this.z;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BitSet getAvailableSections() {
 		return this.availableSections;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public CompoundTag getHeightmaps() {
 		return this.heightmaps;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<CompoundTag> getBlockEntitiesTags() {
 		return this.blockEntitiesTags;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int[] getBiomes() {
 		return this.biomes;
 	}

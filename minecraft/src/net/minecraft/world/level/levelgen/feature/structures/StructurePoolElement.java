@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
@@ -36,6 +37,8 @@ public abstract class StructurePoolElement {
 	protected StructurePoolElement(StructureTemplatePool.Projection projection) {
 		this.projection = projection;
 	}
+
+	public abstract Vec3i getSize(StructureManager structureManager, Rotation rotation);
 
 	public abstract List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
 		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random

@@ -1,16 +1,14 @@
 package net.minecraft.network.protocol.login;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundCustomQueryPacket implements Packet<ServerLoginPacketListener> {
+	private static final int MAX_PAYLOAD_SIZE = 1048576;
 	private final int transactionId;
 	private final FriendlyByteBuf data;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundCustomQueryPacket(int i, @Nullable FriendlyByteBuf friendlyByteBuf) {
 		this.transactionId = i;
 		this.data = friendlyByteBuf;
@@ -43,5 +41,13 @@ public class ServerboundCustomQueryPacket implements Packet<ServerLoginPacketLis
 
 	public void handle(ServerLoginPacketListener serverLoginPacketListener) {
 		serverLoginPacketListener.handleCustomQueryPacket(this);
+	}
+
+	public int getTransactionId() {
+		return this.transactionId;
+	}
+
+	public FriendlyByteBuf getData() {
+		return this.data;
 	}
 }

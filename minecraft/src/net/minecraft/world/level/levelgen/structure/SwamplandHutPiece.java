@@ -25,7 +25,7 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 	private boolean spawnedCat;
 
 	public SwamplandHutPiece(Random random, int i, int j) {
-		super(StructurePieceType.SWAMPLAND_HUT, random, i, 64, j, 7, 7, 9);
+		super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, getRandomHorizontalDirection(random));
 	}
 
 	public SwamplandHutPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -95,15 +95,13 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 			}
 
 			if (!this.spawnedWitch) {
-				int i = this.getWorldX(2, 5);
-				int j = this.getWorldY(2);
-				int k = this.getWorldZ(2, 5);
-				if (boundingBox.isInside(new BlockPos(i, j, k))) {
+				BlockPos blockPos2 = this.getWorldPos(2, 2, 5);
+				if (boundingBox.isInside(blockPos2)) {
 					this.spawnedWitch = true;
 					Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
 					witch.setPersistenceRequired();
-					witch.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
-					witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+					witch.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0F, 0.0F);
+					witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
 					worldGenLevel.addFreshEntityWithPassengers(witch);
 				}
 			}
@@ -115,15 +113,13 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 
 	private void spawnCat(ServerLevelAccessor serverLevelAccessor, BoundingBox boundingBox) {
 		if (!this.spawnedCat) {
-			int i = this.getWorldX(2, 5);
-			int j = this.getWorldY(2);
-			int k = this.getWorldZ(2, 5);
-			if (boundingBox.isInside(new BlockPos(i, j, k))) {
+			BlockPos blockPos = this.getWorldPos(2, 2, 5);
+			if (boundingBox.isInside(blockPos)) {
 				this.spawnedCat = true;
 				Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
 				cat.setPersistenceRequired();
-				cat.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
-				cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+				cat.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
+				cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
 				serverLevelAccessor.addFreshEntityWithPassengers(cat);
 			}
 		}

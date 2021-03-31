@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,6 +11,9 @@ import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 
 public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePacketListener> {
+	private static final int FLAG_IGNORE_ENTITIES = 1;
+	private static final int FLAG_SHOW_AIR = 2;
+	private static final int FLAG_SHOW_BOUNDING_BOX = 4;
 	private final BlockPos pos;
 	private final StructureBlockEntity.UpdateType updateType;
 	private final StructureMode mode;
@@ -28,7 +29,6 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 	private final float integrity;
 	private final long seed;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundSetStructureBlockPacket(
 		BlockPos blockPos,
 		StructureBlockEntity.UpdateType updateType,

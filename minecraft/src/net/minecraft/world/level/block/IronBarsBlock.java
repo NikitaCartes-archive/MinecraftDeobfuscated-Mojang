@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -74,7 +72,6 @@ public class IronBarsBlock extends CrossCollisionBlock {
 		return Shapes.empty();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
 		if (blockState2.is(this)) {

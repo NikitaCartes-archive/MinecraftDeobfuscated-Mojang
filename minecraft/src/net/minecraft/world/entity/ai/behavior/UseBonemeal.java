@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class UseBonemeal extends Behavior<Villager> {
+	private static final int BONEMEALING_DURATION = 80;
 	private long nextWorkCycleTime;
 	private long lastBonemealingSession;
 	private int timeWorkedSoFar;

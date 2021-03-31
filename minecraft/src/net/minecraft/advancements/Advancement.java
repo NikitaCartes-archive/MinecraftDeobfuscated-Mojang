@@ -13,8 +13,6 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.network.FriendlyByteBuf;
@@ -110,7 +108,6 @@ public class Advancement {
 		return this.criteria;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getMaxCriteraRequired() {
 		return this.requirements.length;
 	}
@@ -241,6 +238,11 @@ public class Advancement {
 
 		public Advancement.Builder requirements(RequirementsStrategy requirementsStrategy) {
 			this.requirementsStrategy = requirementsStrategy;
+			return this;
+		}
+
+		public Advancement.Builder requirements(String[][] strings) {
+			this.requirements = strings;
 			return this;
 		}
 

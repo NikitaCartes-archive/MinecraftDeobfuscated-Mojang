@@ -6,8 +6,6 @@ import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,6 +13,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -164,7 +163,6 @@ public class WorldGenRegion implements WorldGenLevel {
 		return this.level.getUncachedNoiseBiome(i, j, k);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getShade(Direction direction, boolean bl) {
 		return 1.0F;
@@ -312,6 +310,12 @@ public class WorldGenRegion implements WorldGenLevel {
 		}
 	}
 
+	@Nullable
+	@Override
+	public MinecraftServer getServer() {
+		return this.level.getServer();
+	}
+
 	@Override
 	public ChunkSource getChunkSource() {
 		return this.level.getChunkSource();
@@ -371,6 +375,11 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Override
 	public boolean isStateAtPosition(BlockPos blockPos, Predicate<BlockState> predicate) {
 		return predicate.test(this.getBlockState(blockPos));
+	}
+
+	@Override
+	public boolean isFluidAtPosition(BlockPos blockPos, Predicate<FluidState> predicate) {
+		return predicate.test(this.getFluidState(blockPos));
 	}
 
 	@Override

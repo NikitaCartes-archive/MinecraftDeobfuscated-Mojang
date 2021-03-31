@@ -10,6 +10,7 @@ public enum MobCategory implements StringRepresentable {
 	MONSTER("monster", 70, false, false, 128),
 	CREATURE("creature", 10, true, true, 128),
 	AMBIENT("ambient", 15, true, false, 128),
+	UNDERGROUND_WATER_CREATURE("underground_water_creature", 5, true, false, 128),
 	WATER_CREATURE("water_creature", 5, true, false, 128),
 	WATER_AMBIENT("water_ambient", 20, true, false, 64),
 	MISC("misc", -1, true, true, 128);

@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.task;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +19,12 @@ public class IntervalBasedStartupDelay implements RestartDelayCalculator {
 	public IntervalBasedStartupDelay(Duration duration) {
 		this.interval = duration;
 		this.clock = Clock::systemUTC;
+	}
+
+	@VisibleForTesting
+	protected IntervalBasedStartupDelay(Duration duration, Supplier<Clock> supplier) {
+		this.interval = duration;
+		this.clock = supplier;
 	}
 
 	@Override

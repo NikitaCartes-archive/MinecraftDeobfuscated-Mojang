@@ -1,10 +1,9 @@
 package net.minecraft.world.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
 public class HorseArmorItem extends Item {
+	private static final String TEX_FOLDER = "textures/entity/horse/";
 	private final int protection;
 	private final String texture;
 
@@ -14,7 +13,6 @@ public class HorseArmorItem extends Item {
 		this.texture = "textures/entity/horse/armor/horse_armor_" + string + ".png";
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getTexture() {
 		return new ResourceLocation(this.texture);
 	}

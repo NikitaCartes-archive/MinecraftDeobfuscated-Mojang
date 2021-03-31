@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -31,6 +29,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class JigsawBlockEntity extends BlockEntity {
+	public static final String TARGET = "target";
+	public static final String POOL = "pool";
+	public static final String JOINT = "joint";
+	public static final String NAME = "name";
+	public static final String FINAL_STATE = "final_state";
 	private ResourceLocation name = new ResourceLocation("empty");
 	private ResourceLocation target = new ResourceLocation("empty");
 	private ResourceLocation pool = new ResourceLocation("empty");
@@ -41,27 +44,22 @@ public class JigsawBlockEntity extends BlockEntity {
 		super(BlockEntityType.JIGSAW, blockPos, blockState);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getName() {
 		return this.name;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getTarget() {
 		return this.target;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getPool() {
 		return this.pool;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getFinalState() {
 		return this.finalState;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public JigsawBlockEntity.JointType getJoint() {
 		return this.joint;
 	}
@@ -164,7 +162,6 @@ public class JigsawBlockEntity extends BlockEntity {
 			return Arrays.stream(values()).filter(jointType -> jointType.getSerializedName().equals(string)).findFirst();
 		}
 
-		@Environment(EnvType.CLIENT)
 		public Component getTranslatedName() {
 			return new TranslatableComponent("jigsaw_block.joint." + this.name);
 		}

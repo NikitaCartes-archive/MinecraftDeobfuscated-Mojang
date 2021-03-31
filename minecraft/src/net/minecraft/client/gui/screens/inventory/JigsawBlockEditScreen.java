@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class JigsawBlockEditScreen extends Screen {
+	private static final int MAX_LEVELS = 7;
 	private static final Component JOINT_LABEL = new TranslatableComponent("jigsaw_block.joint_label");
 	private static final Component POOL_LABEL = new TranslatableComponent("jigsaw_block.pool");
 	private static final Component NAME_LABEL = new TranslatableComponent("jigsaw_block.name");

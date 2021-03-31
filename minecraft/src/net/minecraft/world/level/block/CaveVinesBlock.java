@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -19,6 +17,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class CaveVinesBlock extends GrowingPlantHeadBlock implements BonemealableBlock, CaveVines {
+	private static final float CHANCE_OF_BERRIES_ON_GROWTH = 0.11F;
+
 	public CaveVinesBlock(BlockBehaviour.Properties properties) {
 		super(properties, Direction.DOWN, SHAPE, false, 0.1);
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)).setValue(BERRIES, Boolean.valueOf(false)));
@@ -49,7 +49,6 @@ public class CaveVinesBlock extends GrowingPlantHeadBlock implements Bonemealabl
 		return super.getGrowIntoState(blockState, random).setValue(BERRIES, Boolean.valueOf(random.nextFloat() < 0.11F));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Items.GLOW_BERRIES);

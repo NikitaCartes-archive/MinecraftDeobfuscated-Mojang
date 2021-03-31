@@ -34,6 +34,10 @@ public class ValueCheckCondition implements LootItemCondition {
 		return this.range.test(lootContext, this.provider.getInt(lootContext));
 	}
 
+	public static LootItemCondition.Builder hasValue(NumberProvider numberProvider, IntRange intRange) {
+		return () -> new ValueCheckCondition(numberProvider, intRange);
+	}
+
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<ValueCheckCondition> {
 		public void serialize(JsonObject jsonObject, ValueCheckCondition valueCheckCondition, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.add("value", jsonSerializationContext.serialize(valueCheckCondition.provider));

@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class ServerTickList<T> implements TickList<T> {
+	public static final int MAX_TICK_BLOCKS_PER_TICK = 65536;
 	protected final Predicate<T> ignore;
 	private final Function<T, ResourceLocation> toId;
 	private final Set<TickNextTickData<T>> tickNextTickSet = Sets.<TickNextTickData<T>>newHashSet();
@@ -129,7 +130,10 @@ public class ServerTickList<T> implements TickList<T> {
 		while (iterator.hasNext()) {
 			TickNextTickData<T> tickNextTickData = (TickNextTickData<T>)iterator.next();
 			BlockPos blockPos = tickNextTickData.pos;
-			if (blockPos.getX() >= boundingBox.x0 && blockPos.getX() < boundingBox.x1 && blockPos.getZ() >= boundingBox.z0 && blockPos.getZ() < boundingBox.z1) {
+			if (blockPos.getX() >= boundingBox.minX()
+				&& blockPos.getX() < boundingBox.maxX()
+				&& blockPos.getZ() >= boundingBox.minZ()
+				&& blockPos.getZ() < boundingBox.maxZ()) {
 				if (bl) {
 					iterator.remove();
 				}
@@ -196,6 +200,7 @@ public class ServerTickList<T> implements TickList<T> {
 		}
 	}
 
+	@Override
 	public int size() {
 		return this.tickNextTickSet.size();
 	}

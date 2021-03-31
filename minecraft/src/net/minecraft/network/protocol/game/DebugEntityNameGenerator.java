@@ -2,11 +2,11 @@ package net.minecraft.network.protocol.game;
 
 import java.util.Random;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
-@Environment(EnvType.CLIENT)
 public class DebugEntityNameGenerator {
 	private static final String[] NAMES_FIRST_PART = new String[]{
 		"Slim",
@@ -75,6 +75,15 @@ public class DebugEntityNameGenerator {
 		"Shirt",
 		"Fist"
 	};
+
+	public static String getEntityName(Entity entity) {
+		if (entity instanceof Player) {
+			return entity.getName().getString();
+		} else {
+			Component component = entity.getCustomName();
+			return component != null ? component.getString() : getEntityName(entity.getUUID());
+		}
+	}
 
 	public static String getEntityName(UUID uUID) {
 		Random random = getRandom(uUID);

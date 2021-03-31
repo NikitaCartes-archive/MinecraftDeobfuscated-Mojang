@@ -4,6 +4,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DepthBasedReplacingBaseStoneSource implements BaseStoneSource {
+	private static final int ALWAYS_REPLACE_BELOW_Y = -8;
+	private static final int NEVER_REPLACE_ABOVE_Y = 0;
 	private final WorldgenRandom random;
 	private final long seed;
 	private final BlockState normalBlock;

@@ -9,6 +9,8 @@ import net.minecraft.world.level.block.Blocks;
 
 public class BlockFamilies {
 	private static final Map<Block, BlockFamily> MAP = Maps.<Block, BlockFamily>newHashMap();
+	private static final String RECIPE_GROUP_PREFIX_WOODEN = "wooden";
+	private static final String RECIPE_UNLOCKED_BY_HAS_PLANKS = "has_planks";
 	public static final BlockFamily ACACIA_PLANKS = familyBuilder(Blocks.ACACIA_PLANKS)
 		.button(Blocks.ACACIA_BUTTON)
 		.fence(Blocks.ACACIA_FENCE)

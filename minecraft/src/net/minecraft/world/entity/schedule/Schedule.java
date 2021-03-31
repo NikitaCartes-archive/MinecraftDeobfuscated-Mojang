@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 
 public class Schedule {
+	public static final int WORK_START_TIME = 2000;
+	public static final int TOTAL_WORK_TIME = 7000;
 	public static final Schedule EMPTY = register("empty").changeActivityAt(0, Activity.IDLE).build();
 	public static final Schedule SIMPLE = register("simple").changeActivityAt(5000, Activity.WORK).changeActivityAt(11000, Activity.REST).build();
 	public static final Schedule VILLAGER_BABY = register("villager_baby")

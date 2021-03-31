@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.state.properties;
 import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -36,6 +37,10 @@ public abstract class Property<T extends Comparable<T>> {
 
 	public Stream<Property.Value<T>> getAllValues() {
 		return this.getPossibleValues().stream().map(this::value);
+	}
+
+	public Codec<T> codec() {
+		return this.codec;
 	}
 
 	public Codec<Property.Value<T>> valueCodec() {
@@ -81,6 +86,11 @@ public abstract class Property<T extends Comparable<T>> {
 
 	public int generateHashCode() {
 		return 31 * this.clazz.hashCode() + this.name.hashCode();
+	}
+
+	public <U, S extends StateHolder<?, S>> DataResult<S> parseValue(DynamicOps<U> dynamicOps, S stateHolder, U object) {
+		DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
+		return dataResult.map(comparable -> stateHolder.setValue(this, comparable)).setPartial(stateHolder);
 	}
 
 	public static final class Value<T extends Comparable<T>> {

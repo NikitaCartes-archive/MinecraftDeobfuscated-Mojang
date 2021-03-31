@@ -1,5 +1,7 @@
 package net.minecraft.world.level.storage.loot.entries;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class EntryGroup extends CompositeEntryBase {
@@ -35,6 +37,35 @@ public class EntryGroup extends CompositeEntryBase {
 
 					return true;
 				};
+		}
+	}
+
+	public static EntryGroup.Builder list(LootPoolEntryContainer.Builder<?>... builders) {
+		return new EntryGroup.Builder(builders);
+	}
+
+	public static class Builder extends LootPoolEntryContainer.Builder<EntryGroup.Builder> {
+		private final List<LootPoolEntryContainer> entries = Lists.<LootPoolEntryContainer>newArrayList();
+
+		public Builder(LootPoolEntryContainer.Builder<?>... builders) {
+			for (LootPoolEntryContainer.Builder<?> builder : builders) {
+				this.entries.add(builder.build());
+			}
+		}
+
+		protected EntryGroup.Builder getThis() {
+			return this;
+		}
+
+		@Override
+		public EntryGroup.Builder append(LootPoolEntryContainer.Builder<?> builder) {
+			this.entries.add(builder.build());
+			return this;
+		}
+
+		@Override
+		public LootPoolEntryContainer build() {
+			return new EntryGroup((LootPoolEntryContainer[])this.entries.toArray(new LootPoolEntryContainer[0]), this.getConditions());
 		}
 	}
 }

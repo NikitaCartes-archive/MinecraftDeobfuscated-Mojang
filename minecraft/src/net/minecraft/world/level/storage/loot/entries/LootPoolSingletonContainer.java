@@ -19,6 +19,8 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.apache.commons.lang3.ArrayUtils;
 
 public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer {
+	public static final int DEFAULT_WEIGHT = 1;
+	public static final int DEFAULT_QUALITY = 0;
 	protected final int weight;
 	protected final int quality;
 	protected final LootItemFunction[] functions;

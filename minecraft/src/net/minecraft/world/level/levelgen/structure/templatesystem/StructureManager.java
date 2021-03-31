@@ -30,6 +30,9 @@ import org.apache.logging.log4j.Logger;
 
 public class StructureManager {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String STRUCTURE_DIRECTORY_NAME = "structures";
+	private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
+	private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
 	private final Map<ResourceLocation, StructureTemplate> structureRepository = Maps.<ResourceLocation, StructureTemplate>newHashMap();
 	private final DataFixer fixerUpper;
 	private ResourceManager resourceManager;

@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -66,6 +67,34 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		}
 
 		return itemStack;
+	}
+
+	public static SetAttributesFunction.ModifierBuilder modifier(
+		String string, Attribute attribute, AttributeModifier.Operation operation, NumberProvider numberProvider
+	) {
+		return new SetAttributesFunction.ModifierBuilder(string, attribute, operation, numberProvider);
+	}
+
+	public static SetAttributesFunction.Builder setAttributes() {
+		return new SetAttributesFunction.Builder();
+	}
+
+	public static class Builder extends LootItemConditionalFunction.Builder<SetAttributesFunction.Builder> {
+		private final List<SetAttributesFunction.Modifier> modifiers = Lists.<SetAttributesFunction.Modifier>newArrayList();
+
+		protected SetAttributesFunction.Builder getThis() {
+			return this;
+		}
+
+		public SetAttributesFunction.Builder withModifier(SetAttributesFunction.ModifierBuilder modifierBuilder) {
+			this.modifiers.add(modifierBuilder.build());
+			return this;
+		}
+
+		@Override
+		public LootItemFunction build() {
+			return new SetAttributesFunction(this.getConditions(), this.modifiers);
+		}
 	}
 
 	static class Modifier {
@@ -187,6 +216,39 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 				default:
 					throw new JsonSyntaxException("Unknown attribute modifier operation " + string);
 			}
+		}
+	}
+
+	public static class ModifierBuilder {
+		private final String name;
+		private final Attribute attribute;
+		private final AttributeModifier.Operation operation;
+		private final NumberProvider amount;
+		@Nullable
+		private UUID id;
+		private final Set<EquipmentSlot> slots = EnumSet.noneOf(EquipmentSlot.class);
+
+		public ModifierBuilder(String string, Attribute attribute, AttributeModifier.Operation operation, NumberProvider numberProvider) {
+			this.name = string;
+			this.attribute = attribute;
+			this.operation = operation;
+			this.amount = numberProvider;
+		}
+
+		public SetAttributesFunction.ModifierBuilder forSlot(EquipmentSlot equipmentSlot) {
+			this.slots.add(equipmentSlot);
+			return this;
+		}
+
+		public SetAttributesFunction.ModifierBuilder withUuid(UUID uUID) {
+			this.id = uUID;
+			return this;
+		}
+
+		public SetAttributesFunction.Modifier build() {
+			return new SetAttributesFunction.Modifier(
+				this.name, this.attribute, this.operation, this.amount, (EquipmentSlot[])this.slots.toArray(new EquipmentSlot[0]), this.id
+			);
 		}
 	}
 

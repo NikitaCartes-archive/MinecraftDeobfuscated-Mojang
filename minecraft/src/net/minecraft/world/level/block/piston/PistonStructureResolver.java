@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 
 public class PistonStructureResolver {
+	public static final int MAX_PUSH_DEPTH = 12;
 	private final Level level;
 	private final BlockPos pistonPos;
 	private final boolean extending;
@@ -179,6 +180,10 @@ public class PistonStructureResolver {
 		}
 
 		return true;
+	}
+
+	public Direction getPushDirection() {
+		return this.pushDirection;
 	}
 
 	public List<BlockPos> getToPush() {

@@ -48,6 +48,7 @@ public class FeaturePoolElement extends StructurePoolElement {
 		return compoundTag;
 	}
 
+	@Override
 	public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
 		return Vec3i.ZERO;
 	}

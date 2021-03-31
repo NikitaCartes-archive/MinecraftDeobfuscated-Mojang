@@ -21,6 +21,9 @@ import org.apache.logging.log4j.Logger;
 
 public class CompassItem extends Item implements Vanishable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final String TAG_LODESTONE_POS = "LodestonePos";
+	public static final String TAG_LODESTONE_DIMENSION = "LodestoneDimension";
+	public static final String TAG_LODESTONE_TRACKED = "LodestoneTracked";
 
 	public CompassItem(Item.Properties properties) {
 		super(properties);

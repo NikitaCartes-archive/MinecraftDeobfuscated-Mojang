@@ -3,8 +3,6 @@ package net.minecraft.world.level.block.entity;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +32,11 @@ import org.apache.logging.log4j.Logger;
 
 public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SPAWN_TIME = 200;
+	private static final int COOLDOWN_TIME = 40;
+	private static final int ATTENTION_INTERVAL = 2400;
+	private static final int EVENT_COOLDOWN = 1;
+	private static final int GATEWAY_HEIGHT_ABOVE_SURFACE = 10;
 	private long age;
 	private int teleportCooldown;
 	@Nullable
@@ -64,7 +67,10 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		super.load(compoundTag);
 		this.age = compoundTag.getLong("Age");
 		if (compoundTag.contains("ExitPortal", 10)) {
-			this.exitPortal = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));
+			BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));
+			if (Level.isInSpawnableBounds(blockPos)) {
+				this.exitPortal = blockPos;
+			}
 		}
 
 		this.exactTeleport = compoundTag.getBoolean("ExactTeleport");
@@ -111,12 +117,10 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		return this.teleportCooldown > 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getSpawnPercent(float f) {
 		return Mth.clamp(((float)this.age + f) / 200.0F, 0.0F, 1.0F);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getCooldownPercent(float f) {
 		return 1.0F - Mth.clamp(((float)this.teleportCooldown - f) / 40.0F, 0.0F, 1.0F);
 	}
@@ -289,13 +293,11 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		Feature.END_GATEWAY.configured(endGatewayConfiguration).place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderFace(Direction direction) {
 		return Block.shouldRenderFace(this.getBlockState(), this.level, this.getBlockPos(), direction, this.getBlockPos().relative(direction));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getParticleAmount() {
 		int i = 0;
 

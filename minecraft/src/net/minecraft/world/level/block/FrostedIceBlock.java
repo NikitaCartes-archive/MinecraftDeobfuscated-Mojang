@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -17,7 +15,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class FrostedIceBlock extends IceBlock {
+	public static final int MAX_AGE = 3;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+	private static final int NEIGHBORS_TO_AGE = 4;
+	private static final int NEIGHBORS_TO_MELT = 2;
 
 	public FrostedIceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -89,7 +90,6 @@ public class FrostedIceBlock extends IceBlock {
 		builder.add(AGE);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return ItemStack.EMPTY;

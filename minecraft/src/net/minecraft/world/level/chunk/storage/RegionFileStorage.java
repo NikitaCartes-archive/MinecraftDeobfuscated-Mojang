@@ -12,6 +12,8 @@ import net.minecraft.util.ExceptionCollector;
 import net.minecraft.world.level.ChunkPos;
 
 public final class RegionFileStorage implements AutoCloseable {
+	public static final String ANVIL_EXTENSION = ".mca";
+	private static final int MAX_CACHE_SIZE = 256;
 	private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap<>();
 	private final File folder;
 	private final boolean sync;

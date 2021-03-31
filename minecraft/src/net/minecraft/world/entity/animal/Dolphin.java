@@ -7,8 +7,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -79,6 +77,8 @@ public class Dolphin extends WaterAnimal {
 		.allowSameTeam()
 		.allowInvulnerable()
 		.allowUnseeable();
+	public static final int TOTAL_AIR_SUPPLY = 4800;
+	private static final int TOTAL_MOISTNESS_LEVEL = 2400;
 	public static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive() && itemEntity.isInWater();
 
 	public Dolphin(EntityType<? extends Dolphin> entityType, Level level) {
@@ -295,7 +295,6 @@ public class Dolphin extends WaterAnimal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 38) {
@@ -305,7 +304,6 @@ public class Dolphin extends WaterAnimal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	private void addParticlesAroundSelf(ParticleOptions particleOptions) {
 		for (int i = 0; i < 7; i++) {
 			double d = this.random.nextGaussian() * 0.01;

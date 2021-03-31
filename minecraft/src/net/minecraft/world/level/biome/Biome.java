@@ -14,8 +14,6 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
@@ -91,6 +89,7 @@ public final class Biome {
 	private static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(1234L), ImmutableList.of(0));
 	private static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), ImmutableList.of(-2, -1, 0));
 	public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(2345L), ImmutableList.of(0));
+	private static final int TEMPERATURE_CACHE_SIZE = 1024;
 	private final Biome.ClimateSettings climateSettings;
 	private final BiomeGenerationSettings generationSettings;
 	private final MobSpawnSettings mobSettings;
@@ -126,7 +125,6 @@ public final class Biome {
 		this.specialEffects = biomeSpecialEffects;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getSkyColor() {
 		return this.specialEffects.getSkyColor();
 	}
@@ -291,30 +289,25 @@ public final class Biome {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFogColor() {
 		return this.specialEffects.getFogColor();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getGrassColor(double d, double e) {
 		int i = (Integer)this.specialEffects.getGrassColorOverride().orElseGet(this::getGrassColorFromTexture);
 		return this.specialEffects.getGrassColorModifier().modifyColor(d, e, i);
 	}
 
-	@Environment(EnvType.CLIENT)
 	private int getGrassColorFromTexture() {
 		double d = (double)Mth.clamp(this.climateSettings.temperature, 0.0F, 1.0F);
 		double e = (double)Mth.clamp(this.climateSettings.downfall, 0.0F, 1.0F);
 		return GrassColor.get(d, e);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFoliageColor() {
 		return (Integer)this.specialEffects.getFoliageColorOverride().orElseGet(this::getFoliageColorFromTexture);
 	}
 
-	@Environment(EnvType.CLIENT)
 	private int getFoliageColorFromTexture() {
 		double d = (double)Mth.clamp(this.climateSettings.temperature, 0.0F, 1.0F);
 		double e = (double)Mth.clamp(this.climateSettings.downfall, 0.0F, 1.0F);
@@ -347,37 +340,30 @@ public final class Biome {
 		return this.specialEffects;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final int getWaterColor() {
 		return this.specialEffects.getWaterColor();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final int getWaterFogColor() {
 		return this.specialEffects.getWaterFogColor();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<AmbientParticleSettings> getAmbientParticle() {
 		return this.specialEffects.getAmbientParticleSettings();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<SoundEvent> getAmbientLoop() {
 		return this.specialEffects.getAmbientLoopSoundEvent();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<AmbientMoodSettings> getAmbientMood() {
 		return this.specialEffects.getAmbientMoodSettings();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<AmbientAdditionsSettings> getAmbientAdditions() {
 		return this.specialEffects.getAmbientAdditionsSettings();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<Music> getBackgroundMusic() {
 		return this.specialEffects.getBackgroundMusic();
 	}

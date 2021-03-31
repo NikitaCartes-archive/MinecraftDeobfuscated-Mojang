@@ -3,8 +3,6 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.util.Mth;
@@ -19,6 +17,9 @@ public class TheEndBiomeSource extends BiomeSource {
 				)
 				.apply(instance, instance.stable(TheEndBiomeSource::new))
 	);
+	private static final float ISLAND_THRESHOLD = -0.9F;
+	public static final int ISLAND_CHUNK_DISTANCE = 64;
+	private static final long ISLAND_CHUNK_DISTANCE_SQR = 4096L;
 	private final SimplexNoise islandNoise;
 	private final Registry<Biome> biomes;
 	private final long seed;
@@ -59,7 +60,6 @@ public class TheEndBiomeSource extends BiomeSource {
 		return CODEC;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public BiomeSource withSeed(long l) {
 		return new TheEndBiomeSource(this.biomes, l, this.end, this.highlands, this.midlands, this.islands, this.barrens);

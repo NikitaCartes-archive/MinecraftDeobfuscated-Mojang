@@ -57,6 +57,14 @@ import org.apache.logging.log4j.Logger;
 
 public class EndDragonFight {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int MAX_TICKS_BEFORE_DRAGON_RESPAWN = 1200;
+	private static final int TIME_BETWEEN_CRYSTAL_SCANS = 100;
+	private static final int TIME_BETWEEN_PLAYER_SCANS = 20;
+	private static final int ARENA_SIZE_CHUNKS = 8;
+	public static final int ARENA_TICKET_LEVEL = 9;
+	private static final int GATEWAY_COUNT = 20;
+	private static final int GATEWAY_DISTANCE = 96;
+	public static final int DRAGON_SPAWN_Y = 128;
 	private static final Predicate<Entity> VALID_PLAYER = EntitySelector.ENTITY_STILL_ALIVE.and(EntitySelector.withinDistance(0.0, 128.0, 0.0, 192.0));
 	private final ServerBossEvent dragonEvent = (ServerBossEvent)new ServerBossEvent(
 			new TranslatableComponent("entity.minecraft.ender_dragon"), BossEvent.BossBarColor.PINK, BossEvent.BossBarOverlay.PROGRESS

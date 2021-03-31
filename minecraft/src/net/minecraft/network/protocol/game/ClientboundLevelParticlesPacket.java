@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -73,52 +71,42 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 		this.particle.writeToNetwork(friendlyByteBuf);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isOverrideLimiter() {
 		return this.overrideLimiter;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getX() {
 		return this.x;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getY() {
 		return this.y;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getZ() {
 		return this.z;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getXDist() {
 		return this.xDist;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getYDist() {
 		return this.yDist;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getZDist() {
 		return this.zDist;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getMaxSpeed() {
 		return this.maxSpeed;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getCount() {
 		return this.count;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ParticleOptions getParticle() {
 		return this.particle;
 	}

@@ -17,6 +17,7 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
 		Blocks.BEDROCK, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_WART, Blocks.CHEST, Blocks.SPAWNER
 	);
 	private static final Direction[] DIRECTIONS = Direction.values();
+	private static final double RIM_SPAWN_CHANCE = 0.9;
 
 	public DeltaFeature(Codec<DeltaFeatureConfiguration> codec) {
 		super(codec);

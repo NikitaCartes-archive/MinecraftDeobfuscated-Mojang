@@ -5,12 +5,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class GiantTrunkPlacer extends TrunkPlacer {
 	public static final Codec<GiantTrunkPlacer> CODEC = RecordCodecBuilder.create(instance -> trunkPlacerParts(instance).apply(instance, GiantTrunkPlacer::new));
@@ -26,21 +26,26 @@ public class GiantTrunkPlacer extends TrunkPlacer {
 
 	@Override
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
-		LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		Random random,
+		int i,
+		BlockPos blockPos,
+		TreeConfiguration treeConfiguration
 	) {
 		BlockPos blockPos2 = blockPos.below();
-		setDirtAt(levelSimulatedRW, random, blockPos2, treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.east(), treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.south(), treeConfiguration);
-		setDirtAt(levelSimulatedRW, random, blockPos2.south().east(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2, treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.east(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.south(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos2.south().east(), treeConfiguration);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int j = 0; j < i; j++) {
-			placeLogIfFreeWithOffset(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration, blockPos, 0, j, 0);
+			placeLogIfFreeWithOffset(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration, blockPos, 0, j, 0);
 			if (j < i - 1) {
-				placeLogIfFreeWithOffset(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration, blockPos, 1, j, 0);
-				placeLogIfFreeWithOffset(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration, blockPos, 1, j, 1);
-				placeLogIfFreeWithOffset(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration, blockPos, 0, j, 1);
+				placeLogIfFreeWithOffset(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration, blockPos, 1, j, 0);
+				placeLogIfFreeWithOffset(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration, blockPos, 1, j, 1);
+				placeLogIfFreeWithOffset(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration, blockPos, 0, j, 1);
 			}
 		}
 
@@ -48,11 +53,10 @@ public class GiantTrunkPlacer extends TrunkPlacer {
 	}
 
 	private static void placeLogIfFreeWithOffset(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
-		Set<BlockPos> set,
-		BoundingBox boundingBox,
 		TreeConfiguration treeConfiguration,
 		BlockPos blockPos,
 		int i,
@@ -60,6 +64,6 @@ public class GiantTrunkPlacer extends TrunkPlacer {
 		int k
 	) {
 		mutableBlockPos.setWithOffset(blockPos, i, j, k);
-		placeLogIfFree(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration);
+		placeLogIfFree(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
 	}
 }

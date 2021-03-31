@@ -38,6 +38,10 @@ public class PostPass implements AutoCloseable {
 		this.effect.close();
 	}
 
+	public final String getName() {
+		return this.effect.getName();
+	}
+
 	public void addAuxAsset(String string, IntSupplier intSupplier, int i, int j) {
 		this.auxNames.add(this.auxNames.size(), string);
 		this.auxAssets.add(this.auxAssets.size(), intSupplier);

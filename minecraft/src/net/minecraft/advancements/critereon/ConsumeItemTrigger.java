@@ -36,6 +36,10 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 			return new ConsumeItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.ANY);
 		}
 
+		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemPredicate itemPredicate) {
+			return new ConsumeItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate);
+		}
+
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemLike itemLike) {
 			return new ConsumeItemTrigger.TriggerInstance(
 				EntityPredicate.Composite.ANY,

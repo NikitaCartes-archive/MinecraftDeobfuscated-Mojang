@@ -1,10 +1,9 @@
 package net.minecraft.world.level.pathfinder;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public class Node {
 	public final int x;
@@ -53,10 +52,24 @@ public class Node {
 		return Mth.sqrt(f * f + g * g + h * h);
 	}
 
+	public float distanceTo(BlockPos blockPos) {
+		float f = (float)(blockPos.getX() - this.x);
+		float g = (float)(blockPos.getY() - this.y);
+		float h = (float)(blockPos.getZ() - this.z);
+		return Mth.sqrt(f * f + g * g + h * h);
+	}
+
 	public float distanceToSqr(Node node) {
 		float f = (float)(node.x - this.x);
 		float g = (float)(node.y - this.y);
 		float h = (float)(node.z - this.z);
+		return f * f + g * g + h * h;
+	}
+
+	public float distanceToSqr(BlockPos blockPos) {
+		float f = (float)(blockPos.getX() - this.x);
+		float g = (float)(blockPos.getY() - this.y);
+		float h = (float)(blockPos.getZ() - this.z);
 		return f * f + g * g + h * h;
 	}
 
@@ -76,6 +89,10 @@ public class Node {
 
 	public BlockPos asBlockPos() {
 		return new BlockPos(this.x, this.y, this.z);
+	}
+
+	public Vec3 asVec3() {
+		return new Vec3((double)this.x, (double)this.y, (double)this.z);
 	}
 
 	public boolean equals(Object object) {
@@ -99,7 +116,17 @@ public class Node {
 		return "Node{x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
 	}
 
-	@Environment(EnvType.CLIENT)
+	public void writeToStream(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeInt(this.x);
+		friendlyByteBuf.writeInt(this.y);
+		friendlyByteBuf.writeInt(this.z);
+		friendlyByteBuf.writeFloat(this.walkedDistance);
+		friendlyByteBuf.writeFloat(this.costMalus);
+		friendlyByteBuf.writeBoolean(this.closed);
+		friendlyByteBuf.writeInt(this.type.ordinal());
+		friendlyByteBuf.writeFloat(this.f);
+	}
+
 	public static Node createFromStream(FriendlyByteBuf friendlyByteBuf) {
 		Node node = new Node(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
 		node.walkedDistance = friendlyByteBuf.readFloat();

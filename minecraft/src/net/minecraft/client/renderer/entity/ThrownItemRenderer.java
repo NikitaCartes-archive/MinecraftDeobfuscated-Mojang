@@ -15,6 +15,7 @@ import net.minecraft.world.entity.projectile.ItemSupplier;
 
 @Environment(EnvType.CLIENT)
 public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityRenderer<T> {
+	private static final float MIN_CAMERA_DISTANCE_SQUARED = 12.25F;
 	private final ItemRenderer itemRenderer;
 	private final float scale;
 	private final boolean fullBright;

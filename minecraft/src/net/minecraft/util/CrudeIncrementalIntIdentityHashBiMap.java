@@ -8,7 +8,9 @@ import javax.annotation.Nullable;
 import net.minecraft.core.IdMap;
 
 public class CrudeIncrementalIntIdentityHashBiMap<K> implements IdMap<K> {
+	public static final int NOT_FOUND = -1;
 	private static final Object EMPTY_SLOT = null;
+	private static final float LOADFACTOR = 0.8F;
 	private K[] keys;
 	private int[] values;
 	private K[] byId;
@@ -35,6 +37,14 @@ public class CrudeIncrementalIntIdentityHashBiMap<K> implements IdMap<K> {
 
 	private int getValue(int i) {
 		return i == -1 ? -1 : this.values[i];
+	}
+
+	public boolean contains(K object) {
+		return this.getId(object) != -1;
+	}
+
+	public boolean contains(int i) {
+		return this.byId(i) != null;
 	}
 
 	public int add(K object) {

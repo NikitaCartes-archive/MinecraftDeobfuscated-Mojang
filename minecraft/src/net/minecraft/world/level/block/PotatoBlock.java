@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -27,7 +25,6 @@ public class PotatoBlock extends CropBlock {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	protected ItemLike getBaseSeedId() {
 		return Items.POTATO;

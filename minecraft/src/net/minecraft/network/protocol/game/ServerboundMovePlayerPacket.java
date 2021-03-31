@@ -52,6 +52,14 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 		return this.onGround;
 	}
 
+	public boolean hasPosition() {
+		return this.hasPos;
+	}
+
+	public boolean hasRotation() {
+		return this.hasRot;
+	}
+
 	public static class Pos extends ServerboundMovePlayerPacket {
 		public Pos(double d, double e, double f, boolean bl) {
 			super(d, e, f, 0.0F, 0.0F, bl, true, false);

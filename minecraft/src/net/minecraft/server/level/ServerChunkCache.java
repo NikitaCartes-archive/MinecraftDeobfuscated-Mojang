@@ -17,13 +17,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
@@ -58,10 +57,12 @@ public class ServerChunkCache extends ChunkSource {
 	private long lastInhabitedUpdate;
 	private boolean spawnEnemies = true;
 	private boolean spawnFriendlies = true;
+	private static final int CACHE_SIZE = 4;
 	private final long[] lastChunkPos = new long[4];
 	private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
 	private final ChunkAccess[] lastChunk = new ChunkAccess[4];
 	@Nullable
+	@VisibleForDebug
 	private NaturalSpawner.SpawnState lastSpawnState;
 
 	public ServerChunkCache(
@@ -211,7 +212,6 @@ public class ServerChunkCache extends ChunkSource {
 		Arrays.fill(this.lastChunk, null);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getChunkFuture(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		boolean bl2 = Thread.currentThread() == this.mainThread;
 		CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture;
@@ -339,6 +339,7 @@ public class ServerChunkCache extends ChunkSource {
 		this.chunkMap.close();
 	}
 
+	@Override
 	public void tick(BooleanSupplier booleanSupplier) {
 		this.level.getProfiler().push("purge");
 		this.distanceManager.purgeStaleTickets();
@@ -423,6 +424,7 @@ public class ServerChunkCache extends ChunkSource {
 		return this.generator;
 	}
 
+	@Override
 	public int getLoadedChunksCount() {
 		return this.chunkMap.size();
 	}
@@ -489,7 +491,6 @@ public class ServerChunkCache extends ChunkSource {
 		this.spawnFriendlies = bl2;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getChunkDebugData(ChunkPos chunkPos) {
 		return this.chunkMap.getChunkDebugData(chunkPos);
 	}
@@ -503,6 +504,7 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	@Nullable
+	@VisibleForDebug
 	public NaturalSpawner.SpawnState getLastSpawnState() {
 		return this.lastSpawnState;
 	}

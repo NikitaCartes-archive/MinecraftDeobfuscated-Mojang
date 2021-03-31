@@ -43,6 +43,10 @@ public class SetItemCountFunction extends LootItemConditionalFunction {
 		return simpleBuilder(lootItemConditions -> new SetItemCountFunction(lootItemConditions, numberProvider, false));
 	}
 
+	public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider numberProvider, boolean bl) {
+		return simpleBuilder(lootItemConditions -> new SetItemCountFunction(lootItemConditions, numberProvider, bl));
+	}
+
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetItemCountFunction> {
 		public void serialize(JsonObject jsonObject, SetItemCountFunction setItemCountFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setItemCountFunction, jsonSerializationContext);

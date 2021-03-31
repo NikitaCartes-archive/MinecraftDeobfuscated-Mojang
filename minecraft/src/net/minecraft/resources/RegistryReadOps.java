@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 
 public class RegistryReadOps<T> extends DelegatingOps<T> {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String JSON = ".json";
 	private final RegistryReadOps.ResourceAccess resources;
 	private final RegistryAccess registryAccess;
 	private final Map<ResourceKey<? extends Registry<?>>, RegistryReadOps.ReadCache<?>> readCache;

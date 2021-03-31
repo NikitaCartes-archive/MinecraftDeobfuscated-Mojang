@@ -16,6 +16,8 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
+	private static final long DISPLAY_TIME = 5000L;
+	private static final int MAX_LINE_SIZE = 200;
 	private final SystemToast.SystemToastIds id;
 	private Component title;
 	private List<FormattedCharSequence> messageLines;

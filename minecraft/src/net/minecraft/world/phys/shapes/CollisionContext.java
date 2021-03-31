@@ -19,6 +19,8 @@ public interface CollisionContext {
 
 	boolean isAbove(VoxelShape voxelShape, BlockPos blockPos, boolean bl);
 
+	boolean hasItemOnFeet(Item item);
+
 	boolean isHoldingItem(Item item);
 
 	boolean canStandOnFluid(FluidState fluidState, FlowingFluid flowingFluid);

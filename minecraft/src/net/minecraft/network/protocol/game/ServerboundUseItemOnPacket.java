@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
@@ -11,7 +9,6 @@ public class ServerboundUseItemOnPacket implements Packet<ServerGamePacketListen
 	private final BlockHitResult blockHit;
 	private final InteractionHand hand;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundUseItemOnPacket(InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		this.hand = interactionHand;
 		this.blockHit = blockHitResult;

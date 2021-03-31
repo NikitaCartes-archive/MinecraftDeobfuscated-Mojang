@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class NbtComponent extends BaseComponent implements ContextAwareComponent {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String SEPARATOR = ", ";
 	protected final boolean interpreting;
 	protected final String nbtPathPattern;
 	@Nullable

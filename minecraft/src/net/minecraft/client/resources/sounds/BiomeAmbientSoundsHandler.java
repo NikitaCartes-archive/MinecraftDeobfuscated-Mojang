@@ -20,6 +20,8 @@ import net.minecraft.world.level.biome.BiomeManager;
 
 @Environment(EnvType.CLIENT)
 public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
+	private static final int LOOP_SOUND_CROSS_FADE_TIME = 40;
+	private static final float SKY_MOOD_RECOVERY_RATE = 0.001F;
 	private final LocalPlayer player;
 	private final SoundManager soundManager;
 	private final BiomeManager biomeManager;

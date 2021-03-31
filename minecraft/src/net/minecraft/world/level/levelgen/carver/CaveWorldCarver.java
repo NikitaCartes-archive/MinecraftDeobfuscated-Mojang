@@ -11,20 +11,18 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
-public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
-	public CaveWorldCarver(Codec<CarverConfiguration> codec) {
+public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
+	public CaveWorldCarver(Codec<CaveCarverConfiguration> codec) {
 		super(codec);
 	}
 
-	@Override
-	public boolean isStartChunk(CarverConfiguration carverConfiguration, Random random) {
-		return random.nextFloat() <= carverConfiguration.probability;
+	public boolean isStartChunk(CaveCarverConfiguration caveCarverConfiguration, Random random) {
+		return random.nextFloat() <= caveCarverConfiguration.probability;
 	}
 
-	@Override
 	public boolean carve(
 		CarvingContext carvingContext,
-		CarverConfiguration carverConfiguration,
+		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		Random random,
@@ -37,17 +35,17 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 
 		for (int l = 0; l < k; l++) {
 			double d = (double)chunkPos.getBlockX(random.nextInt(16));
-			double e = (double)this.getCaveY(carvingContext, random);
+			double e = (double)caveCarverConfiguration.y.sample(random, carvingContext);
 			double f = (double)chunkPos.getBlockZ(random.nextInt(16));
-			double g = (double)Mth.randomBetween(random, 0.3F, 1.8F);
-			double h = (double)Mth.randomBetween(random, 0.3F, 1.8F);
-			double m = (double)Mth.randomBetween(random, -1.0F, 0.0F);
+			double g = (double)caveCarverConfiguration.horizontalRadiusMultiplier.sample(random);
+			double h = (double)caveCarverConfiguration.verticalRadiusMultiplier.sample(random);
+			double m = (double)caveCarverConfiguration.floorLevel.sample(random);
 			WorldCarver.CarveSkipChecker carveSkipChecker = (carvingContextx, ex, fx, gx, ix) -> shouldSkip(ex, fx, gx, m);
 			int n = 1;
 			if (random.nextInt(4) == 0) {
-				double o = (double)Mth.randomBetween(random, 0.1F, 0.9F);
+				double o = (double)caveCarverConfiguration.yScale.sample(random);
 				float p = 1.0F + random.nextFloat() * 6.0F;
-				this.createRoom(carvingContext, carverConfiguration, chunkAccess, function, random.nextLong(), i, d, e, f, p, o, bitSet, carveSkipChecker);
+				this.createRoom(carvingContext, caveCarverConfiguration, chunkAccess, function, random.nextLong(), i, d, e, f, p, o, bitSet, carveSkipChecker);
 				n += random.nextInt(4);
 			}
 
@@ -58,7 +56,25 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 				int t = j - random.nextInt(j / 4);
 				int u = 0;
 				this.createTunnel(
-					carvingContext, carverConfiguration, chunkAccess, function, random.nextLong(), i, d, e, f, g, h, s, r, p, 0, t, this.getYScale(), bitSet, carveSkipChecker
+					carvingContext,
+					caveCarverConfiguration,
+					chunkAccess,
+					function,
+					random.nextLong(),
+					i,
+					d,
+					e,
+					f,
+					g,
+					h,
+					s,
+					r,
+					p,
+					0,
+					t,
+					this.getYScale(),
+					bitSet,
+					carveSkipChecker
 				);
 			}
 		}
@@ -83,15 +99,9 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 		return 1.0;
 	}
 
-	protected int getCaveY(CarvingContext carvingContext, Random random) {
-		int i = carvingContext.getMinGenY() + 8;
-		int j = 126;
-		return i > 126 ? i : Mth.randomBetweenInclusive(random, i, 126);
-	}
-
 	protected void createRoom(
 		CarvingContext carvingContext,
-		CarverConfiguration carverConfiguration,
+		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		long l,
@@ -106,12 +116,12 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 	) {
 		double j = 1.5 + (double)(Mth.sin((float) (Math.PI / 2)) * g);
 		double k = j * h;
-		this.carveEllipsoid(carvingContext, carverConfiguration, chunkAccess, function, l, i, d + 1.0, e, f, j, k, bitSet, carveSkipChecker);
+		this.carveEllipsoid(carvingContext, caveCarverConfiguration, chunkAccess, function, l, i, d + 1.0, e, f, j, k, bitSet, carveSkipChecker);
 	}
 
 	protected void createTunnel(
 		CarvingContext carvingContext,
-		CarverConfiguration carverConfiguration,
+		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		long l,
@@ -153,7 +163,7 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 			if (t == q && j > 1.0F) {
 				this.createTunnel(
 					carvingContext,
-					carverConfiguration,
+					caveCarverConfiguration,
 					chunkAccess,
 					function,
 					random.nextLong(),
@@ -174,7 +184,7 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 				);
 				this.createTunnel(
 					carvingContext,
-					carverConfiguration,
+					caveCarverConfiguration,
 					chunkAccess,
 					function,
 					random.nextLong(),
@@ -201,7 +211,7 @@ public class CaveWorldCarver extends WorldCarver<CarverConfiguration> {
 					return;
 				}
 
-				this.carveEllipsoid(carvingContext, carverConfiguration, chunkAccess, function, l, i, d, e, f, u * g, v * h, bitSet, carveSkipChecker);
+				this.carveEllipsoid(carvingContext, caveCarverConfiguration, chunkAccess, function, l, i, d, e, f, u * g, v * h, bitSet, carveSkipChecker);
 			}
 		}
 	}

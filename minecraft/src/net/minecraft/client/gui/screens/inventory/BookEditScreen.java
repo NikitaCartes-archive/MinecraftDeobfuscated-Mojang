@@ -47,6 +47,11 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 @Environment(EnvType.CLIENT)
 public class BookEditScreen extends Screen {
+	private static final int TEXT_WIDTH = 114;
+	private static final int TEXT_HEIGHT = 128;
+	private static final int DOUBLECLICK_SPEED = 250;
+	private static final int IMAGE_WIDTH = 192;
+	private static final int IMAGE_HEIGHT = 192;
 	private static final Component EDIT_TITLE_LABEL = new TranslatableComponent("book.editTitle");
 	private static final Component FINALIZE_WARNING_LABEL = new TranslatableComponent("book.finalizeWarning");
 	private static final FormattedCharSequence BLACK_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.BLACK));

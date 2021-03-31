@@ -12,8 +12,6 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
@@ -117,12 +115,10 @@ public class FlatLevelGeneratorSettings {
 		this.layers = Lists.<BlockState>newArrayList();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public FlatLevelGeneratorSettings withStructureSettings(StructureSettings structureSettings) {
 		return this.withLayers(this.layersInfo, structureSettings);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public FlatLevelGeneratorSettings withLayers(List<FlatLayerInfo> list, StructureSettings structureSettings) {
 		FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings, this.biomes);
 
@@ -208,7 +204,6 @@ public class FlatLevelGeneratorSettings {
 		return (Biome)this.biome.get();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setBiome(Supplier<Biome> supplier) {
 		this.biome = supplier;
 	}

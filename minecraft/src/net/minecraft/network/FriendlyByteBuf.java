@@ -1,5 +1,6 @@
 package net.minecraft.network;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
@@ -34,8 +35,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -48,11 +47,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class FriendlyByteBuf extends ByteBuf {
+	private static final int MAX_VARINT_SIZE = 5;
+	private static final int MAX_VARLONG_SIZE = 10;
+	private static final int DEFAULT_NBT_QUOTA = 2097152;
 	private final ByteBuf source;
+	public static final short MAX_STRING_LENGTH = 32767;
+	public static final int MAX_COMPONENT_STRING_LENGTH = 262144;
 
 	public FriendlyByteBuf(ByteBuf byteBuf) {
 		this.source = byteBuf;
@@ -66,6 +71,16 @@ public class FriendlyByteBuf extends ByteBuf {
 		}
 
 		return 5;
+	}
+
+	public static int getVarLongSize(long l) {
+		for (int i = 1; i < 10; i++) {
+			if ((l & -1L << i * 7) == 0L) {
+				return i;
+			}
+		}
+
+		return 10;
 	}
 
 	public <T> T readWithCodec(Codec<T> codec) {
@@ -242,6 +257,14 @@ public class FriendlyByteBuf extends ByteBuf {
 		return ls;
 	}
 
+	@VisibleForTesting
+	public byte[] accessByteBufWithCorrectSize() {
+		int i = this.writerIndex();
+		byte[] bs = new byte[i];
+		this.getBytes(0, bs);
+		return bs;
+	}
+
 	public BlockPos readBlockPos() {
 		return BlockPos.of(this.readLong());
 	}
@@ -251,9 +274,22 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this;
 	}
 
-	@Environment(EnvType.CLIENT)
+	public ChunkPos readChunkPos() {
+		return new ChunkPos(this.readLong());
+	}
+
+	public FriendlyByteBuf writeChunkPos(ChunkPos chunkPos) {
+		this.writeLong(chunkPos.toLong());
+		return this;
+	}
+
 	public SectionPos readSectionPos() {
 		return SectionPos.of(this.readLong());
+	}
+
+	public FriendlyByteBuf writeSectionPos(SectionPos sectionPos) {
+		this.writeLong(sectionPos.asLong());
+		return this;
 	}
 
 	public Component readComponent() {

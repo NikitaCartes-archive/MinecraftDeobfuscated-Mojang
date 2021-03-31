@@ -4,22 +4,28 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.ai.behavior.WeightedList;
+import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WeightedStateProvider extends BlockStateProvider {
-	public static final Codec<WeightedStateProvider> CODEC = WeightedList.codec(BlockState.CODEC)
+	public static final Codec<WeightedStateProvider> CODEC = SimpleWeightedRandomList.wrappedCodec(BlockState.CODEC)
 		.<WeightedStateProvider>comapFlatMap(WeightedStateProvider::create, weightedStateProvider -> weightedStateProvider.weightedList)
 		.fieldOf("entries")
 		.codec();
-	private final WeightedList<BlockState> weightedList;
+	private final SimpleWeightedRandomList<BlockState> weightedList;
 
-	private static DataResult<WeightedStateProvider> create(WeightedList<BlockState> weightedList) {
-		return weightedList.isEmpty() ? DataResult.error("WeightedStateProvider with no states") : DataResult.success(new WeightedStateProvider(weightedList));
+	private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> simpleWeightedRandomList) {
+		return simpleWeightedRandomList.isEmpty()
+			? DataResult.error("WeightedStateProvider with no states")
+			: DataResult.success(new WeightedStateProvider(simpleWeightedRandomList));
 	}
 
-	private WeightedStateProvider(WeightedList<BlockState> weightedList) {
-		this.weightedList = weightedList;
+	public WeightedStateProvider(SimpleWeightedRandomList<BlockState> simpleWeightedRandomList) {
+		this.weightedList = simpleWeightedRandomList;
+	}
+
+	public WeightedStateProvider(SimpleWeightedRandomList.Builder<BlockState> builder) {
+		this(builder.build());
 	}
 
 	@Override
@@ -27,17 +33,8 @@ public class WeightedStateProvider extends BlockStateProvider {
 		return BlockStateProviderType.WEIGHTED_STATE_PROVIDER;
 	}
 
-	public WeightedStateProvider() {
-		this(new WeightedList<>());
-	}
-
-	public WeightedStateProvider add(BlockState blockState, int i) {
-		this.weightedList.add(blockState, i);
-		return this;
-	}
-
 	@Override
 	public BlockState getState(Random random, BlockPos blockPos) {
-		return this.weightedList.getOne(random);
+		return (BlockState)this.weightedList.getRandomValue(random).orElseThrow(IllegalStateException::new);
 	}
 }

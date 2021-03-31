@@ -2,10 +2,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -30,10 +26,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = ItemSupplier.class
-	)})
 public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ID_FIREWORKS_ITEM = SynchedEntityData.defineId(
 		FireworkRocketEntity.class, EntityDataSerializers.ITEM_STACK
@@ -92,13 +84,11 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		this.entityData.define(DATA_SHOT_AT_ANGLE, false);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		return d < 4096.0 && !this.isAttachedToEntity();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRender(double d, double e, double f) {
 		return super.shouldRender(d, e, f) && !this.isAttachedToEntity();
@@ -253,7 +243,6 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		return this.entityData.get(DATA_SHOT_AT_ANGLE);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 17 && this.level.isClientSide) {
@@ -301,7 +290,6 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getItem() {
 		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);

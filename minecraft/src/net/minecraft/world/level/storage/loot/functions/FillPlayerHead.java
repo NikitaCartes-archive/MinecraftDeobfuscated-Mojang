@@ -48,6 +48,10 @@ public class FillPlayerHead extends LootItemConditionalFunction {
 		return itemStack;
 	}
 
+	public static LootItemConditionalFunction.Builder<?> fillPlayerHead(LootContext.EntityTarget entityTarget) {
+		return simpleBuilder(lootItemConditions -> new FillPlayerHead(lootItemConditions, entityTarget));
+	}
+
 	public static class Serializer extends LootItemConditionalFunction.Serializer<FillPlayerHead> {
 		public void serialize(JsonObject jsonObject, FillPlayerHead fillPlayerHead, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, fillPlayerHead, jsonSerializationContext);

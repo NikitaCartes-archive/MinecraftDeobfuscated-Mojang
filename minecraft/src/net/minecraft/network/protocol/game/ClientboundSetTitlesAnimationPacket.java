@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -33,17 +31,14 @@ public class ClientboundSetTitlesAnimationPacket implements Packet<ClientGamePac
 		clientGamePacketListener.setTitlesAnimation(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFadeIn() {
 		return this.fadeIn;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getStay() {
 		return this.stay;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getFadeOut() {
 		return this.fadeOut;
 	}

@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,6 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BubbleColumnBlock extends Block implements BucketPickup {
 	public static final BooleanProperty DRAG_DOWN = BlockStateProperties.DRAG;
+	private static final int CHECK_PERIOD = 5;
 
 	public BubbleColumnBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -122,7 +121,6 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		double d = (double)blockPos.getX();

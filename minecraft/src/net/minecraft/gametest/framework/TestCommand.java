@@ -46,6 +46,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.io.IOUtils;
 
 public class TestCommand {
+	private static final int DEFAULT_CLEAR_RADIUS = 200;
+	private static final int MAX_CLEAR_RADIUS = 1024;
+	private static final int STRUCTURE_BLOCK_NEARBY_SEARCH_RADIUS = 15;
+	private static final int STRUCTURE_BLOCK_FULL_SEARCH_RADIUS = 200;
+	private static final int TEST_POS_Z_OFFSET_FROM_PLAYER = 3;
+	private static final int SHOW_POS_DURATION_MS = 10000;
+	private static final int DEFAULT_X_SIZE = 5;
+	private static final int DEFAULT_Y_SIZE = 5;
+	private static final int DEFAULT_Z_SIZE = 5;
+
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("test")

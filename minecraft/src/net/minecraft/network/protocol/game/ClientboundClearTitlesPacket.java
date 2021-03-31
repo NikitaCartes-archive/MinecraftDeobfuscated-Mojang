@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -25,7 +23,6 @@ public class ClientboundClearTitlesPacket implements Packet<ClientGamePacketList
 		clientGamePacketListener.handleTitlesClear(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean shouldResetTimes() {
 		return this.resetTimes;
 	}

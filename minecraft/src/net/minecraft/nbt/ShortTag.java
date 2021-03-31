@@ -5,6 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class ShortTag extends NumericTag {
+	private static final int SELF_SIZE_IN_BITS = 80;
 	public static final TagType<ShortTag> TYPE = new TagType<ShortTag>() {
 		public ShortTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(80L);
@@ -104,7 +105,12 @@ public class ShortTag extends NumericTag {
 	}
 
 	static class Cache {
+		private static final int HIGH = 1024;
+		private static final int LOW = -128;
 		static final ShortTag[] cache = new ShortTag[1153];
+
+		private Cache() {
+		}
 
 		static {
 			for (int i = 0; i < cache.length; i++) {

@@ -2,8 +2,6 @@ package net.minecraft.world.entity.boss.enderdragon;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -140,13 +138,11 @@ public class EndCrystal extends Entity {
 		return this.getEntityData().get(DATA_SHOW_BOTTOM);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		return super.shouldRenderAtSqrDistance(d) || this.getBeamTarget() != null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getPickResult() {
 		return new ItemStack(Items.END_CRYSTAL);

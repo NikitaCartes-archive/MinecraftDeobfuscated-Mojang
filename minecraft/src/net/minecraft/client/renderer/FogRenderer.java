@@ -21,6 +21,8 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class FogRenderer {
+	private static final int WATER_FOG_DISTANCE = 192;
+	public static final float BIOME_FOG_TRANSITION_TIME = 5000.0F;
 	private static float fogRed;
 	private static float fogGreen;
 	private static float fogBlue;
@@ -154,25 +156,23 @@ public class FogRenderer {
 			fogBlue = fogBlue * (1.0F - g) + fogBlue * 0.6F * g;
 		}
 
+		float vx;
 		if (fogType == FogType.WATER) {
-			float vx = 0.0F;
 			if (entity instanceof LocalPlayer) {
-				LocalPlayer localPlayer = (LocalPlayer)entity;
-				vx = localPlayer.getWaterVision();
+				vx = ((LocalPlayer)entity).getWaterVision();
+			} else {
+				vx = 1.0F;
 			}
-
-			float wx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
-			fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
-			fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
-			fogBlue = fogBlue * (1.0F - vx) + fogBlue * wx * vx;
 		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION)) {
-			float vx = GameRenderer.getNightVisionScale((LivingEntity)entity, f);
-			float wx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
-			fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
-			fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
-			fogBlue = fogBlue * (1.0F - vx) + fogBlue * wx * vx;
+			vx = GameRenderer.getNightVisionScale((LivingEntity)entity, f);
+		} else {
+			vx = 0.0F;
 		}
 
+		float wx = Math.min(1.0F / fogRed, Math.min(1.0F / fogGreen, 1.0F / fogBlue));
+		fogRed = fogRed * (1.0F - vx) + fogRed * wx * vx;
+		fogGreen = fogGreen * (1.0F - vx) + fogGreen * wx * vx;
+		fogBlue = fogBlue * (1.0F - vx) + fogBlue * wx * vx;
 		RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0F);
 	}
 
@@ -184,10 +184,10 @@ public class FogRenderer {
 		FogType fogType = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
 		if (fogType == FogType.WATER) {
-			float g = f;
-			LocalPlayer localPlayer = (LocalPlayer)entity;
+			float g = 192.0F;
 			if (entity instanceof LocalPlayer) {
-				g = f * Math.max(0.25F, localPlayer.getWaterVision());
+				LocalPlayer localPlayer = (LocalPlayer)entity;
+				g *= Math.max(0.25F, localPlayer.getWaterVision());
 				Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
 				if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
 					g *= 0.85F;

@@ -5,7 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
@@ -32,6 +34,22 @@ public class ListPoolElement extends StructurePoolElement {
 	}
 
 	@Override
+	public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
+		int i = 0;
+		int j = 0;
+		int k = 0;
+
+		for (StructurePoolElement structurePoolElement : this.elements) {
+			Vec3i vec3i = structurePoolElement.getSize(structureManager, rotation);
+			i = Math.max(i, vec3i.getX());
+			j = Math.max(j, vec3i.getY());
+			k = Math.max(k, vec3i.getZ());
+		}
+
+		return new Vec3i(i, j, k);
+	}
+
+	@Override
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
 		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
 	) {
@@ -40,14 +58,12 @@ public class ListPoolElement extends StructurePoolElement {
 
 	@Override
 	public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-		BoundingBox boundingBox = BoundingBox.getUnknownBox();
-
-		for (StructurePoolElement structurePoolElement : this.elements) {
-			BoundingBox boundingBox2 = structurePoolElement.getBoundingBox(structureManager, blockPos, rotation);
-			boundingBox.expand(boundingBox2);
-		}
-
-		return boundingBox;
+		Stream<BoundingBox> stream = this.elements
+			.stream()
+			.filter(structurePoolElement -> structurePoolElement != EmptyPoolElement.INSTANCE)
+			.map(structurePoolElement -> structurePoolElement.getBoundingBox(structureManager, blockPos, rotation));
+		return (BoundingBox)BoundingBox.encapsulatingBoxes(stream::iterator)
+			.orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox for ListPoolElement"));
 	}
 
 	@Override

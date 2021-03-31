@@ -4,6 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
+	private static final int MAX_MESSAGE_LENGTH = 256;
 	private final String message;
 
 	public ServerboundChatPacket(String string) {

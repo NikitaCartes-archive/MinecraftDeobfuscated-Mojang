@@ -3,8 +3,6 @@ package net.minecraft.world.entity.boss.enderdragon;
 import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -56,6 +54,9 @@ public class EnderDragon extends Mob implements Enemy {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final EntityDataAccessor<Integer> DATA_PHASE = SynchedEntityData.defineId(EnderDragon.class, EntityDataSerializers.INT);
 	private static final TargetingConditions CRYSTAL_DESTROY_TARGETING = new TargetingConditions().range(64.0);
+	private static final int GROWL_INTERVAL_MIN = 200;
+	private static final int GROWL_INTERVAL_MAX = 400;
+	private static final float SITTING_ALLOWED_DAMAGE_PERCENTAGE = 0.25F;
 	public final double[][] positions = new double[64][3];
 	public int posPointer = -1;
 	private final EnderDragonPart[] subEntities;
@@ -765,7 +766,6 @@ public class EnderDragon extends Mob implements Enemy {
 		return 5.0F;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getHeadPartYOffset(int i, double[] ds, double[] es) {
 		DragonPhaseInstance dragonPhaseInstance = this.phaseManager.getCurrentPhase();
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
@@ -859,7 +859,6 @@ public class EnderDragon extends Mob implements Enemy {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
 		super.recreateFromPacket(clientboundAddMobPacket);

@@ -3,8 +3,6 @@ package net.minecraft.world.inventory;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -74,7 +72,6 @@ public class Slot {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
 		return null;
 	}
@@ -87,7 +84,6 @@ public class Slot {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isActive() {
 		return true;
 	}
@@ -98,10 +94,6 @@ public class Slot {
 		} else if (!this.allowModification(player) && j < this.getItem().getCount()) {
 			return Optional.empty();
 		} else {
-			if (!this.allowModification(player)) {
-				i = this.getItem().getCount();
-			}
-
 			i = Math.min(i, j);
 			ItemStack itemStack = this.remove(i);
 			if (this.getItem().isEmpty()) {

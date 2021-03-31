@@ -20,6 +20,8 @@ public class LocateBiomeCommand {
 	private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("commands.locatebiome.notFound", object)
 	);
+	private static final int MAX_SEARCH_RADIUS = 6400;
+	private static final int SEARCH_STEP = 8;
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(

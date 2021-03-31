@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -71,6 +69,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, PlayerRideableJumping, Saddleable {
+	public static final int EQUIPMENT_SLOT_OFFSET = 400;
+	public static final int CHEST_SLOT_OFFSET = 499;
+	public static final int INVENTORY_SLOT_OFFSET = 500;
 	private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse
 			&& ((AbstractHorse)livingEntity).isBred();
 	private static final TargetingConditions MOMMY_TARGETING = new TargetingConditions()
@@ -86,6 +87,15 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	private static final EntityDataAccessor<Optional<UUID>> DATA_ID_OWNER_UUID = SynchedEntityData.defineId(
 		AbstractHorse.class, EntityDataSerializers.OPTIONAL_UUID
 	);
+	private static final int FLAG_TAME = 2;
+	private static final int FLAG_SADDLE = 4;
+	private static final int FLAG_BRED = 8;
+	private static final int FLAG_EATING = 16;
+	private static final int FLAG_STANDING = 32;
+	private static final int FLAG_OPEN_MOUTH = 64;
+	public static final int INV_SLOT_SADDLE = 0;
+	public static final int INV_SLOT_ARMOR = 1;
+	public static final int INV_BASE_COUNT = 2;
 	private int eatingCounter;
 	private int mouthCounter;
 	private int standCounter;
@@ -832,22 +842,18 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		return this.getControllingPassenger() instanceof LivingEntity;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getEatAnim(float f) {
 		return Mth.lerp(f, this.eatAnimO, this.eatAnim);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getStandAnim(float f) {
 		return Mth.lerp(f, this.standAnimO, this.standAnim);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getMouthAnim(float f) {
 		return Mth.lerp(f, this.mouthAnimO, this.mouthAnim);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void onPlayerJump(int i) {
 		if (this.isSaddled()) {
@@ -882,7 +888,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public void handleStopJump() {
 	}
 
-	@Environment(EnvType.CLIENT)
 	protected void spawnTamingParticles(boolean bl) {
 		ParticleOptions particleOptions = bl ? ParticleTypes.HEART : ParticleTypes.SMOKE;
 
@@ -894,7 +899,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 7) {

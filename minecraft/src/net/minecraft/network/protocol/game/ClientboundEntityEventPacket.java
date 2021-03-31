@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -33,12 +31,10 @@ public class ClientboundEntityEventPacket implements Packet<ClientGamePacketList
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public Entity getEntity(Level level) {
 		return level.getEntity(this.entityId);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public byte getEventId() {
 		return this.eventId;
 	}

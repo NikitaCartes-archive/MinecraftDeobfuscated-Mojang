@@ -5,6 +5,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 
 @Environment(EnvType.CLIENT)
 public abstract class Option {
+	protected static final int OPTIONS_TOOLTIP_WIDTH = 200;
 	public static final ProgressOption BIOME_BLEND_RADIUS = new ProgressOption(
 		"options.biomeBlendRadius", 0.0, 7.0, 1.0F, options -> (double)options.biomeBlendRadius, (options, double_) -> {
 			options.biomeBlendRadius = Mth.clamp((int)double_.doubleValue(), 0, 7);
@@ -305,9 +307,11 @@ public abstract class Option {
 		});
 	public static final CycleOption GUI_SCALE = CycleOption.create(
 		"options.guiScale",
-		() -> (List)IntStream.rangeClosed(0, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()))
+		(Supplier<List<Integer>>)(() -> (List)IntStream.rangeClosed(
+					0, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode())
+				)
 				.boxed()
-				.collect(Collectors.toList()),
+				.collect(Collectors.toList())),
 		integer -> (Component)(integer == 0 ? new TranslatableComponent("options.guiScale.auto") : new TextComponent(Integer.toString(integer))),
 		options -> options.guiScale,
 		(options, option, integer) -> options.guiScale = integer
@@ -445,6 +449,13 @@ public abstract class Option {
 	);
 	public static final CycleOption<Boolean> VIEW_BOBBING = CycleOption.createOnOff(
 		"options.viewBobbing", options -> options.bobView, (options, option, boolean_) -> options.bobView = boolean_
+	);
+	private static final Component ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND = new TranslatableComponent("options.darkMojangStudiosBackgroundColor.tooltip");
+	public static final CycleOption<Boolean> DARK_MOJANG_STUDIOS_BACKGROUND_COLOR = CycleOption.createOnOff(
+		"options.darkMojangStudiosBackgroundColor",
+		ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND,
+		options -> options.darkMojangStudiosBackground,
+		(options, option, boolean_) -> options.darkMojangStudiosBackground = boolean_
 	);
 	private final Component caption;
 

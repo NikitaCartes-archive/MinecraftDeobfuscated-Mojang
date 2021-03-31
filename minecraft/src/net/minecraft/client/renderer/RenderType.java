@@ -19,6 +19,12 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderType extends RenderStateShard {
+	private static final int BYTES_IN_INT = 4;
+	private static final int MEGABYTE = 1048576;
+	public static final int BIG_BUFFER_SIZE = 2097152;
+	public static final int MEDIUM_BUFFER_SIZE = 262144;
+	public static final int SMALL_BUFFER_SIZE = 131072;
+	public static final int TRANSIENT_BUFFER_SIZE = 256;
 	private static final RenderType SOLID = create(
 		"solid",
 		DefaultVertexFormat.BLOCK,
@@ -886,6 +892,10 @@ public abstract class RenderType extends RenderStateShard {
 		@Override
 		public boolean isOutline() {
 			return this.isOutline;
+		}
+
+		protected final RenderType.CompositeState state() {
+			return this.state;
 		}
 
 		@Override

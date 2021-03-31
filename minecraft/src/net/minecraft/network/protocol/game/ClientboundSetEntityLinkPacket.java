@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -31,12 +29,10 @@ public class ClientboundSetEntityLinkPacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleEntityLinkPacket(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getSourceId() {
 		return this.sourceId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getDestId() {
 		return this.destId;
 	}

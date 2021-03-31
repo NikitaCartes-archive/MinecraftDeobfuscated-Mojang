@@ -30,6 +30,38 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final boolean SHOW_NAME_FOR_ALL = true;
+	private static final boolean SHOW_PROFESSION_FOR_ALL = false;
+	private static final boolean SHOW_BEHAVIORS_FOR_ALL = false;
+	private static final boolean SHOW_ACTIVITIES_FOR_ALL = false;
+	private static final boolean SHOW_INVENTORY_FOR_ALL = false;
+	private static final boolean SHOW_GOSSIPS_FOR_ALL = false;
+	private static final boolean SHOW_PATH_FOR_ALL = false;
+	private static final boolean SHOW_HEALTH_FOR_ALL = false;
+	private static final boolean SHOW_WANTS_GOLEM_FOR_ALL = true;
+	private static final boolean SHOW_NAME_FOR_SELECTED = true;
+	private static final boolean SHOW_PROFESSION_FOR_SELECTED = true;
+	private static final boolean SHOW_BEHAVIORS_FOR_SELECTED = true;
+	private static final boolean SHOW_ACTIVITIES_FOR_SELECTED = true;
+	private static final boolean SHOW_MEMORIES_FOR_SELECTED = true;
+	private static final boolean SHOW_INVENTORY_FOR_SELECTED = true;
+	private static final boolean SHOW_GOSSIPS_FOR_SELECTED = true;
+	private static final boolean SHOW_PATH_FOR_SELECTED = true;
+	private static final boolean SHOW_HEALTH_FOR_SELECTED = true;
+	private static final boolean SHOW_WANTS_GOLEM_FOR_SELECTED = true;
+	private static final boolean SHOW_POI_INFO = true;
+	private static final int MAX_RENDER_DIST_FOR_BRAIN_INFO = 30;
+	private static final int MAX_RENDER_DIST_FOR_POI_INFO = 30;
+	private static final int MAX_TARGETING_DIST = 8;
+	private static final float TEXT_SCALE = 0.02F;
+	private static final int WHITE = -1;
+	private static final int YELLOW = -256;
+	private static final int CYAN = -16711681;
+	private static final int GREEN = -16711936;
+	private static final int GRAY = -3355444;
+	private static final int PINK = -98404;
+	private static final int RED = -65536;
+	private static final int ORANGE = -23296;
 	private final Minecraft minecraft;
 	private final Map<BlockPos, BrainDebugRenderer.PoiInfo> pois = Maps.<BlockPos, BrainDebugRenderer.PoiInfo>newHashMap();
 	private final Map<UUID, BrainDebugRenderer.BrainDump> brainDumpsPerEntity = Maps.<UUID, BrainDebugRenderer.BrainDump>newHashMap();
@@ -66,6 +98,10 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	public void addOrUpdateBrainDump(BrainDebugRenderer.BrainDump brainDump) {
 		this.brainDumpsPerEntity.put(brainDump.uuid, brainDump);
+	}
+
+	public void removeBrainDump(int i) {
+		this.brainDumpsPerEntity.values().removeIf(brainDump -> brainDump.id == i);
 	}
 
 	@Override

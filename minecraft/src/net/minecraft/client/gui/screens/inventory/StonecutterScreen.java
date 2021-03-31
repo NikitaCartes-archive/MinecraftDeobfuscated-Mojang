@@ -19,6 +19,15 @@ import net.minecraft.world.item.crafting.StonecutterRecipe;
 @Environment(EnvType.CLIENT)
 public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> {
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/stonecutter.png");
+	private static final int SCROLLER_WIDTH = 12;
+	private static final int SCROLLER_HEIGHT = 15;
+	private static final int RECIPES_COLUMNS = 4;
+	private static final int RECIPES_ROWS = 3;
+	private static final int RECIPES_IMAGE_SIZE_WIDTH = 16;
+	private static final int RECIPES_IMAGE_SIZE_HEIGHT = 18;
+	private static final int SCROLLER_FULL_HEIGHT = 54;
+	private static final int RECIPES_X = 52;
+	private static final int RECIPES_Y = 14;
 	private float scrollOffs;
 	private boolean scrolling;
 	private int startIndex;

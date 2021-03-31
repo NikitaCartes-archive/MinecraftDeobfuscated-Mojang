@@ -28,8 +28,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
@@ -302,7 +300,6 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 				}
 			}
 
-			@Environment(EnvType.CLIENT)
 			@Override
 			public ResourceLocation getLocation() {
 				return resourceLocation;
@@ -319,8 +316,12 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 				return this.inputStream;
 			}
 
+			@Override
+			public boolean hasMetadata() {
+				return false;
+			}
+
 			@Nullable
-			@Environment(EnvType.CLIENT)
 			@Override
 			public <T> T getMetadata(MetadataSectionSerializer<T> metadataSectionSerializer) {
 				return null;

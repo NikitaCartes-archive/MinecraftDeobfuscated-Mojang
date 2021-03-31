@@ -13,6 +13,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public class StrollThroughVillageGoal extends Goal {
+	private static final int DISTANCE_THRESHOLD = 10;
 	private final PathfinderMob mob;
 	private final int interval;
 	@Nullable

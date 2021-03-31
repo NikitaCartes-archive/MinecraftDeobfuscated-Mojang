@@ -3,8 +3,6 @@ package net.minecraft.network.chat;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;
 
 public interface FormattedText {
@@ -15,7 +13,6 @@ public interface FormattedText {
 			return Optional.empty();
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 			return Optional.empty();
@@ -24,7 +21,6 @@ public interface FormattedText {
 
 	<T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer);
 
-	@Environment(EnvType.CLIENT)
 	<T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style);
 
 	static FormattedText of(String string) {
@@ -34,7 +30,6 @@ public interface FormattedText {
 				return contentConsumer.accept(string);
 			}
 
-			@Environment(EnvType.CLIENT)
 			@Override
 			public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 				return styledContentConsumer.accept(style, string);
@@ -42,7 +37,6 @@ public interface FormattedText {
 		};
 	}
 
-	@Environment(EnvType.CLIENT)
 	static FormattedText of(String string, Style style) {
 		return new FormattedText() {
 			@Override
@@ -57,12 +51,10 @@ public interface FormattedText {
 		};
 	}
 
-	@Environment(EnvType.CLIENT)
 	static FormattedText composite(FormattedText... formattedTexts) {
 		return composite(ImmutableList.copyOf(formattedTexts));
 	}
 
-	@Environment(EnvType.CLIENT)
 	static FormattedText composite(List<FormattedText> list) {
 		return new FormattedText() {
 			@Override
@@ -104,7 +96,6 @@ public interface FormattedText {
 		Optional<T> accept(String string);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public interface StyledContentConsumer<T> {
 		Optional<T> accept(Style style, String string);
 	}

@@ -7,6 +7,7 @@ import com.mojang.serialization.Dynamic;
 import java.util.Random;
 
 public class EntityZombieVillagerTypeFix extends NamedEntityFix {
+	private static final int PROFESSION_MAX = 6;
 	private static final Random RANDOM = new Random();
 
 	public EntityZombieVillagerTypeFix(Schema schema, boolean bl) {

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.tuple.Triple;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
+	private static final float VIEW_SCALE_Z_EPSILON = 0.99975586F;
 	protected final String name;
 	private final Runnable setupState;
 	private final Runnable clearState;

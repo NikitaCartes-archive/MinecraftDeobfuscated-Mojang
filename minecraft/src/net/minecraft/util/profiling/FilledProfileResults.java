@@ -206,6 +206,13 @@ public class FilledProfileResults implements ProfileResults {
 		return stringBuilder.toString();
 	}
 
+	@Override
+	public String getProfilerResults() {
+		StringBuilder stringBuilder = new StringBuilder();
+		this.appendProfilerResults(0, "root", stringBuilder);
+		return stringBuilder.toString();
+	}
+
 	private static StringBuilder indentLine(StringBuilder stringBuilder, int i) {
 		stringBuilder.append(String.format("[%02d] ", i));
 

@@ -32,6 +32,9 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class MetricsPersister {
 	public static final Path PROFILING_RESULTS_DIR = Paths.get("debug/profiling");
+	public static final String METRICS_DIR_NAME = "metrics";
+	public static final String DEVIATIONS_DIR_NAME = "deviations";
+	public static final String PROFILING_RESULT_FILENAME = "profiling.txt";
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = (FileSystemProvider)FileSystemProvider.installedProviders()
 		.stream()

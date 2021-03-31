@@ -56,6 +56,15 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 	@Environment(EnvType.CLIENT)
 	public static class PackEntry extends ObjectSelectionList.Entry<TransferableSelectionList.PackEntry> {
+		private static final int ICON_OVERLAY_X_MOVE_RIGHT = 0;
+		private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
+		private static final int ICON_OVERLAY_X_MOVE_DOWN = 64;
+		private static final int ICON_OVERLAY_X_MOVE_UP = 96;
+		private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
+		private static final int ICON_OVERLAY_Y_SELECTED = 32;
+		private static final int MAX_DESCRIPTION_WIDTH_PIXELS = 157;
+		private static final int MAX_NAME_WIDTH_PIXELS = 157;
+		private static final String TOO_LONG_NAME_SUFFIX = "...";
 		private final TransferableSelectionList parent;
 		protected final Minecraft minecraft;
 		protected final Screen screen;

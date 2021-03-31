@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class TemptingSensor extends Sensor<PathfinderMob> {
+	public static final int TEMPTATION_RANGE = 10;
 	private static final TargetingConditions TEMPT_TARGETING = new TargetingConditions()
 		.range(10.0)
 		.allowInvulnerable()

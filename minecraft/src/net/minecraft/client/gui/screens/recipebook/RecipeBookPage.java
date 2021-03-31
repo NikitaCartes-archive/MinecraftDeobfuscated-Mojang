@@ -13,6 +13,7 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookPage {
+	public static final int ITEMS_PER_PAGE = 20;
 	private final List<RecipeButton> buttons = Lists.<RecipeButton>newArrayListWithCapacity(20);
 	private RecipeButton hoveredButton;
 	private final OverlayRecipeComponent overlay = new OverlayRecipeComponent();

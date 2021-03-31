@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.item;
 
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -77,7 +75,6 @@ public class FallingBlockEntity extends Entity {
 		this.entityData.set(DATA_START_POS, blockPos);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos getStartPos() {
 		return this.entityData.get(DATA_START_POS);
 	}
@@ -274,7 +271,6 @@ public class FallingBlockEntity extends Entity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Level getLevel() {
 		return this.level;
 	}
@@ -285,7 +281,6 @@ public class FallingBlockEntity extends Entity {
 		this.fallDamageMax = i;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean displayFireAnimation() {
 		return false;
@@ -311,7 +306,6 @@ public class FallingBlockEntity extends Entity {
 		return new ClientboundAddEntityPacket(this, Block.getId(this.getBlockState()));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);

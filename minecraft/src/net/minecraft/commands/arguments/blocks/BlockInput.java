@@ -29,6 +29,10 @@ public class BlockInput implements Predicate<BlockInWorld> {
 		return this.state;
 	}
 
+	public Set<Property<?>> getDefinedProperties() {
+		return this.properties;
+	}
+
 	public boolean test(BlockInWorld blockInWorld) {
 		BlockState blockState = blockInWorld.getState();
 		if (!blockState.is(this.state.getBlock())) {
@@ -47,6 +51,10 @@ public class BlockInput implements Predicate<BlockInWorld> {
 				return blockEntity != null && NbtUtils.compareNbt(this.tag, blockEntity.save(new CompoundTag()), true);
 			}
 		}
+	}
+
+	public boolean test(ServerLevel serverLevel, BlockPos blockPos) {
+		return this.test(new BlockInWorld(serverLevel, blockPos, false));
 	}
 
 	public boolean place(ServerLevel serverLevel, BlockPos blockPos, int i) {

@@ -43,4 +43,21 @@ public class LightPredicate {
 			return ANY;
 		}
 	}
+
+	public static class Builder {
+		private MinMaxBounds.Ints composite = MinMaxBounds.Ints.ANY;
+
+		public static LightPredicate.Builder light() {
+			return new LightPredicate.Builder();
+		}
+
+		public LightPredicate.Builder setComposite(MinMaxBounds.Ints ints) {
+			this.composite = ints;
+			return this;
+		}
+
+		public LightPredicate build() {
+			return new LightPredicate(this.composite);
+		}
+	}
 }

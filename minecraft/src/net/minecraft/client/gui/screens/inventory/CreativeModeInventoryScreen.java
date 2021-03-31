@@ -52,8 +52,17 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 @Environment(EnvType.CLIENT)
 public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
 	private static final ResourceLocation CREATIVE_TABS_LOCATION = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+	private static final String GUI_CREATIVE_TAB_PREFIX = "textures/gui/container/creative_inventory/tab_";
+	private static final String CUSTOM_SLOT_LOCK = "CustomCreativeLock";
+	private static final int NUM_ROWS = 5;
+	private static final int NUM_COLS = 9;
+	private static final int TAB_WIDTH = 28;
+	private static final int TAB_HEIGHT = 32;
+	private static final int SCROLLER_WIDTH = 12;
+	private static final int SCROLLER_HEIGHT = 15;
 	private static final SimpleContainer CONTAINER = new SimpleContainer(45);
 	private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
+	private static final int TEXT_COLOR = 16777215;
 	private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
 	private float scrollOffs;
 	private boolean scrolling;

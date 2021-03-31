@@ -2,8 +2,6 @@ package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.Block;
@@ -12,6 +10,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
 public class LevelChunkSection {
+	public static final int SECTION_WIDTH = 16;
+	public static final int SECTION_HEIGHT = 16;
+	public static final int SECTION_SIZE = 4096;
 	private static final Palette<BlockState> GLOBAL_BLOCKSTATE_PALETTE = new GlobalPalette<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState());
 	private final int bottomBlockY;
 	private short nonEmptyBlockCount;
@@ -142,7 +143,6 @@ public class LevelChunkSection {
 		return this.states;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void read(FriendlyByteBuf friendlyByteBuf) {
 		this.nonEmptyBlockCount = friendlyByteBuf.readShort();
 		this.states.read(friendlyByteBuf);

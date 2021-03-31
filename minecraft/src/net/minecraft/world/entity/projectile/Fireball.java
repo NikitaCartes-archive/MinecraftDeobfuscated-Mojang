@@ -1,9 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,10 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = ItemSupplier.class
-	)})
 public abstract class Fireball extends AbstractHurtingProjectile implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(Fireball.class, EntityDataSerializers.ITEM_STACK);
 
@@ -44,7 +36,6 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 		return this.getEntityData().get(DATA_ITEM_STACK);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getItem() {
 		ItemStack itemStack = this.getItemRaw();

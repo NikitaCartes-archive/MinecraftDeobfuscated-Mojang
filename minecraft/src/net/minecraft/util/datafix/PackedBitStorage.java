@@ -4,6 +4,7 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
 
 public class PackedBitStorage {
+	private static final int BIT_TO_LONG_SHIFT = 6;
 	private final long[] data;
 	private final int bits;
 	private final long mask;

@@ -1,11 +1,8 @@
 package net.minecraft.world.entity.player;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
-@Environment(EnvType.CLIENT)
 public enum PlayerModelPart {
 	CAPE(0, "cape"),
 	JACKET(1, "jacket"),
@@ -29,6 +26,10 @@ public enum PlayerModelPart {
 
 	public int getMask() {
 		return this.mask;
+	}
+
+	public int getBit() {
+		return this.bit;
 	}
 
 	public String getId() {

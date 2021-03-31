@@ -1,5 +1,6 @@
 package net.minecraft.client.resources.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -7,11 +8,17 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class ModelResourceLocation extends ResourceLocation {
+	@VisibleForTesting
+	static final char VARIANT_SEPARATOR = '#';
 	private final String variant;
 
 	protected ModelResourceLocation(String[] strings) {
 		super(strings);
 		this.variant = strings[2].toLowerCase(Locale.ROOT);
+	}
+
+	public ModelResourceLocation(String string, String string2, String string3) {
+		this(new String[]{string, string2, string3});
 	}
 
 	public ModelResourceLocation(String string) {

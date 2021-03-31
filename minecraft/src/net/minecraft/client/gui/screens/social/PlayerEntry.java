@@ -27,6 +27,8 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry> {
+	private static final int TOOLTIP_DELAY = 10;
+	private static final int TOOLTIP_MAX_WIDTH = 150;
 	private final Minecraft minecraft;
 	private final List<GuiEventListener> children;
 	private final UUID id;
@@ -45,6 +47,11 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private static final Component OFFLINE = new TranslatableComponent("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
 	private static final Component HIDDEN_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
 	private static final Component BLOCKED_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
+	private static final int SKIN_SIZE = 24;
+	private static final int PADDING = 4;
+	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
+	private static final int CHAT_TOGGLE_ICON_X = 0;
+	private static final int CHAT_TOGGLE_ICON_Y = 38;
 	public static final int SKIN_SHADE = FastColor.ARGB32.color(190, 0, 0, 0);
 	public static final int BG_FILL = FastColor.ARGB32.color(255, 74, 74, 74);
 	public static final int BG_FILL_REMOVED = FastColor.ARGB32.color(255, 48, 48, 48);

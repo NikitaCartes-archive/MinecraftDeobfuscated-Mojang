@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.npc;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +33,6 @@ public class ClientSideMerchant implements Merchant {
 		return this.offers;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void overrideOffers(MerchantOffers merchantOffers) {
 		this.offers = merchantOffers;

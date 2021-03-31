@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -42,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 public class Brain<E extends LivingEntity> {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Supplier<Codec<Brain<E>>> codec;
+	private static final int SCHEDULE_UPDATE_DELAY = 20;
 	private final Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> memories = Maps.<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>>newHashMap();
 	private final Map<SensorType<? extends Sensor<? super E>>, Sensor<? super E>> sensors = Maps.<SensorType<? extends Sensor<? super E>>, Sensor<? super E>>newLinkedHashMap();
 	private final Map<Integer, Map<Activity, Set<Behavior<? super E>>>> availableBehaviorsByPriority = Maps.newTreeMap();
@@ -181,6 +184,12 @@ public class Brain<E extends LivingEntity> {
 		return ((Optional)this.memories.get(memoryModuleType)).map(ExpirableValue::getValue);
 	}
 
+	@Deprecated
+	@VisibleForDebug
+	public Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories() {
+		return this.memories;
+	}
+
 	public <U> boolean isMemoryValue(MemoryModuleType<U> memoryModuleType, U object) {
 		return !this.hasMemoryValue(memoryModuleType) ? false : this.getMemory(memoryModuleType).filter(object2 -> object2.equals(object)).isPresent();
 	}
@@ -207,6 +216,13 @@ public class Brain<E extends LivingEntity> {
 	}
 
 	@Deprecated
+	@VisibleForDebug
+	public Set<Activity> getActiveActivities() {
+		return this.activeActivities;
+	}
+
+	@Deprecated
+	@VisibleForDebug
 	public List<Behavior<? super E>> getRunningBehaviors() {
 		List<Behavior<? super E>> list = new ObjectArrayList<>();
 
@@ -328,6 +344,11 @@ public class Brain<E extends LivingEntity> {
 					.computeIfAbsent(activity, activityx -> Sets.newLinkedHashSet()))
 				.add(pair.getSecond());
 		}
+	}
+
+	@VisibleForTesting
+	public void removeAllBehaviors() {
+		this.availableBehaviorsByPriority.clear();
 	}
 
 	public boolean isActive(Activity activity) {

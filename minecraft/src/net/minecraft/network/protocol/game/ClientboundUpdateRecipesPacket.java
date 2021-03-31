@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -32,7 +30,6 @@ public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleUpdateRecipes(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<Recipe<?>> getRecipes() {
 		return this.recipes;
 	}

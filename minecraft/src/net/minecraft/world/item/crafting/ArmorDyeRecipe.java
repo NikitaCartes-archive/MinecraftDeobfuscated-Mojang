@@ -2,8 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -70,7 +68,6 @@ public class ArmorDyeRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && !list.isEmpty() ? DyeableLeatherItem.dyeArmor(itemStack, list) : ItemStack.EMPTY;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean canCraftInDimensions(int i, int j) {
 		return i * j >= 2;

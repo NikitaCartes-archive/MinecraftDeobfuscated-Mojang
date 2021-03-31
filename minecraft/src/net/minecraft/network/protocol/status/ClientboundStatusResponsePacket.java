@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.status;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -39,7 +37,6 @@ public class ClientboundStatusResponsePacket implements Packet<ClientStatusPacke
 		clientStatusPacketListener.handleStatusResponse(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ServerStatus getStatus() {
 		return this.status;
 	}

@@ -1,8 +1,6 @@
 package net.minecraft.world.level.chunk;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
@@ -32,7 +30,6 @@ public class ChunkBiomeContainer implements BiomeManager.NoiseBiomeSource {
 		this.quartHeight = QuartPos.fromBlock(levelHeightAccessor.getHeight()) - 1;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ChunkBiomeContainer(IdMap<Biome> idMap, LevelHeightAccessor levelHeightAccessor, int[] is) {
 		this(idMap, levelHeightAccessor, new Biome[is.length]);
 

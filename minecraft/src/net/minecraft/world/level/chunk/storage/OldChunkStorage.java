@@ -12,6 +12,7 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.OldDataLayer;
 
 public class OldChunkStorage {
+	private static final int DATALAYER_BITS = 7;
 	private static final LevelHeightAccessor OLD_LEVEL_HEIGHT = new LevelHeightAccessor() {
 		@Override
 		public int getMinBuildHeight() {

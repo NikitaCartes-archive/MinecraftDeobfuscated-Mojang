@@ -1,8 +1,6 @@
 package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,7 +43,6 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public String getGroup() {
 		return this.group;
@@ -63,7 +60,6 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		return nonNullList;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean canCraftInDimensions(int i, int j) {
 		return true;

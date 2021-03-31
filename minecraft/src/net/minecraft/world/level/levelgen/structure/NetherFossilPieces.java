@@ -1,6 +1,5 @@
 package net.minecraft.world.level.levelgen.structure;
 
-import java.util.List;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -18,7 +17,6 @@ import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class NetherFossilPieces {
 	private static final ResourceLocation[] FOSSILS = new ResourceLocation[]{
@@ -38,44 +36,28 @@ public class NetherFossilPieces {
 		new ResourceLocation("nether_fossils/fossil_14")
 	};
 
-	public static void addPieces(StructureManager structureManager, List<StructurePiece> list, Random random, BlockPos blockPos) {
+	public static void addPieces(StructureManager structureManager, StructurePieceAccessor structurePieceAccessor, Random random, BlockPos blockPos) {
 		Rotation rotation = Rotation.getRandom(random);
-		list.add(new NetherFossilPieces.NetherFossilPiece(structureManager, Util.getRandom(FOSSILS, random), blockPos, rotation));
+		structurePieceAccessor.addPiece(new NetherFossilPieces.NetherFossilPiece(structureManager, Util.getRandom(FOSSILS, random), blockPos, rotation));
 	}
 
 	public static class NetherFossilPiece extends TemplateStructurePiece {
-		private final ResourceLocation templateLocation;
-		private final Rotation rotation;
-
 		public NetherFossilPiece(StructureManager structureManager, ResourceLocation resourceLocation, BlockPos blockPos, Rotation rotation) {
-			super(StructurePieceType.NETHER_FOSSIL, 0);
-			this.templateLocation = resourceLocation;
-			this.templatePosition = blockPos;
-			this.rotation = rotation;
-			this.loadTemplate(structureManager);
+			super(StructurePieceType.NETHER_FOSSIL, 0, structureManager, resourceLocation, resourceLocation.toString(), makeSettings(rotation), blockPos);
 		}
 
 		public NetherFossilPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-			super(StructurePieceType.NETHER_FOSSIL, compoundTag);
-			this.templateLocation = new ResourceLocation(compoundTag.getString("Template"));
-			this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-			this.loadTemplate(serverLevel.getStructureManager());
+			super(StructurePieceType.NETHER_FOSSIL, compoundTag, serverLevel, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
 		}
 
-		private void loadTemplate(StructureManager structureManager) {
-			StructureTemplate structureTemplate = structureManager.getOrCreate(this.templateLocation);
-			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
-				.setRotation(this.rotation)
-				.setMirror(Mirror.NONE)
-				.addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-			this.setup(structureTemplate, this.templatePosition, structurePlaceSettings);
+		private static StructurePlaceSettings makeSettings(Rotation rotation) {
+			return new StructurePlaceSettings().setRotation(rotation).setMirror(Mirror.NONE).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
 		}
 
 		@Override
 		protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 			super.addAdditionalSaveData(serverLevel, compoundTag);
-			compoundTag.putString("Template", this.templateLocation.toString());
-			compoundTag.putString("Rot", this.rotation.name());
+			compoundTag.putString("Rot", this.placeSettings.getRotation().name());
 		}
 
 		@Override
@@ -92,7 +74,7 @@ public class NetherFossilPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			boundingBox.expand(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
+			boundingBox.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
 			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 	}

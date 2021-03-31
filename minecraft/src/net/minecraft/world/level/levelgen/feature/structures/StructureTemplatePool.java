@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 public class StructureTemplatePool {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SIZE_UNSET = Integer.MIN_VALUE;
 	public static final Codec<StructureTemplatePool> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("name").forGetter(StructureTemplatePool::getName),
@@ -91,6 +92,7 @@ public class StructureTemplatePool {
 		if (this.maxSize == Integer.MIN_VALUE) {
 			this.maxSize = this.templates
 				.stream()
+				.filter(structurePoolElement -> structurePoolElement != EmptyPoolElement.INSTANCE)
 				.mapToInt(structurePoolElement -> structurePoolElement.getBoundingBox(structureManager, BlockPos.ZERO, Rotation.NONE).getYSpan())
 				.max()
 				.orElse(0);

@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.Difficulty;
@@ -33,7 +31,6 @@ public class WitherRoseBlock extends FlowerBlock {
 			|| blockState.is(Blocks.SOUL_SOIL);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		VoxelShape voxelShape = this.getShape(blockState, level, blockPos, CollisionContext.empty());

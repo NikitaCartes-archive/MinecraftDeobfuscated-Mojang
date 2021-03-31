@@ -10,7 +10,6 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -43,8 +42,8 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 	public static class StrongholdStart extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
 		private final long seed;
 
-		public StrongholdStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-			super(structureFeature, chunkPos, boundingBox, i, l);
+		public StrongholdStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+			super(structureFeature, chunkPos, i, l);
 			this.seed = l;
 		}
 
@@ -61,24 +60,22 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 
 			StrongholdPieces.StartPiece startPiece;
 			do {
-				this.pieces.clear();
-				this.boundingBox = BoundingBox.getUnknownBox();
+				this.clearPieces();
 				this.random.setLargeFeatureSeed(this.seed + (long)(i++), chunkPos.x, chunkPos.z);
 				StrongholdPieces.resetPieces();
 				startPiece = new StrongholdPieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
-				this.pieces.add(startPiece);
-				startPiece.addChildren(startPiece, this.pieces, this.random);
+				this.addPiece(startPiece);
+				startPiece.addChildren(startPiece, this, this.random);
 				List<StructurePiece> list = startPiece.pendingChildren;
 
 				while (!list.isEmpty()) {
 					int j = this.random.nextInt(list.size());
 					StructurePiece structurePiece = (StructurePiece)list.remove(j);
-					structurePiece.addChildren(startPiece, this.pieces, this.random);
+					structurePiece.addChildren(startPiece, this, this.random);
 				}
 
-				this.calculateBoundingBox();
 				this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
-			} while (this.pieces.isEmpty() || startPiece.portalRoomPiece == null);
+			} while (this.hasNoPieces() || startPiece.portalRoomPiece == null);
 		}
 	}
 }

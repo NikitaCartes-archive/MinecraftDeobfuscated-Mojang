@@ -48,6 +48,12 @@ public class ClientPackSource implements RepositorySource {
 	);
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
+	private static final int MAX_WEB_FILESIZE = 104857600;
+	private static final int MAX_KEPT_PACKS = 10;
+	private static final String VANILLA_ID = "vanilla";
+	private static final String SERVER_ID = "server";
+	private static final String PROGRAMMER_ART_ID = "programer_art";
+	private static final String PROGRAMMER_ART_NAME = "Programmer Art";
 	private final VanillaPackResources vanillaPack;
 	private final File serverPackDir;
 	private final ReentrantLock downloadLock = new ReentrantLock();

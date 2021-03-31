@@ -9,6 +9,7 @@ import java.util.function.LongPredicate;
 import net.minecraft.util.Mth;
 
 public abstract class DynamicGraphMinFixedPoint {
+	private static final int NO_COMPUTED_LEVEL = 255;
 	private final int levelCount;
 	private final LongLinkedOpenHashSet[] queues;
 	private final Long2ByteMap computedLevels;

@@ -20,6 +20,10 @@ public interface Condition extends Supplier<JsonElement> {
 		return new Condition.TerminalCondition();
 	}
 
+	static Condition and(Condition... conditions) {
+		return new Condition.CompositeCondition(Condition.Operation.AND, Arrays.asList(conditions));
+	}
+
 	static Condition or(Condition... conditions) {
 		return new Condition.CompositeCondition(Condition.Operation.OR, Arrays.asList(conditions));
 	}
@@ -84,6 +88,17 @@ public interface Condition extends Supplier<JsonElement> {
 		@SafeVarargs
 		public final <T extends Comparable<T>> Condition.TerminalCondition term(Property<T> property, T comparable, T... comparables) {
 			this.putValue(property, getTerm(property, comparable, comparables));
+			return this;
+		}
+
+		public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> property, T comparable) {
+			this.putValue(property, "!" + property.getName(comparable));
+			return this;
+		}
+
+		@SafeVarargs
+		public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(Property<T> property, T comparable, T... comparables) {
+			this.putValue(property, "!" + getTerm(property, comparable, comparables));
 			return this;
 		}
 

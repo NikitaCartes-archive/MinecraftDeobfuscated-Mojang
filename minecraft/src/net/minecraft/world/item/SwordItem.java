@@ -46,11 +46,7 @@ public class SwordItem extends TieredItem implements Vanishable {
 			return 15.0F;
 		} else {
 			Material material = blockState.getMaterial();
-			return material != Material.PLANT
-					&& material != Material.REPLACEABLE_PLANT
-					&& material != Material.CORAL
-					&& !blockState.is(BlockTags.LEAVES)
-					&& material != Material.VEGETABLE
+			return material != Material.PLANT && material != Material.REPLACEABLE_PLANT && !blockState.is(BlockTags.LEAVES) && material != Material.VEGETABLE
 				? 1.0F
 				: 1.5F;
 		}

@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.BitSet;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -90,47 +88,38 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		clientGamePacketListener.handleLightUpdatePacked(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getX() {
 		return this.x;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getZ() {
 		return this.z;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BitSet getSkyYMask() {
 		return this.skyYMask;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BitSet getEmptySkyYMask() {
 		return this.emptySkyYMask;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<byte[]> getSkyUpdates() {
 		return this.skyUpdates;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BitSet getBlockYMask() {
 		return this.blockYMask;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BitSet getEmptyBlockYMask() {
 		return this.emptyBlockYMask;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<byte[]> getBlockUpdates() {
 		return this.blockUpdates;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean getTrustEdges() {
 		return this.trustEdges;
 	}

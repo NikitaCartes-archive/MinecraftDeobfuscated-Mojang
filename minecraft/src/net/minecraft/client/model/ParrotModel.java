@@ -15,6 +15,7 @@ import net.minecraft.world.entity.animal.Parrot;
 
 @Environment(EnvType.CLIENT)
 public class ParrotModel extends HierarchicalModel<Parrot> {
+	private static final String FEATHER = "feather";
 	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart tail;

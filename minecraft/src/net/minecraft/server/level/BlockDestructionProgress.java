@@ -1,10 +1,7 @@
 package net.minecraft.server.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 
-@Environment(EnvType.CLIENT)
 public class BlockDestructionProgress implements Comparable<BlockDestructionProgress> {
 	private final int id;
 	private final BlockPos pos;
@@ -14,6 +11,10 @@ public class BlockDestructionProgress implements Comparable<BlockDestructionProg
 	public BlockDestructionProgress(int i, BlockPos blockPos) {
 		this.id = i;
 		this.pos = blockPos;
+	}
+
+	public int getId() {
+		return this.id;
 	}
 
 	public BlockPos getPos() {

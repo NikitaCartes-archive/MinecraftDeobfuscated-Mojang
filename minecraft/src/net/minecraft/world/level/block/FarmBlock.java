@@ -27,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class FarmBlock extends Block {
 	public static final IntegerProperty MOISTURE = BlockStateProperties.MOISTURE;
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 15.0, 16.0);
+	public static final int MAX_MOISTURE = 7;
 
 	protected FarmBlock(BlockBehaviour.Properties properties) {
 		super(properties);

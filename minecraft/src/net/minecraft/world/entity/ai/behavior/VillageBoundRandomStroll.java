@@ -14,6 +14,8 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class VillageBoundRandomStroll extends Behavior<PathfinderMob> {
+	private static final int MAX_XZ_DIST = 10;
+	private static final int MAX_Y_DIST = 7;
 	private final float speedModifier;
 	private final int maxXyDist;
 	private final int maxYDist;

@@ -35,13 +35,13 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 	) {
 		int j = (this.getRange() * 2 - 1) * 16;
 		double d = (double)chunkPos.getBlockX(random.nextInt(16));
-		int k = this.getY(carvingContext, canyonCarverConfiguration, random);
+		int k = canyonCarverConfiguration.y.sample(random, carvingContext);
 		double e = (double)chunkPos.getBlockZ(random.nextInt(16));
 		float f = random.nextFloat() * (float) (Math.PI * 2);
-		float g = canyonCarverConfiguration.getVerticalRotation().sample(random);
-		double h = (double)canyonCarverConfiguration.getYScale().sample(random);
-		float l = canyonCarverConfiguration.getThickness().sample(random);
-		int m = (int)((float)j * canyonCarverConfiguration.getDistanceFactor().sample(random));
+		float g = canyonCarverConfiguration.verticalRotation.sample(random);
+		double h = (double)canyonCarverConfiguration.yScale.sample(random);
+		float l = canyonCarverConfiguration.shape.thickness.sample(random);
+		int m = (int)((float)j * canyonCarverConfiguration.shape.distanceFactor.sample(random));
 		int n = 0;
 		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), i, d, (double)k, e, l, f, g, 0, m, h, bitSet);
 		return true;
@@ -73,7 +73,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		for (int q = k; q < m; q++) {
 			double r = 1.5 + (double)(Mth.sin((float)q * (float) Math.PI / (float)m) * g);
 			double s = r * n;
-			r *= (double)canyonCarverConfiguration.getHorizontalRadiusFactor().sample(random);
+			r *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(random);
 			s = this.updateVerticalRadius(canyonCarverConfiguration, random, s, (float)m, (float)q);
 			float t = Mth.cos(j);
 			float u = Mth.sin(j);
@@ -111,24 +111,13 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		}
 	}
 
-	private int getY(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
-		int i = canyonCarverConfiguration.getBottomInclusive().resolveY(carvingContext);
-		int j = canyonCarverConfiguration.getTopInclusive().resolveY(carvingContext);
-		if (i >= j) {
-			LOGGER.warn("Empty carver: {} [{}-{}]", this, i, j);
-			return i;
-		} else {
-			return Mth.randomBetweenInclusive(random, i, j);
-		}
-	}
-
 	private float[] initWidthFactors(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
 		int i = carvingContext.getGenDepth();
 		float[] fs = new float[i];
 		float f = 1.0F;
 
 		for (int j = 0; j < i; j++) {
-			if (j == 0 || random.nextInt(canyonCarverConfiguration.getWidthSmoothness()) == 0) {
+			if (j == 0 || random.nextInt(canyonCarverConfiguration.shape.widthSmoothness) == 0) {
 				f = 1.0F + random.nextFloat() * random.nextFloat();
 			}
 
@@ -140,7 +129,7 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 
 	private double updateVerticalRadius(CanyonCarverConfiguration canyonCarverConfiguration, Random random, double d, float f, float g) {
 		float h = 1.0F - Mth.abs(0.5F - g / f) * 2.0F;
-		float i = canyonCarverConfiguration.getVerticalRadiusDefaultFactor() + canyonCarverConfiguration.getVerticalRadiusCenterFactor() * h;
+		float i = canyonCarverConfiguration.shape.verticalRadiusDefaultFactor + canyonCarverConfiguration.shape.verticalRadiusCenterFactor * h;
 		return (double)i * d * (double)Mth.randomBetween(random, 0.75F, 1.0F);
 	}
 

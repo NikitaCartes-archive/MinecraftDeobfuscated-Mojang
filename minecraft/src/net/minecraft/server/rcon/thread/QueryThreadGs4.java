@@ -23,6 +23,10 @@ import org.apache.logging.log4j.Logger;
 
 public class QueryThreadGs4 extends GenericThread {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String GAME_TYPE = "SMP";
+	private static final String GAME_ID = "MINECRAFT";
+	private static final long CHALLENGE_CHECK_INTERVAL = 30000L;
+	private static final long RESPONSE_CACHE_TIME = 5000L;
 	private long lastChallengeCheck;
 	private final int port;
 	private final int serverPort;
@@ -295,6 +299,10 @@ public class QueryThreadGs4 extends GenericThread {
 
 		public byte[] getIdentBytes() {
 			return this.identBytes;
+		}
+
+		public String getIdent() {
+			return this.ident;
 		}
 	}
 }

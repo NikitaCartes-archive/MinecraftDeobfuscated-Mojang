@@ -26,6 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class TridentItem extends Item implements Vanishable {
+	public static final int THROW_THRESHOLD_TIME = 10;
+	public static final float BASE_DAMAGE = 8.0F;
+	public static final float SHOOT_POWER = 2.5F;
 	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
 	public TridentItem(Item.Properties properties) {

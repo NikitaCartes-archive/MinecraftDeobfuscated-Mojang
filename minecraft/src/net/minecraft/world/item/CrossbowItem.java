@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
@@ -35,8 +33,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
+	private static final String TAG_CHARGED = "Charged";
+	private static final String TAG_CHARGED_PROJECTILES = "ChargedProjectiles";
+	private static final int MAX_CHARGE_DURATION = 25;
+	public static final int DEFAULT_RANGE = 8;
 	private boolean startSoundPlayed = false;
 	private boolean midLoadSoundPlayed = false;
+	private static final float START_SOUND_PERCENT = 0.2F;
+	private static final float MID_SOUND_PERCENT = 0.5F;
+	private static final float ARROW_POWER = 3.15F;
+	private static final float FIREWORK_POWER = 1.6F;
 
 	public CrossbowItem(Item.Properties properties) {
 		super(properties);
@@ -359,7 +365,6 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 		return f;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		List<ItemStack> list2 = getChargedProjectiles(itemStack);

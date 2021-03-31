@@ -6,7 +6,6 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -25,6 +24,8 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 public class MapRenderer implements AutoCloseable {
 	private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
 	private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
+	private static final int WIDTH = 128;
+	private static final int HEIGHT = 128;
 	private final TextureManager textureManager;
 	private final Int2ObjectMap<MapRenderer.MapInstance> maps = new Int2ObjectOpenHashMap<>();
 
@@ -42,12 +43,6 @@ public class MapRenderer implements AutoCloseable {
 
 	private MapRenderer.MapInstance getOrCreateMapInstance(int i, MapItemSavedData mapItemSavedData) {
 		return this.maps.computeIfAbsent(i, ix -> new MapRenderer.MapInstance(ix, mapItemSavedData));
-	}
-
-	@Nullable
-	public MapItemSavedData retrieveMapFromRenderer(int i) {
-		MapRenderer.MapInstance mapInstance = this.maps.get(i);
-		return mapInstance != null ? mapInstance.data : null;
 	}
 
 	public void resetData() {

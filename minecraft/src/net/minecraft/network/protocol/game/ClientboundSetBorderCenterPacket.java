@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.border.WorldBorder;
@@ -30,12 +28,10 @@ public class ClientboundSetBorderCenterPacket implements Packet<ClientGamePacket
 		clientGamePacketListener.handleSetBorderCenter(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewCenterZ() {
 		return this.newCenterZ;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getNewCenterX() {
 		return this.newCenterX;
 	}

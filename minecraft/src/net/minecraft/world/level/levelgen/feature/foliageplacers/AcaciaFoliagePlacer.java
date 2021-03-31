@@ -3,20 +3,20 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class AcaciaFoliagePlacer extends FoliagePlacer {
 	public static final Codec<AcaciaFoliagePlacer> CODEC = RecordCodecBuilder.create(
 		instance -> foliagePlacerParts(instance).apply(instance, AcaciaFoliagePlacer::new)
 	);
 
-	public AcaciaFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
-		super(uniformInt, uniformInt2);
+	public AcaciaFoliagePlacer(IntProvider intProvider, IntProvider intProvider2) {
+		super(intProvider, intProvider2);
 	}
 
 	@Override
@@ -26,22 +26,21 @@ public class AcaciaFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	protected void createFoliage(
-		LevelSimulatedRW levelSimulatedRW,
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
 		Random random,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k,
-		Set<BlockPos> set,
-		int l,
-		BoundingBox boundingBox
+		int l
 	) {
 		boolean bl = foliageAttachment.doubleTrunk();
-		BlockPos blockPos = foliageAttachment.foliagePos().above(l);
-		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset(), set, -1 - j, bl, boundingBox);
-		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k - 1, set, -j, bl, boundingBox);
-		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset() - 1, set, 0, bl, boundingBox);
+		BlockPos blockPos = foliageAttachment.pos().above(l);
+		this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset(), -1 - j, bl);
+		this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k - 1, -j, bl);
+		this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset() - 1, 0, bl);
 	}
 
 	@Override

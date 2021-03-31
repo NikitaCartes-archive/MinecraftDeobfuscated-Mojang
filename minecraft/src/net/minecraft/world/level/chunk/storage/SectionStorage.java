@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 public class SectionStorage<R> implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String SECTIONS_TAG = "Sections";
 	private final IOWorker worker;
 	private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<>();
 	private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();

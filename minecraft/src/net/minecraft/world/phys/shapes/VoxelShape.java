@@ -6,8 +6,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
@@ -78,7 +76,6 @@ public abstract class VoxelShape {
 		return voxelShapes[0];
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void forAllEdges(Shapes.DoubleLineConsumer doubleLineConsumer) {
 		this.shape
 			.forAllEdges(
@@ -113,7 +110,15 @@ public abstract class VoxelShape {
 		return list;
 	}
 
-	@Environment(EnvType.CLIENT)
+	public double min(Direction.Axis axis, double d, double e) {
+		Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
+		Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);
+		int i = this.findIndex(axis2, d);
+		int j = this.findIndex(axis3, e);
+		int k = this.shape.firstFull(axis, i, j);
+		return k >= this.shape.getSize(axis) ? Double.POSITIVE_INFINITY : this.get(axis, k);
+	}
+
 	public double max(Direction.Axis axis, double d, double e) {
 		Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
 		Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);

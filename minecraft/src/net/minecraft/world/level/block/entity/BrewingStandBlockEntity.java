@@ -25,9 +25,15 @@ import net.minecraft.world.level.block.BrewingStandBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
+	private static final int INGREDIENT_SLOT = 3;
+	private static final int FUEL_SLOT = 4;
 	private static final int[] SLOTS_FOR_UP = new int[]{3};
 	private static final int[] SLOTS_FOR_DOWN = new int[]{0, 1, 2, 3};
 	private static final int[] SLOTS_FOR_SIDES = new int[]{0, 1, 2, 4};
+	public static final int FUEL_USES = 20;
+	public static final int DATA_BREW_TIME = 0;
+	public static final int DATA_FUEL_USES = 1;
+	public static final int NUM_DATA_VALUES = 2;
 	private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
 	private int brewTime;
 	private boolean[] lastPotionCount;

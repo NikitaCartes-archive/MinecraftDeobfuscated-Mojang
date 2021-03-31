@@ -100,6 +100,12 @@ public class VertexBuffer implements AutoCloseable {
 		RenderSystem.glBindVertexArray(() -> 0);
 	}
 
+	public void draw() {
+		if (this.indexCount != 0) {
+			RenderSystem.drawElements(this.mode.asGLMode, this.indexCount, this.indexType.asGLType);
+		}
+	}
+
 	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
 		if (!RenderSystem.isOnRenderThread()) {
 			RenderSystem.recordRenderCall(() -> this._drawWithShader(matrix4f.copy(), matrix4f2.copy(), shaderInstance));

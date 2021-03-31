@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -62,43 +60,35 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		clientGamePacketListener.handleRespawn(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public DimensionType getDimensionType() {
 		return this.dimensionType;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceKey<Level> getDimension() {
 		return this.dimension;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long getSeed() {
 		return this.seed;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public GameType getPlayerGameType() {
 		return this.playerGameType;
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public GameType getPreviousPlayerGameType() {
 		return this.previousPlayerGameType;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isDebug() {
 		return this.isDebug;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFlat() {
 		return this.isFlat;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean shouldKeepAllPlayerData() {
 		return this.keepAllPlayerData;
 	}

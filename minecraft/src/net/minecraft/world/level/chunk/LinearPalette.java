@@ -3,8 +3,6 @@ package net.minecraft.world.level.chunk;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -61,7 +59,6 @@ public class LinearPalette<T> implements Palette<T> {
 		return i >= 0 && i < this.size ? this.values[i] : null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) {
 		this.size = friendlyByteBuf.readVarInt();
@@ -91,6 +88,7 @@ public class LinearPalette<T> implements Palette<T> {
 		return i;
 	}
 
+	@Override
 	public int getSize() {
 		return this.size;
 	}

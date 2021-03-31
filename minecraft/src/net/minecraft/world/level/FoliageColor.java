@@ -1,9 +1,5 @@
 package net.minecraft.world.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
-@Environment(EnvType.CLIENT)
 public class FoliageColor {
 	private static int[] pixels = new int[65536];
 

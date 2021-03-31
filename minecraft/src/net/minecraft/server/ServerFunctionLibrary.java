@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerFunctionLibrary implements PreparableReloadListener {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String FILE_EXTENSION = ".mcfunction";
 	private static final int PATH_PREFIX_LENGTH = "functions/".length();
 	private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
 	private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();

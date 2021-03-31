@@ -1,10 +1,7 @@
 package com.mojang.math;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
-@Environment(EnvType.CLIENT)
 public class Vector4f {
 	private float x;
 	private float y;
@@ -65,6 +62,13 @@ public class Vector4f {
 		return this.w;
 	}
 
+	public void mul(float f) {
+		this.x *= f;
+		this.y *= f;
+		this.z *= f;
+		this.w *= f;
+	}
+
 	public void mul(Vector3f vector3f) {
 		this.x = this.x * vector3f.x();
 		this.y = this.y * vector3f.y();
@@ -76,6 +80,13 @@ public class Vector4f {
 		this.y = g;
 		this.z = h;
 		this.w = i;
+	}
+
+	public void add(float f, float g, float h, float i) {
+		this.x += f;
+		this.y += g;
+		this.z += h;
+		this.w += i;
 	}
 
 	public float dot(Vector4f vector4f) {
@@ -121,6 +132,14 @@ public class Vector4f {
 		this.y = this.y / this.w;
 		this.z = this.z / this.w;
 		this.w = 1.0F;
+	}
+
+	public void lerp(Vector4f vector4f, float f) {
+		float g = 1.0F - f;
+		this.x = this.x * g + vector4f.x * f;
+		this.y = this.y * g + vector4f.y * f;
+		this.z = this.z * g + vector4f.z * f;
+		this.w = this.w * g + vector4f.w * f;
 	}
 
 	public String toString() {

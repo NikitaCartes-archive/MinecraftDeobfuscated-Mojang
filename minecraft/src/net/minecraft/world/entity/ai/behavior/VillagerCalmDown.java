@@ -6,6 +6,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.Villager;
 
 public class VillagerCalmDown extends Behavior<Villager> {
+	private static final int SAFE_DISTANCE_FROM_DANGER = 36;
+
 	public VillagerCalmDown() {
 		super(ImmutableMap.of());
 	}

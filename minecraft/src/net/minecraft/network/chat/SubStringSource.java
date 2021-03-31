@@ -6,12 +6,9 @@ import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringDecomposer;
 
-@Environment(EnvType.CLIENT)
 public class SubStringSource {
 	private final String plainText;
 	private final List<Style> charStyles;
@@ -53,6 +50,10 @@ public class SubStringSource {
 
 			return bl ? Lists.reverse(list) : list;
 		}
+	}
+
+	public static SubStringSource create(FormattedText formattedText) {
+		return create(formattedText, i -> i, string -> string);
 	}
 
 	public static SubStringSource create(FormattedText formattedText, Int2IntFunction int2IntFunction, UnaryOperator<String> unaryOperator) {

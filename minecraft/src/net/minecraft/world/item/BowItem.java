@@ -14,6 +14,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 public class BowItem extends ProjectileWeaponItem implements Vanishable {
+	public static final int MAX_DRAW_DURATION = 20;
+	public static final int DEFAULT_RANGE = 15;
+
 	public BowItem(Item.Properties properties) {
 		super(properties);
 	}

@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -70,7 +68,6 @@ public class ConcretePowderBlock extends FallingBlock {
 		return touchesLiquid(levelAccessor, blockPos) ? this.concrete : super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return blockState.getMapColor(blockGetter, blockPos).col;

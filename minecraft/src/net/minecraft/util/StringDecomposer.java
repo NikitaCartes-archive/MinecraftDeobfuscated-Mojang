@@ -1,14 +1,12 @@
 package net.minecraft.util;
 
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 
-@Environment(EnvType.CLIENT)
 public class StringDecomposer {
+	private static final char REPLACEMENT_CHAR = '�';
 	private static final Optional<Object> STOP_ITERATION = Optional.of(Unit.INSTANCE);
 
 	private static boolean feedChar(Style style, FormattedCharSink formattedCharSink, int i, char c) {

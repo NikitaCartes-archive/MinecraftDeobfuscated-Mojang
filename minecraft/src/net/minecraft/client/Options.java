@@ -53,7 +53,15 @@ public class Options {
 	private static final Gson GSON = new Gson();
 	private static final TypeToken<List<String>> RESOURCE_PACK_TYPE = new TypeToken<List<String>>() {
 	};
+	public static final int RENDER_DISTANCE_TINY = 2;
+	public static final int RENDER_DISTANCE_SHORT = 4;
+	public static final int RENDER_DISTANCE_NORMAL = 8;
+	public static final int RENDER_DISTANCE_FAR = 12;
+	public static final int RENDER_DISTANCE_REALLY_FAR = 16;
+	public static final int RENDER_DISTANCE_EXTREME = 32;
 	private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
+	private static final float DEFAULT_VOLUME = 1.0F;
+	public boolean darkMojangStudiosBackground;
 	public double sensitivity = 0.5;
 	public int renderDistance;
 	public float entityDistanceScaling = 1.0F;
@@ -254,6 +262,7 @@ public class Options {
 		this.bobView = fieldAccess.process("bobView", this.bobView);
 		this.toggleCrouch = fieldAccess.process("toggleCrouch", this.toggleCrouch);
 		this.toggleSprint = fieldAccess.process("toggleSprint", this.toggleSprint);
+		this.darkMojangStudiosBackground = fieldAccess.process("darkMojangStudiosBackground", this.darkMojangStudiosBackground);
 		this.sensitivity = fieldAccess.process("mouseSensitivity", this.sensitivity);
 		this.fov = fieldAccess.process("fov", (this.fov - 70.0) / 40.0) * 40.0 + 70.0;
 		this.screenEffectScale = fieldAccess.process("screenEffectScale", this.screenEffectScale);

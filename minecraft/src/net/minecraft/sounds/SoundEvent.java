@@ -1,8 +1,6 @@
 package net.minecraft.sounds;
 
 import com.mojang.serialization.Codec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvent {
@@ -13,7 +11,6 @@ public class SoundEvent {
 		this.location = resourceLocation;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getLocation() {
 		return this.location;
 	}

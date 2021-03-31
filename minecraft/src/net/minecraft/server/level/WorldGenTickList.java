@@ -26,4 +26,9 @@ public class WorldGenTickList<T> implements TickList<T> {
 	public boolean willTickThisTick(BlockPos blockPos, T object) {
 		return false;
 	}
+
+	@Override
+	public int size() {
+		return 0;
+	}
 }

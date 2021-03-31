@@ -8,6 +8,7 @@ import net.minecraft.client.resources.language.LanguageInfo;
 @Environment(EnvType.CLIENT)
 public class LanguageMetadataSection {
 	public static final LanguageMetadataSectionSerializer SERIALIZER = new LanguageMetadataSectionSerializer();
+	public static final boolean DEFAULT_BIDIRECTIONAL = false;
 	private final Collection<LanguageInfo> languages;
 
 	public LanguageMetadataSection(Collection<LanguageInfo> collection) {

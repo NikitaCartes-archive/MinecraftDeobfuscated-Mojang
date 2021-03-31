@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -33,17 +31,14 @@ public class ClientboundSetExperiencePacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleSetExperience(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getExperienceProgress() {
 		return this.experienceProgress;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTotalExperience() {
 		return this.totalExperience;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getExperienceLevel() {
 		return this.experienceLevel;
 	}

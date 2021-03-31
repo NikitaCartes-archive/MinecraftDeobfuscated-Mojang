@@ -40,6 +40,8 @@ import org.apache.logging.log4j.Logger;
 
 public class GameProfileCache {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int GAMEPROFILES_MRU_LIMIT = 1000;
+	private static final int GAMEPROFILES_EXPIRATION_MONTHS = 1;
 	private static boolean usesAuthentication;
 	private final Map<String, GameProfileCache.GameProfileInfo> profilesByName = Maps.<String, GameProfileCache.GameProfileInfo>newConcurrentMap();
 	private final Map<UUID, GameProfileCache.GameProfileInfo> profilesByUUID = Maps.<UUID, GameProfileCache.GameProfileInfo>newConcurrentMap();

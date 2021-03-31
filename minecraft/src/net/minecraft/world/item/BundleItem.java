@@ -3,8 +3,6 @@ package net.minecraft.world.item;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -26,13 +24,15 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.level.Level;
 
 public class BundleItem extends Item {
+	private static final String TAG_ITEMS = "Items";
+	public static final int MAX_WEIGHT = 64;
+	private static final int BUNDLE_IN_BUNDLE_WEIGHT = 4;
 	private static final int BAR_COLOR = Mth.color(0.4F, 0.4F, 1.0F);
 
 	public BundleItem(Item.Properties properties) {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static float getFullnessDisplay(ItemStack itemStack) {
 		return (float)getContentWeight(itemStack) / 64.0F;
 	}
@@ -80,19 +80,16 @@ public class BundleItem extends Item {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isBarVisible(ItemStack itemStack) {
 		return getContentWeight(itemStack) > 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public int getBarWidth(ItemStack itemStack) {
 		return Math.min(1 + 12 * getContentWeight(itemStack) / 64, 13);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public int getBarColor(ItemStack itemStack) {
 		return BAR_COLOR;
@@ -205,7 +202,6 @@ public class BundleItem extends Item {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
 		NonNullList<ItemStack> nonNullList = NonNullList.create();
@@ -213,7 +209,6 @@ public class BundleItem extends Item {
 		return Optional.of(new BundleTooltip(nonNullList, getContentWeight(itemStack)));
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		list.add(new TranslatableComponent("item.minecraft.bundle.fullness", getContentWeight(itemStack), 64).withStyle(ChatFormatting.GRAY));

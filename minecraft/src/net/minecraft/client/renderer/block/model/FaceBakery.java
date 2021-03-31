@@ -20,8 +20,12 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class FaceBakery {
+	public static final int VERTEX_INT_SIZE = 8;
 	private static final float RESCALE_22_5 = 1.0F / (float)Math.cos((float) (Math.PI / 8)) - 1.0F;
 	private static final float RESCALE_45 = 1.0F / (float)Math.cos((float) (Math.PI / 4)) - 1.0F;
+	public static final int VERTEX_COUNT = 4;
+	private static final int COLOR_INDEX = 3;
+	public static final int UV_INDEX = 4;
 
 	public BakedQuad bakeQuad(
 		Vector3f vector3f,

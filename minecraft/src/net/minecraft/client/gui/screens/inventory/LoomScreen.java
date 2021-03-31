@@ -36,7 +36,16 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 @Environment(EnvType.CLIENT)
 public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/loom.png");
+	private static final int BASE_PATTERN_INDEX = 1;
+	private static final int PATTERN_COLUMNS = 4;
+	private static final int PATTERN_ROWS = 4;
 	private static final int TOTAL_PATTERN_ROWS = (BannerPattern.COUNT - BannerPattern.PATTERN_ITEM_COUNT - 1 + 4 - 1) / 4;
+	private static final int SCROLLER_WIDTH = 12;
+	private static final int SCROLLER_HEIGHT = 15;
+	private static final int PATTERN_IMAGE_SIZE = 14;
+	private static final int SCROLLER_FULL_HEIGHT = 56;
+	private static final int PATTERNS_X = 60;
+	private static final int PATTERNS_Y = 13;
 	private ModelPart flag;
 	@Nullable
 	private List<Pair<BannerPattern, DyeColor>> resultBannerPatterns;

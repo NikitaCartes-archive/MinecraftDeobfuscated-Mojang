@@ -8,6 +8,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class ScatteredOreFeature extends Feature<OreConfiguration> {
+	private static final int MAX_DIST_FROM_ORIGIN = 7;
+
 	ScatteredOreFeature(Codec<OreConfiguration> codec) {
 		super(codec);
 	}

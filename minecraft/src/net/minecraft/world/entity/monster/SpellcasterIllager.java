@@ -2,8 +2,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -43,7 +41,6 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		compoundTag.putInt("SpellTicks", this.spellCastingTickCount);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public AbstractIllager.IllagerArmPose getArmPose() {
 		if (this.isCastingSpell()) {

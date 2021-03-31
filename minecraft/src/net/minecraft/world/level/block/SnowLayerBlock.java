@@ -21,6 +21,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SnowLayerBlock extends Block {
+	public static final int MAX_HEIGHT = 8;
 	public static final IntegerProperty LAYERS = BlockStateProperties.LAYERS;
 	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[]{
 		Shapes.empty(),
@@ -33,6 +34,7 @@ public class SnowLayerBlock extends Block {
 		Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0),
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
+	public static final int HEIGHT_IMPASSABLE = 5;
 
 	protected SnowLayerBlock(BlockBehaviour.Properties properties) {
 		super(properties);

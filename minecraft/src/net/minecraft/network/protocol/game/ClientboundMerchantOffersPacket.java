@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -46,32 +44,26 @@ public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketL
 		clientGamePacketListener.handleMerchantOffers(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getContainerId() {
 		return this.containerId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MerchantOffers getOffers() {
 		return this.offers;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getVillagerLevel() {
 		return this.villagerLevel;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getVillagerXp() {
 		return this.villagerXp;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean showProgress() {
 		return this.showProgress;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean canRestock() {
 		return this.canRestock;
 	}

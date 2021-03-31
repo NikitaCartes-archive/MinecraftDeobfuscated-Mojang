@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -37,7 +35,6 @@ public class FallbackResourceManager implements ResourceManager {
 		this.fallbacks.add(packResources);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Set<String> getNamespaces() {
 		return ImmutableSet.of(this.namespace);
@@ -68,7 +65,6 @@ public class FallbackResourceManager implements ResourceManager {
 		throw new FileNotFoundException(resourceLocation.toString());
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean hasResource(ResourceLocation resourceLocation) {
 		if (!this.isValidLocation(resourceLocation)) {
@@ -134,7 +130,6 @@ public class FallbackResourceManager implements ResourceManager {
 		return list;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Stream<PackResources> listPacks() {
 		return this.fallbacks.stream();

@@ -29,11 +29,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ItemProperties {
 	private static final Map<ResourceLocation, ItemPropertyFunction> GENERIC_PROPERTIES = Maps.<ResourceLocation, ItemPropertyFunction>newHashMap();
+	private static final String TAG_CUSTOM_MODEL_DATA = "CustomModelData";
 	private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
 	private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
 	private static final ItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0F : 0.0F;
@@ -300,6 +302,18 @@ public class ItemProperties {
 			new ResourceLocation("throwing"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
+		register(Items.LIGHT, new ResourceLocation("level"), (itemStack, clientLevel, livingEntity, i) -> {
+			CompoundTag compoundTag = itemStack.getTagElement("BlockStateTag");
+
+			try {
+				if (compoundTag != null) {
+					return (float)Integer.parseInt(compoundTag.getString(LightBlock.LEVEL.getName()));
+				}
+			} catch (NumberFormatException var6) {
+			}
+
+			return 15.0F;
+		});
 	}
 
 	@Environment(EnvType.CLIENT)

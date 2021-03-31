@@ -6,6 +6,8 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class TextureMetadataSection {
 	public static final TextureMetadataSectionSerializer SERIALIZER = new TextureMetadataSectionSerializer();
+	public static final boolean DEFAULT_BLUR = false;
+	public static final boolean DEFAULT_CLAMP = false;
 	private final boolean blur;
 	private final boolean clamp;
 

@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 public class ConnectScreen extends Screen {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final long NARRATION_DELAY_MS = 2000L;
 	private Connection connection;
 	private boolean aborted;
 	private final Screen parent;

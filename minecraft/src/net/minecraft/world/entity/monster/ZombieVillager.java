@@ -4,8 +4,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -52,6 +50,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	private static final EntityDataAccessor<VillagerData> DATA_VILLAGER_DATA = SynchedEntityData.defineId(
 		ZombieVillager.class, EntityDataSerializers.VILLAGER_DATA
 	);
+	private static final int VILLAGER_CONVERSION_WAIT_MIN = 3600;
+	private static final int VILLAGER_CONVERSION_WAIT_MAX = 6000;
+	private static final int MAX_SPECIAL_BLOCKS_COUNT = 14;
+	private static final int SPECIAL_BLOCK_RADIUS = 4;
 	private int villagerConversionTime;
 	private UUID conversionStarter;
 	private Tag gossips;
@@ -174,7 +176,6 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		this.level.broadcastEntityEvent(this, (byte)16);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 16) {
@@ -314,6 +315,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
+	@Override
 	public void setVillagerData(VillagerData villagerData) {
 		VillagerData villagerData2 = this.getVillagerData();
 		if (villagerData2.getProfession() != villagerData.getProfession()) {
@@ -326,6 +328,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Override
 	public VillagerData getVillagerData() {
 		return this.entityData.get(DATA_VILLAGER_DATA);
+	}
+
+	public int getVillagerXp() {
+		return this.villagerXp;
 	}
 
 	public void setVillagerXp(int i) {

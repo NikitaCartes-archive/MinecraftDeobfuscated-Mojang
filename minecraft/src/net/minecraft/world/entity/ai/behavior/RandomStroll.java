@@ -12,6 +12,8 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class RandomStroll extends Behavior<PathfinderMob> {
+	private static final int MAX_XZ_DIST = 10;
+	private static final int MAX_Y_DIST = 7;
 	private final float speedModifier;
 	protected final int maxHorizontalDistance;
 	protected final int maxVerticalDistance;

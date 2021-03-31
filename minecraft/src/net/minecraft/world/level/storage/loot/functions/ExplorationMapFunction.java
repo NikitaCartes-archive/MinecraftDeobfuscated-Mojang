@@ -27,7 +27,11 @@ import org.apache.logging.log4j.Logger;
 public class ExplorationMapFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final StructureFeature<?> DEFAULT_FEATURE = StructureFeature.BURIED_TREASURE;
+	public static final String DEFAULT_DECORATION_NAME = "mansion";
 	public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.MANSION;
+	public static final byte DEFAULT_ZOOM = 2;
+	public static final int DEFAULT_SEARCH_RADIUS = 50;
+	public static final boolean DEFAULT_SKIP_EXISTING = true;
 	private final StructureFeature<?> destination;
 	private final MapDecoration.Type mapDecoration;
 	private final byte zoom;
@@ -104,6 +108,11 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 
 		public ExplorationMapFunction.Builder setZoom(byte b) {
 			this.zoom = b;
+			return this;
+		}
+
+		public ExplorationMapFunction.Builder setSearchRadius(int i) {
+			this.searchRadius = i;
 			return this;
 		}
 

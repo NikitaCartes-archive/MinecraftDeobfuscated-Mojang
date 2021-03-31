@@ -12,6 +12,9 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class StrollAroundPoi extends Behavior<PathfinderMob> {
+	private static final int MIN_TIME_BETWEEN_STROLLS = 180;
+	private static final int STROLL_MAX_XZ_DIST = 8;
+	private static final int STROLL_MAX_Y_DIST = 6;
 	private final MemoryModuleType<GlobalPos> memoryType;
 	private long nextOkStartTime;
 	private final int maxDistanceFromPoi;

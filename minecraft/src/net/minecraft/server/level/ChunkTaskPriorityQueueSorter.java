@@ -36,6 +36,10 @@ public class ChunkTaskPriorityQueueSorter implements ChunkHolder.LevelChangeList
 		this.mailbox = new ProcessorMailbox<>(new StrictQueue.FixedPriorityQueue(4), executor, "sorter");
 	}
 
+	public static <T> ChunkTaskPriorityQueueSorter.Message<T> message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
+		return new ChunkTaskPriorityQueueSorter.Message<>(function, l, intSupplier);
+	}
+
 	public static ChunkTaskPriorityQueueSorter.Message<Runnable> message(Runnable runnable, long l, IntSupplier intSupplier) {
 		return new ChunkTaskPriorityQueueSorter.Message<>(processorHandle -> () -> {
 				runnable.run();
@@ -45,6 +49,10 @@ public class ChunkTaskPriorityQueueSorter implements ChunkHolder.LevelChangeList
 
 	public static ChunkTaskPriorityQueueSorter.Message<Runnable> message(ChunkHolder chunkHolder, Runnable runnable) {
 		return message(runnable, chunkHolder.getPos().toLong(), chunkHolder::getQueueLevel);
+	}
+
+	public static <T> ChunkTaskPriorityQueueSorter.Message<T> message(ChunkHolder chunkHolder, Function<ProcessorHandle<Unit>, T> function) {
+		return message(function, chunkHolder.getPos().toLong(), chunkHolder::getQueueLevel);
 	}
 
 	public static ChunkTaskPriorityQueueSorter.Release release(Runnable runnable, long l, boolean bl) {

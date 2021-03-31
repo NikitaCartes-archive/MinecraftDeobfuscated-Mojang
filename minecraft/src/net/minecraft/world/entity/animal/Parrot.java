@@ -9,8 +9,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -72,6 +70,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	};
 	private static final Item POISONOUS_FOOD = Items.COOKIE;
 	private static final Set<Item> TAME_FOOD = Sets.<Item>newHashSet(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS);
+	private static final int VARIANTS = 5;
 	private static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.<EntityType<?>, SoundEvent>newHashMap(), hashMap -> {
 		hashMap.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
 		hashMap.put(EntityType.CAVE_SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
@@ -191,14 +190,12 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		this.calculateFlapping();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void setRecordPlayingNearby(BlockPos blockPos, boolean bl) {
 		this.jukebox = blockPos;
 		this.partyParrot = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isPartyParrot() {
 		return this.partyParrot;
 	}
@@ -438,11 +435,11 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		this.setVariant(compoundTag.getInt("Variant"));
 	}
 
+	@Override
 	public boolean isFlying() {
 		return !this.onGround;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));

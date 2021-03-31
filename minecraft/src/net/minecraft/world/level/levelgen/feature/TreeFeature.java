@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.feature;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -28,6 +30,8 @@ import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 public class TreeFeature extends Feature<TreeConfiguration> {
+	private static final int BLOCK_UPDATE_FLAGS = 19;
+
 	public TreeFeature(Codec<TreeConfiguration> codec) {
 		super(codec);
 	}
@@ -59,7 +63,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		});
 	}
 
-	public static void setBlockKnownShape(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState) {
+	private static void setBlockKnownShape(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState) {
 		levelWriter.setBlock(blockPos, blockState, 19);
 	}
 
@@ -71,9 +75,8 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		WorldGenLevel worldGenLevel,
 		Random random,
 		BlockPos blockPos,
-		Set<BlockPos> set,
-		Set<BlockPos> set2,
-		BoundingBox boundingBox,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		BiConsumer<BlockPos, BlockState> biConsumer2,
 		TreeConfiguration treeConfiguration
 	) {
 		int i = treeConfiguration.trunkPlacer.getTreeHeight(random);
@@ -88,11 +91,9 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 			OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
 			int m = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos, treeConfiguration);
 			if (m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt()) {
-				List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer
-					.placeTrunk(worldGenLevel, random, m, blockPos, set, boundingBox, treeConfiguration);
+				List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, biConsumer, random, m, blockPos, treeConfiguration);
 				list.forEach(
-					foliageAttachment -> treeConfiguration.foliagePlacer
-							.createFoliage(worldGenLevel, random, treeConfiguration, m, foliageAttachment, j, l, set2, boundingBox)
+					foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, biConsumer2, random, treeConfiguration, m, foliageAttachment, j, l)
 				);
 				return true;
 			} else {
@@ -134,26 +135,39 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		Set<BlockPos> set = Sets.<BlockPos>newHashSet();
 		Set<BlockPos> set2 = Sets.<BlockPos>newHashSet();
 		Set<BlockPos> set3 = Sets.<BlockPos>newHashSet();
-		BoundingBox boundingBox = BoundingBox.getUnknownBox();
-		boolean bl = this.doPlace(worldGenLevel, random, blockPos, set, set2, boundingBox, treeConfiguration);
-		if (boundingBox.x0 <= boundingBox.x1 && bl && !set.isEmpty()) {
+		BiConsumer<BlockPos, BlockState> biConsumer = (blockPosx, blockState) -> {
+			set.add(blockPosx.immutable());
+			worldGenLevel.setBlock(blockPosx, blockState, 19);
+		};
+		BiConsumer<BlockPos, BlockState> biConsumer2 = (blockPosx, blockState) -> {
+			set2.add(blockPosx.immutable());
+			worldGenLevel.setBlock(blockPosx, blockState, 19);
+		};
+		BiConsumer<BlockPos, BlockState> biConsumer3 = (blockPosx, blockState) -> {
+			set3.add(blockPosx.immutable());
+			worldGenLevel.setBlock(blockPosx, blockState, 19);
+		};
+		boolean bl = this.doPlace(worldGenLevel, random, blockPos, biConsumer, biConsumer2, treeConfiguration);
+		if (bl && (!set.isEmpty() || !set2.isEmpty())) {
 			if (!treeConfiguration.decorators.isEmpty()) {
 				List<BlockPos> list = Lists.<BlockPos>newArrayList(set);
 				List<BlockPos> list2 = Lists.<BlockPos>newArrayList(set2);
 				list.sort(Comparator.comparingInt(Vec3i::getY));
 				list2.sort(Comparator.comparingInt(Vec3i::getY));
-				treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(worldGenLevel, random, list, list2, set3, boundingBox));
+				treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(worldGenLevel, biConsumer3, random, list, list2));
 			}
 
-			DiscreteVoxelShape discreteVoxelShape = this.updateLeaves(worldGenLevel, boundingBox, set, set3);
-			StructureTemplate.updateShapeAtEdge(worldGenLevel, 3, discreteVoxelShape, boundingBox.x0, boundingBox.y0, boundingBox.z0);
-			return true;
+			return (Boolean)BoundingBox.encapsulatingPositions(Iterables.concat(set, set2, set3)).map(boundingBox -> {
+				DiscreteVoxelShape discreteVoxelShape = updateLeaves(worldGenLevel, boundingBox, set, set3);
+				StructureTemplate.updateShapeAtEdge(worldGenLevel, 3, discreteVoxelShape, boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+				return true;
+			}).orElse(false);
 		} else {
 			return false;
 		}
 	}
 
-	private DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2) {
+	private static DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2) {
 		List<Set<BlockPos>> list = Lists.<Set<BlockPos>>newArrayList();
 		DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 		int i = 6;
@@ -166,13 +180,13 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 
 		for (BlockPos blockPos : Lists.newArrayList(set2)) {
 			if (boundingBox.isInside(blockPos)) {
-				discreteVoxelShape.fill(blockPos.getX() - boundingBox.x0, blockPos.getY() - boundingBox.y0, blockPos.getZ() - boundingBox.z0);
+				discreteVoxelShape.fill(blockPos.getX() - boundingBox.minX(), blockPos.getY() - boundingBox.minY(), blockPos.getZ() - boundingBox.minZ());
 			}
 		}
 
 		for (BlockPos blockPosx : Lists.newArrayList(set)) {
 			if (boundingBox.isInside(blockPosx)) {
-				discreteVoxelShape.fill(blockPosx.getX() - boundingBox.x0, blockPosx.getY() - boundingBox.y0, blockPosx.getZ() - boundingBox.z0);
+				discreteVoxelShape.fill(blockPosx.getX() - boundingBox.minX(), blockPosx.getY() - boundingBox.minY(), blockPosx.getZ() - boundingBox.minZ());
 			}
 
 			for (Direction direction : Direction.values()) {
@@ -183,7 +197,9 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 						((Set)list.get(0)).add(mutableBlockPos.immutable());
 						setBlockKnownShape(levelAccessor, mutableBlockPos, blockState.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(1)));
 						if (boundingBox.isInside(mutableBlockPos)) {
-							discreteVoxelShape.fill(mutableBlockPos.getX() - boundingBox.x0, mutableBlockPos.getY() - boundingBox.y0, mutableBlockPos.getZ() - boundingBox.z0);
+							discreteVoxelShape.fill(
+								mutableBlockPos.getX() - boundingBox.minX(), mutableBlockPos.getY() - boundingBox.minY(), mutableBlockPos.getZ() - boundingBox.minZ()
+							);
 						}
 					}
 				}
@@ -196,7 +212,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 
 			for (BlockPos blockPos2 : set3) {
 				if (boundingBox.isInside(blockPos2)) {
-					discreteVoxelShape.fill(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0);
+					discreteVoxelShape.fill(blockPos2.getX() - boundingBox.minX(), blockPos2.getY() - boundingBox.minY(), blockPos2.getZ() - boundingBox.minZ());
 				}
 
 				for (Direction direction2 : Direction.values()) {
@@ -209,7 +225,9 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 								BlockState blockState3 = blockState2.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(k + 1));
 								setBlockKnownShape(levelAccessor, mutableBlockPos, blockState3);
 								if (boundingBox.isInside(mutableBlockPos)) {
-									discreteVoxelShape.fill(mutableBlockPos.getX() - boundingBox.x0, mutableBlockPos.getY() - boundingBox.y0, mutableBlockPos.getZ() - boundingBox.z0);
+									discreteVoxelShape.fill(
+										mutableBlockPos.getX() - boundingBox.minX(), mutableBlockPos.getY() - boundingBox.minY(), mutableBlockPos.getZ() - boundingBox.minZ()
+									);
 								}
 
 								set4.add(mutableBlockPos.immutable());

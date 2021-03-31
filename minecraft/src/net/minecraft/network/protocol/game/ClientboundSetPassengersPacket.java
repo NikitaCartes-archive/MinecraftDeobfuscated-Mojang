@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -36,12 +34,10 @@ public class ClientboundSetPassengersPacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleSetEntityPassengersPacket(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int[] getPassengers() {
 		return this.passengers;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getVehicle() {
 		return this.vehicle;
 	}

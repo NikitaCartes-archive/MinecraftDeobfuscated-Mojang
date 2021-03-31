@@ -15,6 +15,14 @@ import net.minecraft.world.entity.animal.Bee;
 
 @Environment(EnvType.CLIENT)
 public class BeeModel<T extends Bee> extends AgeableListModel<T> {
+	private static final float BEE_Y_BASE = 19.0F;
+	private static final String BONE = "bone";
+	private static final String STINGER = "stinger";
+	private static final String LEFT_ANTENNA = "left_antenna";
+	private static final String RIGHT_ANTENNA = "right_antenna";
+	private static final String FRONT_LEGS = "front_legs";
+	private static final String MIDDLE_LEGS = "middle_legs";
+	private static final String BACK_LEGS = "back_legs";
 	private final ModelPart bone;
 	private final ModelPart rightWing;
 	private final ModelPart leftWing;

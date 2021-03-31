@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -69,12 +67,10 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handleUpdateAttributes(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getEntityId() {
 		return this.entityId;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<ClientboundUpdateAttributesPacket.AttributeSnapshot> getValues() {
 		return this.attributes;
 	}

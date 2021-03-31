@@ -13,6 +13,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class RingBell extends Behavior<LivingEntity> {
+	private static final float BELL_RING_CHANCE = 0.95F;
+	public static final int RING_BELL_FROM_DISTANCE = 3;
+
 	public RingBell() {
 		super(ImmutableMap.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT));
 	}

@@ -37,6 +37,6 @@ public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>>
 	}
 
 	protected boolean isShaking(Strider strider) {
-		return strider.isSuffocating();
+		return super.isShaking(strider) || strider.isSuffocating();
 	}
 }

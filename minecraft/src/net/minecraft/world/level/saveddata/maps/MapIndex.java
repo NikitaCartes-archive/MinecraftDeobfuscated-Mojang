@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class MapIndex extends SavedData {
+	public static final String FILE_NAME = "idcounts";
 	private final Object2IntMap<String> usedAuxIds = new Object2IntOpenHashMap<>();
 
 	public MapIndex() {

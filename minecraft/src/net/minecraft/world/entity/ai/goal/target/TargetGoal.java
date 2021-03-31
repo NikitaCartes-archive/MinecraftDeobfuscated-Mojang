@@ -11,6 +11,9 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.scores.Team;
 
 public abstract class TargetGoal extends Goal {
+	private static final int EMPTY_REACH_CACHE = 0;
+	private static final int CAN_REACH_CACHE = 1;
+	private static final int CANT_REACH_CACHE = 2;
 	protected final Mob mob;
 	protected final boolean mustSee;
 	private final boolean mustReach;

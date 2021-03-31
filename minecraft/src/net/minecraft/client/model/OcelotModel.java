@@ -14,6 +14,27 @@ import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
+	private static final int CROUCH_STATE = 0;
+	private static final int WALK_STATE = 1;
+	private static final int SPRINT_STATE = 2;
+	protected static final int SITTING_STATE = 3;
+	private static final float XO = 0.0F;
+	private static final float YO = 16.0F;
+	private static final float ZO = -9.0F;
+	private static final float HEAD_WALK_Y = 15.0F;
+	private static final float HEAD_WALK_Z = -9.0F;
+	private static final float BODY_WALK_Y = 12.0F;
+	private static final float BODY_WALK_Z = -10.0F;
+	private static final float TAIL_1_WALK_Y = 15.0F;
+	private static final float TAIL_1_WALK_Z = 8.0F;
+	private static final float TAIL_2_WALK_Y = 20.0F;
+	private static final float TAIL_2_WALK_Z = 14.0F;
+	protected static final float BACK_LEG_Y = 18.0F;
+	protected static final float BACK_LEG_Z = 5.0F;
+	protected static final float FRONT_LEG_Y = 14.1F;
+	private static final float FRONT_LEG_Z = -5.0F;
+	private static final String TAIL_1 = "tail1";
+	private static final String TAIL_2 = "tail2";
 	protected final ModelPart leftHindLeg;
 	protected final ModelPart rightHindLeg;
 	protected final ModelPart leftFrontLeg;

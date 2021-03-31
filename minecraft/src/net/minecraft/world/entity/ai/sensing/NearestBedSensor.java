@@ -16,6 +16,9 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class NearestBedSensor extends Sensor<Mob> {
+	private static final int CACHE_TIMEOUT = 40;
+	private static final int BATCH_SIZE = 5;
+	private static final int RATE = 20;
 	private final Long2LongMap batchCache = new Long2LongOpenHashMap();
 	private int triedCount;
 	private long lastUpdate;

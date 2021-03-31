@@ -26,6 +26,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class GiveGiftToHero extends Behavior<Villager> {
+	private static final int THROW_GIFT_AT_DISTANCE = 5;
+	private static final int MIN_TIME_BETWEEN_GIFTS = 600;
+	private static final int MAX_TIME_BETWEEN_GIFTS = 6600;
+	private static final int TIME_TO_DELAY_FOR_HEAD_TO_FINISH_TURNING = 20;
 	private static final Map<VillagerProfession, ResourceLocation> GIFTS = Util.make(Maps.<VillagerProfession, ResourceLocation>newHashMap(), hashMap -> {
 		hashMap.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
 		hashMap.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
@@ -41,6 +45,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 		hashMap.put(VillagerProfession.TOOLSMITH, BuiltInLootTables.TOOLSMITH_GIFT);
 		hashMap.put(VillagerProfession.WEAPONSMITH, BuiltInLootTables.WEAPONSMITH_GIFT);
 	});
+	private static final float SPEED_MODIFIER = 0.5F;
 	private int timeUntilNextGift = 600;
 	private boolean giftGivenDuringThisRun;
 	private long timeSinceStart;

@@ -87,4 +87,38 @@ public class FluidPredicate {
 			return jsonObject;
 		}
 	}
+
+	public static class Builder {
+		@Nullable
+		private Fluid fluid;
+		@Nullable
+		private Tag<Fluid> fluids;
+		private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
+
+		private Builder() {
+		}
+
+		public static FluidPredicate.Builder fluid() {
+			return new FluidPredicate.Builder();
+		}
+
+		public FluidPredicate.Builder of(Fluid fluid) {
+			this.fluid = fluid;
+			return this;
+		}
+
+		public FluidPredicate.Builder of(Tag<Fluid> tag) {
+			this.fluids = tag;
+			return this;
+		}
+
+		public FluidPredicate.Builder setProperties(StatePropertiesPredicate statePropertiesPredicate) {
+			this.properties = statePropertiesPredicate;
+			return this;
+		}
+
+		public FluidPredicate build() {
+			return new FluidPredicate(this.fluids, this.fluid, this.properties);
+		}
+	}
 }

@@ -10,8 +10,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -123,7 +121,6 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	@Environment(EnvType.CLIENT)
 	public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
 		return false;
 	}
@@ -228,7 +225,6 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	@Environment(EnvType.CLIENT)
 	public long getSeed(BlockState blockState, BlockPos blockPos) {
 		return Mth.getSeed(blockPos);
 	}
@@ -269,7 +265,6 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	@Environment(EnvType.CLIENT)
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return blockState.isCollisionShapeFullBlock(blockGetter, blockPos) ? 0.2F : 1.0F;
 	}
@@ -460,12 +455,10 @@ public abstract class BlockBehaviour {
 			return this.getBlock().getRenderShape(this.asState());
 		}
 
-		@Environment(EnvType.CLIENT)
 		public boolean emissiveRendering(BlockGetter blockGetter, BlockPos blockPos) {
 			return this.emissiveRendering.test(this.asState(), blockGetter, blockPos);
 		}
 
-		@Environment(EnvType.CLIENT)
 		public float getShadeBrightness(BlockGetter blockGetter, BlockPos blockPos) {
 			return this.getBlock().getShadeBrightness(this.asState(), blockGetter, blockPos);
 		}
@@ -519,7 +512,6 @@ public abstract class BlockBehaviour {
 			return this.canOcclude;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public boolean skipRendering(BlockState blockState, Direction direction) {
 			return this.getBlock().skipRendering(this.asState(), blockState, direction);
 		}
@@ -647,7 +639,6 @@ public abstract class BlockBehaviour {
 			return this.isSuffocating.test(this.asState(), blockGetter, blockPos);
 		}
 
-		@Environment(EnvType.CLIENT)
 		public boolean isViewBlocking(BlockGetter blockGetter, BlockPos blockPos) {
 			return this.isViewBlocking.test(this.asState(), blockGetter, blockPos);
 		}
@@ -710,7 +701,6 @@ public abstract class BlockBehaviour {
 			return this.getBlock().isRandomlyTicking(this.asState());
 		}
 
-		@Environment(EnvType.CLIENT)
 		public long getSeed(BlockPos blockPos) {
 			return this.getBlock().getSeed(this.asState(), blockPos);
 		}

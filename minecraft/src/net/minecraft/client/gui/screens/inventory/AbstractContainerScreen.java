@@ -27,6 +27,11 @@ import net.minecraft.world.item.ItemStack;
 @Environment(EnvType.CLIENT)
 public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> extends Screen implements MenuAccess<T> {
 	public static final ResourceLocation INVENTORY_LOCATION = new ResourceLocation("textures/gui/container/inventory.png");
+	private static final float SNAPBACK_SPEED = 100.0F;
+	private static final int QUICKDROP_DELAY = 500;
+	private static final int DOUBLECLICK_SPEED = 250;
+	public static final int SLOT_ITEM_BLIT_OFFSET = 100;
+	private static final int HOVER_ITEM_BLIT_OFFSET = 200;
 	protected int imageWidth = 176;
 	protected int imageHeight = 166;
 	protected int titleLabelX;

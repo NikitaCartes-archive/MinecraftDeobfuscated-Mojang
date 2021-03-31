@@ -7,6 +7,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public class WeatherCommand {
+	private static final int DEFAULT_TIME = 6000;
+
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("weather")

@@ -19,6 +19,7 @@ import net.minecraft.world.phys.HitResult;
 
 @Environment(EnvType.CLIENT)
 public class FindTreeTutorialStepInstance implements TutorialStepInstance {
+	private static final int HINT_DELAY = 6000;
 	private static final Set<Block> TREE_BLOCKS = Sets.<Block>newHashSet(
 		Blocks.OAK_LOG,
 		Blocks.SPRUCE_LOG,

@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -30,13 +28,21 @@ public interface TagCollection<T> {
 	Tag<T> getTagOrEmpty(ResourceLocation resourceLocation);
 
 	@Nullable
+	default ResourceLocation getId(Tag.Named<T> named) {
+		return named.getName();
+	}
+
+	@Nullable
 	ResourceLocation getId(Tag<T> tag);
+
+	default boolean hasTag(ResourceLocation resourceLocation) {
+		return this.getAllTags().containsKey(resourceLocation);
+	}
 
 	default Collection<ResourceLocation> getAvailableTags() {
 		return this.getAllTags().keySet();
 	}
 
-	@Environment(EnvType.CLIENT)
 	default Collection<ResourceLocation> getMatchingTags(T object) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
 
@@ -65,7 +71,6 @@ public interface TagCollection<T> {
 		return new TagCollection.NetworkPayload(map2);
 	}
 
-	@Environment(EnvType.CLIENT)
 	static <T> TagCollection<T> createFromNetwork(TagCollection.NetworkPayload networkPayload, Registry<? extends T> registry) {
 		Map<ResourceLocation, Tag<T>> map = Maps.<ResourceLocation, Tag<T>>newHashMapWithExpectedSize(networkPayload.tags.size());
 		networkPayload.tags.forEach((resourceLocation, intList) -> {

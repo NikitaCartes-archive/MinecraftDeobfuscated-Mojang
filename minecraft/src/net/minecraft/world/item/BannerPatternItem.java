@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,13 +21,11 @@ public class BannerPatternItem extends Item {
 		return this.bannerPattern;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		list.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getDisplayName() {
 		return new TranslatableComponent(this.getDescriptionId() + ".desc");
 	}

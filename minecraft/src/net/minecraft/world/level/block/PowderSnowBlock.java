@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
@@ -28,11 +27,16 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PowderSnowBlock extends Block implements BucketPickup {
+	private static final int HORIZONTAL_PARTICLE_MOMENTUM_FACTOR = 12;
+	private static final float IN_BLOCK_HORIZONTAL_SPEED_MULTIPLIER = 0.9F;
+	private static final float IN_BLOCK_VERTICAL_SPEED_MULTIPLIER = 1.5F;
+	private static final float NUM_BLOCKS_TO_FALL_INTO_BLOCK = 2.5F;
+	private static final VoxelShape FALLING_COLLISION_SHAPE = Shapes.box(0.0, 0.0, 0.0, 1.0, 0.9F, 1.0);
+
 	public PowderSnowBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
 		return blockState2.is(this) ? true : super.skipRendering(blockState, blockState2, direction);
@@ -46,10 +50,15 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!(entity instanceof LivingEntity) || ((LivingEntity)entity).getFeetBlockState().is(Blocks.POWDER_SNOW)) {
-			entity.makeStuckInBlock(blockState, new Vec3(0.9F, 0.99F, 0.9F));
+			entity.makeStuckInBlock(blockState, new Vec3(0.9F, 1.5, 0.9F));
 		}
 
 		entity.setIsInPowderSnow(true);
+		if (entity.isOnFire()) {
+			level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
+			level.addDestroyBlockEffect(blockPos, blockState);
+		}
+
 		if (level.isClientSide) {
 			entity.clearFire();
 		} else {
@@ -66,13 +75,16 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 		if (collisionContext instanceof EntityCollisionContext) {
 			EntityCollisionContext entityCollisionContext = (EntityCollisionContext)collisionContext;
 			Optional<Entity> optional = entityCollisionContext.getEntity();
-			boolean bl = optional.isPresent() && optional.get() instanceof FallingBlockEntity;
-			if (bl
-				|| optional.isPresent()
-					&& canEntityWalkOnPowderSnow((Entity)optional.get())
-					&& collisionContext.isAbove(Shapes.block(), blockPos, false)
-					&& !collisionContext.isDescending()) {
-				return super.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
+			if (optional.isPresent()) {
+				Entity entity = (Entity)optional.get();
+				if (entity.fallDistance > 2.5F) {
+					return FALLING_COLLISION_SHAPE;
+				}
+
+				boolean bl = entity instanceof FallingBlockEntity;
+				if (bl || canEntityWalkOnPowderSnow(entity) && collisionContext.isAbove(Shapes.block(), blockPos, false) && !collisionContext.isDescending()) {
+					return super.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
+				}
 			}
 		}
 
@@ -124,5 +136,10 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	@Override
 	public Optional<SoundEvent> getPickupSound() {
 		return Optional.of(SoundEvents.BUCKET_FILL_POWDER_SNOW);
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return true;
 	}
 }

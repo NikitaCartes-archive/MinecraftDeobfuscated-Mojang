@@ -1,7 +1,5 @@
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -15,7 +13,6 @@ public interface Recipe<C extends Container> {
 
 	ItemStack assemble(C container);
 
-	@Environment(EnvType.CLIENT)
 	boolean canCraftInDimensions(int i, int j);
 
 	ItemStack getResultItem();
@@ -41,12 +38,10 @@ public interface Recipe<C extends Container> {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	default String getGroup() {
 		return "";
 	}
 
-	@Environment(EnvType.CLIENT)
 	default ItemStack getToastSymbol() {
 		return new ItemStack(Blocks.CRAFTING_TABLE);
 	}
@@ -57,7 +52,6 @@ public interface Recipe<C extends Container> {
 
 	RecipeType<?> getType();
 
-	@Environment(EnvType.CLIENT)
 	default boolean isIncomplete() {
 		NonNullList<Ingredient> nonNullList = this.getIngredients();
 		return nonNullList.isEmpty() || nonNullList.stream().anyMatch(ingredient -> ingredient.getItems().length == 0);

@@ -40,6 +40,10 @@ public class AdvancementRewards {
 		this.function = cacheableFunction;
 	}
 
+	public ResourceLocation[] getRecipes() {
+		return this.recipes;
+	}
+
 	public void grant(ServerPlayer serverPlayer) {
 		serverPlayer.giveExperiencePoints(this.experience);
 		LootContext lootContext = new LootContext.Builder(serverPlayer.getLevel())
@@ -182,12 +186,30 @@ public class AdvancementRewards {
 			return this;
 		}
 
+		public static AdvancementRewards.Builder loot(ResourceLocation resourceLocation) {
+			return new AdvancementRewards.Builder().addLootTable(resourceLocation);
+		}
+
+		public AdvancementRewards.Builder addLootTable(ResourceLocation resourceLocation) {
+			this.loot.add(resourceLocation);
+			return this;
+		}
+
 		public static AdvancementRewards.Builder recipe(ResourceLocation resourceLocation) {
 			return new AdvancementRewards.Builder().addRecipe(resourceLocation);
 		}
 
 		public AdvancementRewards.Builder addRecipe(ResourceLocation resourceLocation) {
 			this.recipes.add(resourceLocation);
+			return this;
+		}
+
+		public static AdvancementRewards.Builder function(ResourceLocation resourceLocation) {
+			return new AdvancementRewards.Builder().runs(resourceLocation);
+		}
+
+		public AdvancementRewards.Builder runs(ResourceLocation resourceLocation) {
+			this.function = resourceLocation;
 			return this;
 		}
 

@@ -4,13 +4,13 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.math.Vector3f;
 import java.util.Locale;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 
 public abstract class DustParticleOptionsBase implements ParticleOptions {
+	public static final float MIN_SCALE = 0.01F;
+	public static final float MAX_SCALE = 4.0F;
 	protected final Vector3f color;
 	protected final float scale;
 
@@ -48,12 +48,10 @@ public abstract class DustParticleOptionsBase implements ParticleOptions {
 		);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Vector3f getColor() {
 		return this.color;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getScale() {
 		return this.scale;
 	}

@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.LongIterator;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +52,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
@@ -73,6 +72,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -158,10 +158,27 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements SnooperPopulator, CommandSource, AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8F;
+	private static final int TICK_STATS_SPAN = 100;
+	public static final int MS_PER_TICK = 50;
+	private static final int SNOOPER_UPDATE_INTERVAL = 6000;
+	private static final int OVERLOADED_THRESHOLD = 2000;
+	private static final int OVERLOADED_WARNING_INTERVAL = 15000;
+	public static final String LEVEL_STORAGE_PROTOCOL = "level";
+	public static final String LEVEL_STORAGE_SCHEMA = "level://";
+	private static final long STATUS_EXPIRE_TIME_NS = 5000000000L;
+	private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
+	public static final String MAP_RESOURCE_FILE = "resources.zip";
 	public static final File USERID_CACHE_FILE = new File("usercache.json");
+	public static final int START_CHUNK_RADIUS = 11;
+	private static final int START_TICKING_CHUNK_COUNT = 441;
+	private static final int AUTOSAVE_INTERVAL = 6000;
+	private static final int MAX_TICK_LATENCY = 3;
+	public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
 	public static final LevelSettings DEMO_SETTINGS = new LevelSettings(
 		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackConfig.DEFAULT
 	);
+	private static final long DELAYED_TASKS_TICK_EXTENSION = 50L;
 	protected final LevelStorageSource.LevelStorageAccess storageSource;
 	protected final PlayerDataStorage playerDataStorage;
 	private final Snooper snooper = new Snooper("server", this, Util.getMillis());
@@ -208,7 +225,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private long nextTickTime = Util.getMillis();
 	private long delayedTasksMaxNextTickTime;
 	private boolean mayHaveDelayedTasks;
-	@Environment(EnvType.CLIENT)
 	private boolean hasWorldScreenshot;
 	private final PackRepository packRepository;
 	private final ServerScoreboard scoreboard = new ServerScoreboard(this);
@@ -286,7 +302,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				public void progressStartNoAbort(Component component) {
 				}
 
-				@Environment(EnvType.CLIENT)
 				@Override
 				public void progressStart(Component component) {
 				}
@@ -299,7 +314,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					}
 				}
 
-				@Environment(EnvType.CLIENT)
 				@Override
 				public void stop() {
 				}
@@ -777,13 +791,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean hasWorldScreenshot() {
 		this.hasWorldScreenshot = this.hasWorldScreenshot || this.getWorldScreenshotFile().isFile();
 		return this.hasWorldScreenshot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public File getWorldScreenshotFile() {
 		return this.storageSource.getIconFile();
 	}
@@ -903,7 +915,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.serverId = string;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isShutdown() {
 		return !this.serverThread.isAlive();
 	}
@@ -945,6 +956,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.playerList.getPlayerNamesArray();
 	}
 
+	@DontObfuscate
 	public String getServerModName() {
 		return "vanilla";
 	}
@@ -1106,6 +1118,19 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		snooper.setDynamicData("worlds", i);
 	}
 
+	@Override
+	public void populateSnooperInitial(Snooper snooper) {
+		snooper.setFixedData("singleplayer", this.isSingleplayer());
+		snooper.setFixedData("server_brand", this.getServerModName());
+		snooper.setFixedData("gui_supported", GraphicsEnvironment.isHeadless() ? "headless" : "supported");
+		snooper.setFixedData("dedicated", this.isDedicatedServer());
+	}
+
+	@Override
+	public boolean isSnooperEnabled() {
+		return true;
+	}
+
 	public abstract boolean isDedicatedServer();
 
 	public abstract int getRateLimitPacketsPerSecond();
@@ -1185,7 +1210,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.connection;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isReady() {
 		return this.isReady;
 	}
@@ -1202,7 +1226,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.tickCount;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Snooper getSnooper() {
 		return this.snooper;
 	}
@@ -1217,6 +1240,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean repliesToStatus() {
 		return true;
+	}
+
+	public Proxy getProxy() {
+		return this.proxy;
 	}
 
 	public int getPlayerIdleTimeout() {
@@ -1412,6 +1439,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return true;
 	}
 
+	@Override
+	public abstract boolean shouldInformAdmins();
+
 	public RecipeManager getRecipeManager() {
 		return this.resources.getRecipeManager();
 	}
@@ -1481,7 +1511,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public FrameTimer getFrameTimer() {
 		return this.frameTimer;
 	}

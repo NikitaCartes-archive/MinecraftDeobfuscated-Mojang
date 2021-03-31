@@ -20,6 +20,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
 import com.mojang.math.Vector3f;
@@ -85,10 +86,10 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -127,6 +128,14 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final int CHUNK_SIZE = 16;
+	public static final int MAX_CHUNKS_WIDTH = 66;
+	public static final int MAX_CHUNKS_AREA = 4356;
+	private static final float SKY_DISC_RADIUS = 512.0F;
+	private static final int MIN_FOG_DISTANCE = 32;
+	private static final int RAIN_RADIUS = 10;
+	private static final int RAIN_DIAMETER = 21;
+	private static final int TRANSPARENT_SORT_COUNT = 15;
 	private static final ResourceLocation MOON_LOCATION = new ResourceLocation("textures/environment/moon_phases.png");
 	private static final ResourceLocation SUN_LOCATION = new ResourceLocation("textures/environment/sun.png");
 	private static final ResourceLocation CLOUDS_LOCATION = new ResourceLocation("textures/environment/clouds.png");
@@ -553,7 +562,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	protected boolean shouldShowEntityOutlines() {
-		return this.entityTarget != null && this.entityEffect != null && this.minecraft.player != null;
+		return !this.minecraft.gameRenderer.isPanoramicMode() && this.entityTarget != null && this.entityEffect != null && this.minecraft.player != null;
 	}
 
 	private void createDarkSky() {
@@ -685,14 +694,17 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 	}
 
+	public void graphicsChanged() {
+		if (Minecraft.useShaderTransparency()) {
+			this.initTransparency();
+		} else {
+			this.deinitTransparency();
+		}
+	}
+
 	public void allChanged() {
 		if (this.level != null) {
-			if (Minecraft.useShaderTransparency()) {
-				this.initTransparency();
-			} else {
-				this.deinitTransparency();
-			}
-
+			this.graphicsChanged();
 			this.level.clearTintCaches();
 			if (this.chunkRenderDispatcher == null) {
 				this.chunkRenderDispatcher = new ChunkRenderDispatcher(
@@ -1608,6 +1620,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			.endVertex();
 	}
 
+	public void captureFrustum() {
+		this.captureFrustum = true;
+	}
+
+	public void killFrustum() {
+		this.capturedFrustum = null;
+	}
+
 	public void tick() {
 		this.ticks++;
 		if (this.ticks % 20 == 0) {
@@ -2157,10 +2177,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m + s, m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m + v + s, m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m + v + s, m + 0.0F).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m - s, m + p).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m - (v + s), m + p).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m - (v + s), m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m - s, m + 0.0F).endVertex();
 					t++;
 				}
 			}
@@ -2201,10 +2221,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				for (double t = q; t < r; s += 0.5F) {
 					double u = Math.min(1.0, r - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m + s, m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m + v + s, m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m + v + s, m + 0.0F).endVertex();
-					bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m - s, m + p).endVertex();
+					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m - (v + s), m + p).endVertex();
+					bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m - (v + s), m + 0.0F).endVertex();
+					bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m - s, m + 0.0F).endVertex();
 					t++;
 				}
 			}
@@ -2272,6 +2292,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		});
 	}
 
+	public static void renderLineBox(VertexConsumer vertexConsumer, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m) {
+		renderLineBox(new PoseStack(), vertexConsumer, d, e, f, g, h, i, j, k, l, m, j, k, l);
+	}
+
 	public static void renderLineBox(PoseStack poseStack, VertexConsumer vertexConsumer, AABB aABB, float f, float g, float h, float i) {
 		renderLineBox(poseStack, vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, f, g, h, i, f, g, h);
 	}
@@ -2300,36 +2324,37 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		float p
 	) {
 		Matrix4f matrix4f = poseStack.last().pose();
+		Matrix3f matrix3f = poseStack.last().normal();
 		float q = (float)d;
 		float r = (float)e;
 		float s = (float)f;
 		float t = (float)g;
 		float u = (float)h;
 		float v = (float)i;
-		vertexConsumer.vertex(matrix4f, q, r, s).color(j, o, p, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, s).color(j, o, p, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, r, s).color(n, k, p, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, s).color(n, k, p, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, r, s).color(n, o, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, r, v).color(n, o, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(-1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(-1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(0.0F, -1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(0.0F, -1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(0.0F, 0.0F, -1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(0.0F, 0.0F, -1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(1.0F, 0.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, s).color(j, o, p, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, s).color(j, o, p, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, s).color(n, k, p, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, s).color(n, k, p, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, s).color(n, o, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, v).color(n, o, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(matrix3f, -1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, s).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(matrix3f, 0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, r, v).color(j, k, l, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, s).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, q, u, v).color(j, k, l, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, r, v).color(j, k, l, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, s).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t, u, v).color(j, k, l, m).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
 	}
 
 	public static void addChainedFilledBoxVertices(
@@ -2563,7 +2588,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.1F + 0.9F, false);
 				break;
 			case 1009:
-				this.level.playLocalSound(blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
+				if (j == 0) {
+					this.level.playLocalSound(blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F, false);
+				} else if (j == 1) {
+					this.level
+						.playLocalSound(blockPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.7F, 1.6F + (random.nextFloat() - random.nextFloat()) * 0.4F, false);
+				}
 				break;
 			case 1010:
 				if (Item.byId(j) instanceof RecordItem) {
@@ -2898,20 +2928,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 3002:
 				if (j >= 0 && j < Direction.Axis.VALUES.length) {
-					ParticleUtils.spawnParticlesAlongAxis(Direction.Axis.VALUES[j], this.level, blockPos, 0.125, ParticleTypes.ELECTRIC_SPARK, IntRange.of(10, 19));
+					ParticleUtils.spawnParticlesAlongAxis(Direction.Axis.VALUES[j], this.level, blockPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(10, 19));
 				} else {
-					ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.ELECTRIC_SPARK, IntRange.of(3, 5));
+					ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(3, 5));
 				}
 				break;
 			case 3003:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.WAX_ON, IntRange.of(3, 5));
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.WAX_ON, UniformInt.of(3, 5));
 				this.level.playLocalSound(blockPos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 				break;
 			case 3004:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.WAX_OFF, IntRange.of(3, 5));
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.WAX_OFF, UniformInt.of(3, 5));
 				break;
 			case 3005:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, IntRange.of(3, 5));
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
 		}
 	}
 

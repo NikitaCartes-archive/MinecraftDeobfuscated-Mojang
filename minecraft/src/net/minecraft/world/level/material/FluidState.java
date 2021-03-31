@@ -5,8 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -22,6 +20,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public final class FluidState extends StateHolder<Fluid, FluidState> {
 	public static final Codec<FluidState> CODEC = codec(Registry.FLUID, Fluid::defaultFluidState).stable();
+	public static final int AMOUNT_MAX = 9;
+	public static final int AMOUNT_FULL = 8;
 
 	public FluidState(Fluid fluid, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<FluidState> mapCodec) {
 		super(fluid, immutableMap, mapCodec);
@@ -55,7 +55,6 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		return this.getType().getAmount(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean shouldRenderBackwardUpFace(BlockGetter blockGetter, BlockPos blockPos) {
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
@@ -74,7 +73,6 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		this.getType().tick(level, blockPos, this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void animateTick(Level level, BlockPos blockPos, Random random) {
 		this.getType().animateTick(level, blockPos, this, random);
 	}
@@ -96,7 +94,6 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public ParticleOptions getDripParticle() {
 		return this.getType().getDripParticle();
 	}

@@ -6,6 +6,7 @@ import java.io.IOException;
 import net.minecraft.util.Mth;
 
 public class FloatTag extends NumericTag {
+	private static final int SELF_SIZE_IN_BITS = 96;
 	public static final FloatTag ZERO = new FloatTag(0.0F);
 	public static final TagType<FloatTag> TYPE = new TagType<FloatTag>() {
 		public FloatTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {

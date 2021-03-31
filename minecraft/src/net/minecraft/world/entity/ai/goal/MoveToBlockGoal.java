@@ -6,6 +6,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.LevelReader;
 
 public abstract class MoveToBlockGoal extends Goal {
+	private static final int GIVE_UP_TICKS = 1200;
+	private static final int STAY_TICKS = 1200;
+	private static final int INTERVAL_TICKS = 200;
 	protected final PathfinderMob mob;
 	public final double speedModifier;
 	protected int nextStartTick;

@@ -2,14 +2,15 @@ package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.BossEvent;
 
 public class ClientboundBossEventPacket implements Packet<ClientGamePacketListener> {
+	private static final int FLAG_DARKEN = 1;
+	private static final int FLAG_MUSIC = 2;
+	private static final int FLAG_FOG = 4;
 	private final UUID id;
 	private final ClientboundBossEventPacket.Operation operation;
 	private static final ClientboundBossEventPacket.Operation REMOVE_OPERATION = new ClientboundBossEventPacket.Operation() {
@@ -18,7 +19,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.REMOVE;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.remove(uUID);
@@ -95,7 +95,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		clientGamePacketListener.handleBossUpdate(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void dispatch(ClientboundBossEventPacket.Handler handler) {
 		this.operation.dispatch(this.id, handler);
 	}
@@ -135,7 +134,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.ADD;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.add(uUID, this.name, this.progress, this.color, this.overlay, this.darkenScreen, this.playMusic, this.createWorldFog);
@@ -151,7 +149,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public interface Handler {
 		default void add(
 			UUID uUID, Component component, float f, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay, boolean bl, boolean bl2, boolean bl3
@@ -177,7 +174,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 	interface Operation {
 		ClientboundBossEventPacket.OperationType getType();
 
-		@Environment(EnvType.CLIENT)
 		void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler);
 
 		void write(FriendlyByteBuf friendlyByteBuf);
@@ -214,7 +210,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.UPDATE_NAME;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.updateName(uUID, this.name);
@@ -242,7 +237,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.UPDATE_PROGRESS;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.updateProgress(uUID, this.progress);
@@ -277,7 +271,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.UPDATE_PROPERTIES;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.updateProperties(uUID, this.darkenScreen, this.playMusic, this.createWorldFog);
@@ -308,7 +301,6 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			return ClientboundBossEventPacket.OperationType.UPDATE_STYLE;
 		}
 
-		@Environment(EnvType.CLIENT)
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
 			handler.updateStyle(uUID, this.color, this.overlay);

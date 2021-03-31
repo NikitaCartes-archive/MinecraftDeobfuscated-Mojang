@@ -9,6 +9,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class ItemCombinerMenu extends AbstractContainerMenu {
+	public static final int INPUT_SLOT = 0;
+	public static final int ADDITIONAL_SLOT = 1;
+	public static final int RESULT_SLOT = 2;
+	private static final int INV_SLOT_START = 3;
+	private static final int INV_SLOT_END = 30;
+	private static final int USE_ROW_SLOT_START = 30;
+	private static final int USE_ROW_SLOT_END = 39;
 	protected final ResultContainer resultSlots = new ResultContainer();
 	protected final Container inputSlots = new SimpleContainer(2) {
 		@Override

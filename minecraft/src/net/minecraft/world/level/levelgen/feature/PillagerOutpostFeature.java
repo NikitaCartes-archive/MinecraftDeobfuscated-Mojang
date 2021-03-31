@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import java.util.List;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -15,14 +14,16 @@ import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfigura
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public class PillagerOutpostFeature extends JigsawFeature {
-	private static final List<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = ImmutableList.of(new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1));
+	private static final WeightedRandomList<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = WeightedRandomList.create(
+		new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1)
+	);
 
 	public PillagerOutpostFeature(Codec<JigsawConfiguration> codec) {
 		super(codec, 0, true, true);
 	}
 
 	@Override
-	public List<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
 		return OUTPOST_ENEMIES;
 	}
 

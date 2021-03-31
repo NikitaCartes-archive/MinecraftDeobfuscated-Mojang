@@ -2,8 +2,6 @@ package net.minecraft.world.item.trading;
 
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.SimpleMenuProvider;
@@ -20,7 +18,6 @@ public interface Merchant {
 
 	MerchantOffers getOffers();
 
-	@Environment(EnvType.CLIENT)
 	void overrideOffers(MerchantOffers merchantOffers);
 
 	void notifyTrade(MerchantOffer merchantOffer);

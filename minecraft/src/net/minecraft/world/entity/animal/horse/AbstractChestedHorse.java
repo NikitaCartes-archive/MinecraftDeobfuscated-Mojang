@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 
 public abstract class AbstractChestedHorse extends AbstractHorse {
 	private static final EntityDataAccessor<Boolean> DATA_ID_CHEST = SynchedEntityData.defineId(AbstractChestedHorse.class, EntityDataSerializers.BOOLEAN);
+	public static final int INV_CHEST_COUNT = 15;
 
 	protected AbstractChestedHorse(EntityType<? extends AbstractChestedHorse> entityType, Level level) {
 		super(entityType, level);

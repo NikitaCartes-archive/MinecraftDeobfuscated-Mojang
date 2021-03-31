@@ -6,13 +6,10 @@ import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Environment(EnvType.CLIENT)
 public class BlockMath {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final Map<Direction, Transformation> VANILLA_UV_TRANSFORM_LOCAL_TO_GLOBAL = Util.make(Maps.newEnumMap(Direction.class), enumMap -> {
@@ -33,6 +30,13 @@ public class BlockMath {
 		Matrix4f matrix4f = Matrix4f.createTranslateMatrix(0.5F, 0.5F, 0.5F);
 		matrix4f.multiply(transformation.getMatrix());
 		matrix4f.multiply(Matrix4f.createTranslateMatrix(-0.5F, -0.5F, -0.5F));
+		return new Transformation(matrix4f);
+	}
+
+	public static Transformation blockCornerToCenter(Transformation transformation) {
+		Matrix4f matrix4f = Matrix4f.createTranslateMatrix(-0.5F, -0.5F, -0.5F);
+		matrix4f.multiply(transformation.getMatrix());
+		matrix4f.multiply(Matrix4f.createTranslateMatrix(0.5F, 0.5F, 0.5F));
 		return new Transformation(matrix4f);
 	}
 

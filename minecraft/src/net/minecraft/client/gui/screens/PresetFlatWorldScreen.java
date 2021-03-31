@@ -47,6 +47,13 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class PresetFlatWorldScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SLOT_TEX_SIZE = 128;
+	private static final int SLOT_BG_SIZE = 18;
+	private static final int SLOT_STAT_HEIGHT = 20;
+	private static final int SLOT_BG_X = 1;
+	private static final int SLOT_BG_Y = 1;
+	private static final int SLOT_FG_X = 2;
+	private static final int SLOT_FG_Y = 2;
 	private static final List<PresetFlatWorldScreen.PresetInfo> PRESETS = Lists.<PresetFlatWorldScreen.PresetInfo>newArrayList();
 	private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
 	private final CreateFlatWorldScreen parent;

@@ -14,4 +14,6 @@ public abstract class WritableRegistry<T> extends Registry<T> {
 	public abstract <V extends T> V register(ResourceKey<T> resourceKey, V object, Lifecycle lifecycle);
 
 	public abstract <V extends T> V registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle);
+
+	public abstract boolean isEmpty();
 }

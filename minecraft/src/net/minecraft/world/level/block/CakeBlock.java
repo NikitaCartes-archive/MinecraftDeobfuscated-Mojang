@@ -27,8 +27,11 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CakeBlock extends Block {
+	public static final int MAX_BITES = 6;
 	public static final IntegerProperty BITES = BlockStateProperties.BITES;
 	public static final int FULL_CAKE_SIGNAL = getOutputSignal(0);
+	protected static final float AABB_OFFSET = 1.0F;
+	protected static final float AABB_SIZE_PER_BITE = 2.0F;
 	protected static final VoxelShape[] SHAPE_BY_BITE = new VoxelShape[]{
 		Block.box(1.0, 0.0, 1.0, 15.0, 8.0, 15.0),
 		Block.box(3.0, 0.0, 1.0, 15.0, 8.0, 15.0),

@@ -12,6 +12,8 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.phys.Vec3;
 
 public class RandomPos {
+	private static final int RANDOM_POS_ATTEMPTS = 10;
+
 	public static BlockPos generateRandomDirection(Random random, int i, int j) {
 		int k = random.nextInt(2 * i + 1) - i;
 		int l = random.nextInt(2 * j + 1) - j;

@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -46,7 +44,6 @@ public class ClientboundAwardStatsPacket implements Packet<ClientGamePacketListe
 		return stat.getType().getRegistry().getId(stat.getValue());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Map<Stat<?>, Integer> getStats() {
 		return this.stats;
 	}

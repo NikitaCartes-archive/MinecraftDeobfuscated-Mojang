@@ -13,6 +13,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class DemoMode extends ServerPlayerGameMode {
+	public static final int DEMO_DAYS = 5;
+	public static final int TOTAL_PLAY_TICKS = 120500;
 	private boolean displayedIntro;
 	private boolean demoHasEnded;
 	private int demoEndedReminder;

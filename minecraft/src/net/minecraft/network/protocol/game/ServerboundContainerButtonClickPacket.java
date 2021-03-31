@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -9,7 +7,6 @@ public class ServerboundContainerButtonClickPacket implements Packet<ServerGameP
 	private final int containerId;
 	private final int buttonId;
 
-	@Environment(EnvType.CLIENT)
 	public ServerboundContainerButtonClickPacket(int i, int j) {
 		this.containerId = i;
 		this.buttonId = j;

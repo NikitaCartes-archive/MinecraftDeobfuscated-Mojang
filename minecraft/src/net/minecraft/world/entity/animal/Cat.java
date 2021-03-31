@@ -4,8 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -70,11 +68,27 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 
 public class Cat extends TamableAnimal {
+	public static final double TEMPT_SPEED_MOD = 0.6;
+	public static final double WALK_SPEED_MOD = 0.8;
+	public static final double SPRINT_SPEED_MOD = 1.33;
 	private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> IS_LYING = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> RELAX_STATE_ONE = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.INT);
+	public static final int TYPE_TABBY = 0;
+	public static final int TYPE_BLACK = 1;
+	public static final int TYPE_RED = 2;
+	public static final int TYPE_SIAMESE = 3;
+	public static final int TYPE_BRITISH = 4;
+	public static final int TYPE_CALICO = 5;
+	public static final int TYPE_PERSIAN = 6;
+	public static final int TYPE_RAGDOLL = 7;
+	public static final int TYPE_WHITE = 8;
+	public static final int TYPE_JELLIE = 9;
+	public static final int TYPE_ALL_BLACK = 10;
+	private static final int NUMBER_OF_CAT_TYPES = 11;
+	private static final int NUMBER_OF_CAT_TYPES_EXCEPT_ALL_BLACK = 10;
 	public static final Map<Integer, ResourceLocation> TEXTURE_BY_TYPE = Util.make(Maps.<Integer, ResourceLocation>newHashMap(), hashMap -> {
 		hashMap.put(0, new ResourceLocation("textures/entity/cat/tabby.png"));
 		hashMap.put(1, new ResourceLocation("textures/entity/cat/black.png"));
@@ -305,17 +319,14 @@ public class Cat extends TamableAnimal {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getLieDownAmount(float f) {
 		return Mth.lerp(f, this.lieDownAmountO, this.lieDownAmount);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getLieDownAmountTail(float f) {
 		return Mth.lerp(f, this.lieDownAmountOTail, this.lieDownAmountTail);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getRelaxStateOneAmount(float f) {
 		return Mth.lerp(f, this.relaxStateOneAmountO, this.relaxStateOneAmount);
 	}

@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.animal.horse;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -56,6 +54,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
 public class Llama extends AbstractChestedHorse implements RangedAttackMob {
+	private static final int MAX_STRENGTH = 5;
+	private static final int VARIANTS = 4;
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
 	private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
@@ -70,7 +70,6 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		super(entityType, level);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isTraderLlama() {
 		return false;
 	}
@@ -497,7 +496,6 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		this.spit(livingEntity);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, 0.75 * (double)this.getEyeHeight(), (double)this.getBbWidth() * 0.5);

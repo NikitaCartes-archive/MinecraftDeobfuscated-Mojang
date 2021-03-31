@@ -2,8 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -42,7 +40,6 @@ public class UpgradeRecipe implements Recipe<Container> {
 		return itemStack;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean canCraftInDimensions(int i, int j) {
 		return i * j >= 2;
@@ -57,7 +54,6 @@ public class UpgradeRecipe implements Recipe<Container> {
 		return this.addition.test(itemStack);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getToastSymbol() {
 		return new ItemStack(Blocks.SMITHING_TABLE);
@@ -78,7 +74,6 @@ public class UpgradeRecipe implements Recipe<Container> {
 		return RecipeType.SMITHING;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isIncomplete() {
 		return Stream.of(this.base, this.addition).anyMatch(ingredient -> ingredient.getItems().length == 0);
@@ -88,7 +83,7 @@ public class UpgradeRecipe implements Recipe<Container> {
 		public UpgradeRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
 			Ingredient ingredient = Ingredient.fromJson(GsonHelper.getAsJsonObject(jsonObject, "base"));
 			Ingredient ingredient2 = Ingredient.fromJson(GsonHelper.getAsJsonObject(jsonObject, "addition"));
-			ItemStack itemStack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
+			ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
 			return new UpgradeRecipe(resourceLocation, ingredient, ingredient2, itemStack);
 		}
 

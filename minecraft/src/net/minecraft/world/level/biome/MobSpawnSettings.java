@@ -1,13 +1,11 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,7 +14,9 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.Weight;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import org.apache.logging.log4j.LogManager;
@@ -24,10 +24,12 @@ import org.apache.logging.log4j.Logger;
 
 public class MobSpawnSettings {
 	public static final Logger LOGGER = LogManager.getLogger();
+	private static final float DEFAULT_CREATURE_SPAWN_PROBABILITY = 0.1F;
+	public static final WeightedRandomList<MobSpawnSettings.SpawnerData> EMPTY_MOB_LIST = WeightedRandomList.create();
 	public static final MobSpawnSettings EMPTY = new MobSpawnSettings(
 		0.1F,
-		(Map<MobCategory, List<MobSpawnSettings.SpawnerData>>)Stream.of(MobCategory.values())
-			.collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> ImmutableList.of())),
+		(Map<MobCategory, WeightedRandomList<MobSpawnSettings.SpawnerData>>)Stream.of(MobCategory.values())
+			.collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> EMPTY_MOB_LIST)),
 		ImmutableMap.of(),
 		false
 	);
@@ -38,7 +40,7 @@ public class MobSpawnSettings {
 						.forGetter(mobSpawnSettings -> mobSpawnSettings.creatureGenerationProbability),
 					Codec.simpleMap(
 							MobCategory.CODEC,
-							MobSpawnSettings.SpawnerData.CODEC.listOf().promotePartial(Util.prefix("Spawn data: ", LOGGER::error)),
+							WeightedRandomList.codec(MobSpawnSettings.SpawnerData.CODEC).promotePartial(Util.prefix("Spawn data: ", LOGGER::error)),
 							StringRepresentable.keys(MobCategory.values())
 						)
 						.fieldOf("spawners")
@@ -51,19 +53,21 @@ public class MobSpawnSettings {
 				.apply(instance, MobSpawnSettings::new)
 	);
 	private final float creatureGenerationProbability;
-	private final Map<MobCategory, List<MobSpawnSettings.SpawnerData>> spawners;
+	private final Map<MobCategory, WeightedRandomList<MobSpawnSettings.SpawnerData>> spawners;
 	private final Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> mobSpawnCosts;
 	private final boolean playerSpawnFriendly;
 
-	private MobSpawnSettings(float f, Map<MobCategory, List<MobSpawnSettings.SpawnerData>> map, Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> map2, boolean bl) {
+	private MobSpawnSettings(
+		float f, Map<MobCategory, WeightedRandomList<MobSpawnSettings.SpawnerData>> map, Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> map2, boolean bl
+	) {
 		this.creatureGenerationProbability = f;
-		this.spawners = map;
-		this.mobSpawnCosts = map2;
+		this.spawners = ImmutableMap.copyOf(map);
+		this.mobSpawnCosts = ImmutableMap.copyOf(map2);
 		this.playerSpawnFriendly = bl;
 	}
 
-	public List<MobSpawnSettings.SpawnerData> getMobs(MobCategory mobCategory) {
-		return (List<MobSpawnSettings.SpawnerData>)this.spawners.getOrDefault(mobCategory, ImmutableList.of());
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobs(MobCategory mobCategory) {
+		return (WeightedRandomList<MobSpawnSettings.SpawnerData>)this.spawners.getOrDefault(mobCategory, EMPTY_MOB_LIST);
 	}
 
 	@Nullable
@@ -111,7 +115,7 @@ public class MobSpawnSettings {
 		public MobSpawnSettings build() {
 			return new MobSpawnSettings(
 				this.creatureGenerationProbability,
-				(Map)this.spawners.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ImmutableList.copyOf((Collection)entry.getValue()))),
+				(Map)this.spawners.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> WeightedRandomList.create((List)entry.getValue()))),
 				ImmutableMap.copyOf(this.mobSpawnCosts),
 				this.playerCanSpawn
 			);
@@ -143,11 +147,11 @@ public class MobSpawnSettings {
 		}
 	}
 
-	public static class SpawnerData extends WeighedRandom.WeighedRandomItem {
+	public static class SpawnerData extends WeightedEntry.IntrusiveBase {
 		public static final Codec<MobSpawnSettings.SpawnerData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Registry.ENTITY_TYPE.fieldOf("type").forGetter(spawnerData -> spawnerData.type),
-						Codec.INT.fieldOf("weight").forGetter(spawnerData -> spawnerData.weight),
+						Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.IntrusiveBase::getWeight),
 						Codec.INT.fieldOf("minCount").forGetter(spawnerData -> spawnerData.minCount),
 						Codec.INT.fieldOf("maxCount").forGetter(spawnerData -> spawnerData.maxCount)
 					)
@@ -158,14 +162,18 @@ public class MobSpawnSettings {
 		public final int maxCount;
 
 		public SpawnerData(EntityType<?> entityType, int i, int j, int k) {
-			super(i);
+			this(entityType, Weight.of(i), j, k);
+		}
+
+		public SpawnerData(EntityType<?> entityType, Weight weight, int i, int j) {
+			super(weight);
 			this.type = entityType.getCategory() == MobCategory.MISC ? EntityType.PIG : entityType;
-			this.minCount = j;
-			this.maxCount = k;
+			this.minCount = i;
+			this.maxCount = j;
 		}
 
 		public String toString() {
-			return EntityType.getKey(this.type) + "*(" + this.minCount + "-" + this.maxCount + "):" + this.weight;
+			return EntityType.getKey(this.type) + "*(" + this.minCount + "-" + this.maxCount + "):" + this.getWeight();
 		}
 	}
 }

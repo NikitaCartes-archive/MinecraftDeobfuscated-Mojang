@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -31,12 +29,10 @@ public class ClientboundPlaceGhostRecipePacket implements Packet<ClientGamePacke
 		clientGamePacketListener.handlePlaceRecipe(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ResourceLocation getRecipe() {
 		return this.recipe;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getContainerId() {
 		return this.containerId;
 	}

@@ -9,6 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class SuspiciousStewItem extends Item {
+	public static final String EFFECTS_TAG = "Effects";
+	public static final String EFFECT_ID_TAG = "EffectId";
+	public static final String EFFECT_DURATION_TAG = "EffectDuration";
+
 	public SuspiciousStewItem(Item.Properties properties) {
 		super(properties);
 	}

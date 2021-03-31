@@ -39,8 +39,10 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class Vex extends Monster {
+	public static final float FLAP_DEGREES_PER_TICK = 45.836624F;
 	public static final int TICKS_PER_FLAP = Mth.ceil((float) (Math.PI * 5.0 / 4.0));
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
+	private static final int FLAG_IS_CHARGING = 1;
 	private Mob owner;
 	@Nullable
 	private BlockPos boundOrigin;

@@ -9,6 +9,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class ScoreboardSaveData extends SavedData {
+	public static final String FILE_ID = "scoreboard";
 	private final Scoreboard scoreboard;
 
 	public ScoreboardSaveData(Scoreboard scoreboard) {

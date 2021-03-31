@@ -15,6 +15,10 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class BookModel extends Model {
+	private static final String LEFT_PAGES = "left_pages";
+	private static final String RIGHT_PAGES = "right_pages";
+	private static final String FLIP_PAGE_1 = "flip_page1";
+	private static final String FLIP_PAGE_2 = "flip_page2";
 	private final ModelPart root;
 	private final ModelPart leftLid;
 	private final ModelPart rightLid;

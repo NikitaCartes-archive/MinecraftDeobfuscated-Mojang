@@ -19,14 +19,27 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.SerializableUUID;
+import net.minecraft.util.VisibleForDebug;
 
 public class GossipContainer {
+	public static final int DISCARD_THRESHOLD = 2;
 	private final Map<UUID, GossipContainer.EntityGossips> gossips = Maps.<UUID, GossipContainer.EntityGossips>newHashMap();
+
+	@VisibleForDebug
+	public Map<UUID, Object2IntMap<GossipType>> getGossipEntries() {
+		Map<UUID, Object2IntMap<GossipType>> map = Maps.<UUID, Object2IntMap<GossipType>>newHashMap();
+		this.gossips.keySet().forEach(uUID -> {
+			GossipContainer.EntityGossips entityGossips = (GossipContainer.EntityGossips)this.gossips.get(uUID);
+			map.put(uUID, entityGossips.entries);
+		});
+		return map;
+	}
 
 	public void decay() {
 		Iterator<GossipContainer.EntityGossips> iterator = this.gossips.values().iterator();
@@ -89,12 +102,46 @@ public class GossipContainer {
 		return entityGossips != null ? entityGossips.weightedValue(predicate) : 0;
 	}
 
+	public long getCountForType(GossipType gossipType, DoublePredicate doublePredicate) {
+		return this.gossips
+			.values()
+			.stream()
+			.filter(entityGossips -> doublePredicate.test((double)(entityGossips.entries.getOrDefault(gossipType, 0) * gossipType.weight)))
+			.count();
+	}
+
 	public void add(UUID uUID, GossipType gossipType, int i) {
 		GossipContainer.EntityGossips entityGossips = this.getOrCreate(uUID);
 		entityGossips.entries.mergeInt(gossipType, i, (integer, integer2) -> this.mergeValuesForAddition(gossipType, integer, integer2));
 		entityGossips.makeSureValueIsntTooLowOrTooHigh(gossipType);
 		if (entityGossips.isEmpty()) {
 			this.gossips.remove(uUID);
+		}
+	}
+
+	public void remove(UUID uUID, GossipType gossipType, int i) {
+		this.add(uUID, gossipType, -i);
+	}
+
+	public void remove(UUID uUID, GossipType gossipType) {
+		GossipContainer.EntityGossips entityGossips = (GossipContainer.EntityGossips)this.gossips.get(uUID);
+		if (entityGossips != null) {
+			entityGossips.remove(gossipType);
+			if (entityGossips.isEmpty()) {
+				this.gossips.remove(uUID);
+			}
+		}
+	}
+
+	public void remove(GossipType gossipType) {
+		Iterator<GossipContainer.EntityGossips> iterator = this.gossips.values().iterator();
+
+		while (iterator.hasNext()) {
+			GossipContainer.EntityGossips entityGossips = (GossipContainer.EntityGossips)iterator.next();
+			entityGossips.remove(gossipType);
+			if (entityGossips.isEmpty()) {
+				iterator.remove();
+			}
 		}
 	}
 
@@ -172,6 +219,9 @@ public class GossipContainer {
 	}
 
 	static class GossipEntry {
+		public static final String TAG_TARGET = "Target";
+		public static final String TAG_TYPE = "Type";
+		public static final String TAG_VALUE = "Value";
 		public final UUID target;
 		public final GossipType type;
 		public final int value;

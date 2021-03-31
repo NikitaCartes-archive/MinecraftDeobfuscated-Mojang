@@ -1,5 +1,6 @@
 package net.minecraft.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -63,6 +64,10 @@ public class ClassInstanceMultiMap<T> extends AbstractCollection<T> {
 
 	public Iterator<T> iterator() {
 		return (Iterator<T>)(this.allInstances.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.allInstances.iterator()));
+	}
+
+	public List<T> getAllInstances() {
+		return ImmutableList.copyOf(this.allInstances);
 	}
 
 	public int size() {

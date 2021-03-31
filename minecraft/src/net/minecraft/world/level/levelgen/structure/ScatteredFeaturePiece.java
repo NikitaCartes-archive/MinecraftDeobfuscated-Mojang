@@ -1,6 +1,5 @@
 package net.minecraft.world.level.levelgen.structure;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -15,17 +14,12 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 	protected final int depth;
 	protected int heightPosition = -1;
 
-	protected ScatteredFeaturePiece(StructurePieceType structurePieceType, Random random, int i, int j, int k, int l, int m, int n) {
-		super(structurePieceType, 0);
+	protected ScatteredFeaturePiece(StructurePieceType structurePieceType, int i, int j, int k, int l, int m, int n, Direction direction) {
+		super(structurePieceType, 0, StructurePiece.makeBoundingBox(i, j, k, direction, l, m, n));
 		this.width = l;
 		this.height = m;
 		this.depth = n;
-		this.setOrientation(Direction.Plane.HORIZONTAL.getRandomDirection(random));
-		if (this.getOrientation().getAxis() == Direction.Axis.Z) {
-			this.boundingBox = new BoundingBox(i, j, k, i + l - 1, j + m - 1, k + n - 1);
-		} else {
-			this.boundingBox = new BoundingBox(i, j, k, i + n - 1, j + m - 1, k + l - 1);
-		}
+		this.setOrientation(direction);
 	}
 
 	protected ScatteredFeaturePiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -52,8 +46,8 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 			int k = 0;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			for (int l = this.boundingBox.z0; l <= this.boundingBox.z1; l++) {
-				for (int m = this.boundingBox.x0; m <= this.boundingBox.x1; m++) {
+			for (int l = this.boundingBox.minZ(); l <= this.boundingBox.maxZ(); l++) {
+				for (int m = this.boundingBox.minX(); m <= this.boundingBox.maxX(); m++) {
 					mutableBlockPos.set(m, 64, l);
 					if (boundingBox.isInside(mutableBlockPos)) {
 						j += levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY();
@@ -66,7 +60,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 				return false;
 			} else {
 				this.heightPosition = j / k;
-				this.boundingBox.move(0, this.heightPosition - this.boundingBox.y0 + i, 0);
+				this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + i, 0);
 				return true;
 			}
 		}

@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -36,17 +34,14 @@ public class ClientboundChatPacket implements Packet<ClientGamePacketListener> {
 		clientGamePacketListener.handleChat(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getMessage() {
 		return this.message;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ChatType getType() {
 		return this.type;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public UUID getSender() {
 		return this.sender;
 	}

@@ -1,7 +1,9 @@
 package net.minecraft.util;
 
+import net.minecraft.util.valueproviders.UniformInt;
+
 public class TimeUtil {
-	public static IntRange rangeOfSeconds(int i, int j) {
-		return new IntRange(i * 20, j * 20);
+	public static UniformInt rangeOfSeconds(int i, int j) {
+		return UniformInt.of(i * 20, j * 20);
 	}
 }

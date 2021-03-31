@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -13,6 +11,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class ShieldItem extends Item {
+	public static final int EFFECTIVE_BLOCK_DELAY = 5;
+	public static final float MINIMUM_DURABILITY_DAMAGE = 3.0F;
+	public static final String TAG_BASE_COLOR = "Base";
+
 	public ShieldItem(Item.Properties properties) {
 		super(properties);
 		DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
@@ -23,7 +25,6 @@ public class ShieldItem extends Item {
 		return itemStack.getTagElement("BlockEntityTag") != null ? this.getDescriptionId() + '.' + getColor(itemStack).getName() : super.getDescriptionId(itemStack);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		BannerItem.appendHoverTextFromBannerBlockEntityTag(itemStack, list);

@@ -3,8 +3,6 @@ package net.minecraft.world.entity;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,6 +26,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 
 public class LightningBolt extends Entity {
+	private static final int START_LIFE = 2;
 	private int life;
 	public long seed;
 	private int flashes;
@@ -52,6 +51,11 @@ public class LightningBolt extends Entity {
 		return SoundSource.WEATHER;
 	}
 
+	@Nullable
+	public ServerPlayer getCause() {
+		return this.cause;
+	}
+
 	public void setCause(@Nullable ServerPlayer serverPlayer) {
 		this.cause = serverPlayer;
 	}
@@ -67,21 +71,26 @@ public class LightningBolt extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.life == 2 && !this.level.isClientSide) {
-			Difficulty difficulty = this.level.getDifficulty();
-			if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
-				this.spawnFire(4);
-			}
+		if (this.life == 2) {
+			if (this.level.isClientSide()) {
+				this.level
+					.playLocalSound(
+						this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F, false
+					);
+				this.level
+					.playLocalSound(
+						this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F, false
+					);
+			} else {
+				Difficulty difficulty = this.level.getDifficulty();
+				if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
+					this.spawnFire(4);
+				}
 
-			this.powerLightningRod();
-			clearCopperOnLightningStrike(this.level, this.blockPosition().below());
-			this.level
-				.playSound(
-					null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F
-				);
-			this.level
-				.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
-			this.gameEvent(GameEvent.LIGHTNING_STRIKE);
+				this.powerLightningRod();
+				clearCopperOnLightningStrike(this.level, this.blockPosition().below());
+				this.gameEvent(GameEvent.LIGHTNING_STRIKE);
+			}
 		}
 
 		this.life--;
@@ -185,7 +194,6 @@ public class LightningBolt extends Entity {
 		return Optional.empty();
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
 		double e = 64.0 * getViewScale();

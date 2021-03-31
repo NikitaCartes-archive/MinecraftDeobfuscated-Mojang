@@ -373,6 +373,8 @@ public enum ConnectionProtocol {
 			)
 	);
 
+	private static final int MIN_PROTOCOL_ID = -1;
+	private static final int MAX_PROTOCOL_ID = 2;
 	private static final ConnectionProtocol[] LOOKUP = new ConnectionProtocol[4];
 	private static final Map<Class<? extends Packet<?>>, ConnectionProtocol> PROTOCOL_BY_PACKET = Maps.<Class<? extends Packet<?>>, ConnectionProtocol>newHashMap();
 	private final int id;

@@ -6,4 +6,6 @@ public interface SurfaceBuilderConfiguration {
 	BlockState getTopMaterial();
 
 	BlockState getUnderMaterial();
+
+	BlockState getUnderwaterMaterial();
 }

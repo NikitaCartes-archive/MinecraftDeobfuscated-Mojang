@@ -2,8 +2,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -48,6 +46,14 @@ import net.minecraft.world.phys.Vec3;
 
 public class Ravager extends Raider {
 	private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = entity -> entity.isAlive() && !(entity instanceof Ravager);
+	private static final double BASE_MOVEMENT_SPEED = 0.3;
+	private static final double ATTACK_MOVEMENT_SPEED = 0.35;
+	private static final int STUNNED_COLOR = 8356754;
+	private static final double STUNNED_COLOR_BLUE = 0.5725490196078431;
+	private static final double STUNNED_COLOR_GREEN = 0.5137254901960784;
+	private static final double STUNNED_COLOR_RED = 0.4980392156862745;
+	private static final int ATTACK_DURATION = 10;
+	public static final int STUN_DURATION = 40;
 	private int attackTick;
 	private int stunnedTick;
 	private int roarTick;
@@ -257,7 +263,6 @@ public class Ravager extends Raider {
 		entity.push(d / f * 4.0, 0.2, e / f * 4.0);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 4) {
@@ -270,17 +275,14 @@ public class Ravager extends Raider {
 		super.handleEntityEvent(b);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getAttackTick() {
 		return this.attackTick;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getStunnedTick() {
 		return this.stunnedTick;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getRoarTick() {
 		return this.roarTick;
 	}

@@ -24,6 +24,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class NetherBridgePieces {
+	private static final int MAX_DEPTH = 30;
+	private static final int LOWEST_Y_POSITION = 10;
 	private static final NetherBridgePieces.PieceWeight[] BRIDGE_PIECE_WEIGHTS = new NetherBridgePieces.PieceWeight[]{
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeStraight.class, 30, 0, true),
 		new NetherBridgePieces.PieceWeight(NetherBridgePieces.BridgeCrossing.class, 10, 4),
@@ -43,56 +45,54 @@ public class NetherBridgePieces {
 	};
 
 	private static NetherBridgePieces.NetherBridgePiece findAndCreateBridgePieceFactory(
-		NetherBridgePieces.PieceWeight pieceWeight, List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l
+		NetherBridgePieces.PieceWeight pieceWeight, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 	) {
 		Class<? extends NetherBridgePieces.NetherBridgePiece> class_ = pieceWeight.pieceClass;
 		NetherBridgePieces.NetherBridgePiece netherBridgePiece = null;
 		if (class_ == NetherBridgePieces.BridgeStraight.class) {
-			netherBridgePiece = NetherBridgePieces.BridgeStraight.createPiece(list, random, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.BridgeStraight.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.BridgeCrossing.class) {
-			netherBridgePiece = NetherBridgePieces.BridgeCrossing.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.BridgeCrossing.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.RoomCrossing.class) {
-			netherBridgePiece = NetherBridgePieces.RoomCrossing.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.RoomCrossing.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.StairsRoom.class) {
-			netherBridgePiece = NetherBridgePieces.StairsRoom.createPiece(list, i, j, k, l, direction);
+			netherBridgePiece = NetherBridgePieces.StairsRoom.createPiece(structurePieceAccessor, i, j, k, l, direction);
 		} else if (class_ == NetherBridgePieces.MonsterThrone.class) {
-			netherBridgePiece = NetherBridgePieces.MonsterThrone.createPiece(list, i, j, k, l, direction);
+			netherBridgePiece = NetherBridgePieces.MonsterThrone.createPiece(structurePieceAccessor, i, j, k, l, direction);
 		} else if (class_ == NetherBridgePieces.CastleEntrance.class) {
-			netherBridgePiece = NetherBridgePieces.CastleEntrance.createPiece(list, random, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleEntrance.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleSmallCorridorPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorPiece.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleSmallCorridorRightTurnPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorRightTurnPiece.createPiece(list, random, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorRightTurnPiece.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleSmallCorridorLeftTurnPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorLeftTurnPiece.createPiece(list, random, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorLeftTurnPiece.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleCorridorStairsPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleCorridorStairsPiece.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleCorridorStairsPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleCorridorTBalconyPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleCorridorTBalconyPiece.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleCorridorTBalconyPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleSmallCorridorCrossingPiece.class) {
-			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorCrossingPiece.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleSmallCorridorCrossingPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		} else if (class_ == NetherBridgePieces.CastleStalkRoom.class) {
-			netherBridgePiece = NetherBridgePieces.CastleStalkRoom.createPiece(list, i, j, k, direction, l);
+			netherBridgePiece = NetherBridgePieces.CastleStalkRoom.createPiece(structurePieceAccessor, i, j, k, direction, l);
 		}
 
 		return netherBridgePiece;
 	}
 
 	public static class BridgeCrossing extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 19;
+		private static final int HEIGHT = 10;
+		private static final int DEPTH = 19;
+
 		public BridgeCrossing(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, i);
+			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
-		protected BridgeCrossing(Random random, int i, int j) {
-			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, 0);
-			this.setOrientation(Direction.Plane.HORIZONTAL.getRandomDirection(random));
-			if (this.getOrientation().getAxis() == Direction.Axis.Z) {
-				this.boundingBox = new BoundingBox(i, 64, j, i + 19 - 1, 73, j + 19 - 1);
-			} else {
-				this.boundingBox = new BoundingBox(i, 64, j, i + 19 - 1, 73, j + 19 - 1);
-			}
+		protected BridgeCrossing(int i, int j, Direction direction) {
+			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_CROSSING, 0, StructurePiece.makeBoundingBox(i, 64, j, direction, 19, 10, 19));
+			this.setOrientation(direction);
 		}
 
 		protected BridgeCrossing(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -104,15 +104,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 8, 3, false);
-			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, list, random, 3, 8, false);
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 3, 8, false);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 8, 3, false);
+			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 3, 8, false);
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 3, 8, false);
 		}
 
-		public static NetherBridgePieces.BridgeCrossing createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.BridgeCrossing createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -8, -3, 0, 19, 10, 19, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.BridgeCrossing(l, boundingBox, direction)
 				: null;
 		}
@@ -168,12 +168,14 @@ public class NetherBridgePieces {
 	}
 
 	public static class BridgeEndFiller extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 10;
+		private static final int DEPTH = 8;
 		private final int selfSeed;
 
 		public BridgeEndFiller(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_END_FILLER, i);
+			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_END_FILLER, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 			this.selfSeed = random.nextInt();
 		}
 
@@ -182,9 +184,11 @@ public class NetherBridgePieces {
 			this.selfSeed = compoundTag.getInt("Seed");
 		}
 
-		public static NetherBridgePieces.BridgeEndFiller createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.BridgeEndFiller createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -3, 0, 5, 10, 8, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.BridgeEndFiller(l, random, boundingBox, direction)
 				: null;
 		}
@@ -236,10 +240,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class BridgeStraight extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 10;
+		private static final int DEPTH = 19;
+
 		public BridgeStraight(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_STRAIGHT, i);
+			super(StructurePieceType.NETHER_FORTRESS_BRIDGE_STRAIGHT, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public BridgeStraight(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -247,13 +254,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 1, 3, false);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 3, false);
 		}
 
-		public static NetherBridgePieces.BridgeStraight createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.BridgeStraight createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -3, 0, 5, 10, 19, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.BridgeStraight(l, random, boundingBox, direction)
 				: null;
 		}
@@ -303,10 +312,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleCorridorStairsPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 14;
+		private static final int DEPTH = 10;
+
 		public CastleCorridorStairsPiece(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_STAIRS, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_STAIRS, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleCorridorStairsPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -314,13 +326,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 1, 0, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
 		}
 
-		public static NetherBridgePieces.CastleCorridorStairsPiece createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleCorridorStairsPiece createPiece(
+			StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -7, 0, 5, 14, 10, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleCorridorStairsPiece(l, boundingBox, direction)
 				: null;
 		}
@@ -375,10 +389,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleCorridorTBalconyPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 9;
+		private static final int HEIGHT = 7;
+		private static final int DEPTH = 9;
+
 		public CastleCorridorTBalconyPiece(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_T_BALCONY, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_CORRIDOR_T_BALCONY, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleCorridorTBalconyPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -386,20 +403,22 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 			int i = 1;
 			Direction direction = this.getOrientation();
 			if (direction == Direction.WEST || direction == Direction.NORTH) {
 				i = 5;
 			}
 
-			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, i, random.nextInt(8) > 0);
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, i, random.nextInt(8) > 0);
+			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, i, random.nextInt(8) > 0);
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, i, random.nextInt(8) > 0);
 		}
 
-		public static NetherBridgePieces.CastleCorridorTBalconyPiece createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleCorridorTBalconyPiece createPiece(
+			StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -3, 0, 0, 9, 7, 9, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleCorridorTBalconyPiece(l, boundingBox, direction)
 				: null;
 		}
@@ -469,10 +488,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleEntrance extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 13;
+		private static final int HEIGHT = 14;
+		private static final int DEPTH = 13;
+
 		public CastleEntrance(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_ENTRANCE, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_ENTRANCE, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleEntrance(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -480,13 +502,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 5, 3, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 5, 3, true);
 		}
 
-		public static NetherBridgePieces.CastleEntrance createPiece(List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleEntrance createPiece(
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -5, -3, 0, 13, 14, 13, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleEntrance(l, random, boundingBox, direction)
 				: null;
 		}
@@ -628,7 +652,7 @@ public class NetherBridgePieces {
 			this.generateBox(worldGenLevel, boundingBox, 6, 1, 6, 6, 4, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 6, 0, 6, boundingBox);
 			this.placeBlock(worldGenLevel, Blocks.LAVA.defaultBlockState(), 6, 5, 6, boundingBox);
-			BlockPos blockPos2 = new BlockPos(this.getWorldX(6, 6), this.getWorldY(5), this.getWorldZ(6, 6));
+			BlockPos blockPos2 = this.getWorldPos(6, 5, 6);
 			if (boundingBox.isInside(blockPos2)) {
 				worldGenLevel.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
 			}
@@ -638,10 +662,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleSmallCorridorCrossingPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 7;
+		private static final int DEPTH = 5;
+
 		public CastleSmallCorridorCrossingPiece(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_CROSSING, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_CROSSING, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleSmallCorridorCrossingPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -649,15 +676,17 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 1, 0, true);
-			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 1, true);
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 1, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
+			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
 		}
 
-		public static NetherBridgePieces.CastleSmallCorridorCrossingPiece createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleSmallCorridorCrossingPiece createPiece(
+			StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleSmallCorridorCrossingPiece(l, boundingBox, direction)
 				: null;
 		}
@@ -691,12 +720,14 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleSmallCorridorLeftTurnPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 7;
+		private static final int DEPTH = 5;
 		private boolean isNeedingChest;
 
 		public CastleSmallCorridorLeftTurnPiece(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_LEFT_TURN, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_LEFT_TURN, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 			this.isNeedingChest = random.nextInt(3) == 0;
 		}
 
@@ -712,15 +743,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 1, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
 		}
 
 		public static NetherBridgePieces.CastleSmallCorridorLeftTurnPiece createPiece(
-			List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleSmallCorridorLeftTurnPiece(l, random, boundingBox, direction)
 				: null;
 		}
@@ -752,7 +783,7 @@ public class NetherBridgePieces {
 			this.generateBox(worldGenLevel, boundingBox, 0, 2, 4, 3, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
 			this.generateBox(worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
-			if (this.isNeedingChest && boundingBox.isInside(new BlockPos(this.getWorldX(3, 3), this.getWorldY(2), this.getWorldZ(3, 3)))) {
+			if (this.isNeedingChest && boundingBox.isInside(this.getWorldPos(3, 2, 3))) {
 				this.isNeedingChest = false;
 				this.createChest(worldGenLevel, boundingBox, random, 3, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
 			}
@@ -770,10 +801,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleSmallCorridorPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 7;
+		private static final int DEPTH = 5;
+
 		public CastleSmallCorridorPiece(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleSmallCorridorPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -781,13 +815,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 1, 0, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
 		}
 
-		public static NetherBridgePieces.CastleSmallCorridorPiece createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleSmallCorridorPiece createPiece(
+			StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l
+		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleSmallCorridorPiece(l, boundingBox, direction)
 				: null;
 		}
@@ -827,12 +863,14 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleSmallCorridorRightTurnPiece extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 5;
+		private static final int HEIGHT = 7;
+		private static final int DEPTH = 5;
 		private boolean isNeedingChest;
 
 		public CastleSmallCorridorRightTurnPiece(int i, Random random, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_RIGHT_TURN, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_RIGHT_TURN, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 			this.isNeedingChest = random.nextInt(3) == 0;
 		}
 
@@ -848,15 +886,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 1, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
 		}
 
 		public static NetherBridgePieces.CastleSmallCorridorRightTurnPiece createPiece(
-			List<StructurePiece> list, Random random, int i, int j, int k, Direction direction, int l
+			StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l
 		) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleSmallCorridorRightTurnPiece(l, random, boundingBox, direction)
 				: null;
 		}
@@ -888,7 +926,7 @@ public class NetherBridgePieces {
 			this.generateBox(worldGenLevel, boundingBox, 1, 2, 4, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
 			this.generateBox(worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
-			if (this.isNeedingChest && boundingBox.isInside(new BlockPos(this.getWorldX(1, 3), this.getWorldY(2), this.getWorldZ(1, 3)))) {
+			if (this.isNeedingChest && boundingBox.isInside(this.getWorldPos(1, 2, 3))) {
 				this.isNeedingChest = false;
 				this.createChest(worldGenLevel, boundingBox, random, 1, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
 			}
@@ -906,10 +944,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class CastleStalkRoom extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 13;
+		private static final int HEIGHT = 14;
+		private static final int DEPTH = 13;
+
 		public CastleStalkRoom(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_CASTLE_STALK_ROOM, i);
+			super(StructurePieceType.NETHER_FORTRESS_CASTLE_STALK_ROOM, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public CastleStalkRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -917,14 +958,14 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 5, 3, true);
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 5, 11, true);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 5, 3, true);
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 5, 11, true);
 		}
 
-		public static NetherBridgePieces.CastleStalkRoom createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.CastleStalkRoom createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -5, -3, 0, 13, 14, 13, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.CastleStalkRoom(l, boundingBox, direction)
 				: null;
 		}
@@ -1093,12 +1134,14 @@ public class NetherBridgePieces {
 	}
 
 	public static class MonsterThrone extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 7;
+		private static final int HEIGHT = 8;
+		private static final int DEPTH = 9;
 		private boolean hasPlacedSpawner;
 
 		public MonsterThrone(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_MONSTER_THRONE, i);
+			super(StructurePieceType.NETHER_FORTRESS_MONSTER_THRONE, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public MonsterThrone(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1112,9 +1155,9 @@ public class NetherBridgePieces {
 			compoundTag.putBoolean("Mob", this.hasPlacedSpawner);
 		}
 
-		public static NetherBridgePieces.MonsterThrone createPiece(List<StructurePiece> list, int i, int j, int k, int l, Direction direction) {
+		public static NetherBridgePieces.MonsterThrone createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, int l, Direction direction) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -2, 0, 0, 7, 8, 9, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.MonsterThrone(l, boundingBox, direction)
 				: null;
 		}
@@ -1193,7 +1236,7 @@ public class NetherBridgePieces {
 			this.placeBlock(worldGenLevel, blockState, 3, 8, 8, boundingBox);
 			this.placeBlock(worldGenLevel, Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, Boolean.valueOf(true)), 4, 8, 8, boundingBox);
 			if (!this.hasPlacedSpawner) {
-				BlockPos blockPos2 = new BlockPos(this.getWorldX(3, 5), this.getWorldY(5), this.getWorldZ(3, 5));
+				BlockPos blockPos2 = this.getWorldPos(3, 5, 5);
 				if (boundingBox.isInside(blockPos2)) {
 					this.hasPlacedSpawner = true;
 					worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
@@ -1215,8 +1258,8 @@ public class NetherBridgePieces {
 	}
 
 	abstract static class NetherBridgePiece extends StructurePiece {
-		protected NetherBridgePiece(StructurePieceType structurePieceType, int i) {
-			super(structurePieceType, i);
+		protected NetherBridgePiece(StructurePieceType structurePieceType, int i, BoundingBox boundingBox) {
+			super(structurePieceType, i, boundingBox);
 		}
 
 		public NetherBridgePiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -1245,7 +1288,7 @@ public class NetherBridgePieces {
 		private NetherBridgePieces.NetherBridgePiece generatePiece(
 			NetherBridgePieces.StartPiece startPiece,
 			List<NetherBridgePieces.PieceWeight> list,
-			List<StructurePiece> list2,
+			StructurePieceAccessor structurePieceAccessor,
 			Random random,
 			int i,
 			int j,
@@ -1269,7 +1312,7 @@ public class NetherBridgePieces {
 						}
 
 						NetherBridgePieces.NetherBridgePiece netherBridgePiece = NetherBridgePieces.findAndCreateBridgePieceFactory(
-							pieceWeight, list2, random, i, j, k, direction, l
+							pieceWeight, structurePieceAccessor, random, i, j, k, direction, l
 						);
 						if (netherBridgePiece != null) {
 							pieceWeight.placeCount++;
@@ -1284,50 +1327,92 @@ public class NetherBridgePieces {
 				}
 			}
 
-			return NetherBridgePieces.BridgeEndFiller.createPiece(list2, random, i, j, k, direction, l);
+			return NetherBridgePieces.BridgeEndFiller.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 		}
 
 		private StructurePiece generateAndAddPiece(
-			NetherBridgePieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, int k, @Nullable Direction direction, int l, boolean bl
+			NetherBridgePieces.StartPiece startPiece,
+			StructurePieceAccessor structurePieceAccessor,
+			Random random,
+			int i,
+			int j,
+			int k,
+			@Nullable Direction direction,
+			int l,
+			boolean bl
 		) {
-			if (Math.abs(i - startPiece.getBoundingBox().x0) <= 112 && Math.abs(k - startPiece.getBoundingBox().z0) <= 112) {
-				List<NetherBridgePieces.PieceWeight> list2 = startPiece.availableBridgePieces;
+			if (Math.abs(i - startPiece.getBoundingBox().minX()) <= 112 && Math.abs(k - startPiece.getBoundingBox().minZ()) <= 112) {
+				List<NetherBridgePieces.PieceWeight> list = startPiece.availableBridgePieces;
 				if (bl) {
-					list2 = startPiece.availableCastlePieces;
+					list = startPiece.availableCastlePieces;
 				}
 
-				StructurePiece structurePiece = this.generatePiece(startPiece, list2, list, random, i, j, k, direction, l + 1);
+				StructurePiece structurePiece = this.generatePiece(startPiece, list, structurePieceAccessor, random, i, j, k, direction, l + 1);
 				if (structurePiece != null) {
-					list.add(structurePiece);
+					structurePieceAccessor.addPiece(structurePiece);
 					startPiece.pendingChildren.add(structurePiece);
 				}
 
 				return structurePiece;
 			} else {
-				return NetherBridgePieces.BridgeEndFiller.createPiece(list, random, i, j, k, direction, l);
+				return NetherBridgePieces.BridgeEndFiller.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
 			}
 		}
 
 		@Nullable
-		protected StructurePiece generateChildForward(NetherBridgePieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, boolean bl) {
+		protected StructurePiece generateChildForward(
+			NetherBridgePieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + i, this.boundingBox.y0 + j, this.boundingBox.z0 - 1, direction, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + i,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() - 1,
+							direction,
+							this.getGenDepth(),
+							bl
 						);
 					case SOUTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + i, this.boundingBox.y0 + j, this.boundingBox.z1 + 1, direction, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + i,
+							this.boundingBox.minY() + j,
+							this.boundingBox.maxZ() + 1,
+							direction,
+							this.getGenDepth(),
+							bl
 						);
 					case WEST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + j, this.boundingBox.z0 + i, direction, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() + i,
+							direction,
+							this.getGenDepth(),
+							bl
 						);
 					case EAST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + j, this.boundingBox.z0 + i, direction, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + j,
+							this.boundingBox.minZ() + i,
+							direction,
+							this.getGenDepth(),
+							bl
 						);
 				}
 			}
@@ -1336,25 +1421,59 @@ public class NetherBridgePieces {
 		}
 
 		@Nullable
-		protected StructurePiece generateChildLeft(NetherBridgePieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, boolean bl) {
+		protected StructurePiece generateChildLeft(
+			NetherBridgePieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.WEST, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.WEST,
+							this.getGenDepth(),
+							bl
 						);
 					case SOUTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 - 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.WEST, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() - 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.WEST,
+							this.getGenDepth(),
+							bl
 						);
 					case WEST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z0 - 1, Direction.NORTH, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() - 1,
+							Direction.NORTH,
+							this.getGenDepth(),
+							bl
 						);
 					case EAST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z0 - 1, Direction.NORTH, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() - 1,
+							Direction.NORTH,
+							this.getGenDepth(),
+							bl
 						);
 				}
 			}
@@ -1363,25 +1482,59 @@ public class NetherBridgePieces {
 		}
 
 		@Nullable
-		protected StructurePiece generateChildRight(NetherBridgePieces.StartPiece startPiece, List<StructurePiece> list, Random random, int i, int j, boolean bl) {
+		protected StructurePiece generateChildRight(
+			NetherBridgePieces.StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl
+		) {
 			Direction direction = this.getOrientation();
 			if (direction != null) {
 				switch (direction) {
 					case NORTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.EAST, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.EAST,
+							this.getGenDepth(),
+							bl
 						);
 					case SOUTH:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x1 + 1, this.boundingBox.y0 + i, this.boundingBox.z0 + j, Direction.EAST, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.maxX() + 1,
+							this.boundingBox.minY() + i,
+							this.boundingBox.minZ() + j,
+							Direction.EAST,
+							this.getGenDepth(),
+							bl
 						);
 					case WEST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z1 + 1, Direction.SOUTH, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.maxZ() + 1,
+							Direction.SOUTH,
+							this.getGenDepth(),
+							bl
 						);
 					case EAST:
 						return this.generateAndAddPiece(
-							startPiece, list, random, this.boundingBox.x0 + j, this.boundingBox.y0 + i, this.boundingBox.z1 + 1, Direction.SOUTH, this.getGenDepth(), bl
+							startPiece,
+							structurePieceAccessor,
+							random,
+							this.boundingBox.minX() + j,
+							this.boundingBox.minY() + i,
+							this.boundingBox.maxZ() + 1,
+							Direction.SOUTH,
+							this.getGenDepth(),
+							bl
 						);
 				}
 			}
@@ -1390,7 +1543,7 @@ public class NetherBridgePieces {
 		}
 
 		protected static boolean isOkBox(BoundingBox boundingBox) {
-			return boundingBox != null && boundingBox.y0 > 10;
+			return boundingBox != null && boundingBox.minY() > 10;
 		}
 	}
 
@@ -1422,10 +1575,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class RoomCrossing extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 7;
+		private static final int HEIGHT = 9;
+		private static final int DEPTH = 7;
+
 		public RoomCrossing(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_ROOM_CROSSING, i);
+			super(StructurePieceType.NETHER_FORTRESS_ROOM_CROSSING, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public RoomCrossing(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1433,15 +1589,15 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, list, random, 2, 0, false);
-			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 2, false);
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 0, 2, false);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildForward((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 2, 0, false);
+			this.generateChildLeft((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 2, false);
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 0, 2, false);
 		}
 
-		public static NetherBridgePieces.RoomCrossing createPiece(List<StructurePiece> list, int i, int j, int k, Direction direction, int l) {
+		public static NetherBridgePieces.RoomCrossing createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -2, 0, 0, 7, 9, 7, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.RoomCrossing(l, boundingBox, direction)
 				: null;
 		}
@@ -1494,10 +1650,13 @@ public class NetherBridgePieces {
 	}
 
 	public static class StairsRoom extends NetherBridgePieces.NetherBridgePiece {
+		private static final int WIDTH = 7;
+		private static final int HEIGHT = 11;
+		private static final int DEPTH = 7;
+
 		public StairsRoom(int i, BoundingBox boundingBox, Direction direction) {
-			super(StructurePieceType.NETHER_FORTRESS_STAIRS_ROOM, i);
+			super(StructurePieceType.NETHER_FORTRESS_STAIRS_ROOM, i, boundingBox);
 			this.setOrientation(direction);
-			this.boundingBox = boundingBox;
 		}
 
 		public StairsRoom(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1505,13 +1664,13 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
-			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, list, random, 6, 2, false);
+		public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+			this.generateChildRight((NetherBridgePieces.StartPiece)structurePiece, structurePieceAccessor, random, 6, 2, false);
 		}
 
-		public static NetherBridgePieces.StairsRoom createPiece(List<StructurePiece> list, int i, int j, int k, int l, Direction direction) {
+		public static NetherBridgePieces.StairsRoom createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, int l, Direction direction) {
 			BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -2, 0, 0, 7, 11, 7, direction);
-			return isOkBox(boundingBox) && StructurePiece.findCollisionPiece(list, boundingBox) == null
+			return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null
 				? new NetherBridgePieces.StairsRoom(l, boundingBox, direction)
 				: null;
 		}
@@ -1571,7 +1730,7 @@ public class NetherBridgePieces {
 		public final List<StructurePiece> pendingChildren = Lists.<StructurePiece>newArrayList();
 
 		public StartPiece(Random random, int i, int j) {
-			super(random, i, j);
+			super(i, j, getRandomHorizontalDirection(random));
 			this.availableBridgePieces = Lists.<NetherBridgePieces.PieceWeight>newArrayList();
 
 			for (NetherBridgePieces.PieceWeight pieceWeight : NetherBridgePieces.BRIDGE_PIECE_WEIGHTS) {

@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -50,11 +48,12 @@ public class MobBucketItem extends BucketItem {
 	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
 		Entity entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
 		if (entity instanceof Bucketable) {
-			((Bucketable)entity).setFromBucket(true);
+			Bucketable bucketable = (Bucketable)entity;
+			bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
+			bucketable.setFromBucket(true);
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		if (this.type == EntityType.TROPICAL_FISH) {

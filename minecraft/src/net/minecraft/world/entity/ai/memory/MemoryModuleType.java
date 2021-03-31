@@ -50,6 +50,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<LivingEntity> HURT_BY_ENTITY = register("hurt_by_entity");
 	public static final MemoryModuleType<LivingEntity> AVOID_TARGET = register("avoid_target");
 	public static final MemoryModuleType<LivingEntity> NEAREST_HOSTILE = register("nearest_hostile");
+	public static final MemoryModuleType<LivingEntity> NEAREST_ATTACKABLE = register("nearest_attackable");
 	public static final MemoryModuleType<GlobalPos> HIDING_PLACE = register("hiding_place");
 	public static final MemoryModuleType<Long> HEARD_BELL_TIME = register("heard_bell_time");
 	public static final MemoryModuleType<Long> CANT_REACH_WALK_TARGET_SINCE = register("cant_reach_walk_target_since");
@@ -60,6 +61,13 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<AgeableMob> NEAREST_VISIBLE_ADULT = register("nearest_visible_adult");
 	public static final MemoryModuleType<ItemEntity> NEAREST_VISIBLE_WANTED_ITEM = register("nearest_visible_wanted_item");
 	public static final MemoryModuleType<Mob> NEAREST_VISIBLE_NEMESIS = register("nearest_visible_nemesis");
+	public static final MemoryModuleType<Integer> PLAY_DEAD_TICKS = register("play_dead_ticks", Codec.INT);
+	public static final MemoryModuleType<Player> TEMPTING_PLAYER = register("tempting_player");
+	public static final MemoryModuleType<Integer> TEMPTATION_COOLDOWN_TICKS = register("temptation_cooldown_ticks", Codec.INT);
+	public static final MemoryModuleType<Boolean> IS_TEMPTED = register("is_tempted", Codec.BOOL);
+	public static final MemoryModuleType<Integer> LONG_JUMP_COOLDOWN_TICKS = register("long_jump_cooling_down", Codec.INT);
+	public static final MemoryModuleType<Boolean> LONG_JUMP_MID_JUMP = register("long_jump_mid_jump");
+	public static final MemoryModuleType<Boolean> HAS_HUNTING_COOLDOWN = register("has_hunting_cooldown", Codec.BOOL);
 	public static final MemoryModuleType<UUID> ANGRY_AT = register("angry_at", SerializableUUID.CODEC);
 	public static final MemoryModuleType<Boolean> UNIVERSAL_ANGER = register("universal_anger", Codec.BOOL);
 	public static final MemoryModuleType<Boolean> ADMIRING_ITEM = register("admiring_item", Codec.BOOL);
@@ -83,10 +91,6 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Boolean> ATE_RECENTLY = register("ate_recently");
 	public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = register("nearest_repellent");
 	public static final MemoryModuleType<Boolean> PACIFIED = register("pacified");
-	public static final MemoryModuleType<Integer> PLAY_DEAD_TICKS = register("play_dead_ticks", Codec.INT);
-	public static final MemoryModuleType<Player> TEMPTING_PLAYER = register("tempting_player");
-	public static final MemoryModuleType<Integer> TEMPTATION_COOLDOWN_TICKS = register("temptation_cooldown_ticks", Codec.INT);
-	public static final MemoryModuleType<Boolean> IS_TEMPTED = register("is_tempted", Codec.BOOL);
 	private final Optional<Codec<ExpirableValue<U>>> codec;
 
 	private MemoryModuleType(Optional<Codec<U>> optional) {

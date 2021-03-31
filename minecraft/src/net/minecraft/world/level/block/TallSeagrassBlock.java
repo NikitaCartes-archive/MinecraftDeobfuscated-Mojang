@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -23,6 +21,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TallSeagrassBlock extends DoublePlantBlock implements LiquidBlockContainer {
 	public static final EnumProperty<DoubleBlockHalf> HALF = DoublePlantBlock.HALF;
+	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 
 	public TallSeagrassBlock(BlockBehaviour.Properties properties) {
@@ -39,7 +38,6 @@ public class TallSeagrassBlock extends DoublePlantBlock implements LiquidBlockCo
 		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && !blockState.is(Blocks.MAGMA_BLOCK);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Blocks.SEAGRASS);

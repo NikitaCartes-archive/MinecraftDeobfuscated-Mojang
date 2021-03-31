@@ -11,10 +11,17 @@ public final class FluidTags {
 	public static final Tag.Named<Fluid> WATER = bind("water");
 	public static final Tag.Named<Fluid> LAVA = bind("lava");
 
+	private FluidTags() {
+	}
+
 	private static Tag.Named<Fluid> bind(String string) {
 		Tag.Named<Fluid> named = HELPER.bind(string);
 		KNOWN_TAGS.add(named);
 		return named;
+	}
+
+	public static TagCollection<Fluid> getAllTags() {
+		return HELPER.getAllTags();
 	}
 
 	@Deprecated

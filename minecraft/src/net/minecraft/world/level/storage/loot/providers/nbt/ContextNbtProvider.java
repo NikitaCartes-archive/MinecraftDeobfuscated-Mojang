@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ContextNbtProvider implements NbtProvider {
+	private static final String BLOCK_ENTITY_ID = "block_entity";
 	private static final ContextNbtProvider.Getter BLOCK_ENTITY_PROVIDER = new ContextNbtProvider.Getter() {
 		@Override
 		public Tag get(LootContext lootContext) {
@@ -79,6 +80,10 @@ public class ContextNbtProvider implements NbtProvider {
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
 		return this.getter.getReferencedContextParams();
+	}
+
+	public static NbtProvider forContextEntity(LootContext.EntityTarget entityTarget) {
+		return new ContextNbtProvider(forEntity(entityTarget));
 	}
 
 	private static ContextNbtProvider createFromContext(String string) {

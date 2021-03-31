@@ -31,8 +31,6 @@ import java.net.SocketAddress;
 import java.util.Queue;
 import javax.annotation.Nullable;
 import javax.crypto.Cipher;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -51,6 +49,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
 public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
+	private static final float AVERAGE_PACKETS_SMOOTHING = 0.75F;
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final Marker ROOT_MARKER = MarkerManager.getMarker("NETWORK");
 	public static final Marker PACKET_MARKER = MarkerManager.getMarker("NETWORK_PACKETS", ROOT_MARKER);
@@ -262,7 +261,14 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
 	}
 
-	@Environment(EnvType.CLIENT)
+	public PacketFlow getReceiving() {
+		return this.receiving;
+	}
+
+	public PacketFlow getSending() {
+		return this.receiving.getOpposite();
+	}
+
 	public static Connection connectToServer(InetAddress inetAddress, int i, boolean bl) {
 		final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
 		Class<? extends SocketChannel> class_;
@@ -302,7 +308,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		return connection;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static Connection connectToLocalServer(SocketAddress socketAddress) {
 		final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
 		new Bootstrap().group(LOCAL_WORKER_GROUP.get()).handler(new ChannelInitializer<Channel>() {
@@ -320,7 +325,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		this.channel.pipeline().addBefore("prepender", "encrypt", new CipherEncoder(cipher2));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isEncrypted() {
 		return this.encrypted;
 	}
@@ -389,7 +393,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		return this.averageReceivedPackets;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getAverageSentPackets() {
 		return this.averageSentPackets;
 	}

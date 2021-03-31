@@ -16,9 +16,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -40,7 +40,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherFossilFeature;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -115,6 +114,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		.put(new ResourceLocation("bastionremnant"), JIGSAW_RENAME)
 		.put(new ResourceLocation("runtime"), JIGSAW_RENAME)
 		.build();
+	public static final int MAX_STRUCTURE_RANGE = 8;
 	private final Codec<ConfiguredStructureFeature<C, StructureFeature<C>>> configuredStructureCodec;
 
 	private static <F extends StructureFeature<?>> F register(String string, F structureFeature, GenerationStep.Decoration decoration) {
@@ -151,20 +151,10 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 			} else {
 				ChunkPos chunkPos = new ChunkPos(compoundTag.getInt("ChunkX"), compoundTag.getInt("ChunkZ"));
 				int i = compoundTag.getInt("references");
-				BoundingBox boundingBox;
-				if (compoundTag.contains("BB")) {
-					boundingBox = (BoundingBox)BoundingBox.CODEC
-						.parse(NbtOps.INSTANCE, compoundTag.get("BB"))
-						.resultOrPartial(LOGGER::error)
-						.orElse(new BoundingBox(BlockPos.ZERO));
-				} else {
-					boundingBox = BoundingBox.getUnknownBox();
-				}
-
 				ListTag listTag = compoundTag.getList("Children", 10);
 
 				try {
-					StructureStart<?> structureStart = structureFeature.createStart(chunkPos, boundingBox, i, l);
+					StructureStart<?> structureStart = structureFeature.createStart(chunkPos, i, l);
 
 					for (int j = 0; j < listTag.size(); j++) {
 						CompoundTag compoundTag2 = listTag.getCompound(j);
@@ -177,16 +167,16 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 						} else {
 							try {
 								StructurePiece structurePiece = structurePieceType.load(serverLevel, compoundTag2);
-								structureStart.getPieces().add(structurePiece);
-							} catch (Exception var18) {
-								LOGGER.error("Exception loading structure piece with id {}", resourceLocation2, var18);
+								structureStart.addPiece(structurePiece);
+							} catch (Exception var17) {
+								LOGGER.error("Exception loading structure piece with id {}", resourceLocation2, var17);
 							}
 						}
 					}
 
 					return structureStart;
-				} catch (Exception var19) {
-					LOGGER.error("Failed Start with id {}", string, var19);
+				} catch (Exception var18) {
+					LOGGER.error("Failed Start with id {}", string, var18);
 					return null;
 				}
 			}
@@ -296,8 +286,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		return true;
 	}
 
-	private StructureStart<C> createStart(ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-		return this.getStartFactory().create(this, chunkPos, boundingBox, i, l);
+	private StructureStart<C> createStart(ChunkPos chunkPos, int i, long l) {
+		return this.getStartFactory().create(this, chunkPos, i, l);
 	}
 
 	public StructureStart<?> generate(
@@ -318,7 +308,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		if (chunkPos.x == chunkPos2.x
 			&& chunkPos.z == chunkPos2.z
 			&& this.isFeatureChunk(chunkGenerator, biomeSource, l, worldgenRandom, chunkPos, biome, chunkPos2, featureConfiguration, levelHeightAccessor)) {
-			StructureStart<C> structureStart = this.createStart(chunkPos, BoundingBox.getUnknownBox(), i, l);
+			StructureStart<C> structureStart = this.createStart(chunkPos, i, l);
 			structureStart.generatePieces(registryAccess, chunkGenerator, structureManager, chunkPos, biome, featureConfiguration, levelHeightAccessor);
 			if (structureStart.isValid()) {
 				return structureStart;
@@ -334,15 +324,15 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		return (String)STRUCTURES_REGISTRY.inverse().get(this);
 	}
 
-	public List<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
-		return ImmutableList.of();
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
+		return MobSpawnSettings.EMPTY_MOB_LIST;
 	}
 
-	public List<MobSpawnSettings.SpawnerData> getSpecialAnimals() {
-		return ImmutableList.of();
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialAnimals() {
+		return MobSpawnSettings.EMPTY_MOB_LIST;
 	}
 
 	public interface StructureStartFactory<C extends FeatureConfiguration> {
-		StructureStart<C> create(StructureFeature<C> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l);
+		StructureStart<C> create(StructureFeature<C> structureFeature, ChunkPos chunkPos, int i, long l);
 	}
 }

@@ -26,6 +26,18 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class AdvancementWidget extends GuiComponent {
 	private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/advancements/widgets.png");
+	private static final int HEIGHT = 26;
+	private static final int BOX_X = 0;
+	private static final int BOX_WIDTH = 200;
+	private static final int FRAME_WIDTH = 26;
+	private static final int ICON_X = 8;
+	private static final int ICON_Y = 5;
+	private static final int ICON_WIDTH = 26;
+	private static final int TITLE_PADDING_LEFT = 3;
+	private static final int TITLE_PADDING_RIGHT = 5;
+	private static final int TITLE_X = 32;
+	private static final int TITLE_Y = 9;
+	private static final int TITLE_MAX_WIDTH = 163;
 	private static final int[] TEST_SPLIT_OFFSETS = new int[]{0, 10, -10, 25, -25};
 	private final AdvancementTab tab;
 	private final Advancement advancement;
@@ -146,6 +158,10 @@ public class AdvancementWidget extends GuiComponent {
 		for (AdvancementWidget advancementWidget : this.children) {
 			advancementWidget.draw(poseStack, i, j);
 		}
+	}
+
+	public int getWidth() {
+		return this.width;
 	}
 
 	public void setProgress(AdvancementProgress advancementProgress) {

@@ -10,6 +10,8 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 
 public class ThornsEnchantment extends Enchantment {
+	private static final float CHANCE_PER_LEVEL = 0.15F;
+
 	public ThornsEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
 		super(rarity, EnchantmentCategory.ARMOR_CHEST, equipmentSlots);
 	}

@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 @Environment(EnvType.CLIENT)
 public class BellRenderer implements BlockEntityRenderer<BellBlockEntity> {
 	public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
+	private static final String BELL_BODY = "bell_body";
 	private final ModelPart bellBody;
 
 	public BellRenderer(BlockEntityRendererProvider.Context context) {

@@ -1,9 +1,5 @@
 package net.minecraft.world.level.block.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -28,11 +24,8 @@ import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
-@EnvironmentInterfaces({@EnvironmentInterface(
-		value = EnvType.CLIENT,
-		itf = LidBlockEntity.class
-	)})
 public class ChestBlockEntity extends RandomizableContainerBlockEntity implements LidBlockEntity {
+	private static final int EVENT_SET_OPEN_COUNT = 1;
 	private NonNullList<ItemStack> items = NonNullList.withSize(27, ItemStack.EMPTY);
 	private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
 		@Override
@@ -153,7 +146,6 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 		this.items = nonNullList;
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getOpenNess(float f) {
 		return this.chestLidController.getOpenness(f);

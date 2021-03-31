@@ -16,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 
 public class ShowTradesToPlayer extends Behavior<Villager> {
+	private static final int MAX_LOOK_TIME = 900;
+	private static final int STARTING_LOOK_TIME = 40;
 	@Nullable
 	private ItemStack playerItemStack;
 	private final List<ItemStack> displayItems = Lists.<ItemStack>newArrayList();

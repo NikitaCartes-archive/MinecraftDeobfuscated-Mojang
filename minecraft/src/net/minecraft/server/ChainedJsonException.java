@@ -5,11 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.apache.commons.lang3.StringUtils;
 
-@Environment(EnvType.CLIENT)
 public class ChainedJsonException extends IOException {
 	private final List<ChainedJsonException.Entry> entries = Lists.<ChainedJsonException.Entry>newArrayList();
 	private final String message;
@@ -51,7 +48,6 @@ public class ChainedJsonException extends IOException {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static class Entry {
 		@Nullable
 		private String filename;
@@ -62,6 +58,11 @@ public class ChainedJsonException extends IOException {
 
 		private void addJsonKey(String string) {
 			this.jsonKeys.add(0, string);
+		}
+
+		@Nullable
+		public String getFilename() {
+			return this.filename;
 		}
 
 		public String getJsonKeys() {

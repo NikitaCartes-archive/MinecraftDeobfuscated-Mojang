@@ -28,6 +28,12 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(EnvType.CLIENT)
 public class GameModeSwitcherScreen extends Screen {
 	private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
+	private static final int SPRITE_SHEET_WIDTH = 128;
+	private static final int SPRITE_SHEET_HEIGHT = 128;
+	private static final int SLOT_AREA = 26;
+	private static final int SLOT_PADDING = 5;
+	private static final int SLOT_AREA_PADDED = 31;
+	private static final int HELP_TIPS_OFFSET_Y = 5;
 	private static final int ALL_SLOTS_WIDTH = GameModeSwitcherScreen.GameModeIcon.values().length * 31 - 5;
 	private static final Component SELECT_KEY = new TranslatableComponent(
 		"debug.gamemodes.select_next", new TranslatableComponent("debug.gamemodes.press_f4").withStyle(ChatFormatting.AQUA)
@@ -148,6 +154,8 @@ public class GameModeSwitcherScreen extends Screen {
 		SPECTATOR(new TranslatableComponent("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
 
 		protected static final GameModeSwitcherScreen.GameModeIcon[] VALUES = values();
+		private static final int ICON_AREA = 16;
+		protected static final int ICON_TOP_LEFT = 5;
 		final Component name;
 		final String command;
 		final ItemStack renderStack;

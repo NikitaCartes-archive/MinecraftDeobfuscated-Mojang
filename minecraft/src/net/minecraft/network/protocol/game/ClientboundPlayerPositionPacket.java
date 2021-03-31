@@ -2,8 +2,6 @@ package net.minecraft.network.protocol.game;
 
 import java.util.EnumSet;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -57,42 +55,34 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 		clientGamePacketListener.handleMovePlayer(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getX() {
 		return this.x;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getY() {
 		return this.y;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public double getZ() {
 		return this.z;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getYRot() {
 		return this.yRot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getXRot() {
 		return this.xRot;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getId() {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean requestDismountVehicle() {
 		return this.dismountVehicle;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Set<ClientboundPlayerPositionPacket.RelativeArgument> getRelativeArguments() {
 		return this.relativeArguments;
 	}

@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -61,6 +62,13 @@ public class RealmsDataFetcher {
 		this.minecraft = minecraft;
 		this.realmsClient = realmsClient;
 		this.newsLocalStorage = new RealmsPersistence();
+	}
+
+	@VisibleForTesting
+	protected RealmsDataFetcher(Minecraft minecraft, RealmsClient realmsClient, RealmsPersistence realmsPersistence) {
+		this.minecraft = minecraft;
+		this.realmsClient = realmsClient;
+		this.newsLocalStorage = realmsPersistence;
 	}
 
 	public boolean isStopped() {

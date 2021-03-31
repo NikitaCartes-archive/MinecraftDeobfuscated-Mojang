@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -149,6 +147,7 @@ import org.apache.logging.log4j.Logger;
 public class ServerLevel extends Level implements WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int EMPTY_TIME_NO_TICK = 300;
 	private final List<ServerPlayer> players = Lists.<ServerPlayer>newArrayList();
 	private final ServerChunkCache chunkSource;
 	private final MinecraftServer server;
@@ -842,6 +841,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			);
 	}
 
+	@Override
 	public int getLogicalHeight() {
 		return this.dimensionType().logicalHeight();
 	}
@@ -1387,7 +1387,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public float getShade(Direction direction, boolean bl) {
 		return 1.0F;
@@ -1489,6 +1488,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.entityManager.close();
 	}
 
+	@Override
 	public String gatherChunkSourceStats() {
 		return "Chunks[S] W: " + this.chunkSource.gatherStats() + " E: " + this.entityManager.gatherStats();
 	}

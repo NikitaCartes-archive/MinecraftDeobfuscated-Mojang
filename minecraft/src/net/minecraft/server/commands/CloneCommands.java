@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class CloneCommands {
+	private static final int MAX_CLONE_AREA = 32768;
 	private static final SimpleCommandExceptionType ERROR_OVERLAP = new SimpleCommandExceptionType(new TranslatableComponent("commands.clone.overlap"));
 	private static final Dynamic2CommandExceptionType ERROR_AREA_TOO_LARGE = new Dynamic2CommandExceptionType(
 		(object, object2) -> new TranslatableComponent("commands.clone.toobig", object, object2)
@@ -220,9 +221,9 @@ public class CloneCommands {
 	private static int clone(
 		CommandSourceStack commandSourceStack, BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Predicate<BlockInWorld> predicate, CloneCommands.Mode mode
 	) throws CommandSyntaxException {
-		BoundingBox boundingBox = BoundingBox.createProper(blockPos, blockPos2);
+		BoundingBox boundingBox = BoundingBox.fromCorners(blockPos, blockPos2);
 		BlockPos blockPos4 = blockPos3.offset(boundingBox.getLength());
-		BoundingBox boundingBox2 = BoundingBox.createProper(blockPos3, blockPos4);
+		BoundingBox boundingBox2 = BoundingBox.fromCorners(blockPos3, blockPos4);
 		if (!mode.canOverlap() && boundingBox2.intersects(boundingBox)) {
 			throw ERROR_OVERLAP.create();
 		} else {
@@ -236,11 +237,13 @@ public class CloneCommands {
 					List<CloneCommands.CloneBlockInfo> list2 = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
 					List<CloneCommands.CloneBlockInfo> list3 = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
 					Deque<BlockPos> deque = Lists.<BlockPos>newLinkedList();
-					BlockPos blockPos5 = new BlockPos(boundingBox2.x0 - boundingBox.x0, boundingBox2.y0 - boundingBox.y0, boundingBox2.z0 - boundingBox.z0);
+					BlockPos blockPos5 = new BlockPos(
+						boundingBox2.minX() - boundingBox.minX(), boundingBox2.minY() - boundingBox.minY(), boundingBox2.minZ() - boundingBox.minZ()
+					);
 
-					for (int j = boundingBox.z0; j <= boundingBox.z1; j++) {
-						for (int k = boundingBox.y0; k <= boundingBox.y1; k++) {
-							for (int l = boundingBox.x0; l <= boundingBox.x1; l++) {
+					for (int j = boundingBox.minZ(); j <= boundingBox.maxZ(); j++) {
+						for (int k = boundingBox.minY(); k <= boundingBox.maxY(); k++) {
+							for (int l = boundingBox.minX(); l <= boundingBox.maxX(); l++) {
 								BlockPos blockPos6 = new BlockPos(l, k, j);
 								BlockPos blockPos7 = blockPos6.offset(blockPos5);
 								BlockInWorld blockInWorld = new BlockInWorld(serverLevel, blockPos6, false);

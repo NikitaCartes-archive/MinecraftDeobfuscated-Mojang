@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -53,6 +51,9 @@ public class Item implements ItemLike {
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
 	protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
+	public static final int MAX_STACK_SIZE = 64;
+	public static final int EAT_DURATION = 32;
+	public static final int MAX_BAR_WIDTH = 13;
 	protected final CreativeModeTab category;
 	private final Rarity rarity;
 	private final int maxStackSize;
@@ -150,17 +151,14 @@ public class Item implements ItemLike {
 		return this.maxDamage > 0;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isBarVisible(ItemStack itemStack) {
 		return itemStack.isDamaged();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBarWidth(ItemStack itemStack) {
 		return Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)this.maxDamage);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getBarColor(ItemStack itemStack) {
 		float f = Math.max(0.0F, ((float)this.maxDamage - (float)itemStack.getDamageValue()) / (float)this.maxDamage);
 		return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
@@ -190,7 +188,6 @@ public class Item implements ItemLike {
 		return InteractionResult.PASS;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getDescription() {
 		return new TranslatableComponent(this.getDescriptionId());
 	}
@@ -253,11 +250,9 @@ public class Item implements ItemLike {
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
 		return Optional.empty();
 	}

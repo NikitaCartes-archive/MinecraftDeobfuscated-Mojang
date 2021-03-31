@@ -63,6 +63,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class ParticleEngine implements PreparableReloadListener {
+	private static final int MAX_PARTICLES_PER_LAYER = 16384;
 	private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(
 		ParticleRenderType.TERRAIN_SHEET,
 		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
@@ -92,7 +93,8 @@ public class ParticleEngine implements PreparableReloadListener {
 	private void registerProviders() {
 		this.register(ParticleTypes.AMBIENT_ENTITY_EFFECT, SpellParticle.AmbientMobProvider::new);
 		this.register(ParticleTypes.ANGRY_VILLAGER, HeartParticle.AngryVillagerProvider::new);
-		this.register(ParticleTypes.BARRIER, new BarrierParticle.Provider());
+		this.register(ParticleTypes.BARRIER, new StationaryItemParticle.BarrierProvider());
+		this.register(ParticleTypes.LIGHT, new StationaryItemParticle.LightProvider());
 		this.register(ParticleTypes.BLOCK, new TerrainParticle.Provider());
 		this.register(ParticleTypes.BUBBLE, BubbleParticle.Provider::new);
 		this.register(ParticleTypes.BUBBLE_COLUMN_UP, BubbleColumnUpParticle.Provider::new);

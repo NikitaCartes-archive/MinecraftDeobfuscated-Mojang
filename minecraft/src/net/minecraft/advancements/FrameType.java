@@ -1,7 +1,5 @@
 package net.minecraft.advancements;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -27,7 +25,6 @@ public enum FrameType {
 		return this.name;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getTexture() {
 		return this.texture;
 	}
@@ -46,7 +43,6 @@ public enum FrameType {
 		return this.chatColor;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getDisplayName() {
 		return this.displayName;
 	}

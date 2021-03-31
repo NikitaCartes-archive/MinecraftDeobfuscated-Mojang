@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -191,7 +189,6 @@ public abstract class Raider extends PatrollingMonster {
 		return this.wave;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isCelebrating() {
 		return this.entityData.get(IS_CELEBRATING);
 	}

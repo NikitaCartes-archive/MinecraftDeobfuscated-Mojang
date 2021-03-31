@@ -921,6 +921,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.started = false;
 		if (resourceKey != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
+			Map<String, MapItemSavedData> map = this.level.getAllMapData();
 			boolean bl = clientboundRespawnPacket.isDebug();
 			boolean bl2 = clientboundRespawnPacket.isFlat();
 			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
@@ -937,6 +938,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				clientboundRespawnPacket.getSeed()
 			);
 			this.level.setScoreboard(scoreboard);
+			this.level.addMapData(map);
 			this.minecraft.setLevel(this.level);
 			this.minecraft.setScreen(new ReceivingLevelScreen());
 		}
@@ -1230,13 +1232,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		String string = MapItem.makeKey(i);
 		MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(string);
 		if (mapItemSavedData == null) {
-			mapItemSavedData = mapRenderer.retrieveMapFromRenderer(i);
-			if (mapItemSavedData == null) {
-				mapItemSavedData = MapItemSavedData.createForClient(
-					clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension()
-				);
-			}
-
+			mapItemSavedData = MapItemSavedData.createForClient(
+				clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension()
+			);
 			this.minecraft.level.setMapData(string, mapItemSavedData);
 		}
 
@@ -1927,42 +1925,42 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 				boolean bl3 = friendlyByteBuf.readBoolean();
 				BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string3, string4, p, h, q, position, string5, path2, bl3);
-				int r = friendlyByteBuf.readInt();
+				int r = friendlyByteBuf.readVarInt();
 
 				for (int s = 0; s < r; s++) {
 					String string6 = friendlyByteBuf.readUtf();
 					brainDump.activities.add(string6);
 				}
 
-				int s = friendlyByteBuf.readInt();
+				int s = friendlyByteBuf.readVarInt();
 
 				for (int t = 0; t < s; t++) {
 					String string7 = friendlyByteBuf.readUtf();
 					brainDump.behaviors.add(string7);
 				}
 
-				int t = friendlyByteBuf.readInt();
+				int t = friendlyByteBuf.readVarInt();
 
 				for (int u = 0; u < t; u++) {
 					String string8 = friendlyByteBuf.readUtf();
 					brainDump.memories.add(string8);
 				}
 
-				int u = friendlyByteBuf.readInt();
+				int u = friendlyByteBuf.readVarInt();
 
 				for (int v = 0; v < u; v++) {
 					BlockPos blockPos3 = friendlyByteBuf.readBlockPos();
 					brainDump.pois.add(blockPos3);
 				}
 
-				int v = friendlyByteBuf.readInt();
+				int v = friendlyByteBuf.readVarInt();
 
 				for (int w = 0; w < v; w++) {
 					BlockPos blockPos4 = friendlyByteBuf.readBlockPos();
 					brainDump.potentialPois.add(blockPos4);
 				}
 
-				int w = friendlyByteBuf.readInt();
+				int w = friendlyByteBuf.readVarInt();
 
 				for (int x = 0; x < w; x++) {
 					String string9 = friendlyByteBuf.readUtf();
@@ -1997,14 +1995,14 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				}
 
 				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos5, blockPos6, y);
-				int z = friendlyByteBuf.readInt();
+				int z = friendlyByteBuf.readVarInt();
 
 				for (int aa = 0; aa < z; aa++) {
 					String string10 = friendlyByteBuf.readUtf();
 					beeInfo.goals.add(string10);
 				}
 
-				int aa = friendlyByteBuf.readInt();
+				int aa = friendlyByteBuf.readVarInt();
 
 				for (int r = 0; r < aa; r++) {
 					BlockPos blockPos7 = friendlyByteBuf.readBlockPos();

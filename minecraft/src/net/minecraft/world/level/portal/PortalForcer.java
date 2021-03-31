@@ -20,6 +20,19 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class PortalForcer {
+	private static final int TICKET_RADIUS = 3;
+	private static final int SEARCH_RADIUS = 128;
+	private static final int CREATE_RADIUS = 16;
+	private static final int FRAME_HEIGHT = 5;
+	private static final int FRAME_WIDTH = 4;
+	private static final int FRAME_BOX = 3;
+	private static final int FRAME_HEIGHT_START = -1;
+	private static final int FRAME_HEIGHT_END = 4;
+	private static final int FRAME_WIDTH_START = -1;
+	private static final int FRAME_WIDTH_END = 3;
+	private static final int FRAME_BOX_START = -1;
+	private static final int FRAME_BOX_END = 2;
+	private static final int NOTHING_FOUND = -1;
 	private final ServerLevel level;
 
 	public PortalForcer(ServerLevel serverLevel) {

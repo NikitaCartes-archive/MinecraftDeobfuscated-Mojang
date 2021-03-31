@@ -5,6 +5,7 @@ import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.ClipboardManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -44,6 +45,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class KeyboardHandler {
+	public static final int DEBUG_CRASH_TIME = 10000;
 	private final Minecraft minecraft;
 	private boolean sendRepeatsToGui;
 	private final ClipboardManager clipboardManager = new ClipboardManager();
@@ -54,6 +56,39 @@ public class KeyboardHandler {
 
 	public KeyboardHandler(Minecraft minecraft) {
 		this.minecraft = minecraft;
+	}
+
+	private boolean handleChunkDebugKeys(int i) {
+		switch (i) {
+			case 69:
+				this.minecraft.chunkPath = !this.minecraft.chunkPath;
+				this.debugFeedback("ChunkPath: {0}", this.minecraft.chunkPath ? "shown" : "hidden");
+				return true;
+			case 76:
+				this.minecraft.smartCull = !this.minecraft.smartCull;
+				this.debugFeedback("SmartCull: {0}", this.minecraft.smartCull ? "enabled" : "disabled");
+				return true;
+			case 85:
+				if (Screen.hasShiftDown()) {
+					this.minecraft.levelRenderer.killFrustum();
+					this.debugFeedback("Killed frustum");
+				} else {
+					this.minecraft.levelRenderer.captureFrustum();
+					this.debugFeedback("Captured frustum");
+				}
+
+				return true;
+			case 86:
+				this.minecraft.chunkVisibility = !this.minecraft.chunkVisibility;
+				this.debugFeedback("ChunkVisibility: {0}", this.minecraft.chunkVisibility ? "enabled" : "disabled");
+				return true;
+			case 87:
+				this.minecraft.wireframe = !this.minecraft.wireframe;
+				this.debugFeedback("WireFrame: {0}", this.minecraft.wireframe ? "enabled" : "disabled");
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	private void debugFeedbackTranslated(String string, Object... objects) {
@@ -77,6 +112,18 @@ public class KeyboardHandler {
 					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.BOLD}))
 					.append(" ")
 					.append(new TranslatableComponent(string, objects))
+			);
+	}
+
+	private void debugFeedback(String string, Object... objects) {
+		this.minecraft
+			.gui
+			.getChat()
+			.addMessage(
+				new TextComponent("")
+					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD}))
+					.append(" ")
+					.append(MessageFormat.format(string, objects))
 			);
 	}
 
@@ -435,7 +482,9 @@ public class KeyboardHandler {
 	}
 
 	public void setClipboard(String string) {
-		this.clipboardManager.setClipboard(this.minecraft.getWindow().getWindow(), string);
+		if (!string.isEmpty()) {
+			this.clipboardManager.setClipboard(this.minecraft.getWindow().getWindow(), string);
+		}
 	}
 
 	public void tick() {

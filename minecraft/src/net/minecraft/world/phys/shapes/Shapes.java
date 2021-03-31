@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
@@ -22,6 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 public final class Shapes {
+	public static final double EPSILON = 1.0E-7;
+	public static final double BIG_EPSILON = 1.0E-6;
 	private static final VoxelShape BLOCK = Util.make(() -> {
 		DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(1, 1, 1);
 		discreteVoxelShape.fill(0, 0, 0);
@@ -291,7 +291,6 @@ public final class Shapes {
 		return d > 0.0 ? Mth.floor(f + d) + 1 : Mth.floor(e + d) - 1;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static boolean blockOccudes(VoxelShape voxelShape, VoxelShape voxelShape2, Direction direction) {
 		if (voxelShape == block() && voxelShape2 == block()) {
 			return true;

@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
@@ -26,7 +24,6 @@ public class ClientboundAddVibrationSignalPacket implements Packet<ClientGamePac
 		clientGamePacketListener.handleAddVibrationSignal(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public VibrationPath getVibrationPath() {
 		return this.vibrationPath;
 	}

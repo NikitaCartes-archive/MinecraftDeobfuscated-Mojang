@@ -6,6 +6,8 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 public class ItemBasedSteering {
+	private static final int MIN_BOOST_TIME = 140;
+	private static final int MAX_BOOST_TIME = 700;
 	private final SynchedEntityData entityData;
 	private final EntityDataAccessor<Integer> boostTimeAccessor;
 	private final EntityDataAccessor<Boolean> hasSaddleAccessor;

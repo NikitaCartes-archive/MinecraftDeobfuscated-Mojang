@@ -13,6 +13,11 @@ import org.apache.logging.log4j.Logger;
 
 public class RconClient extends GenericThread {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SERVERDATA_AUTH = 3;
+	private static final int SERVERDATA_EXECCOMMAND = 2;
+	private static final int SERVERDATA_RESPONSE_VALUE = 0;
+	private static final int SERVERDATA_AUTH_RESPONSE = 2;
+	private static final int SERVERDATA_AUTH_FAILURE = -1;
 	private boolean authed;
 	private final Socket client;
 	private final byte[] buf = new byte[1460];

@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 public class McRegionUpgrader {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String MCREGION_EXTENSION = ".mcr";
 
 	static boolean convertLevel(LevelStorageSource.LevelStorageAccess levelStorageAccess, ProgressListener progressListener) {
 		progressListener.progressStagePercentage(0);

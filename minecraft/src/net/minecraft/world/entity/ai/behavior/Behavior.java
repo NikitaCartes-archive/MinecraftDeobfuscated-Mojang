@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
 public abstract class Behavior<E extends LivingEntity> {
+	private static final int DEFAULT_DURATION = 60;
 	protected final Map<MemoryModuleType<?>, MemoryStatus> entryCondition;
 	private Behavior.Status status = Behavior.Status.STOPPED;
 	private long endTimestamp;

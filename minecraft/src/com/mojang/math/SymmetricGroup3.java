@@ -13,6 +13,7 @@ public enum SymmetricGroup3 {
 
 	private final int[] permutation;
 	private final Matrix3f transformation;
+	private static final int ORDER = 3;
 	private static final SymmetricGroup3[][] cayleyTable = Util.make(
 		new SymmetricGroup3[values().length][values().length],
 		symmetricGroup3s -> {

@@ -28,6 +28,7 @@ import net.minecraft.client.model.EndermiteModel;
 import net.minecraft.client.model.EvokerFangsModel;
 import net.minecraft.client.model.FoxModel;
 import net.minecraft.client.model.GhastModel;
+import net.minecraft.client.model.GoatModel;
 import net.minecraft.client.model.GuardianModel;
 import net.minecraft.client.model.HoglinModel;
 import net.minecraft.client.model.HorseModel;
@@ -170,6 +171,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.GIANT_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.GIANT_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.GLOW_SQUID, SquidModel.createBodyLayer());
+		builder.put(ModelLayers.GOAT, GoatModel.createBodyLayer());
 		builder.put(ModelLayers.GUARDIAN, GuardianModel.createBodyLayer());
 		builder.put(ModelLayers.HOGLIN, layerDefinition15);
 		builder.put(ModelLayers.HOPPER_MINECART, layerDefinition5);

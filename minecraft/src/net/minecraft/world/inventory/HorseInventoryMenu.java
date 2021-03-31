@@ -1,7 +1,5 @@
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -27,7 +25,6 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return itemStack.is(Items.SADDLE) && !this.hasItem() && abstractHorse.isSaddleable();
 			}
 
-			@Environment(EnvType.CLIENT)
 			@Override
 			public boolean isActive() {
 				return abstractHorse.isSaddleable();
@@ -39,7 +36,6 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return abstractHorse.isArmor(itemStack);
 			}
 
-			@Environment(EnvType.CLIENT)
 			@Override
 			public boolean isActive() {
 				return abstractHorse.canWearArmor();

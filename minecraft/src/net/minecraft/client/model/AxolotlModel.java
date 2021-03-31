@@ -26,6 +26,7 @@ public class AxolotlModel<T extends Axolotl> extends AgeableListModel<T> {
 	private final ModelPart topGills;
 	private final ModelPart leftGills;
 	private final ModelPart rightGills;
+	public static final float SWIMMING_LEG_XROT = 1.8849558F;
 
 	public AxolotlModel(ModelPart modelPart) {
 		super(true, 8.0F, 3.35F);

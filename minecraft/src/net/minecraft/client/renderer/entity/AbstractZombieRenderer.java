@@ -21,6 +21,6 @@ public abstract class AbstractZombieRenderer<T extends Zombie, M extends ZombieM
 	}
 
 	protected boolean isShaking(T zombie) {
-		return zombie.isUnderWaterConverting();
+		return super.isShaking(zombie) || zombie.isUnderWaterConverting();
 	}
 }

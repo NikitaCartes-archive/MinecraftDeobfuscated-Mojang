@@ -95,6 +95,26 @@ public final class ModelPart {
 		}
 	}
 
+	public void visit(PoseStack poseStack, ModelPart.Visitor visitor) {
+		this.visit(poseStack, visitor, "");
+	}
+
+	private void visit(PoseStack poseStack, ModelPart.Visitor visitor, String string) {
+		if (!this.cubes.isEmpty() || !this.children.isEmpty()) {
+			poseStack.pushPose();
+			this.translateAndRotate(poseStack);
+			PoseStack.Pose pose = poseStack.last();
+
+			for (int i = 0; i < this.cubes.size(); i++) {
+				visitor.visit(pose, string, i, (ModelPart.Cube)this.cubes.get(i));
+			}
+
+			String string2 = string + "/";
+			this.children.forEach((string2x, modelPart) -> modelPart.visit(poseStack, visitor, string2 + string2x));
+			poseStack.popPose();
+		}
+	}
+
 	public void translateAndRotate(PoseStack poseStack) {
 		poseStack.translate((double)(this.x / 16.0F), (double)(this.y / 16.0F), (double)(this.z / 16.0F));
 		if (this.zRot != 0.0F) {
@@ -258,5 +278,11 @@ public final class ModelPart {
 			this.u = f;
 			this.v = g;
 		}
+	}
+
+	@FunctionalInterface
+	@Environment(EnvType.CLIENT)
+	public interface Visitor {
+		void visit(PoseStack.Pose pose, String string, int i, ModelPart.Cube cube);
 	}
 }

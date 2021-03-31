@@ -8,6 +8,10 @@ import net.minecraft.sounds.SoundEvents;
 
 @Environment(EnvType.CLIENT)
 public class UnderwaterAmbientSoundHandler implements AmbientSoundHandler {
+	public static final float CHANCE_PER_TICK = 0.01F;
+	public static final float RARE_CHANCE_PER_TICK = 0.001F;
+	public static final float ULTRA_RARE_CHANCE_PER_TICK = 1.0E-4F;
+	private static final int MINIMUM_TICK_DELAY = 0;
 	private final LocalPlayer player;
 	private final SoundManager soundManager;
 	private int tickDelay = 0;

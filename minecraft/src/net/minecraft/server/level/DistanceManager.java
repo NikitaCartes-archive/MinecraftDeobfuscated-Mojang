@@ -17,6 +17,10 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -32,7 +36,9 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class DistanceManager {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int ENTITY_TICKING_RANGE = 2;
 	private static final int PLAYER_TICKET_LEVEL = 33 + ChunkStatus.getDistance(ChunkStatus.FULL) - 2;
+	private static final int INITIAL_TICKET_LIST_CAPACITY = 4;
 	private final Long2ObjectMap<ObjectSet<ServerPlayer>> playersPerChunk = new Long2ObjectOpenHashMap<>();
 	private final Long2ObjectOpenHashMap<SortedArraySet<Ticket<?>>> tickets = new Long2ObjectOpenHashMap<>();
 	private final DistanceManager.ChunkTicketTracker ticketTracker = new DistanceManager.ChunkTicketTracker();
@@ -223,6 +229,42 @@ public abstract class DistanceManager {
 		return this.ticketThrottler.getDebugStatus();
 	}
 
+	private void dumpTickets(String string) {
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(new File(string));
+			Throwable var3 = null;
+
+			try {
+				for (Entry<SortedArraySet<Ticket<?>>> entry : this.tickets.long2ObjectEntrySet()) {
+					ChunkPos chunkPos = new ChunkPos(entry.getLongKey());
+
+					for (Ticket<?> ticket : (SortedArraySet)entry.getValue()) {
+						fileOutputStream.write(
+							("" + chunkPos.x + "\t" + chunkPos.z + "\t" + ticket.getType() + "\t" + ticket.getTicketLevel() + "\t\n").getBytes(StandardCharsets.UTF_8)
+						);
+					}
+				}
+			} catch (Throwable var17) {
+				var3 = var17;
+				throw var17;
+			} finally {
+				if (fileOutputStream != null) {
+					if (var3 != null) {
+						try {
+							fileOutputStream.close();
+						} catch (Throwable var16) {
+							var3.addSuppressed(var16);
+						}
+					} else {
+						fileOutputStream.close();
+					}
+				}
+			}
+		} catch (IOException var19) {
+			LOGGER.error(var19);
+		}
+	}
+
 	class ChunkTicketTracker extends ChunkTracker {
 		public ChunkTicketTracker() {
 			super(ChunkMap.MAX_CHUNK_DISTANCE + 2, 16, 256);
@@ -310,6 +352,38 @@ public abstract class DistanceManager {
 		public void runAllUpdates() {
 			this.runUpdates(Integer.MAX_VALUE);
 		}
+
+		private void dumpChunks(String string) {
+			try {
+				FileOutputStream fileOutputStream = new FileOutputStream(new File(string));
+				Throwable var3 = null;
+
+				try {
+					for (it.unimi.dsi.fastutil.longs.Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
+						ChunkPos chunkPos = new ChunkPos(entry.getLongKey());
+						String string2 = Byte.toString(entry.getByteValue());
+						fileOutputStream.write(("" + chunkPos.x + "\t" + chunkPos.z + "\t" + string2 + "\n").getBytes(StandardCharsets.UTF_8));
+					}
+				} catch (Throwable var16) {
+					var3 = var16;
+					throw var16;
+				} finally {
+					if (fileOutputStream != null) {
+						if (var3 != null) {
+							try {
+								fileOutputStream.close();
+							} catch (Throwable var15) {
+								var3.addSuppressed(var15);
+							}
+						} else {
+							fileOutputStream.close();
+						}
+					}
+				}
+			} catch (IOException var18) {
+				DistanceManager.LOGGER.error(var18);
+			}
+		}
 	}
 
 	class PlayerTicketTracker extends DistanceManager.FixedPlayerDistanceChunkTracker {
@@ -342,15 +416,16 @@ public abstract class DistanceManager {
 			if (bl != bl2) {
 				Ticket<?> ticket = new Ticket<>(TicketType.PLAYER, DistanceManager.PLAYER_TICKET_LEVEL, new ChunkPos(l));
 				if (bl2) {
-					DistanceManager.this.ticketThrottlerInput.tell(ChunkTaskPriorityQueueSorter.message(() -> DistanceManager.this.mainThreadExecutor.execute(() -> {
-							if (this.haveTicketFor(this.getLevel(l))) {
-								DistanceManager.this.addTicket(l, ticket);
-								DistanceManager.this.ticketsToRelease.add(l);
-							} else {
-								DistanceManager.this.ticketThrottlerReleaser.tell(ChunkTaskPriorityQueueSorter.release(() -> {
-								}, l, false));
-							}
-						}), l, () -> i));
+					DistanceManager.this.ticketThrottlerInput
+						.tell(ChunkTaskPriorityQueueSorter.message((Runnable)(() -> DistanceManager.this.mainThreadExecutor.execute(() -> {
+								if (this.haveTicketFor(this.getLevel(l))) {
+									DistanceManager.this.addTicket(l, ticket);
+									DistanceManager.this.ticketsToRelease.add(l);
+								} else {
+									DistanceManager.this.ticketThrottlerReleaser.tell(ChunkTaskPriorityQueueSorter.release(() -> {
+									}, l, false));
+								}
+							})), l, () -> i));
 				} else {
 					DistanceManager.this.ticketThrottlerReleaser
 						.tell(

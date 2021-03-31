@@ -8,8 +8,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -43,12 +43,13 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
 		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.05, AttributeModifier.Operation.ADDITION
 	);
-	private static final IntRange FIRST_ANGER_SOUND_DELAY = TimeUtil.rangeOfSeconds(0, 1);
+	private static final UniformInt FIRST_ANGER_SOUND_DELAY = TimeUtil.rangeOfSeconds(0, 1);
 	private int playFirstAngerSoundIn;
-	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
 	private UUID persistentAngerTarget;
-	private static final IntRange ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
+	private static final int ALERT_RANGE_Y = 10;
+	private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
 	private int ticksUntilNextAlert;
 
 	public ZombifiedPiglin(EntityType<? extends ZombifiedPiglin> entityType, Level level) {
@@ -126,7 +127,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 				this.alertOthers();
 			}
 
-			this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
+			this.ticksUntilNextAlert = ALERT_INTERVAL.sample(this.random);
 		}
 	}
 
@@ -149,8 +150,8 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	@Override
 	public void setTarget(@Nullable LivingEntity livingEntity) {
 		if (this.getTarget() == null && livingEntity != null) {
-			this.playFirstAngerSoundIn = FIRST_ANGER_SOUND_DELAY.randomValue(this.random);
-			this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
+			this.playFirstAngerSoundIn = FIRST_ANGER_SOUND_DELAY.sample(this.random);
+			this.ticksUntilNextAlert = ALERT_INTERVAL.sample(this.random);
 		}
 
 		if (livingEntity instanceof Player) {
@@ -162,7 +163,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 
 	@Override
 	public void startPersistentAngerTimer() {
-		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
 	}
 
 	public static boolean checkZombifiedPiglinSpawnRules(

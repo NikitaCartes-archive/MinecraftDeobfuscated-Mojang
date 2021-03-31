@@ -17,6 +17,7 @@ import net.minecraft.world.level.LightLayer;
 @Environment(EnvType.CLIENT)
 public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Minecraft minecraft;
+	private static final int MAX_RENDER_DIST = 10;
 
 	public LightDebugRenderer(Minecraft minecraft) {
 		this.minecraft = minecraft;

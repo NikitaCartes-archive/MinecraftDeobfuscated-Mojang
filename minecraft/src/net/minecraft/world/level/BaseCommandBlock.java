@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
@@ -174,7 +172,6 @@ public abstract class BaseCommandBlock implements CommandSource {
 		this.trackOutput = bl;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isTrackOutput() {
 		return this.trackOutput;
 	}
@@ -191,7 +188,6 @@ public abstract class BaseCommandBlock implements CommandSource {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public abstract Vec3 getPosition();
 
 	public abstract CommandSourceStack createCommandSourceStack();

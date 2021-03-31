@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -96,6 +94,7 @@ public abstract class PlayerList {
 	public static final File OPLIST_FILE = new File("ops.json");
 	public static final File WHITELIST_FILE = new File("whitelist.json");
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int SEND_PLAYER_INFO_INTERVAL = 600;
 	private static final SimpleDateFormat BAN_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
 	private final MinecraftServer server;
 	private final List<ServerPlayer> players = Lists.<ServerPlayer>newArrayList();
@@ -112,6 +111,7 @@ public abstract class PlayerList {
 	protected final int maxPlayers;
 	private int viewDistance;
 	private boolean allowCheatsForAllPlayers;
+	private static final boolean ALLOW_LOGOUTIVATOR = false;
 	private int sendAllPlayerInfoIn;
 
 	public PlayerList(MinecraftServer minecraftServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage, int i) {
@@ -736,7 +736,6 @@ public abstract class PlayerList {
 		return null;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setAllowCheatsForAllPlayers(boolean bl) {
 		this.allowCheatsForAllPlayers = bl;
 	}

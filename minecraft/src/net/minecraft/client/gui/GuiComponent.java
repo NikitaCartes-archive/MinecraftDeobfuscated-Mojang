@@ -124,8 +124,16 @@ public abstract class GuiComponent {
 		font.drawShadow(poseStack, formattedCharSequence, (float)(i - font.width(formattedCharSequence) / 2), (float)j, k);
 	}
 
+	public static void drawCenteredString(PoseStack poseStack, Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k) {
+		font.drawShadow(poseStack, formattedCharSequence, (float)(i - font.width(formattedCharSequence) / 2), (float)j, k);
+	}
+
 	public static void drawString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
 		font.drawShadow(poseStack, string, (float)i, (float)j, k);
+	}
+
+	public static void drawString(PoseStack poseStack, Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k) {
+		font.drawShadow(poseStack, formattedCharSequence, (float)i, (float)j, k);
 	}
 
 	public static void drawString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {

@@ -3,8 +3,6 @@ package net.minecraft.world.entity.projectile;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -23,7 +21,10 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 
 public class Arrow extends AbstractArrow {
+	private static final int EXPOSED_POTION_DECAY_TIME = 600;
+	private static final int NO_EFFECT_COLOR = -1;
 	private static final EntityDataAccessor<Integer> ID_EFFECT_COLOR = SynchedEntityData.defineId(Arrow.class, EntityDataSerializers.INT);
+	private static final byte EVENT_POTION_PUFF = 0;
 	private Potion potion = Potions.EMPTY;
 	private final Set<MobEffectInstance> effects = Sets.<MobEffectInstance>newHashSet();
 	private boolean fixedColor;
@@ -208,7 +209,6 @@ public class Arrow extends AbstractArrow {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 0) {

@@ -42,9 +42,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeHolder, StackedContentsCompatible {
+	protected static final int SLOT_INPUT = 0;
+	protected static final int SLOT_FUEL = 1;
+	protected static final int SLOT_RESULT = 2;
+	public static final int DATA_LIT_TIME = 0;
 	private static final int[] SLOTS_FOR_UP = new int[]{0};
 	private static final int[] SLOTS_FOR_DOWN = new int[]{2, 1};
 	private static final int[] SLOTS_FOR_SIDES = new int[]{1};
+	public static final int DATA_LIT_DURATION = 1;
+	public static final int DATA_COOKING_PROGRESS = 2;
+	public static final int DATA_COOKING_TOTAL_TIME = 3;
+	public static final int NUM_DATA_VALUES = 4;
+	public static final int BURN_TIME_STANDARD = 200;
+	public static final int BURN_COOL_SPEED = 2;
 	protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
 	private int litTime;
 	private int litDuration;

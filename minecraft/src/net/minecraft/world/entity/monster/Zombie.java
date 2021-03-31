@@ -73,6 +73,11 @@ public class Zombie extends Monster {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_SPECIAL_TYPE_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_DROWNED_CONVERSION_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+	public static final float ZOMBIE_LEADER_CHANCE = 0.05F;
+	public static final int REINFORCEMENT_ATTEMPTS = 50;
+	public static final int REINFORCEMENT_RANGE_MAX = 40;
+	public static final int REINFORCEMENT_RANGE_MIN = 7;
+	private static final float BREAK_DOOR_CHANCE = 0.1F;
 	private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.HARD;
 	private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, DOOR_BREAKING_PREDICATE);
 	private boolean canBreakDoors;

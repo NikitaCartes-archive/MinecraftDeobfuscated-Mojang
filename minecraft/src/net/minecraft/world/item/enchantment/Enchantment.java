@@ -3,8 +3,6 @@ package net.minecraft.world.item.enchantment;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -26,7 +24,6 @@ public abstract class Enchantment {
 	protected String descriptionId;
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public static Enchantment byId(int i) {
 		return Registry.ENCHANTMENT.byId(i);
 	}

@@ -32,6 +32,14 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 			this.damage = damagePredicate;
 		}
 
+		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer() {
+			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, DamagePredicate.ANY);
+		}
+
+		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer(DamagePredicate damagePredicate) {
+			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, damagePredicate);
+		}
+
 		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer(DamagePredicate.Builder builder) {
 			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, builder.build());
 		}

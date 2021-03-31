@@ -1,7 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.item.Item;
@@ -30,12 +28,10 @@ public class ClientboundCooldownPacket implements Packet<ClientGamePacketListene
 		clientGamePacketListener.handleItemCooldown(this);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Item getItem() {
 		return this.item;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public int getDuration() {
 		return this.duration;
 	}

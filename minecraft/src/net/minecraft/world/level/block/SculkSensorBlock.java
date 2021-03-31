@@ -5,8 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,6 +37,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+	public static final int ACTIVE_TICKS = 40;
+	public static final int COOLDOWN_TICKS = 1;
 	public static final Object2IntMap<GameEvent> VIBRATION_STRENGTH_FOR_EVENT = Object2IntMaps.unmodifiable(
 		Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
 			object2IntOpenHashMap.put(GameEvent.STEP, 1);
@@ -246,7 +246,6 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if (getPhase(blockState) == SculkSensorPhase.ACTIVE) {
