@@ -5,8 +5,6 @@ package net.minecraft.world.level.storage;
 
 import com.mojang.serialization.Lifecycle;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -20,6 +18,9 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import org.jetbrains.annotations.Nullable;
 
 public interface WorldData {
+    public static final int ANVIL_VERSION_ID = 19133;
+    public static final int MCREGION_VERSION_ID = 19132;
+
     public DataPackConfig getDataPackConfig();
 
     public void setDataPackConfig(DataPackConfig var1);
@@ -58,7 +59,6 @@ public interface WorldData {
 
     public ServerLevelData overworldData();
 
-    @Environment(value=EnvType.CLIENT)
     public LevelSettings getLevelSettings();
 
     public CompoundTag createTag(RegistryAccess var1, @Nullable CompoundTag var2);
@@ -93,7 +93,6 @@ public interface WorldData {
 
     public WorldGenSettings worldGenSettings();
 
-    @Environment(value=EnvType.CLIENT)
     public Lifecycle worldGenSettingsLifecycle();
 }
 

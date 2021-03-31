@@ -32,12 +32,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ItemProperties {
     private static final Map<ResourceLocation, ItemPropertyFunction> GENERIC_PROPERTIES = Maps.newHashMap();
+    private static final String TAG_CUSTOM_MODEL_DATA = "CustomModelData";
     private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
     private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
     private static final ItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0f : 0.0f;
@@ -77,7 +79,7 @@ public class ItemProperties {
     static {
         ItemProperties.registerGeneric(new ResourceLocation("lefthanded"), (itemStack, clientLevel, livingEntity, i) -> livingEntity == null || livingEntity.getMainArm() == HumanoidArm.RIGHT ? 0.0f : 1.0f);
         ItemProperties.registerGeneric(new ResourceLocation("cooldown"), (itemStack, clientLevel, livingEntity, i) -> livingEntity instanceof Player ? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0f) : 0.0f);
-        ItemProperties.registerGeneric(new ResourceLocation("custom_model_data"), (itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0f);
+        ItemProperties.registerGeneric(new ResourceLocation("custom_model_data"), (itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt(TAG_CUSTOM_MODEL_DATA) : 0.0f);
         ItemProperties.register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
             if (livingEntity == null) {
                 return 0.0f;
@@ -229,6 +231,17 @@ public class ItemProperties {
         });
         ItemProperties.register(Items.SHIELD, new ResourceLocation("blocking"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
         ItemProperties.register(Items.TRIDENT, new ResourceLocation("throwing"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
+        ItemProperties.register(Items.LIGHT, new ResourceLocation("level"), (itemStack, clientLevel, livingEntity, i) -> {
+            CompoundTag compoundTag = itemStack.getTagElement("BlockStateTag");
+            try {
+                if (compoundTag != null) {
+                    return Integer.parseInt(compoundTag.getString(LightBlock.LEVEL.getName()));
+                }
+            } catch (NumberFormatException numberFormatException) {
+                // empty catch block
+            }
+            return 15.0f;
+        });
     }
 
     @Environment(value=EnvType.CLIENT)

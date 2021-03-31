@@ -14,6 +14,7 @@ import net.minecraft.nbt.TagVisitor;
 
 public class ShortTag
 extends NumericTag {
+    private static final int SELF_SIZE_IN_BITS = 80;
     public static final TagType<ShortTag> TYPE = new TagType<ShortTag>(){
 
         @Override
@@ -131,7 +132,12 @@ extends NumericTag {
     }
 
     static class Cache {
+        private static final int HIGH = 1024;
+        private static final int LOW = -128;
         static final ShortTag[] cache = new ShortTag[1153];
+
+        private Cache() {
+        }
 
         static {
             for (int i = 0; i < cache.length; ++i) {

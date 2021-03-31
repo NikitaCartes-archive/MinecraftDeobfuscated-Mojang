@@ -5,11 +5,26 @@ package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.SnooperAccess;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.lwjgl.system.MemoryUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class GlUtil {
+    public static void populateSnooperWithOpenGL(SnooperAccess snooperAccess) {
+    }
+
+    public static ByteBuffer allocateMemory(int i) {
+        return MemoryUtil.memAlloc(i);
+    }
+
+    public static void freeMemory(Buffer buffer) {
+        MemoryUtil.memFree(buffer);
+    }
+
     public static String getVendor() {
         return GlStateManager._getString(7936);
     }

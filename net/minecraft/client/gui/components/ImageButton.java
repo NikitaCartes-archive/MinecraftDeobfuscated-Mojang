@@ -24,6 +24,10 @@ extends Button {
     private final int textureWidth;
     private final int textureHeight;
 
+    public ImageButton(int i, int j, int k, int l, int m, int n, ResourceLocation resourceLocation, Button.OnPress onPress) {
+        this(i, j, k, l, m, n, l, resourceLocation, 256, 256, onPress);
+    }
+
     public ImageButton(int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, Button.OnPress onPress) {
         this(i, j, k, l, m, n, o, resourceLocation, 256, 256, onPress);
     }

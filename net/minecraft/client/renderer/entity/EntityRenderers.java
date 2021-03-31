@@ -45,6 +45,7 @@ import net.minecraft.client.renderer.entity.FoxRenderer;
 import net.minecraft.client.renderer.entity.GhastRenderer;
 import net.minecraft.client.renderer.entity.GiantMobRenderer;
 import net.minecraft.client.renderer.entity.GlowSquidRenderer;
+import net.minecraft.client.renderer.entity.GoatRenderer;
 import net.minecraft.client.renderer.entity.GuardianRenderer;
 import net.minecraft.client.renderer.entity.HoglinRenderer;
 import net.minecraft.client.renderer.entity.HorseRenderer;
@@ -117,6 +118,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class EntityRenderers {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final String DEFAULT_PLAYER_MODEL = "default";
     private static final Map<EntityType<?>, EntityRendererProvider<?>> PROVIDERS = Maps.newHashMap();
     private static final Map<String, EntityRendererProvider<AbstractClientPlayer>> PLAYER_PROVIDERS = ImmutableMap.of("default", context -> new PlayerRenderer(context, false), "slim", context -> new PlayerRenderer(context, true));
 
@@ -201,6 +203,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.GIANT, context -> new GiantMobRenderer(context, 6.0f));
         EntityRenderers.register(EntityType.GLOW_ITEM_FRAME, ItemFrameRenderer::new);
         EntityRenderers.register(EntityType.GLOW_SQUID, context -> new GlowSquidRenderer(context, new SquidModel<GlowSquid>(context.bakeLayer(ModelLayers.GLOW_SQUID))));
+        EntityRenderers.register(EntityType.GOAT, GoatRenderer::new);
         EntityRenderers.register(EntityType.GUARDIAN, GuardianRenderer::new);
         EntityRenderers.register(EntityType.HOGLIN, HoglinRenderer::new);
         EntityRenderers.register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer(context, ModelLayers.HOPPER_MINECART));

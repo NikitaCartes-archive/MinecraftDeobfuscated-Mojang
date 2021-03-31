@@ -34,6 +34,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class StructureManager {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String STRUCTURE_DIRECTORY_NAME = "structures";
+    private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
+    private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
     private final Map<ResourceLocation, StructureTemplate> structureRepository = Maps.newHashMap();
     private final DataFixer fixerUpper;
     private ResourceManager resourceManager;
@@ -74,7 +77,7 @@ public class StructureManager {
      */
     @Nullable
     private StructureTemplate loadFromResource(ResourceLocation resourceLocation) {
-        ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
+        ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + STRUCTURE_FILE_EXTENSION);
         try (Resource resource = this.resourceManager.getResource(resourceLocation2);){
             StructureTemplate structureTemplate = this.readStructure(resource.getInputStream());
             return structureTemplate;
@@ -96,7 +99,7 @@ public class StructureManager {
         if (!this.generatedDir.toFile().isDirectory()) {
             return null;
         }
-        Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
+        Path path = this.createAndValidatePathToStructure(resourceLocation, STRUCTURE_FILE_EXTENSION);
         try (FileInputStream inputStream = new FileInputStream(path.toFile());){
             StructureTemplate structureTemplate = this.readStructure(inputStream);
             return structureTemplate;
@@ -127,7 +130,7 @@ public class StructureManager {
         if (structureTemplate == null) {
             return false;
         }
-        Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
+        Path path = this.createAndValidatePathToStructure(resourceLocation, STRUCTURE_FILE_EXTENSION);
         Path path2 = path.getParent();
         if (path2 == null) {
             return false;
@@ -150,7 +153,7 @@ public class StructureManager {
     public Path createPathToStructure(ResourceLocation resourceLocation, String string) {
         try {
             Path path = this.generatedDir.resolve(resourceLocation.getNamespace());
-            Path path2 = path.resolve("structures");
+            Path path2 = path.resolve(STRUCTURE_DIRECTORY_NAME);
             return FileUtil.createPathToResource(path2, resourceLocation.getPath(), string);
         } catch (InvalidPathException invalidPathException) {
             throw new ResourceLocationException("Invalid resource path: " + resourceLocation, invalidPathException);

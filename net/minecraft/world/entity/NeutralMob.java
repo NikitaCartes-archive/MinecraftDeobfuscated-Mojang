@@ -18,6 +18,9 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public interface NeutralMob {
+    public static final String TAG_ANGER_TIME = "AngerTime";
+    public static final String TAG_ANGRY_AT = "AngryAt";
+
     public int getRemainingPersistentAngerTime();
 
     public void setRemainingPersistentAngerTime(int var1);
@@ -30,22 +33,22 @@ public interface NeutralMob {
     public void startPersistentAngerTimer();
 
     default public void addPersistentAngerSaveData(CompoundTag compoundTag) {
-        compoundTag.putInt("AngerTime", this.getRemainingPersistentAngerTime());
+        compoundTag.putInt(TAG_ANGER_TIME, this.getRemainingPersistentAngerTime());
         if (this.getPersistentAngerTarget() != null) {
-            compoundTag.putUUID("AngryAt", this.getPersistentAngerTarget());
+            compoundTag.putUUID(TAG_ANGRY_AT, this.getPersistentAngerTarget());
         }
     }
 
     default public void readPersistentAngerSaveData(Level level, CompoundTag compoundTag) {
-        this.setRemainingPersistentAngerTime(compoundTag.getInt("AngerTime"));
+        this.setRemainingPersistentAngerTime(compoundTag.getInt(TAG_ANGER_TIME));
         if (!(level instanceof ServerLevel)) {
             return;
         }
-        if (!compoundTag.hasUUID("AngryAt")) {
+        if (!compoundTag.hasUUID(TAG_ANGRY_AT)) {
             this.setPersistentAngerTarget(null);
             return;
         }
-        UUID uUID = compoundTag.getUUID("AngryAt");
+        UUID uUID = compoundTag.getUUID(TAG_ANGRY_AT);
         this.setPersistentAngerTarget(uUID);
         Entity entity = ((ServerLevel)level).getEntity(uUID);
         if (entity == null) {
@@ -117,6 +120,9 @@ public interface NeutralMob {
         this.setTarget(null);
         this.setRemainingPersistentAngerTime(0);
     }
+
+    @Nullable
+    public LivingEntity getLastHurtByMob();
 
     public void setLastHurtByMob(@Nullable LivingEntity var1);
 

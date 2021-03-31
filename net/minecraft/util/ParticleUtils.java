@@ -3,33 +3,30 @@
  */
 package net.minecraft.util;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-@Environment(value=EnvType.CLIENT)
 public class ParticleUtils {
-    public static void spawnParticlesOnBlockFaces(Level level, BlockPos blockPos, ParticleOptions particleOptions, IntRange intRange) {
+    public static void spawnParticlesOnBlockFaces(Level level, BlockPos blockPos, ParticleOptions particleOptions, UniformInt uniformInt) {
         for (Direction direction : Direction.values()) {
-            int i = intRange.randomValue(level.random);
+            int i = uniformInt.sample(level.random);
             for (int j = 0; j < i; ++j) {
                 ParticleUtils.spawnParticleOnFace(level, blockPos, direction, particleOptions);
             }
         }
     }
 
-    public static void spawnParticlesAlongAxis(Direction.Axis axis, Level level, BlockPos blockPos, double d, ParticleOptions particleOptions, IntRange intRange) {
+    public static void spawnParticlesAlongAxis(Direction.Axis axis, Level level, BlockPos blockPos, double d, ParticleOptions particleOptions, UniformInt uniformInt) {
         Vec3 vec3 = Vec3.atCenterOf(blockPos);
         boolean bl = axis == Direction.Axis.X;
         boolean bl2 = axis == Direction.Axis.Y;
         boolean bl3 = axis == Direction.Axis.Z;
-        int i = intRange.randomValue(level.random);
+        int i = uniformInt.sample(level.random);
         for (int j = 0; j < i; ++j) {
             double e = vec3.x + Mth.nextDouble(level.random, -1.0, 1.0) * (bl ? 0.5 : d);
             double f = vec3.y + Mth.nextDouble(level.random, -1.0, 1.0) * (bl2 ? 0.5 : d);

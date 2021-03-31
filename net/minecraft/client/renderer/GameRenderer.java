@@ -77,6 +77,8 @@ implements ResourceManagerReloadListener,
 AutoCloseable {
     private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final boolean DEPTH_BUFFER_DEBUG = false;
+    public static final float PROJECTION_Z_NEAR = 0.05f;
     private final Minecraft minecraft;
     private final ResourceManager resourceManager;
     private final Random random = new Random();
@@ -99,6 +101,7 @@ AutoCloseable {
     private float zoom = 1.0f;
     private float zoomX;
     private float zoomY;
+    public static final int ITEM_ACTIVATION_ANIMATION_LENGTH = 40;
     @Nullable
     private ItemStack itemActivationItem;
     private int itemActivationTicks;
@@ -240,6 +243,22 @@ AutoCloseable {
         }
     }
 
+    public void setRenderHand(boolean bl) {
+        this.renderHand = bl;
+    }
+
+    public void setRenderBlockOutline(boolean bl) {
+        this.renderBlockOutline = bl;
+    }
+
+    public void setPanoramicMode(boolean bl) {
+        this.panoramicMode = bl;
+    }
+
+    public boolean isPanoramicMode() {
+        return this.panoramicMode;
+    }
+
     public void shutdownEffect() {
         if (this.postEffect != null) {
             this.postEffect.close();
@@ -263,6 +282,21 @@ AutoCloseable {
             this.loadEffect(new ResourceLocation("shaders/post/spider.json"));
         } else if (entity instanceof EnderMan) {
             this.loadEffect(new ResourceLocation("shaders/post/invert.json"));
+        }
+    }
+
+    public void cycleEffect() {
+        if (!(this.minecraft.getCameraEntity() instanceof Player)) {
+            return;
+        }
+        if (this.postEffect != null) {
+            this.postEffect.close();
+        }
+        this.effectIndex = (this.effectIndex + 1) % (EFFECTS.length + 1);
+        if (this.effectIndex == EFFECT_NONE) {
+            this.postEffect = null;
+        } else {
+            this.loadEffect(EFFECTS[this.effectIndex]);
         }
     }
 
@@ -386,6 +420,14 @@ AutoCloseable {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         this.shaders.values().forEach(ShaderInstance::close);
         this.shaders.clear();
+    }
+
+    @Nullable
+    public ShaderInstance getShader(@Nullable String string) {
+        if (string == null) {
+            return null;
+        }
+        return this.shaders.get(string);
     }
 
     public void tick() {
@@ -544,6 +586,16 @@ AutoCloseable {
         poseStack.translate(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0);
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(h * (float)Math.PI) * i * 3.0f));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f));
+    }
+
+    public void renderZoomed(float f, float g, float h) {
+        this.zoom = f;
+        this.zoomX = g;
+        this.zoomY = h;
+        this.setRenderBlockOutline(false);
+        this.setRenderHand(false);
+        this.renderLevel(1.0f, 0L, new PoseStack());
+        this.zoom = 1.0f;
     }
 
     private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
@@ -856,6 +908,10 @@ AutoCloseable {
         RenderSystem.enableDepthTest();
     }
 
+    public Minecraft getMinecraft() {
+        return this.minecraft;
+    }
+
     public float getDarkenWorldAmount(float f) {
         return Mth.lerp(f, this.darkenWorldAmountO, this.darkenWorldAmount);
     }
@@ -929,6 +985,11 @@ AutoCloseable {
     @Nullable
     public static ShaderInstance getPositionTexColorNormalShader() {
         return positionTexColorNormalShader;
+    }
+
+    @Nullable
+    public static ShaderInstance getPositionTexLightmapColorShader() {
+        return positionTexLightmapColorShader;
     }
 
     @Nullable

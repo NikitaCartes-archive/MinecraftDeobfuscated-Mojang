@@ -46,6 +46,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.level = ints;
         }
 
+        public static TriggerInstance constructedBeacon() {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY);
+        }
+
         public static TriggerInstance constructedBeacon(MinMaxBounds.Ints ints) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, ints);
         }

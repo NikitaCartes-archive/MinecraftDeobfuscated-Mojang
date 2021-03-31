@@ -10,11 +10,10 @@ import com.mojang.math.Vector3f;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -53,6 +52,11 @@ extends Block {
     public static final EnumProperty<RedstoneSide> WEST = BlockStateProperties.WEST_REDSTONE;
     public static final IntegerProperty POWER = BlockStateProperties.POWER;
     public static final Map<Direction, EnumProperty<RedstoneSide>> PROPERTY_BY_DIRECTION = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, NORTH, Direction.EAST, EAST, Direction.SOUTH, SOUTH, Direction.WEST, WEST));
+    protected static final int H = 1;
+    protected static final int W = 3;
+    protected static final int E = 13;
+    protected static final int N = 3;
+    protected static final int S = 13;
     private static final VoxelShape SHAPE_DOT = Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 13.0);
     private static final Map<Direction, VoxelShape> SHAPES_FLOOR = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Block.box(3.0, 0.0, 0.0, 13.0, 1.0, 13.0), Direction.SOUTH, Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 16.0), Direction.EAST, Block.box(3.0, 0.0, 3.0, 16.0, 1.0, 13.0), Direction.WEST, Block.box(0.0, 0.0, 3.0, 13.0, 1.0, 13.0)));
     private static final Map<Direction, VoxelShape> SHAPES_UP = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Shapes.or(SHAPES_FLOOR.get(Direction.NORTH), Block.box(3.0, 0.0, 0.0, 13.0, 16.0, 1.0)), Direction.SOUTH, Shapes.or(SHAPES_FLOOR.get(Direction.SOUTH), Block.box(3.0, 0.0, 15.0, 13.0, 16.0, 16.0)), Direction.EAST, Shapes.or(SHAPES_FLOOR.get(Direction.EAST), Block.box(15.0, 0.0, 3.0, 16.0, 16.0, 13.0)), Direction.WEST, Shapes.or(SHAPES_FLOOR.get(Direction.WEST), Block.box(0.0, 0.0, 3.0, 1.0, 16.0, 13.0))));
@@ -66,6 +70,7 @@ extends Block {
             vec3s[i] = new Vec3(g, h, j);
         }
     });
+    private static final float PARTICLE_DENSITY = 0.2f;
     private final BlockState crossState;
     private boolean shouldSignal = true;
 
@@ -169,19 +174,19 @@ extends Block {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             RedstoneSide redstoneSide = (RedstoneSide)blockState.getValue(PROPERTY_BY_DIRECTION.get(direction));
-            if (redstoneSide == RedstoneSide.NONE || levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction)).is(this)) continue;
+            if (redstoneSide == RedstoneSide.NONE || levelAccessor.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos, direction)).is(this)) continue;
             mutableBlockPos.move(Direction.DOWN);
             BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
             if (!blockState2.is(Blocks.OBSERVER)) {
-                BlockPos blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-                BlockState blockState3 = blockState2.updateShape(direction.getOpposite(), levelAccessor.getBlockState(blockPos2), levelAccessor, mutableBlockPos, blockPos2);
+                Vec3i blockPos2 = mutableBlockPos.relative(direction.getOpposite());
+                BlockState blockState3 = blockState2.updateShape(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos2), levelAccessor, mutableBlockPos, (BlockPos)blockPos2);
                 RedStoneWireBlock.updateOrDestroy(blockState2, blockState3, levelAccessor, mutableBlockPos, i, j);
             }
-            mutableBlockPos.setWithOffset(blockPos, direction).move(Direction.UP);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction).move(Direction.UP);
             BlockState blockState4 = levelAccessor.getBlockState(mutableBlockPos);
             if (blockState4.is(Blocks.OBSERVER)) continue;
-            BlockPos blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-            BlockState blockState5 = blockState4.updateShape(direction.getOpposite(), levelAccessor.getBlockState(blockPos3), levelAccessor, mutableBlockPos, blockPos3);
+            Vec3i blockPos3 = mutableBlockPos.relative(direction.getOpposite());
+            BlockState blockState5 = blockState4.updateShape(direction.getOpposite(), levelAccessor.getBlockState((BlockPos)blockPos3), levelAccessor, mutableBlockPos, (BlockPos)blockPos3);
             RedStoneWireBlock.updateOrDestroy(blockState4, blockState5, levelAccessor, mutableBlockPos, i, j);
         }
     }
@@ -371,13 +376,11 @@ extends Block {
         return this.shouldSignal;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int getColorForPower(int i) {
         Vec3 vec3 = COLORS[i];
         return Mth.color((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
     }
 
-    @Environment(value=EnvType.CLIENT)
     private void spawnParticlesAlongLine(Level level, Random random, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g) {
         float h = g - f;
         if (random.nextFloat() >= 0.2f * h) {
@@ -392,7 +395,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         int i = blockState.getValue(POWER);
         if (i == 0) {

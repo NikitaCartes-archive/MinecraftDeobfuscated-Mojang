@@ -5,8 +5,6 @@ package net.minecraft.world.level.material;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -35,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class LavaFluid
 extends FlowingFluid {
+    public static final float MIN_LEVEL_CUTOFF = 0.44444445f;
+
     @Override
     public Fluid getFlowing() {
         return Fluids.FLOWING_LAVA;
@@ -51,7 +51,6 @@ extends FlowingFluid {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
         BlockPos blockPos2 = blockPos.above();
         if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
@@ -118,7 +117,6 @@ extends FlowingFluid {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ParticleOptions getDripParticle() {
         return ParticleTypes.DRIPPING_LAVA;
     }

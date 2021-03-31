@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -40,7 +41,11 @@ AutoCloseable {
     @Nullable
     public abstract ChunkAccess getChunk(int var1, int var2, ChunkStatus var3, boolean var4);
 
+    public abstract void tick(BooleanSupplier var1);
+
     public abstract String gatherStats();
+
+    public abstract int getLoadedChunksCount();
 
     @Override
     public void close() throws IOException {

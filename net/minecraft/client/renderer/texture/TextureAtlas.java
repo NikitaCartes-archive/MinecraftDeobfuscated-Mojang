@@ -53,6 +53,7 @@ implements Tickable {
     public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
     @Deprecated
     public static final ResourceLocation LOCATION_PARTICLES = new ResourceLocation("textures/atlas/particles.png");
+    private static final String FILE_EXTENSION = ".png";
     private final List<Tickable> animatedTextures = Lists.newArrayList();
     private final Set<ResourceLocation> sprites = Sets.newHashSet();
     private final Map<ResourceLocation, TextureAtlasSprite> texturesByName = Maps.newHashMap();
@@ -211,7 +212,7 @@ implements Tickable {
     }
 
     private ResourceLocation getResourceLocation(ResourceLocation resourceLocation) {
-        return new ResourceLocation(resourceLocation.getNamespace(), String.format("textures/%s%s", resourceLocation.getPath(), ".png"));
+        return new ResourceLocation(resourceLocation.getNamespace(), String.format("textures/%s%s", resourceLocation.getPath(), FILE_EXTENSION));
     }
 
     public void cycleAnimationFrames() {

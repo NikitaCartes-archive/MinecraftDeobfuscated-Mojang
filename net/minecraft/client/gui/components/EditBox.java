@@ -39,6 +39,16 @@ public class EditBox
 extends AbstractWidget
 implements Widget,
 GuiEventListener {
+    public static final int BACKWARDS = -1;
+    public static final int FORWARDS = 1;
+    private static final int CURSOR_INSERT_WIDTH = 1;
+    private static final int CURSOR_INSERT_COLOR = -3092272;
+    private static final String CURSOR_APPEND_CHARACTER = "_";
+    private static final long NARRATE_DELAY_TYPING_MS = 500L;
+    public static final int DEFAULT_TEXT_COLOR = 0xE0E0E0;
+    private static final int BORDER_COLOR_FOCUSED = -1;
+    private static final int BORDER_COLOR = -6250336;
+    private static final int BACKGROUND_COLOR = -16777216;
     private final Font font;
     private String value = "";
     private int maxLength = 32;
@@ -403,7 +413,7 @@ GuiEventListener {
             if (bl3) {
                 GuiComponent.fill(poseStack, q, o - 1, q + 1, o + 1 + this.font.lineHeight, -3092272);
             } else {
-                this.font.drawShadow(poseStack, "_", (float)q, (float)o, k);
+                this.font.drawShadow(poseStack, CURSOR_APPEND_CHARACTER, (float)q, (float)o, k);
             }
         }
         if (m != l) {

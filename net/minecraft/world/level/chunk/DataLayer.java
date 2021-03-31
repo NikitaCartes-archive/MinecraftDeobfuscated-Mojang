@@ -4,9 +4,13 @@
 package net.minecraft.world.level.chunk;
 
 import net.minecraft.Util;
+import net.minecraft.util.VisibleForDebug;
 import org.jetbrains.annotations.Nullable;
 
 public class DataLayer {
+    public static final int SIZE = 2048;
+    public static final int LAYER_SIZE = 128;
+    private static final int NIBBLE_SIZE = 4;
     @Nullable
     protected byte[] data;
 
@@ -85,6 +89,17 @@ public class DataLayer {
                 stringBuilder.append("\n");
             }
             if ((i & 0xFF) != 255) continue;
+            stringBuilder.append("\n");
+        }
+        return stringBuilder.toString();
+    }
+
+    @VisibleForDebug
+    public String layerToString(int i) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int j = 0; j < 256; ++j) {
+            stringBuilder.append(Integer.toHexString(this.get(j)));
+            if ((j & 0xF) != 15) continue;
             stringBuilder.append("\n");
         }
         return stringBuilder.toString();

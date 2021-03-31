@@ -35,6 +35,10 @@ public class LecternBlockEntity
 extends BlockEntity
 implements Clearable,
 MenuProvider {
+    public static final int DATA_PAGE = 0;
+    public static final int NUM_DATA = 1;
+    public static final int SLOT_BOOK = 0;
+    public static final int NUM_SLOTS = 1;
     private final Container bookAccess = new Container(){
 
         @Override

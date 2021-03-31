@@ -4,8 +4,6 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
@@ -18,12 +16,13 @@ public interface Palette<T> {
     @Nullable
     public T valueFor(int var1);
 
-    @Environment(value=EnvType.CLIENT)
     public void read(FriendlyByteBuf var1);
 
     public void write(FriendlyByteBuf var1);
 
     public int getSerializedSize();
+
+    public int getSize();
 
     public void read(ListTag var1);
 }

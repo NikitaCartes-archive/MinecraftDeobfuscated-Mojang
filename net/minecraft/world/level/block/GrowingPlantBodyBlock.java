@@ -5,8 +5,6 @@ package net.minecraft.world.level.block;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +50,6 @@ implements BonemealableBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return new ItemStack(this.getHeadBlock());
     }

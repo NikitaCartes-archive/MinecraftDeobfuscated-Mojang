@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -27,15 +25,12 @@ public abstract class Team {
 
     public abstract MutableComponent getFormattedName(Component var1);
 
-    @Environment(value=EnvType.CLIENT)
     public abstract boolean canSeeFriendlyInvisibles();
 
     public abstract boolean isAllowFriendlyFire();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract Visibility getNameTagVisibility();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract ChatFormatting getColor();
 
     public abstract Collection<String> getPlayers();
@@ -82,6 +77,10 @@ public abstract class Team {
         private static final Map<String, Visibility> BY_NAME;
         public final String name;
         public final int id;
+
+        public static String[] getAllNames() {
+            return BY_NAME.keySet().toArray(new String[BY_NAME.size()]);
+        }
 
         @Nullable
         public static Visibility byName(String string) {

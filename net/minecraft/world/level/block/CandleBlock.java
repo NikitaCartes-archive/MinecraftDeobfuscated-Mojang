@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
 import java.util.function.ToIntFunction;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,6 +40,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class CandleBlock
 extends AbstractCandleBlock
 implements SimpleWaterloggedBlock {
+    public static final int MIN_CANDLES = 1;
+    public static final int MAX_CANDLES = 4;
     public static final IntegerProperty CANDLES = BlockStateProperties.CANDLES;
     public static final BooleanProperty LIT = AbstractCandleBlock.LIT;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -151,9 +151,13 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     protected Iterable<Vec3> getParticleOffsets(BlockState blockState) {
         return (Iterable)PARTICLE_OFFSETS.get(blockState.getValue(CANDLES));
+    }
+
+    @Override
+    protected boolean canBeLit(BlockState blockState) {
+        return blockState.getValue(WATERLOGGED) == false && super.canBeLit(blockState);
     }
 
     @Override

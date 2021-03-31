@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ChestMenu
 extends AbstractContainerMenu {
+    private static final int SLOTS_PER_ROW = 9;
     private final Container container;
     private final int containerRows;
 
@@ -113,7 +112,6 @@ extends AbstractContainerMenu {
         return this.container;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getRowCount() {
         return this.containerRows;
     }

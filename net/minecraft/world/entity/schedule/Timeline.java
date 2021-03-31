@@ -3,8 +3,10 @@
  */
 package net.minecraft.world.entity.schedule;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
+import java.util.Collection;
 import java.util.List;
 import net.minecraft.world.entity.schedule.Keyframe;
 
@@ -12,8 +14,18 @@ public class Timeline {
     private final List<Keyframe> keyframes = Lists.newArrayList();
     private int previousIndex;
 
+    public ImmutableList<Keyframe> getKeyframes() {
+        return ImmutableList.copyOf(this.keyframes);
+    }
+
     public Timeline addKeyframe(int i, float f) {
         this.keyframes.add(new Keyframe(i, f));
+        this.sortAndDeduplicateKeyframes();
+        return this;
+    }
+
+    public Timeline addKeyframes(Collection<Keyframe> collection) {
+        this.keyframes.addAll(collection);
         this.sortAndDeduplicateKeyframes();
         return this;
     }

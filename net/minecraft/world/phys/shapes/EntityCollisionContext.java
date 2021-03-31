@@ -49,6 +49,11 @@ implements CollisionContext {
     }
 
     @Override
+    public boolean hasItemOnFeet(Item item) {
+        return this.footItem.is(item);
+    }
+
+    @Override
     public boolean isHoldingItem(Item item) {
         return this.heldItem.is(item);
     }

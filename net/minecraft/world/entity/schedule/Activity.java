@@ -22,6 +22,7 @@ public class Activity {
     public static final Activity AVOID = Activity.register("avoid");
     public static final Activity RIDE = Activity.register("ride");
     public static final Activity PLAY_DEAD = Activity.register("play_dead");
+    public static final Activity LONG_JUMP = Activity.register("long_jump");
     private final String name;
     private final int hashCode;
 

@@ -51,6 +51,10 @@ public class MapBanner {
         return this.pos;
     }
 
+    public DyeColor getColor() {
+        return this.color;
+    }
+
     public MapDecoration.Type getDecoration() {
         switch (this.color) {
             case WHITE: {

@@ -82,6 +82,9 @@ public final class ItemTags {
     public static final Tag.Named<Item> OCCLUDES_VIBRATION_SIGNALS = ItemTags.bind("occludes_vibration_signals");
     public static final Tag.Named<Item> CLUSTER_MAX_HARVESTABLES = ItemTags.bind("cluster_max_harvestables");
 
+    private ItemTags() {
+    }
+
     private static Tag.Named<Item> bind(String string) {
         return HELPER.bind(string);
     }

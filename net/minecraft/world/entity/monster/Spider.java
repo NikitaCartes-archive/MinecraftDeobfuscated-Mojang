@@ -51,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 public class Spider
 extends Monster {
     private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.BYTE);
+    private static final float SPIDER_SPECIAL_EFFECT_CHANCE = 0.1f;
 
     public Spider(EntityType<? extends Spider> entityType, Level level) {
         super((EntityType<? extends Monster>)entityType, level);

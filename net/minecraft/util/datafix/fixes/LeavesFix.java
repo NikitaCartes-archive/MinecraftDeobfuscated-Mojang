@@ -38,7 +38,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class LeavesFix
 extends DataFix {
+    private static final int NORTH_WEST_MASK = 128;
+    private static final int WEST_MASK = 64;
+    private static final int SOUTH_WEST_MASK = 32;
+    private static final int SOUTH_MASK = 16;
+    private static final int SOUTH_EAST_MASK = 8;
+    private static final int EAST_MASK = 4;
+    private static final int NORTH_EAST_MASK = 2;
+    private static final int NORTH_MASK = 1;
     private static final int[][] DIRECTIONS = new int[][]{{-1, 0, 0}, {1, 0, 0}, {0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}};
+    private static final int DECAY_DISTANCE = 7;
+    private static final int SIZE_BITS = 12;
+    private static final int SIZE = 4096;
     private static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
         object2IntOpenHashMap.put("minecraft:acacia_leaves", 0);
         object2IntOpenHashMap.put("minecraft:birch_leaves", 1);
@@ -158,6 +169,9 @@ extends DataFix {
 
     public static final class LeavesSection
     extends Section {
+        private static final String PERSISTENT = "persistent";
+        private static final String DECAYABLE = "decayable";
+        private static final String DISTANCE = "distance";
         @Nullable
         private IntSet leaveIds;
         @Nullable
@@ -178,7 +192,7 @@ extends DataFix {
                 Dynamic dynamic = (Dynamic)this.palette.get(i);
                 String string = dynamic.get("Name").asString("");
                 if (LEAVES.containsKey(string)) {
-                    boolean bl = Objects.equals(dynamic.get("Properties").get("decayable").asString(""), "false");
+                    boolean bl = Objects.equals(dynamic.get("Properties").get(DECAYABLE).asString(""), "false");
                     this.leaveIds.add(i);
                     this.stateToIdMap.put(this.getStateId(string, bl, 7), i);
                     this.palette.set(i, this.makeLeafTag(dynamic, string, bl, 7));
@@ -191,8 +205,8 @@ extends DataFix {
 
         private Dynamic<?> makeLeafTag(Dynamic<?> dynamic, String string, boolean bl, int i) {
             Dynamic dynamic2 = dynamic.emptyMap();
-            dynamic2 = dynamic2.set("persistent", dynamic2.createString(bl ? "true" : "false"));
-            dynamic2 = dynamic2.set("distance", dynamic2.createString(Integer.toString(i)));
+            dynamic2 = dynamic2.set(PERSISTENT, dynamic2.createString(bl ? "true" : "false"));
+            dynamic2 = dynamic2.set(DISTANCE, dynamic2.createString(Integer.toString(i)));
             Dynamic dynamic3 = dynamic.emptyMap();
             dynamic3 = dynamic3.set("Properties", dynamic2);
             dynamic3 = dynamic3.set("Name", dynamic3.createString(string));
@@ -211,7 +225,7 @@ extends DataFix {
             if (this.isLog(i)) {
                 return 0;
             }
-            return Integer.parseInt(((Dynamic)this.palette.get(i)).get("Properties").get("distance").asString(""));
+            return Integer.parseInt(((Dynamic)this.palette.get(i)).get("Properties").get(DISTANCE).asString(""));
         }
 
         private void setDistance(int i, int j, int k) {
@@ -219,7 +233,7 @@ extends DataFix {
             boolean bl;
             Dynamic dynamic = (Dynamic)this.palette.get(j);
             String string = dynamic.get("Name").asString("");
-            int l = this.getStateId(string, bl = Objects.equals(dynamic.get("Properties").get("persistent").asString(""), "true"), k);
+            int l = this.getStateId(string, bl = Objects.equals(dynamic.get("Properties").get(PERSISTENT).asString(""), "true"), k);
             if (!this.stateToIdMap.containsKey(l)) {
                 m = this.palette.size();
                 this.leaveIds.add(m);
@@ -239,6 +253,9 @@ extends DataFix {
     }
 
     public static abstract class Section {
+        protected static final String BLOCK_STATES_TAG = "BlockStates";
+        protected static final String NAME_TAG = "Name";
+        protected static final String PROPERTIES_TAG = "Properties";
         private final Type<Pair<String, Dynamic<?>>> blockStateType = DSL.named(References.BLOCK_STATE.typeName(), DSL.remainderType());
         protected final OpticFinder<List<Pair<String, Dynamic<?>>>> paletteFinder = DSL.fieldFinder("Palette", DSL.list(this.blockStateType));
         protected final List<Dynamic<?>> palette;
@@ -261,7 +278,7 @@ extends DataFix {
             if (this.skippable()) {
                 this.storage = null;
             } else {
-                long[] ls = dynamic.get("BlockStates").asLongStream().toArray();
+                long[] ls = dynamic.get(BLOCK_STATES_TAG).asLongStream().toArray();
                 int i = Math.max(4, DataFixUtils.ceillog2(this.palette.size()));
                 this.storage = new PackedBitStorage(i, 4096, ls);
             }
@@ -271,7 +288,7 @@ extends DataFix {
             if (this.isSkippable()) {
                 return typed;
             }
-            return typed.update(DSL.remainderFinder(), dynamic -> dynamic.set("BlockStates", dynamic.createLongList(Arrays.stream(this.storage.getRaw())))).set(this.paletteFinder, this.palette.stream().map(dynamic -> Pair.of(References.BLOCK_STATE.typeName(), dynamic)).collect(Collectors.toList()));
+            return typed.update(DSL.remainderFinder(), dynamic -> dynamic.set(BLOCK_STATES_TAG, dynamic.createLongList(Arrays.stream(this.storage.getRaw())))).set(this.paletteFinder, this.palette.stream().map(dynamic -> Pair.of(References.BLOCK_STATE.typeName(), dynamic)).collect(Collectors.toList()));
         }
 
         public boolean isSkippable() {

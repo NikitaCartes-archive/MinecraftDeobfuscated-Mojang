@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +36,6 @@ public class StaticTagHelper<T> {
         return wrapper;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void resetToEmpty() {
         this.source = TagCollection.empty();
         SetTag tag = SetTag.empty();

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,6 +37,7 @@ public abstract class SignBlock
 extends BaseEntityBlock
 implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    protected static final float AABB_OFFSET = 4.0f;
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
     private final WoodType type;
 
@@ -117,7 +116,6 @@ implements SimpleWaterloggedBlock {
         return super.getFluidState(blockState);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public WoodType type() {
         return this.type;
     }

@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -13,6 +11,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket
 implements Packet<ClientGamePacketListener> {
+    private static final int FLAG_AMBIENT = 1;
+    private static final int FLAG_VISIBLE = 2;
+    private static final int FLAG_SHOW_ICON = 4;
     private final int entityId;
     private final byte effectId;
     private final byte effectAmplifier;
@@ -54,7 +55,6 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeByte(this.flags);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isSuperLongDuration() {
         return this.effectDurationTicks == Short.MAX_VALUE;
     }
@@ -64,37 +64,30 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleUpdateMobEffect(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getEntityId() {
         return this.entityId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public byte getEffectId() {
         return this.effectId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public byte getEffectAmplifier() {
         return this.effectAmplifier;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getEffectDurationTicks() {
         return this.effectDurationTicks;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isEffectVisible() {
         return (this.flags & 2) == 2;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isEffectAmbient() {
         return (this.flags & 1) == 1;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean effectShowsIcon() {
         return (this.flags & 4) == 4;
     }

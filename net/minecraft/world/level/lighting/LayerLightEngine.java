@@ -4,8 +4,6 @@
 package net.minecraft.world.level.lighting;
 
 import java.util.Arrays;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -28,12 +26,14 @@ import org.jetbrains.annotations.Nullable;
 public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S extends LayerLightSectionStorage<M>>
 extends DynamicGraphMinFixedPoint
 implements LayerLightEventListener {
+    public static final long SELF_SOURCE = Long.MAX_VALUE;
     private static final Direction[] DIRECTIONS = Direction.values();
     protected final LightChunkGetter chunkSource;
     protected final LightLayer layer;
     protected final S storage;
     private boolean runningLightUpdates;
     protected final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    private static final int CACHE_SIZE = 2;
     private final long[] lastChunkPos = new long[2];
     private final BlockGetter[] lastChunk = new BlockGetter[2];
 
@@ -153,10 +153,12 @@ implements LayerLightEventListener {
         return 0;
     }
 
+    @Override
     public boolean hasLightWork() {
         return this.hasWork() || ((DynamicGraphMinFixedPoint)this.storage).hasWork() || ((LayerLightSectionStorage)this.storage).hasInconsistencies();
     }
 
+    @Override
     public int runUpdates(int i, boolean bl, boolean bl2) {
         if (!this.runningLightUpdates) {
             if (((DynamicGraphMinFixedPoint)this.storage).hasWork() && (i = ((DynamicGraphMinFixedPoint)this.storage).runUpdates(i)) == 0) {
@@ -192,11 +194,11 @@ implements LayerLightEventListener {
         return ((LayerLightSectionStorage)this.storage).getLightValue(blockPos.asLong());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getDebugData(long l) {
         return "" + ((LayerLightSectionStorage)this.storage).getLevel(l);
     }
 
+    @Override
     public void checkBlock(BlockPos blockPos) {
         long l = blockPos.asLong();
         this.checkNode(l);
@@ -205,6 +207,7 @@ implements LayerLightEventListener {
         }
     }
 
+    @Override
     public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
     }
 
@@ -213,6 +216,7 @@ implements LayerLightEventListener {
         ((LayerLightSectionStorage)this.storage).updateSectionStatus(sectionPos.asLong(), bl);
     }
 
+    @Override
     public void enableLightSources(ChunkPos chunkPos, boolean bl) {
         long l = SectionPos.getZeroNode(SectionPos.asLong(chunkPos.x, 0, chunkPos.z));
         ((LayerLightSectionStorage)this.storage).enableLightSources(l, bl);

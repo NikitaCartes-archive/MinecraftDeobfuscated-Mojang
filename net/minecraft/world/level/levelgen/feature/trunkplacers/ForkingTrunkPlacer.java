@@ -9,15 +9,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class ForkingTrunkPlacer
 extends TrunkPlacer {
@@ -33,9 +33,9 @@ extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         int p;
-        ForkingTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
+        ForkingTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
         ArrayList<FoliagePlacer.FoliageAttachment> list = Lists.newArrayList();
         Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         int j = i - random.nextInt(4) - 1;
@@ -51,7 +51,7 @@ extends TrunkPlacer {
                 m += direction.getStepZ();
                 --k;
             }
-            if (!ForkingTrunkPlacer.placeLog(levelSimulatedRW, random, mutableBlockPos.set(l, p, m), set, boundingBox, treeConfiguration)) continue;
+            if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l, p, m), treeConfiguration)) continue;
             n = p + 1;
         }
         list.add(new FoliagePlacer.FoliageAttachment(new BlockPos(l, n, m), 1, false));
@@ -65,7 +65,7 @@ extends TrunkPlacer {
             for (int r = p; r < i && q > 0; ++r, --q) {
                 if (r < 1) continue;
                 int s = blockPos.getY() + r;
-                if (!ForkingTrunkPlacer.placeLog(levelSimulatedRW, random, mutableBlockPos.set(l += direction2.getStepX(), s, m += direction2.getStepZ()), set, boundingBox, treeConfiguration)) continue;
+                if (!ForkingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l += direction2.getStepX(), s, m += direction2.getStepZ()), treeConfiguration)) continue;
                 n = s + 1;
             }
             if (n > 1) {

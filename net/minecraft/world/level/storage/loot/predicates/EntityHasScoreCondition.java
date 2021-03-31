@@ -71,6 +71,10 @@ implements LootItemCondition {
         return intRange.test(lootContext, scoreboard.getOrCreatePlayerScore(string2, objective).getScore());
     }
 
+    public static Builder hasScores(LootContext.EntityTarget entityTarget) {
+        return new Builder(entityTarget);
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);
@@ -101,6 +105,26 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
+        }
+    }
+
+    public static class Builder
+    implements LootItemCondition.Builder {
+        private final Map<String, IntRange> scores = Maps.newHashMap();
+        private final LootContext.EntityTarget entityTarget;
+
+        public Builder(LootContext.EntityTarget entityTarget) {
+            this.entityTarget = entityTarget;
+        }
+
+        public Builder withScore(String string, IntRange intRange) {
+            this.scores.put(string, intRange);
+            return this;
+        }
+
+        @Override
+        public LootItemCondition build() {
+            return new EntityHasScoreCondition(this.scores, this.entityTarget);
         }
     }
 }

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +15,12 @@ import net.minecraft.world.item.ItemStack;
 
 public class LecternMenu
 extends AbstractContainerMenu {
+    private static final int DATA_COUNT = 1;
+    private static final int SLOT_COUNT = 1;
+    public static final int BUTTON_PREV_PAGE = 1;
+    public static final int BUTTON_NEXT_PAGE = 2;
+    public static final int BUTTON_TAKE_BOOK = 3;
+    public static final int BUTTON_PAGE_JUMP_RANGE_START = 100;
     private final Container lectern;
     private final ContainerData lecternData;
 
@@ -85,12 +89,10 @@ extends AbstractContainerMenu {
         return this.lectern.stillValid(player);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getBook() {
         return this.lectern.getItem(0);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getPage() {
         return this.lecternData.get(0);
     }

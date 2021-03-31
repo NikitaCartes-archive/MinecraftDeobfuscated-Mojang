@@ -5,8 +5,6 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
@@ -34,6 +32,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class FlowerPotBlock
 extends Block {
     private static final Map<Block, Block> POTTED_BY_CONTENT = Maps.newHashMap();
+    public static final float AABB_SIZE = 3.0f;
     protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0);
     private final Block content;
 
@@ -83,7 +82,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         if (this.isEmpty()) {
             return super.getCloneItemStack(blockGetter, blockPos, blockState);

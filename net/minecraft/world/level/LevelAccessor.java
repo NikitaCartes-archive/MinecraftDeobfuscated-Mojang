@@ -6,6 +6,7 @@ package net.minecraft.world.level;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -38,6 +39,9 @@ LevelTimeAccess {
 
     public DifficultyInstance getCurrentDifficultyAt(BlockPos var1);
 
+    @Nullable
+    public MinecraftServer getServer();
+
     default public Difficulty getDifficulty() {
         return this.getLevelData().getDifficulty();
     }
@@ -59,6 +63,10 @@ LevelTimeAccess {
     public void addParticle(ParticleOptions var1, double var2, double var4, double var6, double var8, double var10, double var12);
 
     public void levelEvent(@Nullable Player var1, int var2, BlockPos var3, int var4);
+
+    default public int getLogicalHeight() {
+        return this.dimensionType().logicalHeight();
+    }
 
     default public void levelEvent(int i, BlockPos blockPos, int j) {
         this.levelEvent(null, i, blockPos, j);

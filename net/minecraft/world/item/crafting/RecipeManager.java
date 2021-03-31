@@ -21,8 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -65,6 +63,10 @@ extends SimpleJsonResourceReloadListener {
         }
         this.recipes = map2.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((ImmutableMap.Builder)entry.getValue()).build()));
         LOGGER.info("Loaded {} recipes", (Object)map2.size());
+    }
+
+    public boolean hadErrorsLoading() {
+        return this.hasErrors;
     }
 
     public <C extends Container, T extends Recipe<C>> Optional<T> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
@@ -112,7 +114,6 @@ extends SimpleJsonResourceReloadListener {
         return Registry.RECIPE_SERIALIZER.getOptional(new ResourceLocation(string)).orElseThrow(() -> new JsonSyntaxException("Invalid or unsupported recipe type '" + string + "'")).fromJson(resourceLocation, jsonObject);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void replaceRecipes(Iterable<Recipe<?>> iterable) {
         this.hasErrors = false;
         HashMap map = Maps.newHashMap();

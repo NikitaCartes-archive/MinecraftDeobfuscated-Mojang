@@ -3,11 +3,8 @@
  */
 package net.minecraft.util;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
-@Environment(value=EnvType.CLIENT)
 public class SmoothDouble {
     private double targetValue;
     private double remainingValue;

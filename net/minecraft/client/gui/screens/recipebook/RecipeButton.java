@@ -30,6 +30,9 @@ import net.minecraft.world.item.crafting.Recipe;
 public class RecipeButton
 extends AbstractWidget {
     private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+    private static final float ANIMATION_TIME = 15.0f;
+    private static final int BACKGROUND_SIZE = 25;
+    public static final int TICKS_TO_SWAP = 30;
     private static final Component MORE_RECIPES_TOOLTIP = new TranslatableComponent("gui.recipebook.moreRecipes");
     private RecipeBookMenu<?> menu;
     private RecipeBook book;

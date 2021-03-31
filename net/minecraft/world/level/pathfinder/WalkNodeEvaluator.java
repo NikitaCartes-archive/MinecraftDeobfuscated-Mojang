@@ -39,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WalkNodeEvaluator
 extends NodeEvaluator {
+    public static final double SPACE_BETWEEN_WALL_POSTS = 0.5;
     protected float oldWaterCost;
     private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<BlockPathTypes>();
     private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<AABB>();
@@ -414,7 +415,7 @@ extends NodeEvaluator {
         if (blockState.isAir()) {
             return BlockPathTypes.OPEN;
         }
-        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
+        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD) || blockState.is(Blocks.POWDER_SNOW)) {
             return BlockPathTypes.TRAPDOOR;
         }
         if (blockState.is(Blocks.CACTUS)) {

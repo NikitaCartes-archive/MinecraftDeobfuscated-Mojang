@@ -4,7 +4,6 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -36,6 +35,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,18 +53,27 @@ public abstract class StructurePiece {
     private final StructurePieceType type;
     private static final Set<Block> SHAPE_CHECK_BLOCKS = ((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Blocks.NETHER_BRICK_FENCE)).add(Blocks.TORCH)).add(Blocks.WALL_TORCH)).add(Blocks.OAK_FENCE)).add(Blocks.SPRUCE_FENCE)).add(Blocks.DARK_OAK_FENCE)).add(Blocks.ACACIA_FENCE)).add(Blocks.BIRCH_FENCE)).add(Blocks.JUNGLE_FENCE)).add(Blocks.LADDER)).add(Blocks.IRON_BARS)).build();
 
-    protected StructurePiece(StructurePieceType structurePieceType, int i) {
+    protected StructurePiece(StructurePieceType structurePieceType, int i, BoundingBox boundingBox) {
         this.type = structurePieceType;
         this.genDepth = i;
+        this.boundingBox = boundingBox;
     }
 
     public StructurePiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
-        this(structurePieceType, compoundTag.getInt("GD"));
-        int i;
-        if (compoundTag.contains("BB")) {
-            this.boundingBox = BoundingBox.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("BB")).resultOrPartial(LOGGER::error).orElse(new BoundingBox(BlockPos.ZERO));
+        this(structurePieceType, compoundTag.getInt("GD"), (BoundingBox)BoundingBox.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("BB")).resultOrPartial(LOGGER::error).orElseThrow(() -> new IllegalArgumentException("Invalid boundingbox")));
+        int i = compoundTag.getInt("O");
+        this.setOrientation(i == -1 ? null : Direction.from2DDataValue(i));
+    }
+
+    protected static BoundingBox makeBoundingBox(int i, int j, int k, Direction direction, int l, int m, int n) {
+        if (direction.getAxis() == Direction.Axis.Z) {
+            return new BoundingBox(i, j, k, i + l - 1, j + m - 1, k + n - 1);
         }
-        this.setOrientation((i = compoundTag.getInt("O")) == -1 ? null : Direction.from2DDataValue(i));
+        return new BoundingBox(i, j, k, i + n - 1, j + m - 1, k + l - 1);
+    }
+
+    protected static Direction getRandomHorizontalDirection(Random random) {
+        return Direction.Plane.HORIZONTAL.getRandomDirection(random);
     }
 
     public final CompoundTag createTag(ServerLevel serverLevel) {
@@ -84,7 +93,7 @@ public abstract class StructurePiece {
         return NoiseEffect.BEARD;
     }
 
-    public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
+    public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
     }
 
     public abstract boolean postProcess(WorldGenLevel var1, StructureFeatureManager var2, ChunkGenerator var3, Random var4, BoundingBox var5, ChunkPos var6, BlockPos var7);
@@ -103,16 +112,12 @@ public abstract class StructurePiece {
         return this.boundingBox.intersects(j - i, k - i, j + 15 + i, k + 15 + i);
     }
 
-    public static StructurePiece findCollisionPiece(List<StructurePiece> list, BoundingBox boundingBox) {
-        for (StructurePiece structurePiece : list) {
-            if (structurePiece.getBoundingBox() == null || !structurePiece.getBoundingBox().intersects(boundingBox)) continue;
-            return structurePiece;
-        }
-        return null;
+    public BlockPos getLocatorPosition() {
+        return new BlockPos(this.boundingBox.getCenter());
     }
 
-    protected BlockPos getWorldPos(int i, int j, int k) {
-        return new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
+    protected BlockPos.MutableBlockPos getWorldPos(int i, int j, int k) {
+        return new BlockPos.MutableBlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
     }
 
     protected int getWorldX(int i, int j) {
@@ -123,13 +128,13 @@ public abstract class StructurePiece {
         switch (direction) {
             case NORTH: 
             case SOUTH: {
-                return this.boundingBox.x0 + i;
+                return this.boundingBox.minX() + i;
             }
             case WEST: {
-                return this.boundingBox.x1 - j;
+                return this.boundingBox.maxX() - j;
             }
             case EAST: {
-                return this.boundingBox.x0 + j;
+                return this.boundingBox.minX() + j;
             }
         }
         return i;
@@ -139,7 +144,7 @@ public abstract class StructurePiece {
         if (this.getOrientation() == null) {
             return i;
         }
-        return i + this.boundingBox.y0;
+        return i + this.boundingBox.minY();
     }
 
     protected int getWorldZ(int i, int j) {
@@ -149,21 +154,21 @@ public abstract class StructurePiece {
         }
         switch (direction) {
             case NORTH: {
-                return this.boundingBox.z1 - j;
+                return this.boundingBox.maxZ() - j;
             }
             case SOUTH: {
-                return this.boundingBox.z0 + j;
+                return this.boundingBox.minZ() + j;
             }
             case WEST: 
             case EAST: {
-                return this.boundingBox.z0 + i;
+                return this.boundingBox.minZ() + i;
             }
         }
         return j;
     }
 
     protected void placeBlock(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
-        BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
+        BlockPos.MutableBlockPos blockPos = this.getWorldPos(i, j, k);
         if (!boundingBox.isInside(blockPos)) {
             return;
         }
@@ -191,10 +196,7 @@ public abstract class StructurePiece {
     }
 
     protected BlockState getBlock(BlockGetter blockGetter, int i, int j, int k, BoundingBox boundingBox) {
-        int n;
-        int m;
-        int l = this.getWorldX(i, k);
-        BlockPos blockPos = new BlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k));
+        BlockPos.MutableBlockPos blockPos = this.getWorldPos(i, j, k);
         if (!boundingBox.isInside(blockPos)) {
             return Blocks.AIR.defaultBlockState();
         }
@@ -202,14 +204,11 @@ public abstract class StructurePiece {
     }
 
     protected boolean isInterior(LevelReader levelReader, int i, int j, int k, BoundingBox boundingBox) {
-        int n;
-        int m;
-        int l = this.getWorldX(i, k);
-        BlockPos blockPos = new BlockPos(l, m = this.getWorldY(j + 1), n = this.getWorldZ(i, k));
+        BlockPos.MutableBlockPos blockPos = this.getWorldPos(i, j + 1, k);
         if (!boundingBox.isInside(blockPos)) {
             return false;
         }
-        return m < levelReader.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, l, n);
+        return blockPos.getY() < levelReader.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX(), blockPos.getZ());
     }
 
     protected void generateAirBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
@@ -237,6 +236,10 @@ public abstract class StructurePiece {
         }
     }
 
+    protected void generateBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, BoundingBox boundingBox2, BlockState blockState, BlockState blockState2, boolean bl) {
+        this.generateBox(worldGenLevel, boundingBox, boundingBox2.minX(), boundingBox2.minY(), boundingBox2.minZ(), boundingBox2.maxX(), boundingBox2.maxY(), boundingBox2.maxZ(), blockState, blockState2, bl);
+    }
+
     protected void generateBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, boolean bl, Random random, BlockSelector blockSelector) {
         for (int o = j; o <= m; ++o) {
             for (int p = i; p <= l; ++p) {
@@ -247,6 +250,10 @@ public abstract class StructurePiece {
                 }
             }
         }
+    }
+
+    protected void generateBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, BoundingBox boundingBox2, boolean bl, Random random, BlockSelector blockSelector) {
+        this.generateBox(worldGenLevel, boundingBox, boundingBox2.minX(), boundingBox2.minY(), boundingBox2.minZ(), boundingBox2.maxX(), boundingBox2.maxY(), boundingBox2.maxZ(), bl, random, blockSelector);
     }
 
     protected void generateMaybeBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, int l, int m, int n, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2) {
@@ -304,10 +311,7 @@ public abstract class StructurePiece {
     }
 
     protected void fillColumnDown(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
-        int n;
-        int m;
-        int l = this.getWorldX(i, k);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k));
+        BlockPos.MutableBlockPos mutableBlockPos = this.getWorldPos(i, j, k);
         if (!boundingBox.isInside(mutableBlockPos)) {
             return;
         }
@@ -322,8 +326,7 @@ public abstract class StructurePiece {
     }
 
     protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
-        BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
-        return this.createChest(worldGenLevel, boundingBox, random, blockPos, resourceLocation, null);
+        return this.createChest(worldGenLevel, boundingBox, random, this.getWorldPos(i, j, k), resourceLocation, null);
     }
 
     public static BlockState reorient(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
@@ -378,7 +381,7 @@ public abstract class StructurePiece {
     }
 
     protected boolean createDispenser(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, Direction direction, ResourceLocation resourceLocation) {
-        BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
+        BlockPos.MutableBlockPos blockPos = this.getWorldPos(i, j, k);
         if (boundingBox.isInside(blockPos) && !worldGenLevel.getBlockState(blockPos).is(Blocks.DISPENSER)) {
             this.placeBlock(worldGenLevel, (BlockState)Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, direction), i, j, k, boundingBox);
             BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
@@ -431,6 +434,10 @@ public abstract class StructurePiece {
 
     public Rotation getRotation() {
         return this.rotation;
+    }
+
+    public Mirror getMirror() {
+        return this.mirror;
     }
 
     public StructurePieceType getType() {

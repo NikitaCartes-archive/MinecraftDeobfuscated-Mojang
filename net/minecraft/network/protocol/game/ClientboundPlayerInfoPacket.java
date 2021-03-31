@@ -10,8 +10,6 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -57,12 +55,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handlePlayerInfo(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<PlayerUpdate> getEntries() {
         return this.entries;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Action getAction() {
         return this.action;
     }

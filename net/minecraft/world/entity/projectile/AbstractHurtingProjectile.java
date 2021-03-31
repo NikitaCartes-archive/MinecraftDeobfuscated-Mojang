@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -55,7 +53,6 @@ extends Projectile {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         double e = this.getBoundingBox().getSize() * 4.0;
         if (Double.isNaN(e)) {
@@ -174,7 +171,6 @@ extends Projectile {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
         super.recreateFromPacket(clientboundAddEntityPacket);
         double d = clientboundAddEntityPacket.getXa();

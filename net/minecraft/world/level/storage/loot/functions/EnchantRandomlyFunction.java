@@ -81,6 +81,10 @@ extends LootItemConditionalFunction {
         return itemStack;
     }
 
+    public static Builder randomEnchantment() {
+        return new Builder();
+    }
+
     public static LootItemConditionalFunction.Builder<?> randomApplicableEnchantment() {
         return EnchantRandomlyFunction.simpleBuilder(lootItemConditions -> new EnchantRandomlyFunction((LootItemCondition[])lootItemConditions, (Collection<Enchantment>)ImmutableList.of()));
     }

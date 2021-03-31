@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -188,7 +186,6 @@ extends PatrollingMonster {
         return this.wave;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isCelebrating() {
         return this.entityData.get(IS_CELEBRATING);
     }

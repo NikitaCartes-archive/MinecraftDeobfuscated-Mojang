@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
@@ -222,7 +223,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static boolean checkNeighbors(Function<BlockPos, BlockState> function, BlockPos blockPos, Predicate<BlockState> predicate) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             if (!predicate.test(function.apply(mutableBlockPos))) continue;
             return true;
         }

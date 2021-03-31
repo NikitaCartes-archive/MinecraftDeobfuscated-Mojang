@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -52,32 +50,26 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleMerchantOffers(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getContainerId() {
         return this.containerId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MerchantOffers getOffers() {
         return this.offers;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getVillagerLevel() {
         return this.villagerLevel;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getVillagerXp() {
         return this.villagerXp;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean showProgress() {
         return this.showProgress;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean canRestock() {
         return this.canRestock;
     }

@@ -5,8 +5,6 @@ package net.minecraft.world.level.material;
 
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -51,7 +49,6 @@ extends FlowingFluid {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
         if (!fluidState.isSource() && !fluidState.getValue(FALLING).booleanValue()) {
             if (random.nextInt(64) == 0) {
@@ -64,7 +61,6 @@ extends FlowingFluid {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ParticleOptions getDripParticle() {
         return ParticleTypes.DRIPPING_WATER;
     }

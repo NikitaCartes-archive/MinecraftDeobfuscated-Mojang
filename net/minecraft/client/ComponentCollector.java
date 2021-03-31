@@ -33,5 +33,9 @@ public class ComponentCollector {
         FormattedText formattedText = this.getResult();
         return formattedText != null ? formattedText : FormattedText.EMPTY;
     }
+
+    public void reset() {
+        this.parts.clear();
+    }
 }
 

@@ -6,8 +6,6 @@ package net.minecraft.network.chat;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -25,7 +23,6 @@ extends BaseComponent {
         this.name = string;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void setKeyResolver(Function<String, Supplier<Component>> function) {
         keyResolver = function;
     }
@@ -43,7 +40,6 @@ extends BaseComponent {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         return this.getNestedComponent().visit(styledContentConsumer, style);
     }

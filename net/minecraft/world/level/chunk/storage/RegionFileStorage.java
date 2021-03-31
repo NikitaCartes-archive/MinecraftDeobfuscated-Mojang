@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class RegionFileStorage
 implements AutoCloseable {
+    public static final String ANVIL_EXTENSION = ".mca";
+    private static final int MAX_CACHE_SIZE = 256;
     private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap();
     private final File folder;
     private final boolean sync;
@@ -38,7 +40,7 @@ implements AutoCloseable {
         if (!this.folder.exists()) {
             this.folder.mkdirs();
         }
-        File file = new File(this.folder, "r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
+        File file = new File(this.folder, "r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ANVIL_EXTENSION);
         RegionFile regionFile2 = new RegionFile(file, this.folder, this.sync);
         this.regionCache.putAndMoveToFirst(l, regionFile2);
         return regionFile2;

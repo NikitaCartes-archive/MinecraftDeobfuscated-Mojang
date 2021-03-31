@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
@@ -20,7 +18,6 @@ extends AbstractCookingRecipe {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getToastSymbol() {
         return new ItemStack(Blocks.CAMPFIRE);
     }

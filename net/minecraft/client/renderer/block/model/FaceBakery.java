@@ -27,8 +27,12 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class FaceBakery {
+    public static final int VERTEX_INT_SIZE = 8;
     private static final float RESCALE_22_5 = 1.0f / (float)Math.cos(0.3926991f) - 1.0f;
     private static final float RESCALE_45 = 1.0f / (float)Math.cos(0.7853981852531433) - 1.0f;
+    public static final int VERTEX_COUNT = 4;
+    private static final int COLOR_INDEX = 3;
+    public static final int UV_INDEX = 4;
 
     public BakedQuad bakeQuad(Vector3f vector3f, Vector3f vector3f2, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState, @Nullable BlockElementRotation blockElementRotation, boolean bl, ResourceLocation resourceLocation) {
         BlockFaceUV blockFaceUV = blockElementFace.uv;

@@ -22,6 +22,8 @@ import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 @Environment(value=EnvType.CLIENT)
 public class HoglinModel<T extends Mob>
 extends AgeableListModel<T> {
+    private static final float DEFAULT_HEAD_X_ROT = 0.87266463f;
+    private static final float ATTACK_HEAD_X_ROT_END = -0.34906584f;
     private final ModelPart head;
     private final ModelPart rightEar;
     private final ModelPart leftEar;

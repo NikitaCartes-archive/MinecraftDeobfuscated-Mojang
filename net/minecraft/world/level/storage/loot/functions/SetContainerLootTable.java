@@ -63,6 +63,14 @@ extends LootItemConditionalFunction {
         }
     }
 
+    public static LootItemConditionalFunction.Builder<?> withLootTable(ResourceLocation resourceLocation) {
+        return SetContainerLootTable.simpleBuilder(lootItemConditions -> new SetContainerLootTable((LootItemCondition[])lootItemConditions, resourceLocation, 0L));
+    }
+
+    public static LootItemConditionalFunction.Builder<?> withLootTable(ResourceLocation resourceLocation, long l) {
+        return SetContainerLootTable.simpleBuilder(lootItemConditions -> new SetContainerLootTable((LootItemCondition[])lootItemConditions, resourceLocation, l));
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetContainerLootTable> {
         @Override

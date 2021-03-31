@@ -403,6 +403,14 @@ implements AutoCloseable {
         return this.framebufferHeight;
     }
 
+    public void setWidth(int i) {
+        this.framebufferWidth = i;
+    }
+
+    public void setHeight(int i) {
+        this.framebufferHeight = i;
+    }
+
     public int getScreenWidth() {
         return this.width;
     }

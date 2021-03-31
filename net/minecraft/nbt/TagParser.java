@@ -37,6 +37,12 @@ public class TagParser {
     public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_LIST = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("argument.nbt.list.mixed", object, object2));
     public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_ARRAY = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("argument.nbt.array.mixed", object, object2));
     public static final DynamicCommandExceptionType ERROR_INVALID_ARRAY = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.nbt.array.invalid", object));
+    public static final char ELEMENT_SEPARATOR = ',';
+    public static final char NAME_VALUE_SEPARATOR = ':';
+    private static final char LIST_OPEN = '[';
+    private static final char LIST_CLOSE = ']';
+    private static final char STRUCT_CLOSE = '}';
+    private static final char STRUCT_OPEN = '{';
     private static final Pattern DOUBLE_PATTERN_NOSUFFIX = Pattern.compile("[-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?", 2);
     private static final Pattern DOUBLE_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?d", 2);
     private static final Pattern FLOAT_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?f", 2);

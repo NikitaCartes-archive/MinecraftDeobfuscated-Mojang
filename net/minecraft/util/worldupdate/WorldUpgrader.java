@@ -20,8 +20,6 @@ import java.util.ListIterator;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -205,17 +203,14 @@ public class WorldUpgrader {
         return this.finished;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ImmutableSet<ResourceKey<Level>> levels() {
         return this.levels;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float dimensionProgress(ResourceKey<Level> resourceKey) {
         return this.progressMap.getFloat(resourceKey);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getProgress() {
         return this.progress;
     }

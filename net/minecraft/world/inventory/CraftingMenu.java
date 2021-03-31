@@ -4,8 +4,6 @@
 package net.minecraft.world.inventory;
 
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -30,6 +28,13 @@ import net.minecraft.world.level.block.Blocks;
 
 public class CraftingMenu
 extends RecipeBookMenu<CraftingContainer> {
+    public static final int RESULT_SLOT = 0;
+    private static final int CRAFT_SLOT_START = 1;
+    private static final int CRAFT_SLOT_END = 10;
+    private static final int INV_SLOT_START = 10;
+    private static final int INV_SLOT_END = 37;
+    private static final int USE_ROW_SLOT_START = 37;
+    private static final int USE_ROW_SLOT_END = 46;
     private final CraftingContainer craftSlots = new CraftingContainer(this, 3, 3);
     private final ResultContainer resultSlots = new ResultContainer();
     private final ContainerLevelAccess access;
@@ -167,7 +172,6 @@ extends RecipeBookMenu<CraftingContainer> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public RecipeBookType getRecipeBookType() {
         return RecipeBookType.CRAFTING;
     }

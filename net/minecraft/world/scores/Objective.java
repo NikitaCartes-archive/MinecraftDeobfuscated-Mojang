@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.scores;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
@@ -13,6 +11,7 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class Objective {
+    public static final int MAX_NAME_LENGTH = 16;
     private final Scoreboard scoreboard;
     private final String name;
     private final ObjectiveCriteria criteria;
@@ -29,7 +28,6 @@ public class Objective {
         this.renderType = renderType;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Scoreboard getScoreboard() {
         return this.scoreboard;
     }

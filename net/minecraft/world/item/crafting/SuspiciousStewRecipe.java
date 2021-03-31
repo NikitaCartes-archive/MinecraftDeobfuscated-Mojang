@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffect;
@@ -74,7 +72,6 @@ extends CustomRecipe {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean canCraftInDimensions(int i, int j) {
         return i >= 2 && j >= 2;
     }

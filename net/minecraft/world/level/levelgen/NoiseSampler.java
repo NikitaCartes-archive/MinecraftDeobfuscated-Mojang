@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import org.jetbrains.annotations.Nullable;
 
 public class NoiseSampler {
+    private static final int OLD_CELL_COUNT_Y = 32;
     private static final float[] BIOME_WEIGHTS = Util.make(new float[25], fs -> {
         for (int i = -2; i <= 2; ++i) {
             for (int j = -2; j <= 2; ++j) {

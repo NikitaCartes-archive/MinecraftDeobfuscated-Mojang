@@ -6,8 +6,6 @@ package net.minecraft.world.item;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,6 +29,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class BoneMealItem
 extends Item {
+    public static final int GRASS_SPREAD_WIDTH = 3;
+    public static final int GRASS_SPREAD_HEIGHT = 1;
+    public static final int GRASS_COUNT_MULTIPLIER = 3;
+
     public BoneMealItem(Item.Properties properties) {
         super(properties);
     }
@@ -112,7 +114,6 @@ extends Item {
         return true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void addGrowthParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
         double e;
         BlockState blockState;

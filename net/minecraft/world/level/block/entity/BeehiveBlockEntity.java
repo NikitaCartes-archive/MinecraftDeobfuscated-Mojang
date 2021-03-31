@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
@@ -32,6 +33,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class BeehiveBlockEntity
 extends BlockEntity {
+    public static final String TAG_FLOWER_POS = "FlowerPos";
+    public static final String MIN_OCCUPATION_TICKS = "MinOccupationTicks";
+    public static final String ENTITY_DATA = "EntityData";
+    public static final String TICKS_IN_HIVE = "TicksInHive";
+    public static final String HAS_NECTAR = "HasNectar";
+    public static final String BEES = "Bees";
+    public static final int MAX_OCCUPANTS = 3;
+    private static final int MIN_TICKS_BEFORE_REENTERING_HIVE = 400;
+    private static final int MIN_OCCUPATION_TICKS_NECTAR = 2400;
+    public static final int MIN_OCCUPATION_TICKS_NECTARLESS = 600;
     private final List<BeeData> stored = Lists.newArrayList();
     @Nullable
     private BlockPos savedFlowerPos;
@@ -93,6 +104,7 @@ extends BlockEntity {
         this.addOccupantWithPresetTicks(entity, bl, 0);
     }
 
+    @VisibleForDebug
     public int getOccupantCount() {
         return this.stored.size();
     }
@@ -101,6 +113,7 @@ extends BlockEntity {
         return blockState.getValue(BeehiveBlock.HONEY_LEVEL);
     }
 
+    @VisibleForDebug
     public boolean isSedated() {
         return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos());
     }
@@ -113,7 +126,7 @@ extends BlockEntity {
         entity.ejectPassengers();
         CompoundTag compoundTag = new CompoundTag();
         entity.save(compoundTag);
-        this.stored.add(new BeeData(compoundTag, i, bl ? 2400 : 600));
+        this.storeBee(compoundTag, i, bl);
         if (this.level != null) {
             Bee bee;
             if (entity instanceof Bee && (bee = (Bee)entity).hasSavedFlowerPos() && (!this.hasSavedFlowerPos() || this.level.random.nextBoolean())) {
@@ -123,6 +136,10 @@ extends BlockEntity {
             this.level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1.0f, 1.0f);
         }
         entity.discard();
+    }
+
+    public void storeBee(CompoundTag compoundTag, int i, boolean bl) {
+        this.stored.add(new BeeData(compoundTag, i, bl ? 2400 : 600));
     }
 
     private static boolean releaseOccupant(Level level, BlockPos blockPos, BlockState blockState, BeeData beeData, @Nullable List<Entity> list, BeeReleaseStatus beeReleaseStatus, @Nullable BlockPos blockPos2) {
@@ -200,7 +217,7 @@ extends BlockEntity {
             BeeData beeData = iterator.next();
             if (beeData.ticksInHive > beeData.minOccupationTicks) {
                 BeeReleaseStatus beeReleaseStatus;
-                BeeReleaseStatus beeReleaseStatus2 = beeReleaseStatus = beeData.entityData.getBoolean("HasNectar") ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
+                BeeReleaseStatus beeReleaseStatus2 = beeReleaseStatus = beeData.entityData.getBoolean(HAS_NECTAR) ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
                 if (BeehiveBlockEntity.releaseOccupant(level, blockPos, blockState, beeData, null, beeReleaseStatus, blockPos2)) {
                     iterator.remove();
                 }
@@ -224,24 +241,24 @@ extends BlockEntity {
     public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
         this.stored.clear();
-        ListTag listTag = compoundTag.getList("Bees", 10);
+        ListTag listTag = compoundTag.getList(BEES, 10);
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag2 = listTag.getCompound(i);
-            BeeData beeData = new BeeData(compoundTag2.getCompound("EntityData"), compoundTag2.getInt("TicksInHive"), compoundTag2.getInt("MinOccupationTicks"));
+            BeeData beeData = new BeeData(compoundTag2.getCompound(ENTITY_DATA), compoundTag2.getInt(TICKS_IN_HIVE), compoundTag2.getInt(MIN_OCCUPATION_TICKS));
             this.stored.add(beeData);
         }
         this.savedFlowerPos = null;
-        if (compoundTag.contains("FlowerPos")) {
-            this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+        if (compoundTag.contains(TAG_FLOWER_POS)) {
+            this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound(TAG_FLOWER_POS));
         }
     }
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
         super.save(compoundTag);
-        compoundTag.put("Bees", this.writeBees());
+        compoundTag.put(BEES, this.writeBees());
         if (this.hasSavedFlowerPos()) {
-            compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
+            compoundTag.put(TAG_FLOWER_POS, NbtUtils.writeBlockPos(this.savedFlowerPos));
         }
         return compoundTag;
     }
@@ -251,9 +268,9 @@ extends BlockEntity {
         for (BeeData beeData : this.stored) {
             beeData.entityData.remove("UUID");
             CompoundTag compoundTag = new CompoundTag();
-            compoundTag.put("EntityData", beeData.entityData);
-            compoundTag.putInt("TicksInHive", beeData.ticksInHive);
-            compoundTag.putInt("MinOccupationTicks", beeData.minOccupationTicks);
+            compoundTag.put(ENTITY_DATA, beeData.entityData);
+            compoundTag.putInt(TICKS_IN_HIVE, beeData.ticksInHive);
+            compoundTag.putInt(MIN_OCCUPATION_TICKS, beeData.minOccupationTicks);
             listTag.add(compoundTag);
         }
         return listTag;

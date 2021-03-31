@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -23,6 +21,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TorchBlock
 extends Block {
+    protected static final int AABB_STANDING_OFFSET = 2;
     protected static final VoxelShape AABB = Block.box(6.0, 0.0, 6.0, 10.0, 10.0, 10.0);
     protected final ParticleOptions flameParticle;
 
@@ -50,7 +49,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         double d = (double)blockPos.getX() + 0.5;
         double e = (double)blockPos.getY() + 0.7;

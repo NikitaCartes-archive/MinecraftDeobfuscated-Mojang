@@ -41,6 +41,8 @@ import org.jetbrains.annotations.Nullable;
 public class GameEventListenerRenderer
 implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
+    private static final int LISTENER_RENDER_DIST = 32;
+    private static final float BOX_HEIGHT = 1.0f;
     private final List<TrackedGameEvent> trackedGameEvents = Lists.newArrayList();
     private final List<TrackedListener> trackedListeners = Lists.newArrayList();
 

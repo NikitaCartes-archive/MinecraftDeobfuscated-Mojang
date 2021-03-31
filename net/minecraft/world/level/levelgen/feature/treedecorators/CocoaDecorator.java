@@ -7,17 +7,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class CocoaDecorator
 extends TreeDecorator {
@@ -34,7 +33,7 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(WorldGenLevel worldGenLevel, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
+    public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2) {
         if (random.nextFloat() >= this.probability) {
             return;
         }
@@ -43,9 +42,8 @@ extends TreeDecorator {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 Direction direction2;
                 BlockPos blockPos2;
-                if (!(random.nextFloat() <= 0.25f) || !Feature.isAir(worldGenLevel, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
-                BlockState blockState = (BlockState)((BlockState)Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, random.nextInt(3))).setValue(CocoaBlock.FACING, direction);
-                this.setBlock(worldGenLevel, blockPos2, blockState, set, boundingBox);
+                if (!(random.nextFloat() <= 0.25f) || !Feature.isAir(levelSimulatedReader, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
+                biConsumer.accept(blockPos2, (BlockState)((BlockState)Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, random.nextInt(3))).setValue(CocoaBlock.FACING, direction));
             }
         });
     }

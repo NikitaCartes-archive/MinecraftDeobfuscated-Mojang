@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 
 public class GameTestBatch {
+    public static final String DEFAULT_BATCH_NAME = "defaultBatch";
     private final String name;
     private final Collection<TestFunction> testFunctions;
     @Nullable

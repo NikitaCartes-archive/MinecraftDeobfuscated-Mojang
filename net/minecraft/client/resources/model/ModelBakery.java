@@ -90,6 +90,7 @@ public class ModelBakery {
     public static final Material BANNER_BASE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/banner_base"));
     public static final Material SHIELD_BASE = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/shield_base"));
     public static final Material NO_PATTERN_SHIELD = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/shield_base_nopattern"));
+    public static final int DESTROY_STAGE_COUNT = 10;
     public static final List<ResourceLocation> DESTROY_STAGES = IntStream.range(0, 10).mapToObj(i -> new ResourceLocation("block/destroy_stage_" + i)).collect(Collectors.toList());
     public static final List<ResourceLocation> BREAKING_LOCATIONS = DESTROY_STAGES.stream().map(resourceLocation -> new ResourceLocation("textures/" + resourceLocation.getPath() + ".png")).collect(Collectors.toList());
     public static final List<RenderType> DESTROY_TYPES = BREAKING_LOCATIONS.stream().map(RenderType::crumbling).collect(Collectors.toList());
@@ -120,7 +121,13 @@ public class ModelBakery {
         hashSet.add(new Material(TextureAtlas.LOCATION_BLOCKS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
         Sheets.getAllMaterials(hashSet::add);
     });
+    static final int SINGLETON_MODEL_GROUP = -1;
+    private static final int INVISIBLE_MODEL_GROUP = 0;
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String BUILTIN_SLASH = "builtin/";
+    private static final String BUILTIN_SLASH_GENERATED = "builtin/generated";
+    private static final String BUILTIN_BLOCK_ENTITY = "builtin/entity";
+    private static final String MISSING_MODEL_NAME = "missing";
     public static final ModelResourceLocation MISSING_MODEL_LOCATION = new ModelResourceLocation("builtin/missing", "missing");
     private static final String MISSING_MODEL_LOCATION_STRING = MISSING_MODEL_LOCATION.toString();
     @VisibleForTesting
@@ -461,7 +468,7 @@ public class ModelBakery {
                 resource = null;
                 try {
                     string = resourceLocation.getPath();
-                    if (!"builtin/generated".equals(string)) break block7;
+                    if (!BUILTIN_SLASH_GENERATED.equals(string)) break block7;
                     blockModel = GENERATION_MARKER;
                 } catch (Throwable throwable) {
                     IOUtils.closeQuietly(reader);
@@ -472,14 +479,14 @@ public class ModelBakery {
                 IOUtils.closeQuietly(resource);
                 return blockModel;
             }
-            if (!"builtin/entity".equals(string)) break block8;
+            if (!BUILTIN_BLOCK_ENTITY.equals(string)) break block8;
             BlockModel blockModel = BLOCK_ENTITY_MARKER;
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(resource);
             return blockModel;
         }
-        if (string.startsWith("builtin/")) {
-            String string2 = string.substring("builtin/".length());
+        if (string.startsWith(BUILTIN_SLASH)) {
+            String string2 = string.substring(BUILTIN_SLASH.length());
             String string3 = BUILTIN_MODELS.get(string2);
             if (string3 == null) {
                 throw new FileNotFoundException(resourceLocation.toString());

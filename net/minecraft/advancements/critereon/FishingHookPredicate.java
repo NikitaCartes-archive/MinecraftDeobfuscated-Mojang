@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class FishingHookPredicate {
     public static final FishingHookPredicate ANY = new FishingHookPredicate(false);
+    private static final String IN_OPEN_WATER_KEY = "in_open_water";
     private final boolean inOpenWater;
 
     private FishingHookPredicate(boolean bl) {
@@ -29,9 +30,9 @@ public class FishingHookPredicate {
             return ANY;
         }
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "fishing_hook");
-        JsonElement jsonElement2 = jsonObject.get("in_open_water");
+        JsonElement jsonElement2 = jsonObject.get(IN_OPEN_WATER_KEY);
         if (jsonElement2 != null) {
-            return new FishingHookPredicate(GsonHelper.convertToBoolean(jsonElement2, "in_open_water"));
+            return new FishingHookPredicate(GsonHelper.convertToBoolean(jsonElement2, IN_OPEN_WATER_KEY));
         }
         return ANY;
     }
@@ -41,7 +42,7 @@ public class FishingHookPredicate {
             return JsonNull.INSTANCE;
         }
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("in_open_water", new JsonPrimitive(this.inOpenWater));
+        jsonObject.add(IN_OPEN_WATER_KEY, new JsonPrimitive(this.inOpenWater));
         return jsonObject;
     }
 

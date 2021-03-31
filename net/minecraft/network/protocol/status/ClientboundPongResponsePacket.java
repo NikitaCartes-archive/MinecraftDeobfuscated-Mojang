@@ -28,5 +28,9 @@ implements Packet<ClientStatusPacketListener> {
     public void handle(ClientStatusPacketListener clientStatusPacketListener) {
         clientStatusPacketListener.handlePongResponse(this);
     }
+
+    public long getTime() {
+        return this.time;
+    }
 }
 

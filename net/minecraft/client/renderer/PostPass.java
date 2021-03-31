@@ -44,6 +44,10 @@ implements AutoCloseable {
         this.effect.close();
     }
 
+    public final String getName() {
+        return this.effect.getName();
+    }
+
     public void addAuxAsset(String string, IntSupplier intSupplier, int i, int j) {
         this.auxNames.add(this.auxNames.size(), string);
         this.auxAssets.add(this.auxAssets.size(), intSupplier);
@@ -63,14 +67,14 @@ implements AutoCloseable {
         this.effect.setSampler("DiffuseSampler", this.inTarget::getColorTextureId);
         for (int i = 0; i < this.auxAssets.size(); ++i) {
             this.effect.setSampler(this.auxNames.get(i), this.auxAssets.get(i));
-            this.effect.safeGetUniform("AuxSize" + i).set(this.auxWidths.get(i).intValue(), this.auxHeights.get(i).intValue());
+            this.effect.safeGetUniform("AuxSize" + i).set((float)this.auxWidths.get(i).intValue(), (float)this.auxHeights.get(i).intValue());
         }
         this.effect.safeGetUniform("ProjMat").set(this.shaderOrthoMatrix);
-        this.effect.safeGetUniform("InSize").set(this.inTarget.width, this.inTarget.height);
+        this.effect.safeGetUniform("InSize").set((float)this.inTarget.width, (float)this.inTarget.height);
         this.effect.safeGetUniform("OutSize").set(g, h);
         this.effect.safeGetUniform("Time").set(f);
         Minecraft minecraft = Minecraft.getInstance();
-        this.effect.safeGetUniform("ScreenSize").set(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+        this.effect.safeGetUniform("ScreenSize").set((float)minecraft.getWindow().getWidth(), (float)minecraft.getWindow().getHeight());
         this.effect.apply();
         this.outTarget.clear(Minecraft.ON_OSX);
         this.outTarget.bindWrite(false);

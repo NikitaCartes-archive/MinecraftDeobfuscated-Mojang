@@ -16,8 +16,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
@@ -49,7 +47,6 @@ implements BiomeManager.NoiseBiomeSource {
 
     protected abstract Codec<? extends BiomeSource> codec();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract BiomeSource withSeed(long var1);
 
     public List<Biome> possibleBiomes() {

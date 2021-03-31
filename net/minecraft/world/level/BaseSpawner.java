@@ -4,12 +4,10 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.Lists;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -19,7 +17,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -34,8 +32,10 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseSpawner {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int EVENT_SPAWN = 1;
+    private static WeightedRandomList<SpawnData> EMPTY_POTENTIALS = WeightedRandomList.create();
     private int spawnDelay = 20;
-    private final List<SpawnData> spawnPotentials = Lists.newArrayList();
+    private WeightedRandomList<SpawnData> spawnPotentials = EMPTY_POTENTIALS;
     private SpawnData nextSpawnData = new SpawnData();
     private double spin;
     private double oSpin;
@@ -149,25 +149,24 @@ public abstract class BaseSpawner {
 
     private void delay(Level level, BlockPos blockPos) {
         this.spawnDelay = this.maxSpawnDelay <= this.minSpawnDelay ? this.minSpawnDelay : this.minSpawnDelay + this.random.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
-        if (!this.spawnPotentials.isEmpty()) {
-            WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
-        }
+        this.spawnPotentials.getRandom(this.random).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
         this.broadcastEvent(level, blockPos, 1);
     }
 
     public void load(@Nullable Level level, BlockPos blockPos, CompoundTag compoundTag) {
         this.spawnDelay = compoundTag.getShort("Delay");
-        this.spawnPotentials.clear();
+        ArrayList<SpawnData> list = Lists.newArrayList();
         if (compoundTag.contains("SpawnPotentials", 9)) {
             ListTag listTag = compoundTag.getList("SpawnPotentials", 10);
             for (int i = 0; i < listTag.size(); ++i) {
-                this.spawnPotentials.add(new SpawnData(listTag.getCompound(i)));
+                list.add(new SpawnData(listTag.getCompound(i)));
             }
         }
+        this.spawnPotentials = WeightedRandomList.create(list);
         if (compoundTag.contains("SpawnData", 10)) {
             this.setNextSpawnData(level, blockPos, new SpawnData(1, compoundTag.getCompound("SpawnData")));
-        } else if (!this.spawnPotentials.isEmpty()) {
-            WeighedRandom.getRandomItem(this.random, this.spawnPotentials).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
+        } else if (!list.isEmpty()) {
+            this.spawnPotentials.getRandom(this.random).ifPresent(spawnData -> this.setNextSpawnData(level, blockPos, (SpawnData)spawnData));
         }
         if (compoundTag.contains("MinSpawnDelay", 99)) {
             this.minSpawnDelay = compoundTag.getShort("MinSpawnDelay");
@@ -201,7 +200,7 @@ public abstract class BaseSpawner {
         if (this.spawnPotentials.isEmpty()) {
             listTag.add(this.nextSpawnData.save());
         } else {
-            for (SpawnData spawnData : this.spawnPotentials) {
+            for (SpawnData spawnData : this.spawnPotentials.unwrap()) {
                 listTag.add(spawnData.save());
             }
         }
@@ -210,7 +209,6 @@ public abstract class BaseSpawner {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Entity getOrCreateDisplayEntity(Level level) {
         if (this.displayEntity == null) {
             this.displayEntity = EntityType.loadEntityRecursive(this.nextSpawnData.getTag(), level, Function.identity());
@@ -237,12 +235,10 @@ public abstract class BaseSpawner {
 
     public abstract void broadcastEvent(Level var1, BlockPos var2, int var3);
 
-    @Environment(value=EnvType.CLIENT)
     public double getSpin() {
         return this.spin;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getoSpin() {
         return this.oSpin;
     }

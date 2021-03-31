@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal.horse;
 
 import java.util.EnumSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.AgeableMob;
@@ -34,7 +32,6 @@ extends Llama {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean isTraderLlama() {
         return true;
     }
@@ -63,6 +60,10 @@ extends Llama {
         super.registerGoals();
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
         this.targetSelector.addGoal(1, new TraderLlamaDefendWanderingTraderGoal(this));
+    }
+
+    public void setDespawnDelay(int i) {
+        this.despawnDelay = i;
     }
 
     @Override

@@ -12,8 +12,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -29,9 +27,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -54,6 +53,7 @@ import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -96,10 +96,32 @@ public class Bee
 extends Animal
 implements NeutralMob,
 FlyingAnimal {
+    public static final float FLAP_DEGREES_PER_TICK = 120.32113f;
     public static final int TICKS_PER_FLAP = Mth.ceil(1.4959966f);
     private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Bee.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Bee.class, EntityDataSerializers.INT);
-    private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    private static final int FLAG_ROLL = 2;
+    private static final int FLAG_HAS_STUNG = 4;
+    private static final int FLAG_HAS_NECTAR = 8;
+    private static final int STING_DEATH_COUNTDOWN = 1200;
+    private static final int TICKS_BEFORE_GOING_TO_KNOWN_FLOWER = 2400;
+    private static final int TICKS_WITHOUT_NECTAR_BEFORE_GOING_HOME = 3600;
+    private static final int MIN_ATTACK_DIST = 4;
+    private static final int MAX_CROPS_GROWABLE = 10;
+    private static final int POISON_SECONDS_NORMAL = 10;
+    private static final int POISON_SECONDS_HARD = 18;
+    private static final int TOO_FAR_DISTANCE = 32;
+    private static final int HIVE_CLOSE_ENOUGH_DISTANCE = 2;
+    private static final int PATHFIND_TO_HIVE_WHEN_CLOSER_THAN = 16;
+    private static final int HIVE_SEARCH_DISTANCE = 20;
+    public static final String TAG_CROPS_GROWN_SINCE_POLLINATION = "CropsGrownSincePollination";
+    public static final String TAG_CANNOT_ENTER_HIVE_TICKS = "CannotEnterHiveTicks";
+    public static final String TAG_TICKS_SINCE_POLLINATION = "TicksSincePollination";
+    public static final String TAG_HAS_STUNG = "HasStung";
+    public static final String TAG_HAS_NECTAR = "HasNectar";
+    public static final String TAG_FLOWER_POS = "FlowerPos";
+    public static final String TAG_HIVE_POS = "HivePos";
+    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     private UUID persistentAngerTarget;
     private float rollAmount;
     private float rollAmountO;
@@ -107,7 +129,9 @@ FlyingAnimal {
     private int ticksWithoutNectarSinceExitingHive;
     private int stayOutOfHiveCountdown;
     private int numCropsGrownSincePollination;
+    private static final int COOLDOWN_BEFORE_LOCATING_NEW_HIVE = 200;
     private int remainingCooldownBeforeLocatingNewHive;
+    private static final int COOLDOWN_BEFORE_LOCATING_NEW_FLOWER = 200;
     private int remainingCooldownBeforeLocatingNewFlower;
     @Nullable
     private BlockPos savedFlowerPos;
@@ -171,35 +195,35 @@ FlyingAnimal {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         if (this.hasHive()) {
-            compoundTag.put("HivePos", NbtUtils.writeBlockPos(this.getHivePos()));
+            compoundTag.put(TAG_HIVE_POS, NbtUtils.writeBlockPos(this.getHivePos()));
         }
         if (this.hasSavedFlowerPos()) {
-            compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.getSavedFlowerPos()));
+            compoundTag.put(TAG_FLOWER_POS, NbtUtils.writeBlockPos(this.getSavedFlowerPos()));
         }
-        compoundTag.putBoolean("HasNectar", this.hasNectar());
-        compoundTag.putBoolean("HasStung", this.hasStung());
-        compoundTag.putInt("TicksSincePollination", this.ticksWithoutNectarSinceExitingHive);
-        compoundTag.putInt("CannotEnterHiveTicks", this.stayOutOfHiveCountdown);
-        compoundTag.putInt("CropsGrownSincePollination", this.numCropsGrownSincePollination);
+        compoundTag.putBoolean(TAG_HAS_NECTAR, this.hasNectar());
+        compoundTag.putBoolean(TAG_HAS_STUNG, this.hasStung());
+        compoundTag.putInt(TAG_TICKS_SINCE_POLLINATION, this.ticksWithoutNectarSinceExitingHive);
+        compoundTag.putInt(TAG_CANNOT_ENTER_HIVE_TICKS, this.stayOutOfHiveCountdown);
+        compoundTag.putInt(TAG_CROPS_GROWN_SINCE_POLLINATION, this.numCropsGrownSincePollination);
         this.addPersistentAngerSaveData(compoundTag);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         this.hivePos = null;
-        if (compoundTag.contains("HivePos")) {
-            this.hivePos = NbtUtils.readBlockPos(compoundTag.getCompound("HivePos"));
+        if (compoundTag.contains(TAG_HIVE_POS)) {
+            this.hivePos = NbtUtils.readBlockPos(compoundTag.getCompound(TAG_HIVE_POS));
         }
         this.savedFlowerPos = null;
-        if (compoundTag.contains("FlowerPos")) {
-            this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+        if (compoundTag.contains(TAG_FLOWER_POS)) {
+            this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound(TAG_FLOWER_POS));
         }
         super.readAdditionalSaveData(compoundTag);
-        this.setHasNectar(compoundTag.getBoolean("HasNectar"));
-        this.setHasStung(compoundTag.getBoolean("HasStung"));
-        this.ticksWithoutNectarSinceExitingHive = compoundTag.getInt("TicksSincePollination");
-        this.stayOutOfHiveCountdown = compoundTag.getInt("CannotEnterHiveTicks");
-        this.numCropsGrownSincePollination = compoundTag.getInt("CropsGrownSincePollination");
+        this.setHasNectar(compoundTag.getBoolean(TAG_HAS_NECTAR));
+        this.setHasStung(compoundTag.getBoolean(TAG_HAS_STUNG));
+        this.ticksWithoutNectarSinceExitingHive = compoundTag.getInt(TAG_TICKS_SINCE_POLLINATION);
+        this.stayOutOfHiveCountdown = compoundTag.getInt(TAG_CANNOT_ENTER_HIVE_TICKS);
+        this.numCropsGrownSincePollination = compoundTag.getInt(TAG_CROPS_GROWN_SINCE_POLLINATION);
         this.readPersistentAngerSaveData(this.level, compoundTag);
     }
 
@@ -280,6 +304,16 @@ FlyingAnimal {
         this.savedFlowerPos = blockPos;
     }
 
+    @VisibleForDebug
+    public int getTravellingTicks() {
+        return Math.max(this.goToHiveGoal.travellingTicks, this.goToKnownFlowerGoal.travellingTicks);
+    }
+
+    @VisibleForDebug
+    public List<BlockPos> getBlacklistedHives() {
+        return this.goToHiveGoal.blacklistedTargets;
+    }
+
     private boolean isTiredOfLookingForNectar() {
         return this.ticksWithoutNectarSinceExitingHive > 3600;
     }
@@ -296,7 +330,6 @@ FlyingAnimal {
         this.stayOutOfHiveCountdown = i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getRollAmount(float f) {
         return Mth.lerp(f, this.rollAmountO, this.rollAmount);
     }
@@ -361,7 +394,7 @@ FlyingAnimal {
 
     @Override
     public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
     private boolean doesHiveHaveSpace(BlockPos blockPos) {
@@ -372,13 +405,20 @@ FlyingAnimal {
         return false;
     }
 
+    @VisibleForDebug
     public boolean hasHive() {
         return this.hivePos != null;
     }
 
     @Nullable
+    @VisibleForDebug
     public BlockPos getHivePos() {
         return this.hivePos;
+    }
+
+    @VisibleForDebug
+    public GoalSelector getGoalSelector() {
+        return this.goalSelector;
     }
 
     @Override
@@ -558,6 +598,7 @@ FlyingAnimal {
         return this.isFlying() && this.tickCount % TICKS_PER_FLAP == 0;
     }
 
+    @Override
     public boolean isFlying() {
         return !this.onGround;
     }
@@ -589,7 +630,6 @@ FlyingAnimal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.5f * this.getEyeHeight(), this.getBbWidth() * 0.2f);
     }
@@ -656,6 +696,8 @@ FlyingAnimal {
 
     class BeeGrowCropGoal
     extends BaseBeeGoal {
+        static final int GROW_CHANCE = 30;
+
         private BeeGrowCropGoal() {
         }
 
@@ -753,12 +795,21 @@ FlyingAnimal {
 
     class BeePollinateGoal
     extends BaseBeeGoal {
+        private static final int MIN_POLLINATION_TICKS = 400;
+        private static final int MIN_FIND_FLOWER_RETRY_COOLDOWN = 20;
+        private static final int MAX_FIND_FLOWER_RETRY_COOLDOWN = 60;
         private final Predicate<BlockState> VALID_POLLINATION_BLOCKS;
+        private static final double ARRIVAL_THRESHOLD = 0.1;
+        private static final int POSITION_CHANGE_CHANCE = 25;
+        private static final float SPEED_MODIFIER = 0.35f;
+        private static final float HOVER_HEIGHT_WITHIN_FLOWER = 0.6f;
+        private static final float HOVER_POS_OFFSET = 0.33333334f;
         private int successfulPollinatingTicks;
         private int lastSoundPlayedTick;
         private boolean pollinating;
         private Vec3 hoverPos;
         private int pollinatingTicks;
+        private static final int MAX_POLLINATING_TICKS = 600;
 
         BeePollinateGoal() {
             this.VALID_POLLINATION_BLOCKS = blockState -> {
@@ -951,6 +1002,7 @@ FlyingAnimal {
 
     public class BeeGoToKnownFlowerGoal
     extends BaseBeeGoal {
+        private static final int MAX_TRAVELLING_TICKS = 600;
         private int travellingTicks;
 
         BeeGoToKnownFlowerGoal() {
@@ -1006,12 +1058,16 @@ FlyingAnimal {
         }
     }
 
+    @VisibleForDebug
     public class BeeGoToHiveGoal
     extends BaseBeeGoal {
+        public static final int MAX_TRAVELLING_TICKS = 600;
         private int travellingTicks;
+        private static final int MAX_BLACKLISTED_TARGETS = 3;
         private final List<BlockPos> blacklistedTargets;
         @Nullable
         private Path lastPath;
+        private static final int TICKS_BEFORE_HIVE_DROP = 60;
         private int ticksStuck;
 
         BeeGoToHiveGoal() {
@@ -1124,6 +1180,8 @@ FlyingAnimal {
 
     class BeeWanderGoal
     extends Goal {
+        private static final int WANDER_THRESHOLD = 22;
+
         BeeWanderGoal() {
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }

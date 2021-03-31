@@ -13,8 +13,6 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
 import java.util.Objects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.ClickEvent;
@@ -117,6 +115,10 @@ public class Style {
         return this.withColor(chatFormatting != null ? TextColor.fromLegacyFormat(chatFormatting) : null);
     }
 
+    public Style withColor(int i) {
+        return this.withColor(TextColor.fromRgb(i));
+    }
+
     public Style withBold(@Nullable Boolean boolean_) {
         return new Style(this.color, boolean_, this.italic, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
@@ -125,9 +127,16 @@ public class Style {
         return new Style(this.color, this.bold, boolean_, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Style withUnderlined(@Nullable Boolean boolean_) {
         return new Style(this.color, this.bold, this.italic, boolean_, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
+    }
+
+    public Style withStrikethrough(@Nullable Boolean boolean_) {
+        return new Style(this.color, this.bold, this.italic, this.underlined, boolean_, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font);
+    }
+
+    public Style withObfuscated(@Nullable Boolean boolean_) {
+        return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, boolean_, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
     public Style withClickEvent(@Nullable ClickEvent clickEvent) {
@@ -142,7 +151,6 @@ public class Style {
         return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, string, this.font);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Style withFont(@Nullable ResourceLocation resourceLocation) {
         return new Style(this.color, this.bold, this.italic, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, resourceLocation);
     }
@@ -185,7 +193,6 @@ public class Style {
         return new Style(textColor, boolean_, boolean2, boolean4, boolean3, boolean5, this.clickEvent, this.hoverEvent, this.insertion, this.font);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Style applyLegacyFormat(ChatFormatting chatFormatting) {
         TextColor textColor = this.color;
         Boolean boolean_ = this.bold;

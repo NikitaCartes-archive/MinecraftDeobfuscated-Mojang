@@ -14,6 +14,9 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 @Environment(value=EnvType.CLIENT)
 public class AnimationMetadataSection {
     public static final AnimationMetadataSectionSerializer SERIALIZER = new AnimationMetadataSectionSerializer();
+    public static final String SECTION_NAME = "animation";
+    public static final int DEFAULT_FRAME_TIME = 1;
+    public static final int UNKNOWN_SIZE = -1;
     public static final AnimationMetadataSection EMPTY = new AnimationMetadataSection((List)Lists.newArrayList(), -1, -1, 1, false){
 
         @Override

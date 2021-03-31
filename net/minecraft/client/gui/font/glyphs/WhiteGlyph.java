@@ -14,6 +14,8 @@ public enum WhiteGlyph implements RawGlyph
 {
     INSTANCE;
 
+    private static final int WIDTH = 5;
+    private static final int HEIGHT = 8;
     private static final NativeImage IMAGE_DATA;
 
     @Override

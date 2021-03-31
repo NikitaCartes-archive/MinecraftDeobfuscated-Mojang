@@ -5,11 +5,10 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +32,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class StemBlock
 extends BushBlock
 implements BonemealableBlock {
+    public static final int MAX_AGE = 7;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
+    protected static final float AABB_OFFSET = 1.0f;
     protected static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(7.0, 0.0, 7.0, 9.0, 2.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 4.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 6.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 8.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 10.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 12.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)};
     private final StemGrownBlock fruit;
     private final Supplier<Item> seedSupplier;
@@ -70,7 +71,7 @@ implements BonemealableBlock {
                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
                 BlockPos blockPos2 = blockPos.relative(direction);
                 BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
-                if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(Blocks.DIRT) || blockState2.is(Blocks.COARSE_DIRT) || blockState2.is(Blocks.PODZOL) || blockState2.is(Blocks.GRASS_BLOCK))) {
+                if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.GRASS_BLOCK))) {
                     serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
                     serverLevel.setBlockAndUpdate(blockPos, (BlockState)this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
                 }
@@ -79,7 +80,6 @@ implements BonemealableBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return new ItemStack(this.seedSupplier.get());
     }

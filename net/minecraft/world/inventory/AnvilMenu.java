@@ -4,8 +4,6 @@
 package net.minecraft.world.inventory;
 
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.tags.BlockTags;
@@ -29,9 +27,18 @@ import org.apache.logging.log4j.Logger;
 public class AnvilMenu
 extends ItemCombinerMenu {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final boolean DEBUG_COST = false;
+    public static final int MAX_NAME_LENGTH = 35;
     private int repairItemCountCost;
     private String itemName;
     private final DataSlot cost = DataSlot.standalone();
+    private static final int COST_FAIL = 0;
+    private static final int COST_BASE = 1;
+    private static final int COST_ADDED_BASE = 1;
+    private static final int COST_REPAIR_MATERIAL = 1;
+    private static final int COST_REPAIR_SACRIFICE = 2;
+    private static final int COST_INCOMPATIBLE_PENALTY = 1;
+    private static final int COST_RENAME = 1;
 
     public AnvilMenu(int i, Inventory inventory) {
         this(i, inventory, ContainerLevelAccess.NULL);
@@ -253,7 +260,6 @@ extends ItemCombinerMenu {
         this.createResult();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getCost() {
         return this.cost.get();
     }

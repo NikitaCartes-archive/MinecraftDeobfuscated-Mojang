@@ -5,6 +5,7 @@ package net.minecraft.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
@@ -75,6 +77,7 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
+import net.minecraft.client.Screenshot;
 import net.minecraft.client.Timer;
 import net.minecraft.client.User;
 import net.minecraft.client.color.block.BlockColors;
@@ -139,6 +142,7 @@ import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ClientPackSource;
@@ -175,9 +179,11 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.KeybindComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -247,6 +253,7 @@ import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.apache.commons.io.Charsets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -259,6 +266,7 @@ WindowEventHandler {
     private static Minecraft instance;
     private static final Logger LOGGER;
     public static final boolean ON_OSX;
+    private static final int MAX_TICKS_PER_UPDATE = 10;
     public static final ResourceLocation DEFAULT_FONT;
     public static final ResourceLocation UNIFORM_FONT;
     public static final ResourceLocation ALT_FONT;
@@ -363,6 +371,7 @@ WindowEventHandler {
     private CrashReport delayedCrash;
     private static int fps;
     public String fpsString = "";
+    public boolean wireframe;
     public boolean chunkPath;
     public boolean chunkVisibility;
     public boolean smartCull = true;
@@ -1742,6 +1751,10 @@ WindowEventHandler {
         return this.allowsMultiplayer && this.socialInteractionsService.serversAllowed();
     }
 
+    public boolean allowsRealms() {
+        return this.socialInteractionsService.realmsAllowed();
+    }
+
     public boolean isBlocked(UUID uUID) {
         if (!this.getChatStatus().isChatAllowed(false)) {
             return (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
@@ -1780,7 +1793,7 @@ WindowEventHandler {
     }
 
     public static boolean useShaderTransparency() {
-        return Minecraft.instance.options.graphicsMode.getId() >= GraphicsStatus.FABULOUS.getId();
+        return !Minecraft.instance.gameRenderer.isPanoramicMode() && Minecraft.instance.options.graphicsMode.getId() >= GraphicsStatus.FABULOUS.getId();
     }
 
     public static boolean useAmbientOcclusion() {
@@ -1960,6 +1973,27 @@ WindowEventHandler {
         return "out_of_game";
     }
 
+    @Override
+    public void populateSnooperInitial(Snooper snooper) {
+        snooper.setFixedData("client_brand", ClientBrandRetriever.getClientModName());
+        snooper.setFixedData("launched_version", this.launchedVersion);
+        Minecraft.populateSnooperWithOpenGL(snooper);
+        snooper.setFixedData("gl_max_texture_size", RenderSystem.maxSupportedTextureSize());
+        GameProfile gameProfile = this.user.getGameProfile();
+        if (gameProfile.getId() != null) {
+            snooper.setFixedData("uuid", Hashing.sha1().hashBytes(gameProfile.getId().toString().getBytes(Charsets.ISO_8859_1)).toString());
+        }
+    }
+
+    private static void populateSnooperWithOpenGL(Snooper snooper) {
+        GlUtil.populateSnooperWithOpenGL(snooper::setFixedData);
+    }
+
+    @Override
+    public boolean isSnooperEnabled() {
+        return this.options.snooperEnabled;
+    }
+
     public void setCurrentServer(@Nullable ServerData serverData) {
         this.currentServer = serverData;
     }
@@ -2130,6 +2164,10 @@ WindowEventHandler {
         return this.searchRegistry.getTree(key);
     }
 
+    public static int getAverageFps() {
+        return fps;
+    }
+
     public FrameTimer getFrameTimer() {
         return this.frameTimer;
     }
@@ -2195,12 +2233,134 @@ WindowEventHandler {
         this.windowActive = bl;
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    public Component grabPanoramixScreenshot(File file, int i, int j) {
+        int k = this.window.getWidth();
+        int l = this.window.getHeight();
+        RenderTarget renderTarget = new RenderTarget(i, j, true, ON_OSX);
+        float f = this.player.xRot;
+        float g = this.player.yRot;
+        float h = this.player.xRotO;
+        float m = this.player.yRotO;
+        this.gameRenderer.setRenderBlockOutline(false);
+        try {
+            this.gameRenderer.setPanoramicMode(true);
+            this.levelRenderer.graphicsChanged();
+            this.window.setWidth(i);
+            this.window.setHeight(j);
+            for (int n = 0; n < 6; ++n) {
+                switch (n) {
+                    case 0: {
+                        this.player.yRotO = this.player.yRot = g;
+                        this.player.xRot = 0.0f;
+                        this.player.xRotO = 0.0f;
+                        break;
+                    }
+                    case 1: {
+                        this.player.yRotO = this.player.yRot = (g + 90.0f) % 360.0f;
+                        this.player.xRot = 0.0f;
+                        this.player.xRotO = 0.0f;
+                        break;
+                    }
+                    case 2: {
+                        this.player.yRotO = this.player.yRot = (g + 180.0f) % 360.0f;
+                        this.player.xRot = 0.0f;
+                        this.player.xRotO = 0.0f;
+                        break;
+                    }
+                    case 3: {
+                        this.player.yRotO = this.player.yRot = (g - 90.0f) % 360.0f;
+                        this.player.xRot = 0.0f;
+                        this.player.xRotO = 0.0f;
+                        break;
+                    }
+                    case 4: {
+                        this.player.yRotO = this.player.yRot = g;
+                        this.player.xRot = -90.0f;
+                        this.player.xRotO = -90.0f;
+                        break;
+                    }
+                    default: {
+                        this.player.yRotO = this.player.yRot = g;
+                        this.player.xRot = 90.0f;
+                        this.player.xRotO = 90.0f;
+                    }
+                }
+                renderTarget.bindWrite(true);
+                this.gameRenderer.renderLevel(1.0f, 0L, new PoseStack());
+                try {
+                    Thread.sleep(10L);
+                } catch (InterruptedException interruptedException) {
+                    // empty catch block
+                }
+                Screenshot.grab(file, "panorama_" + n + ".png", i, j, renderTarget, component -> {});
+            }
+            MutableComponent component2 = new TextComponent(file.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
+            TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.success", component2);
+            return translatableComponent;
+        } catch (Exception exception) {
+            LOGGER.error("Couldn't save image", (Throwable)exception);
+            TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.failure", exception.getMessage());
+            return translatableComponent;
+        } finally {
+            this.player.xRot = f;
+            this.player.yRot = g;
+            this.player.xRotO = h;
+            this.player.yRotO = m;
+            this.gameRenderer.setRenderBlockOutline(true);
+            this.window.setWidth(k);
+            this.window.setHeight(l);
+            renderTarget.destroyBuffers();
+            this.gameRenderer.setPanoramicMode(false);
+            this.levelRenderer.graphicsChanged();
+            this.getMainRenderTarget().bindWrite(true);
+        }
+    }
+
+    private Component grabHugeScreenshot(File file, int i, int j, int k, int l) {
+        try {
+            ByteBuffer byteBuffer = GlUtil.allocateMemory(i * j * 3);
+            Screenshot screenshot = new Screenshot(file, k, l, j);
+            float f = (float)k / (float)i;
+            float g = (float)l / (float)j;
+            float h = f > g ? f : g;
+            for (int m = (l - 1) / j * j; m >= 0; m -= j) {
+                for (int n = 0; n < k; n += i) {
+                    RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+                    float o = (float)(k - i) / 2.0f * 2.0f - (float)(n * 2);
+                    float p = (float)(l - j) / 2.0f * 2.0f - (float)(m * 2);
+                    this.gameRenderer.renderZoomed(h, o /= (float)i, p /= (float)j);
+                    byteBuffer.clear();
+                    RenderSystem.pixelStore(3333, 1);
+                    RenderSystem.pixelStore(3317, 1);
+                    RenderSystem.readPixels(0, 0, i, j, 32992, 5121, byteBuffer);
+                    screenshot.addRegion(byteBuffer, n, m, i, j);
+                }
+                screenshot.saveRow();
+            }
+            File file2 = screenshot.close();
+            GlUtil.freeMemory(byteBuffer);
+            MutableComponent component = new TextComponent(file2.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file2.getAbsolutePath())));
+            return new TranslatableComponent("screenshot.success", component);
+        } catch (Exception exception) {
+            LOGGER.warn("Couldn't save screenshot", (Throwable)exception);
+            return new TranslatableComponent("screenshot.failure", exception.getMessage());
+        }
+    }
+
     public ProfilerFiller getProfiler() {
         return this.profiler;
     }
 
     public Game getGame() {
         return this.game;
+    }
+
+    @Nullable
+    public StoringChunkProgressListener getProgressListener() {
+        return this.progressListener.get();
     }
 
     public SplashManager getSplashManager() {

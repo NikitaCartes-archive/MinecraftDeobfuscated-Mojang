@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -48,27 +46,22 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleMoveVehicle(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getY() {
         return this.y;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getZ() {
         return this.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getYRot() {
         return this.yRot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getXRot() {
         return this.xRot;
     }

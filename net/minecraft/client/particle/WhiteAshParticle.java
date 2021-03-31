@@ -16,6 +16,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 @Environment(value=EnvType.CLIENT)
 public class WhiteAshParticle
 extends BaseAshSmokeParticle {
+    private static final int COLOR_RGB24 = 12235202;
+
     protected WhiteAshParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.1f, -0.1f, 0.1f, g, h, i, j, spriteSet, 0.0f, 20, 0.0125f, false);
         this.rCol = 0.7294118f;

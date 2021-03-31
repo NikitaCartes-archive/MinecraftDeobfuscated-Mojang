@@ -22,6 +22,8 @@ import net.minecraft.world.level.material.Material;
 
 public class HugeFungusFeature
 extends Feature<HugeFungusConfiguration> {
+    private static final float HUGE_PROBABILITY = 0.06f;
+
     public HugeFungusFeature(Codec<HugeFungusConfiguration> codec) {
         super(codec);
     }

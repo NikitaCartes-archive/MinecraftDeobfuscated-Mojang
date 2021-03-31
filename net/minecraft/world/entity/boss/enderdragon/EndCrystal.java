@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.boss.enderdragon;
 
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -138,13 +136,11 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         return super.shouldRenderAtSqrDistance(d) || this.getBeamTarget() != null;
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return new ItemStack(Items.END_CRYSTAL);
     }

@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -24,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class EnchantedBookItem
 extends Item {
+    public static final String TAG_STORED_ENCHANTMENTS = "StoredEnchantments";
+
     public EnchantedBookItem(Item.Properties properties) {
         super(properties);
     }
@@ -41,13 +41,12 @@ extends Item {
     public static ListTag getEnchantments(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag != null) {
-            return compoundTag.getList("StoredEnchantments", 10);
+            return compoundTag.getList(TAG_STORED_ENCHANTMENTS, 10);
         }
         return new ListTag();
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, level, list, tooltipFlag);
         ItemStack.appendEnchantmentNames(list, EnchantedBookItem.getEnchantments(itemStack));
@@ -73,7 +72,7 @@ extends Item {
             compoundTag2.putShort("lvl", (short)enchantmentInstance.level);
             listTag.add(compoundTag2);
         }
-        itemStack.getOrCreateTag().put("StoredEnchantments", listTag);
+        itemStack.getOrCreateTag().put(TAG_STORED_ENCHANTMENTS, listTag);
     }
 
     public static ItemStack createForEnchantment(EnchantmentInstance enchantmentInstance) {

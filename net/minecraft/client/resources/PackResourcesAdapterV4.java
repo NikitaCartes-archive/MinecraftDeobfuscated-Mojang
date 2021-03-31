@@ -46,7 +46,11 @@ implements PackResources {
     private static final Set<String> BANNERS = PATTERNS.stream().map(string -> "textures/entity/banner/" + string + ".png").collect(Collectors.toSet());
     public static final ResourceLocation SHIELD_BASE = new ResourceLocation("textures/entity/shield_base.png");
     public static final ResourceLocation BANNER_BASE = new ResourceLocation("textures/entity/banner_base.png");
+    public static final int DEFAULT_CHEST_SIZE = 64;
+    public static final int DEFAULT_SHIELD_SIZE = 64;
+    public static final int DEFAULT_BANNER_SIZE = 64;
     public static final ResourceLocation OLD_IRON_GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem.png");
+    public static final String NEW_IRON_GOLEM_PATH = "textures/entity/iron_golem/iron_golem.png";
     private final PackResources pack;
 
     public PackResourcesAdapterV4(PackResources packResources) {
@@ -67,7 +71,7 @@ implements PackResources {
         if ("textures/misc/enchanted_item_glint.png".equals(string)) {
             return false;
         }
-        if ("textures/entity/iron_golem/iron_golem.png".equals(string)) {
+        if (NEW_IRON_GOLEM_PATH.equals(string)) {
             return this.pack.hasResource(packType, OLD_IRON_GOLEM_LOCATION);
         }
         if ("textures/entity/conduit/wind.png".equals(string) || "textures/entity/conduit/wind_vertical.png".equals(string)) {
@@ -92,7 +96,7 @@ implements PackResources {
             return this.pack.getResource(packType, resourceLocation);
         }
         String string = resourceLocation.getPath();
-        if ("textures/entity/iron_golem/iron_golem.png".equals(string)) {
+        if (NEW_IRON_GOLEM_PATH.equals(string)) {
             return this.pack.getResource(packType, OLD_IRON_GOLEM_LOCATION);
         }
         if (SHIELDS.contains(string)) {

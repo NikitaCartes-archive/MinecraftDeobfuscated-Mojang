@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
@@ -33,6 +31,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class AttachedStemBlock
 extends BushBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    protected static final float AABB_OFFSET = 2.0f;
     private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(Direction.SOUTH, Block.box(6.0, 0.0, 6.0, 10.0, 10.0, 16.0), Direction.WEST, Block.box(0.0, 0.0, 6.0, 10.0, 10.0, 10.0), Direction.NORTH, Block.box(6.0, 0.0, 0.0, 10.0, 10.0, 10.0), Direction.EAST, Block.box(6.0, 0.0, 6.0, 16.0, 10.0, 10.0)));
     private final StemGrownBlock fruit;
     private final Supplier<Item> seedSupplier;
@@ -63,7 +62,6 @@ extends BushBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return new ItemStack(this.seedSupplier.get());
     }

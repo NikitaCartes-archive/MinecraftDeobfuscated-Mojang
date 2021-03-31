@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,6 +27,10 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 
 public class LoomMenu
 extends AbstractContainerMenu {
+    private static final int INV_SLOT_START = 4;
+    private static final int INV_SLOT_END = 31;
+    private static final int USE_ROW_SLOT_START = 31;
+    private static final int USE_ROW_SLOT_END = 40;
     private final ContainerLevelAccess access;
     private final DataSlot selectedBannerPatternIndex = DataSlot.standalone();
     private Runnable slotUpdateListener = () -> {};
@@ -119,7 +121,6 @@ extends AbstractContainerMenu {
         this.addDataSlot(this.selectedBannerPatternIndex);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getSelectedBannerPatternIndex() {
         return this.selectedBannerPatternIndex.get();
     }
@@ -162,7 +163,6 @@ extends AbstractContainerMenu {
         this.broadcastChanges();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void registerUpdateListener(Runnable runnable) {
         this.slotUpdateListener = runnable;
     }
@@ -230,22 +230,18 @@ extends AbstractContainerMenu {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Slot getBannerSlot() {
         return this.bannerSlot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Slot getDyeSlot() {
         return this.dyeSlot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Slot getPatternSlot() {
         return this.patternSlot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Slot getResultSlot() {
         return this.resultSlot;
     }

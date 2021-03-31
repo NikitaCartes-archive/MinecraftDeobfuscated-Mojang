@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -71,7 +69,6 @@ extends CustomRecipe {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean canCraftInDimensions(int i, int j) {
         return i >= 3 && j >= 3;
     }

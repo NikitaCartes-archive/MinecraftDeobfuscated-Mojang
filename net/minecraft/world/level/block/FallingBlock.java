@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -63,7 +61,6 @@ implements Fallable {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         BlockPos blockPos2;
         if (random.nextInt(16) == 0 && FallingBlock.isFree(level.getBlockState(blockPos2 = blockPos.below()))) {
@@ -74,7 +71,6 @@ implements Fallable {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return -16777216;
     }

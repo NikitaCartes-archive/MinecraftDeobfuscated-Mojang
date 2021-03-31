@@ -20,6 +20,7 @@ import net.minecraft.world.entity.schedule.Activity;
 
 public class GoToPotentialJobSite
 extends Behavior<Villager> {
+    private static final int TICKS_UNTIL_TIMEOUT = 1200;
     final float speedModifier;
 
     public GoToPotentialJobSite(float f) {

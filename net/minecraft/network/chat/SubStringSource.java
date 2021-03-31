@@ -10,14 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringDecomposer;
 
-@Environment(value=EnvType.CLIENT)
 public class SubStringSource {
     private final String plainText;
     private final List<Style> charStyles;
@@ -54,6 +51,10 @@ public class SubStringSource {
             list.add(bl ? FormattedCharSequence.backward(string2, style, this.reverseCharModifier) : FormattedCharSequence.forward(string2, style));
         }
         return bl ? Lists.reverse(list) : list;
+    }
+
+    public static SubStringSource create(FormattedText formattedText) {
+        return SubStringSource.create(formattedText, i -> i, string -> string);
     }
 
     public static SubStringSource create(FormattedText formattedText, Int2IntFunction int2IntFunction, UnaryOperator<String> unaryOperator) {

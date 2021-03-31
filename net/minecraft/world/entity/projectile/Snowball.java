@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,14 +38,12 @@ extends ThrowableItemProjectile {
         return Items.SNOWBALL;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private ParticleOptions getParticle() {
         ItemStack itemStack = this.getItemRaw();
         return itemStack.isEmpty() ? ParticleTypes.ITEM_SNOWBALL : new ItemParticleOption(ParticleTypes.ITEM, itemStack);
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 3) {
             ParticleOptions particleOptions = this.getParticle();

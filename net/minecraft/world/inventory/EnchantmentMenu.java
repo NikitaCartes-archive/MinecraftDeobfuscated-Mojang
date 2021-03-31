@@ -5,8 +5,6 @@ package net.minecraft.world.inventory;
 
 import java.util.List;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -214,7 +212,6 @@ extends AbstractContainerMenu {
         return list;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getGoldCount() {
         ItemStack itemStack = this.enchantSlots.getItem(1);
         if (itemStack.isEmpty()) {
@@ -223,7 +220,6 @@ extends AbstractContainerMenu {
         return itemStack.getCount();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getEnchantmentSeed() {
         return this.enchantmentSeed.get();
     }

@@ -50,6 +50,10 @@ extends LootItemConditionalFunction {
         return SetItemCountFunction.simpleBuilder(lootItemConditions -> new SetItemCountFunction((LootItemCondition[])lootItemConditions, numberProvider, false));
     }
 
+    public static LootItemConditionalFunction.Builder<?> setCount(NumberProvider numberProvider, boolean bl) {
+        return SetItemCountFunction.simpleBuilder(lootItemConditions -> new SetItemCountFunction((LootItemCondition[])lootItemConditions, numberProvider, bl));
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetItemCountFunction> {
         @Override

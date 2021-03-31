@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.util.profiling.FilledProfileResults;
 import net.minecraft.util.profiling.ProfileCollector;
@@ -128,7 +126,6 @@ implements ProfileCollector {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void popPush(Supplier<String> supplier) {
         this.pop();
         this.push(supplier);
@@ -158,7 +155,6 @@ implements ProfileCollector {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public PathEntry getEntry(String string) {
         return this.entries.get(string);
     }

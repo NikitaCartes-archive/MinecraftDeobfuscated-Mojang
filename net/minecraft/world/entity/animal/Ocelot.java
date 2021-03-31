@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -60,6 +58,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class Ocelot
 extends Animal {
+    public static final double CROUCH_SPEED_MOD = 0.6;
+    public static final double WALK_SPEED_MOD = 0.8;
+    public static final double SPRINT_SPEED_MOD = 1.33;
     private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
     private static final EntityDataAccessor<Boolean> DATA_TRUSTING = SynchedEntityData.defineId(Ocelot.class, EntityDataSerializers.BOOLEAN);
     private OcelotAvoidEntityGoal<Player> ocelotAvoidPlayersGoal;
@@ -196,7 +197,6 @@ extends Animal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 41) {
             this.spawnTrustingParticles(true);
@@ -269,7 +269,6 @@ extends Animal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.5f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }

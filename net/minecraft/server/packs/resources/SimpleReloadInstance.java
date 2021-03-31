@@ -12,8 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadInstance;
@@ -23,6 +21,9 @@ import net.minecraft.util.profiling.InactiveProfiler;
 
 public class SimpleReloadInstance<S>
 implements ReloadInstance {
+    private static final int PREPARATION_PROGRESS_WEIGHT = 2;
+    private static final int EXTRA_RELOAD_PROGRESS_WEIGHT = 2;
+    private static final int LISTENER_PROGRESS_WEIGHT = 1;
     protected final ResourceManager resourceManager;
     protected final CompletableFuture<Unit> allPreparations = new CompletableFuture();
     protected final CompletableFuture<List<S>> allDone;
@@ -84,7 +85,6 @@ implements ReloadInstance {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public float getActualProgress() {
         int i = this.listenerCount - this.preparingListeners.size();
         float f = this.doneTaskCounter.get() * 2 + this.finishedReloads * 2 + i * 1;
@@ -93,13 +93,11 @@ implements ReloadInstance {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean isDone() {
         return this.allDone.isDone();
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void checkExceptions() {
         if (this.allDone.isCompletedExceptionally()) {
             this.allDone.join();

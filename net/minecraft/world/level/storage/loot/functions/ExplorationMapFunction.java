@@ -35,7 +35,11 @@ public class ExplorationMapFunction
 extends LootItemConditionalFunction {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final StructureFeature<?> DEFAULT_FEATURE = StructureFeature.BURIED_TREASURE;
+    public static final String DEFAULT_DECORATION_NAME = "mansion";
     public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.MANSION;
+    public static final byte DEFAULT_ZOOM = 2;
+    public static final int DEFAULT_SEARCH_RADIUS = 50;
+    public static final boolean DEFAULT_SKIP_EXISTING = true;
     private final StructureFeature<?> destination;
     private final MapDecoration.Type mapDecoration;
     private final byte zoom;
@@ -108,7 +112,7 @@ extends LootItemConditionalFunction {
         @Override
         public ExplorationMapFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             StructureFeature<?> structureFeature = Serializer.readStructure(jsonObject);
-            String string = jsonObject.has("decoration") ? GsonHelper.getAsString(jsonObject, "decoration") : "mansion";
+            String string = jsonObject.has("decoration") ? GsonHelper.getAsString(jsonObject, "decoration") : ExplorationMapFunction.DEFAULT_DECORATION_NAME;
             MapDecoration.Type type = DEFAULT_DECORATION;
             try {
                 type = MapDecoration.Type.valueOf(string.toUpperCase(Locale.ROOT));
@@ -161,6 +165,11 @@ extends LootItemConditionalFunction {
 
         public Builder setZoom(byte b) {
             this.zoom = b;
+            return this;
+        }
+
+        public Builder setSearchRadius(int i) {
+            this.searchRadius = i;
             return this;
         }
 

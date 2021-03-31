@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +37,6 @@ extends BaseEntityBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (!(blockEntity instanceof TheEndGatewayBlockEntity)) {
@@ -66,7 +63,6 @@ extends BaseEntityBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return ItemStack.EMPTY;
     }

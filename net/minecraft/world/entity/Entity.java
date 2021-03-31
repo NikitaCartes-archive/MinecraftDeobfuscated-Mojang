@@ -21,8 +21,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -33,6 +31,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -58,6 +57,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
@@ -130,9 +130,22 @@ implements Nameable,
 EntityAccess,
 CommandSource {
     protected static final Logger LOGGER = LogManager.getLogger();
+    public static final String ID_TAG = "id";
+    public static final String PASSENGERS_TAG = "Passengers";
     private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
     private static final List<ItemStack> EMPTY_LIST = Collections.emptyList();
+    public static final int BOARDING_COOLDOWN = 60;
+    public static final int TOTAL_AIR_SUPPLY = 300;
+    public static final int MAX_ENTITY_TAG_COUNT = 1024;
+    public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW = 0.5000001;
+    public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111f;
+    public static final int BASE_TICKS_REQUIRED_TO_FREEZE = 140;
+    public static final int FREEZE_HURT_FREQUENCY = 40;
     private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    private static final double WATER_FLOW_SCALE = 0.014;
+    private static final double LAVA_FAST_FLOW_SCALE = 0.007;
+    private static final double LAVA_SLOW_FLOW_SCALE = 0.0023333333333333335;
+    public static final String UUID_TAG = "UUID";
     private static double viewScale = 1.0;
     private final EntityType<?> type;
     private int id = ENTITY_COUNTER.incrementAndGet();
@@ -160,6 +173,8 @@ CommandSource {
     protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
     @Nullable
     private RemovalReason removalReason;
+    public static final float DEFAULT_BB_WIDTH = 0.6f;
+    public static final float DEFAULT_BB_HEIGHT = 1.8f;
     public float walkDistO;
     public float walkDist;
     public float moveDist;
@@ -183,6 +198,13 @@ CommandSource {
     protected boolean firstTick = true;
     protected final SynchedEntityData entityData;
     protected static final EntityDataAccessor<Byte> DATA_SHARED_FLAGS_ID = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BYTE);
+    protected static final int FLAG_ONFIRE = 0;
+    private static final int FLAG_SHIFT_KEY_DOWN = 1;
+    private static final int FLAG_SPRINTING = 3;
+    private static final int FLAG_SWIMMING = 4;
+    private static final int FLAG_INVISIBLE = 5;
+    protected static final int FLAG_GLOWING = 6;
+    protected static final int FLAG_FALL_FLYING = 7;
     private static final EntityDataAccessor<Integer> DATA_AIR_SUPPLY_ID = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.OPTIONAL_COMPONENT);
     private static final EntityDataAccessor<Boolean> DATA_CUSTOM_NAME_VISIBLE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.BOOLEAN);
@@ -234,14 +256,12 @@ CommandSource {
         this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isColliding(BlockPos blockPos, BlockState blockState) {
         VoxelShape voxelShape = blockState.getCollisionShape(this.level, blockPos, CollisionContext.of(this));
         VoxelShape voxelShape2 = voxelShape.move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         return Shapes.joinIsNotEmpty(voxelShape2, Shapes.create(this.getBoundingBox()), BooleanOp.AND);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTeamColor() {
         Team team = this.getTeam();
         if (team != null && team.getColor().getColor() != null) {
@@ -271,7 +291,6 @@ CommandSource {
         this.packetCoordinates = vec3;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getPacketCoordinates() {
         return this.packetCoordinates;
     }
@@ -373,7 +392,6 @@ CommandSource {
         this.setPos(this.position.x, this.position.y, this.position.z);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void turn(double d, double e) {
         double f = e * 0.15;
         double g = d * 0.15;
@@ -429,7 +447,10 @@ CommandSource {
                 }
                 this.setRemainingFireTicks(this.remainingFireTicks - 1);
             }
-            this.setTicksFrozen(0);
+            if (this.getTicksFrozen() > 0) {
+                this.setTicksFrozen(0);
+                this.level.levelEvent(null, 1009, this.blockPosition, 1);
+            }
         }
         if (this.isInLava()) {
             this.lavaHurt();
@@ -1279,12 +1300,10 @@ CommandSource {
         return new Vec3(d, e, g);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLightProbePosition(float f) {
         return this.getEyePosition(f);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public final Vec3 getPosition(float f) {
         double d = Mth.lerp((double)f, this.xo, this.getX());
         double e = Mth.lerp((double)f, this.yo, this.getY());
@@ -1313,7 +1332,6 @@ CommandSource {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRender(double d, double e, double f) {
         double g = this.getX() - d;
         double h = this.getY() - e;
@@ -1322,7 +1340,6 @@ CommandSource {
         return this.shouldRenderAtSqrDistance(j);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         double e = this.getBoundingBox().getSize();
         if (Double.isNaN(e)) {
@@ -1339,7 +1356,7 @@ CommandSource {
         if (string == null) {
             return false;
         }
-        compoundTag.putString("id", string);
+        compoundTag.putString(ID_TAG, string);
         this.saveWithoutId(compoundTag);
         return true;
     }
@@ -1369,7 +1386,7 @@ CommandSource {
             compoundTag.putBoolean("OnGround", this.onGround);
             compoundTag.putBoolean("Invulnerable", this.invulnerable);
             compoundTag.putInt("PortalCooldown", this.portalCooldown);
-            compoundTag.putUUID("UUID", this.getUUID());
+            compoundTag.putUUID(UUID_TAG, this.getUUID());
             Component component = this.getCustomName();
             if (component != null) {
                 compoundTag.putString("CustomName", Component.Serializer.toJson(component));
@@ -1405,7 +1422,7 @@ CommandSource {
                     listTag.add(compoundTag2);
                 }
                 if (!listTag.isEmpty()) {
-                    compoundTag.put("Passengers", listTag);
+                    compoundTag.put(PASSENGERS_TAG, listTag);
                 }
             }
         } catch (Throwable throwable) {
@@ -1440,8 +1457,8 @@ CommandSource {
             this.onGround = compoundTag.getBoolean("OnGround");
             this.invulnerable = compoundTag.getBoolean("Invulnerable");
             this.portalCooldown = compoundTag.getInt("PortalCooldown");
-            if (compoundTag.hasUUID("UUID")) {
-                this.uuid = compoundTag.getUUID("UUID");
+            if (compoundTag.hasUUID(UUID_TAG)) {
+                this.uuid = compoundTag.getUUID(UUID_TAG);
                 this.stringUUID = this.uuid.toString();
             }
             if (!(Double.isFinite(this.getX()) && Double.isFinite(this.getY()) && Double.isFinite(this.getZ()))) {
@@ -1591,7 +1608,6 @@ CommandSource {
         moveFunction.accept(entity, this.getX(), d, this.getZ());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void onPassengerTurned(Entity entity) {
     }
 
@@ -1607,7 +1623,6 @@ CommandSource {
         return this.startRiding(entity, false);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean showVehicleHealth() {
         return this instanceof LivingEntity;
     }
@@ -1687,13 +1702,11 @@ CommandSource {
         return this.passengers.isEmpty();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
         this.setPos(d, e, f);
         this.setRot(g, h);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void lerpHeadTo(float f, int i) {
         this.setYHeadRot(f);
     }
@@ -1710,7 +1723,6 @@ CommandSource {
         return new Vec2(this.xRot, this.yRot);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getForward() {
         return Vec3.directionFromRotation(this.getRotationVector());
     }
@@ -1759,12 +1771,10 @@ CommandSource {
         return 300;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void lerpMotion(double d, double e, double f) {
         this.setDeltaMovement(d, e, f);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         switch (b) {
             case 53: {
@@ -1773,7 +1783,6 @@ CommandSource {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void animateHurt() {
     }
 
@@ -1853,7 +1862,6 @@ CommandSource {
         return this.getPose() == Pose.SWIMMING;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isVisuallyCrawling() {
         return this.isVisuallySwimming() && !this.isInWater();
     }
@@ -1877,7 +1885,6 @@ CommandSource {
         return this.getSharedFlag(5);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isInvisibleTo(Player player) {
         if (player.isSpectator()) {
             return false;
@@ -1957,7 +1964,7 @@ CommandSource {
     }
 
     public int getTicksRequiredToFreeze() {
-        return 300;
+        return 140;
     }
 
     public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
@@ -1992,7 +1999,7 @@ CommandSource {
         double g = Double.MAX_VALUE;
         for (Direction direction2 : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.UP}) {
             double i;
-            mutableBlockPos.setWithOffset(blockPos, direction2);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction2);
             if (this.level.getBlockState(mutableBlockPos).isCollisionShapeFullBlock(this.level, mutableBlockPos)) continue;
             double h = vec3.get(direction2.getAxis());
             double d2 = i = direction2.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - h : h;
@@ -2200,7 +2207,6 @@ CommandSource {
         crashReportCategory.setDetail("Entity's Vehicle", () -> this.getVehicle().toString());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean displayFireAnimation() {
         return this.isOnFire() && !this.isSpectator();
     }
@@ -2227,12 +2233,10 @@ CommandSource {
         return true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static double getViewScale() {
         return viewScale;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void setViewScale(double d) {
         viewScale = d;
     }
@@ -2291,7 +2295,6 @@ CommandSource {
         });
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldShowName() {
         return this.isCustomNameVisible();
     }
@@ -2339,7 +2342,6 @@ CommandSource {
         return this.bb;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox();
     }
@@ -2360,7 +2362,6 @@ CommandSource {
         return entityDimensions.height * 0.85f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getEyeHeight(Pose pose) {
         return this.getEyeHeight(pose, this.getDimensions(pose));
     }
@@ -2369,7 +2370,6 @@ CommandSource {
         return this.eyeHeight;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
@@ -2503,7 +2503,6 @@ CommandSource {
         return this.getRootVehicle() == entity.getRootVehicle();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasIndirectPassenger(Entity entity) {
         return this.getIndirectPassengersStream().anyMatch(entity2 -> entity2 == entity);
     }
@@ -2772,12 +2771,10 @@ CommandSource {
     public void checkDespawn() {
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getRopeHoldPosition(float f) {
         return this.getPosition(f).add(0.0, (double)this.eyeHeight * 0.7, 0.0);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
         int i = clientboundAddEntityPacket.getId();
         double d = clientboundAddEntityPacket.getX();
@@ -2792,7 +2789,6 @@ CommandSource {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return null;
     }
@@ -2802,11 +2798,16 @@ CommandSource {
     }
 
     public boolean canFreeze() {
-        return false;
+        return !EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES.contains(this.getType());
     }
 
     public final boolean isRemoved() {
         return this.removalReason != null;
+    }
+
+    @Nullable
+    public RemovalReason getRemovalReason() {
+        return this.removalReason;
     }
 
     @Override

@@ -18,6 +18,10 @@ implements RandomSource {
         super(l);
     }
 
+    public int getCount() {
+        return this.count;
+    }
+
     @Override
     public int next(int i) {
         ++this.count;

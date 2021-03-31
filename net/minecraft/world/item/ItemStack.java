@@ -26,8 +26,6 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -89,10 +87,24 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public final class ItemStack {
-    public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.ITEM.fieldOf("id")).forGetter(itemStack -> itemStack.item), ((MapCodec)Codec.INT.fieldOf("Count")).forGetter(itemStack -> itemStack.count), CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))).apply((Applicative<ItemStack, ?>)instance, ItemStack::new));
+    public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.ITEM.fieldOf(TAG_ENCH_ID)).forGetter(itemStack -> itemStack.item), ((MapCodec)Codec.INT.fieldOf("Count")).forGetter(itemStack -> itemStack.count), CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))).apply((Applicative<ItemStack, ?>)instance, ItemStack::new));
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ItemStack EMPTY = new ItemStack((ItemLike)null);
     public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
+    public static final String TAG_ENCH = "Enchantments";
+    public static final String TAG_ENCH_ID = "id";
+    public static final String TAG_ENCH_LEVEL = "lvl";
+    public static final String TAG_DISPLAY = "display";
+    public static final String TAG_DISPLAY_NAME = "Name";
+    public static final String TAG_LORE = "Lore";
+    public static final String TAG_DAMAGE = "Damage";
+    public static final String TAG_COLOR = "color";
+    private static final String TAG_UNBREAKABLE = "Unbreakable";
+    private static final String TAG_REPAIR_COST = "RepairCost";
+    private static final String TAG_CAN_DESTROY_BLOCK_LIST = "CanDestroy";
+    private static final String TAG_CAN_PLACE_ON_BLOCK_LIST = "CanPlaceOn";
+    private static final String TAG_HIDE_FLAGS = "HideFlags";
+    private static final int DONT_HIDE_TOOLTIP = 0;
     private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
     private int count;
     private int popTime;
@@ -106,7 +118,6 @@ public final class ItemStack {
     private BlockInWorld cachedPlaceBlock;
     private boolean cachedPlaceBlockResult;
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<TooltipComponent> getTooltipImage() {
         return this.getItem().getTooltipImage(this);
     }
@@ -135,7 +146,7 @@ public final class ItemStack {
     }
 
     private ItemStack(CompoundTag compoundTag) {
-        this.item = Registry.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
+        this.item = Registry.ITEM.get(new ResourceLocation(compoundTag.getString(TAG_ENCH_ID)));
         this.count = compoundTag.getByte("Count");
         if (compoundTag.contains("tag", 10)) {
             this.tag = compoundTag.getCompound("tag");
@@ -215,7 +226,7 @@ public final class ItemStack {
 
     public CompoundTag save(CompoundTag compoundTag) {
         ResourceLocation resourceLocation = Registry.ITEM.getKey(this.getItem());
-        compoundTag.putString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
+        compoundTag.putString(TAG_ENCH_ID, resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
         compoundTag.putByte("Count", (byte)this.count);
         if (this.tag != null) {
             compoundTag.put("tag", this.tag.copy());
@@ -236,7 +247,7 @@ public final class ItemStack {
             return false;
         }
         CompoundTag compoundTag = this.getTag();
-        return compoundTag == null || !compoundTag.getBoolean("Unbreakable");
+        return compoundTag == null || !compoundTag.getBoolean(TAG_UNBREAKABLE);
     }
 
     public boolean isDamaged() {
@@ -244,11 +255,11 @@ public final class ItemStack {
     }
 
     public int getDamageValue() {
-        return this.tag == null ? 0 : this.tag.getInt("Damage");
+        return this.tag == null ? 0 : this.tag.getInt(TAG_DAMAGE);
     }
 
     public void setDamageValue(int i) {
-        this.getOrCreateTag().putInt("Damage", Math.max(0, i));
+        this.getOrCreateTag().putInt(TAG_DAMAGE, Math.max(0, i));
     }
 
     public int getMaxDamage() {
@@ -297,17 +308,14 @@ public final class ItemStack {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isBarVisible() {
         return this.item.isBarVisible(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getBarWidth() {
         return this.item.getBarWidth(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getBarColor() {
         return this.item.getBarColor(this);
     }
@@ -507,7 +515,7 @@ public final class ItemStack {
 
     public ListTag getEnchantmentTags() {
         if (this.tag != null) {
-            return this.tag.getList("Enchantments", 10);
+            return this.tag.getList(TAG_ENCH, 10);
         }
         return new ListTag();
     }
@@ -520,37 +528,37 @@ public final class ItemStack {
     }
 
     public Component getHoverName() {
-        CompoundTag compoundTag = this.getTagElement("display");
-        if (compoundTag != null && compoundTag.contains("Name", 8)) {
+        CompoundTag compoundTag = this.getTagElement(TAG_DISPLAY);
+        if (compoundTag != null && compoundTag.contains(TAG_DISPLAY_NAME, 8)) {
             try {
-                MutableComponent component = Component.Serializer.fromJson(compoundTag.getString("Name"));
+                MutableComponent component = Component.Serializer.fromJson(compoundTag.getString(TAG_DISPLAY_NAME));
                 if (component != null) {
                     return component;
                 }
-                compoundTag.remove("Name");
+                compoundTag.remove(TAG_DISPLAY_NAME);
             } catch (JsonParseException jsonParseException) {
-                compoundTag.remove("Name");
+                compoundTag.remove(TAG_DISPLAY_NAME);
             }
         }
         return this.getItem().getName(this);
     }
 
     public ItemStack setHoverName(@Nullable Component component) {
-        CompoundTag compoundTag = this.getOrCreateTagElement("display");
+        CompoundTag compoundTag = this.getOrCreateTagElement(TAG_DISPLAY);
         if (component != null) {
-            compoundTag.putString("Name", Component.Serializer.toJson(component));
+            compoundTag.putString(TAG_DISPLAY_NAME, Component.Serializer.toJson(component));
         } else {
-            compoundTag.remove("Name");
+            compoundTag.remove(TAG_DISPLAY_NAME);
         }
         return this;
     }
 
     public void resetHoverName() {
-        CompoundTag compoundTag = this.getTagElement("display");
+        CompoundTag compoundTag = this.getTagElement(TAG_DISPLAY);
         if (compoundTag != null) {
-            compoundTag.remove("Name");
+            compoundTag.remove(TAG_DISPLAY_NAME);
             if (compoundTag.isEmpty()) {
-                this.removeTagKey("display");
+                this.removeTagKey(TAG_DISPLAY);
             }
         }
         if (this.tag != null && this.tag.isEmpty()) {
@@ -559,11 +567,10 @@ public final class ItemStack {
     }
 
     public boolean hasCustomHoverName() {
-        CompoundTag compoundTag = this.getTagElement("display");
-        return compoundTag != null && compoundTag.contains("Name", 8);
+        CompoundTag compoundTag = this.getTagElement(TAG_DISPLAY);
+        return compoundTag != null && compoundTag.contains(TAG_DISPLAY_NAME, 8);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
         int i;
         Integer integer;
@@ -583,17 +590,17 @@ public final class ItemStack {
             if (ItemStack.shouldShowInTooltip(i, TooltipPart.ENCHANTMENTS)) {
                 ItemStack.appendEnchantmentNames(list, this.getEnchantmentTags());
             }
-            if (this.tag.contains("display", 10)) {
-                CompoundTag compoundTag = this.tag.getCompound("display");
-                if (ItemStack.shouldShowInTooltip(i, TooltipPart.DYE) && compoundTag.contains("color", 99)) {
+            if (this.tag.contains(TAG_DISPLAY, 10)) {
+                CompoundTag compoundTag = this.tag.getCompound(TAG_DISPLAY);
+                if (ItemStack.shouldShowInTooltip(i, TooltipPart.DYE) && compoundTag.contains(TAG_COLOR, 99)) {
                     if (tooltipFlag.isAdvanced()) {
-                        list.add(new TranslatableComponent("item.color", String.format("#%06X", compoundTag.getInt("color"))).withStyle(ChatFormatting.GRAY));
+                        list.add(new TranslatableComponent("item.color", String.format("#%06X", compoundTag.getInt(TAG_COLOR))).withStyle(ChatFormatting.GRAY));
                     } else {
                         list.add(new TranslatableComponent("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                     }
                 }
-                if (compoundTag.getTagType("Lore") == 9) {
-                    ListTag listTag = compoundTag.getList("Lore", 8);
+                if (compoundTag.getTagType(TAG_LORE) == 9) {
+                    ListTag listTag = compoundTag.getList(TAG_LORE, 8);
                     for (int j = 0; j < listTag.size(); ++j) {
                         String string = listTag.getString(j);
                         try {
@@ -602,7 +609,7 @@ public final class ItemStack {
                             list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
                             continue;
                         } catch (JsonParseException jsonParseException) {
-                            compoundTag.remove("Lore");
+                            compoundTag.remove(TAG_LORE);
                         }
                     }
                 }
@@ -644,17 +651,17 @@ public final class ItemStack {
         }
         if (this.hasTag()) {
             ListTag listTag2;
-            if (ItemStack.shouldShowInTooltip(i, TooltipPart.UNBREAKABLE) && this.tag.getBoolean("Unbreakable")) {
+            if (ItemStack.shouldShowInTooltip(i, TooltipPart.UNBREAKABLE) && this.tag.getBoolean(TAG_UNBREAKABLE)) {
                 list.add(new TranslatableComponent("item.unbreakable").withStyle(ChatFormatting.BLUE));
             }
-            if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_DESTROY) && this.tag.contains("CanDestroy", 9) && !(listTag2 = this.tag.getList("CanDestroy", 8)).isEmpty()) {
+            if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_DESTROY) && this.tag.contains(TAG_CAN_DESTROY_BLOCK_LIST, 9) && !(listTag2 = this.tag.getList(TAG_CAN_DESTROY_BLOCK_LIST, 8)).isEmpty()) {
                 list.add(TextComponent.EMPTY);
                 list.add(new TranslatableComponent("item.canBreak").withStyle(ChatFormatting.GRAY));
                 for (int k = 0; k < listTag2.size(); ++k) {
                     list.addAll(ItemStack.expandBlockState(listTag2.getString(k)));
                 }
             }
-            if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_PLACE) && this.tag.contains("CanPlaceOn", 9) && !(listTag2 = this.tag.getList("CanPlaceOn", 8)).isEmpty()) {
+            if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_PLACE) && this.tag.contains(TAG_CAN_PLACE_ON_BLOCK_LIST, 9) && !(listTag2 = this.tag.getList(TAG_CAN_PLACE_ON_BLOCK_LIST, 8)).isEmpty()) {
                 list.add(TextComponent.EMPTY);
                 list.add(new TranslatableComponent("item.canPlace").withStyle(ChatFormatting.GRAY));
                 for (int k = 0; k < listTag2.size(); ++k) {
@@ -674,33 +681,29 @@ public final class ItemStack {
         return list;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static boolean shouldShowInTooltip(int i, TooltipPart tooltipPart) {
         return (i & tooltipPart.getMask()) == 0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private int getHideFlags() {
-        if (this.hasTag() && this.tag.contains("HideFlags", 99)) {
-            return this.tag.getInt("HideFlags");
+        if (this.hasTag() && this.tag.contains(TAG_HIDE_FLAGS, 99)) {
+            return this.tag.getInt(TAG_HIDE_FLAGS);
         }
         return 0;
     }
 
     public void hideTooltipPart(TooltipPart tooltipPart) {
         CompoundTag compoundTag = this.getOrCreateTag();
-        compoundTag.putInt("HideFlags", compoundTag.getInt("HideFlags") | tooltipPart.getMask());
+        compoundTag.putInt(TAG_HIDE_FLAGS, compoundTag.getInt(TAG_HIDE_FLAGS) | tooltipPart.getMask());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void appendEnchantmentNames(List<Component> list, ListTag listTag) {
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
-            Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(compoundTag.getString("id"))).ifPresent(enchantment -> list.add(enchantment.getFullname(compoundTag.getInt("lvl"))));
+            Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(compoundTag.getString(TAG_ENCH_ID))).ifPresent(enchantment -> list.add(enchantment.getFullname(compoundTag.getInt(TAG_ENCH_LEVEL))));
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static Collection<Component> expandBlockState(String string) {
         try {
             boolean bl2;
@@ -742,19 +745,19 @@ public final class ItemStack {
 
     public void enchant(Enchantment enchantment, int i) {
         this.getOrCreateTag();
-        if (!this.tag.contains("Enchantments", 9)) {
-            this.tag.put("Enchantments", new ListTag());
+        if (!this.tag.contains(TAG_ENCH, 9)) {
+            this.tag.put(TAG_ENCH, new ListTag());
         }
-        ListTag listTag = this.tag.getList("Enchantments", 10);
+        ListTag listTag = this.tag.getList(TAG_ENCH, 10);
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
-        compoundTag.putShort("lvl", (byte)i);
+        compoundTag.putString(TAG_ENCH_ID, String.valueOf(Registry.ENCHANTMENT.getKey(enchantment)));
+        compoundTag.putShort(TAG_ENCH_LEVEL, (byte)i);
         listTag.add(compoundTag);
     }
 
     public boolean isEnchanted() {
-        if (this.tag != null && this.tag.contains("Enchantments", 9)) {
-            return !this.tag.getList("Enchantments", 10).isEmpty();
+        if (this.tag != null && this.tag.contains(TAG_ENCH, 9)) {
+            return !this.tag.getList(TAG_ENCH, 10).isEmpty();
         }
         return false;
     }
@@ -782,14 +785,14 @@ public final class ItemStack {
     }
 
     public int getBaseRepairCost() {
-        if (this.hasTag() && this.tag.contains("RepairCost", 3)) {
-            return this.tag.getInt("RepairCost");
+        if (this.hasTag() && this.tag.contains(TAG_REPAIR_COST, 3)) {
+            return this.tag.getInt(TAG_REPAIR_COST);
         }
         return 0;
     }
 
     public void setRepairCost(int i) {
-        this.getOrCreateTag().putInt("RepairCost", i);
+        this.getOrCreateTag().putInt(TAG_REPAIR_COST, i);
     }
 
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
@@ -854,8 +857,8 @@ public final class ItemStack {
             return this.cachedBreakBlockResult;
         }
         this.cachedBreakBlock = blockInWorld;
-        if (this.hasTag() && this.tag.contains("CanDestroy", 9)) {
-            ListTag listTag = this.tag.getList("CanDestroy", 8);
+        if (this.hasTag() && this.tag.contains(TAG_CAN_DESTROY_BLOCK_LIST, 9)) {
+            ListTag listTag = this.tag.getList(TAG_CAN_DESTROY_BLOCK_LIST, 8);
             for (int i = 0; i < listTag.size(); ++i) {
                 String string = listTag.getString(i);
                 try {
@@ -879,8 +882,8 @@ public final class ItemStack {
             return this.cachedPlaceBlockResult;
         }
         this.cachedPlaceBlock = blockInWorld;
-        if (this.hasTag() && this.tag.contains("CanPlaceOn", 9)) {
-            ListTag listTag = this.tag.getList("CanPlaceOn", 8);
+        if (this.hasTag() && this.tag.contains(TAG_CAN_PLACE_ON_BLOCK_LIST, 9)) {
+            ListTag listTag = this.tag.getList(TAG_CAN_PLACE_ON_BLOCK_LIST, 8);
             for (int i = 0; i < listTag.size(); ++i) {
                 String string = listTag.getString(i);
                 try {

@@ -16,8 +16,16 @@ public class Tuple<A, B> {
         return this.a;
     }
 
+    public void setA(A object) {
+        this.a = object;
+    }
+
     public B getB() {
         return this.b;
+    }
+
+    public void setB(B object) {
+        this.b = object;
     }
 }
 

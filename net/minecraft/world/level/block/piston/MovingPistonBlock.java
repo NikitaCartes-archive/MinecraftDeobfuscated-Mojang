@@ -5,8 +5,6 @@ package net.minecraft.world.level.block.piston;
 
 import java.util.Collections;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -129,7 +127,6 @@ extends BaseEntityBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return ItemStack.EMPTY;
     }

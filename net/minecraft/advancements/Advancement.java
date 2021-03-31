@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
@@ -99,7 +97,6 @@ public class Advancement {
         return this.criteria;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getMaxCriteraRequired() {
         return this.requirements.length;
     }
@@ -205,6 +202,11 @@ public class Advancement {
 
         public Builder requirements(RequirementsStrategy requirementsStrategy) {
             this.requirementsStrategy = requirementsStrategy;
+            return this;
+        }
+
+        public Builder requirements(String[][] strings) {
+            this.requirements = strings;
             return this;
         }
 

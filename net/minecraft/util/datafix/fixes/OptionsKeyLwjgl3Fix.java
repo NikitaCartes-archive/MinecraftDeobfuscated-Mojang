@@ -17,8 +17,9 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class OptionsKeyLwjgl3Fix
 extends DataFix {
+    public static final String KEY_UNKNOWN = "key.unknown";
     private static final Int2ObjectMap<String> MAP = DataFixUtils.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
-        int2ObjectOpenHashMap.put(0, "key.unknown");
+        int2ObjectOpenHashMap.put(0, KEY_UNKNOWN);
         int2ObjectOpenHashMap.put(11, "key.0");
         int2ObjectOpenHashMap.put(2, "key.1");
         int2ObjectOpenHashMap.put(3, "key.2");
@@ -146,7 +147,7 @@ extends DataFix {
                     String string = j == 0 ? "key.mouse.left" : (j == 1 ? "key.mouse.right" : (j == 2 ? "key.mouse.middle" : "key.mouse." + (j + 1)));
                     return Pair.of(entry.getKey(), ((Dynamic)entry.getValue()).createString(string));
                 }
-                String string2 = MAP.getOrDefault(i, "key.unknown");
+                String string2 = MAP.getOrDefault(i, KEY_UNKNOWN);
                 return Pair.of(entry.getKey(), ((Dynamic)entry.getValue()).createString(string2));
             }
             return Pair.of(entry.getKey(), entry.getValue());

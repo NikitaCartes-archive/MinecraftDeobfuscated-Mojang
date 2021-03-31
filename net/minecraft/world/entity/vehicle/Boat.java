@@ -6,8 +6,6 @@ package net.minecraft.world.entity.vehicle;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -64,6 +62,12 @@ extends Entity {
     private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_LEFT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_ID_PADDLE_RIGHT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
+    public static final int PADDLE_LEFT = 0;
+    public static final int PADDLE_RIGHT = 1;
+    private static final int TIME_TO_EJECT = 60;
+    private static final double PADDLE_SPEED = (double)0.3926991f;
+    public static final double PADDLE_SOUND_TIME = 0.7853981852531433;
+    public static final int BUBBLE_TIME = 60;
     private final float[] paddlePositions = new float[2];
     private float invFriction;
     private float outOfControlTicks;
@@ -226,7 +230,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateHurt() {
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
@@ -239,7 +242,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
         this.lerpX = d;
         this.lerpY = e;
@@ -385,7 +387,6 @@ extends Entity {
         this.entityData.set(DATA_ID_PADDLE_RIGHT, bl2);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getRowingTime(int i, float f) {
         if (this.getPaddleState(i)) {
             return (float)Mth.clampedLerp((double)this.paddlePositions[i] - (double)0.3926991f, this.paddlePositions[i], f);
@@ -650,7 +651,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void onPassengerTurned(Entity entity) {
         this.clampRotation(entity);
     }
@@ -741,7 +741,6 @@ extends Entity {
         return this.entityData.get(DATA_ID_BUBBLE_TIME);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getBubbleAngle(float f) {
         return Mth.lerp(f, this.bubbleAngleO, this.bubbleAngle);
     }
@@ -773,7 +772,6 @@ extends Entity {
         return this.getFirstPassenger();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setInput(boolean bl, boolean bl2, boolean bl3, boolean bl4) {
         this.inputLeft = bl;
         this.inputRight = bl2;
@@ -792,7 +790,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return new ItemStack(this.getDropItem());
     }

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ToastComponent
 extends GuiComponent {
+    private static final int VISIBLE_TOASTS = 5;
     private final Minecraft minecraft;
     private final ToastInstance<?>[] visible = new ToastInstance[5];
     private final Deque<Toast> queued = Queues.newArrayDeque();
@@ -70,6 +71,7 @@ extends GuiComponent {
 
     @Environment(value=EnvType.CLIENT)
     static class ToastInstance<T extends Toast> {
+        private static final long ANIMATION_TIME = 600L;
         private final T toast;
         private long animationTime = -1L;
         private long visibleTime = -1L;

@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 
 public class DoubleTag
 extends NumericTag {
+    private static final int SELF_SIZE_IN_BITS = 128;
     public static final DoubleTag ZERO = new DoubleTag(0.0);
     public static final TagType<DoubleTag> TYPE = new TagType<DoubleTag>(){
 

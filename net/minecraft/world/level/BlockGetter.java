@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -26,6 +28,14 @@ public interface BlockGetter
 extends LevelHeightAccessor {
     @Nullable
     public BlockEntity getBlockEntity(BlockPos var1);
+
+    default public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos blockPos, BlockEntityType<T> blockEntityType) {
+        BlockEntity blockEntity = this.getBlockEntity(blockPos);
+        if (blockEntity == null || blockEntity.getType() != blockEntityType) {
+            return Optional.empty();
+        }
+        return Optional.of(blockEntity);
+    }
 
     public BlockState getBlockState(BlockPos var1);
 

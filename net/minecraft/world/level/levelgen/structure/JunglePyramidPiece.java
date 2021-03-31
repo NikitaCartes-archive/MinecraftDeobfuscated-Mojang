@@ -39,7 +39,7 @@ extends ScatteredFeaturePiece {
     private static final MossStoneSelector STONE_SELECTOR = new MossStoneSelector();
 
     public JunglePyramidPiece(Random random, int i, int j) {
-        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, random, i, 64, j, 12, 10, 15);
+        super(StructurePieceType.JUNGLE_PYRAMID_PIECE, i, 64, j, 12, 10, 15, JunglePyramidPiece.getRandomHorizontalDirection(random));
     }
 
     public JunglePyramidPiece(ServerLevel serverLevel, CompoundTag compoundTag) {

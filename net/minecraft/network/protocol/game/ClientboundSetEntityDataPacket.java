@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -45,12 +43,10 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public List<SynchedEntityData.DataItem<?>> getUnpackedData() {
         return this.packedItems;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getId() {
         return this.id;
     }

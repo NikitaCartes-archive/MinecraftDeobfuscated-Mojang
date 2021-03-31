@@ -3,10 +3,6 @@
  */
 package net.minecraft.world.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
-@Environment(value=EnvType.CLIENT)
 public class GrassColor {
     private static int[] pixels = new int[65536];
 

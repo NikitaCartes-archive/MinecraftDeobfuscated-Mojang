@@ -3,7 +3,9 @@
  */
 package net.minecraft.client.renderer.block.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -15,8 +17,10 @@ import com.google.gson.JsonParseException;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.MultiVariant;
@@ -57,6 +61,20 @@ public class BlockModelDefinition {
         }
     }
 
+    @VisibleForTesting
+    public boolean hasVariant(String string) {
+        return this.variants.get(string) != null;
+    }
+
+    @VisibleForTesting
+    public MultiVariant getVariant(String string) {
+        MultiVariant multiVariant = this.variants.get(string);
+        if (multiVariant == null) {
+            throw new MissingVariantException();
+        }
+        return multiVariant;
+    }
+
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -78,12 +96,28 @@ public class BlockModelDefinition {
         return this.variants;
     }
 
+    @VisibleForTesting
+    public Set<MultiVariant> getMultiVariants() {
+        HashSet<MultiVariant> set = Sets.newHashSet(this.variants.values());
+        if (this.isMultiPart()) {
+            set.addAll(this.multiPart.getMultiVariants());
+        }
+        return set;
+    }
+
     public boolean isMultiPart() {
         return this.multiPart != null;
     }
 
     public MultiPart getMultiPart() {
         return this.multiPart;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public class MissingVariantException
+    extends RuntimeException {
+        protected MissingVariantException() {
+        }
     }
 
     @Environment(value=EnvType.CLIENT)

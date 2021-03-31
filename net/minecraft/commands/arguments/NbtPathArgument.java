@@ -36,6 +36,11 @@ implements ArgumentType<NbtPath> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
     public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(new TranslatableComponent("arguments.nbtpath.node.invalid"));
     public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(object -> new TranslatableComponent("arguments.nbtpath.nothing_found", object));
+    private static final char INDEX_MATCH_START = '[';
+    private static final char INDEX_MATCH_END = ']';
+    private static final char KEY_MATCH_START = '{';
+    private static final char KEY_MATCH_END = '}';
+    private static final char QUOTED_KEY_START = '\"';
 
     public static NbtPathArgument nbtPath() {
         return new NbtPathArgument();
@@ -583,6 +588,10 @@ implements ArgumentType<NbtPath> {
 
         private static int apply(List<Tag> list, Function<Tag, Integer> function) {
             return list.stream().map(function).reduce(0, (integer, integer2) -> integer + integer2);
+        }
+
+        public int set(Tag tag, Tag tag2) throws CommandSyntaxException {
+            return this.set(tag, tag2::copy);
         }
 
         public int set(Tag tag2, Supplier<Tag> supplier) throws CommandSyntaxException {

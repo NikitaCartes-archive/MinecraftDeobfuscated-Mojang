@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
@@ -51,7 +52,7 @@ extends Feature<NoneFeatureConfiguration> {
             if (!levelAccessor.isEmptyBlock(mutableBlockPos)) continue;
             int j = 0;
             for (Direction direction : DIRECTIONS) {
-                BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction));
+                BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, direction));
                 if (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.NETHER_WART_BLOCK)) {
                     ++j;
                 }

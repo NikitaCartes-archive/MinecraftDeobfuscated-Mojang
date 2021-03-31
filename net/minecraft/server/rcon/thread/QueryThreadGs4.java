@@ -28,6 +28,10 @@ import org.jetbrains.annotations.Nullable;
 public class QueryThreadGs4
 extends GenericThread {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String GAME_TYPE = "SMP";
+    private static final String GAME_ID = "MINECRAFT";
+    private static final long CHALLENGE_CHECK_INTERVAL = 30000L;
+    private static final long RESPONSE_CACHE_TIME = 5000L;
     private long lastChallengeCheck;
     private final int port;
     private final int serverPort;
@@ -117,7 +121,7 @@ extends GenericThread {
                 networkDataOutputStream.write(0);
                 networkDataOutputStream.writeBytes(this.getIdentBytes(datagramPacket.getSocketAddress()));
                 networkDataOutputStream.writeString(this.serverName);
-                networkDataOutputStream.writeString("SMP");
+                networkDataOutputStream.writeString(GAME_TYPE);
                 networkDataOutputStream.writeString(this.worldName);
                 networkDataOutputStream.writeString(Integer.toString(this.serverInterface.getPlayerCount()));
                 networkDataOutputStream.writeString(Integer.toString(this.maxPlayers));
@@ -152,9 +156,9 @@ extends GenericThread {
         this.rulesResponse.writeString("hostname");
         this.rulesResponse.writeString(this.serverName);
         this.rulesResponse.writeString("gametype");
-        this.rulesResponse.writeString("SMP");
+        this.rulesResponse.writeString(GAME_TYPE);
         this.rulesResponse.writeString("game_id");
-        this.rulesResponse.writeString("MINECRAFT");
+        this.rulesResponse.writeString(GAME_ID);
         this.rulesResponse.writeString("version");
         this.rulesResponse.writeString(this.serverInterface.getServerVersion());
         this.rulesResponse.writeString("plugins");
@@ -301,6 +305,10 @@ extends GenericThread {
 
         public byte[] getIdentBytes() {
             return this.identBytes;
+        }
+
+        public String getIdent() {
+            return this.ident;
         }
     }
 }

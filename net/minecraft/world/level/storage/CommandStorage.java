@@ -12,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 public class CommandStorage {
+    private static final String ID_PREFIX = "command_storage_";
     private final Map<String, Container> namespaces = Maps.newHashMap();
     private final DimensionDataStorage storage;
 
@@ -41,18 +42,19 @@ public class CommandStorage {
     }
 
     private static String createId(String string) {
-        return "command_storage_" + string;
+        return ID_PREFIX + string;
     }
 
     static class Container
     extends SavedData {
+        private static final String TAG_CONTENTS = "contents";
         private final Map<String, CompoundTag> storage = Maps.newHashMap();
 
         private Container() {
         }
 
         private Container load(CompoundTag compoundTag) {
-            CompoundTag compoundTag2 = compoundTag.getCompound("contents");
+            CompoundTag compoundTag2 = compoundTag.getCompound(TAG_CONTENTS);
             for (String string : compoundTag2.getAllKeys()) {
                 this.storage.put(string, compoundTag2.getCompound(string));
             }
@@ -63,7 +65,7 @@ public class CommandStorage {
         public CompoundTag save(CompoundTag compoundTag) {
             CompoundTag compoundTag22 = new CompoundTag();
             this.storage.forEach((string, compoundTag2) -> compoundTag22.put((String)string, compoundTag2.copy()));
-            compoundTag.put("contents", compoundTag22);
+            compoundTag.put(TAG_CONTENTS, compoundTag22);
             return compoundTag;
         }
 

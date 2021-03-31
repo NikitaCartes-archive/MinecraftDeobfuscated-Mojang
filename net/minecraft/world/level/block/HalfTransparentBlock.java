@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -17,7 +15,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
         if (blockState2.is(this)) {
             return true;

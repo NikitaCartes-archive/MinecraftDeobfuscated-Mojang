@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -47,7 +45,6 @@ extends BlockEntity {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public Vec3 getPosition() {
             return Vec3.atCenterOf(CommandBlockEntity.this.worldPosition);
         }

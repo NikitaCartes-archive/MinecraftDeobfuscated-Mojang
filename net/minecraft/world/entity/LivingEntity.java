@@ -22,8 +22,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -54,6 +52,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
@@ -138,6 +137,23 @@ extends Entity {
     private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
     private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
     private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(SPEED_MODIFIER_SPRINTING_UUID, "Sprinting speed boost", (double)0.3f, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    public static final int HAND_SLOTS = 2;
+    public static final int ARMOR_SLOTS = 4;
+    public static final int EQUIPMENT_SLOT_OFFSET = 98;
+    public static final int ARMOR_SLOT_OFFSET = 100;
+    public static final int SWING_DURATION = 6;
+    public static final int PLAYER_HURT_EXPERIENCE_TIME = 100;
+    private static final int DAMAGE_SOURCE_TIMEOUT = 40;
+    public static final double MIN_MOVEMENT_DISTANCE = 0.003;
+    public static final double DEFAULT_BASE_GRAVITY = 0.08;
+    public static final int DEATH_DURATION = 20;
+    private static final int WAIT_TICKS_BEFORE_ITEM_USE_EFFECTS = 7;
+    private static final int TICKS_PER_ELYTRA_FREE_FALL_EVENT = 10;
+    private static final int FREE_FALL_EVENTS_PER_ELYTRA_BREAK = 2;
+    public static final int USE_ITEM_INTERVAL = 4;
+    protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
+    protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
+    protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
     protected static final EntityDataAccessor<Byte> DATA_LIVING_ENTITY_FLAGS = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Float> DATA_HEALTH_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> DATA_EFFECT_COLOR_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
@@ -145,13 +161,16 @@ extends Entity {
     private static final EntityDataAccessor<Integer> DATA_ARROW_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_STINGER_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
+    protected static final float DEFAULT_EYE_HEIGHT = 1.74f;
     protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2f, 0.2f);
+    public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5f;
     private final AttributeMap attributes;
     private final CombatTracker combatTracker = new CombatTracker(this);
     private final Map<MobEffect, MobEffectInstance> activeEffects = Maps.newHashMap();
     private final NonNullList<ItemStack> lastHandItemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> lastArmorItemStacks = NonNullList.withSize(4, ItemStack.EMPTY);
     public boolean swinging;
+    private boolean discardFriction = false;
     public InteractionHand swingingArm;
     public int swingTime;
     public int removeArrowTime;
@@ -294,7 +313,6 @@ extends Entity {
         return this.getMobType() == MobType.UNDEAD;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getSwimAmount(float f) {
         return Mth.lerp(f, this.swimAmountO, this.swimAmount);
     }
@@ -577,6 +595,14 @@ extends Entity {
         this.noActionTime = i;
     }
 
+    public boolean shouldDiscardFriction() {
+        return this.discardFriction;
+    }
+
+    public void setDiscardFriction(boolean bl) {
+        this.discardFriction = bl;
+    }
+
     protected void equipEventAndSound(ItemStack itemStack) {
         SoundEvent soundEvent = itemStack.getEquipSound();
         if (itemStack.isEmpty() || soundEvent == null || this.isSpectator()) {
@@ -809,7 +835,6 @@ extends Entity {
         return this.getMobType() != MobType.UNDEAD || (mobEffect = mobEffectInstance.getEffect()) != MobEffects.REGENERATION && mobEffect != MobEffects.POISON;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void forceAddEffect(MobEffectInstance mobEffectInstance) {
         if (!this.canBeAffected(mobEffectInstance)) {
             return;
@@ -1072,7 +1097,6 @@ extends Entity {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private void breakItem(ItemStack itemStack) {
         if (!itemStack.isEmpty()) {
             if (!this.isSilent()) {
@@ -1284,7 +1308,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateHurt() {
         this.hurtTime = this.hurtDuration = 10;
         this.hurtDir = 0.0f;
@@ -1426,7 +1449,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         switch (b) {
             case 2: 
@@ -1522,7 +1544,6 @@ extends Entity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     private void swapHandItems() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.OFFHAND);
         this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND));
@@ -1670,7 +1691,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldShowName() {
         return this.isCustomNameVisible();
     }
@@ -1693,7 +1713,6 @@ extends Entity {
         this.hasImpulse = true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     protected void goDownInWater() {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04f, 0.0));
     }
@@ -1821,7 +1840,11 @@ extends Entity {
                 } else {
                     q = this.getY() > (double)this.level.getMinBuildHeight() ? -0.1 : 0.0;
                 }
-                this.setDeltaMovement(vec37.x * (double)f, q * (double)0.98f, vec37.z * (double)f);
+                if (this.shouldDiscardFriction()) {
+                    this.setDeltaMovement(vec37.x, q, vec37.z);
+                } else {
+                    this.setDeltaMovement(vec37.x * (double)f, q * (double)0.98f, vec37.z * (double)f);
+                }
             }
         }
         this.calculateEntityAnimation(this, this instanceof FlyingAnimal);
@@ -1929,6 +1952,7 @@ extends Entity {
                 if (this.getSharedFlag(6) != bl) {
                     this.setSharedFlag(6, bl);
                 }
+                this.glowing = bl;
             }
             if (this.isSleeping() && !this.checkBedExists()) {
                 this.stopSleeping();
@@ -2104,6 +2128,7 @@ extends Entity {
     }
 
     public void aiStep() {
+        int m;
         if (this.noJumpDelay > 0) {
             --this.noJumpDelay;
         }
@@ -2178,16 +2203,20 @@ extends Entity {
         this.travel(new Vec3(this.xxa, this.yya, this.zza));
         this.level.getProfiler().pop();
         this.level.getProfiler().push("freezing");
-        int m = this.getTicksFrozen();
-        if (this.isInPowderSnow && this.canFreeze()) {
-            this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
-        } else {
-            this.setTicksFrozen(Math.max(0, m - 2));
+        boolean bl2 = this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES);
+        if (!this.level.isClientSide) {
+            m = this.getTicksFrozen();
+            if (this.isInPowderSnow && this.canFreeze()) {
+                this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
+            } else {
+                this.setTicksFrozen(Math.max(0, m - 2));
+            }
         }
         this.removeFrost();
         this.tryAddFrost();
-        if (this.tickCount % 60 == 0 && this.isFullyFrozen() && this.canFreeze()) {
-            this.hurt(DamageSource.FREEZE, 1.0f);
+        if (!this.level.isClientSide && this.tickCount % 40 == 0 && this.isFullyFrozen() && this.canFreeze()) {
+            m = bl2 ? 5 : 1;
+            this.hurt(DamageSource.FREEZE, m);
         }
         this.level.getProfiler().pop();
         this.level.getProfiler().push("push");
@@ -2312,7 +2341,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
         this.lerpX = d;
         this.lerpY = e;
@@ -2323,7 +2351,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpHeadTo(float f, int i) {
         this.lyHeadRot = f;
         this.lerpHeadSteps = i;
@@ -2361,7 +2388,6 @@ extends Entity {
         return Mth.lerp(f, this.yHeadRotO, this.yHeadRot);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getAttackAnim(float f) {
         float g = this.attackAnim - this.oAttackAnim;
         if (g < 0.0f) {
@@ -2619,7 +2645,6 @@ extends Entity {
         return super.isVisuallySwimming() || !this.isFallFlying() && this.getPose() == Pose.FALL_FLYING;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getFallFlyingTicks() {
         return this.fallFlyTicks;
     }
@@ -2672,7 +2697,6 @@ extends Entity {
         return true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setRecordPlayingNearby(BlockPos blockPos, boolean bl) {
     }
 
@@ -2761,7 +2785,6 @@ extends Entity {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Direction getBedOrientation() {
         BlockPos blockPos = this.getSleepingPos().orElse(null);
         return blockPos != null ? BedBlock.getBedOrientation(this.level, blockPos) : null;
@@ -2842,7 +2865,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AABB getBoundingBoxForCulling() {
         if (this.getItemBySlot(EquipmentSlot.HEAD).is(Items.DRAGON_HEAD)) {
             float f = 0.5f;
@@ -2912,10 +2934,10 @@ extends Entity {
         if (this.isSpectator()) {
             return false;
         }
-        return !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
+        boolean bl = !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
+        return bl && super.canFreeze();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
         double d = clientboundAddMobPacket.getX();
         double e = clientboundAddMobPacket.getY();

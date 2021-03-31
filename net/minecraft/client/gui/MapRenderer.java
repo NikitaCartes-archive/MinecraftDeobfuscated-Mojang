@@ -23,13 +23,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class MapRenderer
 implements AutoCloseable {
     private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
     private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
+    private static final int WIDTH = 128;
+    private static final int HEIGHT = 128;
     private final TextureManager textureManager;
     private final Int2ObjectMap<MapInstance> maps = new Int2ObjectOpenHashMap<MapInstance>();
 
@@ -47,12 +48,6 @@ implements AutoCloseable {
 
     private MapInstance getOrCreateMapInstance(int i2, MapItemSavedData mapItemSavedData) {
         return this.maps.computeIfAbsent(i2, i -> new MapInstance(i, mapItemSavedData));
-    }
-
-    @Nullable
-    public MapItemSavedData retrieveMapFromRenderer(int i) {
-        MapInstance mapInstance = (MapInstance)this.maps.get(i);
-        return mapInstance != null ? mapInstance.data : null;
     }
 
     public void resetData() {

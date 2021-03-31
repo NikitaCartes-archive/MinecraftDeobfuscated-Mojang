@@ -97,8 +97,18 @@ implements DataProvider {
             return this;
         }
 
+        public TagAppender<T> addOptional(ResourceLocation resourceLocation) {
+            this.builder.addOptionalElement(resourceLocation, this.source);
+            return this;
+        }
+
         public TagAppender<T> addTag(Tag.Named<T> named) {
             this.builder.addTag(named.getName(), this.source);
+            return this;
+        }
+
+        public TagAppender<T> addOptionalTag(ResourceLocation resourceLocation) {
+            this.builder.addOptionalTag(resourceLocation, this.source);
             return this;
         }
 

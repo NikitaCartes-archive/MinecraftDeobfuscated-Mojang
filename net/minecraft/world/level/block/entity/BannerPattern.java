@@ -7,8 +7,6 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -76,7 +74,6 @@ public enum BannerPattern {
         this.hasPatternItem = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation location(boolean bl) {
         String string = bl ? "banner" : "shield";
         return new ResourceLocation("entity/" + string + "/" + this.getFilename());
@@ -91,7 +88,6 @@ public enum BannerPattern {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static BannerPattern byHash(String string) {
         for (BannerPattern bannerPattern : BannerPattern.values()) {
             if (!bannerPattern.hashname.equals(string)) continue;

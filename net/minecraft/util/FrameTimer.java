@@ -3,10 +3,8 @@
  */
 package net.minecraft.util;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 public class FrameTimer {
+    public static final int LOGGING_LENGTH = 240;
     private final long[] loggedTimes = new long[240];
     private int logStart;
     private int logLength;
@@ -26,18 +24,28 @@ public class FrameTimer {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public long getAverageDuration(int i) {
+        int j = (this.logStart + i) % 240;
+        long l = 0L;
+        for (int k = this.logStart; k != j; ++k) {
+            l += this.loggedTimes[k];
+        }
+        return l / (long)i;
+    }
+
+    public int scaleAverageDurationTo(int i, int j) {
+        return this.scaleSampleTo(this.getAverageDuration(i), j, 60);
+    }
+
     public int scaleSampleTo(long l, int i, int j) {
         double d = (double)l / (double)(1000000000L / (long)j);
         return (int)(d * (double)i);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getLogStart() {
         return this.logStart;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getLogEnd() {
         return this.logEnd;
     }
@@ -46,7 +54,6 @@ public class FrameTimer {
         return i % 240;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long[] getLog() {
         return this.loggedTimes;
     }

@@ -39,6 +39,8 @@ import org.apache.logging.log4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class FileUpload {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MAX_RETRIES = 5;
+    private static final String UPLOAD_PATH = "/upload";
     private final File file;
     private final long worldId;
     private final int slotId;

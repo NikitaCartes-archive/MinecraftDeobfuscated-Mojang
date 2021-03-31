@@ -15,6 +15,9 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class TargetGoal
 extends Goal {
+    private static final int EMPTY_REACH_CACHE = 0;
+    private static final int CAN_REACH_CACHE = 1;
+    private static final int CANT_REACH_CACHE = 2;
     protected final Mob mob;
     protected final boolean mustSee;
     private final boolean mustReach;

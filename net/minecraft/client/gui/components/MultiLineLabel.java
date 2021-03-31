@@ -56,6 +56,10 @@ public interface MultiLineLabel {
         return MultiLineLabel.createFixed(font, Arrays.stream(components).map(Component::getVisualOrderText).map(formattedCharSequence -> new TextWithWidth((FormattedCharSequence)formattedCharSequence, font.width((FormattedCharSequence)formattedCharSequence))).collect(ImmutableList.toImmutableList()));
     }
 
+    public static MultiLineLabel create(Font font, List<Component> list) {
+        return MultiLineLabel.createFixed(font, list.stream().map(Component::getVisualOrderText).map(formattedCharSequence -> new TextWithWidth((FormattedCharSequence)formattedCharSequence, font.width((FormattedCharSequence)formattedCharSequence))).collect(ImmutableList.toImmutableList()));
+    }
+
     public static MultiLineLabel createFixed(final Font font, final List<TextWithWidth> list) {
         if (list.isEmpty()) {
             return EMPTY;

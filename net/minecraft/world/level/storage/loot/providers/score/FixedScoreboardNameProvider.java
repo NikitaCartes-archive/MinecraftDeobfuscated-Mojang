@@ -24,9 +24,17 @@ implements ScoreboardNameProvider {
         this.name = string;
     }
 
+    public static ScoreboardNameProvider forName(String string) {
+        return new FixedScoreboardNameProvider(string);
+    }
+
     @Override
     public LootScoreProviderType getType() {
         return ScoreboardNameProviders.FIXED;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     @Override

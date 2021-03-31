@@ -120,6 +120,11 @@ public class BlockPredicate {
             return this;
         }
 
+        public Builder hasNbt(CompoundTag compoundTag) {
+            this.nbt = new NbtPredicate(compoundTag);
+            return this;
+        }
+
         public Builder setProperties(StatePropertiesPredicate statePropertiesPredicate) {
             this.properties = statePropertiesPredicate;
             return this;

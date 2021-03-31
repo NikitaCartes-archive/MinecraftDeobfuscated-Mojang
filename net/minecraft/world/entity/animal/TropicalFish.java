@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Locale;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -29,10 +27,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class TropicalFish
 extends AbstractSchoolingFish {
+    public static final String BUCKET_VARIANT_TAG = "BucketVariantTag";
     private static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(TropicalFish.class, EntityDataSerializers.INT);
+    public static final int BASE_SMALL = 0;
+    public static final int BASE_LARGE = 1;
+    private static final int BASES = 2;
     private static final ResourceLocation[] BASE_TEXTURE_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/fish/tropical_a.png"), new ResourceLocation("textures/entity/fish/tropical_b.png")};
     private static final ResourceLocation[] PATTERN_A_TEXTURE_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/fish/tropical_a_pattern_1.png"), new ResourceLocation("textures/entity/fish/tropical_a_pattern_2.png"), new ResourceLocation("textures/entity/fish/tropical_a_pattern_3.png"), new ResourceLocation("textures/entity/fish/tropical_a_pattern_4.png"), new ResourceLocation("textures/entity/fish/tropical_a_pattern_5.png"), new ResourceLocation("textures/entity/fish/tropical_a_pattern_6.png")};
     private static final ResourceLocation[] PATTERN_B_TEXTURE_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/fish/tropical_b_pattern_1.png"), new ResourceLocation("textures/entity/fish/tropical_b_pattern_2.png"), new ResourceLocation("textures/entity/fish/tropical_b_pattern_3.png"), new ResourceLocation("textures/entity/fish/tropical_b_pattern_4.png"), new ResourceLocation("textures/entity/fish/tropical_b_pattern_5.png"), new ResourceLocation("textures/entity/fish/tropical_b_pattern_6.png")};
+    private static final int PATTERNS = 6;
+    private static final int COLORS = 15;
     public static final int[] COMMON_VARIANTS = new int[]{TropicalFish.calculateVariant(Pattern.STRIPEY, DyeColor.ORANGE, DyeColor.GRAY), TropicalFish.calculateVariant(Pattern.FLOPPER, DyeColor.GRAY, DyeColor.GRAY), TropicalFish.calculateVariant(Pattern.FLOPPER, DyeColor.GRAY, DyeColor.BLUE), TropicalFish.calculateVariant(Pattern.CLAYFISH, DyeColor.WHITE, DyeColor.GRAY), TropicalFish.calculateVariant(Pattern.SUNSTREAK, DyeColor.BLUE, DyeColor.GRAY), TropicalFish.calculateVariant(Pattern.KOB, DyeColor.ORANGE, DyeColor.WHITE), TropicalFish.calculateVariant(Pattern.SPOTTY, DyeColor.PINK, DyeColor.LIGHT_BLUE), TropicalFish.calculateVariant(Pattern.BLOCKFISH, DyeColor.PURPLE, DyeColor.YELLOW), TropicalFish.calculateVariant(Pattern.CLAYFISH, DyeColor.WHITE, DyeColor.RED), TropicalFish.calculateVariant(Pattern.SPOTTY, DyeColor.WHITE, DyeColor.YELLOW), TropicalFish.calculateVariant(Pattern.GLITTER, DyeColor.WHITE, DyeColor.GRAY), TropicalFish.calculateVariant(Pattern.CLAYFISH, DyeColor.WHITE, DyeColor.ORANGE), TropicalFish.calculateVariant(Pattern.DASHER, DyeColor.CYAN, DyeColor.PINK), TropicalFish.calculateVariant(Pattern.BRINELY, DyeColor.LIME, DyeColor.LIGHT_BLUE), TropicalFish.calculateVariant(Pattern.BETTY, DyeColor.RED, DyeColor.WHITE), TropicalFish.calculateVariant(Pattern.SNOOPER, DyeColor.GRAY, DyeColor.RED), TropicalFish.calculateVariant(Pattern.BLOCKFISH, DyeColor.RED, DyeColor.WHITE), TropicalFish.calculateVariant(Pattern.FLOPPER, DyeColor.WHITE, DyeColor.YELLOW), TropicalFish.calculateVariant(Pattern.KOB, DyeColor.RED, DyeColor.WHITE), TropicalFish.calculateVariant(Pattern.SUNSTREAK, DyeColor.GRAY, DyeColor.WHITE), TropicalFish.calculateVariant(Pattern.DASHER, DyeColor.CYAN, DyeColor.YELLOW), TropicalFish.calculateVariant(Pattern.FLOPPER, DyeColor.YELLOW, DyeColor.YELLOW)};
     private boolean isSchool = true;
 
@@ -44,22 +48,18 @@ extends AbstractSchoolingFish {
         super((EntityType<? extends AbstractSchoolingFish>)entityType, level);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static String getPredefinedName(int i) {
         return "entity.minecraft.tropical_fish.predefined." + i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static DyeColor getBaseColor(int i) {
         return DyeColor.byId(TropicalFish.getBaseColorIdx(i));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static DyeColor getPatternColor(int i) {
         return DyeColor.byId(TropicalFish.getPatternColorIdx(i));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static String getFishTypeName(int i) {
         int j = TropicalFish.getBaseVariant(i);
         int k = TropicalFish.getPatternVariant(i);
@@ -98,14 +98,20 @@ extends AbstractSchoolingFish {
     }
 
     @Override
-    protected void saveToBucketTag(ItemStack itemStack) {
+    public void saveToBucketTag(ItemStack itemStack) {
         super.saveToBucketTag(itemStack);
         CompoundTag compoundTag = itemStack.getOrCreateTag();
-        compoundTag.putInt("BucketVariantTag", this.getVariant());
+        compoundTag.putInt(BUCKET_VARIANT_TAG, this.getVariant());
     }
 
     @Override
-    protected ItemStack getBucketItemStack() {
+    public void loadFromBucketTag(CompoundTag compoundTag) {
+        super.loadFromBucketTag(compoundTag);
+        this.setVariant(compoundTag.getInt(BUCKET_VARIANT_TAG));
+    }
+
+    @Override
+    public ItemStack getBucketItemStack() {
         return new ItemStack(Items.TROPICAL_FISH_BUCKET);
     }
 
@@ -129,42 +135,34 @@ extends AbstractSchoolingFish {
         return SoundEvents.TROPICAL_FISH_FLOP;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static int getBaseColorIdx(int i) {
         return (i & 0xFF0000) >> 16;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float[] getBaseColor() {
         return DyeColor.byId(TropicalFish.getBaseColorIdx(this.getVariant())).getTextureDiffuseColors();
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static int getPatternColorIdx(int i) {
         return (i & 0xFF000000) >> 24;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float[] getPatternColor() {
         return DyeColor.byId(TropicalFish.getPatternColorIdx(this.getVariant())).getTextureDiffuseColors();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int getBaseVariant(int i) {
         return Math.min(i & 0xFF, 1);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getBaseVariant() {
         return TropicalFish.getBaseVariant(this.getVariant());
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static int getPatternVariant(int i) {
         return Math.min((i & 0xFF00) >> 8, 5);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getPatternTextureLocation() {
         if (TropicalFish.getBaseVariant(this.getVariant()) == 0) {
             return PATTERN_A_TEXTURE_LOCATIONS[TropicalFish.getPatternVariant(this.getVariant())];
@@ -172,7 +170,6 @@ extends AbstractSchoolingFish {
         return PATTERN_B_TEXTURE_LOCATIONS[TropicalFish.getPatternVariant(this.getVariant())];
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getBaseTextureLocation() {
         return BASE_TEXTURE_LOCATIONS[TropicalFish.getBaseVariant(this.getVariant())];
     }
@@ -185,8 +182,7 @@ extends AbstractSchoolingFish {
         int j;
         int i;
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (compoundTag != null && compoundTag.contains("BucketVariantTag", 3)) {
-            this.setVariant(compoundTag.getInt("BucketVariantTag"));
+        if (mobSpawnType == MobSpawnType.BUCKET) {
             return spawnGroupData;
         }
         if (spawnGroupData instanceof TropicalFishGroupData) {
@@ -260,12 +256,10 @@ extends AbstractSchoolingFish {
             return this.index;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public static String getPatternName(int i, int j) {
             return VALUES[j + 6 * i].getName();
         }
 
-        @Environment(value=EnvType.CLIENT)
         public String getName() {
             return this.name().toLowerCase(Locale.ROOT);
         }

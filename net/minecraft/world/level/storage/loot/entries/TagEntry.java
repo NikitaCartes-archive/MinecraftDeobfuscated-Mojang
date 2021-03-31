@@ -69,6 +69,10 @@ extends LootPoolSingletonContainer {
         return super.expand(lootContext, consumer);
     }
 
+    public static LootPoolSingletonContainer.Builder<?> tagContents(Tag<Item> tag) {
+        return TagEntry.simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new TagEntry(tag, false, i, j, lootItemConditions, lootItemFunctions));
+    }
+
     public static LootPoolSingletonContainer.Builder<?> expandTag(Tag<Item> tag) {
         return TagEntry.simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new TagEntry(tag, true, i, j, lootItemConditions, lootItemFunctions));
     }

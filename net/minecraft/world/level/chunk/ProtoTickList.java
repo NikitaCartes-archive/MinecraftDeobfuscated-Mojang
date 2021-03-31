@@ -4,8 +4,11 @@
 package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.shorts.ShortList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
@@ -68,6 +71,11 @@ implements TickList<T> {
     @Override
     public boolean willTickThisTick(BlockPos blockPos, T object) {
         return false;
+    }
+
+    @Override
+    public int size() {
+        return Stream.of(this.toBeTicked).filter(Objects::nonNull).mapToInt(List::size).sum();
     }
 }
 

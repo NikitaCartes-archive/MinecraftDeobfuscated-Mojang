@@ -7,8 +7,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MaterialColor;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +71,6 @@ public enum DyeColor implements StringRepresentable
         return this.fireworkColor;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTextColor() {
         return this.textColor;
     }
@@ -94,7 +91,6 @@ public enum DyeColor implements StringRepresentable
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static DyeColor byFireworkColor(int i) {
         return BY_FIREWORK_COLOR.get(i);
     }

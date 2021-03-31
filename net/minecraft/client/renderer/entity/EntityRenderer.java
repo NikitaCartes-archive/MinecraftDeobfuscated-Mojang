@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class EntityRenderer<T extends Entity> {
+    protected static final float NAMETAG_SCALE = 0.025f;
     protected final EntityRenderDispatcher entityRenderDispatcher;
     private final Font font;
     protected float shadowRadius;

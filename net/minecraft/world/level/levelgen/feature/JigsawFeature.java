@@ -14,7 +14,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -34,15 +33,15 @@ extends StructureFeature<JigsawConfiguration> {
 
     @Override
     public StructureFeature.StructureStartFactory<JigsawConfiguration> getStartFactory() {
-        return (structureFeature, chunkPos, boundingBox, i, l) -> new FeatureStart(this, chunkPos, boundingBox, i, l);
+        return (structureFeature, chunkPos, i, l) -> new FeatureStart(this, chunkPos, i, l);
     }
 
     public static class FeatureStart
     extends NoiseAffectingStructureStart<JigsawConfiguration> {
         private final JigsawFeature feature;
 
-        public FeatureStart(JigsawFeature jigsawFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(jigsawFeature, chunkPos, boundingBox, i, l);
+        public FeatureStart(JigsawFeature jigsawFeature, ChunkPos chunkPos, int i, long l) {
+            super(jigsawFeature, chunkPos, i, l);
             this.feature = jigsawFeature;
         }
 
@@ -50,8 +49,7 @@ extends StructureFeature<JigsawConfiguration> {
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, JigsawConfiguration jigsawConfiguration, LevelHeightAccessor levelHeightAccessor) {
             BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), this.feature.startY, chunkPos.getMinBlockZ());
             Pools.bootstrap();
-            JigsawPlacement.addPieces(registryAccess, jigsawConfiguration, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockPos, this.pieces, this.random, this.feature.doExpansionHack, this.feature.projectStartToHeightmap, levelHeightAccessor);
-            this.calculateBoundingBox();
+            JigsawPlacement.addPieces(registryAccess, jigsawConfiguration, PoolElementStructurePiece::new, chunkGenerator, structureManager, blockPos, this, this.random, this.feature.doExpansionHack, this.feature.projectStartToHeightmap, levelHeightAccessor);
         }
     }
 }

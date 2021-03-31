@@ -3,14 +3,9 @@
  */
 package net.minecraft.world.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
-@Environment(value=EnvType.CLIENT)
 public interface TooltipFlag {
     public boolean isAdvanced();
 
-    @Environment(value=EnvType.CLIENT)
     public static enum Default implements TooltipFlag
     {
         NORMAL(false),

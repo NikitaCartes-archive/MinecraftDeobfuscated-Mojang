@@ -61,8 +61,17 @@ import org.jetbrains.annotations.Nullable;
 public class CreativeModeInventoryScreen
 extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private static final ResourceLocation CREATIVE_TABS_LOCATION = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+    private static final String GUI_CREATIVE_TAB_PREFIX = "textures/gui/container/creative_inventory/tab_";
+    private static final String CUSTOM_SLOT_LOCK = "CustomCreativeLock";
+    private static final int NUM_ROWS = 5;
+    private static final int NUM_COLS = 9;
+    private static final int TAB_WIDTH = 28;
+    private static final int TAB_HEIGHT = 32;
+    private static final int SCROLLER_WIDTH = 12;
+    private static final int SCROLLER_HEIGHT = 15;
     private static final SimpleContainer CONTAINER = new SimpleContainer(45);
     private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
+    private static final int TEXT_COLOR = 0xFFFFFF;
     private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
     private float scrollOffs;
     private boolean scrolling;
@@ -419,7 +428,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                     for (k = 0; k < 9; ++k) {
                         if (k == j) {
                             ItemStack itemStack = new ItemStack(Items.PAPER);
-                            itemStack.getOrCreateTagElement("CustomCreativeLock");
+                            itemStack.getOrCreateTagElement(CUSTOM_SLOT_LOCK);
                             Component component = this.minecraft.options.keyHotbarSlots[j].getTranslatedKeyMessage();
                             Component component2 = this.minecraft.options.keySaveHotbarActivator.getTranslatedKeyMessage();
                             itemStack.setHoverName(new TranslatableComponent("inventory.hotbarInfo", component2, component));
@@ -591,7 +600,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             this.renderTabButton(poseStack, creativeModeTab2);
         }
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/container/creative_inventory/tab_" + creativeModeTab.getBackgroundSuffix()));
+        RenderSystem.setShaderTexture(0, new ResourceLocation(GUI_CREATIVE_TAB_PREFIX + creativeModeTab.getBackgroundSuffix()));
         this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.searchBox.render(poseStack, i, j, f);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -707,7 +716,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         @Override
         public boolean mayPickup(Player player) {
             if (super.mayPickup(player) && this.hasItem()) {
-                return this.getItem().getTagElement("CustomCreativeLock") == null;
+                return this.getItem().getTagElement(CreativeModeInventoryScreen.CUSTOM_SLOT_LOCK) == null;
             }
             return !this.hasItem();
         }

@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 public class KnowledgeBookItem
 extends Item {
+    private static final String RECIPE_TAG = "Recipes";
     private static final Logger LOGGER = LogManager.getLogger();
 
     public KnowledgeBookItem(Item.Properties properties) {
@@ -36,12 +37,12 @@ extends Item {
         if (!player.getAbilities().instabuild) {
             player.setItemInHand(interactionHand, ItemStack.EMPTY);
         }
-        if (compoundTag == null || !compoundTag.contains("Recipes", 9)) {
+        if (compoundTag == null || !compoundTag.contains(RECIPE_TAG, 9)) {
             LOGGER.error("Tag not valid: {}", (Object)compoundTag);
             return InteractionResultHolder.fail(itemStack);
         }
         if (!level.isClientSide) {
-            ListTag listTag = compoundTag.getList("Recipes", 8);
+            ListTag listTag = compoundTag.getList(RECIPE_TAG, 8);
             ArrayList<Recipe<?>> list = Lists.newArrayList();
             RecipeManager recipeManager = level.getServer().getRecipeManager();
             for (int i = 0; i < listTag.size(); ++i) {

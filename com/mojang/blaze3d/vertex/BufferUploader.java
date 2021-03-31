@@ -119,7 +119,7 @@ public class BufferUploader {
         }
         if (shaderInstance.SCREEN_SIZE != null) {
             Window window = Minecraft.getInstance().getWindow();
-            shaderInstance.SCREEN_SIZE.set(window.getWidth(), window.getHeight());
+            shaderInstance.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
         }
         if (shaderInstance.LINE_WIDTH != null && (mode == VertexFormat.Mode.LINES || mode == VertexFormat.Mode.LINE_STRIP)) {
             shaderInstance.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());

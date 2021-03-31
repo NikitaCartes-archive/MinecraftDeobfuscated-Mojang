@@ -15,6 +15,8 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConf
 
 public class DefaultSurfaceBuilder
 extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
+    private static final int LOWEST_Y_TO_BUILD_SURFACE_ON = 50;
+
     public DefaultSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
         super(codec);
     }

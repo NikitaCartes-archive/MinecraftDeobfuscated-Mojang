@@ -47,5 +47,22 @@ public class LightPredicate {
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("light"));
         return new LightPredicate(ints);
     }
+
+    public static class Builder {
+        private MinMaxBounds.Ints composite = MinMaxBounds.Ints.ANY;
+
+        public static Builder light() {
+            return new Builder();
+        }
+
+        public Builder setComposite(MinMaxBounds.Ints ints) {
+            this.composite = ints;
+            return this;
+        }
+
+        public LightPredicate build() {
+            return new LightPredicate(this.composite);
+        }
+    }
 }
 

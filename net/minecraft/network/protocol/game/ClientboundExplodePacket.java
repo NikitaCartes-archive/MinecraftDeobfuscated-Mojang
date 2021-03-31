@@ -5,8 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -89,42 +87,34 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleExplosion(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getKnockbackX() {
         return this.knockbackX;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getKnockbackY() {
         return this.knockbackY;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getKnockbackZ() {
         return this.knockbackZ;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getY() {
         return this.y;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getZ() {
         return this.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getPower() {
         return this.power;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<BlockPos> getToBlow() {
         return this.toBlow;
     }

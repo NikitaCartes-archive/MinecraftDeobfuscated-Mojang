@@ -6,8 +6,6 @@ package net.minecraft.network.chat;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Unit;
 
@@ -21,7 +19,6 @@ public interface FormattedText {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public <T> Optional<T> visit(StyledContentConsumer<T> styledContentConsumer, Style style) {
             return Optional.empty();
         }
@@ -29,7 +26,6 @@ public interface FormattedText {
 
     public <T> Optional<T> visit(ContentConsumer<T> var1);
 
-    @Environment(value=EnvType.CLIENT)
     public <T> Optional<T> visit(StyledContentConsumer<T> var1, Style var2);
 
     public static FormattedText of(final String string) {
@@ -41,14 +37,12 @@ public interface FormattedText {
             }
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public <T> Optional<T> visit(StyledContentConsumer<T> styledContentConsumer, Style style) {
                 return styledContentConsumer.accept(style, string);
             }
         };
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static FormattedText of(final String string, final Style style) {
         return new FormattedText(){
 
@@ -64,12 +58,10 @@ public interface FormattedText {
         };
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static FormattedText composite(FormattedText ... formattedTexts) {
         return FormattedText.composite(ImmutableList.copyOf(formattedTexts));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static FormattedText composite(final List<FormattedText> list) {
         return new FormattedText(){
 
@@ -108,7 +100,6 @@ public interface FormattedText {
         public Optional<T> accept(String var1);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static interface StyledContentConsumer<T> {
         public Optional<T> accept(Style var1, String var2);
     }

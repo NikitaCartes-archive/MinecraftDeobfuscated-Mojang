@@ -45,6 +45,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameProfileCache {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int GAMEPROFILES_MRU_LIMIT = 1000;
+    private static final int GAMEPROFILES_EXPIRATION_MONTHS = 1;
     private static boolean usesAuthentication;
     private final Map<String, GameProfileInfo> profilesByName = Maps.newConcurrentMap();
     private final Map<UUID, GameProfileInfo> profilesByUUID = Maps.newConcurrentMap();

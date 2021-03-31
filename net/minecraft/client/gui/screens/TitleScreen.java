@@ -54,6 +54,8 @@ import org.jetbrains.annotations.Nullable;
 public class TitleScreen
 extends Screen {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String DEMO_LEVEL_ID = "Demo_World";
+    public static final String COPYRIGHT_TEXT = "Copyright Mojang AB. Do not distribute!";
     public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
     private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
     private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
@@ -111,7 +113,7 @@ extends Screen {
         if (this.splash == null) {
             this.splash = this.minecraft.getSplashManager().getSplash();
         }
-        this.copyrightWidth = this.font.width("Copyright Mojang AB. Do not distribute!");
+        this.copyrightWidth = this.font.width(COPYRIGHT_TEXT);
         this.copyrightX = this.width - this.copyrightWidth - 2;
         int i = 24;
         int j = this.height / 4 + 48;
@@ -151,21 +153,21 @@ extends Screen {
         boolean bl = this.checkDemoWorldPresence();
         this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
             if (bl) {
-                this.minecraft.loadLevel("Demo_World");
+                this.minecraft.loadLevel(DEMO_LEVEL_ID);
             } else {
                 RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-                this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
+                this.minecraft.createLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
             }
         }));
         this.resetDemoButton = this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
-            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess("Demo_World");){
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(DEMO_LEVEL_ID);){
                 LevelSummary levelSummary = levelStorageAccess.getSummary();
                 if (levelSummary != null) {
                     this.minecraft.setScreen(new ConfirmScreen(this::confirmDemo, new TranslatableComponent("selectWorld.deleteQuestion"), new TranslatableComponent("selectWorld.deleteWarning", levelSummary.getLevelName()), new TranslatableComponent("selectWorld.deleteButton"), CommonComponents.GUI_CANCEL));
                 }
             } catch (IOException iOException) {
-                SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
+                SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
                 LOGGER.warn("Failed to access demo world", (Throwable)iOException);
             }
         }));
@@ -178,11 +180,11 @@ extends Screen {
      * Enabled aggressive exception aggregation
      */
     private boolean checkDemoWorldPresence() {
-        try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World");){
+        try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(DEMO_LEVEL_ID);){
             boolean bl = levelStorageAccess.getSummary() != null;
             return bl;
         } catch (IOException iOException) {
-            SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
+            SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
             LOGGER.warn("Failed to read demo world data", (Throwable)iOException);
             return false;
         }
@@ -249,7 +251,7 @@ extends Screen {
             string = string + I18n.get("menu.modded", new Object[0]);
         }
         TitleScreen.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);
-        TitleScreen.drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 0xFFFFFF | n);
+        TitleScreen.drawString(poseStack, this.font, COPYRIGHT_TEXT, this.copyrightX, this.height - 10, 0xFFFFFF | n);
         if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
             TitleScreen.fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 0xFFFFFF | n);
         }
@@ -285,10 +287,10 @@ extends Screen {
 
     private void confirmDemo(boolean bl) {
         if (bl) {
-            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World");){
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(DEMO_LEVEL_ID);){
                 levelStorageAccess.deleteLevel();
             } catch (IOException iOException) {
-                SystemToast.onWorldDeleteFailure(this.minecraft, "Demo_World");
+                SystemToast.onWorldDeleteFailure(this.minecraft, DEMO_LEVEL_ID);
                 LOGGER.warn("Failed to delete demo world", (Throwable)iOException);
             }
         }

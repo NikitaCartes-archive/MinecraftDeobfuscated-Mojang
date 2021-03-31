@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -16,7 +14,6 @@ implements Packet<ServerGamePacketListener> {
     private final boolean signing;
     private final int slot;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundEditBookPacket(ItemStack itemStack, boolean bl, int i) {
         this.book = itemStack.copy();
         this.signing = bl;

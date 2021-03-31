@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -140,7 +138,6 @@ implements Container {
         this.itemStacks.clear();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getFutureXp() {
         return this.futureXp;
     }

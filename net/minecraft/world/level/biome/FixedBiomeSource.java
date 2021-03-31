@@ -11,8 +11,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -38,7 +36,6 @@ extends BiomeSource {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public BiomeSource withSeed(long l) {
         return this;
     }

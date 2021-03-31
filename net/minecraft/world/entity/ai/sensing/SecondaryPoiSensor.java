@@ -19,6 +19,8 @@ import net.minecraft.world.level.Level;
 
 public class SecondaryPoiSensor
 extends Sensor<Villager> {
+    private static final int SCAN_RATE = 40;
+
     public SecondaryPoiSensor() {
         super(40);
     }

@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,13 +23,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class BannerItem
 extends StandingAndWallBlockItem {
+    private static final String PATTERN_PREFIX = "block.minecraft.banner.";
+
     public BannerItem(Block block, Block block2, Item.Properties properties) {
         super(block, block2, properties);
         Validate.isInstanceOf(AbstractBannerBlock.class, block);
         Validate.isInstanceOf(AbstractBannerBlock.class, block2);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void appendHoverTextFromBannerBlockEntityTag(ItemStack itemStack, List<Component> list) {
         CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
         if (compoundTag == null || !compoundTag.contains("Patterns")) {
@@ -43,7 +42,7 @@ extends StandingAndWallBlockItem {
             DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
             BannerPattern bannerPattern = BannerPattern.byHash(compoundTag2.getString("Pattern"));
             if (bannerPattern == null) continue;
-            list.add(new TranslatableComponent("block.minecraft.banner." + bannerPattern.getFilename() + '.' + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent(PATTERN_PREFIX + bannerPattern.getFilename() + '.' + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -52,7 +51,6 @@ extends StandingAndWallBlockItem {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         BannerItem.appendHoverTextFromBannerBlockEntityTag(itemStack, list);
     }

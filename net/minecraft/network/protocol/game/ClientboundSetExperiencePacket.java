@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -39,17 +37,14 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetExperience(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getExperienceProgress() {
         return this.experienceProgress;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTotalExperience() {
         return this.totalExperience;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getExperienceLevel() {
         return this.experienceLevel;
     }

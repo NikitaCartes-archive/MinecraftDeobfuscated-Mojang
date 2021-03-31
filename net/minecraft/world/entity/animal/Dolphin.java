@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -81,6 +79,8 @@ extends WaterAnimal {
     private static final EntityDataAccessor<Boolean> GOT_FISH = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> MOISTNESS_LEVEL = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.INT);
     private static final TargetingConditions SWIM_WITH_PLAYER_TARGETING = new TargetingConditions().range(10.0).allowSameTeam().allowInvulnerable().allowUnseeable();
+    public static final int TOTAL_AIR_SUPPLY = 4800;
+    private static final int TOTAL_MOISTNESS_LEVEL = 2400;
     public static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive() && itemEntity.isInWater();
 
     public Dolphin(EntityType<? extends Dolphin> entityType, Level level) {
@@ -281,7 +281,6 @@ extends WaterAnimal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 38) {
             this.addParticlesAroundSelf(ParticleTypes.HAPPY_VILLAGER);
@@ -290,7 +289,6 @@ extends WaterAnimal {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     private void addParticlesAroundSelf(ParticleOptions particleOptions) {
         for (int i = 0; i < 7; ++i) {
             double d = this.random.nextGaussian() * 0.01;

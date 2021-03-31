@@ -3,10 +3,9 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -55,7 +54,7 @@ extends FallingBlock {
         for (Direction direction : Direction.values()) {
             BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
             if (direction == Direction.DOWN && !ConcretePowderBlock.canSolidify(blockState)) continue;
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             blockState = blockGetter.getBlockState(mutableBlockPos);
             if (!ConcretePowderBlock.canSolidify(blockState) || blockState.isFaceSturdy(blockGetter, blockPos, direction.getOpposite())) continue;
             bl = true;
@@ -77,7 +76,6 @@ extends FallingBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return blockState.getMapColor((BlockGetter)blockGetter, (BlockPos)blockPos).col;
     }

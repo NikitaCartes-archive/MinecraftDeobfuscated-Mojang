@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -12,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ClientboundCustomPayloadPacket
 implements Packet<ClientGamePacketListener> {
+    private static final int MAX_PAYLOAD_SIZE = 0x100000;
     public static final ResourceLocation BRAND = new ResourceLocation("brand");
     public static final ResourceLocation DEBUG_PATHFINDING_PACKET = new ResourceLocation("debug/path");
     public static final ResourceLocation DEBUG_NEIGHBORSUPDATE_PACKET = new ResourceLocation("debug/neighbors_update");
@@ -61,12 +60,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleCustomPayload(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getIdentifier() {
         return this.identifier;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public FriendlyByteBuf getData() {
         return new FriendlyByteBuf(this.data.copy());
     }

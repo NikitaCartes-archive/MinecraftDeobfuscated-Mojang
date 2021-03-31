@@ -5,8 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -37,7 +35,6 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleRemoveEntity(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public IntList getEntityIds() {
         return this.entityIds;
     }

@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.Objects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -53,23 +51,19 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetScore(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getOwner() {
         return this.owner;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public String getObjectiveName() {
         return this.objectiveName;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getScore() {
         return this.score;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ServerScoreboard.Method getMethod() {
         return this.method;
     }

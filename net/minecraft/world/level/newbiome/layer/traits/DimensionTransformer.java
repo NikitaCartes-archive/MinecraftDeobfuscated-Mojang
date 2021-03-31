@@ -3,7 +3,10 @@
  */
 package net.minecraft.world.level.newbiome.layer.traits;
 
-public interface DimensionTransformer {
+import net.minecraft.world.level.newbiome.layer.LayerBiomes;
+
+public interface DimensionTransformer
+extends LayerBiomes {
     public int getParentX(int var1);
 
     public int getParentY(int var1);

@@ -24,6 +24,7 @@ import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 public class PiglinRenderer
 extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
     private static final Map<EntityType<?>, ResourceLocation> TEXTURES = ImmutableMap.of(EntityType.PIGLIN, new ResourceLocation("textures/entity/piglin/piglin.png"), EntityType.ZOMBIFIED_PIGLIN, new ResourceLocation("textures/entity/piglin/zombified_piglin.png"), EntityType.PIGLIN_BRUTE, new ResourceLocation("textures/entity/piglin/piglin_brute.png"));
+    private static final float PIGLIN_CUSTOM_HEAD_SCALE = 1.0019531f;
 
     public PiglinRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation, ModelLayerLocation modelLayerLocation2, ModelLayerLocation modelLayerLocation3, boolean bl) {
         super(context, PiglinRenderer.createModel(context.getModelSet(), modelLayerLocation, bl), 0.5f, 1.0019531f, 1.0f, 1.0019531f);
@@ -49,7 +50,7 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 
     @Override
     protected boolean isShaking(Mob mob) {
-        return mob instanceof AbstractPiglin && ((AbstractPiglin)mob).isConverting();
+        return super.isShaking(mob) || mob instanceof AbstractPiglin && ((AbstractPiglin)mob).isConverting();
     }
 
     @Override

@@ -53,8 +53,28 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.entity = composite2;
         }
 
+        public static TriggerInstance playerHurtEntity() {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, DamagePredicate.ANY, EntityPredicate.Composite.ANY);
+        }
+
+        public static TriggerInstance playerHurtEntity(DamagePredicate damagePredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, damagePredicate, EntityPredicate.Composite.ANY);
+        }
+
         public static TriggerInstance playerHurtEntity(DamagePredicate.Builder builder) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, builder.build(), EntityPredicate.Composite.ANY);
+        }
+
+        public static TriggerInstance playerHurtEntity(EntityPredicate entityPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, DamagePredicate.ANY, EntityPredicate.Composite.wrap(entityPredicate));
+        }
+
+        public static TriggerInstance playerHurtEntity(DamagePredicate damagePredicate, EntityPredicate entityPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, damagePredicate, EntityPredicate.Composite.wrap(entityPredicate));
+        }
+
+        public static TriggerInstance playerHurtEntity(DamagePredicate.Builder builder, EntityPredicate entityPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, builder.build(), EntityPredicate.Composite.wrap(entityPredicate));
         }
 
         public boolean matches(ServerPlayer serverPlayer, LootContext lootContext, DamageSource damageSource, float f, float g, boolean bl) {

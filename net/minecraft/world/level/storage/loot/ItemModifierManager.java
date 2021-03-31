@@ -47,6 +47,10 @@ extends SimpleJsonResourceReloadListener {
         return this.functions.get(resourceLocation);
     }
 
+    public LootItemFunction get(ResourceLocation resourceLocation, LootItemFunction lootItemFunction) {
+        return this.functions.getOrDefault(resourceLocation, lootItemFunction);
+    }
+
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         ImmutableMap.Builder builder = ImmutableMap.builder();

@@ -20,8 +20,9 @@ import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ItemPotionFix
 extends DataFix {
+    private static final int SPLASH = 16384;
     private static final String[] POTIONS = DataFixUtils.make(new String[128], strings -> {
-        strings[0] = "minecraft:water";
+        strings[0] = DEFAULT;
         strings[1] = "minecraft:regeneration";
         strings[2] = "minecraft:swiftness";
         strings[3] = "minecraft:fire_resistance";
@@ -150,6 +151,7 @@ extends DataFix {
         strings[126] = "minecraft:long_invisibility";
         strings[127] = null;
     });
+    public static final String DEFAULT = "minecraft:water";
 
     public ItemPotionFix(Schema schema, boolean bl) {
         super(schema, bl);
@@ -172,7 +174,7 @@ extends DataFix {
                     Optional<String> optional3 = dynamic2.get("Potion").asString().result();
                     if (!optional3.isPresent()) {
                         String string = POTIONS[s & 0x7F];
-                        Typed<?> typed3 = optional2.get().set(DSL.remainderFinder(), dynamic2.set("Potion", dynamic2.createString(string == null ? "minecraft:water" : string)));
+                        Typed<?> typed3 = optional2.get().set(DSL.remainderFinder(), dynamic2.set("Potion", dynamic2.createString(string == null ? DEFAULT : string)));
                         typed2 = typed2.set(opticFinder2, typed3);
                         if ((s & 0x4000) == 16384) {
                             typed2 = typed2.set(opticFinder, Pair.of(References.ITEM_NAME.typeName(), "minecraft:splash_potion"));

@@ -17,6 +17,7 @@ public enum SymmetricGroup3 {
 
     private final int[] permutation;
     private final Matrix3f transformation;
+    private static final int ORDER = 3;
     private static final SymmetricGroup3[][] cayleyTable;
 
     private SymmetricGroup3(int j, int k, int l) {

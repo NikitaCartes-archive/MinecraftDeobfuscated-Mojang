@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -51,6 +49,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Explosion {
     private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new ExplosionDamageCalculator();
+    private static final int MAX_DROPS_PER_COMBINED_STACK = 16;
     private final boolean fire;
     private final BlockInteraction blockInteraction;
     private final Random random = new Random();
@@ -66,18 +65,19 @@ public class Explosion {
     private final List<BlockPos> toBlow = Lists.newArrayList();
     private final Map<Player, Vec3> hitPlayers = Maps.newHashMap();
 
-    @Environment(value=EnvType.CLIENT)
+    public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g) {
+        this(level, entity, d, e, f, g, false, BlockInteraction.DESTROY);
+    }
+
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, List<BlockPos> list) {
         this(level, entity, d, e, f, g, false, BlockInteraction.DESTROY, list);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, boolean bl, BlockInteraction blockInteraction, List<BlockPos> list) {
         this(level, entity, d, e, f, g, bl, blockInteraction);
         this.toBlow.addAll(list);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, boolean bl, BlockInteraction blockInteraction) {
         this(level, entity, null, null, d, e, f, g, bl, blockInteraction);
     }

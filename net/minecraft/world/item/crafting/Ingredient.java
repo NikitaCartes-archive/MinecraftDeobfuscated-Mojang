@@ -19,8 +19,6 @@ import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +28,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +43,6 @@ implements Predicate<ItemStack> {
         this.values = (Value[])stream.toArray(Value[]::new);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack[] getItems() {
         this.dissolve();
         return this.itemStacks;
@@ -109,11 +107,14 @@ implements Predicate<ItemStack> {
         return ingredient.values.length == 0 ? EMPTY : ingredient;
     }
 
+    public static Ingredient of() {
+        return EMPTY;
+    }
+
     public static Ingredient of(ItemLike ... itemLikes) {
         return Ingredient.of(Arrays.stream(itemLikes).map(ItemStack::new));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Ingredient of(ItemStack ... itemStacks) {
         return Ingredient.of(Arrays.stream(itemStacks));
     }
@@ -152,13 +153,12 @@ implements Predicate<ItemStack> {
             throw new JsonParseException("An ingredient entry is either a tag or an item, not both");
         }
         if (jsonObject.has("item")) {
-            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-            Item item = Registry.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation2 + "'"));
+            Item item = ShapedRecipe.itemFromJson(jsonObject);
             return new ItemValue(new ItemStack(item));
         }
         if (jsonObject.has("tag")) {
-            ResourceLocation resourceLocation3 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            Tag<Item> tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation3, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
+            ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
+            Tag<Item> tag = SerializationTags.getInstance().getTagOrThrow(Registry.ITEM_REGISTRY, resourceLocation2, resourceLocation -> new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'"));
             return new TagValue(tag);
         }
         throw new JsonParseException("An ingredient entry needs either a tag or an item");

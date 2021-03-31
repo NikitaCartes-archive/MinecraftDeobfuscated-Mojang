@@ -29,6 +29,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public class HeightMapRenderer
 implements DebugRenderer.SimpleDebugRenderer {
     private final Minecraft minecraft;
+    private static final int CHUNK_DIST = 2;
+    private static final float BOX_HEIGHT = 0.09375f;
 
     public HeightMapRenderer(Minecraft minecraft) {
         this.minecraft = minecraft;

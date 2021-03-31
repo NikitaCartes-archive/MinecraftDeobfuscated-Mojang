@@ -44,8 +44,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class Vex
 extends Monster {
+    public static final float FLAP_DEGREES_PER_TICK = 45.836624f;
     public static final int TICKS_PER_FLAP = Mth.ceil(3.9269907f);
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
+    private static final int FLAG_IS_CHARGING = 1;
     private Mob owner;
     @Nullable
     private BlockPos boundOrigin;

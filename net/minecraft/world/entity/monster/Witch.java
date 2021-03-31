@@ -5,8 +5,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.List;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -168,7 +166,6 @@ implements RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 15) {
             for (int i = 0; i < this.random.nextInt(35) + 10; ++i) {

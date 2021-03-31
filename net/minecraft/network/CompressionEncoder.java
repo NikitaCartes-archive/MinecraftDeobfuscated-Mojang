@@ -41,6 +41,10 @@ extends MessageToByteEncoder<ByteBuf> {
         }
     }
 
+    public int getThreshold() {
+        return this.threshold;
+    }
+
     public void setThreshold(int i) {
         this.threshold = i;
     }

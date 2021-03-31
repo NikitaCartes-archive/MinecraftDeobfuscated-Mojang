@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -45,7 +43,6 @@ implements Recipe<Container> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean canCraftInDimensions(int i, int j) {
         return true;
     }
@@ -67,7 +64,6 @@ implements Recipe<Container> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public String getGroup() {
         return this.group;
     }

@@ -4,8 +4,6 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.hash.Hashing;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
@@ -38,7 +36,6 @@ public class BiomeManager {
         return this.zoomer.getBiome(this.biomeZoomSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.noiseBiomeSource);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Biome getNoiseBiomeAtPosition(double d, double e, double f) {
         int i = QuartPos.fromBlock(Mth.floor(d));
         int j = QuartPos.fromBlock(Mth.floor(e));
@@ -46,7 +43,6 @@ public class BiomeManager {
         return this.getNoiseBiomeAtQuart(i, j, k);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Biome getNoiseBiomeAtPosition(BlockPos blockPos) {
         int i = QuartPos.fromBlock(blockPos.getX());
         int j = QuartPos.fromBlock(blockPos.getY());
@@ -54,7 +50,6 @@ public class BiomeManager {
         return this.getNoiseBiomeAtQuart(i, j, k);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Biome getNoiseBiomeAtQuart(int i, int j, int k) {
         return this.noiseBiomeSource.getNoiseBiome(i, j, k);
     }

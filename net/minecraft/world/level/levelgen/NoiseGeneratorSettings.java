@@ -121,7 +121,7 @@ public final class NoiseGeneratorSettings {
     }
 
     private static NoiseGeneratorSettings endLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2, boolean bl3) {
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(bl3 ? -64 : 0, bl3 ? 384 : 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, Integer.MIN_VALUE, Integer.MIN_VALUE, bl3 ? -64 : 0, bl, false, false, false);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(bl3 ? -64 : 0, bl3 ? 384 : 256, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, Integer.MIN_VALUE, Integer.MIN_VALUE, bl3 ? -64 : 0, bl, false, false, false);
     }
 
     private static NoiseGeneratorSettings netherLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl) {

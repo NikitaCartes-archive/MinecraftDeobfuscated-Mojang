@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -69,16 +68,15 @@ extends StructureFeature<OceanRuinConfiguration> {
 
     public static class OceanRuinStart
     extends StructureStart<OceanRuinConfiguration> {
-        public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(structureFeature, chunkPos, boundingBox, i, l);
+        public OceanRuinStart(StructureFeature<OceanRuinConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+            super(structureFeature, chunkPos, i, l);
         }
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, OceanRuinConfiguration oceanRuinConfiguration, LevelHeightAccessor levelHeightAccessor) {
             BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 90, chunkPos.getMinBlockZ());
             Rotation rotation = Rotation.getRandom(this.random);
-            OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);
-            this.calculateBoundingBox();
+            OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this, this.random, oceanRuinConfiguration);
         }
     }
 }

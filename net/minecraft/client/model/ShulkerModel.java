@@ -20,22 +20,24 @@ import net.minecraft.world.entity.monster.Shulker;
 @Environment(value=EnvType.CLIENT)
 public class ShulkerModel<T extends Shulker>
 extends ListModel<T> {
+    private static final String LID = "lid";
+    private static final String BASE = "base";
     private final ModelPart base;
     private final ModelPart lid;
     private final ModelPart head;
 
     public ShulkerModel(ModelPart modelPart) {
         super(RenderType::entityCutoutNoCullZOffset);
-        this.lid = modelPart.getChild("lid");
-        this.base = modelPart.getChild("base");
+        this.lid = modelPart.getChild(LID);
+        this.base = modelPart.getChild(BASE);
         this.head = modelPart.getChild("head");
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -16.0f, -8.0f, 16.0f, 12.0f, 16.0f), PartPose.offset(0.0f, 24.0f, 0.0f));
-        partDefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 28).addBox(-8.0f, -8.0f, -8.0f, 16.0f, 8.0f, 16.0f), PartPose.offset(0.0f, 24.0f, 0.0f));
+        partDefinition.addOrReplaceChild(LID, CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -16.0f, -8.0f, 16.0f, 12.0f, 16.0f), PartPose.offset(0.0f, 24.0f, 0.0f));
+        partDefinition.addOrReplaceChild(BASE, CubeListBuilder.create().texOffs(0, 28).addBox(-8.0f, -8.0f, -8.0f, 16.0f, 8.0f, 16.0f), PartPose.offset(0.0f, 24.0f, 0.0f));
         partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 52).addBox(-3.0f, 0.0f, -3.0f, 6.0f, 6.0f, 6.0f), PartPose.offset(0.0f, 12.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }

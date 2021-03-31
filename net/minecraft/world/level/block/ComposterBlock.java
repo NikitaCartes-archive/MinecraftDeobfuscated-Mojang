@@ -6,8 +6,6 @@ package net.minecraft.world.level.block;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -45,8 +43,12 @@ import org.jetbrains.annotations.Nullable;
 public class ComposterBlock
 extends Block
 implements WorldlyContainerHolder {
+    public static final int READY = 8;
+    public static final int MIN_LEVEL = 0;
+    public static final int MAX_LEVEL = 7;
     public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_COMPOSTER;
     public static final Object2FloatMap<ItemLike> COMPOSTABLES = new Object2FloatOpenHashMap<ItemLike>();
+    private static final int AABB_SIDE_THICKNESS = 2;
     private static final VoxelShape OUTER_SHAPE = Shapes.block();
     private static final VoxelShape[] SHAPES = Util.make(new VoxelShape[9], voxelShapes -> {
         for (int i = 0; i < 8; ++i) {
@@ -164,7 +166,6 @@ implements WorldlyContainerHolder {
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LEVEL, 0));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void handleFill(Level level, BlockPos blockPos, boolean bl) {
         BlockState blockState = level.getBlockState(blockPos);
         level.playLocalSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), bl ? SoundEvents.COMPOSTER_FILL_SUCCESS : SoundEvents.COMPOSTER_FILL, SoundSource.BLOCKS, 1.0f, 1.0f, false);

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.recipebook.ServerPlaceRecipe;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -38,7 +36,6 @@ extends AbstractContainerMenu {
 
     public abstract int getSize();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract RecipeBookType getRecipeBookType();
 
     public abstract boolean shouldMoveToInventory(int var1);

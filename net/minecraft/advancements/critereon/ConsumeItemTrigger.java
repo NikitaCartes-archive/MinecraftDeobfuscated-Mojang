@@ -54,6 +54,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.ANY);
         }
 
+        public static TriggerInstance usedItem(ItemPredicate itemPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate);
+        }
+
         public static TriggerInstance usedItem(ItemLike itemLike) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, new ItemPredicate(null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY));
         }

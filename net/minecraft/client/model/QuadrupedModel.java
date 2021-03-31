@@ -63,7 +63,6 @@ extends AgeableListModel<T> {
     public void setupAnim(T entity, float f, float g, float h, float i, float j) {
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
-        this.body.xRot = 1.5707964f;
         this.rightHindLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
         this.leftHindLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
         this.rightFrontLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;

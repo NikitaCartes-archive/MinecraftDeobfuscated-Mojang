@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,7 +25,6 @@ extends ThrowablePotionItem {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         PotionUtils.addPotionTooltip(itemStack, list, 0.25f);
     }

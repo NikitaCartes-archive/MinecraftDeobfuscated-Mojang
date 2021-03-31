@@ -43,7 +43,7 @@ extends MobRenderer<Strider, StriderModel<Strider>> {
 
     @Override
     protected boolean isShaking(Strider strider) {
-        return strider.isSuffocating();
+        return super.isShaking(strider) || strider.isSuffocating();
     }
 
     @Override

@@ -5,8 +5,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -58,7 +56,6 @@ implements Enemy {
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isCharging() {
         return this.entityData.get(DATA_IS_CHARGING);
     }

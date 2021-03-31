@@ -3,6 +3,7 @@
  */
 package net.minecraft.network.chat;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -20,11 +21,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.KeybindComponent;
@@ -72,11 +72,9 @@ FormattedText {
 
     public MutableComponent copy();
 
-    @Environment(value=EnvType.CLIENT)
     public FormattedCharSequence getVisualOrderText();
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     default public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         Style style2 = this.getStyle().applyTo(style);
         Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
@@ -105,7 +103,6 @@ FormattedText {
         return Optional.empty();
     }
 
-    @Environment(value=EnvType.CLIENT)
     default public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         return styledContentConsumer.accept(style, this.getContents());
     }
@@ -114,7 +111,17 @@ FormattedText {
         return contentConsumer.accept(this.getContents());
     }
 
-    @Environment(value=EnvType.CLIENT)
+    default public List<Component> toFlatList(Style style2) {
+        ArrayList<Component> list = Lists.newArrayList();
+        this.visit((style, string) -> {
+            if (!string.isEmpty()) {
+                list.add(new TextComponent(string).withStyle(style));
+            }
+            return Optional.empty();
+        }, style2);
+        return list;
+    }
+
     public static Component nullToEmpty(@Nullable String string) {
         return string != null ? new TextComponent(string) : TextComponent.EMPTY;
     }

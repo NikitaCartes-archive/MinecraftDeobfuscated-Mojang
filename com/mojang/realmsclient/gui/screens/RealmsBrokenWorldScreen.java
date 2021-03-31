@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 public class RealmsBrokenWorldScreen
 extends RealmsScreen {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int DEFAULT_BUTTON_WIDTH = 80;
     private final Screen lastScreen;
     private final RealmsMainScreen mainScreen;
     private RealmsServer serverData;

@@ -12,8 +12,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.registry.MeasuredMetric;
 import net.minecraft.util.profiling.registry.MeasurementCategory;
 import net.minecraft.util.profiling.registry.MeasurementRegistry;
@@ -60,7 +58,6 @@ Executor {
         return this.name;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public <V> CompletableFuture<V> submit(Supplier<V> supplier) {
         if (this.scheduleExecutables()) {
             return CompletableFuture.supplyAsync(supplier, this);
@@ -106,7 +103,6 @@ Executor {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     protected void dropAllTasks() {
         this.pendingRunnables.clear();
     }
@@ -154,7 +150,6 @@ Executor {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public List<MeasuredMetric> metrics() {
         return ImmutableList.of(new MeasuredMetric(new Metric(this.name + "-tasks-pending"), this::getPendingTasksCount, MeasurementCategory.EVENT_LOOP));
     }

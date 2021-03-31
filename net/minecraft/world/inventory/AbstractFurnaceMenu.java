@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,6 +26,15 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 public abstract class AbstractFurnaceMenu
 extends RecipeBookMenu<Container> {
+    public static final int INGREDIENT_SLOT = 0;
+    public static final int FUEL_SLOT = 1;
+    public static final int RESULT_SLOT = 2;
+    public static final int SLOT_COUNT = 3;
+    public static final int DATA_COUNT = 4;
+    private static final int INV_SLOT_START = 3;
+    private static final int INV_SLOT_END = 30;
+    private static final int USE_ROW_SLOT_START = 30;
+    private static final int USE_ROW_SLOT_END = 39;
     private final Container container;
     private final ContainerData data;
     protected final Level level;
@@ -141,7 +148,6 @@ extends RecipeBookMenu<Container> {
         return AbstractFurnaceBlockEntity.isFuel(itemStack);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getBurnProgress() {
         int i = this.data.get(2);
         int j = this.data.get(3);
@@ -151,7 +157,6 @@ extends RecipeBookMenu<Container> {
         return i * 24 / j;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getLitProgress() {
         int i = this.data.get(1);
         if (i == 0) {
@@ -160,13 +165,11 @@ extends RecipeBookMenu<Container> {
         return this.data.get(0) * 13 / i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isLit() {
         return this.data.get(0) > 0;
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public RecipeBookType getRecipeBookType() {
         return this.recipeBookType;
     }

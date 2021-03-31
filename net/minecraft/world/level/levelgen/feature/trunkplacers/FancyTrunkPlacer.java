@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
@@ -22,11 +22,14 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FancyTrunkPlacer
 extends TrunkPlacer {
     public static final Codec<FancyTrunkPlacer> CODEC = RecordCodecBuilder.create(instance -> FancyTrunkPlacer.trunkPlacerParts(instance).apply(instance, FancyTrunkPlacer::new));
+    private static final double TRUNK_HEIGHT_SCALE = 0.618;
+    private static final double CLUSTER_DENSITY_MAGIC = 1.382;
+    private static final double BRANCH_SLOPE = 0.381;
+    private static final double BRANCH_LENGTH_MAGIC = 0.328;
 
     public FancyTrunkPlacer(int i, int j, int k) {
         super(i, j, k);
@@ -38,19 +41,19 @@ extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         int o;
         int j = 5;
         int k = i + 2;
         int l = Mth.floor((double)k * 0.618);
-        FancyTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
+        FancyTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
         double d = 1.0;
         int m = Math.min(1, Mth.floor(1.382 + Math.pow(1.0 * (double)k / 13.0, 2.0)));
         int n = blockPos.getY() + l;
         ArrayList<FoliageCoords> list = Lists.newArrayList();
         list.add(new FoliageCoords(blockPos.above(o), n));
         for (o = k - 5; o >= 0; --o) {
-            float f = this.treeShape(k, o);
+            float f = FancyTrunkPlacer.treeShape(k, o);
             if (f < 0.0f) continue;
             for (int p = 0; p < m; ++p) {
                 BlockPos blockPos3;
@@ -60,18 +63,18 @@ extends TrunkPlacer {
                 double g = 1.0 * (double)f * ((double)random.nextFloat() + 0.328);
                 double q = g * Math.sin(h = (double)(random.nextFloat() * 2.0f) * Math.PI) + 0.5;
                 BlockPos blockPos2 = blockPos.offset(q, (double)(o - 1), r = g * Math.cos(h) + 0.5);
-                if (!this.makeLimb(levelSimulatedRW, random, blockPos2, blockPos3 = blockPos2.above(5), false, set, boundingBox, treeConfiguration)) continue;
+                if (!this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos2, blockPos3 = blockPos2.above(5), false, treeConfiguration)) continue;
                 int s = blockPos.getX() - blockPos2.getX();
                 int t = blockPos.getZ() - blockPos2.getZ();
                 double u = (double)blockPos2.getY() - Math.sqrt(s * s + t * t) * 0.381;
                 int v = u > (double)n ? n : (int)u;
                 BlockPos blockPos4 = new BlockPos(blockPos.getX(), v, blockPos.getZ());
-                if (!this.makeLimb(levelSimulatedRW, random, blockPos4, blockPos2, false, set, boundingBox, treeConfiguration)) continue;
+                if (!this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos4, blockPos2, false, treeConfiguration)) continue;
                 list.add(new FoliageCoords(blockPos2, blockPos4.getY()));
             }
         }
-        this.makeLimb(levelSimulatedRW, random, blockPos, blockPos.above(l), true, set, boundingBox, treeConfiguration);
-        this.makeBranches(levelSimulatedRW, random, k, blockPos, list, set, boundingBox, treeConfiguration);
+        this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos, blockPos.above(l), true, treeConfiguration);
+        this.makeBranches(levelSimulatedReader, biConsumer, random, k, blockPos, list, treeConfiguration);
         ArrayList<FoliagePlacer.FoliageAttachment> list2 = Lists.newArrayList();
         for (FoliageCoords foliageCoords : list) {
             if (!this.trimBranches(k, foliageCoords.getBranchBase() - blockPos.getY())) continue;
@@ -80,7 +83,7 @@ extends TrunkPlacer {
         return list2;
     }
 
-    private boolean makeLimb(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, BlockPos blockPos2, boolean bl, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+    private boolean makeLimb(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, BlockPos blockPos, BlockPos blockPos2, boolean bl, TreeConfiguration treeConfiguration) {
         if (!bl && Objects.equals(blockPos, blockPos2)) {
             return true;
         }
@@ -92,11 +95,10 @@ extends TrunkPlacer {
         for (int j = 0; j <= i; ++j) {
             BlockPos blockPos4 = blockPos.offset(0.5f + (float)j * f, 0.5f + (float)j * g, 0.5f + (float)j * h);
             if (bl) {
-                FancyTrunkPlacer.setBlock(levelSimulatedRW, blockPos4, (BlockState)treeConfiguration.trunkProvider.getState(random, blockPos4).setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)), boundingBox);
-                set.add(blockPos4.immutable());
+                TrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
                 continue;
             }
-            if (TreeFeature.isFree(levelSimulatedRW, blockPos4)) continue;
+            if (TreeFeature.isFree(levelSimulatedReader, blockPos4)) continue;
             return false;
         }
         return true;
@@ -124,16 +126,16 @@ extends TrunkPlacer {
         return (double)j >= (double)i * 0.2;
     }
 
-    private void makeBranches(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, List<FoliageCoords> list, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+    private void makeBranches(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, List<FoliageCoords> list, TreeConfiguration treeConfiguration) {
         for (FoliageCoords foliageCoords : list) {
             int j = foliageCoords.getBranchBase();
             BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ());
-            if (blockPos2.equals(foliageCoords.attachment.foliagePos()) || !this.trimBranches(i, j - blockPos.getY())) continue;
-            this.makeLimb(levelSimulatedRW, random, blockPos2, foliageCoords.attachment.foliagePos(), true, set, boundingBox, treeConfiguration);
+            if (blockPos2.equals(foliageCoords.attachment.pos()) || !this.trimBranches(i, j - blockPos.getY())) continue;
+            this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos2, foliageCoords.attachment.pos(), true, treeConfiguration);
         }
     }
 
-    private float treeShape(int i, int j) {
+    private static float treeShape(int i, int j) {
         if ((float)j < (float)i * 0.3f) {
             return -1.0f;
         }

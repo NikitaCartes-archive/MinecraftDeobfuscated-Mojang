@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -48,12 +46,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleContainerContent(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getContainerId() {
         return this.containerId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<ItemStack> getItems() {
         return this.items;
     }

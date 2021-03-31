@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 public class PrimedTnt
 extends Entity {
     private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
+    private static final int DEFAULT_FUSE_TIME = 80;
     @Nullable
     private LivingEntity owner;
 

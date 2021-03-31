@@ -13,6 +13,7 @@ public abstract class GenericThread
 implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
+    private static final int MAX_STOP_WAIT = 5;
     protected volatile boolean running;
     protected final String name;
     @Nullable

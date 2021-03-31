@@ -55,8 +55,20 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.to = resourceKey2;
         }
 
+        public static TriggerInstance changedDimension() {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, null, null);
+        }
+
+        public static TriggerInstance changedDimension(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, resourceKey, resourceKey2);
+        }
+
         public static TriggerInstance changedDimensionTo(ResourceKey<Level> resourceKey) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, null, resourceKey);
+        }
+
+        public static TriggerInstance changedDimensionFrom(ResourceKey<Level> resourceKey) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, resourceKey, null);
         }
 
         public boolean matches(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {

@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.NoiseAffectingStructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -35,8 +34,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class FeatureStart
     extends NoiseAffectingStructureStart<NoneFeatureConfiguration> {
-        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(structureFeature, chunkPos, boundingBox, i, l);
+        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+            super(structureFeature, chunkPos, i, l);
         }
 
         @Override
@@ -56,8 +55,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
             if (l <= k) {
                 return;
             }
-            NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(i, l, j));
-            this.calculateBoundingBox();
+            NetherFossilPieces.addPieces(structureManager, this, this.random, new BlockPos(i, l, j));
         }
     }
 }

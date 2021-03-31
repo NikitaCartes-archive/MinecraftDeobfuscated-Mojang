@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -15,7 +13,6 @@ implements Packet<ServerGamePacketListener> {
     private final int transactionId;
     private final BlockPos pos;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundBlockEntityTagQuery(int i, BlockPos blockPos) {
         this.transactionId = i;
         this.pos = blockPos;

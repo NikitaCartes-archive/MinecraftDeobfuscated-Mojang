@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChorusFlowerBlock
 extends Block {
+    public static final int DEAD_AGE = 5;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_5;
     private final ChorusPlantBlock plant;
 

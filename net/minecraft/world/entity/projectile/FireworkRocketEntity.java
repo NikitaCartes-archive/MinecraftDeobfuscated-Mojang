@@ -5,10 +5,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.List;
 import java.util.OptionalInt;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -37,7 +33,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-@EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public class FireworkRocketEntity
 extends Projectile
 implements ItemSupplier {
@@ -94,13 +89,11 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         return d < 4096.0 && !this.isAttachedToEntity();
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRender(double d, double e, double f) {
         return super.shouldRender(d, e, f) && !this.isAttachedToEntity();
     }
@@ -231,7 +224,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 17 && this.level.isClientSide) {
             if (!this.hasExplosion()) {
@@ -275,7 +267,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getItem() {
         ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
         return itemStack.isEmpty() ? new ItemStack(Items.FIREWORK_ROCKET) : itemStack;

@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class GameRules {
+    public static final int DEFAULT_RANDOM_TICK_SPEED = 3;
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Key<?>, Type<?>> GAME_RULE_TYPES = Maps.newTreeMap(Comparator.comparing(key -> Key.method_20772(key)));
     public static final Key<BooleanValue> RULE_DOFIRETICK = GameRules.register("doFireTick", Category.UPDATES, BooleanValue.method_20755(true));
@@ -129,12 +128,10 @@ public class GameRules {
         type2.callVisitor(gameRuleTypeVisitor, key2);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void assignFrom(GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
         gameRules.rules.keySet().forEach(key -> this.assignCap((Key)key, gameRules, minecraftServer));
     }
 
-    @Environment(value=EnvType.CLIENT)
     private <T extends Value<T>> void assignCap(Key<T> key, GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
         T value = gameRules.getRule(key);
         ((Value)this.getRule(key)).setFrom(value, minecraftServer);
@@ -205,7 +202,6 @@ public class GameRules {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public void setFrom(BooleanValue booleanValue, @Nullable MinecraftServer minecraftServer) {
             this.value = booleanValue.value;
             this.onChanged(minecraftServer);
@@ -256,6 +252,11 @@ public class GameRules {
             return this.value;
         }
 
+        public void set(int i, @Nullable MinecraftServer minecraftServer) {
+            this.value = i;
+            this.onChanged(minecraftServer);
+        }
+
         @Override
         public String serialize() {
             return Integer.toString(this.value);
@@ -266,7 +267,6 @@ public class GameRules {
             this.value = IntegerValue.safeParse(string);
         }
 
-        @Environment(value=EnvType.CLIENT)
         public boolean tryDeserialize(String string) {
             try {
                 this.value = Integer.parseInt(string);
@@ -303,7 +303,6 @@ public class GameRules {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public void setFrom(IntegerValue integerValue, @Nullable MinecraftServer minecraftServer) {
             this.value = integerValue.value;
             this.onChanged(minecraftServer);
@@ -358,7 +357,6 @@ public class GameRules {
 
         protected abstract T copy();
 
-        @Environment(value=EnvType.CLIENT)
         public abstract void setFrom(T var1, @Nullable MinecraftServer var2);
     }
 
@@ -420,7 +418,6 @@ public class GameRules {
             return "gamerule." + this.id;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public Category getCategory() {
             return this.category;
         }
@@ -456,7 +453,6 @@ public class GameRules {
             this.descriptionId = string2;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public String getDescriptionId() {
             return this.descriptionId;
         }

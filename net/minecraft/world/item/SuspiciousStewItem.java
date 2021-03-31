@@ -16,34 +16,38 @@ import net.minecraft.world.level.Level;
 
 public class SuspiciousStewItem
 extends Item {
+    public static final String EFFECTS_TAG = "Effects";
+    public static final String EFFECT_ID_TAG = "EffectId";
+    public static final String EFFECT_DURATION_TAG = "EffectDuration";
+
     public SuspiciousStewItem(Item.Properties properties) {
         super(properties);
     }
 
     public static void saveMobEffect(ItemStack itemStack, MobEffect mobEffect, int i) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
-        ListTag listTag = compoundTag.getList("Effects", 9);
+        ListTag listTag = compoundTag.getList(EFFECTS_TAG, 9);
         CompoundTag compoundTag2 = new CompoundTag();
-        compoundTag2.putByte("EffectId", (byte)MobEffect.getId(mobEffect));
-        compoundTag2.putInt("EffectDuration", i);
+        compoundTag2.putByte(EFFECT_ID_TAG, (byte)MobEffect.getId(mobEffect));
+        compoundTag2.putInt(EFFECT_DURATION_TAG, i);
         listTag.add(compoundTag2);
-        compoundTag.put("Effects", listTag);
+        compoundTag.put(EFFECTS_TAG, listTag);
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
         ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null && compoundTag.contains("Effects", 9)) {
-            ListTag listTag = compoundTag.getList("Effects", 10);
+        if (compoundTag != null && compoundTag.contains(EFFECTS_TAG, 9)) {
+            ListTag listTag = compoundTag.getList(EFFECTS_TAG, 10);
             for (int i = 0; i < listTag.size(); ++i) {
                 MobEffect mobEffect;
                 int j = 160;
                 CompoundTag compoundTag2 = listTag.getCompound(i);
-                if (compoundTag2.contains("EffectDuration", 3)) {
-                    j = compoundTag2.getInt("EffectDuration");
+                if (compoundTag2.contains(EFFECT_DURATION_TAG, 3)) {
+                    j = compoundTag2.getInt(EFFECT_DURATION_TAG);
                 }
-                if ((mobEffect = MobEffect.byId(compoundTag2.getByte("EffectId"))) == null) continue;
+                if ((mobEffect = MobEffect.byId(compoundTag2.getByte(EFFECT_ID_TAG))) == null) continue;
                 livingEntity.addEffect(new MobEffectInstance(mobEffect, j));
             }
         }

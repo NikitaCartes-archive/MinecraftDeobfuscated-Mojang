@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,6 +16,9 @@ import net.minecraft.world.level.block.state.properties.StructureMode;
 
 public class ServerboundSetStructureBlockPacket
 implements Packet<ServerGamePacketListener> {
+    private static final int FLAG_IGNORE_ENTITIES = 1;
+    private static final int FLAG_SHOW_AIR = 2;
+    private static final int FLAG_SHOW_BOUNDING_BOX = 4;
     private final BlockPos pos;
     private final StructureBlockEntity.UpdateType updateType;
     private final StructureMode mode;
@@ -33,7 +34,6 @@ implements Packet<ServerGamePacketListener> {
     private final float integrity;
     private final long seed;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSetStructureBlockPacket(BlockPos blockPos, StructureBlockEntity.UpdateType updateType, StructureMode structureMode, String string, BlockPos blockPos2, Vec3i vec3i, Mirror mirror, Rotation rotation, String string2, boolean bl, boolean bl2, boolean bl3, float f, long l) {
         this.pos = blockPos;
         this.updateType = updateType;
@@ -57,9 +57,9 @@ implements Packet<ServerGamePacketListener> {
         this.mode = friendlyByteBuf.readEnum(StructureMode.class);
         this.name = friendlyByteBuf.readUtf();
         int i = 48;
-        this.offset = new BlockPos(Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48));
+        this.offset = new BlockPos(Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48), Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48), Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48));
         int j = 48;
-        this.size = new Vec3i(Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48));
+        this.size = new Vec3i(Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48));
         this.mirror = friendlyByteBuf.readEnum(Mirror.class);
         this.rotation = friendlyByteBuf.readEnum(Rotation.class);
         this.data = friendlyByteBuf.readUtf(12);

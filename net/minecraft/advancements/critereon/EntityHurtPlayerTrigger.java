@@ -47,6 +47,14 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.damage = damagePredicate;
         }
 
+        public static TriggerInstance entityHurtPlayer() {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, DamagePredicate.ANY);
+        }
+
+        public static TriggerInstance entityHurtPlayer(DamagePredicate damagePredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, damagePredicate);
+        }
+
         public static TriggerInstance entityHurtPlayer(DamagePredicate.Builder builder) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, builder.build());
         }

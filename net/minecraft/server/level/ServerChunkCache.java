@@ -21,8 +21,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -35,6 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
@@ -72,10 +71,12 @@ extends ChunkSource {
     private long lastInhabitedUpdate;
     private boolean spawnEnemies = true;
     private boolean spawnFriendlies = true;
+    private static final int CACHE_SIZE = 4;
     private final long[] lastChunkPos = new long[4];
     private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
     private final ChunkAccess[] lastChunk = new ChunkAccess[4];
     @Nullable
+    @VisibleForDebug
     private NaturalSpawner.SpawnState lastSpawnState;
 
     public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier<DimensionDataStorage> supplier) {
@@ -182,7 +183,6 @@ extends ChunkSource {
         Arrays.fill(this.lastChunk, null);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getChunkFuture(int i, int j, ChunkStatus chunkStatus, boolean bl) {
         CompletionStage<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture2;
         boolean bl2;
@@ -302,6 +302,7 @@ extends ChunkSource {
         this.chunkMap.close();
     }
 
+    @Override
     public void tick(BooleanSupplier booleanSupplier) {
         this.level.getProfiler().push("purge");
         this.distanceManager.purgeStaleTickets();
@@ -386,6 +387,7 @@ extends ChunkSource {
         return this.generator;
     }
 
+    @Override
     public int getLoadedChunksCount() {
         return this.chunkMap.size();
     }
@@ -452,7 +454,6 @@ extends ChunkSource {
         this.spawnFriendlies = bl2;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getChunkDebugData(ChunkPos chunkPos) {
         return this.chunkMap.getChunkDebugData(chunkPos);
     }
@@ -466,6 +467,7 @@ extends ChunkSource {
     }
 
     @Nullable
+    @VisibleForDebug
     public NaturalSpawner.SpawnState getLastSpawnState() {
         return this.lastSpawnState;
     }

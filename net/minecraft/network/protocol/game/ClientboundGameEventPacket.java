@@ -5,8 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -25,6 +23,11 @@ implements Packet<ClientGamePacketListener> {
     public static final Type PUFFER_FISH_STING = new Type(9);
     public static final Type GUARDIAN_ELDER_EFFECT = new Type(10);
     public static final Type IMMEDIATE_RESPAWN = new Type(11);
+    public static final int DEMO_PARAM_INTRO = 0;
+    public static final int DEMO_PARAM_HINT_1 = 101;
+    public static final int DEMO_PARAM_HINT_2 = 102;
+    public static final int DEMO_PARAM_HINT_3 = 103;
+    public static final int DEMO_PARAM_HINT_4 = 104;
     private final Type event;
     private final float param;
 
@@ -49,12 +52,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleGameEvent(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Type getEvent() {
         return this.event;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getParam() {
         return this.param;
     }

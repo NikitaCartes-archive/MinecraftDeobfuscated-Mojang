@@ -6,8 +6,6 @@ package net.minecraft.world.entity.monster.hoglin;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -58,6 +56,14 @@ extends Animal
 implements Enemy,
 HoglinBase {
     private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Hoglin.class, EntityDataSerializers.BOOLEAN);
+    private static final float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2f;
+    private static final int MAX_HEALTH = 40;
+    private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.3f;
+    private static final int ATTACK_KNOCKBACK = 1;
+    private static final float KNOCKBACK_RESISTANCE = 0.6f;
+    private static final int ATTACK_DAMAGE = 6;
+    private static final float BABY_ATTACK_DAMAGE = 0.5f;
+    private static final int CONVERSION_TIME = 300;
     private int attackAnimationRemainingTicks;
     private int timeInOverworld;
     private boolean cannotBeHunted;
@@ -202,7 +208,6 @@ HoglinBase {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 4) {
             this.attackAnimationRemainingTicks = 10;
@@ -213,7 +218,6 @@ HoglinBase {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getAttackAnimationRemainingTicks() {
         return this.attackAnimationRemainingTicks;
     }

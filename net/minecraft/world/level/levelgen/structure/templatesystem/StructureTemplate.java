@@ -56,6 +56,18 @@ import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class StructureTemplate {
+    public static final String PALETTE_TAG = "palette";
+    public static final String PALETTE_LIST_TAG = "palettes";
+    public static final String ENTITIES_TAG = "entities";
+    public static final String BLOCKS_TAG = "blocks";
+    public static final String BLOCK_TAG_POS = "pos";
+    public static final String BLOCK_TAG_STATE = "state";
+    public static final String BLOCK_TAG_NBT = "nbt";
+    public static final String ENTITY_TAG_POS = "pos";
+    public static final String ENTITY_TAG_BLOCKPOS = "blockPos";
+    public static final String ENTITY_TAG_NBT = "nbt";
+    public static final String SIZE_TAG = "size";
+    static final int CHUNK_SIZE = 16;
     private final List<Palette> palettes = Lists.newArrayList();
     private final List<StructureEntityInfo> entityInfoList = Lists.newArrayList();
     private Vec3i size = Vec3i.ZERO;
@@ -469,13 +481,13 @@ public class StructureTemplate {
         Vec3i vec3i2 = vec3i.offset(-1, -1, -1);
         BlockPos blockPos3 = StructureTemplate.transform(BlockPos.ZERO, mirror, rotation, blockPos2);
         BlockPos blockPos4 = StructureTemplate.transform(BlockPos.ZERO.offset(vec3i2), mirror, rotation, blockPos2);
-        return BoundingBox.createProper(blockPos3, blockPos4).move(blockPos);
+        return BoundingBox.fromCorners(blockPos3, blockPos4).move(blockPos);
     }
 
     public CompoundTag save(CompoundTag compoundTag) {
         if (this.palettes.isEmpty()) {
-            compoundTag.put("blocks", new ListTag());
-            compoundTag.put("palette", new ListTag());
+            compoundTag.put(BLOCKS_TAG, new ListTag());
+            compoundTag.put(PALETTE_TAG, new ListTag());
         } else {
             ListTag listTag2;
             ArrayList<SimplePalette> list = Lists.newArrayList();
@@ -491,7 +503,7 @@ public class StructureTemplate {
                 CompoundTag compoundTag2 = new CompoundTag();
                 compoundTag2.put("pos", this.newIntegerList(structureBlockInfo.pos.getX(), structureBlockInfo.pos.getY(), structureBlockInfo.pos.getZ()));
                 int k = simplePalette.idFor(structureBlockInfo.state);
-                compoundTag2.putInt("state", k);
+                compoundTag2.putInt(BLOCK_TAG_STATE, k);
                 if (structureBlockInfo.nbt != null) {
                     compoundTag2.put("nbt", structureBlockInfo.nbt);
                 }
@@ -501,13 +513,13 @@ public class StructureTemplate {
                     simplePalette2.addMapping(this.palettes.get((int)l).blocks().get((int)j).state, k);
                 }
             }
-            compoundTag.put("blocks", listTag);
+            compoundTag.put(BLOCKS_TAG, listTag);
             if (list.size() == 1) {
                 listTag2 = new ListTag();
                 for (BlockState blockState : simplePalette) {
                     listTag2.add(NbtUtils.writeBlockState(blockState));
                 }
-                compoundTag.put("palette", listTag2);
+                compoundTag.put(PALETTE_TAG, listTag2);
             } else {
                 listTag2 = new ListTag();
                 for (SimplePalette simplePalette3 : list) {
@@ -517,21 +529,21 @@ public class StructureTemplate {
                     }
                     listTag2.add(listTag3);
                 }
-                compoundTag.put("palettes", listTag2);
+                compoundTag.put(PALETTE_LIST_TAG, listTag2);
             }
         }
         ListTag listTag4 = new ListTag();
         for (StructureEntityInfo structureEntityInfo : this.entityInfoList) {
             CompoundTag compoundTag3 = new CompoundTag();
             compoundTag3.put("pos", this.newDoubleList(structureEntityInfo.pos.x, structureEntityInfo.pos.y, structureEntityInfo.pos.z));
-            compoundTag3.put("blockPos", this.newIntegerList(structureEntityInfo.blockPos.getX(), structureEntityInfo.blockPos.getY(), structureEntityInfo.blockPos.getZ()));
+            compoundTag3.put(ENTITY_TAG_BLOCKPOS, this.newIntegerList(structureEntityInfo.blockPos.getX(), structureEntityInfo.blockPos.getY(), structureEntityInfo.blockPos.getZ()));
             if (structureEntityInfo.nbt != null) {
                 compoundTag3.put("nbt", structureEntityInfo.nbt);
             }
             listTag4.add(compoundTag3);
         }
-        compoundTag.put("entities", listTag4);
-        compoundTag.put("size", this.newIntegerList(this.size.getX(), this.size.getY(), this.size.getZ()));
+        compoundTag.put(ENTITIES_TAG, listTag4);
+        compoundTag.put(SIZE_TAG, this.newIntegerList(this.size.getX(), this.size.getY(), this.size.getZ()));
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         return compoundTag;
     }
@@ -541,23 +553,23 @@ public class StructureTemplate {
         ListTag listTag3;
         this.palettes.clear();
         this.entityInfoList.clear();
-        ListTag listTag = compoundTag.getList("size", 3);
+        ListTag listTag = compoundTag.getList(SIZE_TAG, 3);
         this.size = new Vec3i(listTag.getInt(0), listTag.getInt(1), listTag.getInt(2));
-        ListTag listTag2 = compoundTag.getList("blocks", 10);
-        if (compoundTag.contains("palettes", 9)) {
-            listTag3 = compoundTag.getList("palettes", 9);
+        ListTag listTag2 = compoundTag.getList(BLOCKS_TAG, 10);
+        if (compoundTag.contains(PALETTE_LIST_TAG, 9)) {
+            listTag3 = compoundTag.getList(PALETTE_LIST_TAG, 9);
             for (i = 0; i < listTag3.size(); ++i) {
                 this.loadPalette(listTag3.getList(i), listTag2);
             }
         } else {
-            this.loadPalette(compoundTag.getList("palette", 10), listTag2);
+            this.loadPalette(compoundTag.getList(PALETTE_TAG, 10), listTag2);
         }
-        listTag3 = compoundTag.getList("entities", 10);
+        listTag3 = compoundTag.getList(ENTITIES_TAG, 10);
         for (i = 0; i < listTag3.size(); ++i) {
             CompoundTag compoundTag2 = listTag3.getCompound(i);
             ListTag listTag4 = compoundTag2.getList("pos", 6);
             Vec3 vec3 = new Vec3(listTag4.getDouble(0), listTag4.getDouble(1), listTag4.getDouble(2));
-            ListTag listTag5 = compoundTag2.getList("blockPos", 3);
+            ListTag listTag5 = compoundTag2.getList(ENTITY_TAG_BLOCKPOS, 3);
             BlockPos blockPos = new BlockPos(listTag5.getInt(0), listTag5.getInt(1), listTag5.getInt(2));
             if (!compoundTag2.contains("nbt")) continue;
             CompoundTag compoundTag3 = compoundTag2.getCompound("nbt");
@@ -577,7 +589,7 @@ public class StructureTemplate {
             CompoundTag compoundTag = listTag2.getCompound(j);
             ListTag listTag3 = compoundTag.getList("pos", 3);
             BlockPos blockPos = new BlockPos(listTag3.getInt(0), listTag3.getInt(1), listTag3.getInt(2));
-            BlockState blockState = simplePalette.stateFor(compoundTag.getInt("state"));
+            BlockState blockState = simplePalette.stateFor(compoundTag.getInt(BLOCK_TAG_STATE));
             CompoundTag compoundTag2 = compoundTag.contains("nbt") ? compoundTag.getCompound("nbt") : null;
             StructureBlockInfo structureBlockInfo = new StructureBlockInfo(blockPos, blockState, compoundTag2);
             StructureTemplate.addToLists(structureBlockInfo, list, list2, list3);

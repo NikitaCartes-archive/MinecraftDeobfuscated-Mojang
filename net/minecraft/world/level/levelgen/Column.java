@@ -12,6 +12,10 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class Column {
+    public static Range around(int i, int j) {
+        return new Range(i - 1, j + 1);
+    }
+
     public static Range inside(int i, int j) {
         return new Range(i, j);
     }
@@ -20,8 +24,16 @@ public abstract class Column {
         return new Ray(i, false);
     }
 
+    public static Column fromHighest(int i) {
+        return new Ray(i + 1, false);
+    }
+
     public static Column above(int i) {
         return new Ray(i, true);
+    }
+
+    public static Column fromLowest(int i) {
+        return new Ray(i - 1, true);
     }
 
     public static Column line() {
@@ -49,6 +61,10 @@ public abstract class Column {
 
     public Column withFloor(OptionalInt optionalInt) {
         return Column.create(optionalInt, this.getCeiling());
+    }
+
+    public Column withCeiling(OptionalInt optionalInt) {
+        return Column.create(this.getFloor(), optionalInt);
     }
 
     public static Optional<Column> scan(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos, int i, Predicate<BlockState> predicate, Predicate<BlockState> predicate2) {

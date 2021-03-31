@@ -22,6 +22,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 public class StackedContents {
+    private static final int EMPTY = 0;
     public final Int2IntMap contents = new Int2IntOpenHashMap();
 
     public void accountSimpleStack(ItemStack itemStack) {

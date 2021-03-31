@@ -24,6 +24,10 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 @Environment(value=EnvType.CLIENT)
 public class ArmorStandModel
 extends ArmorStandArmorModel {
+    private static final String RIGHT_BODY_STICK = "right_body_stick";
+    private static final String LEFT_BODY_STICK = "left_body_stick";
+    private static final String SHOULDER_STICK = "shoulder_stick";
+    private static final String BASE_PLATE = "base_plate";
     private final ModelPart rightBodyStick;
     private final ModelPart leftBodyStick;
     private final ModelPart shoulderStick;
@@ -31,10 +35,10 @@ extends ArmorStandArmorModel {
 
     public ArmorStandModel(ModelPart modelPart) {
         super(modelPart);
-        this.rightBodyStick = modelPart.getChild("right_body_stick");
-        this.leftBodyStick = modelPart.getChild("left_body_stick");
-        this.shoulderStick = modelPart.getChild("shoulder_stick");
-        this.basePlate = modelPart.getChild("base_plate");
+        this.rightBodyStick = modelPart.getChild(RIGHT_BODY_STICK);
+        this.leftBodyStick = modelPart.getChild(LEFT_BODY_STICK);
+        this.shoulderStick = modelPart.getChild(SHOULDER_STICK);
+        this.basePlate = modelPart.getChild(BASE_PLATE);
         this.hat.visible = false;
     }
 
@@ -47,10 +51,10 @@ extends ArmorStandArmorModel {
         partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 16).mirror().addBox(0.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f), PartPose.offset(5.0f, 2.0f, 0.0f));
         partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(8, 0).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f), PartPose.offset(-1.9f, 12.0f, 0.0f));
         partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0f, 0.0f, -1.0f, 2.0f, 11.0f, 2.0f), PartPose.offset(1.9f, 12.0f, 0.0f));
-        partDefinition.addOrReplaceChild("right_body_stick", CubeListBuilder.create().texOffs(16, 0).addBox(-3.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("left_body_stick", CubeListBuilder.create().texOffs(48, 16).addBox(1.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("shoulder_stick", CubeListBuilder.create().texOffs(0, 48).addBox(-4.0f, 10.0f, -1.0f, 8.0f, 2.0f, 2.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("base_plate", CubeListBuilder.create().texOffs(0, 32).addBox(-6.0f, 11.0f, -6.0f, 12.0f, 1.0f, 12.0f), PartPose.offset(0.0f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild(RIGHT_BODY_STICK, CubeListBuilder.create().texOffs(16, 0).addBox(-3.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(LEFT_BODY_STICK, CubeListBuilder.create().texOffs(48, 16).addBox(1.0f, 3.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(SHOULDER_STICK, CubeListBuilder.create().texOffs(0, 48).addBox(-4.0f, 10.0f, -1.0f, 8.0f, 2.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(BASE_PLATE, CubeListBuilder.create().texOffs(0, 32).addBox(-6.0f, 11.0f, -6.0f, 12.0f, 1.0f, 12.0f), PartPose.offset(0.0f, 12.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class MusicManager {
+    private static final int STARTING_DELAY = 100;
     private final Random random = new Random();
     private final Minecraft minecraft;
     @Nullable

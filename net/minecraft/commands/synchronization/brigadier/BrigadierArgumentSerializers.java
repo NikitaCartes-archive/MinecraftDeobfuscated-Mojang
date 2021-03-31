@@ -18,6 +18,9 @@ import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.StringArgumentSerializer;
 
 public class BrigadierArgumentSerializers {
+    private static final byte NUMBER_FLAG_MIN = 1;
+    private static final byte NUMBER_FLAG_MAX = 2;
+
     public static void bootstrap() {
         ArgumentTypes.register("brigadier:bool", BoolArgumentType.class, new EmptyArgumentSerializer<BoolArgumentType>(BoolArgumentType::bool));
         ArgumentTypes.register("brigadier:float", FloatArgumentType.class, new FloatArgumentSerializer());

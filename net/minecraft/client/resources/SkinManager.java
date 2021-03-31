@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SkinManager {
+    public static final String PROPERTY_TEXTURES = "textures";
     private final TextureManager textureManager;
     private final File skinsDirectory;
     private final MinecraftSessionService sessionService;
@@ -49,7 +50,7 @@ public class SkinManager {
             @Override
             public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> load(String string) {
                 GameProfile gameProfile = new GameProfile(null, "dummy_mcdummyface");
-                gameProfile.getProperties().put("textures", new Property("textures", string, ""));
+                gameProfile.getProperties().put(SkinManager.PROPERTY_TEXTURES, new Property(SkinManager.PROPERTY_TEXTURES, string, ""));
                 try {
                     return minecraftSessionService.getTextures(gameProfile, false);
                 } catch (Throwable throwable) {
@@ -119,7 +120,7 @@ public class SkinManager {
     }
 
     public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> getInsecureSkinInformation(GameProfile gameProfile) {
-        Property property = Iterables.getFirst(gameProfile.getProperties().get("textures"), null);
+        Property property = Iterables.getFirst(gameProfile.getProperties().get(PROPERTY_TEXTURES), null);
         if (property == null) {
             return ImmutableMap.of();
         }

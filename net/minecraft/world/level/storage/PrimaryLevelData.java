@@ -11,8 +11,6 @@ import com.mojang.serialization.Lifecycle;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -49,6 +47,7 @@ public class PrimaryLevelData
 implements ServerLevelData,
 WorldData {
     private static final Logger LOGGER = LogManager.getLogger();
+    protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
     private LevelSettings settings;
     private final WorldGenSettings worldGenSettings;
     private final Lifecycle worldGenSettingsLifecycle;
@@ -149,7 +148,7 @@ WorldData {
         compoundTag.put("Version", compoundTag3);
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, registryAccess);
-        WorldGenSettings.CODEC.encodeStart(registryWriteOps, this.worldGenSettings).resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent(tag -> compoundTag.put("WorldGenSettings", (Tag)tag));
+        WorldGenSettings.CODEC.encodeStart(registryWriteOps, this.worldGenSettings).resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent(tag -> compoundTag.put(WORLD_GEN_SETTINGS, (Tag)tag));
         compoundTag.putInt("GameType", this.settings.gameType().getId());
         compoundTag.putInt("SpawnX", this.xSpawn);
         compoundTag.putInt("SpawnY", this.ySpawn);
@@ -417,7 +416,6 @@ WorldData {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Lifecycle worldGenSettingsLifecycle() {
         return this.worldGenSettingsLifecycle;
     }
@@ -474,6 +472,12 @@ WorldData {
     }
 
     @Override
+    @Nullable
+    public UUID getWanderingTraderId() {
+        return this.wanderingTraderId;
+    }
+
+    @Override
     public void setWanderingTraderId(UUID uUID) {
         this.wanderingTraderId = uUID;
     }
@@ -500,7 +504,6 @@ WorldData {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public LevelSettings getLevelSettings() {
         return this.settings.copy();
     }

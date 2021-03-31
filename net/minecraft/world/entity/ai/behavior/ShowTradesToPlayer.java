@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class ShowTradesToPlayer
 extends Behavior<Villager> {
+    private static final int MAX_LOOK_TIME = 900;
+    private static final int STARTING_LOOK_TIME = 40;
     @Nullable
     private ItemStack playerItemStack;
     private final List<ItemStack> displayItems = Lists.newArrayList();

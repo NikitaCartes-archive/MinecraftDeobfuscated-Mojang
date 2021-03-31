@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -66,43 +64,35 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleRespawn(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public DimensionType getDimensionType() {
         return this.dimensionType;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceKey<Level> getDimension() {
         return this.dimension;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getSeed() {
         return this.seed;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public GameType getPlayerGameType() {
         return this.playerGameType;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public GameType getPreviousPlayerGameType() {
         return this.previousPlayerGameType;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isDebug() {
         return this.isDebug;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isFlat() {
         return this.isFlat;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldKeepAllPlayerData() {
         return this.keepAllPlayerData;
     }

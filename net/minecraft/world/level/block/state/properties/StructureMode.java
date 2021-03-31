@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block.state.properties;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringRepresentable;
@@ -29,7 +27,6 @@ public enum StructureMode implements StringRepresentable
         return this.name;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getDisplayName() {
         return this.displayName;
     }

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class SetWalkTargetFromAttackTargetIfTargetOutOfReach
 extends Behavior<Mob> {
+    private static final int PROJECTILE_ATTACK_RANGE_BUFFER = 1;
     private final Function<LivingEntity, Float> speedModifier;
 
     public SetWalkTargetFromAttackTargetIfTargetOutOfReach(float f) {

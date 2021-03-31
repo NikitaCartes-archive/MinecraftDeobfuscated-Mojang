@@ -33,6 +33,8 @@ extends GuiComponent
 implements Widget,
 GuiEventListener {
     private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+    private static final int MAX_ROW = 4;
+    private static final int MAX_ROW_LARGE = 5;
     private final List<OverlayRecipeButton> recipeButtons = Lists.newArrayList();
     private boolean isVisible;
     private int x;

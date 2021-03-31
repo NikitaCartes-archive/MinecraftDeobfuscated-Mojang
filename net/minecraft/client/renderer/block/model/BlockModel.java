@@ -69,6 +69,8 @@ implements UnbakedModel {
     private static final FaceBakery FACE_BAKERY = new FaceBakery();
     @VisibleForTesting
     static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)BlockModel.class), new Deserializer()).registerTypeAdapter((Type)((Object)BlockElement.class), new BlockElement.Deserializer()).registerTypeAdapter((Type)((Object)BlockElementFace.class), new BlockElementFace.Deserializer()).registerTypeAdapter((Type)((Object)BlockFaceUV.class), new BlockFaceUV.Deserializer()).registerTypeAdapter((Type)((Object)ItemTransform.class), new ItemTransform.Deserializer()).registerTypeAdapter((Type)((Object)ItemTransforms.class), new ItemTransforms.Deserializer()).registerTypeAdapter((Type)((Object)ItemOverride.class), new ItemOverride.Deserializer()).create();
+    private static final char REFERENCE_CHAR = '#';
+    public static final String PARTICLE_TEXTURE_REFERENCE = "particle";
     private final List<BlockElement> elements;
     @Nullable
     private final GuiLight guiLight;
@@ -125,6 +127,10 @@ implements UnbakedModel {
         return GuiLight.SIDE;
     }
 
+    public boolean isResolved() {
+        return this.parentLocation == null || this.parent != null && this.parent.isResolved();
+    }
+
     public List<ItemOverride> getOverrides() {
         return this.overrides;
     }
@@ -172,7 +178,7 @@ implements UnbakedModel {
             blockModel.parent = (BlockModel)unbakedModel;
             blockModel = blockModel.parent;
         }
-        HashSet<Material> set3 = Sets.newHashSet(this.getMaterial("particle"));
+        HashSet<Material> set3 = Sets.newHashSet(this.getMaterial(PARTICLE_TEXTURE_REFERENCE));
         for (BlockElement blockElement : this.getElements()) {
             for (BlockElementFace blockElementFace : blockElement.faces.values()) {
                 Material material = this.getMaterial(blockElementFace.texture);
@@ -201,7 +207,7 @@ implements UnbakedModel {
     }
 
     public BakedModel bake(ModelBakery modelBakery, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation, boolean bl) {
-        TextureAtlasSprite textureAtlasSprite = function.apply(this.getMaterial("particle"));
+        TextureAtlasSprite textureAtlasSprite = function.apply(this.getMaterial(PARTICLE_TEXTURE_REFERENCE));
         if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
             return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBakery, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
         }
@@ -314,8 +320,18 @@ implements UnbakedModel {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static class LoopException
+    extends RuntimeException {
+        public LoopException(String string) {
+            super(string);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Deserializer
     implements JsonDeserializer<BlockModel> {
+        private static final boolean DEFAULT_AMBIENT_OCCLUSION = true;
+
         @Override
         public BlockModel deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             JsonObject jsonObject = jsonElement.getAsJsonObject();

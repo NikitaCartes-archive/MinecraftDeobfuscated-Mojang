@@ -23,6 +23,8 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class VillagerMakeLove
 extends Behavior<Villager> {
+    private static final int INTERACT_DIST_SQR = 5;
+    private static final float SPEED_MODIFIER = 0.5f;
     private long birthTimestamp;
 
     public VillagerMakeLove() {

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.lighting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -156,7 +154,6 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public String getDebugData(long l) {
         return super.getDebugData(l) + (((SkyLightSectionStorage)this.storage).isAboveData(l) ? "*" : "");
     }

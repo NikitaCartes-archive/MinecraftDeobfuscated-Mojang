@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 public class ItemParser {
     public static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(new TranslatableComponent("argument.item.tag.disallowed"));
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.item.id.invalid", object));
+    private static final char SYNTAX_START_NBT = '{';
+    private static final char SYNTAX_TAG = '#';
     private static final BiFunction<SuggestionsBuilder, TagCollection<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
     private final StringReader reader;
     private final boolean forTesting;

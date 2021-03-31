@@ -21,8 +21,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -33,6 +31,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundCommandsPacket
 implements Packet<ClientGamePacketListener> {
+    private static final byte MASK_TYPE = 3;
+    private static final byte FLAG_EXECUTABLE = 4;
+    private static final byte FLAG_REDIRECT = 8;
+    private static final byte FLAG_CUSTOM_SUGGESTIONS = 16;
+    private static final byte TYPE_ROOT = 0;
+    private static final byte TYPE_LITERAL = 1;
+    private static final byte TYPE_ARGUMENT = 2;
     private final RootCommandNode<SharedSuggestionProvider> root;
 
     public ClientboundCommandsPacket(RootCommandNode<SharedSuggestionProvider> rootCommandNode) {
@@ -162,7 +167,6 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleCommands(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public RootCommandNode<SharedSuggestionProvider> getRoot() {
         return this.root;
     }

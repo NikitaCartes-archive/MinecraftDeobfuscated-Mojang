@@ -7,8 +7,6 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.gameevent.PositionSource;
@@ -34,7 +32,6 @@ public class VibrationPath {
         return this.origin;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public PositionSource getDestination() {
         return this.destination;
     }

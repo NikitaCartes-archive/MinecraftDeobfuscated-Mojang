@@ -19,6 +19,10 @@ import net.minecraft.client.renderer.RenderType;
 @Environment(value=EnvType.CLIENT)
 public class ShieldModel
 extends Model {
+    private static final String PLATE = "plate";
+    private static final String HANDLE = "handle";
+    private static final int SHIELD_WIDTH = 10;
+    private static final int SHIELD_HEIGHT = 20;
     private final ModelPart root;
     private final ModelPart plate;
     private final ModelPart handle;
@@ -26,15 +30,15 @@ extends Model {
     public ShieldModel(ModelPart modelPart) {
         super(RenderType::entitySolid);
         this.root = modelPart;
-        this.plate = modelPart.getChild("plate");
-        this.handle = modelPart.getChild("handle");
+        this.plate = modelPart.getChild(PLATE);
+        this.handle = modelPart.getChild(HANDLE);
     }
 
     public static LayerDefinition createLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0f, -11.0f, -2.0f, 12.0f, 22.0f, 1.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("handle", CubeListBuilder.create().texOffs(26, 0).addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(PLATE, CubeListBuilder.create().texOffs(0, 0).addBox(-6.0f, -11.0f, -2.0f, 12.0f, 22.0f, 1.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(HANDLE, CubeListBuilder.create().texOffs(26, 0).addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

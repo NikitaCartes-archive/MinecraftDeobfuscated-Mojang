@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.effect;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 
 public enum MobEffectCategory {
@@ -18,7 +16,6 @@ public enum MobEffectCategory {
         this.tooltipFormatting = chatFormatting;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ChatFormatting getTooltipFormatting() {
         return this.tooltipFormatting;
     }

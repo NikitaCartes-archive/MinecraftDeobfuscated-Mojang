@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.phys.shapes;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
@@ -58,7 +56,24 @@ public abstract class DiscreteVoxelShape {
 
     public abstract int lastFull(Direction.Axis var1);
 
-    @Environment(value=EnvType.CLIENT)
+    public int firstFull(Direction.Axis axis, int i, int j) {
+        int k = this.getSize(axis);
+        if (i < 0 || j < 0) {
+            return k;
+        }
+        Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
+        Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);
+        if (i >= this.getSize(axis2) || j >= this.getSize(axis3)) {
+            return k;
+        }
+        AxisCycle axisCycle = AxisCycle.between(Direction.Axis.X, axis);
+        for (int l = 0; l < k; ++l) {
+            if (!this.isFull(axisCycle, l, i, j)) continue;
+            return l;
+        }
+        return k;
+    }
+
     public int lastFull(Direction.Axis axis, int i, int j) {
         if (i < 0 || j < 0) {
             return 0;
@@ -93,14 +108,12 @@ public abstract class DiscreteVoxelShape {
         return this.getSize(Direction.Axis.Z);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void forAllEdges(IntLineConsumer intLineConsumer, boolean bl) {
         this.forAllAxisEdges(intLineConsumer, AxisCycle.NONE, bl);
         this.forAllAxisEdges(intLineConsumer, AxisCycle.FORWARD, bl);
         this.forAllAxisEdges(intLineConsumer, AxisCycle.BACKWARD, bl);
     }
 
-    @Environment(value=EnvType.CLIENT)
     private void forAllAxisEdges(IntLineConsumer intLineConsumer, AxisCycle axisCycle, boolean bl) {
         AxisCycle axisCycle2 = axisCycle.inverse();
         int i = this.getSize(axisCycle2.cycle(Direction.Axis.X));

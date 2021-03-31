@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class FontTexture
 extends AbstractTexture {
+    private static final int SIZE = 256;
     private final ResourceLocation name;
     private final RenderType normalType;
     private final RenderType seeThroughType;

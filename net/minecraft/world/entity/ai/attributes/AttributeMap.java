@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -98,7 +96,6 @@ public class AttributeMap {
         });
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void assignValues(AttributeMap attributeMap) {
         attributeMap.attributes.values().forEach(attributeInstance -> {
             AttributeInstance attributeInstance2 = this.getInstance(attributeInstance.getAttribute());

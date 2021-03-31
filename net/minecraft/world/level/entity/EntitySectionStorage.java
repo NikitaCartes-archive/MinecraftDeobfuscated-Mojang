@@ -19,6 +19,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntitySection;
@@ -124,6 +125,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
         this.sectionIds.remove(l);
     }
 
+    @VisibleForDebug
     public int count() {
         return this.sectionIds.size();
     }

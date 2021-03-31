@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class IdMapper<T>
 implements IdMap<T> {
+    public static final int DEFAULT = -1;
     private int nextId;
     private final IdentityHashMap<T, Integer> tToId;
     private final List<T> idToT;
@@ -60,6 +61,10 @@ implements IdMap<T> {
     @Override
     public Iterator<T> iterator() {
         return Iterators.filter(this.idToT.iterator(), Predicates.notNull());
+    }
+
+    public boolean contains(int i) {
+        return this.byId(i) != null;
     }
 
     public int size() {

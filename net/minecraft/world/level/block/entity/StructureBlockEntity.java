@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -39,6 +37,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class StructureBlockEntity
 extends BlockEntity {
+    private static final int SCAN_CORNER_BLOCKS_RANGE = 5;
+    public static final int MAX_OFFSET_PER_AXIS = 48;
+    public static final int MAX_SIZE_PER_AXIS = 48;
+    public static final String AUTHOR_TAG = "author";
     private ResourceLocation structureName;
     private String author = "";
     private String metaData = "";
@@ -63,7 +65,7 @@ extends BlockEntity {
     public CompoundTag save(CompoundTag compoundTag) {
         super.save(compoundTag);
         compoundTag.putString("name", this.getStructureName());
-        compoundTag.putString("author", this.author);
+        compoundTag.putString(AUTHOR_TAG, this.author);
         compoundTag.putString("metadata", this.metaData);
         compoundTag.putInt("posX", this.structurePos.getX());
         compoundTag.putInt("posY", this.structurePos.getY());
@@ -87,7 +89,7 @@ extends BlockEntity {
     public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
         this.setStructureName(compoundTag.getString("name"));
-        this.author = compoundTag.getString("author");
+        this.author = compoundTag.getString(AUTHOR_TAG);
         this.metaData = compoundTag.getString("metadata");
         int i = Mth.clamp(compoundTag.getInt("posX"), -48, 48);
         int j = Mth.clamp(compoundTag.getInt("posY"), -48, 48);
@@ -177,7 +179,6 @@ extends BlockEntity {
         this.author = livingEntity.getName().getString();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos getStructurePos() {
         return this.structurePos;
     }
@@ -194,7 +195,6 @@ extends BlockEntity {
         this.structureSize = vec3i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Mirror getMirror() {
         return this.mirror;
     }
@@ -211,7 +211,6 @@ extends BlockEntity {
         this.rotation = rotation;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getMetaData() {
         return this.metaData;
     }
@@ -232,7 +231,6 @@ extends BlockEntity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isIgnoreEntities() {
         return this.ignoreEntities;
     }
@@ -241,7 +239,6 @@ extends BlockEntity {
         this.ignoreEntities = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getIntegrity() {
         return this.integrity;
     }
@@ -250,7 +247,6 @@ extends BlockEntity {
         this.integrity = f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getSeed() {
         return this.seed;
     }
@@ -269,11 +265,11 @@ extends BlockEntity {
         BlockPos blockPos3 = new BlockPos(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80);
         Stream<BlockPos> stream = this.getRelatedCorners(blockPos2, blockPos3);
         return StructureBlockEntity.calculateEnclosingBoundingBox(blockPos, stream).filter(boundingBox -> {
-            int i = boundingBox.x1 - boundingBox.x0;
-            int j = boundingBox.y1 - boundingBox.y0;
-            int k = boundingBox.z1 - boundingBox.z0;
+            int i = boundingBox.maxX() - boundingBox.minX();
+            int j = boundingBox.maxY() - boundingBox.minY();
+            int k = boundingBox.maxZ() - boundingBox.minZ();
             if (i > 1 && j > 1 && k > 1) {
-                this.structurePos = new BlockPos(boundingBox.x0 - blockPos.getX() + 1, boundingBox.y0 - blockPos.getY() + 1, boundingBox.z0 - blockPos.getZ() + 1);
+                this.structurePos = new BlockPos(boundingBox.minX() - blockPos.getX() + 1, boundingBox.minY() - blockPos.getY() + 1, boundingBox.minZ() - blockPos.getZ() + 1);
                 this.structureSize = new Vec3i(i - 1, j - 1, k - 1);
                 this.setChanged();
                 BlockState blockState = this.level.getBlockState(blockPos);
@@ -415,7 +411,6 @@ extends BlockEntity {
         this.powered = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean getShowAir() {
         return this.showAir;
     }
@@ -424,13 +419,16 @@ extends BlockEntity {
         this.showAir = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean getShowBoundingBox() {
         return this.showBoundingBox;
     }
 
     public void setShowBoundingBox(boolean bl) {
         this.showBoundingBox = bl;
+    }
+
+    private static /* synthetic */ void method_35293(ServerLevel serverLevel, BlockPos blockPos) {
+        serverLevel.setBlock(blockPos, Blocks.STRUCTURE_VOID.defaultBlockState(), 2);
     }
 
     public static enum UpdateType {

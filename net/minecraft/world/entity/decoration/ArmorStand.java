@@ -5,8 +5,6 @@ package net.minecraft.world.entity.decoration;
 
 import java.util.List;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Rotations;
@@ -49,6 +47,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class ArmorStand
 extends LivingEntity {
+    public static final int WOBBLE_TIME = 5;
+    private static final boolean ENABLE_ARMS = true;
     private static final Rotations DEFAULT_HEAD_POSE = new Rotations(0.0f, 0.0f, 0.0f);
     private static final Rotations DEFAULT_BODY_POSE = new Rotations(0.0f, 0.0f, 0.0f);
     private static final Rotations DEFAULT_LEFT_ARM_POSE = new Rotations(-10.0f, 0.0f, -10.0f);
@@ -57,6 +57,16 @@ extends LivingEntity {
     private static final Rotations DEFAULT_RIGHT_LEG_POSE = new Rotations(1.0f, 0.0f, 1.0f);
     private static final EntityDimensions MARKER_DIMENSIONS = new EntityDimensions(0.0f, 0.0f, true);
     private static final EntityDimensions BABY_DIMENSIONS = EntityType.ARMOR_STAND.getDimensions().scale(0.5f);
+    private static final double FEET_OFFSET = 0.1;
+    private static final double CHEST_OFFSET = 0.9;
+    private static final double LEGS_OFFSET = 0.4;
+    private static final double HEAD_OFFSET = 1.6;
+    public static final int DISABLE_TAKING_OFFSET = 8;
+    public static final int DISABLE_PUTTING_OFFSET = 16;
+    public static final int CLIENT_FLAG_SMALL = 1;
+    public static final int CLIENT_FLAG_SHOW_ARMS = 4;
+    public static final int CLIENT_FLAG_NO_BASEPLATE = 8;
+    public static final int CLIENT_FLAG_MARKER = 16;
     public static final EntityDataAccessor<Byte> DATA_CLIENT_FLAGS = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.BYTE);
     public static final EntityDataAccessor<Rotations> DATA_HEAD_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
     public static final EntityDataAccessor<Rotations> DATA_BODY_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
@@ -439,7 +449,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 32) {
             if (this.level.isClientSide) {
@@ -452,7 +461,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         double e = this.getBoundingBox().getSize() * 4.0;
         if (Double.isNaN(e) || e == 0.0) {
@@ -681,22 +689,18 @@ extends LivingEntity {
         return this.bodyPose;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Rotations getLeftArmPose() {
         return this.leftArmPose;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Rotations getRightArmPose() {
         return this.rightArmPose;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Rotations getLeftLegPose() {
         return this.leftLegPose;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Rotations getRightLegPose() {
         return this.rightLegPose;
     }
@@ -769,7 +773,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLightProbePosition(float f) {
         if (this.isMarker()) {
             AABB aABB = this.getDimensionsMarker(false).makeBoundingBox(this.position());
@@ -790,7 +793,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return new ItemStack(Items.ARMOR_STAND);
     }

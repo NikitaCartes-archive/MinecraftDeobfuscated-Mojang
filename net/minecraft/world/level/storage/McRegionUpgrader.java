@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 
 public class McRegionUpgrader {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String MCREGION_EXTENSION = ".mcr";
 
     static boolean convertLevel(LevelStorageSource.LevelStorageAccess levelStorageAccess, ProgressListener progressListener) {
         progressListener.progressStagePercentage(0);
@@ -94,7 +95,7 @@ public class McRegionUpgrader {
     private static void convertRegion(RegistryAccess.RegistryHolder registryHolder, File file, File file2, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
         String string = file2.getName();
         try (RegionFile regionFile = new RegionFile(file2, file, true);
-             RegionFile regionFile2 = new RegionFile(new File(file, string.substring(0, string.length() - ".mcr".length()) + ".mca"), file, true);){
+             RegionFile regionFile2 = new RegionFile(new File(file, string.substring(0, string.length() - MCREGION_EXTENSION.length()) + ".mca"), file, true);){
             for (int k = 0; k < 32; ++k) {
                 int l;
                 for (l = 0; l < 32; ++l) {
@@ -134,7 +135,7 @@ public class McRegionUpgrader {
 
     private static void addRegionFiles(File file2, Collection<File> collection) {
         File file22 = new File(file2, "region");
-        File[] files = file22.listFiles((file, string) -> string.endsWith(".mcr"));
+        File[] files = file22.listFiles((file, string) -> string.endsWith(MCREGION_EXTENSION));
         if (files != null) {
             Collections.addAll(collection, files);
         }

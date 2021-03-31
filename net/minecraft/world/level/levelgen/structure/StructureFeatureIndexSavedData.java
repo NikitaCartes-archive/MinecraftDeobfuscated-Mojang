@@ -10,6 +10,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 public class StructureFeatureIndexSavedData
 extends SavedData {
+    private static final String TAG_REMAINING_INDEXES = "Remaining";
+    private static final String TAG_All_INDEXES = "All";
     private final LongSet all;
     private final LongSet remaining;
 
@@ -23,13 +25,13 @@ extends SavedData {
     }
 
     public static StructureFeatureIndexSavedData load(CompoundTag compoundTag) {
-        return new StructureFeatureIndexSavedData(new LongOpenHashSet(compoundTag.getLongArray("All")), new LongOpenHashSet(compoundTag.getLongArray("Remaining")));
+        return new StructureFeatureIndexSavedData(new LongOpenHashSet(compoundTag.getLongArray(TAG_All_INDEXES)), new LongOpenHashSet(compoundTag.getLongArray(TAG_REMAINING_INDEXES)));
     }
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
-        compoundTag.putLongArray("All", this.all.toLongArray());
-        compoundTag.putLongArray("Remaining", this.remaining.toLongArray());
+        compoundTag.putLongArray(TAG_All_INDEXES, this.all.toLongArray());
+        compoundTag.putLongArray(TAG_REMAINING_INDEXES, this.remaining.toLongArray());
         return compoundTag;
     }
 

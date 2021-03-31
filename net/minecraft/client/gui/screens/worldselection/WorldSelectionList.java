@@ -157,6 +157,14 @@ extends ObjectSelectionList<WorldListEntry> {
     public final class WorldListEntry
     extends ObjectSelectionList.Entry<WorldListEntry>
     implements AutoCloseable {
+        private static final int ICON_WIDTH = 32;
+        private static final int ICON_HEIGHT = 32;
+        private static final int ICON_OVERLAY_X_JOIN = 0;
+        private static final int ICON_OVERLAY_X_JOIN_WITH_NOTIFY = 32;
+        private static final int ICON_OVERLAY_X_WARNING = 64;
+        private static final int ICON_OVERLAY_X_ERROR = 96;
+        private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
+        private static final int ICON_OVERLAY_Y_SELECTED = 32;
         private final Minecraft minecraft;
         private final SelectWorldScreen screen;
         private final LevelSummary summary;
@@ -405,6 +413,10 @@ extends ObjectSelectionList<WorldListEntry> {
             if (this.icon != null) {
                 this.icon.close();
             }
+        }
+
+        public String getLevelName() {
+            return this.summary.getLevelName();
         }
     }
 }

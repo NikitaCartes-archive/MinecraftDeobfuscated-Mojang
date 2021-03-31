@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class HopperMenu
 extends AbstractContainerMenu {
+    public static final int CONTAINER_SIZE = 5;
     private final Container hopper;
 
     public HopperMenu(int i, Inventory inventory) {

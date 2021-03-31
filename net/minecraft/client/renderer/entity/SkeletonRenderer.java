@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 
 @Environment(value=EnvType.CLIENT)
@@ -31,6 +32,16 @@ extends HumanoidMobRenderer<AbstractSkeleton, SkeletonModel<AbstractSkeleton>> {
     @Override
     public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
         return SKELETON_LOCATION;
+    }
+
+    @Override
+    protected boolean isShaking(AbstractSkeleton abstractSkeleton) {
+        return abstractSkeleton.isShaking();
+    }
+
+    @Override
+    protected /* synthetic */ boolean isShaking(LivingEntity livingEntity) {
+        return this.isShaking((AbstractSkeleton)livingEntity);
     }
 }
 

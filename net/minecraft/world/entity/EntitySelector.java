@@ -23,6 +23,9 @@ public final class EntitySelector {
     public static final Predicate<Entity> ATTACK_ALLOWED = entity -> !(entity instanceof Player) || !entity.isSpectator() && !((Player)entity).isCreative() && entity.level.getDifficulty() != Difficulty.PEACEFUL;
     public static final Predicate<Entity> NO_SPECTATORS = entity -> !entity.isSpectator();
 
+    private EntitySelector() {
+    }
+
     public static Predicate<Entity> withinDistance(double d, double e, double f, double g) {
         double h = g * g;
         return entity -> entity != null && entity.distanceToSqr(d, e, f) <= h;

@@ -19,6 +19,8 @@ import net.minecraft.world.level.Level;
 
 public class MilkBucketItem
 extends Item {
+    private static final int DRINK_DURATION = 32;
+
     public MilkBucketItem(Item.Properties properties) {
         super(properties);
     }

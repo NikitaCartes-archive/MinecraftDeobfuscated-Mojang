@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ShulkerBoxMenu
 extends AbstractContainerMenu {
+    private static final int CONTAINER_SIZE = 27;
     private final Container container;
 
     public ShulkerBoxMenu(int i, Inventory inventory) {

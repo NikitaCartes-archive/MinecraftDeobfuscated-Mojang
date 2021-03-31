@@ -12,6 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 public class DefaultPlayerSkin {
     private static final ResourceLocation STEVE_SKIN_LOCATION = new ResourceLocation("textures/entity/steve.png");
     private static final ResourceLocation ALEX_SKIN_LOCATION = new ResourceLocation("textures/entity/alex.png");
+    private static final String STEVE_MODEL = "default";
+    private static final String ALEX_MODEL = "slim";
 
     public static ResourceLocation getDefaultSkin() {
         return STEVE_SKIN_LOCATION;
@@ -26,9 +28,9 @@ public class DefaultPlayerSkin {
 
     public static String getSkinModelName(UUID uUID) {
         if (DefaultPlayerSkin.isAlexDefault(uUID)) {
-            return "slim";
+            return ALEX_MODEL;
         }
-        return "default";
+        return STEVE_MODEL;
     }
 
     private static boolean isAlexDefault(UUID uUID) {

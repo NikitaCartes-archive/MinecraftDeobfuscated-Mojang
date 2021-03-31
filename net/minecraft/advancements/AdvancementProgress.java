@@ -18,8 +18,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.network.FriendlyByteBuf;
@@ -111,7 +109,6 @@ implements Comparable<AdvancementProgress> {
         return this.criteria.get(string);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getPercent() {
         if (this.criteria.isEmpty()) {
             return 0.0f;
@@ -122,7 +119,6 @@ implements Comparable<AdvancementProgress> {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public String getProgressText() {
         if (this.criteria.isEmpty()) {
             return null;
@@ -135,7 +131,6 @@ implements Comparable<AdvancementProgress> {
         return j + "/" + i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private int countCompletedRequirements() {
         int i = 0;
         for (String[] strings : this.requirements) {

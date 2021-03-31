@@ -10,8 +10,6 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.BlockUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -70,6 +68,7 @@ extends Entity {
     private static final EntityDataAccessor<Integer> DATA_ID_DISPLAY_OFFSET = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ID_CUSTOM_DISPLAY = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.BOOLEAN);
     private static final ImmutableMap<Pose, ImmutableList<Integer>> POSE_DISMOUNT_HEIGHTS = ImmutableMap.of(Pose.STANDING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(-1)), Pose.CROUCHING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(-1)), Pose.SWIMMING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1)));
+    protected static final float WATER_SLOWDOWN_FACTOR = 0.95f;
     private boolean flipped;
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), enumMap -> {
         Vec3i vec3i = Direction.WEST.getNormal();
@@ -97,11 +96,8 @@ extends Entity {
     private double lz;
     private double lyr;
     private double lxr;
-    @Environment(value=EnvType.CLIENT)
     private double lxd;
-    @Environment(value=EnvType.CLIENT)
     private double lyd;
-    @Environment(value=EnvType.CLIENT)
     private double lzd;
 
     protected AbstractMinecart(EntityType<?> entityType, Level level) {
@@ -261,7 +257,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateHurt() {
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
@@ -559,7 +554,6 @@ extends Entity {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getPosOffs(double d, double e, double f, double g) {
         BlockState blockState;
         int k;
@@ -637,7 +631,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AABB getBoundingBoxForCulling() {
         AABB aABB = this.getBoundingBox();
         if (this.hasCustomDisplay()) {
@@ -726,7 +719,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
         this.lx = d;
         this.ly = e;
@@ -738,7 +730,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpMotion(double d, double e, double f) {
         this.lxd = d;
         this.lyd = e;
@@ -818,7 +809,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         Item item;
         switch (this.getMinecartType()) {

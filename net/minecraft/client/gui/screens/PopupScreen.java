@@ -18,6 +18,9 @@ import net.minecraft.network.chat.FormattedText;
 @Environment(value=EnvType.CLIENT)
 public class PopupScreen
 extends Screen {
+    private static final int BUTTON_PADDING = 20;
+    private static final int BUTTON_MARGIN = 5;
+    private static final int BUTTON_HEIGHT = 20;
     private final FormattedText message;
     private final ImmutableList<ButtonOption> buttonOptions;
     private MultiLineLabel messageLines = MultiLineLabel.EMPTY;

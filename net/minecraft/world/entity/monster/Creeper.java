@@ -4,10 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.Collection;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -48,7 +44,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-@EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=PowerableMob.class)})
 public class Creeper
 extends Monster
 implements PowerableMob {
@@ -190,7 +185,6 @@ implements PowerableMob {
         return this.entityData.get(DATA_IS_POWERED);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getSwelling(float f) {
         return Mth.lerp(f, this.oldSwell, this.swell) / (float)(this.maxSwell - 2);
     }

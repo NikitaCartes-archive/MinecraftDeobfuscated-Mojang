@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.ai;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -44,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 public class Brain<E extends LivingEntity> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Supplier<Codec<Brain<E>>> codec;
+    private static final int SCHEDULE_UPDATE_DELAY = 20;
     private final Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> memories = Maps.newHashMap();
     private final Map<SensorType<? extends Sensor<? super E>>, Sensor<? super E>> sensors = Maps.newLinkedHashMap();
     private final Map<Integer, Map<Activity, Set<Behavior<? super E>>>> availableBehaviorsByPriority = Maps.newTreeMap();
@@ -158,6 +161,12 @@ public class Brain<E extends LivingEntity> {
         return this.memories.get(memoryModuleType).map(ExpirableValue::getValue);
     }
 
+    @Deprecated
+    @VisibleForDebug
+    public Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> getMemories() {
+        return this.memories;
+    }
+
     public <U> boolean isMemoryValue(MemoryModuleType<U> memoryModuleType, U object) {
         if (!this.hasMemoryValue(memoryModuleType)) {
             return false;
@@ -186,6 +195,13 @@ public class Brain<E extends LivingEntity> {
     }
 
     @Deprecated
+    @VisibleForDebug
+    public Set<Activity> getActiveActivities() {
+        return this.activeActivities;
+    }
+
+    @Deprecated
+    @VisibleForDebug
     public List<Behavior<? super E>> getRunningBehaviors() {
         ObjectArrayList<Behavior<Behavior<E>>> list = new ObjectArrayList<Behavior<Behavior<E>>>();
         for (Map<Activity, Set<Behavior<E>>> map : this.availableBehaviorsByPriority.values()) {
@@ -287,6 +303,11 @@ public class Brain<E extends LivingEntity> {
         for (Pair pair : immutableList) {
             this.availableBehaviorsByPriority.computeIfAbsent((Integer)pair.getFirst(), (Function<Integer, Map<Activity, Set<Behavior<E>>>>)((Function<Integer, Map>)integer -> Maps.newHashMap())).computeIfAbsent(activity2, activity -> Sets.newLinkedHashSet()).add(pair.getSecond());
         }
+    }
+
+    @VisibleForTesting
+    public void removeAllBehaviors() {
+        this.availableBehaviorsByPriority.clear();
     }
 
     public boolean isActive(Activity activity) {

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 @Unmodifiable
 public class LockCode {
     public static final LockCode NO_LOCK = new LockCode("");
+    public static final String TAG_LOCK = "Lock";
     private final String key;
 
     public LockCode(String string) {
@@ -22,13 +23,13 @@ public class LockCode {
 
     public void addToTag(CompoundTag compoundTag) {
         if (!this.key.isEmpty()) {
-            compoundTag.putString("Lock", this.key);
+            compoundTag.putString(TAG_LOCK, this.key);
         }
     }
 
     public static LockCode fromTag(CompoundTag compoundTag) {
-        if (compoundTag.contains("Lock", 8)) {
-            return new LockCode(compoundTag.getString("Lock"));
+        if (compoundTag.contains(TAG_LOCK, 8)) {
+            return new LockCode(compoundTag.getString(TAG_LOCK));
         }
         return NO_LOCK;
     }

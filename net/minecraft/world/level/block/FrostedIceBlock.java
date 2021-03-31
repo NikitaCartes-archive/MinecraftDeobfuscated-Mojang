@@ -4,10 +4,9 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +22,10 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class FrostedIceBlock
 extends IceBlock {
+    public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+    private static final int NEIGHBORS_TO_AGE = 4;
+    private static final int NEIGHBORS_TO_MELT = 2;
 
     public FrostedIceBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -40,7 +42,7 @@ extends IceBlock {
         if ((random.nextInt(3) == 0 || this.fewerNeigboursThan(serverLevel, blockPos, 4)) && serverLevel.getMaxLocalRawBrightness(blockPos) > 11 - blockState.getValue(AGE) - blockState.getLightBlock(serverLevel, blockPos) && this.slightlyMelt(blockState, serverLevel, blockPos)) {
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             for (Direction direction : Direction.values()) {
-                mutableBlockPos.setWithOffset(blockPos, direction);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
                 BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
                 if (!blockState2.is(this) || this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) continue;
                 serverLevel.getBlockTicks().scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
@@ -72,7 +74,7 @@ extends IceBlock {
         int j = 0;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             if (!blockGetter.getBlockState(mutableBlockPos).is(this) || ++j < i) continue;
             return false;
         }
@@ -85,7 +87,6 @@ extends IceBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return ItemStack.EMPTY;
     }

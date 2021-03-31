@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public class ChestLidController {
@@ -22,7 +20,6 @@ public class ChestLidController {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getOpenness(float f) {
         return Mth.lerp(f, this.oOpenness, this.openness);
     }

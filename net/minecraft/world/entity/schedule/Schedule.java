@@ -14,6 +14,8 @@ import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import net.minecraft.world.entity.schedule.Timeline;
 
 public class Schedule {
+    public static final int WORK_START_TIME = 2000;
+    public static final int TOTAL_WORK_TIME = 7000;
     public static final Schedule EMPTY = Schedule.register("empty").changeActivityAt(0, Activity.IDLE).build();
     public static final Schedule SIMPLE = Schedule.register("simple").changeActivityAt(5000, Activity.WORK).changeActivityAt(11000, Activity.REST).build();
     public static final Schedule VILLAGER_BABY = Schedule.register("villager_baby").changeActivityAt(10, Activity.IDLE).changeActivityAt(3000, Activity.PLAY).changeActivityAt(6000, Activity.IDLE).changeActivityAt(10000, Activity.PLAY).changeActivityAt(12000, Activity.REST).build();

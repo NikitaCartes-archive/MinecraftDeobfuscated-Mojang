@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +15,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenTickList;
 import net.minecraft.sounds.SoundEvent;
@@ -165,7 +164,6 @@ implements WorldGenLevel {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public float getShade(Direction direction, boolean bl) {
         return 1.0f;
     }
@@ -302,6 +300,12 @@ implements WorldGenLevel {
     }
 
     @Override
+    @Nullable
+    public MinecraftServer getServer() {
+        return this.level.getServer();
+    }
+
+    @Override
     public ChunkSource getChunkSource() {
         return this.level.getChunkSource();
     }
@@ -360,6 +364,11 @@ implements WorldGenLevel {
     @Override
     public boolean isStateAtPosition(BlockPos blockPos, Predicate<BlockState> predicate) {
         return predicate.test(this.getBlockState(blockPos));
+    }
+
+    @Override
+    public boolean isFluidAtPosition(BlockPos blockPos, Predicate<FluidState> predicate) {
+        return predicate.test(this.getFluidState(blockPos));
     }
 
     @Override

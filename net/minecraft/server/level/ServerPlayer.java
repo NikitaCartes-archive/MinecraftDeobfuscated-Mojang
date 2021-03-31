@@ -148,6 +148,8 @@ import org.jetbrains.annotations.Nullable;
 public class ServerPlayer
 extends Player {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
+    private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
     public ServerGamePacketListenerImpl connection;
     public final MinecraftServer server;
     public final ServerPlayerGameMode gameMode;
@@ -1188,6 +1190,10 @@ extends Player {
         this.textFilteringEnabled = serverboundClientInformationPacket.isTextFilteringEnabled();
         this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)serverboundClientInformationPacket.getModelCustomisation());
         this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)(serverboundClientInformationPacket.getMainHand() != HumanoidArm.LEFT ? 1 : 0));
+    }
+
+    public boolean canChatInColor() {
+        return this.canChatColor;
     }
 
     public ChatVisiblity getChatVisibility() {

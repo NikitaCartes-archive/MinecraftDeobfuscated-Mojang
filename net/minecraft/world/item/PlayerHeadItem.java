@@ -18,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PlayerHeadItem
 extends StandingAndWallBlockItem {
+    public static final String TAG_SKULL_OWNER = "SkullOwner";
+
     public PlayerHeadItem(Block block, Block block2, Item.Properties properties) {
         super(block, block2, properties);
     }
@@ -28,9 +30,9 @@ extends StandingAndWallBlockItem {
             CompoundTag compoundTag2;
             String string = null;
             CompoundTag compoundTag = itemStack.getTag();
-            if (compoundTag.contains("SkullOwner", 8)) {
-                string = compoundTag.getString("SkullOwner");
-            } else if (compoundTag.contains("SkullOwner", 10) && (compoundTag2 = compoundTag.getCompound("SkullOwner")).contains("Name", 8)) {
+            if (compoundTag.contains(TAG_SKULL_OWNER, 8)) {
+                string = compoundTag.getString(TAG_SKULL_OWNER);
+            } else if (compoundTag.contains(TAG_SKULL_OWNER, 10) && (compoundTag2 = compoundTag.getCompound(TAG_SKULL_OWNER)).contains("Name", 8)) {
                 string = compoundTag2.getString("Name");
             }
             if (string != null) {
@@ -43,10 +45,10 @@ extends StandingAndWallBlockItem {
     @Override
     public boolean verifyTagAfterLoad(CompoundTag compoundTag) {
         super.verifyTagAfterLoad(compoundTag);
-        if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
-            GameProfile gameProfile = new GameProfile(null, compoundTag.getString("SkullOwner"));
+        if (compoundTag.contains(TAG_SKULL_OWNER, 8) && !StringUtils.isBlank(compoundTag.getString(TAG_SKULL_OWNER))) {
+            GameProfile gameProfile = new GameProfile(null, compoundTag.getString(TAG_SKULL_OWNER));
             gameProfile = SkullBlockEntity.updateGameprofile(gameProfile);
-            compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+            compoundTag.put(TAG_SKULL_OWNER, NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
             return true;
         }
         return false;

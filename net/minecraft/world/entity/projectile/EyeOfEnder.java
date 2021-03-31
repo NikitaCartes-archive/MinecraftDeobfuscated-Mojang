@@ -3,10 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,7 +24,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-@EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public class EyeOfEnder
 extends Entity
 implements ItemSupplier {
@@ -70,7 +65,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         double e = this.getBoundingBox().getSize() * 4.0;
         if (Double.isNaN(e)) {
@@ -100,7 +94,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpMotion(double d, double e, double f) {
         this.setDeltaMovement(d, e, f);
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {

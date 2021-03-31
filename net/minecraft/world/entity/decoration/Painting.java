@@ -6,8 +6,6 @@ package net.minecraft.world.entity.decoration;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Iterator;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -62,7 +60,6 @@ extends HangingEntity {
         this.setDirection(direction);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Painting(Level level, BlockPos blockPos, Direction direction, Motive motive) {
         this(level, blockPos, direction);
         this.motive = motive;
@@ -126,7 +123,6 @@ extends HangingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
         BlockPos blockPos = this.pos.offset(d - this.getX(), e - this.getY(), f - this.getZ());
         this.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
@@ -138,7 +134,6 @@ extends HangingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         return new ItemStack(Items.PAINTING);
     }

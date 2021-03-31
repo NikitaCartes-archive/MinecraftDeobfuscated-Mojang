@@ -16,9 +16,7 @@ public class WeighedRandom {
 
     public static int getTotalWeight(List<? extends WeighedRandomItem> list) {
         long l = 0L;
-        int j = list.size();
-        for (int i = 0; i < j; ++i) {
-            WeighedRandomItem weighedRandomItem = list.get(i);
+        for (WeighedRandomItem weighedRandomItem : list) {
             l += (long)weighedRandomItem.weight;
         }
         if (l > Integer.MAX_VALUE) {
@@ -39,9 +37,7 @@ public class WeighedRandom {
     }
 
     public static <T extends WeighedRandomItem> Optional<T> getWeightedItem(List<T> list, int i) {
-        int k = list.size();
-        for (int j = 0; j < k; ++j) {
-            WeighedRandomItem weighedRandomItem = (WeighedRandomItem)list.get(j);
+        for (WeighedRandomItem weighedRandomItem : list) {
             if ((i -= weighedRandomItem.weight) >= 0) continue;
             return Optional.of(weighedRandomItem);
         }

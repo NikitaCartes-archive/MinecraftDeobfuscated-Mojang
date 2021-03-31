@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 @Environment(value=EnvType.CLIENT)
 public class AndCondition
 implements Condition {
+    public static final String TOKEN = "AND";
     private final Iterable<? extends Condition> conditions;
 
     public AndCondition(Iterable<? extends Condition> iterable) {

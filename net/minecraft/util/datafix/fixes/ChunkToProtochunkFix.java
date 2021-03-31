@@ -25,6 +25,8 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class ChunkToProtochunkFix
 extends DataFix {
+    private static final int NUM_SECTIONS = 16;
+
     public ChunkToProtochunkFix(Schema schema, boolean bl) {
         super(schema, bl);
     }

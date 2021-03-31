@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.BaseComponent;
@@ -125,7 +123,6 @@ implements ContextAwareComponent {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         this.decompose();
         for (FormattedText formattedText : this.decomposedParts) {

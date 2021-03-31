@@ -8,8 +8,6 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.util.Mth;
@@ -22,6 +20,9 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 public class TheEndBiomeSource
 extends BiomeSource {
     public static final Codec<TheEndBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(theEndBiomeSource -> theEndBiomeSource.biomes), ((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(theEndBiomeSource -> theEndBiomeSource.seed)).apply((Applicative<TheEndBiomeSource, ?>)instance, instance.stable(TheEndBiomeSource::new)));
+    private static final float ISLAND_THRESHOLD = -0.9f;
+    public static final int ISLAND_CHUNK_DISTANCE = 64;
+    private static final long ISLAND_CHUNK_DISTANCE_SQR = 4096L;
     private final SimplexNoise islandNoise;
     private final Registry<Biome> biomes;
     private final long seed;
@@ -55,7 +56,6 @@ extends BiomeSource {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public BiomeSource withSeed(long l) {
         return new TheEndBiomeSource(this.biomes, l, this.end, this.highlands, this.midlands, this.islands, this.barrens);
     }

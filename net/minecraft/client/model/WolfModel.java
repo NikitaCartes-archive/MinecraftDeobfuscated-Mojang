@@ -20,6 +20,9 @@ import net.minecraft.world.entity.animal.Wolf;
 @Environment(value=EnvType.CLIENT)
 public class WolfModel<T extends Wolf>
 extends ColorableAgeableListModel<T> {
+    private static final String REAL_HEAD = "real_head";
+    private static final String UPPER_BODY = "upper_body";
+    private static final String REAL_TAIL = "real_tail";
     private final ModelPart head;
     private final ModelPart realHead;
     private final ModelPart body;
@@ -30,18 +33,19 @@ extends ColorableAgeableListModel<T> {
     private final ModelPart tail;
     private final ModelPart realTail;
     private final ModelPart upperBody;
+    private static final int LEG_SIZE = 8;
 
     public WolfModel(ModelPart modelPart) {
         this.head = modelPart.getChild("head");
-        this.realHead = this.head.getChild("real_head");
+        this.realHead = this.head.getChild(REAL_HEAD);
         this.body = modelPart.getChild("body");
-        this.upperBody = modelPart.getChild("upper_body");
+        this.upperBody = modelPart.getChild(UPPER_BODY);
         this.rightHindLeg = modelPart.getChild("right_hind_leg");
         this.leftHindLeg = modelPart.getChild("left_hind_leg");
         this.rightFrontLeg = modelPart.getChild("right_front_leg");
         this.leftFrontLeg = modelPart.getChild("left_front_leg");
         this.tail = modelPart.getChild("tail");
-        this.realTail = this.tail.getChild("real_tail");
+        this.realTail = this.tail.getChild(REAL_TAIL);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -49,16 +53,16 @@ extends ColorableAgeableListModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         float f = 13.5f;
         PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(-1.0f, 13.5f, -7.0f));
-        partDefinition2.addOrReplaceChild("real_head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f).texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(16, 14).addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f), PartPose.ZERO);
+        partDefinition2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -3.0f, -2.0f, 6.0f, 6.0f, 4.0f).texOffs(16, 14).addBox(-2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(16, 14).addBox(2.0f, -5.0f, 0.0f, 2.0f, 2.0f, 1.0f).texOffs(0, 10).addBox(-0.5f, 0.0f, -5.0f, 3.0f, 3.0f, 4.0f), PartPose.ZERO);
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(18, 14).addBox(-3.0f, -2.0f, -3.0f, 6.0f, 9.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 14.0f, 2.0f, 1.5707964f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("upper_body", CubeListBuilder.create().texOffs(21, 0).addBox(-3.0f, -3.0f, -3.0f, 8.0f, 6.0f, 7.0f), PartPose.offsetAndRotation(-1.0f, 14.0f, -3.0f, 1.5707964f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(UPPER_BODY, CubeListBuilder.create().texOffs(21, 0).addBox(-3.0f, -3.0f, -3.0f, 8.0f, 6.0f, 7.0f), PartPose.offsetAndRotation(-1.0f, 14.0f, -3.0f, 1.5707964f, 0.0f, 0.0f));
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f);
         partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, 7.0f));
         partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, 7.0f));
         partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-2.5f, 16.0f, -4.0f));
         partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(0.5f, 16.0f, -4.0f));
         PartDefinition partDefinition3 = partDefinition.addOrReplaceChild("tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0f, 12.0f, 8.0f, 0.62831855f, 0.0f, 0.0f));
-        partDefinition3.addOrReplaceChild("real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f), PartPose.ZERO);
+        partDefinition3.addOrReplaceChild(REAL_TAIL, CubeListBuilder.create().texOffs(9, 18).addBox(0.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 

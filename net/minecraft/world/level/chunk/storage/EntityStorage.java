@@ -32,6 +32,8 @@ import org.apache.logging.log4j.Logger;
 public class EntityStorage
 implements EntityPersistentStorage<Entity> {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String ENTITIES_TAG = "Entities";
+    private static final String POSITION_TAG = "Position";
     private final ServerLevel level;
     private final IOWorker worker;
     private final LongSet emptyChunks = new LongOpenHashSet();
@@ -64,19 +66,19 @@ implements EntityPersistentStorage<Entity> {
                 LOGGER.warn("Failed to parse chunk {} position info", (Object)chunkPos, (Object)exception);
             }
             CompoundTag compoundTag2 = this.upgradeChunkTag((CompoundTag)compoundTag);
-            ListTag listTag = compoundTag2.getList("Entities", 10);
+            ListTag listTag = compoundTag2.getList(ENTITIES_TAG, 10);
             List list = EntityType.loadEntitiesRecursive(listTag, this.level).collect(ImmutableList.toImmutableList());
             return new ChunkEntities(chunkPos, list);
         }, this.mainThreadExecutor);
     }
 
     private static ChunkPos readChunkPos(CompoundTag compoundTag) {
-        int[] is = compoundTag.getIntArray("Position");
+        int[] is = compoundTag.getIntArray(POSITION_TAG);
         return new ChunkPos(is[0], is[1]);
     }
 
     private static void writeChunkPos(CompoundTag compoundTag, ChunkPos chunkPos) {
-        compoundTag.put("Position", new IntArrayTag(new int[]{chunkPos.x, chunkPos.z}));
+        compoundTag.put(POSITION_TAG, new IntArrayTag(new int[]{chunkPos.x, chunkPos.z}));
     }
 
     private static ChunkEntities<Entity> emptyChunk(ChunkPos chunkPos) {
@@ -101,7 +103,7 @@ implements EntityPersistentStorage<Entity> {
         });
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-        compoundTag.put("Entities", listTag);
+        compoundTag.put(ENTITIES_TAG, listTag);
         EntityStorage.writeChunkPos(compoundTag, chunkPos);
         this.worker.store(chunkPos, compoundTag).exceptionally(throwable -> {
             LOGGER.error("Failed to store chunk {}", (Object)chunkPos, throwable);

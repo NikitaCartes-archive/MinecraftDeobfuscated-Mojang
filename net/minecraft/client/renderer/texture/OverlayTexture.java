@@ -12,6 +12,10 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 @Environment(value=EnvType.CLIENT)
 public class OverlayTexture
 implements AutoCloseable {
+    private static final int SIZE = 16;
+    public static final int NO_WHITE_U = 0;
+    public static final int RED_OVERLAY_V = 3;
+    public static final int WHITE_OVERLAY_V = 10;
     public static final int NO_OVERLAY = OverlayTexture.pack(0, 10);
     private final DynamicTexture texture = new DynamicTexture(16, 16, false);
 

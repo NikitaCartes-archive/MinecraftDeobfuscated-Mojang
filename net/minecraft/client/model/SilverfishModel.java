@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 @Environment(value=EnvType.CLIENT)
 public class SilverfishModel<T extends Entity>
 extends HierarchicalModel<T> {
+    private static final int BODY_COUNT = 7;
     private final ModelPart root;
     private final ModelPart[] bodyParts = new ModelPart[7];
     private final ModelPart[] bodyLayers = new ModelPart[3];

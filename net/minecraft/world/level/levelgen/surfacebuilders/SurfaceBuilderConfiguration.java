@@ -9,5 +9,7 @@ public interface SurfaceBuilderConfiguration {
     public BlockState getTopMaterial();
 
     public BlockState getUnderMaterial();
+
+    public BlockState getUnderwaterMaterial();
 }
 

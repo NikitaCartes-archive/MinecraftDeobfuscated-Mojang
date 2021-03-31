@@ -493,6 +493,9 @@ public class EntityDataSerializers {
         return SERIALIZERS.getId(entityDataSerializer);
     }
 
+    private EntityDataSerializers() {
+    }
+
     static {
         EntityDataSerializers.registerSerializer(BYTE);
         EntityDataSerializers.registerSerializer(INT);

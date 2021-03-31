@@ -39,6 +39,9 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 @Environment(value=EnvType.CLIENT)
 public class ChestRenderer<T extends BlockEntity>
 implements BlockEntityRenderer<T> {
+    private static final String BOTTOM = "bottom";
+    private static final String LID = "lid";
+    private static final String LOCK = "lock";
     private final ModelPart lid;
     private final ModelPart bottom;
     private final ModelPart lock;
@@ -56,43 +59,43 @@ implements BlockEntityRenderer<T> {
             this.xmasTextures = true;
         }
         ModelPart modelPart = context.bakeLayer(ModelLayers.CHEST);
-        this.bottom = modelPart.getChild("bottom");
-        this.lid = modelPart.getChild("lid");
-        this.lock = modelPart.getChild("lock");
+        this.bottom = modelPart.getChild(BOTTOM);
+        this.lid = modelPart.getChild(LID);
+        this.lock = modelPart.getChild(LOCK);
         ModelPart modelPart2 = context.bakeLayer(ModelLayers.DOUBLE_CHEST_LEFT);
-        this.doubleLeftBottom = modelPart2.getChild("bottom");
-        this.doubleLeftLid = modelPart2.getChild("lid");
-        this.doubleLeftLock = modelPart2.getChild("lock");
+        this.doubleLeftBottom = modelPart2.getChild(BOTTOM);
+        this.doubleLeftLid = modelPart2.getChild(LID);
+        this.doubleLeftLock = modelPart2.getChild(LOCK);
         ModelPart modelPart3 = context.bakeLayer(ModelLayers.DOUBLE_CHEST_RIGHT);
-        this.doubleRightBottom = modelPart3.getChild("bottom");
-        this.doubleRightLid = modelPart3.getChild("lid");
-        this.doubleRightLock = modelPart3.getChild("lock");
+        this.doubleRightBottom = modelPart3.getChild(BOTTOM);
+        this.doubleRightLid = modelPart3.getChild(LID);
+        this.doubleRightLock = modelPart3.getChild(LOCK);
     }
 
     public static LayerDefinition createSingleBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 14.0f, 10.0f, 14.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 14.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
-        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0f, -1.0f, 15.0f, 2.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        partDefinition.addOrReplaceChild(BOTTOM, CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 14.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(LID, CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 14.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild(LOCK, CubeListBuilder.create().texOffs(0, 0).addBox(7.0f, -1.0f, 15.0f, 2.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     public static LayerDefinition createDoubleBodyRightLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
-        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(15.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        partDefinition.addOrReplaceChild(BOTTOM, CubeListBuilder.create().texOffs(0, 19).addBox(1.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(LID, CubeListBuilder.create().texOffs(0, 0).addBox(1.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild(LOCK, CubeListBuilder.create().texOffs(0, 0).addBox(15.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 
     public static LayerDefinition createDoubleBodyLeftLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("bottom", CubeListBuilder.create().texOffs(0, 19).addBox(0.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
-        partDefinition.addOrReplaceChild("lock", CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
+        partDefinition.addOrReplaceChild(BOTTOM, CubeListBuilder.create().texOffs(0, 19).addBox(0.0f, 0.0f, 1.0f, 15.0f, 10.0f, 14.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(LID, CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, 0.0f, 0.0f, 15.0f, 5.0f, 14.0f), PartPose.offset(0.0f, 9.0f, 1.0f));
+        partDefinition.addOrReplaceChild(LOCK, CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, -1.0f, 15.0f, 1.0f, 4.0f, 1.0f), PartPose.offset(0.0f, 8.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

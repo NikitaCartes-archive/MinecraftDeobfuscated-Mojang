@@ -10,6 +10,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 public class ForcedChunksSavedData
 extends SavedData {
+    public static final String FILE_ID = "chunks";
+    private static final String TAG_FORCED = "Forced";
     private final LongSet chunks;
 
     private ForcedChunksSavedData(LongSet longSet) {
@@ -21,12 +23,12 @@ extends SavedData {
     }
 
     public static ForcedChunksSavedData load(CompoundTag compoundTag) {
-        return new ForcedChunksSavedData(new LongOpenHashSet(compoundTag.getLongArray("Forced")));
+        return new ForcedChunksSavedData(new LongOpenHashSet(compoundTag.getLongArray(TAG_FORCED)));
     }
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
-        compoundTag.putLongArray("Forced", this.chunks.toLongArray());
+        compoundTag.putLongArray(TAG_FORCED, this.chunks.toLongArray());
         return compoundTag;
     }
 

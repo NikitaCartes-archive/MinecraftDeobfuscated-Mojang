@@ -18,6 +18,9 @@ import net.minecraft.world.entity.Entity;
 @Environment(value=EnvType.CLIENT)
 public class EvokerFangsModel<T extends Entity>
 extends HierarchicalModel<T> {
+    private static final String BASE = "base";
+    private static final String UPPER_JAW = "upper_jaw";
+    private static final String LOWER_JAW = "lower_jaw";
     private final ModelPart root;
     private final ModelPart base;
     private final ModelPart upperJaw;
@@ -25,18 +28,18 @@ extends HierarchicalModel<T> {
 
     public EvokerFangsModel(ModelPart modelPart) {
         this.root = modelPart;
-        this.base = modelPart.getChild("base");
-        this.upperJaw = modelPart.getChild("upper_jaw");
-        this.lowerJaw = modelPart.getChild("lower_jaw");
+        this.base = modelPart.getChild(BASE);
+        this.upperJaw = modelPart.getChild(UPPER_JAW);
+        this.lowerJaw = modelPart.getChild(LOWER_JAW);
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, 0.0f, 0.0f, 10.0f, 12.0f, 10.0f), PartPose.offset(-5.0f, 24.0f, -5.0f));
+        partDefinition.addOrReplaceChild(BASE, CubeListBuilder.create().texOffs(0, 0).addBox(0.0f, 0.0f, 0.0f, 10.0f, 12.0f, 10.0f), PartPose.offset(-5.0f, 24.0f, -5.0f));
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(40, 0).addBox(0.0f, 0.0f, 0.0f, 4.0f, 14.0f, 8.0f);
-        partDefinition.addOrReplaceChild("upper_jaw", cubeListBuilder, PartPose.offset(1.5f, 24.0f, -4.0f));
-        partDefinition.addOrReplaceChild("lower_jaw", cubeListBuilder, PartPose.offsetAndRotation(-1.5f, 24.0f, 4.0f, 0.0f, (float)Math.PI, 0.0f));
+        partDefinition.addOrReplaceChild(UPPER_JAW, cubeListBuilder, PartPose.offset(1.5f, 24.0f, -4.0f));
+        partDefinition.addOrReplaceChild(LOWER_JAW, cubeListBuilder, PartPose.offsetAndRotation(-1.5f, 24.0f, 4.0f, 0.0f, (float)Math.PI, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 

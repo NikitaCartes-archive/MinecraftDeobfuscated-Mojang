@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
@@ -84,7 +82,6 @@ public abstract class VoxelShape {
         return voxelShapes[0];
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void forAllEdges(Shapes.DoubleLineConsumer doubleLineConsumer) {
         this.shape.forAllEdges((i, j, k, l, m, n) -> doubleLineConsumer.consume(this.get(Direction.Axis.X, i), this.get(Direction.Axis.Y, j), this.get(Direction.Axis.Z, k), this.get(Direction.Axis.X, l), this.get(Direction.Axis.Y, m), this.get(Direction.Axis.Z, n)), true);
     }
@@ -102,7 +99,18 @@ public abstract class VoxelShape {
         return list;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public double min(Direction.Axis axis, double d, double e) {
+        int j;
+        Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
+        Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);
+        int i = this.findIndex(axis2, d);
+        int k = this.shape.firstFull(axis, i, j = this.findIndex(axis3, e));
+        if (k >= this.shape.getSize(axis)) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return this.get(axis, k);
+    }
+
     public double max(Direction.Axis axis, double d, double e) {
         int j;
         Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);

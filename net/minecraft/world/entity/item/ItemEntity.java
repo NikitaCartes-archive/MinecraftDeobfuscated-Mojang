@@ -6,8 +6,6 @@ package net.minecraft.world.entity.item;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -40,6 +38,9 @@ import org.jetbrains.annotations.Nullable;
 public class ItemEntity
 extends Entity {
     private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemEntity.class, EntityDataSerializers.ITEM_STACK);
+    private static final int LIFETIME = 6000;
+    private static final int INFINITE_PICKUP_DELAY = Short.MAX_VALUE;
+    private static final int INFINITE_LIFETIME = Short.MIN_VALUE;
     private int age;
     private int pickupDelay;
     private int health = 5;
@@ -64,7 +65,6 @@ extends Entity {
         this.setItem(itemStack);
     }
 
-    @Environment(value=EnvType.CLIENT)
     private ItemEntity(ItemEntity itemEntity) {
         super(itemEntity.getType(), itemEntity.level);
         this.setItem(itemEntity.getItem().copy());
@@ -371,7 +371,6 @@ extends Entity {
         this.thrower = uUID;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getAge() {
         return this.age;
     }
@@ -396,6 +395,10 @@ extends Entity {
         return this.pickupDelay > 0;
     }
 
+    public void setUnlimitedLifetime() {
+        this.age = Short.MIN_VALUE;
+    }
+
     public void setExtendedLifetime() {
         this.age = -6000;
     }
@@ -405,7 +408,6 @@ extends Entity {
         this.age = 5999;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getSpin(float f) {
         return ((float)this.getAge() + f) / 20.0f + this.bobOffs;
     }
@@ -415,7 +417,6 @@ extends Entity {
         return new ClientboundAddEntityPacket(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemEntity copy() {
         return new ItemEntity(this);
     }

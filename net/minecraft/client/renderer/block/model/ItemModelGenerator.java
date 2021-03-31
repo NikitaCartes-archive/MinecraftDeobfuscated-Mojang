@@ -24,6 +24,8 @@ import net.minecraft.core.Direction;
 @Environment(value=EnvType.CLIENT)
 public class ItemModelGenerator {
     public static final List<String> LAYERS = Lists.newArrayList("layer0", "layer1", "layer2", "layer3", "layer4");
+    private static final float MIN_Z = 7.5f;
+    private static final float MAX_Z = 8.5f;
 
     public BlockModel generateBlockModel(Function<Material, TextureAtlasSprite> function, BlockModel blockModel) {
         String string;

@@ -13,6 +13,7 @@ import net.minecraft.client.resources.metadata.animation.VillagerMetadataSection
 @Environment(value=EnvType.CLIENT)
 public class VillagerMetaDataSection {
     public static final VillagerMetadataSectionSerializer SERIALIZER = new VillagerMetadataSectionSerializer();
+    public static final String SECTION_NAME = "villager";
     private final Hat hat;
 
     public VillagerMetaDataSection(Hat hat) {

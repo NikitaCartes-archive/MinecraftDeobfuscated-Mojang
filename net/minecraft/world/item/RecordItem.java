@@ -6,8 +6,6 @@ package net.minecraft.world.item;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -66,23 +64,19 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         list.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MutableComponent getDisplayName() {
         return new TranslatableComponent(this.getDescriptionId() + ".desc");
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static RecordItem getBySound(SoundEvent soundEvent) {
         return BY_NAME.get(soundEvent);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SoundEvent getSound() {
         return this.sound;
     }

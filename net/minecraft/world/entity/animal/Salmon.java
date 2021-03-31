@@ -24,7 +24,7 @@ extends AbstractSchoolingFish {
     }
 
     @Override
-    protected ItemStack getBucketItemStack() {
+    public ItemStack getBucketItemStack() {
         return new ItemStack(Items.SALMON_BUCKET);
     }
 

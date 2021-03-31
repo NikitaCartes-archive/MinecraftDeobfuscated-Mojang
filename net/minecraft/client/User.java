@@ -54,6 +54,10 @@ public class User {
         }
     }
 
+    public Type getType() {
+        return this.type;
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static enum Type {
         LEGACY("legacy"),

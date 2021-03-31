@@ -28,6 +28,10 @@ implements ScoreboardNameProvider {
         this.target = entityTarget;
     }
 
+    public static ScoreboardNameProvider forTarget(LootContext.EntityTarget entityTarget) {
+        return new ContextScoreboardNameProvider(entityTarget);
+    }
+
     @Override
     public LootScoreProviderType getType() {
         return ScoreboardNameProviders.CONTEXT;

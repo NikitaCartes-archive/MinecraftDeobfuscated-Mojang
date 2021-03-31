@@ -26,6 +26,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlayTagWithOtherKids
 extends Behavior<PathfinderMob> {
+    private static final int MAX_FLEE_XZ_DIST = 20;
+    private static final int MAX_FLEE_Y_DIST = 8;
+    private static final float FLEE_SPEED_MODIFIER = 0.6f;
+    private static final float CHASE_SPEED_MODIFIER = 0.6f;
+    private static final int MAX_CHASERS_PER_TARGET = 5;
+    private static final int AVERAGE_WAIT_TIME_BETWEEN_RUNS = 10;
+
     public PlayTagWithOtherKids() {
         super(ImmutableMap.of(MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.INTERACTION_TARGET, MemoryStatus.REGISTERED));
     }

@@ -69,6 +69,10 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class DebugScreenOverlay
 extends GuiComponent {
+    private static final int COLOR_GREY = 0xE0E0E0;
+    private static final int MARGIN_RIGHT = 2;
+    private static final int MARGIN_LEFT = 2;
+    private static final int MARGIN_TOP = 2;
     private static final Map<Heightmap.Types, String> HEIGHTMAP_NAMES = Util.make(new EnumMap(Heightmap.Types.class), enumMap -> {
         enumMap.put(Heightmap.Types.WORLD_SURFACE_WG, "SW");
         enumMap.put(Heightmap.Types.WORLD_SURFACE, "S");
@@ -87,6 +91,9 @@ extends GuiComponent {
     private LevelChunk clientChunk;
     @Nullable
     private CompletableFuture<LevelChunk> serverChunk;
+    private static final int RED = -65536;
+    private static final int YELLOW = -256;
+    private static final int GREEN = -16711936;
 
     public DebugScreenOverlay(Minecraft minecraft) {
         this.minecraft = minecraft;

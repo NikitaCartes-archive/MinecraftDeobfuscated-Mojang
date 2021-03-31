@@ -7,8 +7,6 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
@@ -27,22 +25,18 @@ public class AmbientMoodSettings {
         this.soundPositionOffset = d;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SoundEvent getSoundEvent() {
         return this.soundEvent;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTickDelay() {
         return this.tickDelay;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getBlockSearchExtent() {
         return this.blockSearchExtent;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getSoundPositionOffset() {
         return this.soundPositionOffset;
     }

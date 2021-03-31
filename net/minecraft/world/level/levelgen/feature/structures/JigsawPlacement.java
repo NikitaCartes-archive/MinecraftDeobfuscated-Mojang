@@ -31,6 +31,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -44,18 +45,22 @@ import org.apache.logging.log4j.Logger;
 public class JigsawPlacement {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void addPieces(RegistryAccess registryAccess, JigsawConfiguration jigsawConfiguration, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<? super PoolElementStructurePiece> list, Random random, boolean bl, boolean bl2, LevelHeightAccessor levelHeightAccessor) {
+    public static void addPieces(RegistryAccess registryAccess, JigsawConfiguration jigsawConfiguration, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, StructurePieceAccessor structurePieceAccessor, Random random, boolean bl, boolean bl2, LevelHeightAccessor levelHeightAccessor) {
         StructureFeature.bootstrap();
+        ArrayList<PoolElementStructurePiece> list = Lists.newArrayList();
         Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
         Rotation rotation = Rotation.getRandom(random);
         StructureTemplatePool structureTemplatePool = jigsawConfiguration.startPool().get();
         StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
+        if (structurePoolElement == EmptyPoolElement.INSTANCE) {
+            return;
+        }
         PoolElementStructurePiece poolElementStructurePiece = pieceFactory.create(structureManager, structurePoolElement, blockPos, structurePoolElement.getGroundLevelDelta(), rotation, structurePoolElement.getBoundingBox(structureManager, blockPos, rotation));
         BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-        int i = (boundingBox.x1 + boundingBox.x0) / 2;
-        int j = (boundingBox.z1 + boundingBox.z0) / 2;
+        int i = (boundingBox.maxX() + boundingBox.minX()) / 2;
+        int j = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
         int k = bl2 ? blockPos.getY() + chunkGenerator.getFirstFreeHeight(i, j, Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor) : blockPos.getY();
-        int l = boundingBox.y0 + poolElementStructurePiece.getGroundLevelDelta();
+        int l = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
         poolElementStructurePiece.move(0, k - l, 0);
         list.add(poolElementStructurePiece);
         if (jigsawConfiguration.maxDepth() <= 0) {
@@ -69,6 +74,7 @@ public class JigsawPlacement {
             PieceState pieceState = (PieceState)placer.placing.removeFirst();
             placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl, levelHeightAccessor);
         }
+        list.forEach(structurePieceAccessor::addPiece);
     }
 
     public static void addPieces(RegistryAccess registryAccess, PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random, LevelHeightAccessor levelHeightAccessor) {
@@ -113,7 +119,7 @@ public class JigsawPlacement {
             boolean bl2 = projection == StructureTemplatePool.Projection.RIGID;
             MutableObject<VoxelShape> mutableObject2 = new MutableObject<VoxelShape>();
             BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-            int k = boundingBox.y0;
+            int k = boundingBox.minY();
             block0: for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : structurePoolElement.getShuffledJigsawBlocks(this.structureManager, blockPos, rotation, this.random)) {
                 StructurePoolElement structurePoolElement2;
                 int n;
@@ -173,9 +179,9 @@ public class JigsawPlacement {
                             int s;
                             if (!JigsawBlock.canAttach(structureBlockInfo2, structureBlockInfo22)) continue;
                             BlockPos blockPos4 = structureBlockInfo22.pos;
-                            BlockPos blockPos5 = new BlockPos(blockPos3.getX() - blockPos4.getX(), blockPos3.getY() - blockPos4.getY(), blockPos3.getZ() - blockPos4.getZ());
+                            BlockPos blockPos5 = blockPos3.subtract(blockPos4);
                             BoundingBox boundingBox3 = structurePoolElement2.getBoundingBox(this.structureManager, blockPos5, rotation2);
-                            int p = boundingBox3.y0;
+                            int p = boundingBox3.minY();
                             StructureTemplatePool.Projection projection2 = structurePoolElement2.getProjection();
                             boolean bl4 = projection2 == StructureTemplatePool.Projection.RIGID;
                             int q = blockPos4.getY();
@@ -192,8 +198,8 @@ public class JigsawPlacement {
                             BoundingBox boundingBox4 = boundingBox3.moved(0, t, 0);
                             BlockPos blockPos6 = blockPos5.offset(0, t, 0);
                             if (o > 0) {
-                                u = Math.max(o + 1, boundingBox4.y1 - boundingBox4.y0);
-                                boundingBox4.y1 = boundingBox4.y0 + u;
+                                u = Math.max(o + 1, boundingBox4.maxY() - boundingBox4.minY());
+                                boundingBox4.encapsulate(new BlockPos(boundingBox4.minX(), boundingBox4.minY() + u, boundingBox4.minZ()));
                             }
                             if (Shapes.joinIsNotEmpty((VoxelShape)mutableObject3.getValue(), Shapes.create(AABB.of(boundingBox4).deflate(0.25)), BooleanOp.ONLY_SECOND)) continue;
                             mutableObject3.setValue(Shapes.joinUnoptimized((VoxelShape)mutableObject3.getValue(), Shapes.create(AABB.of(boundingBox4)), BooleanOp.ONLY_FIRST));

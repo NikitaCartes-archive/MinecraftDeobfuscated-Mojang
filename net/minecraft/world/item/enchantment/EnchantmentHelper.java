@@ -19,7 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -290,13 +290,13 @@ public class EnchantmentHelper {
         float f = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.15f;
         List<EnchantmentInstance> list2 = EnchantmentHelper.getAvailableEnchantmentResults(i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE), itemStack, bl);
         if (!list2.isEmpty()) {
-            WeighedRandom.getRandomItem(random, list2).ifPresent(list::add);
+            WeightedRandom.getRandomItem(random, list2).ifPresent(list::add);
             while (random.nextInt(50) <= i) {
                 if (!list.isEmpty()) {
                     EnchantmentHelper.filterCompatibleEnchantments(list2, Util.lastOf(list));
                 }
                 if (list2.isEmpty()) break;
-                WeighedRandom.getRandomItem(random, list2).ifPresent(list::add);
+                WeightedRandom.getRandomItem(random, list2).ifPresent(list::add);
                 i /= 2;
             }
         }

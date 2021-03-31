@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
 public class AnimationFrame {
+    public static final int UNKNOWN_FRAME_TIME = -1;
     private final int index;
     private final int time;
 

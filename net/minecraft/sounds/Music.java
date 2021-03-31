@@ -7,8 +7,6 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 
 public class Music {
@@ -25,22 +23,18 @@ public class Music {
         this.replaceCurrentMusic = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SoundEvent getEvent() {
         return this.event;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getMinDelay() {
         return this.minDelay;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getMaxDelay() {
         return this.maxDelay;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean replaceCurrentMusic() {
         return this.replaceCurrentMusic;
     }

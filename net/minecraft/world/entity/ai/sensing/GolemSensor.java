@@ -15,6 +15,9 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 
 public class GolemSensor
 extends Sensor<LivingEntity> {
+    private static final int GOLEM_SCAN_RATE = 200;
+    private static final int MEMORY_TIME_TO_LIVE = 600;
+
     public GolemSensor() {
         this(200);
     }

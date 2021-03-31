@@ -13,6 +13,7 @@ import net.minecraft.nbt.TagVisitor;
 
 public class EndTag
 implements Tag {
+    private static final int SELF_SIZE_IN_BITS = 64;
     public static final TagType<EndTag> TYPE = new TagType<EndTag>(){
 
         @Override

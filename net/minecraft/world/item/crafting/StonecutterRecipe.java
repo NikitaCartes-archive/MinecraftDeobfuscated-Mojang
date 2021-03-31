@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item.crafting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +25,6 @@ extends SingleItemRecipe {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getToastSymbol() {
         return new ItemStack(Blocks.STONECUTTER);
     }

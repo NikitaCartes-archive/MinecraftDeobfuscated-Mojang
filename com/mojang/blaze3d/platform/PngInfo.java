@@ -58,6 +58,7 @@ public class PngInfo {
     @Environment(value=EnvType.CLIENT)
     static class StbReaderBufferedChannel
     extends StbReader {
+        private static final int START_BUFFER_SIZE = 128;
         private final ReadableByteChannel channel;
         private long readBufferAddress = MemoryUtil.nmemAlloc(128L);
         private int bufferSize = 128;

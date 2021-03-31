@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class PathfindToRaidGoal<T extends Raider>
 extends Goal {
+    private static final float SPEED_MODIFIER = 1.0f;
     private final T mob;
 
     public PathfindToRaidGoal(T raider) {

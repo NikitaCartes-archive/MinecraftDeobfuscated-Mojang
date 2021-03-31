@@ -33,6 +33,7 @@ import net.minecraft.client.User;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.main.SilentInitException;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
@@ -47,6 +48,7 @@ public class Main {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
+    @DontObfuscate
     public static void main(String[] strings) {
         Thread thread2;
         Minecraft minecraft;

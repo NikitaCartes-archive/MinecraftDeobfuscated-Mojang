@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -34,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class PotionItem
 extends Item {
+    private static final int DRINK_DURATION = 32;
+
     public PotionItem(Item.Properties properties) {
         super(properties);
     }
@@ -99,7 +99,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         PotionUtils.addPotionTooltip(itemStack, list, 1.0f);
     }

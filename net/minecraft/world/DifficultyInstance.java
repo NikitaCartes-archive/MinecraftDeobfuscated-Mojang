@@ -9,6 +9,9 @@ import org.jetbrains.annotations.Unmodifiable;
 
 @Unmodifiable
 public class DifficultyInstance {
+    private static final float DIFFICULTY_TIME_GLOBAL_OFFSET = -72000.0f;
+    private static final float MAX_DIFFICULTY_TIME_GLOBAL = 1440000.0f;
+    private static final float MAX_DIFFICULTY_TIME_LOCAL = 3600000.0f;
     private final Difficulty base;
     private final float effectiveDifficulty;
 
@@ -23,6 +26,10 @@ public class DifficultyInstance {
 
     public float getEffectiveDifficulty() {
         return this.effectiveDifficulty;
+    }
+
+    public boolean isHard() {
+        return this.effectiveDifficulty >= (float)Difficulty.HARD.ordinal();
     }
 
     public boolean isHarderThan(float f) {

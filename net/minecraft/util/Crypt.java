@@ -16,15 +16,19 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.CryptException;
 
 public class Crypt {
-    @Environment(value=EnvType.CLIENT)
+    private static final String SYMMETRIC_ALGORITHM = "AES";
+    private static final int SYMMETRIC_BITS = 128;
+    private static final String ASYMMETRIC_ALGORITHM = "RSA";
+    private static final int ASYMMETRIC_BITS = 1024;
+    private static final String BYTE_ENCODING = "ISO_8859_1";
+    private static final String HASH_ALGORITHM = "SHA-1";
+
     public static SecretKey generateSecretKey() throws CryptException {
         try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(SYMMETRIC_ALGORITHM);
             keyGenerator.init(128);
             return keyGenerator.generateKey();
         } catch (Exception exception) {
@@ -34,7 +38,7 @@ public class Crypt {
 
     public static KeyPair generateKeyPair() throws CryptException {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ASYMMETRIC_ALGORITHM);
             keyPairGenerator.initialize(1024);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception exception) {
@@ -44,25 +48,24 @@ public class Crypt {
 
     public static byte[] digestData(String string, PublicKey publicKey, SecretKey secretKey) throws CryptException {
         try {
-            return Crypt.digestData(string.getBytes("ISO_8859_1"), secretKey.getEncoded(), publicKey.getEncoded());
+            return Crypt.digestData(string.getBytes(BYTE_ENCODING), secretKey.getEncoded(), publicKey.getEncoded());
         } catch (Exception exception) {
             throw new CryptException(exception);
         }
     }
 
     private static byte[] digestData(byte[] ... bs) throws Exception {
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+        MessageDigest messageDigest = MessageDigest.getInstance(HASH_ALGORITHM);
         for (byte[] cs : bs) {
             messageDigest.update(cs);
         }
         return messageDigest.digest();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static PublicKey byteToPublicKey(byte[] bs) throws CryptException {
         try {
             X509EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bs);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance(ASYMMETRIC_ALGORITHM);
             return keyFactory.generatePublic(encodedKeySpec);
         } catch (Exception exception) {
             throw new CryptException(exception);
@@ -72,13 +75,12 @@ public class Crypt {
     public static SecretKey decryptByteToSecretKey(PrivateKey privateKey, byte[] bs) throws CryptException {
         byte[] cs = Crypt.decryptUsingKey(privateKey, bs);
         try {
-            return new SecretKeySpec(cs, "AES");
+            return new SecretKeySpec(cs, SYMMETRIC_ALGORITHM);
         } catch (Exception exception) {
             throw new CryptException(exception);
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static byte[] encryptUsingKey(Key key, byte[] bs) throws CryptException {
         return Crypt.cipherData(1, key, bs);
     }

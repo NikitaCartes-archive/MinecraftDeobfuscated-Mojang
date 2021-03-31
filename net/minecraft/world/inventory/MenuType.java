@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -63,13 +61,11 @@ public class MenuType<T extends AbstractContainerMenu> {
         this.constructor = menuSupplier;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public T create(int i, Inventory inventory) {
         return this.constructor.create(i, inventory);
     }
 
     static interface MenuSupplier<T extends AbstractContainerMenu> {
-        @Environment(value=EnvType.CLIENT)
         public T create(int var1, Inventory var2);
     }
 }

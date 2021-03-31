@@ -17,6 +17,8 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 @Environment(value=EnvType.CLIENT)
 public class RidingMinecartSoundInstance
 extends AbstractTickableSoundInstance {
+    private static final float VOLUME_MIN = 0.0f;
+    private static final float VOLUME_MAX = 0.75f;
     private final Player player;
     private final AbstractMinecart minecart;
     private final boolean underwaterSound;

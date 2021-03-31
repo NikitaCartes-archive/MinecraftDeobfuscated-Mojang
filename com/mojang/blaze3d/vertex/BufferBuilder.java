@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 public class BufferBuilder
 extends DefaultedVertexConsumer
 implements BufferVertexConsumer {
+    private static final int GROWTH_SIZE = 0x200000;
     private static final Logger LOGGER = LogManager.getLogger();
     private ByteBuffer buffer;
     private final List<DrawState> drawStates = Lists.newArrayList();

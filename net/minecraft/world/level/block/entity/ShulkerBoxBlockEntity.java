@@ -5,8 +5,6 @@ package net.minecraft.world.level.block.entity;
 
 import java.util.List;
 import java.util.stream.IntStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -42,6 +40,14 @@ import org.jetbrains.annotations.Nullable;
 public class ShulkerBoxBlockEntity
 extends RandomizableContainerBlockEntity
 implements WorldlyContainer {
+    public static final int COLUMNS = 9;
+    public static final int ROWS = 3;
+    public static final int CONTAINER_SIZE = 27;
+    public static final int EVENT_SET_OPEN_COUNT = 1;
+    public static final int OPENING_TICK_LENGTH = 10;
+    public static final float MAX_LID_HEIGHT = 0.5f;
+    public static final float MAX_LID_ROTATION = 270.0f;
+    public static final String ITEMS_TAG = "Items";
     private static final int[] SLOTS = IntStream.range(0, 27).toArray();
     private NonNullList<ItemStack> itemStacks = NonNullList.withSize(27, ItemStack.EMPTY);
     private int openCount;
@@ -213,7 +219,7 @@ implements WorldlyContainer {
 
     public void loadFromTag(CompoundTag compoundTag) {
         this.itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains("Items", 9)) {
+        if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains(ITEMS_TAG, 9)) {
             ContainerHelper.loadAllItems(compoundTag, this.itemStacks);
         }
     }
@@ -255,7 +261,6 @@ implements WorldlyContainer {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public DyeColor getColor() {
         return this.color;
     }

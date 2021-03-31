@@ -29,6 +29,7 @@ public class PoiType {
     public static final Predicate<PoiType> ALL_JOBS = poiType -> ALL_JOB_POI_TYPES.get().contains(poiType);
     public static final Predicate<PoiType> ALL = poiType -> true;
     private static final Set<BlockState> BEDS = ImmutableList.of(Blocks.RED_BED, Blocks.BLACK_BED, Blocks.BLUE_BED, Blocks.BROWN_BED, Blocks.CYAN_BED, Blocks.GRAY_BED, Blocks.GREEN_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.LIME_BED, Blocks.MAGENTA_BED, Blocks.ORANGE_BED, new Block[]{Blocks.PINK_BED, Blocks.PURPLE_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED}).stream().flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).filter(blockState -> blockState.getValue(BedBlock.PART) == BedPart.HEAD).collect(ImmutableSet.toImmutableSet());
+    private static final Set<BlockState> CAULDRONS = ImmutableList.of(Blocks.CAULDRON, Blocks.LAVA_CAULDRON, Blocks.WATER_CAULDRON, Blocks.POWDER_SNOW_CAULDRON).stream().flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(ImmutableSet.toImmutableSet());
     private static final Map<BlockState, PoiType> TYPE_BY_STATE = Maps.newHashMap();
     public static final PoiType UNEMPLOYED = PoiType.register("unemployed", ImmutableSet.of(), 1, ALL_JOBS, 1);
     public static final PoiType ARMORER = PoiType.register("armorer", PoiType.getBlockStates(Blocks.BLAST_FURNACE), 1, 1);
@@ -38,7 +39,7 @@ public class PoiType {
     public static final PoiType FARMER = PoiType.register("farmer", PoiType.getBlockStates(Blocks.COMPOSTER), 1, 1);
     public static final PoiType FISHERMAN = PoiType.register("fisherman", PoiType.getBlockStates(Blocks.BARREL), 1, 1);
     public static final PoiType FLETCHER = PoiType.register("fletcher", PoiType.getBlockStates(Blocks.FLETCHING_TABLE), 1, 1);
-    public static final PoiType LEATHERWORKER = PoiType.register("leatherworker", PoiType.getBlockStates(Blocks.CAULDRON), 1, 1);
+    public static final PoiType LEATHERWORKER = PoiType.register("leatherworker", CAULDRONS, 1, 1);
     public static final PoiType LIBRARIAN = PoiType.register("librarian", PoiType.getBlockStates(Blocks.LECTERN), 1, 1);
     public static final PoiType MASON = PoiType.register("mason", PoiType.getBlockStates(Blocks.STONECUTTER), 1, 1);
     public static final PoiType NITWIT = PoiType.register("nitwit", ImmutableSet.of(), 1, 1);
@@ -79,12 +80,20 @@ public class PoiType {
         this.validRange = j;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public int getMaxTickets() {
         return this.maxTickets;
     }
 
     public Predicate<PoiType> getPredicate() {
         return this.predicate;
+    }
+
+    public boolean is(BlockState blockState) {
+        return this.matchingStates.contains(blockState);
     }
 
     public int getValidRange() {

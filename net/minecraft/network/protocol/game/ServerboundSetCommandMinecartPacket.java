@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -20,7 +18,6 @@ implements Packet<ServerGamePacketListener> {
     private final String command;
     private final boolean trackOutput;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSetCommandMinecartPacket(int i, String string, boolean bl) {
         this.entity = i;
         this.command = string;

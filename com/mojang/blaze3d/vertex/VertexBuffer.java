@@ -111,6 +111,13 @@ implements AutoCloseable {
         RenderSystem.glBindVertexArray(() -> 0);
     }
 
+    public void draw() {
+        if (this.indexCount == 0) {
+            return;
+        }
+        RenderSystem.drawElements(this.mode.asGLMode, this.indexCount, this.indexType.asGLType);
+    }
+
     public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> this._drawWithShader(matrix4f.copy(), matrix4f2.copy(), shaderInstance));
@@ -155,7 +162,7 @@ implements AutoCloseable {
         }
         if (shaderInstance.SCREEN_SIZE != null) {
             Window window = Minecraft.getInstance().getWindow();
-            shaderInstance.SCREEN_SIZE.set(window.getWidth(), window.getHeight());
+            shaderInstance.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
         }
         if (shaderInstance.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
             shaderInstance.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());

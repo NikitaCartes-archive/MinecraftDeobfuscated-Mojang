@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 
 public class FloatTag
 extends NumericTag {
+    private static final int SELF_SIZE_IN_BITS = 96;
     public static final FloatTag ZERO = new FloatTag(0.0f);
     public static final TagType<FloatTag> TYPE = new TagType<FloatTag>(){
 

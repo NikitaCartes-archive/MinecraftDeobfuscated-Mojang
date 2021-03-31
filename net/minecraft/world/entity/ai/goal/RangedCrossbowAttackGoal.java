@@ -4,7 +4,8 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
-import net.minecraft.util.IntRange;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.Items;
 
 public class RangedCrossbowAttackGoal<T extends Monster & CrossbowAttackMob>
 extends Goal {
-    public static final IntRange PATHFINDING_DELAY_RANGE = new IntRange(20, 40);
+    public static final UniformInt PATHFINDING_DELAY_RANGE = TimeUtil.rangeOfSeconds(1, 2);
     private final T mob;
     private CrossbowState crossbowState = CrossbowState.UNCHARGED;
     private final double speedModifier;
@@ -86,7 +87,7 @@ extends Goal {
             --this.updatePathDelay;
             if (this.updatePathDelay <= 0) {
                 ((Mob)this.mob).getNavigation().moveTo(livingEntity, this.canRun() ? this.speedModifier : this.speedModifier * 0.5);
-                this.updatePathDelay = PATHFINDING_DELAY_RANGE.randomValue(((LivingEntity)this.mob).getRandom());
+                this.updatePathDelay = PATHFINDING_DELAY_RANGE.sample(((LivingEntity)this.mob).getRandom());
             }
         } else {
             this.updatePathDelay = 0;

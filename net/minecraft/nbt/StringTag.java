@@ -14,6 +14,7 @@ import net.minecraft.nbt.TagVisitor;
 
 public class StringTag
 implements Tag {
+    private static final int SELF_SIZE_IN_BITS = 288;
     public static final TagType<StringTag> TYPE = new TagType<StringTag>(){
 
         @Override
@@ -45,6 +46,10 @@ implements Tag {
         }
     };
     private static final StringTag EMPTY = new StringTag("");
+    private static final char DOUBLE_QUOTE = '\"';
+    private static final char SINGLE_QUOTE = '\'';
+    private static final char ESCAPE = '\\';
+    private static final char NOT_SET = '\u0000';
     private final String data;
 
     private StringTag(String string) {

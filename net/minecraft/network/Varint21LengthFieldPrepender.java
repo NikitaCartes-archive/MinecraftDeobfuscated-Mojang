@@ -12,6 +12,8 @@ import net.minecraft.network.FriendlyByteBuf;
 @ChannelHandler.Sharable
 public class Varint21LengthFieldPrepender
 extends MessageToByteEncoder<ByteBuf> {
+    private static final int MAX_BYTES = 3;
+
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
         int i = byteBuf.readableBytes();

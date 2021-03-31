@@ -27,6 +27,10 @@ extends HierarchicalModel<Guardian> {
     private static final float[] SPIKE_X = new float[]{0.0f, 0.0f, 8.0f, -8.0f, -8.0f, 8.0f, 8.0f, -8.0f, 0.0f, 0.0f, 8.0f, -8.0f};
     private static final float[] SPIKE_Y = new float[]{-8.0f, -8.0f, -8.0f, -8.0f, 0.0f, 0.0f, 0.0f, 0.0f, 8.0f, 8.0f, 8.0f, 8.0f};
     private static final float[] SPIKE_Z = new float[]{8.0f, -8.0f, 0.0f, 0.0f, -8.0f, -8.0f, 8.0f, 8.0f, 8.0f, -8.0f, 0.0f, 0.0f};
+    private static final String EYE = "eye";
+    private static final String TAIL_0 = "tail0";
+    private static final String TAIL_1 = "tail1";
+    private static final String TAIL_2 = "tail2";
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart eye;
@@ -40,11 +44,11 @@ extends HierarchicalModel<Guardian> {
         for (int i = 0; i < this.spikeParts.length; ++i) {
             this.spikeParts[i] = this.head.getChild(GuardianModel.createSpikeName(i));
         }
-        this.eye = this.head.getChild("eye");
+        this.eye = this.head.getChild(EYE);
         this.tailParts = new ModelPart[3];
-        this.tailParts[0] = this.head.getChild("tail0");
-        this.tailParts[1] = this.tailParts[0].getChild("tail1");
-        this.tailParts[2] = this.tailParts[1].getChild("tail2");
+        this.tailParts[0] = this.head.getChild(TAIL_0);
+        this.tailParts[1] = this.tailParts[0].getChild(TAIL_1);
+        this.tailParts[2] = this.tailParts[1].getChild(TAIL_2);
     }
 
     private static String createSpikeName(int i) {
@@ -65,10 +69,10 @@ extends HierarchicalModel<Guardian> {
             float l = (float)Math.PI * SPIKE_Z_ROT[i];
             partDefinition2.addOrReplaceChild(GuardianModel.createSpikeName(i), cubeListBuilder, PartPose.offsetAndRotation(f, g, h, j, k, l));
         }
-        partDefinition2.addOrReplaceChild("eye", CubeListBuilder.create().texOffs(8, 0).addBox(-1.0f, 15.0f, 0.0f, 2.0f, 2.0f, 1.0f), PartPose.offset(0.0f, 0.0f, -8.25f));
-        PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("tail0", CubeListBuilder.create().texOffs(40, 0).addBox(-2.0f, 14.0f, 7.0f, 4.0f, 4.0f, 8.0f), PartPose.ZERO);
-        PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0, 54).addBox(0.0f, 14.0f, 0.0f, 3.0f, 3.0f, 7.0f), PartPose.offset(-1.5f, 0.5f, 14.0f));
-        partDefinition4.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(41, 32).addBox(0.0f, 14.0f, 0.0f, 2.0f, 2.0f, 6.0f).texOffs(25, 19).addBox(1.0f, 10.5f, 3.0f, 1.0f, 9.0f, 9.0f), PartPose.offset(0.5f, 0.5f, 6.0f));
+        partDefinition2.addOrReplaceChild(EYE, CubeListBuilder.create().texOffs(8, 0).addBox(-1.0f, 15.0f, 0.0f, 2.0f, 2.0f, 1.0f), PartPose.offset(0.0f, 0.0f, -8.25f));
+        PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(TAIL_0, CubeListBuilder.create().texOffs(40, 0).addBox(-2.0f, 14.0f, 7.0f, 4.0f, 4.0f, 8.0f), PartPose.ZERO);
+        PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild(TAIL_1, CubeListBuilder.create().texOffs(0, 54).addBox(0.0f, 14.0f, 0.0f, 3.0f, 3.0f, 7.0f), PartPose.offset(-1.5f, 0.5f, 14.0f));
+        partDefinition4.addOrReplaceChild(TAIL_2, CubeListBuilder.create().texOffs(41, 32).addBox(0.0f, 14.0f, 0.0f, 2.0f, 2.0f, 6.0f).texOffs(25, 19).addBox(1.0f, 10.5f, 3.0f, 1.0f, 9.0f, 9.0f), PartPose.offset(0.5f, 0.5f, 6.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

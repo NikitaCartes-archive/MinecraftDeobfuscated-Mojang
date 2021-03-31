@@ -4,8 +4,6 @@
 package net.minecraft.stats;
 
 import java.util.Objects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.StatFormatter;
@@ -42,7 +40,6 @@ extends ObjectiveCriteria {
         return this.value;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String format(int i) {
         return this.formatter.format(i);
     }

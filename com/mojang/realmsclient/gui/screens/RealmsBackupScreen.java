@@ -61,6 +61,7 @@ extends RealmsScreen {
     private Button changesButton;
     private Boolean noBackups = false;
     private final RealmsServer serverData;
+    private static final String UPLOADED_KEY = "Uploaded";
     private RealmsLabel titleLabel;
 
     public RealmsBackupScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer, int i) {
@@ -120,7 +121,7 @@ extends RealmsScreen {
             Backup backup2 = this.backups.get(i + 1);
             if (backup.metadata.isEmpty() || backup2.metadata.isEmpty()) continue;
             for (String string : backup.metadata.keySet()) {
-                if (!string.contains("Uploaded") && backup2.metadata.containsKey(string)) {
+                if (!string.contains(UPLOADED_KEY) && backup2.metadata.containsKey(string)) {
                     if (backup.metadata.get(string).equals(backup2.metadata.get(string))) continue;
                     this.addToChangeList(backup, string);
                     continue;
@@ -131,7 +132,7 @@ extends RealmsScreen {
     }
 
     private void addToChangeList(Backup backup, String string) {
-        if (string.contains("Uploaded")) {
+        if (string.contains(UPLOADED_KEY)) {
             String string2 = DateFormat.getDateTimeInstance(3, 3).format(backup.lastModifiedDate);
             backup.changeList.put(string, string2);
             backup.setUploadedVersion(true);

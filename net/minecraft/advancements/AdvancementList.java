@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +23,6 @@ public class AdvancementList {
     private final Set<Advancement> tasks = Sets.newLinkedHashSet();
     private Listener listener;
 
-    @Environment(value=EnvType.CLIENT)
     private void remove(Advancement advancement) {
         for (Advancement advancement2 : advancement.getChildren()) {
             this.remove(advancement2);
@@ -45,7 +42,6 @@ public class AdvancementList {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void remove(Set<ResourceLocation> set) {
         for (ResourceLocation resourceLocation : set) {
             Advancement advancement = this.advancements.get(resourceLocation);
@@ -89,7 +85,6 @@ public class AdvancementList {
         LOGGER.info("Loaded {} advancements", (Object)this.advancements.size());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void clear() {
         this.advancements.clear();
         this.roots.clear();
@@ -112,7 +107,6 @@ public class AdvancementList {
         return this.advancements.get(resourceLocation);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setListener(@Nullable Listener listener) {
         this.listener = listener;
         if (listener != null) {
@@ -128,15 +122,12 @@ public class AdvancementList {
     public static interface Listener {
         public void onAddAdvancementRoot(Advancement var1);
 
-        @Environment(value=EnvType.CLIENT)
         public void onRemoveAdvancementRoot(Advancement var1);
 
         public void onAddAdvancementTask(Advancement var1);
 
-        @Environment(value=EnvType.CLIENT)
         public void onRemoveAdvancementTask(Advancement var1);
 
-        @Environment(value=EnvType.CLIENT)
         public void onAdvancementsCleared();
     }
 }

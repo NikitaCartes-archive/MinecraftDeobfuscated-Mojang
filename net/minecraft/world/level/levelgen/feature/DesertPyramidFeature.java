@@ -11,7 +11,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -29,15 +28,14 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class FeatureStart
     extends StructureStart<NoneFeatureConfiguration> {
-        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(structureFeature, chunkPos, boundingBox, i, l);
+        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+            super(structureFeature, chunkPos, i, l);
         }
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
             DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
-            this.pieces.add(desertPyramidPiece);
-            this.calculateBoundingBox();
+            this.addPiece(desertPyramidPiece);
         }
     }
 }

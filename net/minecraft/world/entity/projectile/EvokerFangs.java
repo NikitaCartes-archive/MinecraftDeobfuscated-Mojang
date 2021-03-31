@@ -5,8 +5,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.List;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -22,6 +20,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class EvokerFangs
 extends Entity {
+    public static final int ATTACK_DURATION = 20;
+    public static final int LIFE_OFFSET = 2;
+    public static final int ATTACK_TRIGGER_TICKS = 14;
     private int warmupDelayTicks;
     private boolean sentSpikeEvent;
     private int lifeTicks = 22;
@@ -126,7 +127,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         super.handleEntityEvent(b);
         if (b == 4) {
@@ -137,7 +137,6 @@ extends Entity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getAnimationProgress(float f) {
         if (!this.clientSideAttackStarted) {
             return 0.0f;

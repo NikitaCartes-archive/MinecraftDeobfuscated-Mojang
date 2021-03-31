@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.math.OctahedralGroup;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -57,7 +55,6 @@ public enum Mirror {
         return this.rotation;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component symbol() {
         return this.symbol;
     }

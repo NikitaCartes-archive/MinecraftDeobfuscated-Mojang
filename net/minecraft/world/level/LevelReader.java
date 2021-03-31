@@ -4,8 +4,6 @@
 package net.minecraft.world.level;
 
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.QuartPos;
@@ -60,7 +58,6 @@ BiomeManager.NoiseBiomeSource {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     default public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         return colorResolver.getColor(this.getBiome(blockPos), blockPos.getX(), blockPos.getZ());
     }

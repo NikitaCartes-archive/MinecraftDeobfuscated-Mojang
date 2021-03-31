@@ -22,6 +22,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class StateHolder<O, S> {
+    public static final String NAME_TAG = "Name";
+    public static final String PROPERTIES_TAG = "Properties";
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, String> PROPERTY_ENTRY_TO_STRING_FUNCTION = new Function<Map.Entry<Property<?>, Comparable<?>>, String>(){
 
         @Override
@@ -145,12 +147,12 @@ public abstract class StateHolder<O, S> {
     }
 
     protected static <O, S extends StateHolder<O, S>> Codec<S> codec(Codec<O> codec, Function<O, S> function) {
-        return codec.dispatch("Name", stateHolder -> stateHolder.owner, object -> {
+        return codec.dispatch(NAME_TAG, stateHolder -> stateHolder.owner, object -> {
             StateHolder stateHolder = (StateHolder)function.apply(object);
             if (stateHolder.getValues().isEmpty()) {
                 return Codec.unit(stateHolder);
             }
-            return stateHolder.propertiesCodec.fieldOf("Properties").codec();
+            return stateHolder.propertiesCodec.fieldOf(PROPERTIES_TAG).codec();
         });
     }
 }

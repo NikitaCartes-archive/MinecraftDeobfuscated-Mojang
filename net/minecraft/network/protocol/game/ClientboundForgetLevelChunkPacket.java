@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -35,12 +33,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleForgetLevelChunk(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getZ() {
         return this.z;
     }

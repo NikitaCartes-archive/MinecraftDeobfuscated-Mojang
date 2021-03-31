@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 @Environment(value=EnvType.CLIENT)
 public class GoalSelectorDebugRenderer
 implements DebugRenderer.SimpleDebugRenderer {
+    private static final int MAX_RENDER_DIST = 160;
     private final Minecraft minecraft;
     private final Map<Integer, List<DebugGoal>> goalSelectors = Maps.newHashMap();
 
@@ -29,6 +30,10 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     public void addGoalSelector(int i, List<DebugGoal> list) {
         this.goalSelectors.put(i, list);
+    }
+
+    public void removeGoalSelector(int i) {
+        this.goalSelectors.remove(i);
     }
 
     public GoalSelectorDebugRenderer(Minecraft minecraft) {

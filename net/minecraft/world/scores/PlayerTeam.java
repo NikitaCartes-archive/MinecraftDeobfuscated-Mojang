@@ -6,8 +6,6 @@ package net.minecraft.world.scores;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -21,6 +19,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlayerTeam
 extends Team {
+    public static final int MAX_NAME_LENGTH = 16;
+    private static final int BIT_FRIENDLY_FIRE = 0;
+    private static final int BIT_SEE_INVISIBLES = 1;
     private final Scoreboard scoreboard;
     private final String name;
     private final Set<String> players = Sets.newHashSet();
@@ -40,6 +41,10 @@ extends Team {
         this.name = string;
         this.displayName = new TextComponent(string);
         this.displayNameStyle = Style.EMPTY.withInsertion(string).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(string)));
+    }
+
+    public Scoreboard getScoreboard() {
+        return this.scoreboard;
     }
 
     @Override
@@ -169,7 +174,6 @@ extends Team {
         return i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void unpackOptions(int i) {
         this.setAllowFriendlyFire((i & 1) > 0);
         this.setSeeFriendlyInvisibles((i & 2) > 0);

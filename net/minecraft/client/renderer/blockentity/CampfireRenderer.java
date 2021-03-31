@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 @Environment(value=EnvType.CLIENT)
 public class CampfireRenderer
 implements BlockEntityRenderer<CampfireBlockEntity> {
+    private static final float SIZE = 0.375f;
+
     public CampfireRenderer(BlockEntityRendererProvider.Context context) {
     }
 

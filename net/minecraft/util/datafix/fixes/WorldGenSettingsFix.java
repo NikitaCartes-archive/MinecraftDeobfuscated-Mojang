@@ -31,6 +31,15 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 public class WorldGenSettingsFix
 extends DataFix {
+    private static final String VILLAGE = "minecraft:village";
+    private static final String DESERT_PYRAMID = "minecraft:desert_pyramid";
+    private static final String IGLOO = "minecraft:igloo";
+    private static final String JUNGLE_TEMPLE = "minecraft:jungle_pyramid";
+    private static final String SWAMP_HUT = "minecraft:swamp_hut";
+    private static final String PILLAGER_OUTPOST = "minecraft:pillager_outpost";
+    private static final String END_CITY = "minecraft:endcity";
+    private static final String WOODLAND_MANSION = "minecraft:mansion";
+    private static final String OCEAN_MONUMENT = "minecraft:monument";
     private static final ImmutableMap<String, StructureFeatureConfiguration> DEFAULTS = ImmutableMap.builder().put("minecraft:village", new StructureFeatureConfiguration(32, 8, 10387312)).put("minecraft:desert_pyramid", new StructureFeatureConfiguration(32, 8, 14357617)).put("minecraft:igloo", new StructureFeatureConfiguration(32, 8, 14357618)).put("minecraft:jungle_pyramid", new StructureFeatureConfiguration(32, 8, 14357619)).put("minecraft:swamp_hut", new StructureFeatureConfiguration(32, 8, 14357620)).put("minecraft:pillager_outpost", new StructureFeatureConfiguration(32, 8, 165745296)).put("minecraft:monument", new StructureFeatureConfiguration(32, 5, 10387313)).put("minecraft:endcity", new StructureFeatureConfiguration(20, 11, 10387313)).put("minecraft:mansion", new StructureFeatureConfiguration(80, 20, 10387319)).build();
 
     public WorldGenSettingsFix(Schema schema) {
@@ -141,7 +150,7 @@ extends DataFix {
         HashMap<String, StructureFeatureConfiguration> map = Maps.newHashMap();
         if (!optionalDynamic.result().isPresent()) {
             mutableBoolean.setTrue();
-            map.put("minecraft:village", DEFAULTS.get("minecraft:village"));
+            map.put(VILLAGE, DEFAULTS.get(VILLAGE));
         }
         optionalDynamic.get("structures").flatMap(Dynamic::getMapValues).result().ifPresent(map2 -> map2.forEach((dynamic, dynamic2) -> dynamic2.getMapValues().result().ifPresent(map2 -> map2.forEach((dynamic2, dynamic3) -> {
             String string = dynamic.asString("");
@@ -169,23 +178,23 @@ extends DataFix {
                 case "distance": {
                     switch (string) {
                         case "village": {
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:village", string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, VILLAGE, string3, 9);
                             return;
                         }
                         case "biome_1": {
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:desert_pyramid", string3, 9);
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:igloo", string3, 9);
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:jungle_pyramid", string3, 9);
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:swamp_hut", string3, 9);
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:pillager_outpost", string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, DESERT_PYRAMID, string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, IGLOO, string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, JUNGLE_TEMPLE, string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, SWAMP_HUT, string3, 9);
+                            WorldGenSettingsFix.setSpacing(map, PILLAGER_OUTPOST, string3, 9);
                             return;
                         }
                         case "endcity": {
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:endcity", string3, 1);
+                            WorldGenSettingsFix.setSpacing(map, END_CITY, string3, 1);
                             return;
                         }
                         case "mansion": {
-                            WorldGenSettingsFix.setSpacing(map, "minecraft:mansion", string3, 1);
+                            WorldGenSettingsFix.setSpacing(map, WOODLAND_MANSION, string3, 1);
                             return;
                         }
                     }
@@ -193,15 +202,15 @@ extends DataFix {
                 }
                 case "separation": {
                     if ("oceanmonument".equals(string)) {
-                        StructureFeatureConfiguration structureFeatureConfiguration = map.getOrDefault("minecraft:monument", DEFAULTS.get("minecraft:monument"));
+                        StructureFeatureConfiguration structureFeatureConfiguration = map.getOrDefault(OCEAN_MONUMENT, DEFAULTS.get(OCEAN_MONUMENT));
                         int i = WorldGenSettingsFix.getInt(string3, structureFeatureConfiguration.separation, 1);
-                        map.put("minecraft:monument", new StructureFeatureConfiguration(i, structureFeatureConfiguration.separation, structureFeatureConfiguration.salt));
+                        map.put(OCEAN_MONUMENT, new StructureFeatureConfiguration(i, structureFeatureConfiguration.separation, structureFeatureConfiguration.salt));
                     }
                     return;
                 }
                 case "spacing": {
                     if ("oceanmonument".equals(string)) {
-                        WorldGenSettingsFix.setSpacing(map, "minecraft:monument", string3, 1);
+                        WorldGenSettingsFix.setSpacing(map, OCEAN_MONUMENT, string3, 1);
                     }
                     return;
                 }

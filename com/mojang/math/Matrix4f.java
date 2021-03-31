@@ -6,10 +6,9 @@ package com.mojang.math;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.nio.FloatBuffer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public final class Matrix4f {
+    private static final int ORDER = 4;
     protected float m00;
     protected float m01;
     protected float m02;
@@ -75,6 +74,21 @@ public final class Matrix4f {
         this.m12 = 2.0f * (n - p);
     }
 
+    public boolean isInteger() {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.m30 = 1.0f;
+        matrix4f.m31 = 1.0f;
+        matrix4f.m32 = 1.0f;
+        matrix4f.m33 = 0.0f;
+        Matrix4f matrix4f2 = this.copy();
+        matrix4f2.multiply(matrix4f);
+        return Matrix4f.isInteger(matrix4f2.m00 / matrix4f2.m03) && Matrix4f.isInteger(matrix4f2.m10 / matrix4f2.m13) && Matrix4f.isInteger(matrix4f2.m20 / matrix4f2.m23) && Matrix4f.isInteger(matrix4f2.m01 / matrix4f2.m03) && Matrix4f.isInteger(matrix4f2.m11 / matrix4f2.m13) && Matrix4f.isInteger(matrix4f2.m21 / matrix4f2.m23) && Matrix4f.isInteger(matrix4f2.m02 / matrix4f2.m03) && Matrix4f.isInteger(matrix4f2.m12 / matrix4f2.m13) && Matrix4f.isInteger(matrix4f2.m22 / matrix4f2.m23);
+    }
+
+    private static boolean isInteger(float f) {
+        return (double)Math.abs(f - (float)Math.round(f)) <= 1.0E-5;
+    }
+
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -106,9 +120,73 @@ public final class Matrix4f {
         return i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static int bufferIndex(int i, int j) {
         return j * 4 + i;
+    }
+
+    public void load(FloatBuffer floatBuffer) {
+        this.m00 = floatBuffer.get(Matrix4f.bufferIndex(0, 0));
+        this.m01 = floatBuffer.get(Matrix4f.bufferIndex(0, 1));
+        this.m02 = floatBuffer.get(Matrix4f.bufferIndex(0, 2));
+        this.m03 = floatBuffer.get(Matrix4f.bufferIndex(0, 3));
+        this.m10 = floatBuffer.get(Matrix4f.bufferIndex(1, 0));
+        this.m11 = floatBuffer.get(Matrix4f.bufferIndex(1, 1));
+        this.m12 = floatBuffer.get(Matrix4f.bufferIndex(1, 2));
+        this.m13 = floatBuffer.get(Matrix4f.bufferIndex(1, 3));
+        this.m20 = floatBuffer.get(Matrix4f.bufferIndex(2, 0));
+        this.m21 = floatBuffer.get(Matrix4f.bufferIndex(2, 1));
+        this.m22 = floatBuffer.get(Matrix4f.bufferIndex(2, 2));
+        this.m23 = floatBuffer.get(Matrix4f.bufferIndex(2, 3));
+        this.m30 = floatBuffer.get(Matrix4f.bufferIndex(3, 0));
+        this.m31 = floatBuffer.get(Matrix4f.bufferIndex(3, 1));
+        this.m32 = floatBuffer.get(Matrix4f.bufferIndex(3, 2));
+        this.m33 = floatBuffer.get(Matrix4f.bufferIndex(3, 3));
+    }
+
+    public void loadTransposed(FloatBuffer floatBuffer) {
+        this.m00 = floatBuffer.get(Matrix4f.bufferIndex(0, 0));
+        this.m01 = floatBuffer.get(Matrix4f.bufferIndex(1, 0));
+        this.m02 = floatBuffer.get(Matrix4f.bufferIndex(2, 0));
+        this.m03 = floatBuffer.get(Matrix4f.bufferIndex(3, 0));
+        this.m10 = floatBuffer.get(Matrix4f.bufferIndex(0, 1));
+        this.m11 = floatBuffer.get(Matrix4f.bufferIndex(1, 1));
+        this.m12 = floatBuffer.get(Matrix4f.bufferIndex(2, 1));
+        this.m13 = floatBuffer.get(Matrix4f.bufferIndex(3, 1));
+        this.m20 = floatBuffer.get(Matrix4f.bufferIndex(0, 2));
+        this.m21 = floatBuffer.get(Matrix4f.bufferIndex(1, 2));
+        this.m22 = floatBuffer.get(Matrix4f.bufferIndex(2, 2));
+        this.m23 = floatBuffer.get(Matrix4f.bufferIndex(3, 2));
+        this.m30 = floatBuffer.get(Matrix4f.bufferIndex(0, 3));
+        this.m31 = floatBuffer.get(Matrix4f.bufferIndex(1, 3));
+        this.m32 = floatBuffer.get(Matrix4f.bufferIndex(2, 3));
+        this.m33 = floatBuffer.get(Matrix4f.bufferIndex(3, 3));
+    }
+
+    public void load(FloatBuffer floatBuffer, boolean bl) {
+        if (bl) {
+            this.loadTransposed(floatBuffer);
+        } else {
+            this.load(floatBuffer);
+        }
+    }
+
+    public void load(Matrix4f matrix4f) {
+        this.m00 = matrix4f.m00;
+        this.m01 = matrix4f.m01;
+        this.m02 = matrix4f.m02;
+        this.m03 = matrix4f.m03;
+        this.m10 = matrix4f.m10;
+        this.m11 = matrix4f.m11;
+        this.m12 = matrix4f.m12;
+        this.m13 = matrix4f.m13;
+        this.m20 = matrix4f.m20;
+        this.m21 = matrix4f.m21;
+        this.m22 = matrix4f.m22;
+        this.m23 = matrix4f.m23;
+        this.m30 = matrix4f.m30;
+        this.m31 = matrix4f.m31;
+        this.m32 = matrix4f.m32;
+        this.m33 = matrix4f.m33;
     }
 
     public String toString() {
@@ -149,7 +227,6 @@ public final class Matrix4f {
         return stringBuilder.toString();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void store(FloatBuffer floatBuffer) {
         floatBuffer.put(Matrix4f.bufferIndex(0, 0), this.m00);
         floatBuffer.put(Matrix4f.bufferIndex(0, 1), this.m01);
@@ -169,7 +246,33 @@ public final class Matrix4f {
         floatBuffer.put(Matrix4f.bufferIndex(3, 3), this.m33);
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public void storeTransposed(FloatBuffer floatBuffer) {
+        floatBuffer.put(Matrix4f.bufferIndex(0, 0), this.m00);
+        floatBuffer.put(Matrix4f.bufferIndex(1, 0), this.m01);
+        floatBuffer.put(Matrix4f.bufferIndex(2, 0), this.m02);
+        floatBuffer.put(Matrix4f.bufferIndex(3, 0), this.m03);
+        floatBuffer.put(Matrix4f.bufferIndex(0, 1), this.m10);
+        floatBuffer.put(Matrix4f.bufferIndex(1, 1), this.m11);
+        floatBuffer.put(Matrix4f.bufferIndex(2, 1), this.m12);
+        floatBuffer.put(Matrix4f.bufferIndex(3, 1), this.m13);
+        floatBuffer.put(Matrix4f.bufferIndex(0, 2), this.m20);
+        floatBuffer.put(Matrix4f.bufferIndex(1, 2), this.m21);
+        floatBuffer.put(Matrix4f.bufferIndex(2, 2), this.m22);
+        floatBuffer.put(Matrix4f.bufferIndex(3, 2), this.m23);
+        floatBuffer.put(Matrix4f.bufferIndex(0, 3), this.m30);
+        floatBuffer.put(Matrix4f.bufferIndex(1, 3), this.m31);
+        floatBuffer.put(Matrix4f.bufferIndex(2, 3), this.m32);
+        floatBuffer.put(Matrix4f.bufferIndex(3, 3), this.m33);
+    }
+
+    public void store(FloatBuffer floatBuffer, boolean bl) {
+        if (bl) {
+            this.storeTransposed(floatBuffer);
+        } else {
+            this.store(floatBuffer);
+        }
+    }
+
     public void setIdentity() {
         this.m00 = 1.0f;
         this.m01 = 0.0f;
@@ -189,7 +292,6 @@ public final class Matrix4f {
         this.m33 = 1.0f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float adjugateAndDet() {
         float f = this.m00 * this.m11 - this.m01 * this.m10;
         float g = this.m00 * this.m12 - this.m02 * this.m10;
@@ -238,7 +340,22 @@ public final class Matrix4f {
         return f * q - g * p + h * o + i * n - j * m + k * l;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public float determinant() {
+        float f = this.m00 * this.m11 - this.m01 * this.m10;
+        float g = this.m00 * this.m12 - this.m02 * this.m10;
+        float h = this.m00 * this.m13 - this.m03 * this.m10;
+        float i = this.m01 * this.m12 - this.m02 * this.m11;
+        float j = this.m01 * this.m13 - this.m03 * this.m11;
+        float k = this.m02 * this.m13 - this.m03 * this.m12;
+        float l = this.m20 * this.m31 - this.m21 * this.m30;
+        float m = this.m20 * this.m32 - this.m22 * this.m30;
+        float n = this.m20 * this.m33 - this.m23 * this.m30;
+        float o = this.m21 * this.m32 - this.m22 * this.m31;
+        float p = this.m21 * this.m33 - this.m23 * this.m31;
+        float q = this.m22 * this.m33 - this.m23 * this.m32;
+        return f * q - g * p + h * o + i * n - j * m + k * l;
+    }
+
     public void transpose() {
         float f = this.m10;
         this.m10 = this.m01;
@@ -260,7 +377,6 @@ public final class Matrix4f {
         this.m23 = f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean invert() {
         float f = this.adjugateAndDet();
         if (Math.abs(f) > 1.0E-6f) {
@@ -270,7 +386,6 @@ public final class Matrix4f {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void multiply(Matrix4f matrix4f) {
         float f = this.m00 * matrix4f.m00 + this.m01 * matrix4f.m10 + this.m02 * matrix4f.m20 + this.m03 * matrix4f.m30;
         float g = this.m00 * matrix4f.m01 + this.m01 * matrix4f.m11 + this.m02 * matrix4f.m21 + this.m03 * matrix4f.m31;
@@ -306,12 +421,10 @@ public final class Matrix4f {
         this.m33 = u;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void multiply(Quaternion quaternion) {
         this.multiply(new Matrix4f(quaternion));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void multiply(float f) {
         this.m00 *= f;
         this.m01 *= f;
@@ -331,7 +444,48 @@ public final class Matrix4f {
         this.m33 *= f;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public void add(Matrix4f matrix4f) {
+        this.m00 += matrix4f.m00;
+        this.m01 += matrix4f.m01;
+        this.m02 += matrix4f.m02;
+        this.m03 += matrix4f.m03;
+        this.m10 += matrix4f.m10;
+        this.m11 += matrix4f.m11;
+        this.m12 += matrix4f.m12;
+        this.m13 += matrix4f.m13;
+        this.m20 += matrix4f.m20;
+        this.m21 += matrix4f.m21;
+        this.m22 += matrix4f.m22;
+        this.m23 += matrix4f.m23;
+        this.m30 += matrix4f.m30;
+        this.m31 += matrix4f.m31;
+        this.m32 += matrix4f.m32;
+        this.m33 += matrix4f.m33;
+    }
+
+    public void subtract(Matrix4f matrix4f) {
+        this.m00 -= matrix4f.m00;
+        this.m01 -= matrix4f.m01;
+        this.m02 -= matrix4f.m02;
+        this.m03 -= matrix4f.m03;
+        this.m10 -= matrix4f.m10;
+        this.m11 -= matrix4f.m11;
+        this.m12 -= matrix4f.m12;
+        this.m13 -= matrix4f.m13;
+        this.m20 -= matrix4f.m20;
+        this.m21 -= matrix4f.m21;
+        this.m22 -= matrix4f.m22;
+        this.m23 -= matrix4f.m23;
+        this.m30 -= matrix4f.m30;
+        this.m31 -= matrix4f.m31;
+        this.m32 -= matrix4f.m32;
+        this.m33 -= matrix4f.m33;
+    }
+
+    public float trace() {
+        return this.m00 + this.m11 + this.m22 + this.m33;
+    }
+
     public static Matrix4f perspective(double d, float f, float g, float h) {
         float i = (float)(1.0 / Math.tan(d * 0.01745329238474369 / 2.0));
         Matrix4f matrix4f = new Matrix4f();
@@ -343,7 +497,6 @@ public final class Matrix4f {
         return matrix4f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Matrix4f orthographic(float f, float g, float h, float i) {
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.m00 = 2.0f / f;
@@ -357,7 +510,6 @@ public final class Matrix4f {
         return matrix4f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Matrix4f orthographic(float f, float g, float h, float i, float j, float k) {
         Matrix4f matrix4f = new Matrix4f();
         float l = g - f;
@@ -373,19 +525,16 @@ public final class Matrix4f {
         return matrix4f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void translate(Vector3f vector3f) {
         this.m03 += vector3f.x();
         this.m13 += vector3f.y();
         this.m23 += vector3f.z();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Matrix4f copy() {
         return new Matrix4f(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void multiplyWithTranslation(float f, float g, float h) {
         this.m03 = this.m00 * f + this.m01 * g + this.m02 * h + this.m03;
         this.m13 = this.m10 * f + this.m11 * g + this.m12 * h + this.m13;
@@ -393,7 +542,6 @@ public final class Matrix4f {
         this.m33 = this.m30 * f + this.m31 * g + this.m32 * h + this.m33;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Matrix4f createScaleMatrix(float f, float g, float h) {
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.m00 = f;
@@ -403,7 +551,6 @@ public final class Matrix4f {
         return matrix4f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Matrix4f createTranslateMatrix(float f, float g, float h) {
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.m00 = 1.0f;

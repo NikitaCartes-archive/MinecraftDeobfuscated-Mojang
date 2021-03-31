@@ -31,6 +31,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractCauldronBlock
 extends Block {
+    private static final int SIDE_THICKNESS = 2;
+    private static final int LEG_WIDTH = 4;
+    private static final int LEG_HEIGHT = 3;
+    private static final int LEG_DEPTH = 2;
+    protected static final int FLOOR_LEVEL = 4;
     private static final VoxelShape INSIDE = AbstractCauldronBlock.box(2.0, 4.0, 2.0, 14.0, 16.0, 14.0);
     protected static final VoxelShape SHAPE = Shapes.join(Shapes.block(), Shapes.or(AbstractCauldronBlock.box(0.0, 0.0, 4.0, 16.0, 3.0, 12.0), AbstractCauldronBlock.box(4.0, 0.0, 0.0, 12.0, 3.0, 16.0), AbstractCauldronBlock.box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0), INSIDE), BooleanOp.ONLY_FIRST);
     private final Map<Item, CauldronInteraction> interactions;
@@ -74,6 +79,8 @@ extends Block {
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
     }
+
+    public abstract boolean isFull(BlockState var1);
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {

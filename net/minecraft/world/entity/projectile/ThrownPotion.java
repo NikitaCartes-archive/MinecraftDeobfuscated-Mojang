@@ -5,9 +5,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.List;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +25,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -36,10 +34,11 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
-@EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public class ThrownPotion
 extends ThrowableItemProjectile
 implements ItemSupplier {
+    public static final double SPLASH_RANGE = 4.0;
+    private static final double SPLASH_RANGE_SQ = 16.0;
     public static final Predicate<LivingEntity> WATER_SENSITIVE = LivingEntity::isSensitiveToWater;
 
     public ThrownPotion(EntityType<? extends ThrownPotion> entityType, Level level) {
@@ -177,6 +176,8 @@ implements ItemSupplier {
         BlockState blockState = this.level.getBlockState(blockPos);
         if (blockState.is(BlockTags.FIRE)) {
             this.level.removeBlock(blockPos, false);
+        } else if (AbstractCandleBlock.isLit(blockState)) {
+            AbstractCandleBlock.extinguish(null, blockState, this.level, blockPos);
         } else if (CampfireBlock.isLitCampfire(blockState)) {
             this.level.levelEvent(null, 1009, blockPos, 0);
             CampfireBlock.dowse(this.getOwner(), this.level, blockPos, blockState);

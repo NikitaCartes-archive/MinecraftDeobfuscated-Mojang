@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -99,7 +97,6 @@ extends AbstractArrow {
         return this.tridentItem.copy();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isFoil() {
         return this.entityData.get(ID_FOIL);
     }
@@ -204,7 +201,6 @@ extends AbstractArrow {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRender(double d, double e, double f) {
         return true;
     }

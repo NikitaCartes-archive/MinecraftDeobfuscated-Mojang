@@ -76,6 +76,11 @@ implements TickList<T> {
         this.ticks.forEach(scheduledTick -> tickList.scheduleTick(scheduledTick.pos, ((ScheduledTick)scheduledTick).type, scheduledTick.delay, scheduledTick.priority));
     }
 
+    @Override
+    public int size() {
+        return this.ticks.size();
+    }
+
     static class ScheduledTick<T> {
         private final T type;
         public final BlockPos pos;

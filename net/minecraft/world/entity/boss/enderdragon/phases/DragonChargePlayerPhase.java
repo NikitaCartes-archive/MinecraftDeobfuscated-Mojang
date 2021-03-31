@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class DragonChargePlayerPhase
 extends AbstractDragonPhaseInstance {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int CHARGE_RECOVERY_TIME = 10;
     private Vec3 targetLocation;
     private int timeSinceCharge;
 

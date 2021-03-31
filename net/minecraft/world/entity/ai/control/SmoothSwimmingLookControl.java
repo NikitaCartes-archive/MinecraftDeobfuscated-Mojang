@@ -10,6 +10,8 @@ import net.minecraft.world.entity.ai.control.LookControl;
 public class SmoothSwimmingLookControl
 extends LookControl {
     private final int maxYRotFromCenter;
+    private static final int HEAD_TILT_X = 10;
+    private static final int HEAD_TILT_Y = 20;
 
     public SmoothSwimmingLookControl(Mob mob, int i) {
         super(mob);

@@ -13,6 +13,7 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class EntityZombieVillagerTypeFix
 extends NamedEntityFix {
+    private static final int PROFESSION_MAX = 6;
     private static final Random RANDOM = new Random();
 
     public EntityZombieVillagerTypeFix(Schema schema, boolean bl) {

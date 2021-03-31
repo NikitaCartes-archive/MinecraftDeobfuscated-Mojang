@@ -23,14 +23,21 @@ implements Comparable<KeyMapping> {
     private static final Map<String, KeyMapping> ALL = Maps.newHashMap();
     private static final Map<InputConstants.Key, KeyMapping> MAP = Maps.newHashMap();
     private static final Set<String> CATEGORIES = Sets.newHashSet();
+    public static final String CATEGORY_MOVEMENT = "key.categories.movement";
+    public static final String CATEGORY_MISC = "key.categories.misc";
+    public static final String CATEGORY_MULTIPLAYER = "key.categories.multiplayer";
+    public static final String CATEGORY_GAMEPLAY = "key.categories.gameplay";
+    public static final String CATEGORY_INVENTORY = "key.categories.inventory";
+    public static final String CATEGORY_INTERFACE = "key.categories.ui";
+    public static final String CATEGORY_CREATIVE = "key.categories.creative";
     private static final Map<String, Integer> CATEGORY_SORT_ORDER = Util.make(Maps.newHashMap(), hashMap -> {
-        hashMap.put("key.categories.movement", 1);
-        hashMap.put("key.categories.gameplay", 2);
-        hashMap.put("key.categories.inventory", 3);
-        hashMap.put("key.categories.creative", 4);
-        hashMap.put("key.categories.multiplayer", 5);
-        hashMap.put("key.categories.ui", 6);
-        hashMap.put("key.categories.misc", 7);
+        hashMap.put(CATEGORY_MOVEMENT, 1);
+        hashMap.put(CATEGORY_GAMEPLAY, 2);
+        hashMap.put(CATEGORY_INVENTORY, 3);
+        hashMap.put(CATEGORY_CREATIVE, 4);
+        hashMap.put(CATEGORY_MULTIPLAYER, 5);
+        hashMap.put(CATEGORY_INTERFACE, 6);
+        hashMap.put(CATEGORY_MISC, 7);
     });
     private final String name;
     private final InputConstants.Key defaultKey;

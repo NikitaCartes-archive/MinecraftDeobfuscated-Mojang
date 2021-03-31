@@ -14,6 +14,8 @@ public enum MissingGlyph implements RawGlyph
 {
     INSTANCE;
 
+    private static final int MISSING_IMAGE_WIDTH = 5;
+    private static final int MISSING_IMAGE_HEIGHT = 8;
     private static final NativeImage IMAGE_DATA;
 
     @Override

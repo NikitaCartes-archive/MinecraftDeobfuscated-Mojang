@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -20,7 +18,6 @@ public interface ArmorMaterial {
 
     public Ingredient getRepairIngredient();
 
-    @Environment(value=EnvType.CLIENT)
     public String getName();
 
     public float getToughness();

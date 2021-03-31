@@ -12,6 +12,11 @@ public class DebugBuffer<T> {
     private final AtomicReferenceArray<T> data;
     private final AtomicInteger index;
 
+    public DebugBuffer(int i) {
+        this.data = new AtomicReferenceArray(i);
+        this.index = new AtomicInteger(0);
+    }
+
     public void push(T object) {
         int k;
         int j;

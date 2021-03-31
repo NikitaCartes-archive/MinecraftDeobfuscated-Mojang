@@ -6,8 +6,6 @@ package net.minecraft.world.level;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -159,7 +157,6 @@ implements CommandSource {
         this.trackOutput = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isTrackOutput() {
         return this.trackOutput;
     }
@@ -174,7 +171,6 @@ implements CommandSource {
         return InteractionResult.sidedSuccess(player.level.isClientSide);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public abstract Vec3 getPosition();
 
     public abstract CommandSourceStack createCommandSourceStack();

@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class RandomStroll
 extends Behavior<PathfinderMob> {
+    private static final int MAX_XZ_DIST = 10;
+    private static final int MAX_Y_DIST = 7;
     private final float speedModifier;
     protected final int maxHorizontalDistance;
     protected final int maxVerticalDistance;

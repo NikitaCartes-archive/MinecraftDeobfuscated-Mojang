@@ -9,5 +9,8 @@ public interface TestReporter {
     public void onTestFailed(GameTestInfo var1);
 
     public void onTestSuccess(GameTestInfo var1);
+
+    default public void finish() {
+    }
 }
 

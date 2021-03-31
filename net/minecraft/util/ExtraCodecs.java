@@ -8,50 +8,10 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.PrimitiveCodec;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class ExtraCodecs {
-    public static final Codec<DoubleStream> DOUBLE_STREAM = new PrimitiveCodec<DoubleStream>(){
-
-        @Override
-        public <T> DataResult<DoubleStream> read(DynamicOps<T> dynamicOps, T object) {
-            return ExtraCodecs.asDoubleStream(dynamicOps, object);
-        }
-
-        @Override
-        public <T> T write(DynamicOps<T> dynamicOps, DoubleStream doubleStream) {
-            return (T)ExtraCodecs.createDoubleList(dynamicOps, doubleStream);
-        }
-
-        public String toString() {
-            return "DoubleStream";
-        }
-
-        @Override
-        public /* synthetic */ Object write(DynamicOps dynamicOps, Object object) {
-            return this.write(dynamicOps, (DoubleStream)object);
-        }
-    };
-
-    private static <T> DataResult<DoubleStream> asDoubleStream(DynamicOps<T> dynamicOps, T object) {
-        return dynamicOps.getStream(object).flatMap(stream -> {
-            List list = stream.collect(Collectors.toList());
-            if (list.stream().allMatch(object -> dynamicOps.getNumberValue(object).result().isPresent())) {
-                return DataResult.success(list.stream().mapToDouble(object -> dynamicOps.getNumberValue(object).result().get().doubleValue()));
-            }
-            return DataResult.error("Some elements are not doubles: " + object);
-        });
-    }
-
-    private static <T> T createDoubleList(DynamicOps<T> dynamicOps, DoubleStream doubleStream) {
-        return (T)dynamicOps.createList(doubleStream.mapToObj(dynamicOps::createDouble));
-    }
-
     public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
         return new XorCodec<F, S>(codec, codec2);
     }

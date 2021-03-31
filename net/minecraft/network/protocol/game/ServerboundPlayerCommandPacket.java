@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -16,12 +14,10 @@ implements Packet<ServerGamePacketListener> {
     private final Action action;
     private final int data;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerCommandPacket(Entity entity, Action action) {
         this(entity, action, 0);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerCommandPacket(Entity entity, Action action, int i) {
         this.id = entity.getId();
         this.action = action;
@@ -44,6 +40,10 @@ implements Packet<ServerGamePacketListener> {
     @Override
     public void handle(ServerGamePacketListener serverGamePacketListener) {
         serverGamePacketListener.handlePlayerCommand(this);
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     public Action getAction() {

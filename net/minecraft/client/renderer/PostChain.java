@@ -36,6 +36,7 @@ import org.apache.commons.io.IOUtils;
 @Environment(value=EnvType.CLIENT)
 public class PostChain
 implements AutoCloseable {
+    private static final String MAIN_RENDER_TARGET = "minecraft:main";
     private final RenderTarget screenTarget;
     private final ResourceManager resourceManager;
     private final String name;
@@ -339,7 +340,7 @@ implements AutoCloseable {
         if (string == null) {
             return null;
         }
-        if (string.equals("minecraft:main")) {
+        if (string.equals(MAIN_RENDER_TARGET)) {
             return this.screenTarget;
         }
         return this.customRenderTargets.get(string);

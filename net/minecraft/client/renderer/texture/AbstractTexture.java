@@ -17,6 +17,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractTexture
 implements AutoCloseable {
+    public static final int NOT_ASSIGNED = -1;
     protected int id = -1;
     protected boolean blur;
     protected boolean mipmap;

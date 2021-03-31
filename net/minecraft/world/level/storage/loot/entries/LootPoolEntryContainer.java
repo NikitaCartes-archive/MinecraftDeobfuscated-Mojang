@@ -14,7 +14,9 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.AlternativesEntry;
 import net.minecraft.world.level.storage.loot.entries.ComposableEntryContainer;
+import net.minecraft.world.level.storage.loot.entries.EntryGroup;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
+import net.minecraft.world.level.storage.loot.entries.SequentialEntry;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
@@ -96,6 +98,14 @@ implements ComposableEntryContainer {
 
         public AlternativesEntry.Builder otherwise(Builder<?> builder) {
             return new AlternativesEntry.Builder(this, builder);
+        }
+
+        public EntryGroup.Builder append(Builder<?> builder) {
+            return new EntryGroup.Builder(this, builder);
+        }
+
+        public SequentialEntry.Builder then(Builder<?> builder) {
+            return new SequentialEntry.Builder(this, builder);
         }
 
         public abstract LootPoolEntryContainer build();

@@ -42,6 +42,8 @@ import org.jetbrains.annotations.Nullable;
 public class HopperBlockEntity
 extends RandomizableContainerBlockEntity
 implements Hopper {
+    public static final int MOVE_ITEM_SPEED = 8;
+    public static final int HOPPER_CONTAINER_SIZE = 5;
     private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
     private int cooldownTime = -1;
     private long tickedGameTime;

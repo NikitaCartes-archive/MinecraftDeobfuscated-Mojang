@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -36,6 +34,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class WrittenBookItem
 extends Item {
+    public static final int TITLE_LENGTH = 16;
+    public static final int TITLE_MAX_LENGTH = 32;
+    public static final int PAGE_EDIT_LENGTH = 1024;
+    public static final int PAGE_LENGTH = Short.MAX_VALUE;
+    public static final int MAX_PAGES = 100;
+    public static final int MAX_GENERATION = 2;
+    public static final String TAG_TITLE = "title";
+    public static final String TAG_FILTERED_TITLE = "filtered_title";
+    public static final String TAG_AUTHOR = "author";
+    public static final String TAG_PAGES = "pages";
+    public static final String TAG_FILTERED_PAGES = "filtered_pages";
+    public static final String TAG_GENERATION = "generation";
+    public static final String TAG_RESOLVED = "resolved";
+
     public WrittenBookItem(Item.Properties properties) {
         super(properties);
     }
@@ -44,45 +56,44 @@ extends Item {
         if (!WritableBookItem.makeSureTagIsValid(compoundTag)) {
             return false;
         }
-        if (!compoundTag.contains("title", 8)) {
+        if (!compoundTag.contains(TAG_TITLE, 8)) {
             return false;
         }
-        String string = compoundTag.getString("title");
+        String string = compoundTag.getString(TAG_TITLE);
         if (string.length() > 32) {
             return false;
         }
-        return compoundTag.contains("author", 8);
+        return compoundTag.contains(TAG_AUTHOR, 8);
     }
 
     public static int getGeneration(ItemStack itemStack) {
-        return itemStack.getTag().getInt("generation");
+        return itemStack.getTag().getInt(TAG_GENERATION);
     }
 
     public static int getPageCount(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag != null ? compoundTag.getList("pages", 8).size() : 0;
+        return compoundTag != null ? compoundTag.getList(TAG_PAGES, 8).size() : 0;
     }
 
     @Override
     public Component getName(ItemStack itemStack) {
         String string;
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null && !StringUtil.isNullOrEmpty(string = compoundTag.getString("title"))) {
+        if (compoundTag != null && !StringUtil.isNullOrEmpty(string = compoundTag.getString(TAG_TITLE))) {
             return new TextComponent(string);
         }
         return super.getName(itemStack);
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         if (itemStack.hasTag()) {
             CompoundTag compoundTag = itemStack.getTag();
-            String string = compoundTag.getString("author");
+            String string = compoundTag.getString(TAG_AUTHOR);
             if (!StringUtil.isNullOrEmpty(string)) {
                 list.add(new TranslatableComponent("book.byAuthor", string).withStyle(ChatFormatting.GRAY));
             }
-            list.add(new TranslatableComponent("book.generation." + compoundTag.getInt("generation")).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent("book.generation." + compoundTag.getInt(TAG_GENERATION)).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -107,19 +118,19 @@ extends Item {
 
     public static boolean resolveBookComponents(ItemStack itemStack, @Nullable CommandSourceStack commandSourceStack, @Nullable Player player) {
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag == null || compoundTag.getBoolean("resolved")) {
+        if (compoundTag == null || compoundTag.getBoolean(TAG_RESOLVED)) {
             return false;
         }
-        compoundTag.putBoolean("resolved", true);
+        compoundTag.putBoolean(TAG_RESOLVED, true);
         if (!WrittenBookItem.makeSureTagIsValid(compoundTag)) {
             return false;
         }
-        ListTag listTag = compoundTag.getList("pages", 8);
+        ListTag listTag = compoundTag.getList(TAG_PAGES, 8);
         for (int i = 0; i < listTag.size(); ++i) {
             listTag.set(i, StringTag.valueOf(WrittenBookItem.resolvePage(commandSourceStack, player, listTag.getString(i))));
         }
-        if (compoundTag.contains("filtered_pages", 10)) {
-            CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
+        if (compoundTag.contains(TAG_FILTERED_PAGES, 10)) {
+            CompoundTag compoundTag2 = compoundTag.getCompound(TAG_FILTERED_PAGES);
             for (String string : compoundTag2.getAllKeys()) {
                 compoundTag2.putString(string, WrittenBookItem.resolvePage(commandSourceStack, player, compoundTag2.getString(string)));
             }

@@ -61,6 +61,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChunkSerializer {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final String TAG_UPGRADE_DATA = "UpgradeData";
 
     public static ProtoChunk read(ServerLevel serverLevel, StructureManager structureManager, PoiManager poiManager, ChunkPos chunkPos, CompoundTag compoundTag) {
         int n;
@@ -74,7 +75,7 @@ public class ChunkSerializer {
             LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", (Object)chunkPos, (Object)chunkPos, (Object)chunkPos2);
         }
         ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), serverLevel, chunkPos, biomeSource, compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null);
-        UpgradeData upgradeData = compoundTag2.contains("UpgradeData", 10) ? new UpgradeData(compoundTag2.getCompound("UpgradeData"), serverLevel) : UpgradeData.EMPTY;
+        UpgradeData upgradeData = compoundTag2.contains(TAG_UPGRADE_DATA, 10) ? new UpgradeData(compoundTag2.getCompound(TAG_UPGRADE_DATA), serverLevel) : UpgradeData.EMPTY;
         ProtoTickList<Block> protoTickList = new ProtoTickList<Block>(block -> block == null || block.defaultBlockState().isAir(), chunkPos, compoundTag2.getList("ToBeTicked", 9), serverLevel);
         ProtoTickList<Fluid> protoTickList2 = new ProtoTickList<Fluid>(fluid -> fluid == null || fluid == Fluids.EMPTY, chunkPos, compoundTag2.getList("LiquidsToBeTicked", 9), serverLevel);
         boolean bl = compoundTag2.getBoolean("isLightOn");
@@ -197,7 +198,7 @@ public class ChunkSerializer {
         compoundTag2.putString("Status", chunkAccess.getStatus().getName());
         UpgradeData upgradeData = chunkAccess.getUpgradeData();
         if (!upgradeData.isEmpty()) {
-            compoundTag2.put("UpgradeData", upgradeData.write());
+            compoundTag2.put(TAG_UPGRADE_DATA, upgradeData.write());
         }
         LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
         ListTag listTag = new ListTag();

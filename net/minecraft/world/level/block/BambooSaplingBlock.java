@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +30,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class BambooSaplingBlock
 extends Block
 implements BonemealableBlock {
+    protected static final float SAPLING_AABB_OFFSET = 4.0f;
     protected static final VoxelShape SAPLING_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 12.0, 12.0);
 
     public BambooSaplingBlock(BlockBehaviour.Properties properties) {
@@ -73,7 +72,6 @@ implements BonemealableBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return new ItemStack(Items.BAMBOO);
     }

@@ -40,6 +40,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 extends EntityRenderer<T>
 implements RenderLayerParent<T, M> {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final float EYE_BED_OFFSET = 0.1f;
     protected M model;
     protected final List<RenderLayer<T, M>> layers = Lists.newArrayList();
 
@@ -171,7 +172,7 @@ implements RenderLayerParent<T, M> {
     }
 
     protected boolean isShaking(T livingEntity) {
-        return false;
+        return ((Entity)livingEntity).isFullyFrozen();
     }
 
     protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {

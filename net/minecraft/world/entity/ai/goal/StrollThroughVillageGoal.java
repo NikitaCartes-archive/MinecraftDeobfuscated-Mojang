@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class StrollThroughVillageGoal
 extends Goal {
+    private static final int DISTANCE_THRESHOLD = 10;
     private final PathfinderMob mob;
     private final int interval;
     @Nullable

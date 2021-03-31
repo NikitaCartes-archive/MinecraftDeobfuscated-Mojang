@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsPersistence {
+    private static final String FILE_NAME = "realms_persistence.json";
     private static final GuardedSerializer GSON = new GuardedSerializer();
 
     public RealmsPersistenceData read() {
@@ -47,7 +48,7 @@ public class RealmsPersistence {
     }
 
     private static File getPathToData() {
-        return new File(Minecraft.getInstance().gameDirectory, "realms_persistence.json");
+        return new File(Minecraft.getInstance().gameDirectory, FILE_NAME);
     }
 
     @Environment(value=EnvType.CLIENT)

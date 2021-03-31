@@ -35,6 +35,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class TurtleEggBlock
 extends Block {
+    public static final int MAX_HATCH_LEVEL = 2;
+    public static final int MIN_EGGS = 1;
+    public static final int MAX_EGGS = 4;
     private static final VoxelShape ONE_EGG_AABB = Block.box(3.0, 0.0, 3.0, 12.0, 7.0, 12.0);
     private static final VoxelShape MULTIPLE_EGGS_AABB = Block.box(1.0, 0.0, 1.0, 15.0, 7.0, 15.0);
     public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
@@ -133,7 +136,7 @@ extends Block {
 
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-        if (blockPlaceContext.getItemInHand().is(this.asItem()) && blockState.getValue(EGGS) < 4) {
+        if (!blockPlaceContext.isSecondaryUseActive() && blockPlaceContext.getItemInHand().is(this.asItem()) && blockState.getValue(EGGS) < 4) {
             return true;
         }
         return super.canBeReplaced(blockState, blockPlaceContext);

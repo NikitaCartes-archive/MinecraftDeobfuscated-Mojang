@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.login;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -32,7 +30,6 @@ implements Packet<ClientLoginPacketListener> {
         clientLoginPacketListener.handleDisconnect(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getReason() {
         return this.reason;
     }

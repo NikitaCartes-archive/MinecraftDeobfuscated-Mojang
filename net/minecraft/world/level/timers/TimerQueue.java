@@ -24,6 +24,9 @@ import org.apache.logging.log4j.Logger;
 
 public class TimerQueue<T> {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String CALLBACK_DATA_TAG = "Callback";
+    private static final String TIMER_NAME_TAG = "Name";
+    private static final String TIMER_TRIGGER_TIME_TAG = "TriggerTime";
     private final TimerCallbacks<T> callbacksRegistry;
     private final Queue<Event<T>> queue = new PriorityQueue<Event<T>>(TimerQueue.createComparator());
     private UnsignedLong sequentialId = UnsignedLong.ZERO;
@@ -83,20 +86,20 @@ public class TimerQueue<T> {
     }
 
     private void loadEvent(CompoundTag compoundTag) {
-        CompoundTag compoundTag2 = compoundTag.getCompound("Callback");
+        CompoundTag compoundTag2 = compoundTag.getCompound(CALLBACK_DATA_TAG);
         TimerCallback<T> timerCallback = this.callbacksRegistry.deserialize(compoundTag2);
         if (timerCallback != null) {
-            String string = compoundTag.getString("Name");
-            long l = compoundTag.getLong("TriggerTime");
+            String string = compoundTag.getString(TIMER_NAME_TAG);
+            long l = compoundTag.getLong(TIMER_TRIGGER_TIME_TAG);
             this.schedule(string, l, timerCallback);
         }
     }
 
     private CompoundTag storeEvent(Event<T> event) {
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("Name", event.id);
-        compoundTag.putLong("TriggerTime", event.triggerTime);
-        compoundTag.put("Callback", this.callbacksRegistry.serialize(event.callback));
+        compoundTag.putString(TIMER_NAME_TAG, event.id);
+        compoundTag.putLong(TIMER_TRIGGER_TIME_TAG, event.triggerTime);
+        compoundTag.put(CALLBACK_DATA_TAG, this.callbacksRegistry.serialize(event.callback));
         return compoundTag;
     }
 

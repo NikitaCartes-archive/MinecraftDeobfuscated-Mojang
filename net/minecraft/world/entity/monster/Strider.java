@@ -6,8 +6,6 @@ package net.minecraft.world.entity.monster;
 import com.google.common.collect.Sets;
 import java.util.LinkedHashSet;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -77,6 +75,9 @@ public class Strider
 extends Animal
 implements ItemSteerable,
 Saddleable {
+    private static final float SUFFOCATE_STEERING_MODIFIER = 0.23f;
+    private static final float SUFFOCATE_SPEED_MODIFIER = 0.66f;
+    private static final float STEERING_MODIFIER = 0.55f;
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WARPED_FUNGUS);
     private static final Ingredient TEMPT_ITEMS = Ingredient.of(Items.WARPED_FUNGUS, Items.WARPED_FUNGUS_ON_A_STICK);
     private static final EntityDataAccessor<Integer> DATA_BOOST_TIME = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.INT);
@@ -414,7 +415,6 @@ Saddleable {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.6f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }

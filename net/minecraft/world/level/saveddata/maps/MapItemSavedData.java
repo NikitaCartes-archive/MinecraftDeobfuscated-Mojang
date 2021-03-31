@@ -10,8 +10,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -41,6 +39,9 @@ import org.jetbrains.annotations.Nullable;
 public class MapItemSavedData
 extends SavedData {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MAP_SIZE = 128;
+    private static final int HALF_MAP_SIZE = 64;
+    public static final int MAX_SCALE = 4;
     public final int x;
     public final int z;
     public final ResourceKey<Level> dimension;
@@ -75,7 +76,6 @@ extends SavedData {
         return new MapItemSavedData(l, m, b, bl, bl2, false, resourceKey);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static MapItemSavedData createForClient(byte b, boolean bl, ResourceKey<Level> resourceKey) {
         return new MapItemSavedData(0, 0, b, false, false, bl, resourceKey);
     }
@@ -84,7 +84,7 @@ extends SavedData {
         ResourceKey<Level> resourceKey = DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("dimension"))).resultOrPartial(LOGGER::error).orElseThrow(() -> new IllegalArgumentException("Invalid map dimension: " + compoundTag.get("dimension")));
         int i = compoundTag.getInt("xCenter");
         int j = compoundTag.getInt("zCenter");
-        byte b = (byte)Mth.clamp(compoundTag.getByte("scale"), 0, 4);
+        byte b = (byte)Mth.clamp((int)compoundTag.getByte("scale"), 0, 4);
         boolean bl = !compoundTag.contains("trackingPosition", 1) || compoundTag.getBoolean("trackingPosition");
         boolean bl2 = compoundTag.getBoolean("unlimitedTracking");
         boolean bl3 = compoundTag.getBoolean("locked");
@@ -325,6 +325,10 @@ extends SavedData {
         }
     }
 
+    public Collection<MapBanner> getBanners() {
+        return this.bannerMarkers.values();
+    }
+
     public void removedFromFrame(BlockPos blockPos, int i) {
         this.removeDecoration("frame-" + i);
         this.frameMarkers.remove(MapFrame.frameId(blockPos));
@@ -352,7 +356,6 @@ extends SavedData {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void addClientSideDecorations(List<MapDecoration> list) {
         this.decorations.clear();
         for (int i = 0; i < list.size(); ++i) {
@@ -361,7 +364,6 @@ extends SavedData {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Iterable<MapDecoration> getDecorations() {
         return this.decorations.values();
     }
@@ -452,7 +454,6 @@ extends SavedData {
             this.mapColors = bs;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void applyToMap(MapItemSavedData mapItemSavedData) {
             for (int i = 0; i < this.width; ++i) {
                 for (int j = 0; j < this.height; ++j) {

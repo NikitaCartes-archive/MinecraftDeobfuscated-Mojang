@@ -19,6 +19,10 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -41,7 +45,9 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class DistanceManager {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int ENTITY_TICKING_RANGE = 2;
     private static final int PLAYER_TICKET_LEVEL = 33 + ChunkStatus.getDistance(ChunkStatus.FULL) - 2;
+    private static final int INITIAL_TICKET_LIST_CAPACITY = 4;
     private final Long2ObjectMap<ObjectSet<ServerPlayer>> playersPerChunk = new Long2ObjectOpenHashMap<ObjectSet<ServerPlayer>>();
     private final Long2ObjectOpenHashMap<SortedArraySet<Ticket<?>>> tickets = new Long2ObjectOpenHashMap();
     private final ChunkTicketTracker ticketTracker = new ChunkTicketTracker();
@@ -214,6 +220,19 @@ public abstract class DistanceManager {
         return this.ticketThrottler.getDebugStatus();
     }
 
+    private void dumpTickets(String string) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(new File(string));){
+            for (Long2ObjectMap.Entry entry : this.tickets.long2ObjectEntrySet()) {
+                ChunkPos chunkPos = new ChunkPos(entry.getLongKey());
+                for (Ticket ticket : (SortedArraySet)entry.getValue()) {
+                    fileOutputStream.write(("" + chunkPos.x + "\t" + chunkPos.z + "\t" + ticket.getType() + "\t" + ticket.getTicketLevel() + "\t\n").getBytes(StandardCharsets.UTF_8));
+                }
+            }
+        } catch (IOException iOException) {
+            LOGGER.error(iOException);
+        }
+    }
+
     class ChunkTicketTracker
     extends ChunkTracker {
         public ChunkTicketTracker() {
@@ -371,6 +390,18 @@ public abstract class DistanceManager {
 
         public void runAllUpdates() {
             this.runUpdates(Integer.MAX_VALUE);
+        }
+
+        private void dumpChunks(String string) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(new File(string));){
+                for (Long2ByteMap.Entry entry : this.chunks.long2ByteEntrySet()) {
+                    ChunkPos chunkPos = new ChunkPos(entry.getLongKey());
+                    String string2 = Byte.toString(entry.getByteValue());
+                    fileOutputStream.write(("" + chunkPos.x + "\t" + chunkPos.z + "\t" + string2 + "\n").getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (IOException iOException) {
+                LOGGER.error(iOException);
+            }
         }
     }
 }

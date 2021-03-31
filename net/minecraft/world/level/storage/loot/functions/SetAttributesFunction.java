@@ -14,6 +14,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -66,6 +68,14 @@ extends LootItemConditionalFunction {
             itemStack.addAttributeModifier(modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot);
         }
         return itemStack;
+    }
+
+    public static ModifierBuilder modifier(String string, Attribute attribute, AttributeModifier.Operation operation, NumberProvider numberProvider) {
+        return new ModifierBuilder(string, attribute, operation, numberProvider);
+    }
+
+    public static Builder setAttributes() {
+        return new Builder();
     }
 
     static class Modifier {
@@ -203,6 +213,62 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        }
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final List<Modifier> modifiers = Lists.newArrayList();
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        public Builder withModifier(ModifierBuilder modifierBuilder) {
+            this.modifiers.add(modifierBuilder.build());
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new SetAttributesFunction(this.getConditions(), this.modifiers);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
+        }
+    }
+
+    public static class ModifierBuilder {
+        private final String name;
+        private final Attribute attribute;
+        private final AttributeModifier.Operation operation;
+        private final NumberProvider amount;
+        @Nullable
+        private UUID id;
+        private final Set<EquipmentSlot> slots = EnumSet.noneOf(EquipmentSlot.class);
+
+        public ModifierBuilder(String string, Attribute attribute, AttributeModifier.Operation operation, NumberProvider numberProvider) {
+            this.name = string;
+            this.attribute = attribute;
+            this.operation = operation;
+            this.amount = numberProvider;
+        }
+
+        public ModifierBuilder forSlot(EquipmentSlot equipmentSlot) {
+            this.slots.add(equipmentSlot);
+            return this;
+        }
+
+        public ModifierBuilder withUuid(UUID uUID) {
+            this.id = uUID;
+            return this;
+        }
+
+        public Modifier build() {
+            return new Modifier(this.name, this.attribute, this.operation, this.amount, this.slots.toArray(new EquipmentSlot[0]), this.id);
         }
     }
 }

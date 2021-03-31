@@ -35,6 +35,7 @@ public enum BlockModelRotation implements ModelState
     X270_Y180(270, 180),
     X270_Y270(270, 270);
 
+    private static final int DEGREES = 360;
     private static final Map<Integer, BlockModelRotation> BY_INDEX;
     private final Transformation transformation;
     private final OctahedralGroup actualRotation;
@@ -67,6 +68,10 @@ public enum BlockModelRotation implements ModelState
 
     public static BlockModelRotation by(int i, int j) {
         return BY_INDEX.get(BlockModelRotation.getIndex(Mth.positiveModulo(i, 360), Mth.positiveModulo(j, 360)));
+    }
+
+    public OctahedralGroup actualRotation() {
+        return this.actualRotation;
     }
 
     static {

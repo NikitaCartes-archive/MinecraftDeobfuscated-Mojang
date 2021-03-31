@@ -8,8 +8,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -59,13 +57,11 @@ public class DisplayInfo {
         return this.description;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getIcon() {
         return this.icon;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getBackground() {
         return this.background;
     }
@@ -74,17 +70,14 @@ public class DisplayInfo {
         return this.frame;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getY() {
         return this.y;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldShowToast() {
         return this.showToast;
     }

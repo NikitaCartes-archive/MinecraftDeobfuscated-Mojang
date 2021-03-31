@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -118,7 +116,6 @@ public class AttributeInstance {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void removeModifiers() {
         for (AttributeModifier attributeModifier : this.getModifiers()) {
             this.removeModifier(attributeModifier);

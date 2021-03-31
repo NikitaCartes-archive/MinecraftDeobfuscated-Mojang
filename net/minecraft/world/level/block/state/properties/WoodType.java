@@ -6,8 +6,6 @@ package net.minecraft.world.level.block.state.properties;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public class WoodType {
     private static final Set<WoodType> VALUES = new ObjectArraySet<WoodType>();
@@ -30,12 +28,10 @@ public class WoodType {
         return woodType;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static Stream<WoodType> values() {
         return VALUES.stream();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String name() {
         return this.name;
     }

@@ -8,8 +8,6 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -39,7 +37,6 @@ extends ChunkGenerator {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ChunkGenerator withSeed(long l) {
         return this;
     }

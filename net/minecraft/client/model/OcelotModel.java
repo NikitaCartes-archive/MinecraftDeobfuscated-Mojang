@@ -19,6 +19,27 @@ import net.minecraft.world.entity.Entity;
 @Environment(value=EnvType.CLIENT)
 public class OcelotModel<T extends Entity>
 extends AgeableListModel<T> {
+    private static final int CROUCH_STATE = 0;
+    private static final int WALK_STATE = 1;
+    private static final int SPRINT_STATE = 2;
+    protected static final int SITTING_STATE = 3;
+    private static final float XO = 0.0f;
+    private static final float YO = 16.0f;
+    private static final float ZO = -9.0f;
+    private static final float HEAD_WALK_Y = 15.0f;
+    private static final float HEAD_WALK_Z = -9.0f;
+    private static final float BODY_WALK_Y = 12.0f;
+    private static final float BODY_WALK_Z = -10.0f;
+    private static final float TAIL_1_WALK_Y = 15.0f;
+    private static final float TAIL_1_WALK_Z = 8.0f;
+    private static final float TAIL_2_WALK_Y = 20.0f;
+    private static final float TAIL_2_WALK_Z = 14.0f;
+    protected static final float BACK_LEG_Y = 18.0f;
+    protected static final float BACK_LEG_Z = 5.0f;
+    protected static final float FRONT_LEG_Y = 14.1f;
+    private static final float FRONT_LEG_Z = -5.0f;
+    private static final String TAIL_1 = "tail1";
+    private static final String TAIL_2 = "tail2";
     protected final ModelPart leftHindLeg;
     protected final ModelPart rightHindLeg;
     protected final ModelPart leftFrontLeg;
@@ -33,8 +54,8 @@ extends AgeableListModel<T> {
         super(true, 10.0f, 4.0f);
         this.head = modelPart.getChild("head");
         this.body = modelPart.getChild("body");
-        this.tail1 = modelPart.getChild("tail1");
-        this.tail2 = modelPart.getChild("tail2");
+        this.tail1 = modelPart.getChild(TAIL_1);
+        this.tail2 = modelPart.getChild(TAIL_2);
         this.leftHindLeg = modelPart.getChild("left_hind_leg");
         this.rightHindLeg = modelPart.getChild("right_hind_leg");
         this.leftFrontLeg = modelPart.getChild("left_front_leg");
@@ -46,8 +67,8 @@ extends AgeableListModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         partDefinition.addOrReplaceChild("head", CubeListBuilder.create().addBox("main", -2.5f, -2.0f, -3.0f, 5.0f, 4.0f, 5.0f, cubeDeformation).addBox("nose", -1.5f, 0.0f, -4.0f, 3, 2, 2, cubeDeformation, 0, 24).addBox("ear1", -2.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 0, 10).addBox("ear2", 1.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 6, 10), PartPose.offset(0.0f, 15.0f, -9.0f));
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(20, 0).addBox(-2.0f, 3.0f, -8.0f, 4.0f, 16.0f, 6.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 12.0f, -10.0f, 1.5707964f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("tail1", CubeListBuilder.create().texOffs(0, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 15.0f, 8.0f, 0.9f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(4, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offset(0.0f, 20.0f, 14.0f));
+        partDefinition.addOrReplaceChild(TAIL_1, CubeListBuilder.create().texOffs(0, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 15.0f, 8.0f, 0.9f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(TAIL_2, CubeListBuilder.create().texOffs(4, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offset(0.0f, 20.0f, 14.0f));
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(8, 13).addBox(-1.0f, 0.0f, 1.0f, 2.0f, 6.0f, 2.0f, cubeDeformation);
         partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(1.1f, 18.0f, 5.0f));
         partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-1.1f, 18.0f, 5.0f));

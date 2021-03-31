@@ -19,6 +19,9 @@ import net.minecraft.world.level.Level;
 @Environment(value=EnvType.CLIENT)
 public class LightTexture
 implements AutoCloseable {
+    public static final int FULL_BRIGHT = 0xF000F0;
+    public static final int FULL_SKY = 0xF00000;
+    public static final int FULL_BLOCK = 240;
     private final DynamicTexture lightTexture;
     private final NativeImage lightPixels;
     private final ResourceLocation lightTextureLocation;

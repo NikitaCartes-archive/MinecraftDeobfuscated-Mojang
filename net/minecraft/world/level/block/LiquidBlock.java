@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -91,7 +89,6 @@ implements BucketPickup {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
         return blockState2.getFluidState().getType().isSame(this.fluid);
     }

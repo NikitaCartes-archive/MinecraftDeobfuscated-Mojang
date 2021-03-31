@@ -3,9 +3,6 @@
  */
 package net.minecraft.util.profiling;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 public final class ResultField
 implements Comparable<ResultField> {
     public final double percentage;
@@ -31,7 +28,6 @@ implements Comparable<ResultField> {
         return resultField.name.compareTo(this.name);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getColor() {
         return (this.name.hashCode() & 0xAAAAAA) + 0x444444;
     }

@@ -238,6 +238,10 @@ public class MouseHandler {
         return this.isLeftPressed;
     }
 
+    public boolean isMiddlePressed() {
+        return this.isMiddlePressed;
+    }
+
     public boolean isRightPressed() {
         return this.isRightPressed;
     }

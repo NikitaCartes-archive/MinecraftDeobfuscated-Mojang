@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NearestHealableRaiderTargetGoal<T extends LivingEntity>
 extends NearestAttackableTargetGoal<T> {
+    private static final int DEFAULT_COOLDOWN = 200;
     private int cooldown = 0;
 
     public NearestHealableRaiderTargetGoal(Raider raider, Class<T> class_, boolean bl, @Nullable Predicate<LivingEntity> predicate) {

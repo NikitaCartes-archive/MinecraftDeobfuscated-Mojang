@@ -9,15 +9,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class MegaJungleTrunkPlacer
 extends GiantTrunkPlacer {
@@ -33,9 +33,9 @@ extends GiantTrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         ArrayList<FoliagePlacer.FoliageAttachment> list = Lists.newArrayList();
-        list.addAll(super.placeTrunk(levelSimulatedRW, random, i, blockPos, set, boundingBox, treeConfiguration));
+        list.addAll(super.placeTrunk(levelSimulatedReader, biConsumer, random, i, blockPos, treeConfiguration));
         for (int j = i - 2 - random.nextInt(4); j > i / 2; j -= 2 + random.nextInt(4)) {
             float f = random.nextFloat() * ((float)Math.PI * 2);
             int k = 0;
@@ -44,7 +44,7 @@ extends GiantTrunkPlacer {
                 k = (int)(1.5f + Mth.cos(f) * (float)m);
                 l = (int)(1.5f + Mth.sin(f) * (float)m);
                 BlockPos blockPos2 = blockPos.offset(k, j - 3 + m / 2, l);
-                MegaJungleTrunkPlacer.placeLog(levelSimulatedRW, random, blockPos2, set, boundingBox, treeConfiguration);
+                MegaJungleTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, blockPos2, treeConfiguration);
             }
             list.add(new FoliagePlacer.FoliageAttachment(blockPos.offset(k, j, l), -2, false));
         }

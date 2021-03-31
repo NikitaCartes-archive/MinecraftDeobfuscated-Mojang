@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
 
 public interface StrictQueue<T, F> {
@@ -21,7 +19,6 @@ public interface StrictQueue<T, F> {
 
     public boolean isEmpty();
 
-    @Environment(value=EnvType.CLIENT)
     public int size();
 
     public static final class FixedPriorityQueue
@@ -56,7 +53,6 @@ public interface StrictQueue<T, F> {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public int size() {
             int i = 0;
             for (Queue<Runnable> queue : this.queueList) {
@@ -117,7 +113,6 @@ public interface StrictQueue<T, F> {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public int size() {
             return this.queue.size();
         }

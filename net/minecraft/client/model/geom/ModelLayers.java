@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelLayers {
+    private static final String DEFAULT_LAYER = "main";
     private static final Set<ModelLayerLocation> ALL_MODELS = Sets.newHashSet();
     public static final ModelLayerLocation ARMOR_STAND = ModelLayers.register("armor_stand");
     public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = ModelLayers.registerInnerArmor("armor_stand");
@@ -68,6 +69,7 @@ public class ModelLayers {
     public static final ModelLayerLocation GIANT_INNER_ARMOR = ModelLayers.registerInnerArmor("giant");
     public static final ModelLayerLocation GIANT_OUTER_ARMOR = ModelLayers.registerOuterArmor("giant");
     public static final ModelLayerLocation GLOW_SQUID = ModelLayers.register("glow_squid");
+    public static final ModelLayerLocation GOAT = ModelLayers.register("goat");
     public static final ModelLayerLocation GUARDIAN = ModelLayers.register("guardian");
     public static final ModelLayerLocation HOGLIN = ModelLayers.register("hoglin");
     public static final ModelLayerLocation HOPPER_MINECART = ModelLayers.register("hopper_minecart");
@@ -172,7 +174,7 @@ public class ModelLayers {
     public static final ModelLayerLocation ZOMBIFIED_PIGLIN_OUTER_ARMOR = ModelLayers.registerOuterArmor("zombified_piglin");
 
     private static ModelLayerLocation register(String string) {
-        return ModelLayers.register(string, "main");
+        return ModelLayers.register(string, DEFAULT_LAYER);
     }
 
     private static ModelLayerLocation register(String string, String string2) {
@@ -196,11 +198,11 @@ public class ModelLayers {
     }
 
     public static ModelLayerLocation createBoatModelName(Boat.Type type) {
-        return ModelLayers.createLocation("boat/" + type.getName(), "main");
+        return ModelLayers.createLocation("boat/" + type.getName(), DEFAULT_LAYER);
     }
 
     public static ModelLayerLocation createSignModelName(WoodType woodType) {
-        return ModelLayers.createLocation("sign/" + woodType.name(), "main");
+        return ModelLayers.createLocation("sign/" + woodType.name(), DEFAULT_LAYER);
     }
 
     public static Stream<ModelLayerLocation> getKnownLocations() {

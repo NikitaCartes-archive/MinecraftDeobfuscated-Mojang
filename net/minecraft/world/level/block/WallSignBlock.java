@@ -33,6 +33,9 @@ import org.jetbrains.annotations.Nullable;
 public class WallSignBlock
 extends SignBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    protected static final float AABB_THICKNESS = 2.0f;
+    protected static final float AABB_BOTTOM = 4.5f;
+    protected static final float AABB_TOP = 12.5f;
     private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Block.box(0.0, 4.5, 14.0, 16.0, 12.5, 16.0), Direction.SOUTH, Block.box(0.0, 4.5, 0.0, 16.0, 12.5, 2.0), Direction.EAST, Block.box(0.0, 4.5, 0.0, 2.0, 12.5, 16.0), Direction.WEST, Block.box(14.0, 4.5, 0.0, 16.0, 12.5, 16.0)));
 
     public WallSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {

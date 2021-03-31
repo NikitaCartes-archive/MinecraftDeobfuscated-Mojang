@@ -66,6 +66,11 @@ public class ItemRenderer
 implements ResourceManagerReloadListener {
     public static final ResourceLocation ENCHANT_GLINT_LOCATION = new ResourceLocation("textures/misc/enchanted_item_glint.png");
     private static final Set<Item> IGNORED = Sets.newHashSet(Items.AIR);
+    private static final int GUI_SLOT_CENTER_X = 8;
+    private static final int GUI_SLOT_CENTER_Y = 8;
+    public static final int ITEM_COUNT_BLIT_OFFSET = 200;
+    public static final float COMPASS_FOIL_UI_SCALE = 0.5f;
+    public static final float COMPASS_FOIL_FIRST_PERSON_SCALE = 0.75f;
     public float blitOffset;
     private final ItemModelShaper itemModelShaper;
     private final TextureManager textureManager;
@@ -147,11 +152,11 @@ implements ResourceManagerReloadListener {
     }
 
     public static VertexConsumer getCompassFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
-        return VertexMultiConsumer.create(new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType));
+        return VertexMultiConsumer.create((VertexConsumer)new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType));
     }
 
     public static VertexConsumer getCompassFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
-        return VertexMultiConsumer.create(new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType));
+        return VertexMultiConsumer.create((VertexConsumer)new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType));
     }
 
     public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {

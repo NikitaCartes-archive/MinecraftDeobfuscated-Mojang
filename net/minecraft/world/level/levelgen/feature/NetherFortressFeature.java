@@ -3,10 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -17,7 +18,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class NetherFortressFeature
 extends StructureFeature<NoneFeatureConfiguration> {
-    private static final List<MobSpawnSettings.SpawnerData> FORTRESS_ENEMIES = ImmutableList.of(new MobSpawnSettings.SpawnerData(EntityType.BLAZE, 10, 2, 3), new MobSpawnSettings.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 5, 4, 4), new MobSpawnSettings.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5), new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 2, 5, 5), new MobSpawnSettings.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4));
+    private static final WeightedRandomList<MobSpawnSettings.SpawnerData> FORTRESS_ENEMIES = WeightedRandomList.create((WeightedEntry[])new MobSpawnSettings.SpawnerData[]{new MobSpawnSettings.SpawnerData(EntityType.BLAZE, 10, 2, 3), new MobSpawnSettings.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 5, 4, 4), new MobSpawnSettings.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5), new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 2, 5, 5), new MobSpawnSettings.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4)});
 
     public NetherFortressFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -42,28 +42,27 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public List<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
         return FORTRESS_ENEMIES;
     }
 
     public static class NetherBridgeStart
     extends StructureStart<NoneFeatureConfiguration> {
-        public NetherBridgeStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(structureFeature, chunkPos, boundingBox, i, l);
+        public NetherBridgeStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+            super(structureFeature, chunkPos, i, l);
         }
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
             NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, chunkPos.getBlockX(2), chunkPos.getBlockZ(2));
-            this.pieces.add(startPiece);
-            startPiece.addChildren(startPiece, this.pieces, this.random);
+            this.addPiece(startPiece);
+            startPiece.addChildren(startPiece, this, this.random);
             List<StructurePiece> list = startPiece.pendingChildren;
             while (!list.isEmpty()) {
                 int i = this.random.nextInt(list.size());
                 StructurePiece structurePiece = list.remove(i);
-                structurePiece.addChildren(startPiece, this.pieces, this.random);
+                structurePiece.addChildren(startPiece, this, this.random);
             }
-            this.calculateBoundingBox();
             this.moveInsideHeights(this.random, 48, 70);
         }
     }

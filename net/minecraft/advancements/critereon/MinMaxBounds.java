@@ -169,8 +169,20 @@ public abstract class MinMaxBounds<T extends Number> {
             this.maxSq = Floats.squareOpt(float2);
         }
 
+        public static Floats exactly(float f) {
+            return new Floats(Float.valueOf(f), Float.valueOf(f));
+        }
+
+        public static Floats between(float f, float g) {
+            return new Floats(Float.valueOf(f), Float.valueOf(g));
+        }
+
         public static Floats atLeast(float f) {
             return new Floats(Float.valueOf(f), null);
+        }
+
+        public static Floats atMost(float f) {
+            return new Floats(null, Float.valueOf(f));
         }
 
         public boolean matches(float f) {
@@ -228,8 +240,16 @@ public abstract class MinMaxBounds<T extends Number> {
             return new Ints(i, i);
         }
 
+        public static Ints between(int i, int j) {
+            return new Ints(i, j);
+        }
+
         public static Ints atLeast(int i) {
             return new Ints(i, null);
+        }
+
+        public static Ints atMost(int i) {
+            return new Ints(null, i);
         }
 
         public boolean matches(int i) {
@@ -237,6 +257,13 @@ public abstract class MinMaxBounds<T extends Number> {
                 return false;
             }
             return this.max == null || (Integer)this.max >= i;
+        }
+
+        public boolean matchesSqr(long l) {
+            if (this.minSq != null && this.minSq > l) {
+                return false;
+            }
+            return this.maxSq == null || this.maxSq >= l;
         }
 
         public static Ints fromJson(@Nullable JsonElement jsonElement) {

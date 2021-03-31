@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -50,22 +48,18 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleAddOrRemoveRecipes(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<ResourceLocation> getRecipes() {
         return this.recipes;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<ResourceLocation> getHighlights() {
         return this.toHighlight;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public RecipeBookSettings getBookSettings() {
         return this.bookSettings;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public State getState() {
         return this.state;
     }

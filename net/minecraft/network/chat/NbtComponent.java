@@ -37,6 +37,7 @@ public abstract class NbtComponent
 extends BaseComponent
 implements ContextAwareComponent {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String SEPARATOR = ", ";
     protected final boolean interpreting;
     protected final String nbtPathPattern;
     @Nullable
@@ -92,9 +93,9 @@ implements ContextAwareComponent {
                     LOGGER.warn("Failed to parse component: {}", string, (Object)exception);
                     return Stream.of(new MutableComponent[0]);
                 }
-            }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(", ").append((Component)mutableComponent2)).orElse(new TextComponent(""));
+            }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(SEPARATOR).append((Component)mutableComponent2)).orElse(new TextComponent(""));
         }
-        return new TextComponent(Joiner.on(", ").join(stream.iterator()));
+        return new TextComponent(Joiner.on(SEPARATOR).join(stream.iterator()));
     }
 
     public static class StorageNbtComponent

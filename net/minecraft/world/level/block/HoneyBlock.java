@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -30,6 +28,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HoneyBlock
 extends HalfTransparentBlock {
+    private static final double SLIDE_STARTS_WHEN_VERTICAL_SPEED_IS_AT_LEAST = 0.13;
+    private static final double MIN_FALL_SPEED_TO_BE_CONSIDERED_SLIDING = 0.08;
+    private static final double THROTTLE_SLIDE_SPEED_TO = 0.05;
+    private static final int SLIDE_ADVANCEMENT_CHECK_INTERVAL = 20;
     protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
 
     public HoneyBlock(BlockBehaviour.Properties properties) {
@@ -110,17 +112,14 @@ extends HalfTransparentBlock {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void showSlideParticles(Entity entity) {
         HoneyBlock.showParticles(entity, 5);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void showJumpParticles(Entity entity) {
         HoneyBlock.showParticles(entity, 10);
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static void showParticles(Entity entity, int i) {
         if (!entity.level.isClientSide) {
             return;

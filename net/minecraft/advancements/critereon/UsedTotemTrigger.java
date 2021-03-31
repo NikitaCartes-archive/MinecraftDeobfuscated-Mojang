@@ -48,6 +48,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.item = itemPredicate;
         }
 
+        public static TriggerInstance usedTotem(ItemPredicate itemPredicate) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate);
+        }
+
         public static TriggerInstance usedTotem(ItemLike itemLike) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.Builder.item().of(itemLike).build());
         }

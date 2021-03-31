@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.login;
 
 import java.security.PublicKey;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
@@ -42,17 +40,14 @@ implements Packet<ClientLoginPacketListener> {
         clientLoginPacketListener.handleHello(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getServerId() {
         return this.serverId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public PublicKey getPublicKey() throws CryptException {
         return Crypt.byteToPublicKey(this.publicKey);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public byte[] getNonce() {
         return this.nonce;
     }

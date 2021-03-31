@@ -124,6 +124,10 @@ implements BakedModel {
             return this;
         }
 
+        public Builder item() {
+            return this;
+        }
+
         public BakedModel build() {
             if (this.particleIcon == null) {
                 throw new RuntimeException("Missing particle!");

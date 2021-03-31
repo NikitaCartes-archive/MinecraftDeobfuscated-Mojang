@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 public class TextComponentTagVisitor
 implements TagVisitor {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int INLINE_LIST_THRESHOLD = 8;
     private static final ByteCollection INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
     private static final ChatFormatting SYNTAX_HIGHLIGHTING_KEY = ChatFormatting.AQUA;
     private static final ChatFormatting SYNTAX_HIGHLIGHTING_STRING = ChatFormatting.GREEN;
@@ -46,6 +47,13 @@ implements TagVisitor {
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     private static final String NAME_VALUE_SEPARATOR = String.valueOf(':');
     private static final String ELEMENT_SEPARATOR = String.valueOf(',');
+    private static final String LIST_OPEN = "[";
+    private static final String LIST_CLOSE = "]";
+    private static final String LIST_TYPE_SEPARATOR = ";";
+    private static final String ELEMENT_SPACING = " ";
+    private static final String STRUCT_OPEN = "{";
+    private static final String STRUCT_CLOSE = "}";
+    private static final String NEWLINE = "\n";
     private final String indentation;
     private final int depth;
     private Component result;
@@ -106,44 +114,44 @@ implements TagVisitor {
     @Override
     public void visitByteArray(ByteArrayTag byteArrayTag) {
         MutableComponent component = new TextComponent("B").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+        MutableComponent mutableComponent = new TextComponent(LIST_OPEN).append(component).append(LIST_TYPE_SEPARATOR);
         byte[] bs = byteArrayTag.getAsByteArray();
         for (int i = 0; i < bs.length; ++i) {
             MutableComponent mutableComponent2 = new TextComponent(String.valueOf(bs[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
-            mutableComponent.append(" ").append(mutableComponent2).append(component);
+            mutableComponent.append(ELEMENT_SPACING).append(mutableComponent2).append(component);
             if (i == bs.length - 1) continue;
             mutableComponent.append(ELEMENT_SEPARATOR);
         }
-        mutableComponent.append("]");
+        mutableComponent.append(LIST_CLOSE);
         this.result = mutableComponent;
     }
 
     @Override
     public void visitIntArray(IntArrayTag intArrayTag) {
         MutableComponent component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+        MutableComponent mutableComponent = new TextComponent(LIST_OPEN).append(component).append(LIST_TYPE_SEPARATOR);
         int[] is = intArrayTag.getAsIntArray();
         for (int i = 0; i < is.length; ++i) {
-            mutableComponent.append(" ").append(new TextComponent(String.valueOf(is[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+            mutableComponent.append(ELEMENT_SPACING).append(new TextComponent(String.valueOf(is[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
             if (i == is.length - 1) continue;
             mutableComponent.append(ELEMENT_SEPARATOR);
         }
-        mutableComponent.append("]");
+        mutableComponent.append(LIST_CLOSE);
         this.result = mutableComponent;
     }
 
     @Override
     public void visitLongArray(LongArrayTag longArrayTag) {
         MutableComponent component = new TextComponent("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+        MutableComponent mutableComponent = new TextComponent(LIST_OPEN).append(component).append(LIST_TYPE_SEPARATOR);
         long[] ls = longArrayTag.getAsLongArray();
         for (int i = 0; i < ls.length; ++i) {
             MutableComponent component2 = new TextComponent(String.valueOf(ls[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
-            mutableComponent.append(" ").append(component2).append(component);
+            mutableComponent.append(ELEMENT_SPACING).append(component2).append(component);
             if (i == ls.length - 1) continue;
             mutableComponent.append(ELEMENT_SEPARATOR);
         }
-        mutableComponent.append("]");
+        mutableComponent.append(LIST_CLOSE);
         this.result = mutableComponent;
     }
 
@@ -154,34 +162,34 @@ implements TagVisitor {
             return;
         }
         if (INLINE_ELEMENT_TYPES.contains(listTag.getElementType()) && listTag.size() <= 8) {
-            String string = ELEMENT_SEPARATOR + " ";
-            TextComponent mutableComponent = new TextComponent("[");
+            String string = ELEMENT_SEPARATOR + ELEMENT_SPACING;
+            TextComponent mutableComponent = new TextComponent(LIST_OPEN);
             for (int i = 0; i < listTag.size(); ++i) {
                 if (i != 0) {
                     mutableComponent.append(string);
                 }
                 mutableComponent.append(new TextComponentTagVisitor(this.indentation, this.depth).visit(listTag.get(i)));
             }
-            mutableComponent.append("]");
+            mutableComponent.append(LIST_CLOSE);
             this.result = mutableComponent;
             return;
         }
-        TextComponent mutableComponent2 = new TextComponent("[");
+        TextComponent mutableComponent2 = new TextComponent(LIST_OPEN);
         if (!this.indentation.isEmpty()) {
-            mutableComponent2.append("\n");
+            mutableComponent2.append(NEWLINE);
         }
         for (int j = 0; j < listTag.size(); ++j) {
             TextComponent mutableComponent3 = new TextComponent(Strings.repeat(this.indentation, this.depth + 1));
             mutableComponent3.append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(listTag.get(j)));
             if (j != listTag.size() - 1) {
-                mutableComponent3.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
+                mutableComponent3.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? ELEMENT_SPACING : NEWLINE);
             }
             mutableComponent2.append(mutableComponent3);
         }
         if (!this.indentation.isEmpty()) {
-            mutableComponent2.append("\n").append(Strings.repeat(this.indentation, this.depth));
+            mutableComponent2.append(NEWLINE).append(Strings.repeat(this.indentation, this.depth));
         }
-        mutableComponent2.append("]");
+        mutableComponent2.append(LIST_CLOSE);
         this.result = mutableComponent2;
     }
 
@@ -191,7 +199,7 @@ implements TagVisitor {
             this.result = new TextComponent("{}");
             return;
         }
-        TextComponent mutableComponent = new TextComponent("{");
+        TextComponent mutableComponent = new TextComponent(STRUCT_OPEN);
         Collection<String> collection = compoundTag.getAllKeys();
         if (LOGGER.isDebugEnabled()) {
             ArrayList<String> list = Lists.newArrayList(compoundTag.getAllKeys());
@@ -199,21 +207,21 @@ implements TagVisitor {
             collection = list;
         }
         if (!this.indentation.isEmpty()) {
-            mutableComponent.append("\n");
+            mutableComponent.append(NEWLINE);
         }
         Iterator iterator = collection.iterator();
         while (iterator.hasNext()) {
             String string = (String)iterator.next();
-            MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(this.indentation, this.depth + 1)).append(TextComponentTagVisitor.handleEscapePretty(string)).append(NAME_VALUE_SEPARATOR).append(" ").append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(compoundTag.get(string)));
+            MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(this.indentation, this.depth + 1)).append(TextComponentTagVisitor.handleEscapePretty(string)).append(NAME_VALUE_SEPARATOR).append(ELEMENT_SPACING).append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(compoundTag.get(string)));
             if (iterator.hasNext()) {
-                mutableComponent2.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
+                mutableComponent2.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? ELEMENT_SPACING : NEWLINE);
             }
             mutableComponent.append(mutableComponent2);
         }
         if (!this.indentation.isEmpty()) {
-            mutableComponent.append("\n").append(Strings.repeat(this.indentation, this.depth));
+            mutableComponent.append(NEWLINE).append(Strings.repeat(this.indentation, this.depth));
         }
-        mutableComponent.append("}");
+        mutableComponent.append(STRUCT_CLOSE);
         this.result = mutableComponent;
     }
 

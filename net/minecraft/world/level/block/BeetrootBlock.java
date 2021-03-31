@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Items;
@@ -24,6 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BeetrootBlock
 extends CropBlock {
+    public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
     private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0)};
 
@@ -42,7 +41,6 @@ extends CropBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     protected ItemLike getBaseSeedId() {
         return Items.BEETROOT_SEEDS;
     }

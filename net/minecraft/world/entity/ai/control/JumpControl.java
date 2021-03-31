@@ -4,8 +4,10 @@
 package net.minecraft.world.entity.ai.control;
 
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.control.Control;
 
-public class JumpControl {
+public class JumpControl
+implements Control {
     private final Mob mob;
     protected boolean jump;
 

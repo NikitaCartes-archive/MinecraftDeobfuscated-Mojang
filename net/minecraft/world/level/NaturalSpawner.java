@@ -6,14 +6,11 @@ package net.minecraft.world.level;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -23,7 +20,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -58,8 +56,14 @@ import org.jetbrains.annotations.Nullable;
 
 public final class NaturalSpawner {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MIN_SPAWN_DISTANCE = 24;
+    public static final int SPAWN_DISTANCE_CHUNK = 8;
+    public static final int SPAWN_DISTANCE_BLOCK = 128;
     private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
     private static final MobCategory[] SPAWNING_CATEGORIES = (MobCategory[])Stream.of(MobCategory.values()).filter(mobCategory -> mobCategory != MobCategory.MISC).toArray(MobCategory[]::new);
+
+    private NaturalSpawner() {
+    }
 
     public static SpawnState createState(int i, Iterable<Entity> iterable, ChunkGetter chunkGetter) {
         PotentialCalculator potentialCalculator = new PotentialCalculator();
@@ -100,6 +104,11 @@ public final class NaturalSpawner {
             return;
         }
         NaturalSpawner.spawnCategoryForPosition(mobCategory, serverLevel, levelChunk, blockPos, spawnPredicate, afterSpawnCallback);
+    }
+
+    @VisibleForDebug
+    public static void spawnCategoryForPosition(MobCategory mobCategory, ServerLevel serverLevel, BlockPos blockPos2) {
+        NaturalSpawner.spawnCategoryForPosition(mobCategory, serverLevel, serverLevel.getChunk(blockPos2), blockPos2, (entityType, blockPos, chunkAccess) -> true, (mob, chunkAccess) -> {});
     }
 
     public static void spawnCategoryForPosition(MobCategory mobCategory, ServerLevel serverLevel, ChunkAccess chunkAccess, BlockPos blockPos, SpawnPredicate spawnPredicate, AfterSpawnCallback afterSpawnCallback) {
@@ -212,18 +221,14 @@ public final class NaturalSpawner {
         if (mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98f) {
             return Optional.empty();
         }
-        List<MobSpawnSettings.SpawnerData> list = NaturalSpawner.mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
-        if (list.isEmpty()) {
-            return Optional.empty();
-        }
-        return WeighedRandom.getRandomItem(random, list);
+        return NaturalSpawner.mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome).getRandom(random);
     }
 
     private static boolean canSpawnMobAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, MobSpawnSettings.SpawnerData spawnerData, BlockPos blockPos) {
-        return NaturalSpawner.mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, null).contains(spawnerData);
+        return NaturalSpawner.mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, null).unwrap().contains(spawnerData);
     }
 
-    private static List<MobSpawnSettings.SpawnerData> mobsAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, BlockPos blockPos, @Nullable Biome biome) {
+    private static WeightedRandomList<MobSpawnSettings.SpawnerData> mobsAt(ServerLevel serverLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, BlockPos blockPos, @Nullable Biome biome) {
         if (mobCategory == MobCategory.MONSTER && serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS) && structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.NETHER_BRIDGE).isValid()) {
             return StructureFeature.NETHER_BRIDGE.getSpecialEnemies();
         }
@@ -283,14 +288,14 @@ public final class NaturalSpawner {
 
     public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, ChunkPos chunkPos, Random random) {
         MobSpawnSettings mobSpawnSettings = biome.getMobSettings();
-        List<MobSpawnSettings.SpawnerData> list = mobSpawnSettings.getMobs(MobCategory.CREATURE);
-        if (list.isEmpty()) {
+        WeightedRandomList<MobSpawnSettings.SpawnerData> weightedRandomList = mobSpawnSettings.getMobs(MobCategory.CREATURE);
+        if (weightedRandomList.isEmpty()) {
             return;
         }
         int i = chunkPos.getMinBlockX();
         int j = chunkPos.getMinBlockZ();
         while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
-            Optional<MobSpawnSettings.SpawnerData> optional = WeighedRandom.getRandomItem(random, list);
+            Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(random);
             if (!optional.isPresent()) continue;
             MobSpawnSettings.SpawnerData spawnerData = optional.get();
             int k = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
@@ -408,7 +413,6 @@ public final class NaturalSpawner {
             this.mobCategoryCounts.addTo(entityType.getCategory(), 1);
         }
 
-        @Environment(value=EnvType.CLIENT)
         public int getSpawnableChunkCount() {
             return this.spawnableChunkCount;
         }

@@ -7,5 +7,9 @@ import net.minecraft.world.Snooper;
 
 public interface SnooperPopulator {
     public void populateSnooper(Snooper var1);
+
+    public void populateSnooperInitial(Snooper var1);
+
+    public boolean isSnooperEnabled();
 }
 

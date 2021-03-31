@@ -20,6 +20,8 @@ import net.minecraft.world.phys.HitResult;
 
 public class DragonFireball
 extends AbstractHurtingProjectile {
+    public static final float SPLASH_RANGE = 4.0f;
+
     public DragonFireball(EntityType<? extends DragonFireball> entityType, Level level) {
         super((EntityType<? extends AbstractHurtingProjectile>)entityType, level);
     }

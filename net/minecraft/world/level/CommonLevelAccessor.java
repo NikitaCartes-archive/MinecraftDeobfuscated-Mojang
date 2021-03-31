@@ -15,6 +15,8 @@ import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -24,6 +26,11 @@ public interface CommonLevelAccessor
 extends EntityGetter,
 LevelReader,
 LevelSimulatedRW {
+    @Override
+    default public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos blockPos, BlockEntityType<T> blockEntityType) {
+        return LevelReader.super.getBlockEntity(blockPos, blockEntityType);
+    }
+
     @Override
     default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
         return EntityGetter.super.getEntityCollisions(entity, aABB, predicate);

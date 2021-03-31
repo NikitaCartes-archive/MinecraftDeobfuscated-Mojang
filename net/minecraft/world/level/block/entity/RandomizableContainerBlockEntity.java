@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class RandomizableContainerBlockEntity
 extends BaseContainerBlockEntity {
+    public static final String LOOT_TABLE_TAG = "LootTable";
+    public static final String LOOT_TABLE_SEED_TAG = "LootTableSeed";
     @Nullable
     protected ResourceLocation lootTable;
     protected long lootTableSeed;
@@ -46,9 +48,9 @@ extends BaseContainerBlockEntity {
     }
 
     protected boolean tryLoadLootTable(CompoundTag compoundTag) {
-        if (compoundTag.contains("LootTable", 8)) {
-            this.lootTable = new ResourceLocation(compoundTag.getString("LootTable"));
-            this.lootTableSeed = compoundTag.getLong("LootTableSeed");
+        if (compoundTag.contains(LOOT_TABLE_TAG, 8)) {
+            this.lootTable = new ResourceLocation(compoundTag.getString(LOOT_TABLE_TAG));
+            this.lootTableSeed = compoundTag.getLong(LOOT_TABLE_SEED_TAG);
             return true;
         }
         return false;
@@ -58,9 +60,9 @@ extends BaseContainerBlockEntity {
         if (this.lootTable == null) {
             return false;
         }
-        compoundTag.putString("LootTable", this.lootTable.toString());
+        compoundTag.putString(LOOT_TABLE_TAG, this.lootTable.toString());
         if (this.lootTableSeed != 0L) {
-            compoundTag.putLong("LootTableSeed", this.lootTableSeed);
+            compoundTag.putLong(LOOT_TABLE_SEED_TAG, this.lootTableSeed);
         }
         return true;
     }

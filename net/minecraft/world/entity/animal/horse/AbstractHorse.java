@@ -6,8 +6,6 @@ package net.minecraft.world.entity.animal.horse;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -78,11 +76,23 @@ extends Animal
 implements ContainerListener,
 PlayerRideableJumping,
 Saddleable {
+    public static final int EQUIPMENT_SLOT_OFFSET = 400;
+    public static final int CHEST_SLOT_OFFSET = 499;
+    public static final int INVENTORY_SLOT_OFFSET = 500;
     private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isBred();
     private static final TargetingConditions MOMMY_TARGETING = new TargetingConditions().range(16.0).allowInvulnerable().allowSameTeam().allowUnseeable().selector(PARENT_HORSE_SELECTOR);
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Items.SUGAR, Blocks.HAY_BLOCK.asItem(), Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Optional<UUID>> DATA_ID_OWNER_UUID = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final int FLAG_TAME = 2;
+    private static final int FLAG_SADDLE = 4;
+    private static final int FLAG_BRED = 8;
+    private static final int FLAG_EATING = 16;
+    private static final int FLAG_STANDING = 32;
+    private static final int FLAG_OPEN_MOUTH = 64;
+    public static final int INV_SLOT_SADDLE = 0;
+    public static final int INV_SLOT_ARMOR = 1;
+    public static final int INV_BASE_COUNT = 2;
     private int eatingCounter;
     private int mouthCounter;
     private int standCounter;
@@ -767,23 +777,19 @@ Saddleable {
         return this.getControllingPassenger() instanceof LivingEntity;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getEatAnim(float f) {
         return Mth.lerp(f, this.eatAnimO, this.eatAnim);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getStandAnim(float f) {
         return Mth.lerp(f, this.standAnimO, this.standAnim);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getMouthAnim(float f) {
         return Mth.lerp(f, this.mouthAnimO, this.mouthAnim);
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void onPlayerJump(int i) {
         if (!this.isSaddled()) {
             return;
@@ -813,7 +819,6 @@ Saddleable {
     public void handleStopJump() {
     }
 
-    @Environment(value=EnvType.CLIENT)
     protected void spawnTamingParticles(boolean bl) {
         SimpleParticleType particleOptions = bl ? ParticleTypes.HEART : ParticleTypes.SMOKE;
         for (int i = 0; i < 7; ++i) {
@@ -825,7 +830,6 @@ Saddleable {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 7) {
             this.spawnTamingParticles(true);

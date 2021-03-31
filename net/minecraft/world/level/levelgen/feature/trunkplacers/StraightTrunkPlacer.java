@@ -8,14 +8,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class StraightTrunkPlacer
 extends TrunkPlacer {
@@ -31,10 +31,10 @@ extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
-        StraightTrunkPlacer.setDirtAt(levelSimulatedRW, random, blockPos.below(), treeConfiguration);
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+        StraightTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
         for (int j = 0; j < i; ++j) {
-            StraightTrunkPlacer.placeLog(levelSimulatedRW, random, blockPos.above(j), set, boundingBox, treeConfiguration);
+            StraightTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, blockPos.above(j), treeConfiguration);
         }
         return ImmutableList.of(new FoliagePlacer.FoliageAttachment(blockPos.above(i), 0, false));
     }

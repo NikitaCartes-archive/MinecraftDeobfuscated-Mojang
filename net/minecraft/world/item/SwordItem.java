@@ -53,7 +53,7 @@ implements Vanishable {
             return 15.0f;
         }
         Material material = blockState.getMaterial();
-        if (material == Material.PLANT || material == Material.REPLACEABLE_PLANT || material == Material.CORAL || blockState.is(BlockTags.LEAVES) || material == Material.VEGETABLE) {
+        if (material == Material.PLANT || material == Material.REPLACEABLE_PLANT || blockState.is(BlockTags.LEAVES) || material == Material.VEGETABLE) {
             return 1.5f;
         }
         return 1.0f;

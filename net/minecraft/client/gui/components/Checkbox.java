@@ -19,6 +19,7 @@ import net.minecraft.util.Mth;
 public class Checkbox
 extends AbstractButton {
     private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/checkbox.png");
+    private static final int TEXT_COLOR = 0xE0E0E0;
     private boolean selected;
     private final boolean showLabel;
 

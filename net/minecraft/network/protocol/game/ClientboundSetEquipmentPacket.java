@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -16,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class ClientboundSetEquipmentPacket
 implements Packet<ClientGamePacketListener> {
+    private static final byte CONTINUE_MASK = -128;
     private final int entity;
     private final List<Pair<EquipmentSlot, ItemStack>> slots;
 
@@ -56,12 +55,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetEquipment(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getEntity() {
         return this.entity;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<Pair<EquipmentSlot, ItemStack>> getSlots() {
         return this.slots;
     }

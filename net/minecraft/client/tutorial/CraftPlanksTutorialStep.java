@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 @Environment(value=EnvType.CLIENT)
 public class CraftPlanksTutorialStep
 implements TutorialStepInstance {
+    private static final int HINT_DELAY = 1200;
     private static final Component CRAFT_TITLE = new TranslatableComponent("tutorial.craft_planks.title");
     private static final Component CRAFT_DESCRIPTION = new TranslatableComponent("tutorial.craft_planks.description");
     private final Tutorial tutorial;

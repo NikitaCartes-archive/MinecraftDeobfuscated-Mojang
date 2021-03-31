@@ -4,15 +4,12 @@
 package net.minecraft.server.level.progress;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(value=EnvType.CLIENT)
 public class StoringChunkProgressListener
 implements ChunkProgressListener {
     private final LoggerChunkProgressListener delegate;

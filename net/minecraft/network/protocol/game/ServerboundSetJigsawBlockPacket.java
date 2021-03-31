@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -21,7 +19,6 @@ implements Packet<ServerGamePacketListener> {
     private final String finalState;
     private final JigsawBlockEntity.JointType joint;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSetJigsawBlockPacket(BlockPos blockPos, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3, String string, JigsawBlockEntity.JointType jointType) {
         this.pos = blockPos;
         this.name = resourceLocation;

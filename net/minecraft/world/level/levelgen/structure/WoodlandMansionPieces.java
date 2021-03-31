@@ -40,6 +40,15 @@ public class WoodlandMansionPieces {
         mansionPiecePlacer.createMansion(blockPos, rotation, list, mansionGrid);
     }
 
+    public static void main(String[] strings) {
+        Random random = new Random();
+        long l = random.nextLong();
+        System.out.println("Seed: " + l);
+        random.setSeed(l);
+        MansionGrid mansionGrid = new MansionGrid(random);
+        mansionGrid.print();
+    }
+
     static class ThirdFloorRoomCollection
     extends SecondFloorRoomCollection {
         private ThirdFloorRoomCollection() {
@@ -199,6 +208,22 @@ public class WoodlandMansionPieces {
     }
 
     static class MansionGrid {
+        private static final int DEFAULT_SIZE = 11;
+        private static final int CLEAR = 0;
+        private static final int CORRIDOR = 1;
+        private static final int ROOM = 2;
+        private static final int START_ROOM = 3;
+        private static final int TEST_ROOM = 4;
+        private static final int BLOCKED = 5;
+        private static final int ROOM_1x1 = 65536;
+        private static final int ROOM_1x2 = 131072;
+        private static final int ROOM_2x2 = 262144;
+        private static final int ROOM_ORIGIN_FLAG = 0x100000;
+        private static final int ROOM_DOOR_FLAG = 0x200000;
+        private static final int ROOM_STAIRS_FLAG = 0x400000;
+        private static final int ROOM_CORRIDOR_FLAG = 0x800000;
+        private static final int ROOM_TYPE_MASK = 983040;
+        private static final int ROOM_ID_MASK = 65535;
         private final Random random;
         private final SimpleGrid baseGrid;
         private final SimpleGrid thirdFloorGrid;
@@ -440,6 +465,40 @@ public class WoodlandMansionPieces {
                     }
                 }
                 ++i;
+            }
+        }
+
+        public void print() {
+            for (int i = 0; i < 2; ++i) {
+                SimpleGrid simpleGrid = i == 0 ? this.baseGrid : this.thirdFloorGrid;
+                for (int j = 0; j < simpleGrid.height; ++j) {
+                    for (int k = 0; k < simpleGrid.width; ++k) {
+                        int l = simpleGrid.get(k, j);
+                        if (l == 1) {
+                            System.out.print("+");
+                            continue;
+                        }
+                        if (l == 4) {
+                            System.out.print("x");
+                            continue;
+                        }
+                        if (l == 2) {
+                            System.out.print("X");
+                            continue;
+                        }
+                        if (l == 3) {
+                            System.out.print("O");
+                            continue;
+                        }
+                        if (l == 5) {
+                            System.out.print("#");
+                            continue;
+                        }
+                        System.out.print(" ");
+                    }
+                    System.out.println("");
+                }
+                System.out.println("");
             }
         }
     }
@@ -909,41 +968,34 @@ public class WoodlandMansionPieces {
 
     public static class WoodlandMansionPiece
     extends TemplateStructurePiece {
-        private final String templateName;
-        private final Rotation rotation;
-        private final Mirror mirror;
-
         public WoodlandMansionPiece(StructureManager structureManager, String string, BlockPos blockPos, Rotation rotation) {
             this(structureManager, string, blockPos, rotation, Mirror.NONE);
         }
 
         public WoodlandMansionPiece(StructureManager structureManager, String string, BlockPos blockPos, Rotation rotation, Mirror mirror) {
-            super(StructurePieceType.WOODLAND_MANSION_PIECE, 0);
-            this.templateName = string;
-            this.templatePosition = blockPos;
-            this.rotation = rotation;
-            this.mirror = mirror;
-            this.loadTemplate(structureManager);
+            super(StructurePieceType.WOODLAND_MANSION_PIECE, 0, structureManager, WoodlandMansionPiece.makeLocation(string), string, WoodlandMansionPiece.makeSettings(mirror, rotation), blockPos);
         }
 
         public WoodlandMansionPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
-            super(StructurePieceType.WOODLAND_MANSION_PIECE, compoundTag);
-            this.templateName = compoundTag.getString("Template");
-            this.rotation = Rotation.valueOf(compoundTag.getString("Rot"));
-            this.mirror = Mirror.valueOf(compoundTag.getString("Mi"));
-            this.loadTemplate(serverLevel.getStructureManager());
+            super(StructurePieceType.WOODLAND_MANSION_PIECE, compoundTag, serverLevel, (ResourceLocation resourceLocation) -> WoodlandMansionPiece.makeSettings(Mirror.valueOf(compoundTag.getString("Mi")), Rotation.valueOf(compoundTag.getString("Rot"))));
         }
 
-        private void loadTemplate(StructureManager structureManager) {
-            StructureTemplate structureTemplate = structureManager.getOrCreate(new ResourceLocation("woodland_mansion/" + this.templateName));
-            StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setIgnoreEntities(true).setRotation(this.rotation).setMirror(this.mirror).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-            this.setup(structureTemplate, this.templatePosition, structurePlaceSettings);
+        @Override
+        protected ResourceLocation makeTemplateLocation() {
+            return WoodlandMansionPiece.makeLocation(this.templateName);
+        }
+
+        private static ResourceLocation makeLocation(String string) {
+            return new ResourceLocation("woodland_mansion/" + string);
+        }
+
+        private static StructurePlaceSettings makeSettings(Mirror mirror, Rotation rotation) {
+            return new StructurePlaceSettings().setIgnoreEntities(true).setRotation(rotation).setMirror(mirror).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
         }
 
         @Override
         protected void addAdditionalSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
             super.addAdditionalSaveData(serverLevel, compoundTag);
-            compoundTag.putString("Template", this.templateName);
             compoundTag.putString("Rot", this.placeSettings.getRotation().name());
             compoundTag.putString("Mi", this.placeSettings.getMirror().name());
         }

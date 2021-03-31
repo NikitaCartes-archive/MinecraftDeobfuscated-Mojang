@@ -438,6 +438,17 @@ public class SoundEvents {
     public static final SoundEvent GLOW_SQUID_DEATH = SoundEvents.register("entity.glow_squid.death");
     public static final SoundEvent GLOW_SQUID_HURT = SoundEvents.register("entity.glow_squid.hurt");
     public static final SoundEvent GLOW_SQUID_SQUIRT = SoundEvents.register("entity.glow_squid.squirt");
+    public static final SoundEvent GOAT_AMBIENT = SoundEvents.register("entity.goat.ambient");
+    public static final SoundEvent GOAT_DEATH = SoundEvents.register("entity.goat.death");
+    public static final SoundEvent GOAT_HURT = SoundEvents.register("entity.goat.hurt");
+    public static final SoundEvent GOAT_MILK = SoundEvents.register("entity.goat.milk");
+    public static final SoundEvent GOAT_PREPARE_RAM = SoundEvents.register("entity.goat.prepare_ram");
+    public static final SoundEvent GOAT_SCREAMING_AMBIENT = SoundEvents.register("entity.goat.screaming.ambient");
+    public static final SoundEvent GOAT_SCREAMING_DEATH = SoundEvents.register("entity.goat.screaming.death");
+    public static final SoundEvent GOAT_SCREAMING_HURT = SoundEvents.register("entity.goat.screaming.hurt");
+    public static final SoundEvent GOAT_SCREAMING_MILK = SoundEvents.register("entity.goat.screaming.milk");
+    public static final SoundEvent GOAT_SCREAMING_RAM = SoundEvents.register("entity.goat.screaming.ram");
+    public static final SoundEvent GOAT_STEP = SoundEvents.register("entity.goat.step");
     public static final SoundEvent GRASS_BREAK = SoundEvents.register("block.grass.break");
     public static final SoundEvent GRASS_FALL = SoundEvents.register("block.grass.fall");
     public static final SoundEvent GRASS_HIT = SoundEvents.register("block.grass.hit");

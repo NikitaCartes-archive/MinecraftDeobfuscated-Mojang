@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.gameevent;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 
 public class GameEvent {
@@ -53,6 +51,7 @@ public class GameEvent {
     public static final GameEvent STEP = GameEvent.register("step");
     public static final GameEvent SWIM = GameEvent.register("swim");
     public static final GameEvent WOLF_SHAKING = GameEvent.register("wolf_shaking");
+    public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
     private final String name;
     private final int notificationRadius;
 
@@ -61,7 +60,6 @@ public class GameEvent {
         this.notificationRadius = i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getName() {
         return this.name;
     }

@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 public class TagLoader<T> {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
+    private static final String PATH_SUFFIX = ".json";
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
     private final Function<ResourceLocation, Optional<T>> idToValue;
     private final String directory;
@@ -53,7 +54,7 @@ public class TagLoader<T> {
      */
     public Map<ResourceLocation, Tag.Builder> load(ResourceManager resourceManager) {
         HashMap<ResourceLocation, Tag.Builder> map = Maps.newHashMap();
-        for (ResourceLocation resourceLocation2 : resourceManager.listResources(this.directory, string -> string.endsWith(".json"))) {
+        for (ResourceLocation resourceLocation2 : resourceManager.listResources(this.directory, string -> string.endsWith(PATH_SUFFIX))) {
             String string2 = resourceLocation2.getPath();
             ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string2.substring(this.directory.length() + 1, string2.length() - PATH_SUFFIX_LENGTH));
             try {

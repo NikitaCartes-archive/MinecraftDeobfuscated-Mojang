@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -33,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 public class SynchedEntityData {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<Class<? extends Entity>>();
+    private static final int EOF_MARKER = 255;
+    private static final int MAX_ID_VALUE = 254;
     private final Entity entity;
     private final Int2ObjectMap<DataItem<?>> itemsById = new Int2ObjectOpenHashMap();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -205,7 +205,6 @@ public class SynchedEntityData {
         return new DataItem<T>(entityDataSerializer.createAccessor(i), entityDataSerializer.read(friendlyByteBuf));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void assignValues(List<DataItem<?>> list) {
         this.lock.writeLock().lock();
         for (DataItem<?> dataItem : list) {
@@ -218,7 +217,6 @@ public class SynchedEntityData {
         this.isDirty = true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private <T> void assignValue(DataItem<T> dataItem, DataItem<?> dataItem2) {
         if (!Objects.equals(((DataItem)dataItem2).accessor.getSerializer(), ((DataItem)dataItem).accessor.getSerializer())) {
             throw new IllegalStateException(String.format("Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", ((DataItem)dataItem).accessor.getId(), this.entity, ((DataItem)dataItem).value, ((DataItem)dataItem).value.getClass(), ((DataItem)dataItem2).value, ((DataItem)dataItem2).value.getClass()));

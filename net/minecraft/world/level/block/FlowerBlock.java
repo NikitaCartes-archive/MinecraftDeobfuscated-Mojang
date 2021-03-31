@@ -16,6 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FlowerBlock
 extends BushBlock {
+    protected static final float AABB_OFFSET = 3.0f;
     protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0);
     private final MobEffect suspiciousStewEffect;
     private final int effectDuration;

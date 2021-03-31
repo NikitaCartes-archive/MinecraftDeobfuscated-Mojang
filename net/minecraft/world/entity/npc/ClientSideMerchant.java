@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.npc;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +38,6 @@ implements Merchant {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void overrideOffers(MerchantOffers merchantOffers) {
         this.offers = merchantOffers;
     }

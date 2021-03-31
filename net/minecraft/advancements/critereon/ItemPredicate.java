@@ -216,6 +216,21 @@ public class ItemPredicate {
             return this;
         }
 
+        public Builder withCount(MinMaxBounds.Ints ints) {
+            this.count = ints;
+            return this;
+        }
+
+        public Builder hasDurability(MinMaxBounds.Ints ints) {
+            this.durability = ints;
+            return this;
+        }
+
+        public Builder isPotion(Potion potion) {
+            this.potion = potion;
+            return this;
+        }
+
         public Builder hasNbt(CompoundTag compoundTag) {
             this.nbt = new NbtPredicate(compoundTag);
             return this;
@@ -223,6 +238,11 @@ public class ItemPredicate {
 
         public Builder hasEnchantment(EnchantmentPredicate enchantmentPredicate) {
             this.enchantments.add(enchantmentPredicate);
+            return this;
+        }
+
+        public Builder hasStoredEnchantment(EnchantmentPredicate enchantmentPredicate) {
+            this.storedEnchantments.add(enchantmentPredicate);
             return this;
         }
 

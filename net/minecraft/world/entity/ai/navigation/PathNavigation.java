@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class PathNavigation {
+    private static final int MAX_TIME_RECOMPUTE = 20;
     protected final Mob mob;
     protected final Level level;
     @Nullable
@@ -113,12 +114,22 @@ public abstract class PathNavigation {
     }
 
     @Nullable
+    public Path createPath(BlockPos blockPos, int i, int j) {
+        return this.createPath(ImmutableSet.of(blockPos), 8, false, i, j);
+    }
+
+    @Nullable
     public Path createPath(Entity entity, int i) {
         return this.createPath(ImmutableSet.of(entity.blockPosition()), 16, true, i);
     }
 
     @Nullable
     protected Path createPath(Set<BlockPos> set, int i, boolean bl, int j) {
+        return this.createPath(set, i, bl, j, (float)this.mob.getAttributeValue(Attributes.FOLLOW_RANGE));
+    }
+
+    @Nullable
+    protected Path createPath(Set<BlockPos> set, int i, boolean bl, int j, float f) {
         if (set.isEmpty()) {
             return null;
         }
@@ -132,7 +143,6 @@ public abstract class PathNavigation {
             return this.path;
         }
         this.level.getProfiler().push("pathfind");
-        float f = (float)this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
         BlockPos blockPos = bl ? this.mob.blockPosition().above() : this.mob.blockPosition();
         int k = (int)(f + (float)i);
         PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
@@ -340,6 +350,10 @@ public abstract class PathNavigation {
         if (blockPos.closerThan(vec3, (double)(this.path.getNodeCount() - this.path.getNextNodeIndex()))) {
             this.recomputePath();
         }
+    }
+
+    public float getMaxDistanceToWaypoint() {
+        return this.maxDistanceToWaypoint;
     }
 
     public boolean isStuck() {

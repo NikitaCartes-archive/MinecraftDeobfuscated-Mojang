@@ -16,6 +16,7 @@ import org.lwjgl.system.MemoryUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class ClipboardManager {
+    public static final int FORMAT_UNAVAILABLE = 65545;
     private final ByteBuffer clipboardScratchBuffer = BufferUtils.createByteBuffer(8192);
 
     public String getClipboard(long l, GLFWErrorCallbackI gLFWErrorCallbackI) {

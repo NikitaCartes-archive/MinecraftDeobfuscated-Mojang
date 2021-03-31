@@ -11,6 +11,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.level.timers.TimerQueue;
+import org.jetbrains.annotations.Nullable;
 
 public interface ServerLevelData
 extends WritableLevelData {
@@ -45,6 +46,9 @@ extends WritableLevelData {
     public int getWanderingTraderSpawnChance();
 
     public void setWanderingTraderSpawnChance(int var1);
+
+    @Nullable
+    public UUID getWanderingTraderId();
 
     public void setWanderingTraderId(UUID var1);
 

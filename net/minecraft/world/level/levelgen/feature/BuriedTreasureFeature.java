@@ -14,13 +14,14 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class BuriedTreasureFeature
 extends StructureFeature<ProbabilityFeatureConfiguration> {
+    private static final int RANDOM_SALT = 10387320;
+
     public BuriedTreasureFeature(Codec<ProbabilityFeatureConfiguration> codec) {
         super(codec);
     }
@@ -38,15 +39,14 @@ extends StructureFeature<ProbabilityFeatureConfiguration> {
 
     public static class BuriedTreasureStart
     extends StructureStart<ProbabilityFeatureConfiguration> {
-        public BuriedTreasureStart(StructureFeature<ProbabilityFeatureConfiguration> structureFeature, ChunkPos chunkPos, BoundingBox boundingBox, int i, long l) {
-            super(structureFeature, chunkPos, boundingBox, i, l);
+        public BuriedTreasureStart(StructureFeature<ProbabilityFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
+            super(structureFeature, chunkPos, i, l);
         }
 
         @Override
         public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, ChunkPos chunkPos, Biome biome, ProbabilityFeatureConfiguration probabilityFeatureConfiguration, LevelHeightAccessor levelHeightAccessor) {
             BlockPos blockPos = new BlockPos(chunkPos.getBlockX(9), 90, chunkPos.getBlockZ(9));
-            this.pieces.add(new BuriedTreasurePieces.BuriedTreasurePiece(blockPos));
-            this.calculateBoundingBox();
+            this.addPiece(new BuriedTreasurePieces.BuriedTreasurePiece(blockPos));
         }
 
         @Override

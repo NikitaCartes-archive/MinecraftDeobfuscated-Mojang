@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
@@ -39,13 +37,15 @@ import net.minecraft.world.phys.shapes.SliceShape;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public final class Shapes {
+    public static final double EPSILON = 1.0E-7;
+    public static final double BIG_EPSILON = 1.0E-6;
     private static final VoxelShape BLOCK = Util.make(() -> {
         BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(1, 1, 1);
         ((DiscreteVoxelShape)discreteVoxelShape).fill(0, 0, 0);
         return new CubeVoxelShape(discreteVoxelShape);
     });
     public static final VoxelShape INFINITY = Shapes.box(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    private static final VoxelShape EMPTY = new ArrayVoxelShape(new BitSetDiscreteVoxelShape(0, 0, 0), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0}));
+    private static final VoxelShape EMPTY = new ArrayVoxelShape((DiscreteVoxelShape)new BitSetDiscreteVoxelShape(0, 0, 0), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0}));
 
     public static VoxelShape empty() {
         return EMPTY;
@@ -142,7 +142,7 @@ public final class Shapes {
         if (indexMerger instanceof DiscreteCubeMerger && indexMerger2 instanceof DiscreteCubeMerger && indexMerger3 instanceof DiscreteCubeMerger) {
             return new CubeVoxelShape(bitSetDiscreteVoxelShape);
         }
-        return new ArrayVoxelShape(bitSetDiscreteVoxelShape, indexMerger.getList(), indexMerger2.getList(), indexMerger3.getList());
+        return new ArrayVoxelShape((DiscreteVoxelShape)bitSetDiscreteVoxelShape, indexMerger.getList(), indexMerger2.getList(), indexMerger3.getList());
     }
 
     public static boolean joinIsNotEmpty(VoxelShape voxelShape, VoxelShape voxelShape2, BooleanOp booleanOp) {
@@ -251,7 +251,6 @@ public final class Shapes {
         return d > 0.0 ? Mth.floor(f + d) + 1 : Mth.floor(e + d) - 1;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean blockOccudes(VoxelShape voxelShape, VoxelShape voxelShape2, Direction direction) {
         if (voxelShape == Shapes.block() && voxelShape2 == Shapes.block()) {
             return true;

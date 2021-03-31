@@ -19,7 +19,12 @@ public final class EntityTypeTags {
     public static final Tag.Named<EntityType<?>> IMPACT_PROJECTILES = EntityTypeTags.bind("impact_projectiles");
     public static final Tag.Named<EntityType<?>> POWDER_SNOW_WALKABLE_MOBS = EntityTypeTags.bind("powder_snow_walkable_mobs");
     public static final Tag.Named<EntityType<?>> AXOLOTL_ALWAYS_HOSTILES = EntityTypeTags.bind("axolotl_always_hostiles");
-    public static final Tag.Named<EntityType<?>> AXOLOTL_TEMPTED_HOSTILES = EntityTypeTags.bind("axolotl_tempted_hostiles");
+    public static final Tag.Named<EntityType<?>> AXOLOTL_HUNT_TARGETS = EntityTypeTags.bind("axolotl_hunt_targets");
+    public static final Tag.Named<EntityType<?>> FREEZE_IMMUNE_ENTITY_TYPES = EntityTypeTags.bind("freeze_immune_entity_types");
+    public static final Tag.Named<EntityType<?>> FREEZE_HURTS_EXTRA_TYPES = EntityTypeTags.bind("freeze_hurts_extra_types");
+
+    private EntityTypeTags() {
+    }
 
     private static Tag.Named<EntityType<?>> bind(String string) {
         return HELPER.bind(string);

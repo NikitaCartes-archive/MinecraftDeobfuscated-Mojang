@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
@@ -17,8 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PackResources
 extends AutoCloseable {
+    public static final String METADATA_EXTENSION = ".mcmeta";
+    public static final String PACK_META = "pack.mcmeta";
+
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public InputStream getRootResource(String var1) throws IOException;
 
     public InputStream getResource(PackType var1, ResourceLocation var2) throws IOException;

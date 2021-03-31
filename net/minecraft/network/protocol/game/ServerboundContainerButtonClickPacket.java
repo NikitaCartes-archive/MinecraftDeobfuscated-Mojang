@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -14,7 +12,6 @@ implements Packet<ServerGamePacketListener> {
     private final int containerId;
     private final int buttonId;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundContainerButtonClickPacket(int i, int j) {
         this.containerId = i;
         this.buttonId = j;

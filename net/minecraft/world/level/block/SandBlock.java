@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.FallingBlock;
@@ -21,7 +19,6 @@ extends FallingBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return this.dustColor;
     }

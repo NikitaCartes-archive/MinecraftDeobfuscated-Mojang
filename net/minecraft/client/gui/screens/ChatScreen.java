@@ -21,6 +21,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class ChatScreen
 extends Screen {
+    public static final int MOUSE_SCROLL_SPEED = 7;
     private String historyBuffer = "";
     private int historyPos = -1;
     protected EditBox input;

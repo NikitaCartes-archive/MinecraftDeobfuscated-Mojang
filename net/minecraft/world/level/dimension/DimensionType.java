@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -50,6 +48,7 @@ public class DimensionType {
     public static final ResourceLocation NETHER_EFFECTS = new ResourceLocation("the_nether");
     public static final ResourceLocation END_EFFECTS = new ResourceLocation("the_end");
     public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)ResourceLocation.CODEC.fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)).comapFlatMap(DimensionType::guardY, Function.identity());
+    private static final int MOON_PHASES = 8;
     public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0f, 0.75f, 0.5f, 0.25f, 0.0f, 0.25f, 0.5f, 0.75f};
     public static final ResourceKey<DimensionType> OVERWORLD_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<DimensionType> NETHER_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("the_nether"));
@@ -289,7 +288,6 @@ public class DimensionType {
         return tag != null ? tag : BlockTags.INFINIBURN_OVERWORLD;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation effectsLocation() {
         return this.effectsLocation;
     }

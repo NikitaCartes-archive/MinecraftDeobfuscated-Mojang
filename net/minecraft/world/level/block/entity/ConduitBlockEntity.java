@@ -7,8 +7,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -36,6 +34,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class ConduitBlockEntity
 extends BlockEntity {
+    private static final int BLOCK_REFRESH_RATE = 2;
+    private static final int EFFECT_DURATION = 13;
+    private static final float ROTATION_SPEED = -0.0375f;
+    private static final int MIN_ACTIVE_SIZE = 16;
+    private static final int MIN_KILL_SIZE = 42;
+    private static final int KILL_RANGE = 8;
     private static final Block[] VALID_BLOCKS = new Block[]{Blocks.PRISMARINE, Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE};
     public int tickCount;
     private float activeRotation;
@@ -255,7 +259,6 @@ extends BlockEntity {
         return this.isActive;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isHunting() {
         return this.isHunting;
     }
@@ -264,7 +267,6 @@ extends BlockEntity {
         this.isHunting = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getActiveRotation(float f) {
         return (this.activeRotation + f) * -0.0375f;
     }

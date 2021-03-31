@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.renderer.block.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -77,6 +78,15 @@ implements ModelState {
     @Environment(value=EnvType.CLIENT)
     public static class Deserializer
     implements JsonDeserializer<Variant> {
+        @VisibleForTesting
+        static final boolean DEFAULT_UVLOCK = false;
+        @VisibleForTesting
+        static final int DEFAULT_WEIGHT = 1;
+        @VisibleForTesting
+        static final int DEFAULT_X_ROTATION = 0;
+        @VisibleForTesting
+        static final int DEFAULT_Y_ROTATION = 0;
+
         @Override
         public Variant deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             JsonObject jsonObject = jsonElement.getAsJsonObject();

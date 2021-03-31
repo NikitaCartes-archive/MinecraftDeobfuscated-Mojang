@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -27,7 +25,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         CompoundTag compoundTag = itemStack.getTagElement("Explosion");
         if (compoundTag != null) {
@@ -35,7 +32,6 @@ extends Item {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void appendHoverText(CompoundTag compoundTag, List<Component> list) {
         int[] js;
         FireworkRocketItem.Shape shape = FireworkRocketItem.Shape.byId(compoundTag.getByte("Type"));
@@ -55,7 +51,6 @@ extends Item {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static Component appendColors(MutableComponent mutableComponent, int[] is) {
         for (int i = 0; i < is.length; ++i) {
             if (i > 0) {
@@ -66,7 +61,6 @@ extends Item {
         return mutableComponent;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static Component getColorName(int i) {
         DyeColor dyeColor = DyeColor.byFireworkColor(i);
         if (dyeColor == null) {

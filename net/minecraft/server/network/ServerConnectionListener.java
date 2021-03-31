@@ -10,6 +10,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.MultithreadEventLoopGroup;
@@ -21,14 +23,16 @@ import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.concurrent.TimeUnit;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
@@ -103,7 +107,6 @@ public class ServerConnectionListener {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    @Environment(value=EnvType.CLIENT)
     public SocketAddress startMemoryChannel() {
         ChannelFuture channelFuture;
         List<ChannelFuture> list = this.channels;
@@ -166,6 +169,45 @@ public class ServerConnectionListener {
 
     public MinecraftServer getServer() {
         return this.server;
+    }
+
+    static class LatencySimulator
+    extends ChannelInboundHandlerAdapter {
+        private static final Timer TIMER = new HashedWheelTimer();
+        private final int delay;
+        private final int jitter;
+        private final List<DelayedMessage> queuedMessages = Lists.newArrayList();
+
+        public LatencySimulator(int i, int j) {
+            this.delay = i;
+            this.jitter = j;
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) {
+            this.delayDownstream(channelHandlerContext, object);
+        }
+
+        private void delayDownstream(ChannelHandlerContext channelHandlerContext, Object object) {
+            int i = this.delay + (int)(Math.random() * (double)this.jitter);
+            this.queuedMessages.add(new DelayedMessage(channelHandlerContext, object));
+            TIMER.newTimeout(this::onTimeout, i, TimeUnit.MILLISECONDS);
+        }
+
+        private void onTimeout(Timeout timeout) {
+            DelayedMessage delayedMessage = this.queuedMessages.remove(0);
+            delayedMessage.ctx.fireChannelRead(delayedMessage.msg);
+        }
+
+        static class DelayedMessage {
+            public final ChannelHandlerContext ctx;
+            public final Object msg;
+
+            public DelayedMessage(ChannelHandlerContext channelHandlerContext, Object object) {
+                this.ctx = channelHandlerContext;
+                this.msg = object;
+            }
+        }
     }
 }
 

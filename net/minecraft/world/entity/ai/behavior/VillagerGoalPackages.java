@@ -75,6 +75,8 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 
 public class VillagerGoalPackages {
+    private static final float STROLL_SPEED_MODIFIER = 0.4f;
+
     public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getCorePackage(VillagerProfession villagerProfession, float f) {
         return ImmutableList.of(Pair.of(0, new Swim(0.8f)), Pair.of(0, new InteractWithDoor()), Pair.of(0, new LookAtTargetSink(45, 90)), Pair.of(0, new VillagerPanicTrigger()), Pair.of(0, new WakeUp()), Pair.of(0, new ReactToBell()), Pair.of(0, new SetRaidStatus()), Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)), Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.POTENTIAL_JOB_SITE)), Pair.of(1, new MoveToTargetSink()), Pair.of(2, new PoiCompetitorScan(villagerProfession)), Pair.of(3, new LookAndFollowTradingPlayerSink(f)), new Pair[]{Pair.of(5, new GoToWantedItem(f, false, 4)), Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())), Pair.of(7, new GoToPotentialJobSite(f)), Pair.of(8, new YieldJobSite(f)), Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false, Optional.of((byte)14))), Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true, Optional.of((byte)14))), Pair.of(10, new AssignProfessionFromJobSite()), Pair.of(10, new ResetProfession())});
     }
@@ -119,7 +121,7 @@ public class VillagerGoalPackages {
     }
 
     private static Pair<Integer, Behavior<LivingEntity>> getFullLookBehavior() {
-        return Pair.of(5, new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.CAT, 8.0f), 8), Pair.of(new SetEntityLookTarget(EntityType.VILLAGER, 8.0f), 2), Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 2), Pair.of(new SetEntityLookTarget(MobCategory.CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_AMBIENT, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.MONSTER, 8.0f), 1), Pair.of(new DoNothing(30, 60), 2))));
+        return Pair.of(5, new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.CAT, 8.0f), 8), Pair.of(new SetEntityLookTarget(EntityType.VILLAGER, 8.0f), 2), Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 2), Pair.of(new SetEntityLookTarget(MobCategory.CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.UNDERGROUND_WATER_CREATURE, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.WATER_AMBIENT, 8.0f), 1), Pair.of(new SetEntityLookTarget(MobCategory.MONSTER, 8.0f), 1), Pair.of(new DoNothing(30, 60), 2))));
     }
 
     private static Pair<Integer, Behavior<LivingEntity>> getMinimalLookBehavior() {

@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.StringRepresentable;
@@ -52,62 +50,50 @@ public class BiomeSpecialEffects {
         this.backgroundMusic = optional7;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getFogColor() {
         return this.fogColor;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getWaterColor() {
         return this.waterColor;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getWaterFogColor() {
         return this.waterFogColor;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getSkyColor() {
         return this.skyColor;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<Integer> getFoliageColorOverride() {
         return this.foliageColorOverride;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<Integer> getGrassColorOverride() {
         return this.grassColorOverride;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public GrassColorModifier getGrassColorModifier() {
         return this.grassColorModifier;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<AmbientParticleSettings> getAmbientParticleSettings() {
         return this.ambientParticleSettings;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<SoundEvent> getAmbientLoopSoundEvent() {
         return this.ambientLoopSoundEvent;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<AmbientMoodSettings> getAmbientMoodSettings() {
         return this.ambientMoodSettings;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<AmbientAdditionsSettings> getAmbientAdditionsSettings() {
         return this.ambientAdditionsSettings;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<Music> getBackgroundMusic() {
         return this.backgroundMusic;
     }
@@ -117,7 +103,6 @@ public class BiomeSpecialEffects {
         NONE("none"){
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public int modifyColor(double d, double e, int i) {
                 return i;
             }
@@ -126,7 +111,6 @@ public class BiomeSpecialEffects {
         DARK_FOREST("dark_forest"){
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public int modifyColor(double d, double e, int i) {
                 return (i & 0xFEFEFE) + 2634762 >> 1;
             }
@@ -135,7 +119,6 @@ public class BiomeSpecialEffects {
         SWAMP("swamp"){
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public int modifyColor(double d, double e, int i) {
                 double f = Biome.BIOME_INFO_NOISE.getValue(d * 0.0225, e * 0.0225, false);
                 if (f < -0.1) {
@@ -149,7 +132,6 @@ public class BiomeSpecialEffects {
         public static final Codec<GrassColorModifier> CODEC;
         private static final Map<String, GrassColorModifier> BY_NAME;
 
-        @Environment(value=EnvType.CLIENT)
         public abstract int modifyColor(double var1, double var3, int var5);
 
         private GrassColorModifier(String string2) {

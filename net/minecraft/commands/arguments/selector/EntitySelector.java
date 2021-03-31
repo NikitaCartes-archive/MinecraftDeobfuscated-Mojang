@@ -27,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EntitySelector {
+    public static final int INFINITE = Integer.MAX_VALUE;
     private static final EntityTypeTest<Entity, ?> ANY_TYPE = new EntityTypeTest<Entity, Entity>(){
 
         @Override
@@ -86,6 +87,10 @@ public class EntitySelector {
 
     public boolean isWorldLimited() {
         return this.worldLimited;
+    }
+
+    public boolean usesSelector() {
+        return this.usesSelector;
     }
 
     private void checkPermissions(CommandSourceStack commandSourceStack) throws CommandSyntaxException {

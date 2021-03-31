@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public class SubtitleOverlay
 extends GuiComponent
 implements SoundEventListener {
+    private static final long DISPLAY_TIME = 3000L;
     private final Minecraft minecraft;
     private final List<Subtitle> subtitles = Lists.newArrayList();
     private boolean isListening;

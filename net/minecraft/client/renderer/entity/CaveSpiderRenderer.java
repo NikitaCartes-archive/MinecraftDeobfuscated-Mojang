@@ -16,6 +16,7 @@ import net.minecraft.world.entity.monster.CaveSpider;
 public class CaveSpiderRenderer
 extends SpiderRenderer<CaveSpider> {
     private static final ResourceLocation CAVE_SPIDER_LOCATION = new ResourceLocation("textures/entity/spider/cave_spider.png");
+    private static final float SCALE = 0.7f;
 
     public CaveSpiderRenderer(EntityRendererProvider.Context context) {
         super(context, ModelLayers.CAVE_SPIDER);

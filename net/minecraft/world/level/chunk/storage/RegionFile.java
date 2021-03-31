@@ -34,7 +34,16 @@ import org.jetbrains.annotations.Nullable;
 public class RegionFile
 implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int SECTOR_BYTES = 4096;
+    @VisibleForTesting
+    protected static final int SECTOR_INTS = 1024;
+    private static final int CHUNK_HEADER_SIZE = 5;
+    private static final int HEADER_OFFSET = 0;
     private static final ByteBuffer PADDING_BUFFER = ByteBuffer.allocateDirect(1);
+    private static final String EXTERNAL_FILE_EXTENSION = ".mcc";
+    private static final int EXTERNAL_STREAM_FLAG = 128;
+    private static final int EXTERNAL_CHUNK_THRESHOLD = 256;
+    private static final int CHUNK_NOT_PRESENT = 0;
     private final FileChannel file;
     private final Path externalFileDir;
     private final RegionFileVersion version;
@@ -93,7 +102,7 @@ implements AutoCloseable {
     }
 
     private Path getExternalChunkPath(ChunkPos chunkPos) {
-        String string = "c." + chunkPos.x + "." + chunkPos.z + ".mcc";
+        String string = "c." + chunkPos.x + "." + chunkPos.z + EXTERNAL_FILE_EXTENSION;
         return this.externalFileDir.resolve(string);
     }
 

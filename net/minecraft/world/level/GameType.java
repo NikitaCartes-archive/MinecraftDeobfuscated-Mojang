@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Abilities;
@@ -17,6 +15,7 @@ public enum GameType {
     SPECTATOR(3, "spectator");
 
     public static final GameType DEFAULT_MODE;
+    private static final int NOT_SET = -1;
     private final int id;
     private final String name;
     private final Component shortName;
@@ -41,7 +40,6 @@ public enum GameType {
         return this.longName;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getShortDisplayName() {
         return this.shortName;
     }

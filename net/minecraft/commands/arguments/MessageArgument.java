@@ -64,6 +64,10 @@ implements ArgumentType<Message> {
             return this.end;
         }
 
+        public EntitySelector getSelector() {
+            return this.selector;
+        }
+
         @Nullable
         public Component toComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
             return EntitySelector.joinNames(this.selector.findEntities(commandSourceStack));
@@ -77,6 +81,14 @@ implements ArgumentType<Message> {
         public Message(String string, Part[] parts) {
             this.text = string;
             this.parts = parts;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public Part[] getParts() {
+            return this.parts;
         }
 
         public Component toComponent(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {

@@ -24,6 +24,12 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(value=EnvType.CLIENT)
 public abstract class RenderType
 extends RenderStateShard {
+    private static final int BYTES_IN_INT = 4;
+    private static final int MEGABYTE = 0x100000;
+    public static final int BIG_BUFFER_SIZE = 0x200000;
+    public static final int MEDIUM_BUFFER_SIZE = 262144;
+    public static final int SMALL_BUFFER_SIZE = 131072;
+    public static final int TRANSIENT_BUFFER_SIZE = 256;
     private static final RenderType SOLID = RenderType.create("solid", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 0x200000, true, false, CompositeState.builder().setLightmapState(LIGHTMAP).setShaderState(RENDERTYPE_SOLID_SHADER).setTextureState(BLOCK_SHEET_MIPPED).createCompositeState(true));
     private static final RenderType CUTOUT_MIPPED = RenderType.create("cutout_mipped", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false, CompositeState.builder().setLightmapState(LIGHTMAP).setShaderState(RENDERTYPE_CUTOUT_MIPPED_SHADER).setTextureState(BLOCK_SHEET_MIPPED).createCompositeState(true));
     private static final RenderType CUTOUT = RenderType.create("cutout", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 131072, true, false, CompositeState.builder().setLightmapState(LIGHTMAP).setShaderState(RENDERTYPE_CUTOUT_SHADER).setTextureState(BLOCK_SHEET).createCompositeState(true));
@@ -397,6 +403,10 @@ extends RenderStateShard {
         @Override
         public boolean isOutline() {
             return this.isOutline;
+        }
+
+        protected final CompositeState state() {
+            return this.state;
         }
 
         @Override

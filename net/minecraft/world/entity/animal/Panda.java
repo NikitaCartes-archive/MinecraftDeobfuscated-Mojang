@@ -9,8 +9,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,6 +74,13 @@ extends Animal {
     private static final EntityDataAccessor<Byte> HIDDEN_GENE_ID = SynchedEntityData.defineId(Panda.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Panda.class, EntityDataSerializers.BYTE);
     private static final TargetingConditions BREED_TARGETING = new TargetingConditions().range(8.0).allowSameTeam().allowInvulnerable();
+    private static final int FLAG_SNEEZE = 2;
+    private static final int FLAG_ROLL = 4;
+    private static final int FLAG_SIT = 8;
+    private static final int FLAG_ON_BACK = 16;
+    private static final int EAT_TICK_INTERVAL = 5;
+    public static final int TOTAL_ROLL_STEPS = 32;
+    private static final int TOTAL_UNHAPPY_TIME = 32;
     private boolean gotBamboo;
     private boolean didBite;
     public int rollCounter;
@@ -288,6 +293,10 @@ extends Animal {
         return this.getVariant() == Gene.PLAYFUL;
     }
 
+    public boolean isBrown() {
+        return this.getVariant() == Gene.BROWN;
+    }
+
     public boolean isWeak() {
         return this.getVariant() == Gene.WEAK;
     }
@@ -416,17 +425,14 @@ extends Animal {
         this.rollAmount = this.isRolling() ? Math.min(1.0f, this.rollAmount + 0.15f) : Math.max(0.0f, this.rollAmount - 0.19f);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getSitAmount(float f) {
         return Mth.lerp(f, this.sitAmountO, this.sitAmount);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getLieOnBackAmount(float f) {
         return Mth.lerp(f, this.onBackAmountO, this.onBackAmount);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getRollAmount(float f) {
         return Mth.lerp(f, this.rollAmountO, this.rollAmount);
     }
@@ -1007,6 +1013,7 @@ extends Animal {
         AGGRESSIVE(6, "aggressive", false);
 
         private static final Gene[] BY_ID;
+        private static final int MAX_GENE = 6;
         private final int id;
         private final String name;
         private final boolean isRecessive;

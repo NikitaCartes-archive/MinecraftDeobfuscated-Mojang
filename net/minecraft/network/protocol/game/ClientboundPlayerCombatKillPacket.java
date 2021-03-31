@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -50,12 +48,14 @@ implements Packet<ClientGamePacketListener> {
         return true;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public int getKillerId() {
+        return this.killerId;
+    }
+
     public int getPlayerId() {
         return this.playerId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getMessage() {
         return this.message;
     }

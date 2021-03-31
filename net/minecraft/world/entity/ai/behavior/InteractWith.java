@@ -42,6 +42,10 @@ extends Behavior<E> {
         return new InteractWith<LivingEntity, LivingEntity>(entityType, i, livingEntity -> true, livingEntity -> true, memoryModuleType, f, j);
     }
 
+    public static <T extends LivingEntity> InteractWith<LivingEntity, T> of(EntityType<? extends T> entityType, int i, Predicate<T> predicate, MemoryModuleType<T> memoryModuleType, float f, int j) {
+        return new InteractWith<LivingEntity, T>(entityType, i, livingEntity -> true, predicate, memoryModuleType, f, j);
+    }
+
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
         return this.selfFilter.test(livingEntity) && this.seesAtLeastOneValidTarget(livingEntity);

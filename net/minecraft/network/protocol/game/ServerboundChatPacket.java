@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
 public class ServerboundChatPacket
 implements Packet<ServerGamePacketListener> {
+    private static final int MAX_MESSAGE_LENGTH = 256;
     private final String message;
 
     public ServerboundChatPacket(String string) {

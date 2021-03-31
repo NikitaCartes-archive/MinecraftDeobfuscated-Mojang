@@ -3,8 +3,6 @@
  */
 package net.minecraft.util.profiling;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -15,7 +13,6 @@ extends ProfilerFiller {
     public ProfileResults getResults();
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ActiveProfiler.PathEntry getEntry(String var1);
 }
 

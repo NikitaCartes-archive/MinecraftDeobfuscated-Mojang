@@ -26,6 +26,14 @@ extends Attribute {
         }
     }
 
+    public double getMinValue() {
+        return this.minValue;
+    }
+
+    public double getMaxValue() {
+        return this.maxValue;
+    }
+
     @Override
     public double sanitizeValue(double d) {
         d = Mth.clamp(d, this.minValue, this.maxValue);

@@ -10,6 +10,8 @@ import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
 public class NormalNoise {
+    private static final double INPUT_FACTOR = 1.0181268882175227;
+    private static final double TARGET_DEVIATION = 0.3333333333333333;
     private final double valueFactor;
     private final PerlinNoise first;
     private final PerlinNoise second;

@@ -5,6 +5,7 @@ package com.mojang.blaze3d.platform;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
@@ -31,6 +32,7 @@ import oshi.SystemInfo;
 import oshi.hardware.Processor;
 
 @Environment(value=EnvType.CLIENT)
+@DontObfuscate
 public class GLX {
     private static final Logger LOGGER = LogManager.getLogger();
     private static String cpuInfo;
@@ -109,6 +111,7 @@ public class GLX {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         GlStateManager._disableTexture();
         GlStateManager._depthMask(false);
+        GlStateManager._disableCull();
         RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -143,6 +146,7 @@ public class GLX {
         }
         tesselator.end();
         RenderSystem.lineWidth(1.0f);
+        GlStateManager._enableCull();
         GlStateManager._depthMask(true);
         GlStateManager._enableTexture();
     }

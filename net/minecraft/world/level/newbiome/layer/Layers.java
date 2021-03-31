@@ -21,6 +21,7 @@ import net.minecraft.world.level.newbiome.layer.BiomeEdgeLayer;
 import net.minecraft.world.level.newbiome.layer.BiomeInitLayer;
 import net.minecraft.world.level.newbiome.layer.IslandLayer;
 import net.minecraft.world.level.newbiome.layer.Layer;
+import net.minecraft.world.level.newbiome.layer.LayerBiomes;
 import net.minecraft.world.level.newbiome.layer.OceanLayer;
 import net.minecraft.world.level.newbiome.layer.OceanMixerLayer;
 import net.minecraft.world.level.newbiome.layer.RareBiomeLargeLayer;
@@ -35,7 +36,14 @@ import net.minecraft.world.level.newbiome.layer.SmoothLayer;
 import net.minecraft.world.level.newbiome.layer.ZoomLayer;
 import net.minecraft.world.level.newbiome.layer.traits.AreaTransformer1;
 
-public class Layers {
+public class Layers
+implements LayerBiomes {
+    protected static final int WARM_ID = 1;
+    protected static final int MEDIUM_ID = 2;
+    protected static final int COLD_ID = 3;
+    protected static final int ICE_ID = 4;
+    protected static final int SPECIAL_MASK = 3840;
+    protected static final int SPECIAL_SHIFT = 8;
     private static final Int2IntMap CATEGORIES = Util.make(new Int2IntOpenHashMap(), int2IntOpenHashMap -> {
         Layers.register(int2IntOpenHashMap, Category.BEACH, 16);
         Layers.register(int2IntOpenHashMap, Category.BEACH, 26);

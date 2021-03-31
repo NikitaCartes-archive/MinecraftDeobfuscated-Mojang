@@ -7,8 +7,6 @@ import com.google.common.collect.Maps;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -56,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Vindicator
 extends AbstractIllager {
+    private static final String TAG_JOHNNY = "Johnny";
     private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD;
     private boolean isJohnny;
 
@@ -98,12 +97,11 @@ extends AbstractIllager {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         if (this.isJohnny) {
-            compoundTag.putBoolean("Johnny", true);
+            compoundTag.putBoolean(TAG_JOHNNY, true);
         }
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AbstractIllager.IllagerArmPose getArmPose() {
         if (this.isAggressive()) {
             return AbstractIllager.IllagerArmPose.ATTACKING;
@@ -117,8 +115,8 @@ extends AbstractIllager {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("Johnny", 99)) {
-            this.isJohnny = compoundTag.getBoolean("Johnny");
+        if (compoundTag.contains(TAG_JOHNNY, 99)) {
+            this.isJohnny = compoundTag.getBoolean(TAG_JOHNNY);
         }
     }
 
@@ -158,7 +156,7 @@ extends AbstractIllager {
     @Override
     public void setCustomName(@Nullable Component component) {
         super.setCustomName(component);
-        if (!this.isJohnny && component != null && component.getString().equals("Johnny")) {
+        if (!this.isJohnny && component != null && component.getString().equals(TAG_JOHNNY)) {
             this.isJohnny = true;
         }
     }

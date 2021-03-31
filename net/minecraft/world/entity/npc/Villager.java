@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.npc;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -16,8 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -100,12 +99,24 @@ extends AbstractVillager
 implements ReputationEventHandler,
 VillagerDataHolder {
     private static final EntityDataAccessor<VillagerData> DATA_VILLAGER_DATA = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.VILLAGER_DATA);
+    public static final int BREEDING_FOOD_THRESHOLD = 12;
     public static final Map<Item, Integer> FOOD_POINTS = ImmutableMap.of(Items.BREAD, 4, Items.POTATO, 1, Items.CARROT, 1, Items.BEETROOT, 1);
+    private static final int TRADES_PER_LEVEL = 2;
     private static final Set<Item> WANTED_ITEMS = ImmutableSet.of(Items.BREAD, Items.POTATO, Items.CARROT, Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT, new Item[]{Items.BEETROOT_SEEDS});
+    private static final int MAX_GOSSIP_TOPICS = 10;
+    private static final int GOSSIP_COOLDOWN = 1200;
+    private static final int GOSSIP_DECAY_INTERVAL = 24000;
+    private static final int REPUTATION_CHANGE_PER_EVENT = 25;
+    private static final int HOW_FAR_AWAY_TO_TALK_TO_OTHER_VILLAGERS_ABOUT_GOLEMS = 10;
+    private static final int HOW_MANY_VILLAGERS_NEED_TO_AGREE_TO_SPAWN_A_GOLEM = 5;
+    private static final long TIME_SINCE_SLEEPING_FOR_GOLEM_SPAWNING = 24000L;
+    @VisibleForTesting
+    public static final float SPEED_MODIFIER = 0.5f;
     private int updateMerchantTimer;
     private boolean increaseProfessionLevelOnUpdate;
     @Nullable
     private Player lastTradedPlayer;
+    private boolean chasing;
     private byte foodLevel;
     private final GossipContainer gossips = new GossipContainer();
     private long lastGossipTime;
@@ -459,6 +470,7 @@ VillagerDataHolder {
         }
     }
 
+    @Override
     public void setVillagerData(VillagerData villagerData) {
         VillagerData villagerData2 = this.getVillagerData();
         if (villagerData2.getProfession() != villagerData.getProfession()) {
@@ -485,6 +497,14 @@ VillagerDataHolder {
         if (merchantOffer.shouldRewardExp()) {
             this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY() + 0.5, this.getZ(), i));
         }
+    }
+
+    public void setChasing(boolean bl) {
+        this.chasing = bl;
+    }
+
+    public boolean isChasing() {
+        return this.chasing;
     }
 
     @Override
@@ -608,7 +628,6 @@ VillagerDataHolder {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 12) {
             this.addParticlesAroundSelf(ParticleTypes.HEART);

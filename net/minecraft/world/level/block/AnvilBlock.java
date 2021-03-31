@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -51,6 +49,8 @@ extends FallingBlock {
     private static final VoxelShape X_AXIS_AABB = Shapes.or(BASE, X_LEG1, X_LEG2, X_TOP);
     private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
     private static final Component CONTAINER_TITLE = new TranslatableComponent("container.repair");
+    private static final float FALL_DAMAGE_PER_DISTANCE = 2.0f;
+    private static final int FALL_DAMAGE_MAX = 40;
 
     public AnvilBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -138,7 +138,6 @@ extends FallingBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return blockState.getMapColor((BlockGetter)blockGetter, (BlockPos)blockPos).col;
     }

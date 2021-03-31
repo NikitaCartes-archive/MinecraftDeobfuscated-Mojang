@@ -10,7 +10,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -34,6 +33,7 @@ implements GameMasterBlock {
 
     protected StructureBlock(BlockBehaviour.Properties properties) {
         super(properties);
+        this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(MODE, StructureMode.LOAD));
     }
 
     @Override
@@ -64,11 +64,6 @@ implements GameMasterBlock {
     @Override
     public RenderShape getRenderShape(BlockState blockState) {
         return RenderShape.MODEL;
-    }
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(MODE, StructureMode.LOAD);
     }
 
     @Override

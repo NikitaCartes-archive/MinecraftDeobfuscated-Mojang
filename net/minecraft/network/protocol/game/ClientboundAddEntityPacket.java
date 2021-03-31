@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddEntityPacket
 implements Packet<ClientGamePacketListener> {
+    public static final double MAGICAL_QUANTIZATION = 8000.0;
     private final int id;
     private final UUID uuid;
     private final double x;
@@ -30,6 +29,7 @@ implements Packet<ClientGamePacketListener> {
     private final int yRot;
     private final EntityType<?> type;
     private final int data;
+    public static final double LIMIT = 3.9;
 
     public ClientboundAddEntityPacket(int i, UUID uUID, double d, double e, double f, float g, float h, EntityType<?> entityType, int j, Vec3 vec3) {
         this.id = i;
@@ -94,62 +94,50 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleAddEntity(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getId() {
         return this.id;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public UUID getUUID() {
         return this.uuid;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getY() {
         return this.y;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getZ() {
         return this.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getXa() {
         return (double)this.xa / 8000.0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getYa() {
         return (double)this.ya / 8000.0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getZa() {
         return (double)this.za / 8000.0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getxRot() {
         return this.xRot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getyRot() {
         return this.yRot;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public EntityType<?> getType() {
         return this.type;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getData() {
         return this.data;
     }

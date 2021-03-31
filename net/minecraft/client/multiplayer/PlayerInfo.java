@@ -64,6 +64,10 @@ public class PlayerInfo {
         this.latency = i;
     }
 
+    public boolean isCapeLoaded() {
+        return this.getCapeLocation() != null;
+    }
+
     public boolean isSkinLoaded() {
         return this.getSkinLocation() != null;
     }

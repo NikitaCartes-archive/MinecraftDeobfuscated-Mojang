@@ -58,6 +58,14 @@ implements Packet<ServerGamePacketListener> {
         return this.onGround;
     }
 
+    public boolean hasPosition() {
+        return this.hasPos;
+    }
+
+    public boolean hasRotation() {
+        return this.hasRot;
+    }
+
     public static class StatusOnly
     extends ServerboundMovePlayerPacket {
         public StatusOnly(boolean bl) {

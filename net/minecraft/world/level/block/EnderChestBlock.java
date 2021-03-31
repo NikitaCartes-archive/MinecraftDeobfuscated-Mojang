@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -65,7 +63,6 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
         return DoubleBlockCombiner.Combiner::acceptNone;
     }
@@ -120,7 +117,6 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         for (int i = 0; i < 3; ++i) {
             int j = random.nextInt(2) * 2 - 1;

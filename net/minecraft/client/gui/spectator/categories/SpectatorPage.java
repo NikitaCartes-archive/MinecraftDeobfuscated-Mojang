@@ -12,6 +12,7 @@ import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 
 @Environment(value=EnvType.CLIENT)
 public class SpectatorPage {
+    public static final int NO_SELECTION = -1;
     private final List<SpectatorMenuItem> items;
     private final int selection;
 

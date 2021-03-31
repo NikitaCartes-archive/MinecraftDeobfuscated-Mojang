@@ -15,6 +15,11 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 @Environment(value=EnvType.CLIENT)
 public class MinecartSoundInstance
 extends AbstractTickableSoundInstance {
+    private static final float VOLUME_MIN = 0.0f;
+    private static final float VOLUME_MAX = 0.7f;
+    private static final float PITCH_MIN = 0.0f;
+    private static final float PITCH_MAX = 1.0f;
+    private static final float PITCH_DELTA = 0.0025f;
     private final AbstractMinecart minecart;
     private float pitch = 0.0f;
 

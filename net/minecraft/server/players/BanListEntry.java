@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BanListEntry<T>
 extends StoredUserEntry<T> {
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+    public static final String EXPIRES_NEVER = "forever";
     protected final Date created;
     protected final String source;
     protected final Date expires;
@@ -47,6 +48,10 @@ extends StoredUserEntry<T> {
         this.reason = jsonObject.has("reason") ? jsonObject.get("reason").getAsString() : "Banned by an operator.";
     }
 
+    public Date getCreated() {
+        return this.created;
+    }
+
     public String getSource() {
         return this.source;
     }
@@ -73,7 +78,7 @@ extends StoredUserEntry<T> {
     protected void serialize(JsonObject jsonObject) {
         jsonObject.addProperty("created", DATE_FORMAT.format(this.created));
         jsonObject.addProperty("source", this.source);
-        jsonObject.addProperty("expires", this.expires == null ? "forever" : DATE_FORMAT.format(this.expires));
+        jsonObject.addProperty("expires", this.expires == null ? EXPIRES_NEVER : DATE_FORMAT.format(this.expires));
         jsonObject.addProperty("reason", this.reason);
     }
 }

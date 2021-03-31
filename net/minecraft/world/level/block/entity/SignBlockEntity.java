@@ -5,8 +5,6 @@ package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -32,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SignBlockEntity
 extends BlockEntity {
+    public static final int LINES = 4;
     private static final String[] RAW_TEXT_FIELD_NAMES = new String[]{"Text1", "Text2", "Text3", "Text4"};
     private static final String[] FILTERED_TEXT_FIELD_NAMES = new String[]{"FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4"};
     private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
@@ -40,7 +39,6 @@ extends BlockEntity {
     private Player playerWhoMayEdit;
     @Nullable
     private FormattedCharSequence[] renderMessages;
-    @Environment(value=EnvType.CLIENT)
     private boolean renderMessagedFiltered;
     private DyeColor color = DyeColor.BLACK;
     private boolean hasGlowingText;
@@ -105,7 +103,6 @@ extends BlockEntity {
         return TextComponent.EMPTY;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getMessage(int i, boolean bl) {
         return this.getMessages(bl)[i];
     }
@@ -120,7 +117,6 @@ extends BlockEntity {
         this.renderMessages = null;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public FormattedCharSequence[] getRenderMessages(boolean bl, Function<Component, FormattedCharSequence> function) {
         if (this.renderMessages == null || this.renderMessagedFiltered != bl) {
             this.renderMessagedFiltered = bl;
@@ -156,7 +152,6 @@ extends BlockEntity {
         return this.isEditable;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setEditable(boolean bl) {
         this.isEditable = bl;
         if (!bl) {

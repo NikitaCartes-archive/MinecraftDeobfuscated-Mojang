@@ -6,8 +6,6 @@ package net.minecraft.util.profiling;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ResultField;
 
@@ -19,7 +17,6 @@ implements ProfileResults {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public List<ResultField> getTimes(String string) {
         return Collections.emptyList();
     }
@@ -47,6 +44,11 @@ implements ProfileResults {
     @Override
     public int getEndTimeTicks() {
         return 0;
+    }
+
+    @Override
+    public String getProfilerResults() {
+        return "";
     }
 }
 

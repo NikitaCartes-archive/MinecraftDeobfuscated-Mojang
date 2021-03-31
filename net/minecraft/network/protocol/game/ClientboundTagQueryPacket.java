@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -38,13 +36,11 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleTagQueryPacket(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTransactionId() {
         return this.transactionId;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public CompoundTag getTag() {
         return this.tag;
     }

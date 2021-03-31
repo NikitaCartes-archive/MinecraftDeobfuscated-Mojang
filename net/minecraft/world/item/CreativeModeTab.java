@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -23,7 +21,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_BUILDING_BLOCKS = new CreativeModeTab(0, "buildingBlocks"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Blocks.BRICKS);
         }
@@ -31,7 +28,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_DECORATIONS = new CreativeModeTab(1, "decorations"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Blocks.PEONY);
         }
@@ -39,7 +35,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_REDSTONE = new CreativeModeTab(2, "redstone"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.REDSTONE);
         }
@@ -47,7 +42,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_TRANSPORTATION = new CreativeModeTab(3, "transportation"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Blocks.POWERED_RAIL);
         }
@@ -55,7 +49,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_MISC = new CreativeModeTab(6, "misc"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.LAVA_BUCKET);
         }
@@ -63,7 +56,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_SEARCH = new CreativeModeTab(5, "search"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.COMPASS);
         }
@@ -71,7 +63,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_FOOD = new CreativeModeTab(7, "food"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.APPLE);
         }
@@ -79,7 +70,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_TOOLS = new CreativeModeTab(8, "tools"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.IRON_AXE);
         }
@@ -87,7 +77,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_COMBAT = new CreativeModeTab(9, "combat"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Items.GOLDEN_SWORD);
         }
@@ -95,7 +84,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_BREWING = new CreativeModeTab(10, "brewing"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
         }
@@ -104,19 +92,16 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_HOTBAR = new CreativeModeTab(4, "hotbar"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Blocks.BOOKSHELF);
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public void fillItemList(NonNullList<ItemStack> nonNullList) {
             throw new RuntimeException("Implement exception client-side.");
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public boolean isAlignedRight() {
             return true;
         }
@@ -124,7 +109,6 @@ public abstract class CreativeModeTab {
     public static final CreativeModeTab TAB_INVENTORY = new CreativeModeTab(11, "inventory"){
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public ItemStack makeIcon() {
             return new ItemStack(Blocks.CHEST);
         }
@@ -147,7 +131,6 @@ public abstract class CreativeModeTab {
         CreativeModeTab.TABS[i] = this;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getId() {
         return this.id;
     }
@@ -156,12 +139,10 @@ public abstract class CreativeModeTab {
         return this.recipeFolderName == null ? this.langId : this.recipeFolderName;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getDisplayName() {
         return this.displayName;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getIconItem() {
         if (this.iconItemStack.isEmpty()) {
             this.iconItemStack = this.makeIcon();
@@ -169,10 +150,8 @@ public abstract class CreativeModeTab {
         return this.iconItemStack;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public abstract ItemStack makeIcon();
 
-    @Environment(value=EnvType.CLIENT)
     public String getBackgroundSuffix() {
         return this.backgroundSuffix;
     }
@@ -187,7 +166,6 @@ public abstract class CreativeModeTab {
         return this;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean showTitle() {
         return this.showTitle;
     }
@@ -197,7 +175,6 @@ public abstract class CreativeModeTab {
         return this;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean canScroll() {
         return this.canScroll;
     }
@@ -207,17 +184,14 @@ public abstract class CreativeModeTab {
         return this;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getColumn() {
         return this.id % 6;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isTopRow() {
         return this.id < 6;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isAlignedRight() {
         return this.getColumn() == 5;
     }
@@ -241,7 +215,6 @@ public abstract class CreativeModeTab {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void fillItemList(NonNullList<ItemStack> nonNullList) {
         for (Item item : Registry.ITEM) {
             item.fillItemCategory(this, nonNullList);

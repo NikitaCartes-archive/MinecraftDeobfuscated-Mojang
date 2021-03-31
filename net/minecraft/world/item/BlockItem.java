@@ -5,8 +5,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -42,6 +40,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockItem
 extends Item {
+    public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+    public static final String BLOCK_STATE_TAG = "BlockStateTag";
     @Deprecated
     private final Block block;
 
@@ -119,7 +119,7 @@ extends Item {
         BlockState blockState2 = blockState;
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag != null) {
-            CompoundTag compoundTag2 = compoundTag.getCompound("BlockStateTag");
+            CompoundTag compoundTag2 = compoundTag.getCompound(BLOCK_STATE_TAG);
             StateDefinition<Block, BlockState> stateDefinition = blockState2.getBlock().getStateDefinition();
             for (String string : compoundTag2.getAllKeys()) {
                 Property<?> property = stateDefinition.getProperty(string);
@@ -158,7 +158,7 @@ extends Item {
         if (minecraftServer == null) {
             return false;
         }
-        CompoundTag compoundTag = itemStack.getTagElement("BlockEntityTag");
+        CompoundTag compoundTag = itemStack.getTagElement(BLOCK_ENTITY_TAG);
         if (compoundTag != null && (blockEntity = level.getBlockEntity(blockPos)) != null) {
             if (!(level.isClientSide || !blockEntity.onlyOpCanSetNbt() || player != null && player.canUseGameMasterBlocks())) {
                 return false;
@@ -191,7 +191,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, level, list, tooltipFlag);
         this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag);
@@ -214,7 +213,7 @@ extends Item {
     public void onDestroyed(ItemEntity itemEntity) {
         CompoundTag compoundTag;
         if (this.block instanceof ShulkerBoxBlock && (compoundTag = itemEntity.getItem().getTag()) != null) {
-            ListTag listTag = compoundTag.getCompound("BlockEntityTag").getList("Items", 10);
+            ListTag listTag = compoundTag.getCompound(BLOCK_ENTITY_TAG).getList("Items", 10);
             ItemUtils.onContainerDestroyed(itemEntity, listTag.stream().map(CompoundTag.class::cast).map(ItemStack::of));
         }
     }

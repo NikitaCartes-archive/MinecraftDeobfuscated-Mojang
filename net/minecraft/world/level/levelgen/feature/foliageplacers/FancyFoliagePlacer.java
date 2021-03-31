@@ -6,23 +6,23 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FancyFoliagePlacer
 extends BlobFoliagePlacer {
     public static final Codec<FancyFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> FancyFoliagePlacer.blobParts(instance).apply(instance, FancyFoliagePlacer::new));
 
-    public FancyFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, int i) {
-        super(uniformInt, uniformInt2, i);
+    public FancyFoliagePlacer(IntProvider intProvider, IntProvider intProvider2, int i) {
+        super(intProvider, intProvider2, i);
     }
 
     @Override
@@ -31,10 +31,10 @@ extends BlobFoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l, BoundingBox boundingBox) {
+    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
         for (int m = l; m >= l - j; --m) {
             int n = k + (m == l || m == l - j ? 0 : 1);
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, foliageAttachment.foliagePos(), n, set, m, foliageAttachment.doubleTrunk(), boundingBox);
+            this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, foliageAttachment.pos(), n, m, foliageAttachment.doubleTrunk());
         }
     }
 

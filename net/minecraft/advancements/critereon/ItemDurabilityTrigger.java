@@ -54,6 +54,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.delta = ints2;
         }
 
+        public static TriggerInstance changedDurability(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
+            return TriggerInstance.changedDurability(EntityPredicate.Composite.ANY, itemPredicate, ints);
+        }
+
         public static TriggerInstance changedDurability(EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
             return new TriggerInstance(composite, itemPredicate, ints, MinMaxBounds.Ints.ANY);
         }

@@ -35,13 +35,13 @@ extends WorldCarver<CanyonCarverConfiguration> {
     public boolean carve(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, ChunkPos chunkPos, BitSet bitSet) {
         int j = (this.getRange() * 2 - 1) * 16;
         double d = chunkPos.getBlockX(random.nextInt(16));
-        int k = this.getY(carvingContext, canyonCarverConfiguration, random);
+        int k = canyonCarverConfiguration.y.sample(random, carvingContext);
         double e = chunkPos.getBlockZ(random.nextInt(16));
         float f = random.nextFloat() * ((float)Math.PI * 2);
-        float g = canyonCarverConfiguration.getVerticalRotation().sample(random);
-        double h = canyonCarverConfiguration.getYScale().sample(random);
-        float l = canyonCarverConfiguration.getThickness().sample(random);
-        int m = (int)((float)j * canyonCarverConfiguration.getDistanceFactor().sample(random));
+        float g = canyonCarverConfiguration.verticalRotation.sample(random);
+        double h = canyonCarverConfiguration.yScale.sample(random);
+        float l = canyonCarverConfiguration.shape.thickness.sample(random);
+        int m = (int)((float)j * canyonCarverConfiguration.shape.distanceFactor.sample(random));
         boolean n = false;
         this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), i, d, k, e, l, f, g, 0, m, h, bitSet);
         return true;
@@ -55,7 +55,7 @@ extends WorldCarver<CanyonCarverConfiguration> {
         for (int q = k; q < m; ++q) {
             double r = 1.5 + (double)(Mth.sin((float)q * (float)Math.PI / (float)m) * g);
             double s = r * n;
-            r *= (double)canyonCarverConfiguration.getHorizontalRadiusFactor().sample(random);
+            r *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(random);
             s = this.updateVerticalRadius(canyonCarverConfiguration, random, s, m, q);
             float t = Mth.cos(j);
             float u = Mth.sin(j);
@@ -77,22 +77,12 @@ extends WorldCarver<CanyonCarverConfiguration> {
         }
     }
 
-    private int getY(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
-        int j;
-        int i = canyonCarverConfiguration.getBottomInclusive().resolveY(carvingContext);
-        if (i >= (j = canyonCarverConfiguration.getTopInclusive().resolveY(carvingContext))) {
-            LOGGER.warn("Empty carver: {} [{}-{}]", (Object)this, (Object)i, (Object)j);
-            return i;
-        }
-        return Mth.randomBetweenInclusive(random, i, j);
-    }
-
     private float[] initWidthFactors(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
         int i = carvingContext.getGenDepth();
         float[] fs = new float[i];
         float f = 1.0f;
         for (int j = 0; j < i; ++j) {
-            if (j == 0 || random.nextInt(canyonCarverConfiguration.getWidthSmoothness()) == 0) {
+            if (j == 0 || random.nextInt(canyonCarverConfiguration.shape.widthSmoothness) == 0) {
                 f = 1.0f + random.nextFloat() * random.nextFloat();
             }
             fs[j] = f * f;
@@ -102,7 +92,7 @@ extends WorldCarver<CanyonCarverConfiguration> {
 
     private double updateVerticalRadius(CanyonCarverConfiguration canyonCarverConfiguration, Random random, double d, float f, float g) {
         float h = 1.0f - Mth.abs(0.5f - g / f) * 2.0f;
-        float i = canyonCarverConfiguration.getVerticalRadiusDefaultFactor() + canyonCarverConfiguration.getVerticalRadiusCenterFactor() * h;
+        float i = canyonCarverConfiguration.shape.verticalRadiusDefaultFactor + canyonCarverConfiguration.shape.verticalRadiusCenterFactor * h;
         return (double)i * d * (double)Mth.randomBetween(random, 0.75f, 1.0f);
     }
 

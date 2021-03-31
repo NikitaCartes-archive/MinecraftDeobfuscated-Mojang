@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -91,12 +89,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleMapItemData(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getMapId() {
         return this.mapId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void applyToMap(MapItemSavedData mapItemSavedData) {
         if (this.decorations != null) {
             mapItemSavedData.addClientSideDecorations(this.decorations);
@@ -106,12 +102,10 @@ implements Packet<ClientGamePacketListener> {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public byte getScale() {
         return this.scale;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isLocked() {
         return this.locked;
     }

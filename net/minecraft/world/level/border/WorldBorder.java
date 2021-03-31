@@ -6,8 +6,6 @@ package net.minecraft.world.level.border;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DynamicLike;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -41,6 +39,10 @@ public class WorldBorder {
         return (double)chunkPos.getMaxBlockX() > this.getMinX() && (double)chunkPos.getMinBlockX() < this.getMaxX() && (double)chunkPos.getMaxBlockZ() > this.getMinZ() && (double)chunkPos.getMinBlockZ() < this.getMaxZ();
     }
 
+    public boolean isWithinBounds(double d, double e) {
+        return d > this.getMinX() && d < this.getMaxX() && e > this.getMinZ() && e < this.getMaxZ();
+    }
+
     public boolean isWithinBounds(AABB aABB) {
         return aABB.maxX > this.getMinX() && aABB.minX < this.getMaxX() && aABB.maxZ > this.getMinZ() && aABB.minZ < this.getMaxZ();
     }
@@ -63,7 +65,6 @@ public class WorldBorder {
         return Math.min(j, g);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BorderStatus getStatus() {
         return this.extent.getStatus();
     }
@@ -135,6 +136,10 @@ public class WorldBorder {
         this.listeners.add(borderChangeListener);
     }
 
+    public void removeListener(BorderChangeListener borderChangeListener) {
+        this.listeners.remove(borderChangeListener);
+    }
+
     public void setAbsoluteMaxSize(int i) {
         this.absoluteMaxSize = i;
         this.extent.onAbsoluteMaxSizeChange();
@@ -166,7 +171,6 @@ public class WorldBorder {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getLerpSpeed() {
         return this.extent.getLerpSpeed();
     }
@@ -351,13 +355,11 @@ public class WorldBorder {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public BorderStatus getStatus() {
             return BorderStatus.STATIONARY;
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public double getLerpSpeed() {
             return 0.0;
         }
@@ -444,7 +446,6 @@ public class WorldBorder {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public double getLerpSpeed() {
             return Math.abs(this.from - this.to) / (double)(this.lerpEnd - this.lerpBegin);
         }
@@ -460,7 +461,6 @@ public class WorldBorder {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public BorderStatus getStatus() {
             return this.to < this.from ? BorderStatus.SHRINKING : BorderStatus.GROWING;
         }
@@ -498,14 +498,12 @@ public class WorldBorder {
 
         public double getSize();
 
-        @Environment(value=EnvType.CLIENT)
         public double getLerpSpeed();
 
         public long getLerpRemainingTime();
 
         public double getLerpTarget();
 
-        @Environment(value=EnvType.CLIENT)
         public BorderStatus getStatus();
 
         public void onAbsoluteMaxSizeChange();

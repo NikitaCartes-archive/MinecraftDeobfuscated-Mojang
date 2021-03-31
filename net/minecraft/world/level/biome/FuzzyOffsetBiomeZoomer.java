@@ -12,6 +12,9 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer
 {
     INSTANCE;
 
+    private static final int ZOOM_BITS = 2;
+    private static final int ZOOM = 4;
+    private static final int ZOOM_MASK = 3;
 
     @Override
     public Biome getBiome(long l, int i, int j, int k, BiomeManager.NoiseBiomeSource noiseBiomeSource) {

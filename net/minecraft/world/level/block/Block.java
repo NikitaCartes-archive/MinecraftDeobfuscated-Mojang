@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -21,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -85,12 +84,27 @@ implements ItemLike {
             return this.load((VoxelShape)object);
         }
     });
+    public static final int UPDATE_NEIGHBORS = 1;
+    public static final int UPDATE_CLIENTS = 2;
+    public static final int UPDATE_INVISIBLE = 4;
+    public static final int UPDATE_IMMEDIATE = 8;
+    public static final int UPDATE_KNOWN_SHAPE = 16;
+    public static final int UPDATE_SUPPRESS_DROPS = 32;
+    public static final int UPDATE_MOVE_BY_PISTON = 64;
+    public static final int UPDATE_SUPPRESS_LIGHT = 128;
+    public static final int UPDATE_NONE = 4;
+    public static final int UPDATE_ALL = 3;
+    public static final int UPDATE_ALL_IMMEDIATE = 11;
+    public static final float INDESTRUCTIBLE = -1.0f;
+    public static final float INSTANT = 0.0f;
+    public static final int UPDATE_LIMIT = 512;
     protected final StateDefinition<Block, BlockState> stateDefinition;
     private BlockState defaultBlockState;
     @Nullable
     private String descriptionId;
     @Nullable
     private Item item;
+    private static final int CACHE_SIZE = 2048;
     private static final ThreadLocal<Object2ByteLinkedOpenHashMap<BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
         Object2ByteLinkedOpenHashMap<BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<BlockStatePairKey>(2048, 0.25f){
 
@@ -143,7 +157,7 @@ implements ItemLike {
         BlockState blockState2 = blockState;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : UPDATE_SHAPE_ORDER) {
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             blockState2 = blockState2.updateShape(direction, levelAccessor.getBlockState(mutableBlockPos), levelAccessor, blockPos, mutableBlockPos);
         }
         return blockState2;
@@ -185,7 +199,6 @@ implements ItemLike {
         return this.isRandomlyTicking;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
         BlockState blockState2 = blockGetter.getBlockState(blockPos2);
         if (blockState.skipRendering(blockState2, direction)) {
@@ -238,7 +251,6 @@ implements ItemLike {
         return !Block.isShapeFullBlock(blockState.getShape(blockGetter, blockPos)) && blockState.getFluidState().isEmpty();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
     }
 
@@ -253,6 +265,13 @@ implements ItemLike {
     public static List<ItemStack> getDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack itemStack) {
         LootContext.Builder builder = new LootContext.Builder(serverLevel).withRandom(serverLevel.random).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos)).withParameter(LootContextParams.TOOL, itemStack).withOptionalParameter(LootContextParams.THIS_ENTITY, entity).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity);
         return blockState.getDrops(builder);
+    }
+
+    public static void dropResources(BlockState blockState, LootContext.Builder builder) {
+        ServerLevel serverLevel = builder.getLevel();
+        BlockPos blockPos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
+        blockState.getDrops(builder).forEach(itemStack -> Block.popResource(serverLevel, blockPos, itemStack));
+        blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY);
     }
 
     public static void dropResources(BlockState blockState, Level level, BlockPos blockPos) {
@@ -323,7 +342,6 @@ implements ItemLike {
         return !this.material.isSolid() && !this.material.isLiquid();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MutableComponent getName() {
         return new TranslatableComponent(this.getDescriptionId());
     }
@@ -343,7 +361,6 @@ implements ItemLike {
         entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
         return new ItemStack(this);
     }
@@ -431,7 +448,6 @@ implements ItemLike {
         return "Block{" + Registry.BLOCK.getKey(this) + "}";
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
     }
 

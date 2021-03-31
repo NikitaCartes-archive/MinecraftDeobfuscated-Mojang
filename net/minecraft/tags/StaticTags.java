@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -42,7 +40,6 @@ public class StaticTags {
         HELPERS.forEach(staticTagHelper -> staticTagHelper.reset(tagContainer));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void resetAllToEmpty() {
         HELPERS.forEach(StaticTagHelper::resetToEmpty);
     }

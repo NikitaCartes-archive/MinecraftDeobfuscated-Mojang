@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -13,7 +11,6 @@ public class ServerboundAcceptTeleportationPacket
 implements Packet<ServerGamePacketListener> {
     private final int id;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundAcceptTeleportationPacket(int i) {
         this.id = i;
     }

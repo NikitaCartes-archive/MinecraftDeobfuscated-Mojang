@@ -17,6 +17,9 @@ import net.minecraft.world.level.Level;
 
 public class SpyglassItem
 extends Item {
+    public static final int USE_DURATION = 1200;
+    public static final float ZOOM_FOV_MODIFIER = 0.1f;
+
     public SpyglassItem(Item.Properties properties) {
         super(properties);
     }

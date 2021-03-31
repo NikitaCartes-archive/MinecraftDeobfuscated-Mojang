@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RecipeBookPage {
+    public static final int ITEMS_PER_PAGE = 20;
     private final List<RecipeButton> buttons = Lists.newArrayListWithCapacity(20);
     private RecipeButton hoveredButton;
     private final OverlayRecipeComponent overlay = new OverlayRecipeComponent();

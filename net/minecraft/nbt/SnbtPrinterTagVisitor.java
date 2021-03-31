@@ -43,6 +43,13 @@ implements TagVisitor {
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     private static final String NAME_VALUE_SEPARATOR = String.valueOf(':');
     private static final String ELEMENT_SEPARATOR = String.valueOf(',');
+    private static final String LIST_OPEN = "[";
+    private static final String LIST_CLOSE = "]";
+    private static final String LIST_TYPE_SEPARATOR = ";";
+    private static final String ELEMENT_SPACING = " ";
+    private static final String STRUCT_OPEN = "{";
+    private static final String STRUCT_CLOSE = "}";
+    private static final String NEWLINE = "\n";
     private final String indentation;
     private final int depth;
     private final List<String> path;
@@ -100,41 +107,41 @@ implements TagVisitor {
 
     @Override
     public void visitByteArray(ByteArrayTag byteArrayTag) {
-        StringBuilder stringBuilder = new StringBuilder("[").append("B").append(";");
+        StringBuilder stringBuilder = new StringBuilder(LIST_OPEN).append("B").append(LIST_TYPE_SEPARATOR);
         byte[] bs = byteArrayTag.getAsByteArray();
         for (int i = 0; i < bs.length; ++i) {
-            stringBuilder.append(" ").append(bs[i]).append("B");
+            stringBuilder.append(ELEMENT_SPACING).append(bs[i]).append("B");
             if (i == bs.length - 1) continue;
             stringBuilder.append(ELEMENT_SEPARATOR);
         }
-        stringBuilder.append("]");
+        stringBuilder.append(LIST_CLOSE);
         this.result = stringBuilder.toString();
     }
 
     @Override
     public void visitIntArray(IntArrayTag intArrayTag) {
-        StringBuilder stringBuilder = new StringBuilder("[").append("I").append(";");
+        StringBuilder stringBuilder = new StringBuilder(LIST_OPEN).append("I").append(LIST_TYPE_SEPARATOR);
         int[] is = intArrayTag.getAsIntArray();
         for (int i = 0; i < is.length; ++i) {
-            stringBuilder.append(" ").append(is[i]);
+            stringBuilder.append(ELEMENT_SPACING).append(is[i]);
             if (i == is.length - 1) continue;
             stringBuilder.append(ELEMENT_SEPARATOR);
         }
-        stringBuilder.append("]");
+        stringBuilder.append(LIST_CLOSE);
         this.result = stringBuilder.toString();
     }
 
     @Override
     public void visitLongArray(LongArrayTag longArrayTag) {
         String string = "L";
-        StringBuilder stringBuilder = new StringBuilder("[").append("L").append(";");
+        StringBuilder stringBuilder = new StringBuilder(LIST_OPEN).append("L").append(LIST_TYPE_SEPARATOR);
         long[] ls = longArrayTag.getAsLongArray();
         for (int i = 0; i < ls.length; ++i) {
-            stringBuilder.append(" ").append(ls[i]).append("L");
+            stringBuilder.append(ELEMENT_SPACING).append(ls[i]).append("L");
             if (i == ls.length - 1) continue;
             stringBuilder.append(ELEMENT_SEPARATOR);
         }
-        stringBuilder.append("]");
+        stringBuilder.append(LIST_CLOSE);
         this.result = stringBuilder.toString();
     }
 
@@ -145,22 +152,22 @@ implements TagVisitor {
             this.result = "[]";
             return;
         }
-        StringBuilder stringBuilder = new StringBuilder("[");
+        StringBuilder stringBuilder = new StringBuilder(LIST_OPEN);
         this.pushPath("[]");
         String string2 = string = NO_INDENTATION.contains(this.pathString()) ? "" : this.indentation;
         if (!string.isEmpty()) {
-            stringBuilder.append("\n");
+            stringBuilder.append(NEWLINE);
         }
         for (int i = 0; i < listTag.size(); ++i) {
             stringBuilder.append(Strings.repeat(string, this.depth + 1));
             stringBuilder.append(new SnbtPrinterTagVisitor(string, this.depth + 1, this.path).visit(listTag.get(i)));
             if (i == listTag.size() - 1) continue;
-            stringBuilder.append(ELEMENT_SEPARATOR).append(string.isEmpty() ? " " : "\n");
+            stringBuilder.append(ELEMENT_SEPARATOR).append(string.isEmpty() ? ELEMENT_SPACING : NEWLINE);
         }
         if (!string.isEmpty()) {
-            stringBuilder.append("\n").append(Strings.repeat(string, this.depth));
+            stringBuilder.append(NEWLINE).append(Strings.repeat(string, this.depth));
         }
-        stringBuilder.append("]");
+        stringBuilder.append(LIST_CLOSE);
         this.result = stringBuilder.toString();
         this.popPath();
     }
@@ -172,11 +179,11 @@ implements TagVisitor {
             this.result = "{}";
             return;
         }
-        StringBuilder stringBuilder = new StringBuilder("{");
+        StringBuilder stringBuilder = new StringBuilder(STRUCT_OPEN);
         this.pushPath("{}");
         String string2 = string = NO_INDENTATION.contains(this.pathString()) ? "" : this.indentation;
         if (!string.isEmpty()) {
-            stringBuilder.append("\n");
+            stringBuilder.append(NEWLINE);
         }
         List<String> collection = this.getKeys(compoundTag);
         Iterator iterator = collection.iterator();
@@ -184,15 +191,15 @@ implements TagVisitor {
             String string22 = (String)iterator.next();
             Tag tag = compoundTag.get(string22);
             this.pushPath(string22);
-            stringBuilder.append(Strings.repeat(string, this.depth + 1)).append(SnbtPrinterTagVisitor.handleEscapePretty(string22)).append(NAME_VALUE_SEPARATOR).append(" ").append(new SnbtPrinterTagVisitor(string, this.depth + 1, this.path).visit(tag));
+            stringBuilder.append(Strings.repeat(string, this.depth + 1)).append(SnbtPrinterTagVisitor.handleEscapePretty(string22)).append(NAME_VALUE_SEPARATOR).append(ELEMENT_SPACING).append(new SnbtPrinterTagVisitor(string, this.depth + 1, this.path).visit(tag));
             this.popPath();
             if (!iterator.hasNext()) continue;
-            stringBuilder.append(ELEMENT_SEPARATOR).append(string.isEmpty() ? " " : "\n");
+            stringBuilder.append(ELEMENT_SEPARATOR).append(string.isEmpty() ? ELEMENT_SPACING : NEWLINE);
         }
         if (!string.isEmpty()) {
-            stringBuilder.append("\n").append(Strings.repeat(string, this.depth));
+            stringBuilder.append(NEWLINE).append(Strings.repeat(string, this.depth));
         }
-        stringBuilder.append("}");
+        stringBuilder.append(STRUCT_CLOSE);
         this.result = stringBuilder.toString();
         this.popPath();
     }

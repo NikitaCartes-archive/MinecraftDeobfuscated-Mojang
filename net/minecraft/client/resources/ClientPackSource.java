@@ -53,6 +53,12 @@ implements RepositorySource {
     private static final PackMetadataSection BUILT_IN = new PackMetadataSection(new TranslatableComponent("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
+    private static final int MAX_WEB_FILESIZE = 0x6400000;
+    private static final int MAX_KEPT_PACKS = 10;
+    private static final String VANILLA_ID = "vanilla";
+    private static final String SERVER_ID = "server";
+    private static final String PROGRAMMER_ART_ID = "programer_art";
+    private static final String PROGRAMMER_ART_NAME = "Programmer Art";
     private final VanillaPackResources vanillaPack;
     private final File serverPackDir;
     private final ReentrantLock downloadLock = new ReentrantLock();
@@ -71,7 +77,7 @@ implements RepositorySource {
     @Override
     public void loadPacks(Consumer<Pack> consumer, Pack.PackConstructor packConstructor) {
         Pack pack2;
-        Pack pack = Pack.create("vanilla", true, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+        Pack pack = Pack.create(VANILLA_ID, true, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
         if (pack != null) {
             consumer.accept(pack);
         }
@@ -204,7 +210,7 @@ implements RepositorySource {
             return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), iOException));
         }
         LOGGER.info("Applying server pack {}", (Object)file);
-        this.serverPack = new Pack("server", true, () -> new FilePackResources(file), new TranslatableComponent("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES), Pack.Position.TOP, true, packSource);
+        this.serverPack = new Pack(SERVER_ID, true, () -> new FilePackResources(file), new TranslatableComponent("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES), Pack.Position.TOP, true, packSource);
         return Minecraft.getInstance().delayTextureReload();
     }
 
@@ -224,7 +230,7 @@ implements RepositorySource {
 
     @Nullable
     private static Pack createProgrammerArtPack(Pack.PackConstructor packConstructor, Supplier<PackResources> supplier) {
-        return Pack.create("programer_art", false, supplier, packConstructor, Pack.Position.TOP, PackSource.BUILT_IN);
+        return Pack.create(PROGRAMMER_ART_ID, false, supplier, packConstructor, Pack.Position.TOP, PackSource.BUILT_IN);
     }
 
     private static FolderPackResources createProgrammerArtDirPack(File file) {
@@ -232,7 +238,7 @@ implements RepositorySource {
 
             @Override
             public String getName() {
-                return "Programmer Art";
+                return ClientPackSource.PROGRAMMER_ART_NAME;
             }
         };
     }
@@ -242,7 +248,7 @@ implements RepositorySource {
 
             @Override
             public String getName() {
-                return "Programmer Art";
+                return ClientPackSource.PROGRAMMER_ART_NAME;
             }
         };
     }

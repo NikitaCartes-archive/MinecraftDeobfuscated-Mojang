@@ -33,6 +33,10 @@ extends Option {
         this.buttonSetup = supplier;
     }
 
+    public static <T> CycleOption<T> create(String string, List<T> list, Function<T, Component> function, Function<Options, T> function2, OptionSetter<T> optionSetter) {
+        return new CycleOption<T>(string, function2, optionSetter, () -> CycleButton.builder(function).withValues(list));
+    }
+
     public static <T> CycleOption<T> create(String string, Supplier<List<T>> supplier, Function<T, Component> function, Function<Options, T> function2, OptionSetter<T> optionSetter) {
         return new CycleOption<T>(string, function2, optionSetter, () -> CycleButton.builder(function).withValues((List)supplier.get()));
     }

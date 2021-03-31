@@ -15,7 +15,9 @@ import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.Tag;
@@ -25,6 +27,7 @@ import net.minecraft.nbt.TagVisitor;
 
 public class ListTag
 extends CollectionTag<Tag> {
+    private static final int SELF_SIZE_IN_BITS = 296;
     public static final TagType<ListTag> TYPE = new TagType<ListTag>(){
 
         @Override
@@ -146,6 +149,22 @@ extends CollectionTag<Tag> {
             return ((IntTag)tag).getAsInt();
         }
         return 0;
+    }
+
+    public int[] getIntArray(int i) {
+        Tag tag;
+        if (i >= 0 && i < this.list.size() && (tag = this.list.get(i)).getId() == 11) {
+            return ((IntArrayTag)tag).getAsIntArray();
+        }
+        return new int[0];
+    }
+
+    public long[] getLongArray(int i) {
+        Tag tag;
+        if (i >= 0 && i < this.list.size() && (tag = this.list.get(i)).getId() == 11) {
+            return ((LongArrayTag)tag).getAsLongArray();
+        }
+        return new long[0];
     }
 
     public double getDouble(int i) {

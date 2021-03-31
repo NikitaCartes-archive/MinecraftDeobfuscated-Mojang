@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +28,10 @@ import net.minecraft.world.item.alchemy.Potions;
 import org.jetbrains.annotations.Nullable;
 
 public class PotionUtils {
+    public static final String TAG_CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+    public static final String TAG_CUSTOM_POTION_COLOR = "CustomPotionColor";
+    public static final String TAG_POTION = "Potion";
+    private static final int EMPTY_COLOR = 0xF800F8;
     private static final Component NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
 
     public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
@@ -61,8 +63,8 @@ public class PotionUtils {
     }
 
     public static void getCustomEffects(@Nullable CompoundTag compoundTag, List<MobEffectInstance> list) {
-        if (compoundTag != null && compoundTag.contains("CustomPotionEffects", 9)) {
-            ListTag listTag = compoundTag.getList("CustomPotionEffects", 10);
+        if (compoundTag != null && compoundTag.contains(TAG_CUSTOM_POTION_EFFECTS, 9)) {
+            ListTag listTag = compoundTag.getList(TAG_CUSTOM_POTION_EFFECTS, 10);
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag2 = listTag.getCompound(i);
                 MobEffectInstance mobEffectInstance = MobEffectInstance.load(compoundTag2);
@@ -74,8 +76,8 @@ public class PotionUtils {
 
     public static int getColor(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null && compoundTag.contains("CustomPotionColor", 99)) {
-            return compoundTag.getInt("CustomPotionColor");
+        if (compoundTag != null && compoundTag.contains(TAG_CUSTOM_POTION_COLOR, 99)) {
+            return compoundTag.getInt(TAG_CUSTOM_POTION_COLOR);
         }
         return PotionUtils.getPotion(itemStack) == Potions.EMPTY ? 0xF800F8 : PotionUtils.getColor(PotionUtils.getMobEffects(itemStack));
     }
@@ -119,15 +121,15 @@ public class PotionUtils {
         if (compoundTag == null) {
             return Potions.EMPTY;
         }
-        return Potion.byName(compoundTag.getString("Potion"));
+        return Potion.byName(compoundTag.getString(TAG_POTION));
     }
 
     public static ItemStack setPotion(ItemStack itemStack, Potion potion) {
         ResourceLocation resourceLocation = Registry.POTION.getKey(potion);
         if (potion == Potions.EMPTY) {
-            itemStack.removeTagKey("Potion");
+            itemStack.removeTagKey(TAG_POTION);
         } else {
-            itemStack.getOrCreateTag().putString("Potion", resourceLocation.toString());
+            itemStack.getOrCreateTag().putString(TAG_POTION, resourceLocation.toString());
         }
         return itemStack;
     }
@@ -137,15 +139,14 @@ public class PotionUtils {
             return itemStack;
         }
         CompoundTag compoundTag = itemStack.getOrCreateTag();
-        ListTag listTag = compoundTag.getList("CustomPotionEffects", 9);
+        ListTag listTag = compoundTag.getList(TAG_CUSTOM_POTION_EFFECTS, 9);
         for (MobEffectInstance mobEffectInstance : collection) {
             listTag.add(mobEffectInstance.save(new CompoundTag()));
         }
-        compoundTag.put("CustomPotionEffects", listTag);
+        compoundTag.put(TAG_CUSTOM_POTION_EFFECTS, listTag);
         return itemStack;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
         List<MobEffectInstance> list2 = PotionUtils.getMobEffects(itemStack);
         ArrayList<Pair<Attribute, AttributeModifier>> list3 = Lists.newArrayList();

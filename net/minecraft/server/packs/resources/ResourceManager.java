@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
@@ -21,17 +19,14 @@ import net.minecraft.server.packs.resources.ResourceProvider;
 
 public interface ResourceManager
 extends ResourceProvider {
-    @Environment(value=EnvType.CLIENT)
     public Set<String> getNamespaces();
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasResource(ResourceLocation var1);
 
     public List<Resource> getResources(ResourceLocation var1) throws IOException;
 
     public Collection<ResourceLocation> listResources(String var1, Predicate<String> var2);
 
-    @Environment(value=EnvType.CLIENT)
     public Stream<PackResources> listPacks();
 
     public static enum Empty implements ResourceManager
@@ -40,7 +35,6 @@ extends ResourceProvider {
 
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public Set<String> getNamespaces() {
             return ImmutableSet.of();
         }
@@ -51,7 +45,6 @@ extends ResourceProvider {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public boolean hasResource(ResourceLocation resourceLocation) {
             return false;
         }
@@ -67,7 +60,6 @@ extends ResourceProvider {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public Stream<PackResources> listPacks() {
             return Stream.of(new PackResources[0]);
         }

@@ -28,6 +28,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     private final Map<DimensionType, Map<String, BoundingBox>> postMainBoxes = Maps.newIdentityHashMap();
     private final Map<DimensionType, Map<String, BoundingBox>> postPiecesBoxes = Maps.newIdentityHashMap();
     private final Map<DimensionType, Map<String, Boolean>> startPiecesMap = Maps.newIdentityHashMap();
+    private static final int MAX_RENDER_DIST = 500;
 
     public StructureRenderer(Minecraft minecraft) {
         this.minecraft = minecraft;
@@ -43,7 +44,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         if (this.postMainBoxes.containsKey(dimensionType)) {
             for (BoundingBox boundingBox : this.postMainBoxes.get(dimensionType).values()) {
                 if (!blockPos.closerThan(boundingBox.getCenter(), 500.0)) continue;
-                LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox.x0 - d, (double)boundingBox.y0 - e, (double)boundingBox.z0 - f, (double)(boundingBox.x1 + 1) - d, (double)(boundingBox.y1 + 1) - e, (double)(boundingBox.z1 + 1) - f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+                LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox.minX() - d, (double)boundingBox.minY() - e, (double)boundingBox.minZ() - f, (double)(boundingBox.maxX() + 1) - d, (double)(boundingBox.maxY() + 1) - e, (double)(boundingBox.maxZ() + 1) - f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
         if (this.postPiecesBoxes.containsKey(dimensionType)) {
@@ -53,10 +54,10 @@ implements DebugRenderer.SimpleDebugRenderer {
                 Boolean boolean_ = this.startPiecesMap.get(dimensionType).get(string);
                 if (!blockPos.closerThan(boundingBox2.getCenter(), 500.0)) continue;
                 if (boolean_.booleanValue()) {
-                    LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox2.x0 - d, (double)boundingBox2.y0 - e, (double)boundingBox2.z0 - f, (double)(boundingBox2.x1 + 1) - d, (double)(boundingBox2.y1 + 1) - e, (double)(boundingBox2.z1 + 1) - f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+                    LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox2.minX() - d, (double)boundingBox2.minY() - e, (double)boundingBox2.minZ() - f, (double)(boundingBox2.maxX() + 1) - d, (double)(boundingBox2.maxY() + 1) - e, (double)(boundingBox2.maxZ() + 1) - f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
                     continue;
                 }
-                LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox2.x0 - d, (double)boundingBox2.y0 - e, (double)boundingBox2.z0 - f, (double)(boundingBox2.x1 + 1) - d, (double)(boundingBox2.y1 + 1) - e, (double)(boundingBox2.z1 + 1) - f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+                LevelRenderer.renderLineBox(poseStack, vertexConsumer, (double)boundingBox2.minX() - d, (double)boundingBox2.minY() - e, (double)boundingBox2.minZ() - f, (double)(boundingBox2.maxX() + 1) - d, (double)(boundingBox2.maxY() + 1) - e, (double)(boundingBox2.maxZ() + 1) - f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
             }
         }
     }

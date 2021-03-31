@@ -33,7 +33,7 @@ extends HumanoidMobRenderer<ZombieVillager, ZombieVillagerModel<ZombieVillager>>
 
     @Override
     protected boolean isShaking(ZombieVillager zombieVillager) {
-        return zombieVillager.isConverting();
+        return super.isShaking(zombieVillager) || zombieVillager.isConverting();
     }
 
     @Override

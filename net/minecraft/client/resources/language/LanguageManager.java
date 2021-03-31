@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 public class LanguageManager
 implements ResourceManagerReloadListener {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final String DEFAULT_LANGUAGE_CODE = "en_us";
     private static final LanguageInfo DEFAULT_LANGUAGE = new LanguageInfo("en_us", "US", "English", false);
     private Map<String, LanguageInfo> languages = ImmutableMap.of("en_us", DEFAULT_LANGUAGE);
     private String currentCode;
@@ -59,7 +60,7 @@ implements ResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         this.languages = LanguageManager.extractLanguages(resourceManager.listPacks());
-        LanguageInfo languageInfo = this.languages.getOrDefault("en_us", DEFAULT_LANGUAGE);
+        LanguageInfo languageInfo = this.languages.getOrDefault(DEFAULT_LANGUAGE_CODE, DEFAULT_LANGUAGE);
         this.currentLanguage = this.languages.getOrDefault(this.currentCode, languageInfo);
         ArrayList<LanguageInfo> list = Lists.newArrayList(languageInfo);
         if (this.currentLanguage != languageInfo) {

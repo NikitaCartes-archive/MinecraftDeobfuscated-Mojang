@@ -25,6 +25,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 public class ForceLoadCommand {
+    private static final int MAX_CHUNK_LIMIT = 256;
     private static final Dynamic2CommandExceptionType ERROR_TOO_MANY_CHUNKS = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.forceload.toobig", object, object2));
     private static final Dynamic2CommandExceptionType ERROR_NOT_TICKING = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.forceload.query.failure", object, object2));
     private static final SimpleCommandExceptionType ERROR_ALL_ADDED = new SimpleCommandExceptionType(new TranslatableComponent("commands.forceload.added.failure"));

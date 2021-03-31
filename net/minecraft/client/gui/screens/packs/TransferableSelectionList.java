@@ -62,6 +62,15 @@ extends ObjectSelectionList<PackEntry> {
     @Environment(value=EnvType.CLIENT)
     public static class PackEntry
     extends ObjectSelectionList.Entry<PackEntry> {
+        private static final int ICON_OVERLAY_X_MOVE_RIGHT = 0;
+        private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
+        private static final int ICON_OVERLAY_X_MOVE_DOWN = 64;
+        private static final int ICON_OVERLAY_X_MOVE_UP = 96;
+        private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
+        private static final int ICON_OVERLAY_Y_SELECTED = 32;
+        private static final int MAX_DESCRIPTION_WIDTH_PIXELS = 157;
+        private static final int MAX_NAME_WIDTH_PIXELS = 157;
+        private static final String TOO_LONG_NAME_SUFFIX = "...";
         private final TransferableSelectionList parent;
         protected final Minecraft minecraft;
         protected final Screen screen;
@@ -85,7 +94,7 @@ extends ObjectSelectionList<PackEntry> {
         private static FormattedCharSequence cacheName(Minecraft minecraft, Component component) {
             int i = minecraft.font.width(component);
             if (i > 157) {
-                FormattedText formattedText = FormattedText.composite(minecraft.font.substrByWidth(component, 157 - minecraft.font.width("...")), FormattedText.of("..."));
+                FormattedText formattedText = FormattedText.composite(minecraft.font.substrByWidth(component, 157 - minecraft.font.width(TOO_LONG_NAME_SUFFIX)), FormattedText.of(TOO_LONG_NAME_SUFFIX));
                 return Language.getInstance().getVisualOrder(formattedText);
             }
             return component.getVisualOrderText();

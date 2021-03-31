@@ -85,6 +85,12 @@ public class StringSplitter {
         return string.substring(mutableInt.intValue());
     }
 
+    public int formattedIndexByWidth(String string, int i, Style style) {
+        WidthLimitedCharSink widthLimitedCharSink = new WidthLimitedCharSink(i);
+        StringDecomposer.iterateFormatted(string, style, (FormattedCharSink)widthLimitedCharSink);
+        return widthLimitedCharSink.getPosition();
+    }
+
     @Nullable
     public Style componentStyleAtWidth(FormattedText formattedText, int i) {
         WidthLimitedCharSink widthLimitedCharSink = new WidthLimitedCharSink(i);
@@ -103,6 +109,10 @@ public class StringSplitter {
             return true;
         });
         return (Style)mutableObject.getValue();
+    }
+
+    public String formattedHeadByWidth(String string, int i, Style style) {
+        return string.substring(0, this.formattedIndexByWidth(string, i, style));
     }
 
     public FormattedText headByWidth(FormattedText formattedText, int i, Style style) {
@@ -126,6 +136,12 @@ public class StringSplitter {
                 return Optional.empty();
             }
         }, style).orElse(formattedText);
+    }
+
+    public int findLineBreak(String string, int i, Style style) {
+        LineBreakFinder lineBreakFinder = new LineBreakFinder(i);
+        StringDecomposer.iterateFormatted(string, style, (FormattedCharSink)lineBreakFinder);
+        return lineBreakFinder.getSplitPosition();
     }
 
     public static int getWordPosition(String string, int i, int j, boolean bl) {
@@ -185,7 +201,13 @@ public class StringSplitter {
 
     public List<FormattedText> splitLines(FormattedText formattedText2, int i, Style style) {
         ArrayList<FormattedText> list = Lists.newArrayList();
-        this.splitLines(formattedText2, i, style, (formattedText, boolean_) -> list.add((FormattedText)formattedText));
+        this.splitLines(formattedText2, i, style, (FormattedText formattedText, Boolean boolean_) -> list.add((FormattedText)formattedText));
+        return list;
+    }
+
+    public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style, FormattedText formattedText22) {
+        ArrayList<FormattedText> list = Lists.newArrayList();
+        this.splitLines(formattedText, i, style, (FormattedText formattedText2, Boolean boolean_) -> list.add(boolean_ != false ? FormattedText.composite(formattedText22, formattedText2) : formattedText2));
         return list;
     }
 

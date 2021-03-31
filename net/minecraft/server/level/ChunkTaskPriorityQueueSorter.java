@@ -42,6 +42,10 @@ AutoCloseable {
         this.mailbox = new ProcessorMailbox<StrictQueue.IntRunnable>(new StrictQueue.FixedPriorityQueue(4), executor, "sorter");
     }
 
+    public static <T> Message<T> message(Function<ProcessorHandle<Unit>, T> function, long l, IntSupplier intSupplier) {
+        return new Message(function, l, intSupplier);
+    }
+
     public static Message<Runnable> message(Runnable runnable, long l, IntSupplier intSupplier) {
         return new Message<Runnable>(processorHandle -> () -> {
             runnable.run();
@@ -51,6 +55,10 @@ AutoCloseable {
 
     public static Message<Runnable> message(ChunkHolder chunkHolder, Runnable runnable) {
         return ChunkTaskPriorityQueueSorter.message(runnable, chunkHolder.getPos().toLong(), chunkHolder::getQueueLevel);
+    }
+
+    public static <T> Message<T> message(ChunkHolder chunkHolder, Function<ProcessorHandle<Unit>, T> function) {
+        return ChunkTaskPriorityQueueSorter.message(function, chunkHolder.getPos().toLong(), chunkHolder::getQueueLevel);
     }
 
     public static Release release(Runnable runnable, long l, boolean bl) {

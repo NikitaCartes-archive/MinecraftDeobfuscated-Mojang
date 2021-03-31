@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
@@ -29,13 +30,18 @@ extends StructurePoolElement {
     }
 
     @Override
+    public Vec3i getSize(StructureManager structureManager, Rotation rotation) {
+        return Vec3i.ZERO;
+    }
+
+    @Override
     public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random) {
         return Collections.emptyList();
     }
 
     @Override
     public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-        return BoundingBox.getUnknownBox();
+        throw new IllegalStateException("Invalid call to EmtyPoolElement.getBoundingBox, filter me!");
     }
 
     @Override

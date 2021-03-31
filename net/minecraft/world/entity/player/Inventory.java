@@ -6,8 +6,6 @@ package net.minecraft.world.entity.player;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -34,6 +32,11 @@ import net.minecraft.world.level.block.state.BlockState;
 public class Inventory
 implements Container,
 Nameable {
+    public static final int POP_TIME_DURATION = 5;
+    public static final int INVENTORY_SIZE = 36;
+    private static final int SELECTION_SIZE = 9;
+    public static final int SLOT_OFFHAND = 40;
+    public static final int NOT_FOUND_INDEX = -1;
     public final NonNullList<ItemStack> items = NonNullList.withSize(36, ItemStack.EMPTY);
     public final NonNullList<ItemStack> armor = NonNullList.withSize(4, ItemStack.EMPTY);
     public final NonNullList<ItemStack> offhand = NonNullList.withSize(1, ItemStack.EMPTY);
@@ -69,7 +72,6 @@ Nameable {
         return -1;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setPickedItem(ItemStack itemStack) {
         int i = this.findSlotMatchingItem(itemStack);
         if (Inventory.isHotbarSlot(i)) {
@@ -99,7 +101,6 @@ Nameable {
         return i >= 0 && i < 9;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int findSlotMatchingItem(ItemStack itemStack) {
         for (int i = 0; i < this.items.size(); ++i) {
             if (this.items.get(i).isEmpty() || !ItemStack.isSameItemSameTags(itemStack, this.items.get(i))) continue;
@@ -133,7 +134,6 @@ Nameable {
         return this.selected;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void swapPaint(double d) {
         if (d > 0.0) {
             d = 1.0;
@@ -444,7 +444,6 @@ Nameable {
         return new TranslatableComponent("container.inventory");
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getArmor(int i) {
         return this.armor.get(i);
     }
@@ -480,7 +479,6 @@ Nameable {
         ++this.timesChanged;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getTimesChanged() {
         return this.timesChanged;
     }
@@ -503,7 +501,6 @@ Nameable {
         return false;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean contains(Tag<Item> tag) {
         for (List list : this.compartments) {
             for (ItemStack itemStack : list) {

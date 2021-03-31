@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.BitStorage;
@@ -93,6 +91,10 @@ public class Heightmap {
         return this.getFirstAvailable(Heightmap.getIndex(i, j));
     }
 
+    public int getHighestTaken(int i, int j) {
+        return this.getFirstAvailable(Heightmap.getIndex(i, j)) - 1;
+    }
+
     private int getFirstAvailable(int i) {
         return this.data.get(i) + this.chunk.getMinBuildHeight();
     }
@@ -150,7 +152,6 @@ public class Heightmap {
             return this.usage == Usage.CLIENT;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public boolean keepAfterWorldgen() {
             return this.usage != Usage.WORLDGEN;
         }

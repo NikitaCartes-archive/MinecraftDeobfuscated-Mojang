@@ -108,6 +108,7 @@ extends DataFix {
         hashMap.put("166", "minecraft:modified_wooded_badlands_plateau");
         hashMap.put("167", "minecraft:modified_badlands_plateau");
     });
+    public static final String GENERATOR_OPTIONS = "generatorOptions";
 
     public LevelDataGeneratorOptionsFix(Schema schema, boolean bl) {
         super(schema, bl);
@@ -118,13 +119,13 @@ extends DataFix {
         Type<?> type = this.getOutputSchema().getType(References.LEVEL);
         return this.fixTypeEverywhereTyped("LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, (Typed<?> typed) -> typed.write().flatMap(dynamic -> {
             Dynamic dynamic2;
-            Optional<String> optional = dynamic.get("generatorOptions").asString().result();
+            Optional<String> optional = dynamic.get(GENERATOR_OPTIONS).asString().result();
             if ("flat".equalsIgnoreCase(dynamic.get("generatorName").asString(""))) {
                 String string = optional.orElse("");
-                dynamic2 = dynamic.set("generatorOptions", LevelDataGeneratorOptionsFix.convert(string, dynamic.getOps()));
+                dynamic2 = dynamic.set(GENERATOR_OPTIONS, LevelDataGeneratorOptionsFix.convert(string, dynamic.getOps()));
             } else if ("buffet".equalsIgnoreCase(dynamic.get("generatorName").asString("")) && optional.isPresent()) {
                 Dynamic<JsonObject> dynamic3 = new Dynamic<JsonObject>(JsonOps.INSTANCE, GsonHelper.parse(optional.get(), true));
-                dynamic2 = dynamic.set("generatorOptions", dynamic3.convert(dynamic.getOps()));
+                dynamic2 = dynamic.set(GENERATOR_OPTIONS, dynamic3.convert(dynamic.getOps()));
             } else {
                 dynamic2 = dynamic;
             }

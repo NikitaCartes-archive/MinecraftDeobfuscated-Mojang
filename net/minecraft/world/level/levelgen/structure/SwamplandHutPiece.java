@@ -31,7 +31,7 @@ extends ScatteredFeaturePiece {
     private boolean spawnedCat;
 
     public SwamplandHutPiece(Random random, int i, int j) {
-        super(StructurePieceType.SWAMPLAND_HUT, random, i, 64, j, 7, 7, 9);
+        super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, SwamplandHutPiece.getRandomHorizontalDirection(random));
     }
 
     public SwamplandHutPiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -49,9 +49,7 @@ extends ScatteredFeaturePiece {
 
     @Override
     public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-        int k;
-        int j;
-        int i;
+        BlockPos.MutableBlockPos blockPos2;
         if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
             return false;
         }
@@ -88,17 +86,17 @@ extends ScatteredFeaturePiece {
         this.placeBlock(worldGenLevel, (BlockState)blockState.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 6, 4, 1, boundingBox);
         this.placeBlock(worldGenLevel, (BlockState)blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 0, 4, 8, boundingBox);
         this.placeBlock(worldGenLevel, (BlockState)blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_RIGHT), 6, 4, 8, boundingBox);
-        for (i = 2; i <= 7; i += 5) {
-            for (j = 1; j <= 5; j += 4) {
+        for (int i = 2; i <= 7; i += 5) {
+            for (int j = 1; j <= 5; j += 4) {
                 this.fillColumnDown(worldGenLevel, Blocks.OAK_LOG.defaultBlockState(), j, -1, i, boundingBox);
             }
         }
-        if (!this.spawnedWitch && boundingBox.isInside(new BlockPos(i = this.getWorldX(2, 5), j = this.getWorldY(2), k = this.getWorldZ(2, 5)))) {
+        if (!this.spawnedWitch && boundingBox.isInside(blockPos2 = this.getWorldPos(2, 2, 5))) {
             this.spawnedWitch = true;
             Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
             witch.setPersistenceRequired();
-            witch.moveTo((double)i + 0.5, j, (double)k + 0.5, 0.0f, 0.0f);
-            witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+            witch.moveTo((double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0f, 0.0f);
+            witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
             worldGenLevel.addFreshEntityWithPassengers(witch);
         }
         this.spawnCat(worldGenLevel, boundingBox);
@@ -106,15 +104,13 @@ extends ScatteredFeaturePiece {
     }
 
     private void spawnCat(ServerLevelAccessor serverLevelAccessor, BoundingBox boundingBox) {
-        int k;
-        int j;
-        int i;
-        if (!this.spawnedCat && boundingBox.isInside(new BlockPos(i = this.getWorldX(2, 5), j = this.getWorldY(2), k = this.getWorldZ(2, 5)))) {
+        BlockPos.MutableBlockPos blockPos;
+        if (!this.spawnedCat && boundingBox.isInside(blockPos = this.getWorldPos(2, 2, 5))) {
             this.spawnedCat = true;
             Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
             cat.setPersistenceRequired();
-            cat.moveTo((double)i + 0.5, j, (double)k + 0.5, 0.0f, 0.0f);
-            cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+            cat.moveTo((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
+            cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
             serverLevelAccessor.addFreshEntityWithPassengers(cat);
         }
     }

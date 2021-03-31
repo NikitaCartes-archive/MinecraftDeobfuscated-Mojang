@@ -205,6 +205,14 @@ extends PathNavigation {
         this.nodeEvaluator.setCanOpenDoors(bl);
     }
 
+    public boolean canPassDoors() {
+        return this.nodeEvaluator.canPassDoors();
+    }
+
+    public void setCanPassDoors(boolean bl) {
+        this.nodeEvaluator.setCanPassDoors(bl);
+    }
+
     public boolean canOpenDoors() {
         return this.nodeEvaluator.canPassDoors();
     }

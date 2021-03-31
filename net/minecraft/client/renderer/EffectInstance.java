@@ -42,8 +42,10 @@ import org.jetbrains.annotations.Nullable;
 public class EffectInstance
 implements Effect,
 AutoCloseable {
+    private static final String EFFECT_SHADER_PATH = "shaders/program/";
     private static final Logger LOGGER = LogManager.getLogger();
     private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
+    private static final boolean ALWAYS_REAPPLY = true;
     private static EffectInstance lastAppliedEffect;
     private static int lastProgramId;
     private final Map<String, IntSupplier> samplerMap = Maps.newHashMap();
@@ -62,7 +64,7 @@ AutoCloseable {
     private final EffectProgram fragmentProgram;
 
     public EffectInstance(ResourceManager resourceManager, String string) throws IOException {
-        ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + ".json");
+        ResourceLocation resourceLocation = new ResourceLocation(EFFECT_SHADER_PATH + string + ".json");
         this.name = string;
         Resource resource = null;
         try {
@@ -150,7 +152,7 @@ AutoCloseable {
             throw new InvalidClassException("Program is not of type EffectProgram");
         }
         if (program == null) {
-            ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + type.getExtension());
+            ResourceLocation resourceLocation = new ResourceLocation(EFFECT_SHADER_PATH + string + type.getExtension());
             Resource resource = resourceManager.getResource(resourceLocation);
             try {
                 effectProgram = EffectProgram.compileShader(type, string, resource.getInputStream(), resource.getSourceName());
@@ -372,6 +374,10 @@ AutoCloseable {
     public void attachToProgram() {
         this.fragmentProgram.attachToEffect(this);
         this.vertexProgram.attachToEffect(this);
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     @Override

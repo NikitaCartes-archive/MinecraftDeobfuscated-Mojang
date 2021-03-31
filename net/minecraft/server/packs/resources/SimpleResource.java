@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.Resource;
@@ -24,9 +22,7 @@ implements Resource {
     private final ResourceLocation location;
     private final InputStream resourceStream;
     private final InputStream metadataStream;
-    @Environment(value=EnvType.CLIENT)
     private boolean triedMetadata;
-    @Environment(value=EnvType.CLIENT)
     private JsonObject metadata;
 
     public SimpleResource(String string, ResourceLocation resourceLocation, InputStream inputStream, @Nullable InputStream inputStream2) {
@@ -37,7 +33,6 @@ implements Resource {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getLocation() {
         return this.location;
     }
@@ -47,14 +42,13 @@ implements Resource {
         return this.resourceStream;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    @Override
     public boolean hasMetadata() {
         return this.metadataStream != null;
     }
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public <T> T getMetadata(MetadataSectionSerializer<T> metadataSectionSerializer) {
         if (!this.hasMetadata()) {
             return null;

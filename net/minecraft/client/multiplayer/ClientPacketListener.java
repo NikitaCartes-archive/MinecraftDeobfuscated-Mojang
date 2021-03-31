@@ -840,11 +840,13 @@ implements ClientGamePacketListener {
         if (resourceKey != localPlayer.level.dimension()) {
             ClientLevel.ClientLevelData clientLevelData;
             Scoreboard scoreboard = this.level.getScoreboard();
+            Map<String, MapItemSavedData> map = this.level.getAllMapData();
             boolean bl = clientboundRespawnPacket.isDebug();
             boolean bl2 = clientboundRespawnPacket.isFlat();
             this.levelData = clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
             this.level = new ClientLevel(this, clientLevelData, resourceKey, dimensionType, this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
             this.level.setScoreboard(scoreboard);
+            this.level.addMapData(map);
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());
         }
@@ -1073,10 +1075,7 @@ implements ClientGamePacketListener {
         String string = MapItem.makeKey(i);
         MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(string);
         if (mapItemSavedData == null) {
-            mapItemSavedData = mapRenderer.retrieveMapFromRenderer(i);
-            if (mapItemSavedData == null) {
-                mapItemSavedData = MapItemSavedData.createForClient(clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension());
-            }
+            mapItemSavedData = MapItemSavedData.createForClient(clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension());
             this.minecraft.level.setMapData(string, mapItemSavedData);
         }
         clientboundMapItemDataPacket.applyToMap(mapItemSavedData);
@@ -1667,32 +1666,32 @@ implements ClientGamePacketListener {
                 Path path2 = bl2 ? Path.createFromStream(friendlyByteBuf) : null;
                 boolean bl3 = friendlyByteBuf.readBoolean();
                 BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string3, string4, p, h, q, position, string5, path2, bl3);
-                int r = friendlyByteBuf.readInt();
+                int r = friendlyByteBuf.readVarInt();
                 for (s = 0; s < r; ++s) {
                     String string6 = friendlyByteBuf.readUtf();
                     brainDump.activities.add(string6);
                 }
-                s = friendlyByteBuf.readInt();
+                s = friendlyByteBuf.readVarInt();
                 for (t = 0; t < s; ++t) {
                     String string7 = friendlyByteBuf.readUtf();
                     brainDump.behaviors.add(string7);
                 }
-                t = friendlyByteBuf.readInt();
+                t = friendlyByteBuf.readVarInt();
                 for (u = 0; u < t; ++u) {
                     String string8 = friendlyByteBuf.readUtf();
                     brainDump.memories.add(string8);
                 }
-                u = friendlyByteBuf.readInt();
+                u = friendlyByteBuf.readVarInt();
                 for (v = 0; v < u; ++v) {
                     BlockPos blockPos3 = friendlyByteBuf.readBlockPos();
                     brainDump.pois.add(blockPos3);
                 }
-                v = friendlyByteBuf.readInt();
+                v = friendlyByteBuf.readVarInt();
                 for (w = 0; w < v; ++w) {
                     BlockPos blockPos4 = friendlyByteBuf.readBlockPos();
                     brainDump.potentialPois.add(blockPos4);
                 }
-                w = friendlyByteBuf.readInt();
+                w = friendlyByteBuf.readVarInt();
                 for (int x = 0; x < w; ++x) {
                     String string9 = friendlyByteBuf.readUtf();
                     brainDump.gossips.add(string9);
@@ -1723,12 +1722,12 @@ implements ClientGamePacketListener {
                     path3 = Path.createFromStream(friendlyByteBuf);
                 }
                 BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos5, blockPos6, y);
-                int z = friendlyByteBuf.readInt();
+                int z = friendlyByteBuf.readVarInt();
                 for (aa = 0; aa < z; ++aa) {
                     String string10 = friendlyByteBuf.readUtf();
                     beeInfo.goals.add(string10);
                 }
-                aa = friendlyByteBuf.readInt();
+                aa = friendlyByteBuf.readVarInt();
                 for (int r = 0; r < aa; ++r) {
                     BlockPos blockPos7 = friendlyByteBuf.readBlockPos();
                     beeInfo.blacklistedHives.add(blockPos7);

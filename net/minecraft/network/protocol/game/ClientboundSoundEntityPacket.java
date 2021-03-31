@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -48,27 +46,22 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeFloat(this.pitch);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SoundEvent getSound() {
         return this.sound;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SoundSource getSource() {
         return this.source;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getId() {
         return this.id;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getVolume() {
         return this.volume;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getPitch() {
         return this.pitch;
     }

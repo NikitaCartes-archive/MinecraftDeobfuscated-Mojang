@@ -24,6 +24,9 @@ import org.jetbrains.annotations.Nullable;
 public class BlockAgeProcessor
 extends StructureProcessor {
     public static final Codec<BlockAgeProcessor> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("mossiness")).xmap(BlockAgeProcessor::new, blockAgeProcessor -> Float.valueOf(blockAgeProcessor.mossiness)).codec();
+    private static final float PROBABILITY_OF_REPLACING_FULL_BLOCK = 0.5f;
+    private static final float PROBABILITY_OF_REPLACING_STAIRS = 0.5f;
+    private static final float PROBABILITY_OF_REPLACING_OBSIDIAN = 0.15f;
     private static final BlockState[] NON_MOSSY_REPLACEMENTS = new BlockState[]{Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()};
     private final float mossiness;
 

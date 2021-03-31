@@ -3,6 +3,7 @@
  */
 package com.mojang.blaze3d.shaders;
 
+import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Effect;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.GlslPreprocessor;
 
 @Environment(value=EnvType.CLIENT)
 public class EffectProgram

@@ -15,8 +15,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -173,7 +171,6 @@ public class HoverEvent {
         @Nullable
         private final CompoundTag tag;
         @Nullable
-        @Environment(value=EnvType.CLIENT)
         private ItemStack itemStack;
 
         ItemStackInfo(Item item, int i, @Nullable CompoundTag compoundTag) {
@@ -204,7 +201,6 @@ public class HoverEvent {
             return i;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public ItemStack getItemStack() {
             if (this.itemStack == null) {
                 this.itemStack = new ItemStack(this.item, this.count);
@@ -264,7 +260,6 @@ public class HoverEvent {
         @Nullable
         public final Component name;
         @Nullable
-        @Environment(value=EnvType.CLIENT)
         private List<Component> linesCache;
 
         public EntityTooltipInfo(EntityType<?> entityType, UUID uUID, @Nullable Component component) {
@@ -308,7 +303,6 @@ public class HoverEvent {
             return jsonObject;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public List<Component> getTooltipLines() {
             if (this.linesCache == null) {
                 this.linesCache = Lists.newArrayList();

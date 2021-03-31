@@ -5,8 +5,6 @@ package net.minecraft.world.inventory;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,6 +27,12 @@ import net.minecraft.world.level.block.Blocks;
 
 public class StonecutterMenu
 extends AbstractContainerMenu {
+    public static final int INPUT_SLOT = 0;
+    public static final int RESULT_SLOT = 1;
+    private static final int INV_SLOT_START = 2;
+    private static final int INV_SLOT_END = 29;
+    private static final int USE_ROW_SLOT_START = 29;
+    private static final int USE_ROW_SLOT_END = 38;
     private final ContainerLevelAccess access;
     private final DataSlot selectedRecipeIndex = DataSlot.standalone();
     private final Level level;
@@ -95,22 +99,18 @@ extends AbstractContainerMenu {
         this.addDataSlot(this.selectedRecipeIndex);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getSelectedRecipeIndex() {
         return this.selectedRecipeIndex.get();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<StonecutterRecipe> getRecipes() {
         return this.recipes;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getNumRecipes() {
         return this.recipes.size();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasInputItem() {
         return this.inputSlot.hasItem() && !this.recipes.isEmpty();
     }
@@ -167,7 +167,6 @@ extends AbstractContainerMenu {
         return MenuType.STONECUTTER;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void registerUpdateListener(Runnable runnable) {
         this.slotUpdateListener = runnable;
     }

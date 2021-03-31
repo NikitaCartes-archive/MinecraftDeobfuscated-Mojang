@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -21,29 +21,29 @@ import org.jetbrains.annotations.Nullable;
 
 public class RandomizedIntStateProvider
 extends BlockStateProvider {
-    public static final Codec<RandomizedIntStateProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("source")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.source), ((MapCodec)Codec.STRING.fieldOf("property")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.propertyName), ((MapCodec)UniformInt.CODEC.fieldOf("values")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.values)).apply((Applicative<RandomizedIntStateProvider, ?>)instance, RandomizedIntStateProvider::new));
+    public static final Codec<RandomizedIntStateProvider> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("source")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.source), ((MapCodec)Codec.STRING.fieldOf("property")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.propertyName), ((MapCodec)IntProvider.CODEC.fieldOf("values")).forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.values)).apply((Applicative<RandomizedIntStateProvider, ?>)instance, RandomizedIntStateProvider::new));
     private final BlockStateProvider source;
     private final String propertyName;
     @Nullable
     private IntegerProperty property;
-    private final UniformInt values;
+    private final IntProvider values;
 
-    public RandomizedIntStateProvider(BlockStateProvider blockStateProvider, IntegerProperty integerProperty, UniformInt uniformInt) {
+    public RandomizedIntStateProvider(BlockStateProvider blockStateProvider, IntegerProperty integerProperty, IntProvider intProvider) {
         this.source = blockStateProvider;
         this.property = integerProperty;
         this.propertyName = integerProperty.getName();
-        this.values = uniformInt;
+        this.values = intProvider;
         Collection<Integer> collection = integerProperty.getPossibleValues();
-        for (int i = uniformInt.getBaseValue(); i < uniformInt.getMaxValue(); ++i) {
+        for (int i = intProvider.getMinValue(); i <= intProvider.getMaxValue(); ++i) {
             if (collection.contains(i)) continue;
             throw new IllegalArgumentException("Property value out of range: " + integerProperty.getName() + ": " + i);
         }
     }
 
-    public RandomizedIntStateProvider(BlockStateProvider blockStateProvider, String string, UniformInt uniformInt) {
+    public RandomizedIntStateProvider(BlockStateProvider blockStateProvider, String string, IntProvider intProvider) {
         this.source = blockStateProvider;
         this.propertyName = string;
-        this.values = uniformInt;
+        this.values = intProvider;
     }
 
     @Override

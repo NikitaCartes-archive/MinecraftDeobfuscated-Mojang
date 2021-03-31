@@ -3,7 +3,9 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
@@ -20,12 +22,12 @@ public interface Decoratable<R> {
         return this.decorated(FeatureDecorator.CHANCE.configured(new ChanceDecoratorConfiguration(i)));
     }
 
-    default public R count(UniformInt uniformInt) {
-        return this.decorated(FeatureDecorator.COUNT.configured(new CountConfiguration(uniformInt)));
+    default public R count(IntProvider intProvider) {
+        return this.decorated(FeatureDecorator.COUNT.configured(new CountConfiguration(intProvider)));
     }
 
     default public R count(int i) {
-        return this.count(UniformInt.fixed(i));
+        return this.count(ConstantInt.of(i));
     }
 
     default public R countRandom(int i) {

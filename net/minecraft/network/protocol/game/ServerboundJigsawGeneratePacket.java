@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -16,7 +14,6 @@ implements Packet<ServerGamePacketListener> {
     private final int levels;
     private final boolean keepJigsaws;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundJigsawGeneratePacket(BlockPos blockPos, int i, boolean bl) {
         this.pos = blockPos;
         this.levels = i;

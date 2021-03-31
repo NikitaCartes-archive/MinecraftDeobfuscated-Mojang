@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -13,6 +11,7 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 
 public class ServerboundClientInformationPacket
 implements Packet<ServerGamePacketListener> {
+    public static final int MAX_LANGUAGE_LENGTH = 16;
     private final String language;
     private final int viewDistance;
     private final ChatVisiblity chatVisibility;
@@ -21,7 +20,6 @@ implements Packet<ServerGamePacketListener> {
     private final HumanoidArm mainHand;
     private final boolean textFilteringEnabled;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundClientInformationPacket(String string, int i, ChatVisiblity chatVisiblity, boolean bl, int j, HumanoidArm humanoidArm, boolean bl2) {
         this.language = string;
         this.viewDistance = i;
@@ -56,6 +54,14 @@ implements Packet<ServerGamePacketListener> {
     @Override
     public void handle(ServerGamePacketListener serverGamePacketListener) {
         serverGamePacketListener.handleClientInformation(this);
+    }
+
+    public String getLanguage() {
+        return this.language;
+    }
+
+    public int getViewDistance() {
+        return this.viewDistance;
     }
 
     public ChatVisiblity getChatVisibility() {

@@ -6,6 +6,7 @@ package com.mojang.blaze3d.shaders;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
@@ -13,11 +14,11 @@ import java.io.InputStream;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.GlslPreprocessor;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class Program {
+    private static final int MAX_LOG_LENGTH = 32768;
     private final Type type;
     private final String name;
     private final int id;
@@ -64,6 +65,10 @@ public class Program {
             throw new IOException("Couldn't compile " + type.getName() + " program (" + string2 + ", " + string + ") : " + string4);
         }
         return i;
+    }
+
+    private static Program createProgram(Type type, String string, int i) {
+        return new Program(type, i, string);
     }
 
     protected int getId() {

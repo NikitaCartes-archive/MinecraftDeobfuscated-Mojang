@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.PathfinderMob;
@@ -43,7 +44,7 @@ extends WaterAvoidingRandomStrollGoal {
         for (BlockPos blockPos2 : iterable) {
             BlockState blockState;
             boolean bl;
-            if (blockPos.equals(blockPos2) || !(bl = (blockState = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset(blockPos2, Direction.DOWN))).getBlock() instanceof LeavesBlock || blockState.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset(blockPos2, Direction.UP))) continue;
+            if (blockPos.equals(blockPos2) || !(bl = (blockState = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset((Vec3i)blockPos2, Direction.DOWN))).getBlock() instanceof LeavesBlock || blockState.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset((Vec3i)blockPos2, Direction.UP))) continue;
             return Vec3.atBottomCenterOf(blockPos2);
         }
         return null;

@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -50,6 +51,14 @@ public class LootContext {
 
     public boolean hasParam(LootContextParam<?> lootContextParam) {
         return this.params.containsKey(lootContextParam);
+    }
+
+    public <T> T getParam(LootContextParam<T> lootContextParam) {
+        Object object = this.params.get(lootContextParam);
+        if (object == null) {
+            throw new NoSuchElementException(lootContextParam.getName().toString());
+        }
+        return (T)object;
     }
 
     public void addDynamicDrops(ResourceLocation resourceLocation, Consumer<ItemStack> consumer) {

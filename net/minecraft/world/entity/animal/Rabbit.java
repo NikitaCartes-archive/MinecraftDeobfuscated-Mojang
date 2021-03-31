@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -66,8 +64,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class Rabbit
 extends Animal {
+    public static final double STROLL_SPEED_MOD = 0.6;
+    public static final double BREED_SPEED_MOD = 0.8;
+    public static final double FOLLOW_SPEED_MOD = 1.0;
+    public static final double FLEE_SPEED_MOD = 2.2;
+    public static final double ATTACK_SPEED_MOD = 1.4;
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Rabbit.class, EntityDataSerializers.INT);
+    public static final int TYPE_BROWN = 0;
+    public static final int TYPE_WHITE = 1;
+    public static final int TYPE_BLACK = 2;
+    public static final int TYPE_WHITE_SPLOTCHED = 3;
+    public static final int TYPE_GOLD = 4;
+    public static final int TYPE_SALT = 5;
+    public static final int TYPE_EVIL = 99;
     private static final ResourceLocation KILLER_BUNNY = new ResourceLocation("killer_bunny");
+    public static final int EVIL_ATTACK_POWER = 8;
+    public static final int EVIL_ARMOR_VALUE = 8;
+    private static final int MORE_CARROTS_DELAY = 40;
     private int jumpTicks;
     private int jumpDuration;
     private boolean wasOnGround;
@@ -126,7 +139,6 @@ extends Animal {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getJumpCompletion(float f) {
         if (this.jumpDuration == 0) {
             return 0.0f;
@@ -362,7 +374,6 @@ extends Animal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 1) {
             this.spawnSprintParticle();
@@ -374,7 +385,6 @@ extends Animal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.6f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }

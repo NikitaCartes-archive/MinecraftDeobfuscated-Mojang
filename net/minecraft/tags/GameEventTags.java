@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.StaticTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class GameEventTags {
@@ -16,6 +17,10 @@ public class GameEventTags {
 
     private static Tag.Named<GameEvent> bind(String string) {
         return HELPER.bind(string);
+    }
+
+    public static TagCollection<GameEvent> getAllTags() {
+        return HELPER.getAllTags();
     }
 }
 

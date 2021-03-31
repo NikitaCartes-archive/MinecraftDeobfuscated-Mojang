@@ -23,8 +23,6 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -154,7 +152,6 @@ public class WorldGenSettings {
         return this.overworld() instanceof FlatLevelSource;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isOldCustomizedWorld() {
         return this.legacyCustomOptions.isPresent();
     }
@@ -163,12 +160,10 @@ public class WorldGenSettings {
         return new WorldGenSettings(this.seed, this.generateFeatures, true, this.dimensions, this.legacyCustomOptions);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public WorldGenSettings withFeaturesToggled() {
         return new WorldGenSettings(this.seed, !this.generateFeatures, this.generateBonusChest, this.dimensions);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public WorldGenSettings withBonusChestToggled() {
         return new WorldGenSettings(this.seed, this.generateFeatures, !this.generateBonusChest, this.dimensions);
     }
@@ -218,7 +213,6 @@ public class WorldGenSettings {
         return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry2, registry3, l)));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {
         MappedRegistry<LevelStem> mappedRegistry;
         long l = optionalLong.orElse(this.seed);

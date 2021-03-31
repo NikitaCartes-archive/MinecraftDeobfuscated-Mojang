@@ -15,6 +15,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class MoveBackToVillageGoal
 extends RandomStrollGoal {
+    private static final int MAX_XZ_DIST = 10;
+    private static final int MAX_Y_DIST = 7;
+
     public MoveBackToVillageGoal(PathfinderMob pathfinderMob, double d, boolean bl) {
         super(pathfinderMob, d, 10, bl);
     }

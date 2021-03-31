@@ -35,6 +35,32 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class BeeDebugRenderer
 implements DebugRenderer.SimpleDebugRenderer {
+    private static final boolean SHOW_GOAL_FOR_ALL_BEES = true;
+    private static final boolean SHOW_NAME_FOR_ALL_BEES = true;
+    private static final boolean SHOW_HIVE_FOR_ALL_BEES = true;
+    private static final boolean SHOW_FLOWER_POS_FOR_ALL_BEES = true;
+    private static final boolean SHOW_TRAVEL_TICKS_FOR_ALL_BEES = true;
+    private static final boolean SHOW_PATH_FOR_ALL_BEES = false;
+    private static final boolean SHOW_GOAL_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_NAME_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_HIVE_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_FLOWER_POS_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_TRAVEL_TICKS_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_PATH_FOR_SELECTED_BEE = true;
+    private static final boolean SHOW_HIVE_MEMBERS = true;
+    private static final boolean SHOW_BLACKLISTS = true;
+    private static final int MAX_RENDER_DIST_FOR_HIVE_OVERLAY = 30;
+    private static final int MAX_RENDER_DIST_FOR_BEE_OVERLAY = 30;
+    private static final int MAX_TARGETING_DIST = 8;
+    private static final int HIVE_TIMEOUT = 20;
+    private static final float TEXT_SCALE = 0.02f;
+    private static final int WHITE = -1;
+    private static final int YELLOW = -256;
+    private static final int ORANGE = -23296;
+    private static final int GREEN = -16711936;
+    private static final int GRAY = -3355444;
+    private static final int PINK = -98404;
+    private static final int RED = -65536;
     private final Minecraft minecraft;
     private final Map<BlockPos, HiveInfo> hives = Maps.newHashMap();
     private final Map<UUID, BeeInfo> beeInfosPerEntity = Maps.newHashMap();
@@ -57,6 +83,10 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     public void addOrUpdateBeeInfo(BeeInfo beeInfo) {
         this.beeInfosPerEntity.put(beeInfo.uuid, beeInfo);
+    }
+
+    public void removeBeeInfo(int i) {
+        this.beeInfosPerEntity.values().removeIf(beeInfo -> beeInfo.id == i);
     }
 
     @Override
@@ -234,6 +264,10 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     private Camera getCamera() {
         return this.minecraft.gameRenderer.getMainCamera();
+    }
+
+    private Set<String> getHiveMemberNames(HiveInfo hiveInfo) {
+        return this.getHiveMembers(hiveInfo.pos).stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet());
     }
 
     private String getPosDescription(BeeInfo beeInfo, BlockPos blockPos) {

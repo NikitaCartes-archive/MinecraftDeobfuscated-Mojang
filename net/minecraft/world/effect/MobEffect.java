@@ -6,8 +6,6 @@ package net.minecraft.world.effect;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -129,7 +127,6 @@ public class MobEffect {
         return new TranslatableComponent(this.getDescriptionId());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MobEffectCategory getCategory() {
         return this.category;
     }
@@ -144,7 +141,6 @@ public class MobEffect {
         return this;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Map<Attribute, AttributeModifier> getAttributeModifiers() {
         return this.attributeModifiers;
     }
@@ -171,7 +167,6 @@ public class MobEffect {
         return attributeModifier.getAmount() * (double)(i + 1);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isBeneficial() {
         return this.category == MobEffectCategory.BENEFICIAL;
     }

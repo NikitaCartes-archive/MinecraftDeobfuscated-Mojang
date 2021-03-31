@@ -74,6 +74,14 @@ extends LootItemConditionalFunction {
         return itemStack;
     }
 
+    public static LootItemConditionalFunction.Builder<?> setName(Component component) {
+        return SetNameFunction.simpleBuilder(lootItemConditions -> new SetNameFunction((LootItemCondition[])lootItemConditions, component, null));
+    }
+
+    public static LootItemConditionalFunction.Builder<?> setName(Component component, LootContext.EntityTarget entityTarget) {
+        return SetNameFunction.simpleBuilder(lootItemConditions -> new SetNameFunction((LootItemCondition[])lootItemConditions, component, entityTarget));
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetNameFunction> {
         @Override

@@ -49,6 +49,7 @@ extends Item {
             if (mob.getLeashHolder() != player) continue;
             if (leashFenceKnotEntity == null) {
                 leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
+                leashFenceKnotEntity.playPlacementSound();
             }
             mob.setLeashedTo(leashFenceKnotEntity, true);
             bl = true;

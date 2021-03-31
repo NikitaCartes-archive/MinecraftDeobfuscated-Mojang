@@ -36,23 +36,29 @@ import net.minecraft.world.level.block.state.BlockState;
 @Environment(value=EnvType.CLIENT)
 public class BannerRenderer
 implements BlockEntityRenderer<BannerBlockEntity> {
+    private static final int BANNER_WIDTH = 20;
+    private static final int BANNER_HEIGHT = 40;
+    private static final int MAX_PATTERNS = 16;
+    public static final String FLAG = "flag";
+    private static final String POLE = "pole";
+    private static final String BAR = "bar";
     private final ModelPart flag;
     private final ModelPart pole;
     private final ModelPart bar;
 
     public BannerRenderer(BlockEntityRendererProvider.Context context) {
         ModelPart modelPart = context.bakeLayer(ModelLayers.BANNER);
-        this.flag = modelPart.getChild("flag");
-        this.pole = modelPart.getChild("pole");
-        this.bar = modelPart.getChild("bar");
+        this.flag = modelPart.getChild(FLAG);
+        this.pole = modelPart.getChild(POLE);
+        this.bar = modelPart.getChild(BAR);
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("flag", CubeListBuilder.create().texOffs(0, 0).addBox(-10.0f, 0.0f, -2.0f, 20.0f, 40.0f, 1.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("pole", CubeListBuilder.create().texOffs(44, 0).addBox(-1.0f, -30.0f, -1.0f, 2.0f, 42.0f, 2.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("bar", CubeListBuilder.create().texOffs(0, 42).addBox(-10.0f, -32.0f, -1.0f, 20.0f, 2.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(FLAG, CubeListBuilder.create().texOffs(0, 0).addBox(-10.0f, 0.0f, -2.0f, 20.0f, 40.0f, 1.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(POLE, CubeListBuilder.create().texOffs(44, 0).addBox(-1.0f, -30.0f, -1.0f, 2.0f, 42.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(BAR, CubeListBuilder.create().texOffs(0, 42).addBox(-10.0f, -32.0f, -1.0f, 20.0f, 2.0f, 2.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

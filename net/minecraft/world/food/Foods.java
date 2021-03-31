@@ -12,7 +12,7 @@ public class Foods {
     public static final FoodProperties BAKED_POTATO = new FoodProperties.Builder().nutrition(5).saturationMod(0.6f).build();
     public static final FoodProperties BEEF = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).meat().build();
     public static final FoodProperties BEETROOT = new FoodProperties.Builder().nutrition(1).saturationMod(0.6f).build();
-    public static final FoodProperties BEETROOT_SOUP = Foods.stew(6);
+    public static final FoodProperties BEETROOT_SOUP = Foods.stew(6).build();
     public static final FoodProperties BREAD = new FoodProperties.Builder().nutrition(5).saturationMod(0.6f).build();
     public static final FoodProperties CARROT = new FoodProperties.Builder().nutrition(3).saturationMod(0.6f).build();
     public static final FoodProperties CHICKEN = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(new MobEffectInstance(MobEffects.HUNGER, 600, 0), 0.3f).meat().build();
@@ -32,7 +32,7 @@ public class Foods {
     public static final FoodProperties GOLDEN_CARROT = new FoodProperties.Builder().nutrition(6).saturationMod(1.2f).build();
     public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationMod(0.1f).build();
     public static final FoodProperties MELON_SLICE = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).build();
-    public static final FoodProperties MUSHROOM_STEW = Foods.stew(6);
+    public static final FoodProperties MUSHROOM_STEW = Foods.stew(6).build();
     public static final FoodProperties MUTTON = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).meat().build();
     public static final FoodProperties POISONOUS_POTATO = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).effect(new MobEffectInstance(MobEffects.POISON, 100, 0), 0.6f).build();
     public static final FoodProperties PORKCHOP = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).meat().build();
@@ -40,17 +40,17 @@ public class Foods {
     public static final FoodProperties PUFFERFISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).effect(new MobEffectInstance(MobEffects.POISON, 1200, 1), 1.0f).effect(new MobEffectInstance(MobEffects.HUNGER, 300, 2), 1.0f).effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 0), 1.0f).build();
     public static final FoodProperties PUMPKIN_PIE = new FoodProperties.Builder().nutrition(8).saturationMod(0.3f).build();
     public static final FoodProperties RABBIT = new FoodProperties.Builder().nutrition(3).saturationMod(0.3f).meat().build();
-    public static final FoodProperties RABBIT_STEW = Foods.stew(10);
+    public static final FoodProperties RABBIT_STEW = Foods.stew(10).build();
     public static final FoodProperties ROTTEN_FLESH = new FoodProperties.Builder().nutrition(4).saturationMod(0.1f).effect(new MobEffectInstance(MobEffects.HUNGER, 600, 0), 0.8f).meat().build();
     public static final FoodProperties SALMON = new FoodProperties.Builder().nutrition(2).saturationMod(0.1f).build();
     public static final FoodProperties SPIDER_EYE = new FoodProperties.Builder().nutrition(2).saturationMod(0.8f).effect(new MobEffectInstance(MobEffects.POISON, 100, 0), 1.0f).build();
-    public static final FoodProperties SUSPICIOUS_STEW = Foods.stew(6);
+    public static final FoodProperties SUSPICIOUS_STEW = Foods.stew(6).alwaysEat().build();
     public static final FoodProperties SWEET_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1f).build();
     public static final FoodProperties GLOW_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1f).build();
     public static final FoodProperties TROPICAL_FISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).build();
 
-    private static FoodProperties stew(int i) {
-        return new FoodProperties.Builder().nutrition(i).saturationMod(0.6f).build();
+    private static FoodProperties.Builder stew(int i) {
+        return new FoodProperties.Builder().nutrition(i).saturationMod(0.6f);
     }
 }
 

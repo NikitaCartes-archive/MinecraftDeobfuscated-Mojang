@@ -30,6 +30,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 
 public class CopyNbtFunction
@@ -72,6 +73,10 @@ extends LootItemConditionalFunction {
 
     public static Builder copyData(NbtProvider nbtProvider) {
         return new Builder(nbtProvider);
+    }
+
+    public static Builder copyData(LootContext.EntityTarget entityTarget) {
+        return new Builder(ContextNbtProvider.forContextEntity(entityTarget));
     }
 
     public static class Serializer

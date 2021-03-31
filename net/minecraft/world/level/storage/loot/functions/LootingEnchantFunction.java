@@ -26,6 +26,7 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class LootingEnchantFunction
 extends LootItemConditionalFunction {
+    public static final int NO_LIMIT = 0;
     private final NumberProvider value;
     private final int limit;
 

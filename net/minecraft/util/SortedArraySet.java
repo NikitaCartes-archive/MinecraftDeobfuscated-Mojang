@@ -9,9 +9,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.jetbrains.annotations.Nullable;
 
 public class SortedArraySet<T>
 extends AbstractSet<T> {
+    private static final int DEFAULT_INITIAL_CAPACITY = 10;
     private final Comparator<T> comparator;
     private T[] contents;
     private int size;
@@ -24,8 +26,20 @@ extends AbstractSet<T> {
         this.contents = SortedArraySet.castRawArray(new Object[i]);
     }
 
+    public static <T extends Comparable<T>> SortedArraySet<T> create() {
+        return SortedArraySet.create(10);
+    }
+
     public static <T extends Comparable<T>> SortedArraySet<T> create(int i) {
         return new SortedArraySet(i, Comparator.naturalOrder());
+    }
+
+    public static <T> SortedArraySet<T> create(Comparator<T> comparator) {
+        return SortedArraySet.create(comparator, 10);
+    }
+
+    public static <T> SortedArraySet<T> create(Comparator<T> comparator, int i) {
+        return new SortedArraySet<T>(i, comparator);
     }
 
     private static <T> T[] castRawArray(Object[] objects) {
@@ -105,8 +119,21 @@ extends AbstractSet<T> {
         return false;
     }
 
+    @Nullable
+    public T get(T object) {
+        int i = this.findIndex(object);
+        if (i >= 0) {
+            return this.getInternal(i);
+        }
+        return null;
+    }
+
     public T first() {
         return this.getInternal(0);
+    }
+
+    public T last() {
+        return this.getInternal(this.size - 1);
     }
 
     @Override

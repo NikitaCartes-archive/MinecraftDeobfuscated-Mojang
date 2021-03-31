@@ -61,11 +61,32 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Raid {
+    private static final int SECTION_RADIUS_FOR_FINDING_NEW_VILLAGE_CENTER = 2;
+    private static final int ATTEMPT_RAID_FARTHEST = 0;
+    private static final int ATTEMPT_RAID_CLOSE = 1;
+    private static final int ATTEMPT_RAID_INSIDE = 2;
+    private static final int VILLAGE_SEARCH_RADIUS = 32;
+    private static final int RAID_TIMEOUT_TICKS = 48000;
+    private static final int NUM_SPAWN_ATTEMPTS = 3;
+    private static final String OMINOUS_BANNER_PATTERN_NAME = "block.minecraft.ominous_banner";
+    private static final String RAIDERS_REMAINING = "event.minecraft.raid.raiders_remaining";
+    public static final int VILLAGE_RADIUS_BUFFER = 16;
+    private static final int POST_RAID_TICK_LIMIT = 40;
+    private static final int DEFAULT_PRE_RAID_TICKS = 300;
+    public static final int MAX_NO_ACTION_TIME = 2400;
+    public static final int MAX_CELEBRATION_TICKS = 600;
+    private static final int OUTSIDE_RAID_BOUNDS_TIMEOUT = 30;
+    public static final int TICKS_PER_DAY = 24000;
+    public static final int DEFAULT_MAX_BAD_OMEN_LEVEL = 5;
+    private static final int LOW_MOB_THRESHOLD = 2;
     private static final Component RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
     private static final Component VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
     private static final Component DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
     private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
     private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
+    private static final int HERO_OF_THE_VILLAGE_DURATION = 48000;
+    public static final int VALID_RAID_RADIUS_SQR = 9216;
+    public static final int RAID_REMOVAL_THRESHOLD_SQR = 12544;
     private final Map<Integer, Raider> groupToLeaderMap = Maps.newHashMap();
     private final Map<Integer, Set<Raider>> groupRaiderMap = Maps.newHashMap();
     private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
@@ -145,6 +166,18 @@ public class Raid {
         return this.status == RaidStatus.LOSS;
     }
 
+    public float getTotalHealth() {
+        return this.totalHealth;
+    }
+
+    public Set<Raider> getAllRaiders() {
+        HashSet<Raider> set = Sets.newHashSet();
+        for (Set<Raider> set2 : this.groupRaiderMap.values()) {
+            set.addAll(set2);
+        }
+        return set;
+    }
+
     public Level getLevel() {
         return this.level;
     }
@@ -183,6 +216,10 @@ public class Raid {
 
     public int getBadOmenLevel() {
         return this.badOmenLevel;
+    }
+
+    public void setBadOmenLevel(int i) {
+        this.badOmenLevel = i;
     }
 
     public void absorbBadOmen(Player player) {
@@ -266,7 +303,7 @@ public class Raid {
                 this.updateRaiders();
                 if (i > 0) {
                     if (i <= 2) {
-                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(new TranslatableComponent("event.minecraft.raid.raiders_remaining", i)));
+                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(new TranslatableComponent(RAIDERS_REMAINING, i)));
                     } else {
                         this.raidEvent.setName(RAID_NAME_COMPONENT);
                     }
@@ -508,7 +545,7 @@ public class Raid {
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.RHOMBUS_MIDDLE, DyeColor.CYAN).addPattern(BannerPattern.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_CENTER, DyeColor.GRAY).addPattern(BannerPattern.BORDER, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_MIDDLE, DyeColor.BLACK).addPattern(BannerPattern.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.BORDER, DyeColor.BLACK).toListTag();
         compoundTag.put("Patterns", listTag);
         itemStack.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
-        itemStack.setHoverName(new TranslatableComponent("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD));
+        itemStack.setHoverName(new TranslatableComponent(OMINOUS_BANNER_PATTERN_NAME).withStyle(ChatFormatting.GOLD));
         return itemStack;
     }
 

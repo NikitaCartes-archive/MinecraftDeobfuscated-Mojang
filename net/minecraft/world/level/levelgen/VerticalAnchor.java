@@ -70,6 +70,10 @@ public abstract class VerticalAnchor {
         public int resolveY(WorldGenerationContext worldGenerationContext) {
             return worldGenerationContext.getGenDepth() - 1 + worldGenerationContext.getMinGenY() - this.value();
         }
+
+        public String toString() {
+            return this.value() + " below top";
+        }
     }
 
     static final class AboveBottom
@@ -84,6 +88,10 @@ public abstract class VerticalAnchor {
         public int resolveY(WorldGenerationContext worldGenerationContext) {
             return worldGenerationContext.getMinGenY() + this.value();
         }
+
+        public String toString() {
+            return this.value() + " above bottom";
+        }
     }
 
     static final class Absolute
@@ -97,6 +105,10 @@ public abstract class VerticalAnchor {
         @Override
         public int resolveY(WorldGenerationContext worldGenerationContext) {
             return this.value();
+        }
+
+        public String toString() {
+            return this.value() + " absolute";
         }
     }
 }

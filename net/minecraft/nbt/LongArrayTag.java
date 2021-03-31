@@ -20,6 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class LongArrayTag
 extends CollectionTag<LongTag> {
+    private static final int SELF_SIZE_IN_BITS = 192;
     public static final TagType<LongArrayTag> TYPE = new TagType<LongArrayTag>(){
 
         @Override

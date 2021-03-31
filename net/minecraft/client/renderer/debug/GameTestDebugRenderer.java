@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 @Environment(value=EnvType.CLIENT)
 public class GameTestDebugRenderer
 implements DebugRenderer.SimpleDebugRenderer {
+    private static final float PADDING = 0.02f;
     private final Map<BlockPos, Marker> markers = Maps.newHashMap();
 
     public void addMarker(BlockPos blockPos, int i, String string, int j) {

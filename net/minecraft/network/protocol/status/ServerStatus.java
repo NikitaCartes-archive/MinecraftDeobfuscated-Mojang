@@ -18,6 +18,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 
 public class ServerStatus {
+    public static final int FAVICON_WIDTH = 64;
+    public static final int FAVICON_HEIGHT = 64;
     private Component description;
     private Players players;
     private Version version;

@@ -56,11 +56,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CharPredicate;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.ReportedException;
@@ -171,14 +168,12 @@ public class Util {
         });
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static <T> CompletableFuture<T> failedFuture(Throwable throwable) {
         CompletableFuture completableFuture = new CompletableFuture();
         completableFuture.completeExceptionally(throwable);
         return completableFuture;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void throwAsRuntime(Throwable throwable) {
         throw throwable instanceof RuntimeException ? (RuntimeException)throwable : new RuntimeException(throwable);
     }
@@ -514,7 +509,6 @@ public class Util {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int offsetByCodepoints(String string, int i, int j) {
         int k = string.length();
         if (j >= 0) {
@@ -547,16 +541,15 @@ public class Util {
         return DataResult.success(is);
     }
 
-    public static DataResult<double[]> fixedSize(DoubleStream doubleStream, int i) {
-        double[] ds = doubleStream.limit(i + 1).toArray();
-        if (ds.length != i) {
-            String string = "Input is not a list of " + i + " doubles";
-            if (ds.length >= i) {
-                return DataResult.error(string, Arrays.copyOf(ds, i));
+    public static <T> DataResult<List<T>> fixedSize(List<T> list, int i) {
+        if (list.size() != i) {
+            String string = "Input is not a list of " + i + " elements";
+            if (list.size() >= i) {
+                return DataResult.error(string, list.subList(0, i));
             }
             return DataResult.error(string);
         }
-        return DataResult.success(ds);
+        return DataResult.success(list);
     }
 
     public static void startTimerHackThread() {
@@ -579,19 +572,16 @@ public class Util {
         thread.start();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void copyBetweenDirs(Path path, Path path2, Path path3) throws IOException {
         Path path4 = path.relativize(path3);
         Path path5 = path2.resolve(path4);
         Files.copy(path3, path5, new CopyOption[0]);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static String sanitizeName(String string, CharPredicate charPredicate) {
         return string.toLowerCase(Locale.ROOT).chars().mapToObj(i -> charPredicate.test((char)i) ? Character.toString((char)i) : "_").collect(Collectors.joining());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static <T, R> Function<T, R> memoize(final Function<T, R> function) {
         return new Function<T, R>(){
             private final Map<T, R> cache = Maps.newHashMap();
@@ -607,7 +597,6 @@ public class Util {
         };
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static <T, U, R> BiFunction<T, U, R> memoize(final BiFunction<T, U, R> biFunction) {
         return new BiFunction<T, U, R>(){
             private final Map<Pair<T, U>, R> cache = Maps.newHashMap();
@@ -645,7 +634,6 @@ public class Util {
         WINDOWS{
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             protected String[] getOpenUrlArguments(URL uRL) {
                 return new String[]{"rundll32", "url.dll,FileProtocolHandler", uRL.toString()};
             }
@@ -654,7 +642,6 @@ public class Util {
         OSX{
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             protected String[] getOpenUrlArguments(URL uRL) {
                 return new String[]{"open", uRL.toString()};
             }
@@ -663,7 +650,6 @@ public class Util {
         UNKNOWN;
 
 
-        @Environment(value=EnvType.CLIENT)
         public void openUrl(URL uRL) {
             try {
                 Process process = AccessController.doPrivileged(() -> Runtime.getRuntime().exec(this.getOpenUrlArguments(uRL)));
@@ -678,7 +664,6 @@ public class Util {
             }
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void openUri(URI uRI) {
             try {
                 this.openUrl(uRI.toURL());
@@ -687,7 +672,6 @@ public class Util {
             }
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void openFile(File file) {
             try {
                 this.openUrl(file.toURI().toURL());
@@ -696,7 +680,6 @@ public class Util {
             }
         }
 
-        @Environment(value=EnvType.CLIENT)
         protected String[] getOpenUrlArguments(URL uRL) {
             String string = uRL.toString();
             if ("file".equals(uRL.getProtocol())) {
@@ -705,7 +688,6 @@ public class Util {
             return new String[]{"xdg-open", string};
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void openUri(String string) {
             try {
                 this.openUrl(new URI(string).toURL());

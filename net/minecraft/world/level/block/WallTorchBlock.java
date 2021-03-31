@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -35,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 public class WallTorchBlock
 extends TorchBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    protected static final float AABB_OFFSET = 2.5f;
     private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Block.box(5.5, 3.0, 11.0, 10.5, 13.0, 16.0), Direction.SOUTH, Block.box(5.5, 3.0, 0.0, 10.5, 13.0, 5.0), Direction.WEST, Block.box(11.0, 3.0, 5.5, 16.0, 13.0, 10.5), Direction.EAST, Block.box(0.0, 3.0, 5.5, 5.0, 13.0, 10.5)));
 
     protected WallTorchBlock(BlockBehaviour.Properties properties, ParticleOptions particleOptions) {
@@ -88,7 +87,6 @@ extends TorchBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         Direction direction = blockState.getValue(FACING);
         double d = (double)blockPos.getX() + 0.5;

@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class MinecartHopper
 extends AbstractMinecartContainer
 implements Hopper {
+    public static final int MOVE_ITEM_SPEED = 4;
     private boolean enabled = true;
     private int cooldownTime = -1;
     private final BlockPos lastPosition = BlockPos.ZERO;

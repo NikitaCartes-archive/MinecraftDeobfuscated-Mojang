@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.monster.piglin;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -30,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractPiglin
 extends Monster {
     protected static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(AbstractPiglin.class, EntityDataSerializers.BOOLEAN);
+    protected static final int CONVERSION_TIME = 300;
     protected int timeInOverworld;
 
     public AbstractPiglin(EntityType<? extends AbstractPiglin> entityType, Level level) {
@@ -108,7 +107,6 @@ extends Monster {
         return !this.isBaby();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public abstract PiglinArmPose getArmPose();
 
     @Override

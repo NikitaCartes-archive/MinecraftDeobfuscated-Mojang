@@ -13,8 +13,6 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -84,7 +82,14 @@ AutoCloseable {
     public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
     public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
     public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
+    public static final int MAX_LEVEL_SIZE = 30000000;
+    public static final int LONG_PARTICLE_CLIP_RANGE = 512;
+    public static final int SHORT_PARTICLE_CLIP_RANGE = 32;
     private static final Direction[] DIRECTIONS = Direction.values();
+    public static final int MAX_BRIGHTNESS = 15;
+    public static final int TICKS_PER_DAY = 24000;
+    public static final int MAX_ENTITY_SPAWN_Y = 20000000;
+    public static final int MIN_ENTITY_SPAWN_Y = -20000000;
     protected final List<TickingBlockEntity> blockEntityTickers = Lists.newArrayList();
     private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.newArrayList();
     private boolean tickingBlockEntities;
@@ -134,6 +139,7 @@ AutoCloseable {
         return this.isClientSide;
     }
 
+    @Override
     @Nullable
     public MinecraftServer getServer() {
         return null;
@@ -370,7 +376,6 @@ AutoCloseable {
     public void addParticle(ParticleOptions particleOptions, double d, double e, double f, double g, double h, double i) {
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void addParticle(ParticleOptions particleOptions, boolean bl, double d, double e, double f, double g, double h, double i) {
     }
 
@@ -435,6 +440,8 @@ AutoCloseable {
         explosion.finalizeExplosion(true);
         return explosion;
     }
+
+    public abstract String gatherChunkSourceStats();
 
     @Override
     @Nullable
@@ -635,7 +642,6 @@ AutoCloseable {
         return i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void disconnect() {
     }
 
@@ -671,7 +677,6 @@ AutoCloseable {
         return Mth.lerp(f, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(f);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setThunderLevel(float f) {
         this.oThunderLevel = f;
         this.thunderLevel = f;
@@ -681,7 +686,6 @@ AutoCloseable {
         return Mth.lerp(f, this.oRainLevel, this.rainLevel);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setRainLevel(float f) {
         this.oRainLevel = f;
         this.rainLevel = f;
@@ -742,7 +746,6 @@ AutoCloseable {
 
     public abstract void destroyBlockProgress(int var1, BlockPos var2, int var3);
 
-    @Environment(value=EnvType.CLIENT)
     public void createFireworks(double d, double e, double f, double g, double h, double i, @Nullable CompoundTag compoundTag) {
     }
 
@@ -807,6 +810,11 @@ AutoCloseable {
     @Override
     public boolean isStateAtPosition(BlockPos blockPos, Predicate<BlockState> predicate) {
         return predicate.test(this.getBlockState(blockPos));
+    }
+
+    @Override
+    public boolean isFluidAtPosition(BlockPos blockPos, Predicate<FluidState> predicate) {
+        return predicate.test(this.getFluidState(blockPos));
     }
 
     public abstract RecipeManager getRecipeManager();

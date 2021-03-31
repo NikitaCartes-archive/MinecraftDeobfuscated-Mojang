@@ -48,6 +48,10 @@ implements LootItemCondition {
         return this.value.test(lootContext, (int)l);
     }
 
+    public static Builder time(IntRange intRange) {
+        return new Builder(intRange);
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);
@@ -71,6 +75,32 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
+        }
+    }
+
+    public static class Builder
+    implements LootItemCondition.Builder {
+        @Nullable
+        private Long period;
+        private final IntRange value;
+
+        public Builder(IntRange intRange) {
+            this.value = intRange;
+        }
+
+        public Builder setPeriod(long l) {
+            this.period = l;
+            return this;
+        }
+
+        @Override
+        public TimeCheck build() {
+            return new TimeCheck(this.period, this.value);
+        }
+
+        @Override
+        public /* synthetic */ LootItemCondition build() {
+            return this.build();
         }
     }
 }

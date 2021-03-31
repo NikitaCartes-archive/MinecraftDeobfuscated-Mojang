@@ -6,8 +6,6 @@ package net.minecraft.world.entity.animal;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +48,7 @@ public class MushroomCow
 extends Cow
 implements Shearable {
     private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(MushroomCow.class, EntityDataSerializers.STRING);
+    private static final int MUTATE_CHANCE = 1024;
     private MobEffect effect;
     private int effectDuration;
     private UUID lastLightningBoltUUID;
@@ -247,7 +246,6 @@ implements Shearable {
             this.blockState = blockState;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public BlockState getBlockState() {
             return this.blockState;
         }

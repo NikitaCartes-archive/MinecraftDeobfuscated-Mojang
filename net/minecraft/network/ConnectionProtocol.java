@@ -182,6 +182,8 @@ public enum ConnectionProtocol {
     STATUS(1, ConnectionProtocol.protocol().addFlow(PacketFlow.SERVERBOUND, new PacketSet<T>().addPacket(ServerboundStatusRequestPacket.class, ServerboundStatusRequestPacket::new).addPacket(ServerboundPingRequestPacket.class, ServerboundPingRequestPacket::new)).addFlow(PacketFlow.CLIENTBOUND, new PacketSet<T>().addPacket(ClientboundStatusResponsePacket.class, ClientboundStatusResponsePacket::new).addPacket(ClientboundPongResponsePacket.class, ClientboundPongResponsePacket::new))),
     LOGIN(2, ConnectionProtocol.protocol().addFlow(PacketFlow.CLIENTBOUND, new PacketSet<T>().addPacket(ClientboundLoginDisconnectPacket.class, ClientboundLoginDisconnectPacket::new).addPacket(ClientboundHelloPacket.class, ClientboundHelloPacket::new).addPacket(ClientboundGameProfilePacket.class, ClientboundGameProfilePacket::new).addPacket(ClientboundLoginCompressionPacket.class, ClientboundLoginCompressionPacket::new).addPacket(ClientboundCustomQueryPacket.class, ClientboundCustomQueryPacket::new)).addFlow(PacketFlow.SERVERBOUND, new PacketSet<T>().addPacket(ServerboundHelloPacket.class, ServerboundHelloPacket::new).addPacket(ServerboundKeyPacket.class, ServerboundKeyPacket::new).addPacket(ServerboundCustomQueryPacket.class, ServerboundCustomQueryPacket::new)));
 
+    private static final int MIN_PROTOCOL_ID = -1;
+    private static final int MAX_PROTOCOL_ID = 2;
     private static final ConnectionProtocol[] LOOKUP;
     private static final Map<Class<? extends Packet<?>>, ConnectionProtocol> PROTOCOL_BY_PACKET;
     private final int id;

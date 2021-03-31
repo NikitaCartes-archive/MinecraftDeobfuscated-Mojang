@@ -5,8 +5,6 @@ package net.minecraft.world.entity;
 
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -31,6 +29,11 @@ import net.minecraft.world.phys.Vec3;
 
 public class ExperienceOrb
 extends Entity {
+    private static final int LIFETIME = 6000;
+    private static final int ENTITY_SCAN_PERIOD = 20;
+    private static final int MAX_FOLLOW_DIST = 8;
+    private static final int ORB_GROUPS_PER_AREA = 40;
+    private static final double ORB_MERGE_DISTANCE = 0.5;
     private int age;
     private int health = 5;
     private int value;
@@ -195,23 +198,32 @@ extends Entity {
             return;
         }
         if (player.takeXpDelay == 0) {
-            ItemStack itemStack;
             player.takeXpDelay = 2;
             player.take(this, 1);
-            Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
-            if (entry != null && !(itemStack = entry.getValue()).isEmpty() && itemStack.isDamaged()) {
-                int i = Math.min(this.xpToDurability(this.value), itemStack.getDamageValue());
-                this.value -= this.durabilityToXp(i);
-                itemStack.setDamageValue(itemStack.getDamageValue() - i);
-            }
-            if (this.value > 0) {
-                player.giveExperiencePoints(this.value);
+            int i = this.repairPlayerItems(player, this.value);
+            if (i > 0) {
+                player.giveExperiencePoints(i);
             }
             --this.count;
             if (this.count == 0) {
                 this.discard();
             }
         }
+    }
+
+    private int repairPlayerItems(Player player, int i) {
+        Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
+        if (entry != null) {
+            ItemStack itemStack = entry.getValue();
+            int j = Math.min(this.xpToDurability(this.value), itemStack.getDamageValue());
+            itemStack.setDamageValue(itemStack.getDamageValue() - j);
+            int k = i - this.durabilityToXp(j);
+            if (k > 0) {
+                return this.repairPlayerItems(player, k);
+            }
+            return 0;
+        }
+        return i;
     }
 
     private int durabilityToXp(int i) {
@@ -226,7 +238,6 @@ extends Entity {
         return this.value;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getIcon() {
         if (this.value >= 2477) {
             return 10;

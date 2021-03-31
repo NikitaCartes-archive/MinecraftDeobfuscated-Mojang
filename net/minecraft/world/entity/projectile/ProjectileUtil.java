@@ -5,8 +5,6 @@ package net.minecraft.world.entity.projectile;
 
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +41,6 @@ public final class ProjectileUtil {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static EntityHitResult getEntityHitResult(Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, double d) {
         Level level = entity.level;
         double e = d;

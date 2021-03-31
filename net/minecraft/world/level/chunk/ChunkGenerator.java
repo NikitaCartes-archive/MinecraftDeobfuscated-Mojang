@@ -14,8 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -28,6 +26,7 @@ import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -120,7 +119,6 @@ public abstract class ChunkGenerator {
 
     protected abstract Codec<? extends ChunkGenerator> codec();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract ChunkGenerator withSeed(long var1);
 
     public void createBiomes(Registry<Biome> registry, ChunkAccess chunkAccess) {
@@ -221,7 +219,7 @@ public abstract class ChunkGenerator {
         return 384;
     }
 
-    public List<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
+    public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
         return biome.getMobSettings().getMobs(mobCategory);
     }
 
@@ -258,7 +256,7 @@ public abstract class ChunkGenerator {
                 long p = ChunkPos.asLong(n, o);
                 for (StructureStart<?> structureStart : worldGenLevel.getChunk(n, o).getAllStarts().values()) {
                     try {
-                        if (structureStart == StructureStart.INVALID_START || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
+                        if (!structureStart.isValid() || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
                         structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
                         DebugPackets.sendStructurePacket(worldGenLevel, structureStart);
                     } catch (Exception exception) {

@@ -22,6 +22,14 @@ import net.minecraft.world.entity.animal.Bee;
 @Environment(value=EnvType.CLIENT)
 public class BeeModel<T extends Bee>
 extends AgeableListModel<T> {
+    private static final float BEE_Y_BASE = 19.0f;
+    private static final String BONE = "bone";
+    private static final String STINGER = "stinger";
+    private static final String LEFT_ANTENNA = "left_antenna";
+    private static final String RIGHT_ANTENNA = "right_antenna";
+    private static final String FRONT_LEGS = "front_legs";
+    private static final String MIDDLE_LEGS = "middle_legs";
+    private static final String BACK_LEGS = "back_legs";
     private final ModelPart bone;
     private final ModelPart rightWing;
     private final ModelPart leftWing;
@@ -35,33 +43,33 @@ extends AgeableListModel<T> {
 
     public BeeModel(ModelPart modelPart) {
         super(false, 24.0f, 0.0f);
-        this.bone = modelPart.getChild("bone");
+        this.bone = modelPart.getChild(BONE);
         ModelPart modelPart2 = this.bone.getChild("body");
-        this.stinger = modelPart2.getChild("stinger");
-        this.leftAntenna = modelPart2.getChild("left_antenna");
-        this.rightAntenna = modelPart2.getChild("right_antenna");
+        this.stinger = modelPart2.getChild(STINGER);
+        this.leftAntenna = modelPart2.getChild(LEFT_ANTENNA);
+        this.rightAntenna = modelPart2.getChild(RIGHT_ANTENNA);
         this.rightWing = this.bone.getChild("right_wing");
         this.leftWing = this.bone.getChild("left_wing");
-        this.frontLeg = this.bone.getChild("front_legs");
-        this.midLeg = this.bone.getChild("middle_legs");
-        this.backLeg = this.bone.getChild("back_legs");
+        this.frontLeg = this.bone.getChild(FRONT_LEGS);
+        this.midLeg = this.bone.getChild(MIDDLE_LEGS);
+        this.backLeg = this.bone.getChild(BACK_LEGS);
     }
 
     public static LayerDefinition createBodyLayer() {
         float f = 19.0f;
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0f, 19.0f, 0.0f));
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(BONE, CubeListBuilder.create(), PartPose.offset(0.0f, 19.0f, 0.0f));
         PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.5f, -4.0f, -5.0f, 7.0f, 7.0f, 10.0f), PartPose.ZERO);
-        partDefinition3.addOrReplaceChild("stinger", CubeListBuilder.create().texOffs(26, 7).addBox(0.0f, -1.0f, 5.0f, 0.0f, 1.0f, 2.0f), PartPose.ZERO);
-        partDefinition3.addOrReplaceChild("left_antenna", CubeListBuilder.create().texOffs(2, 0).addBox(1.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f), PartPose.offset(0.0f, -2.0f, -5.0f));
-        partDefinition3.addOrReplaceChild("right_antenna", CubeListBuilder.create().texOffs(2, 3).addBox(-2.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f), PartPose.offset(0.0f, -2.0f, -5.0f));
+        partDefinition3.addOrReplaceChild(STINGER, CubeListBuilder.create().texOffs(26, 7).addBox(0.0f, -1.0f, 5.0f, 0.0f, 1.0f, 2.0f), PartPose.ZERO);
+        partDefinition3.addOrReplaceChild(LEFT_ANTENNA, CubeListBuilder.create().texOffs(2, 0).addBox(1.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f), PartPose.offset(0.0f, -2.0f, -5.0f));
+        partDefinition3.addOrReplaceChild(RIGHT_ANTENNA, CubeListBuilder.create().texOffs(2, 3).addBox(-2.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f), PartPose.offset(0.0f, -2.0f, -5.0f));
         CubeDeformation cubeDeformation = new CubeDeformation(0.001f);
         partDefinition2.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(0, 18).addBox(-9.0f, 0.0f, 0.0f, 9.0f, 0.0f, 6.0f, cubeDeformation), PartPose.offsetAndRotation(-1.5f, -4.0f, -3.0f, 0.0f, -0.2618f, 0.0f));
         partDefinition2.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 18).mirror().addBox(0.0f, 0.0f, 0.0f, 9.0f, 0.0f, 6.0f, cubeDeformation), PartPose.offsetAndRotation(1.5f, -4.0f, -3.0f, 0.0f, 0.2618f, 0.0f));
-        partDefinition2.addOrReplaceChild("front_legs", CubeListBuilder.create().addBox("front_legs", -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 1), PartPose.offset(1.5f, 3.0f, -2.0f));
-        partDefinition2.addOrReplaceChild("middle_legs", CubeListBuilder.create().addBox("middle_legs", -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 3), PartPose.offset(1.5f, 3.0f, 0.0f));
-        partDefinition2.addOrReplaceChild("back_legs", CubeListBuilder.create().addBox("back_legs", -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 5), PartPose.offset(1.5f, 3.0f, 2.0f));
+        partDefinition2.addOrReplaceChild(FRONT_LEGS, CubeListBuilder.create().addBox(FRONT_LEGS, -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 1), PartPose.offset(1.5f, 3.0f, -2.0f));
+        partDefinition2.addOrReplaceChild(MIDDLE_LEGS, CubeListBuilder.create().addBox(MIDDLE_LEGS, -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 3), PartPose.offset(1.5f, 3.0f, 0.0f));
+        partDefinition2.addOrReplaceChild(BACK_LEGS, CubeListBuilder.create().addBox(BACK_LEGS, -5.0f, 0.0f, 0.0f, 7, 2, 0, 26, 5), PartPose.offset(1.5f, 3.0f, 2.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

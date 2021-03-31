@@ -4,12 +4,9 @@
 package net.minecraft.util.profiling.registry;
 
 import java.util.function.DoubleSupplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.registry.MeasurementCategory;
 import net.minecraft.util.profiling.registry.Metric;
 
-@Environment(value=EnvType.CLIENT)
 public class MeasuredMetric {
     private final Metric metric;
     private final DoubleSupplier currentValue;

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WaterAvoidingRandomStrollGoal
 extends RandomStrollGoal {
+    public static final float PROBABILITY = 0.001f;
     protected final float probability;
 
     public WaterAvoidingRandomStrollGoal(PathfinderMob pathfinderMob, double d) {

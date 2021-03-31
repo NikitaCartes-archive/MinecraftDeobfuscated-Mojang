@@ -31,6 +31,9 @@ public class CompassItem
 extends Item
 implements Vanishable {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final String TAG_LODESTONE_POS = "LodestonePos";
+    public static final String TAG_LODESTONE_DIMENSION = "LodestoneDimension";
+    public static final String TAG_LODESTONE_TRACKED = "LodestoneTracked";
 
     public CompassItem(Item.Properties properties) {
         super(properties);
@@ -38,7 +41,7 @@ implements Vanishable {
 
     public static boolean isLodestoneCompass(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag != null && (compoundTag.contains("LodestoneDimension") || compoundTag.contains("LodestonePos"));
+        return compoundTag != null && (compoundTag.contains(TAG_LODESTONE_DIMENSION) || compoundTag.contains(TAG_LODESTONE_POS));
     }
 
     @Override
@@ -47,7 +50,7 @@ implements Vanishable {
     }
 
     public static Optional<ResourceKey<Level>> getLodestoneDimension(CompoundTag compoundTag) {
-        return Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LodestoneDimension")).result();
+        return Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get(TAG_LODESTONE_DIMENSION)).result();
     }
 
     @Override
@@ -58,12 +61,12 @@ implements Vanishable {
         if (CompassItem.isLodestoneCompass(itemStack)) {
             BlockPos blockPos;
             CompoundTag compoundTag = itemStack.getOrCreateTag();
-            if (compoundTag.contains("LodestoneTracked") && !compoundTag.getBoolean("LodestoneTracked")) {
+            if (compoundTag.contains(TAG_LODESTONE_TRACKED) && !compoundTag.getBoolean(TAG_LODESTONE_TRACKED)) {
                 return;
             }
             Optional<ResourceKey<Level>> optional = CompassItem.getLodestoneDimension(compoundTag);
-            if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos") && (!level.isInWorldBounds(blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"))) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, blockPos))) {
-                compoundTag.remove("LodestonePos");
+            if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains(TAG_LODESTONE_POS) && (!level.isInWorldBounds(blockPos = NbtUtils.readBlockPos(compoundTag.getCompound(TAG_LODESTONE_POS))) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, blockPos))) {
+                compoundTag.remove(TAG_LODESTONE_POS);
             }
         }
     }
@@ -98,9 +101,9 @@ implements Vanishable {
     }
 
     private void addLodestoneTags(ResourceKey<Level> resourceKey, BlockPos blockPos, CompoundTag compoundTag) {
-        compoundTag.put("LodestonePos", NbtUtils.writeBlockPos(blockPos));
-        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, resourceKey).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("LodestoneDimension", (Tag)tag));
-        compoundTag.putBoolean("LodestoneTracked", true);
+        compoundTag.put(TAG_LODESTONE_POS, NbtUtils.writeBlockPos(blockPos));
+        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, resourceKey).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put(TAG_LODESTONE_DIMENSION, (Tag)tag));
+        compoundTag.putBoolean(TAG_LODESTONE_TRACKED, true);
     }
 
     @Override

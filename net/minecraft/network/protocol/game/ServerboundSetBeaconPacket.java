@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -14,7 +12,6 @@ implements Packet<ServerGamePacketListener> {
     private final int primary;
     private final int secondary;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSetBeaconPacket(int i, int j) {
         this.primary = i;
         this.secondary = j;

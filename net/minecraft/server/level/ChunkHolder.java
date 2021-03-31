@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -51,6 +49,7 @@ public class ChunkHolder {
     private static final CompletableFuture<Either<LevelChunk, ChunkLoadingFailure>> UNLOADED_LEVEL_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_LEVEL_CHUNK);
     private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
     private static final FullChunkStatus[] FULL_CHUNK_STATUSES = FullChunkStatus.values();
+    private static final int BLOCKS_BEFORE_RESEND_FUDGE = 64;
     private final AtomicReferenceArray<CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>>> futures = new AtomicReferenceArray(CHUNK_STATUSES.size());
     private final LevelHeightAccessor levelHeightAccessor;
     private volatile CompletableFuture<Either<LevelChunk, ChunkLoadingFailure>> fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
@@ -121,7 +120,6 @@ public class ChunkHolder {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ChunkStatus getLastAvailableStatus() {
         for (int i = CHUNK_STATUSES.size() - 1; i >= 0; --i) {
             ChunkStatus chunkStatus = CHUNK_STATUSES.get(i);
@@ -258,7 +256,6 @@ public class ChunkHolder {
         this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess2, either) -> either.map(chunkAccess -> chunkAccess, chunkLoadingFailure -> chunkAccess2));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public FullChunkStatus getFullStatus() {
         return ChunkHolder.getFullChunkStatus(this.ticketLevel);
     }

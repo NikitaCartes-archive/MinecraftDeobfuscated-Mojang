@@ -24,8 +24,19 @@ public class TextureMapping {
         return this;
     }
 
+    public TextureMapping putForced(TextureSlot textureSlot, ResourceLocation resourceLocation) {
+        this.slots.put(textureSlot, resourceLocation);
+        this.forcedSlots.add(textureSlot);
+        return this;
+    }
+
     public Stream<TextureSlot> getForced() {
         return this.forcedSlots.stream();
+    }
+
+    public TextureMapping copySlot(TextureSlot textureSlot, TextureSlot textureSlot2) {
+        this.slots.put(textureSlot2, this.slots.get(textureSlot));
+        return this;
     }
 
     public TextureMapping copyForced(TextureSlot textureSlot, TextureSlot textureSlot2) {
@@ -97,6 +108,10 @@ public class TextureMapping {
         return TextureMapping.singleSlot(TextureSlot.WOOL, TextureMapping.getBlockTexture(block));
     }
 
+    public static TextureMapping wool(ResourceLocation resourceLocation) {
+        return TextureMapping.singleSlot(TextureSlot.WOOL, resourceLocation);
+    }
+
     public static TextureMapping stem(Block block) {
         return TextureMapping.singleSlot(TextureSlot.STEM, TextureMapping.getBlockTexture(block));
     }
@@ -153,6 +168,10 @@ public class TextureMapping {
     public static TextureMapping columnWithWall(Block block) {
         ResourceLocation resourceLocation = TextureMapping.getBlockTexture(block);
         return new TextureMapping().put(TextureSlot.WALL, resourceLocation).put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top"));
+    }
+
+    public static TextureMapping door(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
+        return new TextureMapping().put(TextureSlot.TOP, resourceLocation).put(TextureSlot.BOTTOM, resourceLocation2);
     }
 
     public static TextureMapping door(Block block) {

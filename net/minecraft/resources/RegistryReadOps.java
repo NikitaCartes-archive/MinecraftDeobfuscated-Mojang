@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 public class RegistryReadOps<T>
 extends DelegatingOps<T> {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String JSON = ".json";
     private final ResourceAccess resources;
     private final RegistryAccess registryAccess;
     private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache;
@@ -86,7 +87,7 @@ extends DelegatingOps<T> {
         String string = resourceKey.location().getPath() + "/";
         for (ResourceLocation resourceLocation : collection) {
             String string2 = resourceLocation.getPath();
-            if (!string2.endsWith(".json")) {
+            if (!string2.endsWith(JSON)) {
                 LOGGER.warn("Skipping resource {} since it is not a json file", (Object)resourceLocation);
                 continue;
             }
@@ -94,7 +95,7 @@ extends DelegatingOps<T> {
                 LOGGER.warn("Skipping resource {} since it does not have a registry name prefix", (Object)resourceLocation);
                 continue;
             }
-            String string3 = string2.substring(string.length(), string2.length() - ".json".length());
+            String string3 = string2.substring(string.length(), string2.length() - JSON.length());
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string3);
             dataResult = dataResult.flatMap(mappedRegistry -> this.readAndRegisterElement(resourceKey, (WritableRegistry)mappedRegistry, codec, resourceLocation2).map(supplier -> mappedRegistry));
         }
@@ -145,7 +146,7 @@ extends DelegatingOps<T> {
 
                 @Override
                 public Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> resourceKey) {
-                    return resourceManager.listResources(resourceKey.location().getPath(), string -> string.endsWith(".json"));
+                    return resourceManager.listResources(resourceKey.location().getPath(), string -> string.endsWith(RegistryReadOps.JSON));
                 }
 
                 /*
@@ -236,7 +237,7 @@ extends DelegatingOps<T> {
 
             @Override
             public Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> resourceKey) {
-                return this.data.keySet().stream().filter(resourceKey2 -> resourceKey2.isFor(resourceKey)).map(resourceKey2 -> new ResourceLocation(resourceKey2.location().getNamespace(), resourceKey.location().getPath() + "/" + resourceKey2.location().getPath() + ".json")).collect(Collectors.toList());
+                return this.data.keySet().stream().filter(resourceKey2 -> resourceKey2.isFor(resourceKey)).map(resourceKey2 -> new ResourceLocation(resourceKey2.location().getNamespace(), resourceKey.location().getPath() + "/" + resourceKey2.location().getPath() + RegistryReadOps.JSON)).collect(Collectors.toList());
             }
 
             @Override

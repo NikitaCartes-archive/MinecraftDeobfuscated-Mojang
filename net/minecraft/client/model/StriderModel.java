@@ -18,6 +18,12 @@ import net.minecraft.world.entity.monster.Strider;
 @Environment(value=EnvType.CLIENT)
 public class StriderModel<T extends Strider>
 extends HierarchicalModel<T> {
+    private static final String RIGHT_BOTTOM_BRISTLE = "right_bottom_bristle";
+    private static final String RIGHT_MIDDLE_BRISTLE = "right_middle_bristle";
+    private static final String RIGHT_TOP_BRISTLE = "right_top_bristle";
+    private static final String LEFT_TOP_BRISTLE = "left_top_bristle";
+    private static final String LEFT_MIDDLE_BRISTLE = "left_middle_bristle";
+    private static final String LEFT_BOTTOM_BRISTLE = "left_bottom_bristle";
     private final ModelPart root;
     private final ModelPart rightLeg;
     private final ModelPart leftLeg;
@@ -34,12 +40,12 @@ extends HierarchicalModel<T> {
         this.rightLeg = modelPart.getChild("right_leg");
         this.leftLeg = modelPart.getChild("left_leg");
         this.body = modelPart.getChild("body");
-        this.rightBottomBristle = this.body.getChild("right_bottom_bristle");
-        this.rightMiddleBristle = this.body.getChild("right_middle_bristle");
-        this.rightTopBristle = this.body.getChild("right_top_bristle");
-        this.leftTopBristle = this.body.getChild("left_top_bristle");
-        this.leftMiddleBristle = this.body.getChild("left_middle_bristle");
-        this.leftBottomBristle = this.body.getChild("left_bottom_bristle");
+        this.rightBottomBristle = this.body.getChild(RIGHT_BOTTOM_BRISTLE);
+        this.rightMiddleBristle = this.body.getChild(RIGHT_MIDDLE_BRISTLE);
+        this.rightTopBristle = this.body.getChild(RIGHT_TOP_BRISTLE);
+        this.leftTopBristle = this.body.getChild(LEFT_TOP_BRISTLE);
+        this.leftMiddleBristle = this.body.getChild(LEFT_MIDDLE_BRISTLE);
+        this.leftBottomBristle = this.body.getChild(LEFT_BOTTOM_BRISTLE);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -48,12 +54,12 @@ extends HierarchicalModel<T> {
         partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f), PartPose.offset(-4.0f, 8.0f, 0.0f));
         partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 55).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f), PartPose.offset(4.0f, 8.0f, 0.0f));
         PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -6.0f, -8.0f, 16.0f, 14.0f, 16.0f), PartPose.offset(0.0f, 1.0f, 0.0f));
-        partDefinition2.addOrReplaceChild("right_bottom_bristle", CubeListBuilder.create().texOffs(16, 65).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, 4.0f, -8.0f, 0.0f, 0.0f, -1.2217305f));
-        partDefinition2.addOrReplaceChild("right_middle_bristle", CubeListBuilder.create().texOffs(16, 49).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -1.0f, -8.0f, 0.0f, 0.0f, -1.134464f));
-        partDefinition2.addOrReplaceChild("right_top_bristle", CubeListBuilder.create().texOffs(16, 33).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -5.0f, -8.0f, 0.0f, 0.0f, -0.87266463f));
-        partDefinition2.addOrReplaceChild("left_top_bristle", CubeListBuilder.create().texOffs(16, 33).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -6.0f, -8.0f, 0.0f, 0.0f, 0.87266463f));
-        partDefinition2.addOrReplaceChild("left_middle_bristle", CubeListBuilder.create().texOffs(16, 49).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -2.0f, -8.0f, 0.0f, 0.0f, 1.134464f));
-        partDefinition2.addOrReplaceChild("left_bottom_bristle", CubeListBuilder.create().texOffs(16, 65).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, 3.0f, -8.0f, 0.0f, 0.0f, 1.2217305f));
+        partDefinition2.addOrReplaceChild(RIGHT_BOTTOM_BRISTLE, CubeListBuilder.create().texOffs(16, 65).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, 4.0f, -8.0f, 0.0f, 0.0f, -1.2217305f));
+        partDefinition2.addOrReplaceChild(RIGHT_MIDDLE_BRISTLE, CubeListBuilder.create().texOffs(16, 49).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -1.0f, -8.0f, 0.0f, 0.0f, -1.134464f));
+        partDefinition2.addOrReplaceChild(RIGHT_TOP_BRISTLE, CubeListBuilder.create().texOffs(16, 33).addBox(-12.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f, true), PartPose.offsetAndRotation(-8.0f, -5.0f, -8.0f, 0.0f, 0.0f, -0.87266463f));
+        partDefinition2.addOrReplaceChild(LEFT_TOP_BRISTLE, CubeListBuilder.create().texOffs(16, 33).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -6.0f, -8.0f, 0.0f, 0.0f, 0.87266463f));
+        partDefinition2.addOrReplaceChild(LEFT_MIDDLE_BRISTLE, CubeListBuilder.create().texOffs(16, 49).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, -2.0f, -8.0f, 0.0f, 0.0f, 1.134464f));
+        partDefinition2.addOrReplaceChild(LEFT_BOTTOM_BRISTLE, CubeListBuilder.create().texOffs(16, 65).addBox(0.0f, 0.0f, 0.0f, 12.0f, 0.0f, 16.0f), PartPose.offsetAndRotation(8.0f, 3.0f, -8.0f, 0.0f, 0.0f, 1.2217305f));
         return LayerDefinition.create(meshDefinition, 64, 128);
     }
 

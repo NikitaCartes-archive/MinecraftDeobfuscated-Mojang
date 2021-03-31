@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.registry.MeasuredMetric;
 import net.minecraft.util.profiling.registry.MeasurementCategory;
 import net.minecraft.util.profiling.registry.ProfilerMeasured;
@@ -25,7 +23,6 @@ public class MeasurementRegistry {
         this.measuredInstances.put(profilerMeasured, null);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Map<MeasurementCategory, List<MeasuredMetric>> getMetricsByCategories() {
         return this.measuredInstances.keySet().stream().flatMap(profilerMeasured -> profilerMeasured.metrics().stream()).collect(Collectors.collectingAndThen(Collectors.groupingBy(MeasuredMetric::getGetCategory), EnumMap::new));
     }

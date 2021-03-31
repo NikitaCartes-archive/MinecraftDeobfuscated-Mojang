@@ -67,6 +67,16 @@ public abstract class PropertyDispatch {
     }
 
     @FunctionalInterface
+    public static interface PentaFunction<P1, P2, P3, P4, P5, R> {
+        public R apply(P1 var1, P2 var2, P3 var3, P4 var4, P5 var5);
+    }
+
+    @FunctionalInterface
+    public static interface QuadFunction<P1, P2, P3, P4, R> {
+        public R apply(P1 var1, P2 var2, P3 var3, P4 var4);
+    }
+
+    @FunctionalInterface
     public static interface TriFunction<P1, P2, P3, R> {
         public R apply(P1 var1, P2 var2, P3 var3);
     }
@@ -101,6 +111,16 @@ public abstract class PropertyDispatch {
         public C5<T1, T2, T3, T4, T5> select(T1 comparable, T2 comparable2, T3 comparable3, T4 comparable4, T5 comparable5, Variant variant) {
             return this.select(comparable, comparable2, comparable3, comparable4, comparable5, Collections.singletonList(variant));
         }
+
+        public PropertyDispatch generate(PentaFunction<T1, T2, T3, T4, T5, Variant> pentaFunction) {
+            this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.property4.getPossibleValues().forEach(comparable4 -> this.property5.getPossibleValues().forEach(comparable5 -> this.select(comparable, comparable2, comparable3, comparable4, comparable5, (Variant)pentaFunction.apply(comparable, comparable2, comparable3, comparable4, comparable5)))))));
+            return this;
+        }
+
+        public PropertyDispatch generateList(PentaFunction<T1, T2, T3, T4, T5, List<Variant>> pentaFunction) {
+            this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.property4.getPossibleValues().forEach(comparable4 -> this.property5.getPossibleValues().forEach(comparable5 -> this.select(comparable, comparable2, comparable3, comparable4, comparable5, (List)pentaFunction.apply(comparable, comparable2, comparable3, comparable4, comparable5)))))));
+            return this;
+        }
     }
 
     public static class C4<T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>>
@@ -130,6 +150,16 @@ public abstract class PropertyDispatch {
 
         public C4<T1, T2, T3, T4> select(T1 comparable, T2 comparable2, T3 comparable3, T4 comparable4, Variant variant) {
             return this.select(comparable, comparable2, comparable3, comparable4, Collections.singletonList(variant));
+        }
+
+        public PropertyDispatch generate(QuadFunction<T1, T2, T3, T4, Variant> quadFunction) {
+            this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.property4.getPossibleValues().forEach(comparable4 -> this.select(comparable, comparable2, comparable3, comparable4, (Variant)quadFunction.apply(comparable, comparable2, comparable3, comparable4))))));
+            return this;
+        }
+
+        public PropertyDispatch generateList(QuadFunction<T1, T2, T3, T4, List<Variant>> quadFunction) {
+            this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.property4.getPossibleValues().forEach(comparable4 -> this.select(comparable, comparable2, comparable3, comparable4, (List)quadFunction.apply(comparable, comparable2, comparable3, comparable4))))));
+            return this;
         }
     }
 
@@ -162,6 +192,11 @@ public abstract class PropertyDispatch {
 
         public PropertyDispatch generate(TriFunction<T1, T2, T3, Variant> triFunction) {
             this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.select(comparable, comparable2, comparable3, (Variant)triFunction.apply(comparable, comparable2, comparable3)))));
+            return this;
+        }
+
+        public PropertyDispatch generateList(TriFunction<T1, T2, T3, List<Variant>> triFunction) {
+            this.property1.getPossibleValues().forEach(comparable -> this.property2.getPossibleValues().forEach(comparable2 -> this.property3.getPossibleValues().forEach(comparable3 -> this.select(comparable, comparable2, comparable3, (List)triFunction.apply(comparable, comparable2, comparable3)))));
             return this;
         }
     }
@@ -227,6 +262,11 @@ public abstract class PropertyDispatch {
 
         public PropertyDispatch generate(Function<T1, Variant> function) {
             this.property1.getPossibleValues().forEach(comparable -> this.select(comparable, (Variant)function.apply(comparable)));
+            return this;
+        }
+
+        public PropertyDispatch generateList(Function<T1, List<Variant>> function) {
+            this.property1.getPossibleValues().forEach(comparable -> this.select(comparable, (List)function.apply(comparable)));
             return this;
         }
     }

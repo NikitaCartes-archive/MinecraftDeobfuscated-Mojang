@@ -21,6 +21,10 @@ import net.minecraft.world.entity.animal.Rabbit;
 @Environment(value=EnvType.CLIENT)
 public class RabbitModel<T extends Rabbit>
 extends EntityModel<T> {
+    private static final float REAR_JUMP_ANGLE = 50.0f;
+    private static final float FRONT_JUMP_ANGLE = -40.0f;
+    private static final String LEFT_HAUNCH = "left_haunch";
+    private static final String RIGHT_HAUNCH = "right_haunch";
     private final ModelPart leftRearFoot;
     private final ModelPart rightRearFoot;
     private final ModelPart leftHaunch;
@@ -34,12 +38,13 @@ extends EntityModel<T> {
     private final ModelPart tail;
     private final ModelPart nose;
     private float jumpRotation;
+    private static final float NEW_SCALE = 0.6f;
 
     public RabbitModel(ModelPart modelPart) {
         this.leftRearFoot = modelPart.getChild("left_hind_foot");
         this.rightRearFoot = modelPart.getChild("right_hind_foot");
-        this.leftHaunch = modelPart.getChild("left_haunch");
-        this.rightHaunch = modelPart.getChild("right_haunch");
+        this.leftHaunch = modelPart.getChild(LEFT_HAUNCH);
+        this.rightHaunch = modelPart.getChild(RIGHT_HAUNCH);
         this.body = modelPart.getChild("body");
         this.leftFrontLeg = modelPart.getChild("left_front_leg");
         this.rightFrontLeg = modelPart.getChild("right_front_leg");
@@ -55,8 +60,8 @@ extends EntityModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         partDefinition.addOrReplaceChild("left_hind_foot", CubeListBuilder.create().texOffs(26, 24).addBox(-1.0f, 5.5f, -3.7f, 2.0f, 1.0f, 7.0f), PartPose.offset(3.0f, 17.5f, 3.7f));
         partDefinition.addOrReplaceChild("right_hind_foot", CubeListBuilder.create().texOffs(8, 24).addBox(-1.0f, 5.5f, -3.7f, 2.0f, 1.0f, 7.0f), PartPose.offset(-3.0f, 17.5f, 3.7f));
-        partDefinition.addOrReplaceChild("left_haunch", CubeListBuilder.create().texOffs(30, 15).addBox(-1.0f, 0.0f, 0.0f, 2.0f, 4.0f, 5.0f), PartPose.offsetAndRotation(3.0f, 17.5f, 3.7f, -0.34906584f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("right_haunch", CubeListBuilder.create().texOffs(16, 15).addBox(-1.0f, 0.0f, 0.0f, 2.0f, 4.0f, 5.0f), PartPose.offsetAndRotation(-3.0f, 17.5f, 3.7f, -0.34906584f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(LEFT_HAUNCH, CubeListBuilder.create().texOffs(30, 15).addBox(-1.0f, 0.0f, 0.0f, 2.0f, 4.0f, 5.0f), PartPose.offsetAndRotation(3.0f, 17.5f, 3.7f, -0.34906584f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(RIGHT_HAUNCH, CubeListBuilder.create().texOffs(16, 15).addBox(-1.0f, 0.0f, 0.0f, 2.0f, 4.0f, 5.0f), PartPose.offsetAndRotation(-3.0f, 17.5f, 3.7f, -0.34906584f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -2.0f, -10.0f, 6.0f, 5.0f, 10.0f), PartPose.offsetAndRotation(0.0f, 19.0f, 8.0f, -0.34906584f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild("left_front_leg", CubeListBuilder.create().texOffs(8, 15).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.offsetAndRotation(3.0f, 17.0f, -1.0f, -0.17453292f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild("right_front_leg", CubeListBuilder.create().texOffs(0, 15).addBox(-1.0f, 0.0f, -1.0f, 2.0f, 7.0f, 2.0f), PartPose.offsetAndRotation(-3.0f, 17.0f, -1.0f, -0.17453292f, 0.0f, 0.0f));

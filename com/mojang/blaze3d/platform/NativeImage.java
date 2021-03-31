@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -41,6 +42,10 @@ import org.lwjgl.system.MemoryUtil;
 public final class NativeImage
 implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int OFFSET_A = 24;
+    private static final int OFFSET_B = 16;
+    private static final int OFFSET_G = 8;
+    private static final int OFFSET_R = 0;
     private static final Set<StandardOpenOption> OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     private final Format format;
     private final int width;
@@ -184,6 +189,55 @@ implements AutoCloseable {
         MemoryUtil.memPutInt(this.pixels + l, k);
     }
 
+    public void setPixelLuminance(int i, int j, byte b) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        if (!this.format.hasLuminance()) {
+            throw new IllegalArgumentException(String.format("setPixelLuminance only works on image with luminance; have %s", new Object[]{this.format}));
+        }
+        if (i > this.width || j > this.height) {
+            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+        }
+        this.checkAllocated();
+        long l = (i + j * this.width) * this.format.components() + this.format.luminanceOffset() / 8;
+        MemoryUtil.memPutByte(this.pixels + l, b);
+    }
+
+    public byte getRedOrLuminance(int i, int j) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        if (!this.format.hasLuminanceOrRed()) {
+            throw new IllegalArgumentException(String.format("no red or luminance in %s", new Object[]{this.format}));
+        }
+        if (i > this.width || j > this.height) {
+            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+        }
+        int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrRedOffset() / 8;
+        return MemoryUtil.memGetByte(this.pixels + (long)k);
+    }
+
+    public byte getGreenOrLuminance(int i, int j) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        if (!this.format.hasLuminanceOrGreen()) {
+            throw new IllegalArgumentException(String.format("no green or luminance in %s", new Object[]{this.format}));
+        }
+        if (i > this.width || j > this.height) {
+            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+        }
+        int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrGreenOffset() / 8;
+        return MemoryUtil.memGetByte(this.pixels + (long)k);
+    }
+
+    public byte getBlueOrLuminance(int i, int j) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        if (!this.format.hasLuminanceOrBlue()) {
+            throw new IllegalArgumentException(String.format("no blue or luminance in %s", new Object[]{this.format}));
+        }
+        if (i > this.width || j > this.height) {
+            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+        }
+        int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrBlueOffset() / 8;
+        return MemoryUtil.memGetByte(this.pixels + (long)k);
+    }
+
     public byte getLuminanceOrAlpha(int i, int j) {
         if (!this.format.hasLuminanceOrAlpha()) {
             throw new IllegalArgumentException(String.format("no luminance or alpha in %s", new Object[]{this.format}));
@@ -193,6 +247,44 @@ implements AutoCloseable {
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8;
         return MemoryUtil.memGetByte(this.pixels + (long)k);
+    }
+
+    public void blendPixel(int i, int j, int k) {
+        if (this.format != Format.RGBA) {
+            throw new UnsupportedOperationException("Can only call blendPixel with RGBA format");
+        }
+        int l = this.getPixelRGBA(i, j);
+        float f = (float)NativeImage.getA(k) / 255.0f;
+        float g = (float)NativeImage.getB(k) / 255.0f;
+        float h = (float)NativeImage.getG(k) / 255.0f;
+        float m = (float)NativeImage.getR(k) / 255.0f;
+        float n = (float)NativeImage.getA(l) / 255.0f;
+        float o = (float)NativeImage.getB(l) / 255.0f;
+        float p = (float)NativeImage.getG(l) / 255.0f;
+        float q = (float)NativeImage.getR(l) / 255.0f;
+        float r = f;
+        float s = 1.0f - f;
+        float t = f * r + n * s;
+        float u = g * r + o * s;
+        float v = h * r + p * s;
+        float w = m * r + q * s;
+        if (t > 1.0f) {
+            t = 1.0f;
+        }
+        if (u > 1.0f) {
+            u = 1.0f;
+        }
+        if (v > 1.0f) {
+            v = 1.0f;
+        }
+        if (w > 1.0f) {
+            w = 1.0f;
+        }
+        int x = (int)(t * 255.0f);
+        int y = (int)(u * 255.0f);
+        int z = (int)(v * 255.0f);
+        int aa = (int)(w * 255.0f);
+        this.setPixelRGBA(i, j, NativeImage.combine(x, y, z, aa));
     }
 
     @Deprecated
@@ -247,7 +339,7 @@ implements AutoCloseable {
         GlStateManager._texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
         if (bl2) {
             GlStateManager._texParameter(3553, 10242, 33071);
-            GlStateManager._texParameter(3553, 10242, 33071);
+            GlStateManager._texParameter(3553, 10243, 33071);
         }
         if (bl4) {
             this.close();
@@ -266,6 +358,26 @@ implements AutoCloseable {
                 }
             }
         }
+    }
+
+    public void downloadDepthBuffer(float f) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        if (this.format.components() != 1) {
+            throw new IllegalStateException("Depth buffer must be stored in NativeImage with 1 component.");
+        }
+        this.checkAllocated();
+        this.format.setPackPixelStoreState();
+        GlStateManager._readPixels(0, 0, this.width, this.height, 6402, 5121, this.pixels);
+    }
+
+    public void drawPixels() {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        this.format.setUnpackPixelStoreState();
+        GlStateManager._glDrawPixels(this.width, this.height, this.format.glFormat(), 5121, this.pixels);
+    }
+
+    public void writeToFile(String string) throws IOException {
+        this.writeToFile(FileSystems.getDefault().getPath(string, new String[0]));
     }
 
     public void writeToFile(File file) throws IOException {
@@ -523,16 +635,72 @@ implements AutoCloseable {
             return this.glFormat;
         }
 
+        public boolean hasRed() {
+            return this.hasRed;
+        }
+
+        public boolean hasGreen() {
+            return this.hasGreen;
+        }
+
+        public boolean hasBlue() {
+            return this.hasBlue;
+        }
+
+        public boolean hasLuminance() {
+            return this.hasLuminance;
+        }
+
         public boolean hasAlpha() {
             return this.hasAlpha;
+        }
+
+        public int redOffset() {
+            return this.redOffset;
+        }
+
+        public int greenOffset() {
+            return this.greenOffset;
+        }
+
+        public int blueOffset() {
+            return this.blueOffset;
+        }
+
+        public int luminanceOffset() {
+            return this.luminanceOffset;
         }
 
         public int alphaOffset() {
             return this.alphaOffset;
         }
 
+        public boolean hasLuminanceOrRed() {
+            return this.hasLuminance || this.hasRed;
+        }
+
+        public boolean hasLuminanceOrGreen() {
+            return this.hasLuminance || this.hasGreen;
+        }
+
+        public boolean hasLuminanceOrBlue() {
+            return this.hasLuminance || this.hasBlue;
+        }
+
         public boolean hasLuminanceOrAlpha() {
             return this.hasLuminance || this.hasAlpha;
+        }
+
+        public int luminanceOrRedOffset() {
+            return this.hasLuminance ? this.luminanceOffset : this.redOffset;
+        }
+
+        public int luminanceOrGreenOffset() {
+            return this.hasLuminance ? this.luminanceOffset : this.greenOffset;
+        }
+
+        public int luminanceOrBlueOffset() {
+            return this.hasLuminance ? this.luminanceOffset : this.blueOffset;
         }
 
         public int luminanceOrAlphaOffset() {
@@ -573,7 +741,7 @@ implements AutoCloseable {
             this.glFormat = j;
         }
 
-        int glFormat() {
+        public int glFormat() {
             return this.glFormat;
         }
     }

@@ -19,7 +19,7 @@ extends AbstractSchoolingFish {
     }
 
     @Override
-    protected ItemStack getBucketItemStack() {
+    public ItemStack getBucketItemStack() {
         return new ItemStack(Items.COD_BUCKET);
     }
 

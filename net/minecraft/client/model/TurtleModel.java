@@ -23,11 +23,12 @@ import net.minecraft.world.entity.animal.Turtle;
 @Environment(value=EnvType.CLIENT)
 public class TurtleModel<T extends Turtle>
 extends QuadrupedModel<T> {
+    private static final String EGG_BELLY = "egg_belly";
     private final ModelPart eggBelly;
 
     public TurtleModel(ModelPart modelPart) {
         super(modelPart, true, 120.0f, 0.0f, 9.0f, 6.0f, 120);
-        this.eggBelly = modelPart.getChild("egg_belly");
+        this.eggBelly = modelPart.getChild(EGG_BELLY);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -35,7 +36,7 @@ extends QuadrupedModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(3, 0).addBox(-3.0f, -1.0f, -3.0f, 6.0f, 5.0f, 6.0f), PartPose.offset(0.0f, 19.0f, -10.0f));
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(7, 37).addBox("shell", -9.5f, 3.0f, -10.0f, 19.0f, 20.0f, 6.0f).texOffs(31, 1).addBox("belly", -5.5f, 3.0f, -13.0f, 11.0f, 18.0f, 3.0f), PartPose.offsetAndRotation(0.0f, 11.0f, -10.0f, 1.5707964f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("egg_belly", CubeListBuilder.create().texOffs(70, 33).addBox(-4.5f, 3.0f, -14.0f, 9.0f, 18.0f, 1.0f), PartPose.offsetAndRotation(0.0f, 11.0f, -10.0f, 1.5707964f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(EGG_BELLY, CubeListBuilder.create().texOffs(70, 33).addBox(-4.5f, 3.0f, -14.0f, 9.0f, 18.0f, 1.0f), PartPose.offsetAndRotation(0.0f, 11.0f, -10.0f, 1.5707964f, 0.0f, 0.0f));
         boolean i = true;
         partDefinition.addOrReplaceChild("right_hind_leg", CubeListBuilder.create().texOffs(1, 23).addBox(-2.0f, 0.0f, 0.0f, 4.0f, 1.0f, 10.0f), PartPose.offset(-3.5f, 22.0f, 11.0f));
         partDefinition.addOrReplaceChild("left_hind_leg", CubeListBuilder.create().texOffs(1, 12).addBox(-2.0f, 0.0f, 0.0f, 4.0f, 1.0f, 10.0f), PartPose.offset(3.5f, 22.0f, 11.0f));

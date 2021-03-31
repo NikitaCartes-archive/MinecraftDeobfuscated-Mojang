@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.login;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import javax.crypto.SecretKey;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
@@ -19,7 +17,6 @@ implements Packet<ServerLoginPacketListener> {
     private final byte[] keybytes;
     private final byte[] nonce;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, byte[] bs) throws CryptException {
         this.keybytes = Crypt.encryptUsingKey(publicKey, secretKey.getEncoded());
         this.nonce = Crypt.encryptUsingKey(publicKey, bs);

@@ -5,8 +5,6 @@ package net.minecraft.world.entity;
 
 import java.util.Optional;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,6 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -29,7 +28,8 @@ import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TamableAnimal
-extends Animal {
+extends Animal
+implements OwnableEntity {
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(TamableAnimal.class, EntityDataSerializers.BYTE);
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(TamableAnimal.class, EntityDataSerializers.OPTIONAL_UUID);
     private boolean orderedToSit;
@@ -82,7 +82,6 @@ extends Animal {
         return !this.isLeashed();
     }
 
-    @Environment(value=EnvType.CLIENT)
     protected void spawnTamingParticles(boolean bl) {
         SimpleParticleType particleOptions = ParticleTypes.HEART;
         if (!bl) {
@@ -97,7 +96,6 @@ extends Animal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 7) {
             this.spawnTamingParticles(true);
@@ -138,6 +136,7 @@ extends Animal {
         }
     }
 
+    @Override
     @Nullable
     public UUID getOwnerUUID() {
         return this.entityData.get(DATA_OWNERUUID_ID).orElse(null);
@@ -155,6 +154,7 @@ extends Animal {
         }
     }
 
+    @Override
     @Nullable
     public LivingEntity getOwner() {
         try {
@@ -221,6 +221,12 @@ extends Animal {
 
     public void setOrderedToSit(boolean bl) {
         this.orderedToSit = bl;
+    }
+
+    @Override
+    @Nullable
+    public /* synthetic */ Entity getOwner() {
+        return this.getOwner();
     }
 }
 

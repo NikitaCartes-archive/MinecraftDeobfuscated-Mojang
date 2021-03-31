@@ -183,13 +183,48 @@ public class LocationPredicate {
             return new Builder();
         }
 
+        public Builder setX(MinMaxBounds.Floats floats) {
+            this.x = floats;
+            return this;
+        }
+
+        public Builder setY(MinMaxBounds.Floats floats) {
+            this.y = floats;
+            return this;
+        }
+
+        public Builder setZ(MinMaxBounds.Floats floats) {
+            this.z = floats;
+            return this;
+        }
+
         public Builder setBiome(@Nullable ResourceKey<Biome> resourceKey) {
             this.biome = resourceKey;
             return this;
         }
 
+        public Builder setFeature(@Nullable StructureFeature<?> structureFeature) {
+            this.feature = structureFeature;
+            return this;
+        }
+
+        public Builder setDimension(@Nullable ResourceKey<Level> resourceKey) {
+            this.dimension = resourceKey;
+            return this;
+        }
+
+        public Builder setLight(LightPredicate lightPredicate) {
+            this.light = lightPredicate;
+            return this;
+        }
+
         public Builder setBlock(BlockPredicate blockPredicate) {
             this.block = blockPredicate;
+            return this;
+        }
+
+        public Builder setFluid(FluidPredicate fluidPredicate) {
+            this.fluid = fluidPredicate;
             return this;
         }
 

@@ -55,7 +55,12 @@ public class StructureFeatureManager {
     }
 
     public StructureStart<?> getStructureAt(BlockPos blockPos, boolean bl, StructureFeature<?> structureFeature) {
-        return DataFixUtils.orElse(this.startsForFeature(SectionPos.of(blockPos), structureFeature).filter(structureStart -> structureStart.getBoundingBox().isInside(blockPos)).filter(structureStart -> !bl || structureStart.getPieces().stream().anyMatch(structurePiece -> structurePiece.getBoundingBox().isInside(blockPos))).findFirst(), StructureStart.INVALID_START);
+        return DataFixUtils.orElse(this.startsForFeature(SectionPos.of(blockPos), structureFeature).filter(structureStart -> {
+            if (bl) {
+                return structureStart.getPieces().stream().anyMatch(structurePiece -> structurePiece.getBoundingBox().isInside(blockPos));
+            }
+            return structureStart.getBoundingBox().isInside(blockPos);
+        }).findFirst(), StructureStart.INVALID_START);
     }
 }
 

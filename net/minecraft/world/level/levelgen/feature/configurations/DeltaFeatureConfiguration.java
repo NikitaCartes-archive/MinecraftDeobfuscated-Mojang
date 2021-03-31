@@ -7,23 +7,23 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.UniformInt;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class DeltaFeatureConfiguration
 implements FeatureConfiguration {
-    public static final Codec<DeltaFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("contents")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.contents), ((MapCodec)BlockState.CODEC.fieldOf("rim")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rim), ((MapCodec)UniformInt.codec(0, 8, 8).fieldOf("size")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.size), ((MapCodec)UniformInt.codec(0, 8, 8).fieldOf("rim_size")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rimSize)).apply((Applicative<DeltaFeatureConfiguration, ?>)instance, DeltaFeatureConfiguration::new));
+    public static final Codec<DeltaFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("contents")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.contents), ((MapCodec)BlockState.CODEC.fieldOf("rim")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rim), ((MapCodec)IntProvider.codec(0, 16).fieldOf("size")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.size), ((MapCodec)IntProvider.codec(0, 16).fieldOf("rim_size")).forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rimSize)).apply((Applicative<DeltaFeatureConfiguration, ?>)instance, DeltaFeatureConfiguration::new));
     private final BlockState contents;
     private final BlockState rim;
-    private final UniformInt size;
-    private final UniformInt rimSize;
+    private final IntProvider size;
+    private final IntProvider rimSize;
 
-    public DeltaFeatureConfiguration(BlockState blockState, BlockState blockState2, UniformInt uniformInt, UniformInt uniformInt2) {
+    public DeltaFeatureConfiguration(BlockState blockState, BlockState blockState2, IntProvider intProvider, IntProvider intProvider2) {
         this.contents = blockState;
         this.rim = blockState2;
-        this.size = uniformInt;
-        this.rimSize = uniformInt2;
+        this.size = intProvider;
+        this.rimSize = intProvider2;
     }
 
     public BlockState contents() {
@@ -34,11 +34,11 @@ implements FeatureConfiguration {
         return this.rim;
     }
 
-    public UniformInt size() {
+    public IntProvider size() {
         return this.size;
     }
 
-    public UniformInt rimSize() {
+    public IntProvider rimSize() {
         return this.rimSize;
     }
 }

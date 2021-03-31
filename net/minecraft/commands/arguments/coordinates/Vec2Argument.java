@@ -38,6 +38,10 @@ implements ArgumentType<Coordinates> {
         return new Vec2Argument(true);
     }
 
+    public static Vec2Argument vec2(boolean bl) {
+        return new Vec2Argument(bl);
+    }
+
     public static Vec2 getVec2(CommandContext<CommandSourceStack> commandContext, String string) {
         Vec3 vec3 = commandContext.getArgument(string, Coordinates.class).getPosition(commandContext.getSource());
         return new Vec2((float)vec3.x, (float)vec3.z);

@@ -41,6 +41,11 @@ implements ContextAwareComponent {
         return this.pattern;
     }
 
+    @Nullable
+    public EntitySelector getSelector() {
+        return this.selector;
+    }
+
     @Override
     public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (commandSourceStack == null || this.selector == null) {

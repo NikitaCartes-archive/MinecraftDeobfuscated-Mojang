@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class LongRunningTask
 implements ErrorCallback,
 Runnable {
+    protected static final int NUMBER_OF_RETRIES = 25;
     public static final Logger LOGGER = LogManager.getLogger();
     protected RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen;
 

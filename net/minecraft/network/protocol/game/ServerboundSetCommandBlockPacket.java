@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -13,6 +11,9 @@ import net.minecraft.world.level.block.entity.CommandBlockEntity;
 
 public class ServerboundSetCommandBlockPacket
 implements Packet<ServerGamePacketListener> {
+    private static final int FLAG_TRACK_OUTPUT = 1;
+    private static final int FLAG_CONDITIONAL = 2;
+    private static final int FLAG_AUTOMATIC = 4;
     private final BlockPos pos;
     private final String command;
     private final boolean trackOutput;
@@ -20,7 +21,6 @@ implements Packet<ServerGamePacketListener> {
     private final boolean automatic;
     private final CommandBlockEntity.Mode mode;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSetCommandBlockPacket(BlockPos blockPos, String string, CommandBlockEntity.Mode mode, boolean bl, boolean bl2, boolean bl3) {
         this.pos = blockPos;
         this.command = string;

@@ -27,6 +27,9 @@ extends AgeableListModel<T> {
     private final ModelPart rightFrontLeg;
     private final ModelPart leftFrontLeg;
     private final ModelPart tail;
+    private static final int LEG_SIZE = 6;
+    private static final float HEAD_HEIGHT = 16.5f;
+    private static final float LEG_POS = 17.5f;
     private float legMotionPos;
 
     public FoxModel(ModelPart modelPart) {

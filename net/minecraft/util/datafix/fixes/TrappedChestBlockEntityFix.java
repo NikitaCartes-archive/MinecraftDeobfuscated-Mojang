@@ -28,6 +28,8 @@ import org.jetbrains.annotations.Nullable;
 public class TrappedChestBlockEntityFix
 extends DataFix {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int SIZE = 4096;
+    private static final short SIZE_BITS = 12;
 
     public TrappedChestBlockEntityFix(Schema schema, boolean bl) {
         super(schema, bl);

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -25,7 +23,6 @@ extends CropBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     protected ItemLike getBaseSeedId() {
         return Items.POTATO;
     }

@@ -14,6 +14,7 @@ import net.minecraft.world.BossEvent;
 @Environment(value=EnvType.CLIENT)
 public class LerpingBossEvent
 extends BossEvent {
+    private static final long LERP_MILLISECONDS = 100L;
     protected float targetPercent;
     protected long setTime;
 

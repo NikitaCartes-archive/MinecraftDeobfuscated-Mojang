@@ -42,10 +42,12 @@ import org.jetbrains.annotations.Nullable;
 public class AreaEffectCloud
 extends Entity {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int TIME_BETWEEN_APPLICATIONS = 5;
     private static final EntityDataAccessor<Float> DATA_RADIUS = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_WAITING = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<ParticleOptions> DATA_PARTICLE = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.PARTICLE);
+    private static final float MAX_RADIUS = 32.0f;
     private Potion potion = Potions.EMPTY;
     private final List<MobEffectInstance> effects = Lists.newArrayList();
     private final Map<Entity, Integer> victims = Maps.newHashMap();
@@ -269,12 +271,32 @@ extends Entity {
         }
     }
 
+    public float getRadiusOnUse() {
+        return this.radiusOnUse;
+    }
+
     public void setRadiusOnUse(float f) {
         this.radiusOnUse = f;
     }
 
+    public float getRadiusPerTick() {
+        return this.radiusPerTick;
+    }
+
     public void setRadiusPerTick(float f) {
         this.radiusPerTick = f;
+    }
+
+    public int getDurationOnUse() {
+        return this.durationOnUse;
+    }
+
+    public void setDurationOnUse(int i) {
+        this.durationOnUse = i;
+    }
+
+    public int getWaitTime() {
+        return this.waitTime;
     }
 
     public void setWaitTime(int i) {
@@ -367,6 +389,10 @@ extends Entity {
             this.refreshDimensions();
         }
         super.onSyncedDataUpdated(entityDataAccessor);
+    }
+
+    public Potion getPotion() {
+        return this.potion;
     }
 
     @Override

@@ -4,8 +4,6 @@
 package net.minecraft.core.particles;
 
 import com.mojang.serialization.Codec;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleOptions;
 
 public abstract class ParticleType<T extends ParticleOptions> {
@@ -17,7 +15,6 @@ public abstract class ParticleType<T extends ParticleOptions> {
         this.deserializer = deserializer;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean getOverrideLimiter() {
         return this.overrideLimiter;
     }

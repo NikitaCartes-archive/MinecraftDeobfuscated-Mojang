@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -14,7 +12,6 @@ implements Packet<ServerGamePacketListener> {
     private final int id;
     private final String command;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundCommandSuggestionPacket(int i, String string) {
         this.id = i;
         this.command = string;

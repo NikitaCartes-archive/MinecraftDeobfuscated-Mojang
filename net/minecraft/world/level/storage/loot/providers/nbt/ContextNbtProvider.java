@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ContextNbtProvider
 implements NbtProvider {
+    private static final String BLOCK_ENTITY_ID = "block_entity";
     private static final Getter BLOCK_ENTITY_PROVIDER = new Getter(){
 
         @Override
@@ -37,7 +38,7 @@ implements NbtProvider {
 
         @Override
         public String getId() {
-            return "block_entity";
+            return ContextNbtProvider.BLOCK_ENTITY_ID;
         }
 
         @Override
@@ -90,8 +91,12 @@ implements NbtProvider {
         return this.getter.getReferencedContextParams();
     }
 
+    public static NbtProvider forContextEntity(LootContext.EntityTarget entityTarget) {
+        return new ContextNbtProvider(ContextNbtProvider.forEntity(entityTarget));
+    }
+
     private static ContextNbtProvider createFromContext(String string) {
-        if (string.equals("block_entity")) {
+        if (string.equals(BLOCK_ENTITY_ID)) {
             return new ContextNbtProvider(BLOCK_ENTITY_PROVIDER);
         }
         LootContext.EntityTarget entityTarget = LootContext.EntityTarget.getByName(string);

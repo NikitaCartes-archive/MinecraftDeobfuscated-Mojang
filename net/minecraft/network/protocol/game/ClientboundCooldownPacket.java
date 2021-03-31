@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -36,12 +34,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleItemCooldown(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Item getItem() {
         return this.item;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getDuration() {
         return this.duration;
     }

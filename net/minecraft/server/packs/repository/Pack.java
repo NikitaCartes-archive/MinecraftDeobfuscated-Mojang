@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -74,12 +72,10 @@ implements AutoCloseable {
         this(string, bl, supplier, component, packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, packType), position, false, packSource);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getTitle() {
         return this.title;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getDescription() {
         return this.description;
     }
@@ -112,7 +108,6 @@ implements AutoCloseable {
         return this.defaultPosition;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public PackSource getPackSource() {
         return this.packSource;
     }

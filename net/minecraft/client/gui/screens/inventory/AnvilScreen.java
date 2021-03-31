@@ -53,8 +53,10 @@ extends ItemCombinerScreen<AnvilMenu> {
         this.name.setBordered(false);
         this.name.setMaxLength(35);
         this.name.setResponder(this::onNameChanged);
+        this.name.setValue("");
         this.children.add(this.name);
         this.setInitialFocus(this.name);
+        this.name.setEditable(false);
     }
 
     @Override

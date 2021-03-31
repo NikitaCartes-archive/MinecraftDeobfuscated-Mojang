@@ -31,6 +31,8 @@ extends GuiComponent
 implements Widget,
 GuiEventListener {
     public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    private static final int NARRATE_DELAY_MOUSE = 750;
+    private static final int NARRATE_DELAY_FOCUS = 200;
     protected int width;
     protected int height;
     public int x;

@@ -29,18 +29,19 @@ import net.minecraft.world.entity.LivingEntity;
 public class SpinAttackEffectLayer<T extends LivingEntity>
 extends RenderLayer<T, PlayerModel<T>> {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/trident_riptide.png");
+    public static final String BOX = "box";
     private final ModelPart box;
 
     public SpinAttackEffectLayer(RenderLayerParent<T, PlayerModel<T>> renderLayerParent, EntityModelSet entityModelSet) {
         super(renderLayerParent);
         ModelPart modelPart = entityModelSet.bakeLayer(ModelLayers.PLAYER_SPIN_ATTACK);
-        this.box = modelPart.getChild("box");
+        this.box = modelPart.getChild(BOX);
     }
 
     public static LayerDefinition createLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("box", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -16.0f, -8.0f, 16.0f, 32.0f, 16.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(BOX, CubeListBuilder.create().texOffs(0, 0).addBox(-8.0f, -16.0f, -8.0f, 16.0f, 32.0f, 16.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

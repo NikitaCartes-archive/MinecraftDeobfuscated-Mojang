@@ -16,5 +16,7 @@ public interface TickList<T> {
     public void scheduleTick(BlockPos var1, T var2, int var3, TickPriority var4);
 
     public boolean willTickThisTick(BlockPos var1, T var2);
+
+    public int size();
 }
 

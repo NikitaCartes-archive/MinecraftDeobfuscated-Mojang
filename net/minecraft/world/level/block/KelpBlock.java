@@ -26,6 +26,7 @@ public class KelpBlock
 extends GrowingPlantHeadBlock
 implements LiquidBlockContainer {
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 9.0, 16.0);
+    private static final double GROW_PER_TICK_PROBABILITY = 0.14;
 
     protected KelpBlock(BlockBehaviour.Properties properties) {
         super(properties, Direction.UP, SHAPE, true, 0.14);

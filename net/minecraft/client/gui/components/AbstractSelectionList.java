@@ -299,6 +299,10 @@ implements Widget {
         return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
     }
 
+    public int getScrollBottom() {
+        return (int)this.getScrollAmount() - this.height - this.headerHeight;
+    }
+
     protected void updateScrollingState(double d, double e, int i) {
         this.scrolling = i == 0 && d >= (double)this.getScrollbarPosition() && d < (double)(this.getScrollbarPosition() + 6);
     }

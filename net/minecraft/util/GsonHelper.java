@@ -17,8 +17,8 @@ import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -35,12 +35,18 @@ public class GsonHelper {
         return jsonObject.getAsJsonPrimitive(string).isString();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean isStringValue(JsonElement jsonElement) {
         if (!jsonElement.isJsonPrimitive()) {
             return false;
         }
         return jsonElement.getAsJsonPrimitive().isString();
+    }
+
+    public static boolean isNumberValue(JsonObject jsonObject, String string) {
+        if (!GsonHelper.isValidPrimitive(jsonObject, string)) {
+            return false;
+        }
+        return jsonObject.getAsJsonPrimitive(string).isNumber();
     }
 
     public static boolean isNumberValue(JsonElement jsonElement) {
@@ -50,7 +56,6 @@ public class GsonHelper {
         return jsonElement.getAsJsonPrimitive().isNumber();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean isBooleanValue(JsonObject jsonObject, String string) {
         if (!GsonHelper.isValidPrimitive(jsonObject, string)) {
             return false;
@@ -58,11 +63,25 @@ public class GsonHelper {
         return jsonObject.getAsJsonPrimitive(string).isBoolean();
     }
 
+    public static boolean isBooleanValue(JsonElement jsonElement) {
+        if (!jsonElement.isJsonPrimitive()) {
+            return false;
+        }
+        return jsonElement.getAsJsonPrimitive().isBoolean();
+    }
+
     public static boolean isArrayNode(JsonObject jsonObject, String string) {
         if (!GsonHelper.isValidNode(jsonObject, string)) {
             return false;
         }
         return jsonObject.get(string).isJsonArray();
+    }
+
+    public static boolean isObjectNode(JsonObject jsonObject, String string) {
+        if (!GsonHelper.isValidNode(jsonObject, string)) {
+            return false;
+        }
+        return jsonObject.get(string).isJsonObject();
     }
 
     public static boolean isValidPrimitive(JsonObject jsonObject, String string) {
@@ -115,6 +134,13 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string + ", expected to find an item");
     }
 
+    public static Item getAsItem(JsonObject jsonObject, String string, Item item) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToItem(jsonObject.get(string), string);
+        }
+        return item;
+    }
+
     public static boolean convertToBoolean(JsonElement jsonElement, String string) {
         if (jsonElement.isJsonPrimitive()) {
             return jsonElement.getAsBoolean();
@@ -134,6 +160,27 @@ public class GsonHelper {
             return GsonHelper.convertToBoolean(jsonObject.get(string), string);
         }
         return bl;
+    }
+
+    public static double convertToDouble(JsonElement jsonElement, String string) {
+        if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+            return jsonElement.getAsDouble();
+        }
+        throw new JsonSyntaxException("Expected " + string + " to be a Double, was " + GsonHelper.getType(jsonElement));
+    }
+
+    public static double getAsDouble(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToDouble(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a Double");
+    }
+
+    public static double getAsDouble(JsonObject jsonObject, String string, double d) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToDouble(jsonObject.get(string), string);
+        }
+        return d;
     }
 
     public static float convertToFloat(JsonElement jsonElement, String string) {
@@ -206,11 +253,102 @@ public class GsonHelper {
         throw new JsonSyntaxException("Expected " + string + " to be a Byte, was " + GsonHelper.getType(jsonElement));
     }
 
+    public static byte getAsByte(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToByte(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a Byte");
+    }
+
     public static byte getAsByte(JsonObject jsonObject, String string, byte b) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToByte(jsonObject.get(string), string);
         }
         return b;
+    }
+
+    public static char convertToCharacter(JsonElement jsonElement, String string) {
+        if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+            return jsonElement.getAsCharacter();
+        }
+        throw new JsonSyntaxException("Expected " + string + " to be a Character, was " + GsonHelper.getType(jsonElement));
+    }
+
+    public static char getAsCharacter(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToCharacter(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a Character");
+    }
+
+    public static char getAsCharacter(JsonObject jsonObject, String string, char c) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToCharacter(jsonObject.get(string), string);
+        }
+        return c;
+    }
+
+    public static BigDecimal convertToBigDecimal(JsonElement jsonElement, String string) {
+        if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+            return jsonElement.getAsBigDecimal();
+        }
+        throw new JsonSyntaxException("Expected " + string + " to be a BigDecimal, was " + GsonHelper.getType(jsonElement));
+    }
+
+    public static BigDecimal getAsBigDecimal(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToBigDecimal(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a BigDecimal");
+    }
+
+    public static BigDecimal getAsBigDecimal(JsonObject jsonObject, String string, BigDecimal bigDecimal) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToBigDecimal(jsonObject.get(string), string);
+        }
+        return bigDecimal;
+    }
+
+    public static BigInteger convertToBigInteger(JsonElement jsonElement, String string) {
+        if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+            return jsonElement.getAsBigInteger();
+        }
+        throw new JsonSyntaxException("Expected " + string + " to be a BigInteger, was " + GsonHelper.getType(jsonElement));
+    }
+
+    public static BigInteger getAsBigInteger(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToBigInteger(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a BigInteger");
+    }
+
+    public static BigInteger getAsBigInteger(JsonObject jsonObject, String string, BigInteger bigInteger) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToBigInteger(jsonObject.get(string), string);
+        }
+        return bigInteger;
+    }
+
+    public static short convertToShort(JsonElement jsonElement, String string) {
+        if (jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isNumber()) {
+            return jsonElement.getAsShort();
+        }
+        throw new JsonSyntaxException("Expected " + string + " to be a Short, was " + GsonHelper.getType(jsonElement));
+    }
+
+    public static short getAsShort(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToShort(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a Short");
+    }
+
+    public static short getAsShort(JsonObject jsonObject, String string, short s) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToShort(jsonObject.get(string), string);
+        }
+        return s;
     }
 
     public static JsonObject convertToJsonObject(JsonElement jsonElement, String string) {
@@ -315,7 +453,6 @@ public class GsonHelper {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
         try {
             JsonReader jsonReader = new JsonReader(reader);
@@ -327,7 +464,6 @@ public class GsonHelper {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken, boolean bl) {
         return GsonHelper.fromJson(gson, (Reader)new StringReader(string), typeToken, bl);
     }
@@ -338,13 +474,11 @@ public class GsonHelper {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken) {
         return GsonHelper.fromJson(gson, reader, typeToken, false);
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken) {
         return GsonHelper.fromJson(gson, string, typeToken, false);
     }

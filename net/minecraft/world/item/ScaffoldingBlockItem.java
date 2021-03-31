@@ -42,7 +42,7 @@ extends BlockItem {
                     Player player = blockPlaceContext.getPlayer();
                     int j = level.getMaxBuildHeight();
                     if (!(player instanceof ServerPlayer) || mutableBlockPos.getY() < j) break;
-                    ((ServerPlayer)player).sendMessage(new TranslatableComponent("build.tooHigh", j).withStyle(ChatFormatting.RED), ChatType.GAME_INFO, Util.NIL_UUID);
+                    ((ServerPlayer)player).sendMessage(new TranslatableComponent("build.tooHigh", j - 1).withStyle(ChatFormatting.RED), ChatType.GAME_INFO, Util.NIL_UUID);
                     break;
                 }
                 blockState = level.getBlockState(mutableBlockPos);

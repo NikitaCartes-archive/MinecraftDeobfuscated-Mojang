@@ -27,6 +27,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -118,6 +119,40 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        }
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private final Map<Enchantment, NumberProvider> enchantments = Maps.newHashMap();
+        private final boolean add;
+
+        public Builder() {
+            this(false);
+        }
+
+        public Builder(boolean bl) {
+            this.add = bl;
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        public Builder withEnchantment(Enchantment enchantment, NumberProvider numberProvider) {
+            this.enchantments.put(enchantment, numberProvider);
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new SetEnchantmentsFunction(this.getConditions(), this.enchantments, this.add);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
         }
     }
 }

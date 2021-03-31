@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 
 public class PotionBrewing {
+    public static final int BREWING_TIME_SECONDS = 20;
     private static final List<Mix<Potion>> POTION_MIXES = Lists.newArrayList();
     private static final List<Mix<Item>> CONTAINER_MIXES = Lists.newArrayList();
     private static final List<Ingredient> ALLOWED_CONTAINERS = Lists.newArrayList();

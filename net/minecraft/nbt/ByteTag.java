@@ -14,6 +14,7 @@ import net.minecraft.nbt.TagVisitor;
 
 public class ByteTag
 extends NumericTag {
+    private static final int SELF_SIZE_IN_BITS = 72;
     public static final TagType<ByteTag> TYPE = new TagType<ByteTag>(){
 
         @Override
@@ -135,6 +136,9 @@ extends NumericTag {
 
     static class Cache {
         private static final ByteTag[] cache = new ByteTag[256];
+
+        private Cache() {
+        }
 
         static {
             for (int i = 0; i < cache.length; ++i) {

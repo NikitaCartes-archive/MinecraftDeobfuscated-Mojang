@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.Difficulty;
@@ -37,7 +35,6 @@ extends FlowerBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         VoxelShape voxelShape = this.getShape(blockState, level, blockPos, CollisionContext.empty());
         Vec3 vec3 = voxelShape.bounds().getCenter();

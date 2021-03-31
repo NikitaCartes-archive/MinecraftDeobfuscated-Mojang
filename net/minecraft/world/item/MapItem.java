@@ -7,8 +7,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multisets;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,6 +41,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class MapItem
 extends ComplexItem {
+    public static final int IMAGE_WIDTH = 128;
+    public static final int IMAGE_HEIGHT = 128;
+    private static final int DEFAULT_MAP_COLOR = -12173266;
+    private static final String TAG_MAP = "map";
+
     public MapItem(Item.Properties properties) {
         super(properties);
     }
@@ -67,7 +70,7 @@ extends ComplexItem {
     @Nullable
     public static Integer getMapId(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag != null && compoundTag.contains("map", 99) ? Integer.valueOf(compoundTag.getInt("map")) : null;
+        return compoundTag != null && compoundTag.contains(TAG_MAP, 99) ? Integer.valueOf(compoundTag.getInt(TAG_MAP)) : null;
     }
 
     private static int createNewSavedData(Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
@@ -78,7 +81,7 @@ extends ComplexItem {
     }
 
     private static void storeMapData(ItemStack itemStack, int i) {
-        itemStack.getOrCreateTag().putInt("map", i);
+        itemStack.getOrCreateTag().putInt(TAG_MAP, i);
     }
 
     private static void createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
@@ -344,7 +347,6 @@ extends ComplexItem {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         MapItemSavedData mapItemSavedData;
         Integer integer = MapItem.getMapId(itemStack);
@@ -363,7 +365,6 @@ extends ComplexItem {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int getColor(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTagElement("display");
         if (compoundTag != null && compoundTag.contains("MapColor", 99)) {

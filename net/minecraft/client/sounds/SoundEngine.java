@@ -49,7 +49,13 @@ import org.jetbrains.annotations.Nullable;
 public class SoundEngine {
     private static final Marker MARKER = MarkerManager.getMarker("SOUNDS");
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final float PITCH_MIN = 0.5f;
+    private static final float PITCH_MAX = 2.0f;
+    private static final float VOLUME_MIN = 0.0f;
+    private static final float VOLUME_MAX = 1.0f;
+    private static final int MIN_SOURCE_LIFETIME = 20;
     private static final Set<ResourceLocation> ONLY_WARN_ONCE = Sets.newHashSet();
+    public static final String MISSING_SOUND = "FOR THE DEBUG!";
     private final SoundManager soundManager;
     private final Options options;
     private boolean loaded;

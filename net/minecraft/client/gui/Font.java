@@ -38,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Font {
+    private static final float EFFECT_DEPTH = 0.01f;
     private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0f, 0.0f, 0.03f);
     public final int lineHeight = 9;
     public final Random random = new Random();

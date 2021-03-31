@@ -40,6 +40,7 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class Option {
+    protected static final int OPTIONS_TOOLTIP_WIDTH = 200;
     public static final ProgressOption BIOME_BLEND_RADIUS = new ProgressOption("options.biomeBlendRadius", 0.0, 7.0, 1.0f, options -> options.biomeBlendRadius, (options, double_) -> {
         options.biomeBlendRadius = Mth.clamp((int)double_.doubleValue(), 0, 7);
         Minecraft.getInstance().levelRenderer.allChanged();
@@ -358,6 +359,10 @@ public abstract class Option {
     });
     public static final CycleOption<Boolean> VIEW_BOBBING = CycleOption.createOnOff("options.viewBobbing", options -> options.bobView, (options, option, boolean_) -> {
         options.bobView = boolean_;
+    });
+    private static final Component ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND = new TranslatableComponent("options.darkMojangStudiosBackgroundColor.tooltip");
+    public static final CycleOption<Boolean> DARK_MOJANG_STUDIOS_BACKGROUND_COLOR = CycleOption.createOnOff("options.darkMojangStudiosBackgroundColor", ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND, options -> options.darkMojangStudiosBackground, (options, option, boolean_) -> {
+        options.darkMojangStudiosBackground = boolean_;
     });
     private final Component caption;
 

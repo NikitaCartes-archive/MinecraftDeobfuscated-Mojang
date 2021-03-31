@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.WorldGenLevel;
@@ -64,7 +65,7 @@ extends Feature<VegetationPatchConfiguration> {
                 for (m = 0; worldGenLevel.isStateAtPosition(mutableBlockPos, blockState -> !blockState.isAir()) && m < vegetationPatchConfiguration.verticalRange; ++m) {
                     mutableBlockPos.move(direction2);
                 }
-                mutableBlockPos2.setWithOffset(mutableBlockPos, vegetationPatchConfiguration.surface.getDirection());
+                mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, vegetationPatchConfiguration.surface.getDirection());
                 BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos2);
                 if (!worldGenLevel.isEmptyBlock(mutableBlockPos) || !blockState2.isFaceSturdy(worldGenLevel, mutableBlockPos2, vegetationPatchConfiguration.surface.getDirection().getOpposite())) continue;
                 int n = vegetationPatchConfiguration.depth.sample(random) + (vegetationPatchConfiguration.extraBottomBlockChance > 0.0f && random.nextFloat() < vegetationPatchConfiguration.extraBottomBlockChance ? 1 : 0);

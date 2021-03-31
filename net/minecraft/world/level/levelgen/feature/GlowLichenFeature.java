@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlowLichenBlock;
@@ -44,7 +45,7 @@ extends Feature<GlowLichenConfiguration> {
             mutableBlockPos.set(blockPos);
             List<Direction> list2 = GlowLichenFeature.getShuffledDirectionsExcept(glowLichenConfiguration, random, direction.getOpposite());
             for (int i = 0; i < glowLichenConfiguration.searchRange; ++i) {
-                mutableBlockPos.setWithOffset(blockPos, direction);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
                 BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
                 if (!GlowLichenFeature.isAirOrWater(blockState) && !blockState.is(Blocks.GLOW_LICHEN)) continue block0;
                 if (!GlowLichenFeature.placeGlowLichenIfPossible(worldGenLevel, mutableBlockPos, blockState, glowLichenConfiguration, random, list2)) continue;
@@ -57,7 +58,7 @@ extends Feature<GlowLichenConfiguration> {
     public static boolean placeGlowLichenIfPossible(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockState blockState, GlowLichenConfiguration glowLichenConfiguration, Random random, List<Direction> list) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (Direction direction : list) {
-            BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction));
+            BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos, direction));
             if (!glowLichenConfiguration.canBePlacedOn(blockState2.getBlock())) continue;
             GlowLichenBlock glowLichenBlock = (GlowLichenBlock)Blocks.GLOW_LICHEN;
             BlockState blockState3 = glowLichenBlock.getStateForPlacement(blockState, worldGenLevel, blockPos, direction);

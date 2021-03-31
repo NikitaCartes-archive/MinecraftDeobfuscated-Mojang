@@ -7,8 +7,6 @@ import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SkullBlockEntity
 extends BlockEntity {
+    public static final String TAG_SKULL_OWNER = "SkullOwner";
     @Nullable
     private static GameProfileCache profileCache;
     @Nullable
@@ -50,7 +49,7 @@ extends BlockEntity {
         if (this.owner != null) {
             CompoundTag compoundTag2 = new CompoundTag();
             NbtUtils.writeGameProfile(compoundTag2, this.owner);
-            compoundTag.put("SkullOwner", compoundTag2);
+            compoundTag.put(TAG_SKULL_OWNER, compoundTag2);
         }
         return compoundTag;
     }
@@ -59,8 +58,8 @@ extends BlockEntity {
     public void load(CompoundTag compoundTag) {
         String string;
         super.load(compoundTag);
-        if (compoundTag.contains("SkullOwner", 10)) {
-            this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
+        if (compoundTag.contains(TAG_SKULL_OWNER, 10)) {
+            this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound(TAG_SKULL_OWNER)));
         } else if (compoundTag.contains("ExtraType", 8) && !StringUtil.isNullOrEmpty(string = compoundTag.getString("ExtraType"))) {
             this.setOwner(new GameProfile(null, string));
         }
@@ -75,7 +74,6 @@ extends BlockEntity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getMouthAnimation(float f) {
         if (this.isMovingMouth) {
             return (float)this.mouthTickCount + f;
@@ -84,7 +82,6 @@ extends BlockEntity {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public GameProfile getOwnerProfile() {
         return this.owner;
     }

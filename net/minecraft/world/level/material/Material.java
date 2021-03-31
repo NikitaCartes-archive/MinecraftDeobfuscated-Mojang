@@ -48,7 +48,7 @@ public final class Material {
     public static final Material HEAVY_METAL = new Builder(MaterialColor.METAL).notPushable().build();
     public static final Material BARRIER = new Builder(MaterialColor.NONE).notPushable().build();
     public static final Material PISTON = new Builder(MaterialColor.STONE).notPushable().build();
-    public static final Material CORAL = new Builder(MaterialColor.PLANT).destroyOnPush().build();
+    public static final Material MOSS = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material VEGETABLE = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material EGG = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material CAKE = new Builder(MaterialColor.NONE).destroyOnPush().build();

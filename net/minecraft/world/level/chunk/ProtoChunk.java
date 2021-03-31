@@ -285,6 +285,21 @@ implements ChunkAccess {
     }
 
     @Override
+    public BlockPos getHeighestPosition(Heightmap.Types types) {
+        int i = this.getMinBuildHeight();
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int j = this.chunkPos.getMinBlockX(); j <= this.chunkPos.getMaxBlockX(); ++j) {
+            for (int k = this.chunkPos.getMinBlockZ(); k <= this.chunkPos.getMaxBlockZ(); ++k) {
+                int l = this.getHeight(types, j & 0xF, k & 0xF);
+                if (l <= i) continue;
+                i = l;
+                mutableBlockPos.set(j, i, k);
+            }
+        }
+        return mutableBlockPos.immutable();
+    }
+
+    @Override
     public ChunkPos getPos() {
         return this.chunkPos;
     }

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -37,7 +35,6 @@ extends AbstractContainerMenu {
             }
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public boolean isActive() {
                 return abstractHorse.isSaddleable();
             }
@@ -50,7 +47,6 @@ extends AbstractContainerMenu {
             }
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public boolean isActive() {
                 return abstractHorse.canWearArmor();
             }

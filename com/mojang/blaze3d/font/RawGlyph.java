@@ -36,6 +36,7 @@ extends GlyphInfo {
         return this.getUp() + (float)this.getPixelHeight() / this.getOversample();
     }
 
+    @Override
     default public float getBearingY() {
         return 3.0f;
     }

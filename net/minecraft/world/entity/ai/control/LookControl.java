@@ -7,9 +7,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.control.Control;
 import net.minecraft.world.phys.Vec3;
 
-public class LookControl {
+public class LookControl
+implements Control {
     protected final Mob mob;
     protected float yMaxRotSpeed;
     protected float xMaxRotAngle;
@@ -24,6 +26,10 @@ public class LookControl {
 
     public void setLookAt(Vec3 vec3) {
         this.setLookAt(vec3.x, vec3.y, vec3.z);
+    }
+
+    public void setLookAt(Entity entity) {
+        this.setLookAt(entity.getX(), LookControl.getWantedY(entity), entity.getZ());
     }
 
     public void setLookAt(Entity entity, float f, float g) {

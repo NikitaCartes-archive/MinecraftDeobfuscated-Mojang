@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -17,7 +15,6 @@ implements Packet<ServerGamePacketListener> {
     private final ResourceLocation recipe;
     private final boolean shiftDown;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundPlaceRecipePacket(int i, Recipe<?> recipe, boolean bl) {
         this.containerId = i;
         this.recipe = recipe.getId();

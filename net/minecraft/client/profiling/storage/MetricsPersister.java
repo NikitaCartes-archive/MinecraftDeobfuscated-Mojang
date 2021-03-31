@@ -38,6 +38,9 @@ import org.apache.logging.log4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class MetricsPersister {
     public static final Path PROFILING_RESULTS_DIR = Paths.get("debug/profiling", new String[0]);
+    public static final String METRICS_DIR_NAME = "metrics";
+    public static final String DEVIATIONS_DIR_NAME = "deviations";
+    public static final String PROFILING_RESULT_FILENAME = "profiling.txt";
     private static final Logger LOGGER = LogManager.getLogger();
     public static final FileSystemProvider ZIP_FILE_SYSTEM_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElseThrow(() -> new IllegalStateException("No jar file system provider found"));
 
@@ -51,12 +54,12 @@ public class MetricsPersister {
         try (FileSystem fileSystem = ZIP_FILE_SYSTEM_PROVIDER.newFileSystem(path, ImmutableMap.of("create", "true"));){
             Files.createDirectories(PROFILING_RESULTS_DIR, new FileAttribute[0]);
             Path path2 = fileSystem.getPath("/", new String[0]);
-            Path path3 = path2.resolve("metrics");
+            Path path3 = path2.resolve(METRICS_DIR_NAME);
             for (SamplerCategory samplerCategory : list) {
                 this.saveMetrics(samplerCategory, path3);
             }
             if (!list2.isEmpty()) {
-                this.saveSpikeLogs(list2, path2.resolve("deviations"));
+                this.saveSpikeLogs(list2, path2.resolve(DEVIATIONS_DIR_NAME));
             }
             this.saveProfilingTaskExecutionResult(continuousProfiler, path2);
         } catch (IOException iOException2) {
@@ -111,7 +114,7 @@ public class MetricsPersister {
     }
 
     private void saveProfilingTaskExecutionResult(ContinuousProfiler continuousProfiler, Path path) {
-        continuousProfiler.getResults().saveResults(path.resolve("profiling.txt"));
+        continuousProfiler.getResults().saveResults(path.resolve(PROFILING_RESULT_FILENAME));
     }
 
     private Path renameZipFile(Path path) {

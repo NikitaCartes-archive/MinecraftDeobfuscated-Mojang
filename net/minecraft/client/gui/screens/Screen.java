@@ -61,6 +61,7 @@ implements TickableWidget,
 Widget {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Set<String> ALLOWED_PROTOCOLS = Sets.newHashSet("http", "https");
+    private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
     protected final Component title;
     protected final List<GuiEventListener> children = Lists.newArrayList();
     @Nullable
@@ -348,7 +349,7 @@ Widget {
 
     public void renderBackground(PoseStack poseStack, int i) {
         if (this.minecraft.level != null) {
-            this.fillGradient(poseStack, 0, 0, this.width, this.height, -2146430960, -1609560048);
+            this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.renderDirtBackground(i);
         }

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.animal.AbstractSchoolingFish;
 
 public class FollowFlockLeaderGoal
 extends Goal {
+    private static final int INTERVAL_TICKS = 200;
     private final AbstractSchoolingFish mob;
     private int timeToRecalcPath;
     private int nextStartTick;

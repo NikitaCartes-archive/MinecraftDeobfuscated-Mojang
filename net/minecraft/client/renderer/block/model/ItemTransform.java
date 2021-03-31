@@ -71,6 +71,8 @@ public class ItemTransform {
         private static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0f, 0.0f, 0.0f);
         private static final Vector3f DEFAULT_TRANSLATION = new Vector3f(0.0f, 0.0f, 0.0f);
         private static final Vector3f DEFAULT_SCALE = new Vector3f(1.0f, 1.0f, 1.0f);
+        public static final float MAX_TRANSLATION = 5.0f;
+        public static final float MAX_SCALE = 4.0f;
 
         protected Deserializer() {
         }

@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ChangeOverTimeBlock<T extends Enum<T>> {
+    public static final int SCAN_DISTANCE = 4;
+
     public Optional<BlockState> getNext(BlockState var1);
 
     public float getChanceModifier();

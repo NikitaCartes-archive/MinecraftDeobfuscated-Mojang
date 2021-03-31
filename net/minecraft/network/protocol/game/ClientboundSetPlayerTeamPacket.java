@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -18,6 +16,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundSetPlayerTeamPacket
 implements Packet<ClientGamePacketListener> {
+    private static final int METHOD_ADD = 0;
+    private static final int METHOD_REMOVE = 1;
+    private static final int METHOD_CHANGE = 2;
+    private static final int METHOD_JOIN = 3;
+    private static final int METHOD_LEAVE = 4;
+    private static final int MAX_VISIBILITY_LENGTH = 40;
+    private static final int MAX_COLLISION_LENGTH = 40;
     private final int method;
     private final String name;
     private final Collection<String> players;
@@ -70,7 +75,6 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Action getPlayerAction() {
         switch (this.method) {
             case 0: 
@@ -85,7 +89,6 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Action getTeamAction() {
         switch (this.method) {
             case 0: {
@@ -103,17 +106,14 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetPlayerTeamPacket(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getName() {
         return this.name;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Collection<String> getPlayers() {
         return this.players;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<Parameters> getParameters() {
         return this.parameters;
     }
@@ -147,37 +147,30 @@ implements Packet<ClientGamePacketListener> {
             this.playerSuffix = friendlyByteBuf.readComponent();
         }
 
-        @Environment(value=EnvType.CLIENT)
         public Component getDisplayName() {
             return this.displayName;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public int getOptions() {
             return this.options;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public ChatFormatting getColor() {
             return this.color;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public String getNametagVisibility() {
             return this.nametagVisibility;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public String getCollisionRule() {
             return this.collisionRule;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public Component getPlayerPrefix() {
             return this.playerPrefix;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public Component getPlayerSuffix() {
             return this.playerSuffix;
         }

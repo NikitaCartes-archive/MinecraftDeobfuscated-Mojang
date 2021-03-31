@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -18,18 +16,15 @@ implements Packet<ServerGamePacketListener> {
     @Nullable
     private final ResourceLocation tab;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundSeenAdvancementsPacket(Action action, @Nullable ResourceLocation resourceLocation) {
         this.action = action;
         this.tab = resourceLocation;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static ServerboundSeenAdvancementsPacket openedTab(Advancement advancement) {
         return new ServerboundSeenAdvancementsPacket(Action.OPENED_TAB, advancement.getId());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static ServerboundSeenAdvancementsPacket closedScreen() {
         return new ServerboundSeenAdvancementsPacket(Action.CLOSED_SCREEN, null);
     }

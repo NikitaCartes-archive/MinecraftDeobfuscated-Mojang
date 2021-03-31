@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.effect;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -12,7 +10,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class MobEffectUtil {
-    @Environment(value=EnvType.CLIENT)
     public static String formatDuration(MobEffectInstance mobEffectInstance, float f) {
         if (mobEffectInstance.isNoCounter()) {
             return "**:**";

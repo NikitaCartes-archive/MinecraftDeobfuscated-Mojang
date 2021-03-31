@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -90,6 +91,12 @@ public class PoiSection {
         supplierArray[1] = poiRecord::getPos;
         LOGGER.debug("Removed POI of type {} @ {}", supplierArray);
         this.setDirty.run();
+    }
+
+    @Deprecated
+    @VisibleForDebug
+    public int getFreeTickets(BlockPos blockPos) {
+        return this.getPoiRecord(blockPos).map(PoiRecord::getFreeTickets).orElse(0);
     }
 
     public boolean release(BlockPos blockPos) {

@@ -31,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class HarvestFarmland
 extends Behavior<Villager> {
+    private static final int HARVEST_DURATION = 200;
+    public static final float SPEED_MODIFIER = 0.5f;
     @Nullable
     private BlockPos aboveFarmlandPos;
     private long nextOkStartTime;

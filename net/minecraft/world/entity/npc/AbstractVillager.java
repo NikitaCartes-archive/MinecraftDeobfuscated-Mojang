@@ -5,8 +5,6 @@ package net.minecraft.world.entity.npc;
 
 import com.google.common.collect.Sets;
 import java.util.HashSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,6 +28,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
@@ -44,9 +44,12 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractVillager
 extends AgeableMob
-implements Npc,
+implements InventoryCarrier,
+Npc,
 Merchant {
     private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
+    public static final int VILLAGER_SLOT_OFFSET = 300;
+    private static final int VILLAGER_INVENTORY_SIZE = 8;
     @Nullable
     private Player tradingPlayer;
     @Nullable
@@ -119,7 +122,6 @@ Merchant {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void overrideOffers(@Nullable MerchantOffers merchantOffers) {
     }
 
@@ -201,7 +203,6 @@ Merchant {
         this.stopTrading();
     }
 
-    @Environment(value=EnvType.CLIENT)
     protected void addParticlesAroundSelf(ParticleOptions particleOptions) {
         for (int i = 0; i < 5; ++i) {
             double d = this.random.nextGaussian() * 0.02;
@@ -216,6 +217,7 @@ Merchant {
         return false;
     }
 
+    @Override
     public SimpleContainer getInventory() {
         return this.inventory;
     }
@@ -256,11 +258,15 @@ Merchant {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getRopeHoldPosition(float f) {
         float g = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180);
         Vec3 vec3 = new Vec3(0.0, this.getBoundingBox().getYsize() - 1.0, 0.2);
         return this.getPosition(f).add(vec3.yRot(-g));
+    }
+
+    @Override
+    public /* synthetic */ Container getInventory() {
+        return this.getInventory();
     }
 }
 

@@ -3,12 +3,17 @@
  */
 package net.minecraft.advancements.critereon;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.function.Function;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class WrappedMinMaxBounds {
@@ -22,6 +27,42 @@ public class WrappedMinMaxBounds {
         this.max = float2;
     }
 
+    public static WrappedMinMaxBounds exactly(float f) {
+        return new WrappedMinMaxBounds(Float.valueOf(f), Float.valueOf(f));
+    }
+
+    public static WrappedMinMaxBounds between(float f, float g) {
+        return new WrappedMinMaxBounds(Float.valueOf(f), Float.valueOf(g));
+    }
+
+    public static WrappedMinMaxBounds atLeast(float f) {
+        return new WrappedMinMaxBounds(Float.valueOf(f), null);
+    }
+
+    public static WrappedMinMaxBounds atMost(float f) {
+        return new WrappedMinMaxBounds(null, Float.valueOf(f));
+    }
+
+    public boolean matches(float f) {
+        if (this.min != null && this.max != null && this.min.floatValue() > this.max.floatValue() && this.min.floatValue() > f && this.max.floatValue() < f) {
+            return false;
+        }
+        if (this.min != null && this.min.floatValue() > f) {
+            return false;
+        }
+        return this.max == null || !(this.max.floatValue() < f);
+    }
+
+    public boolean matchesSqr(double d) {
+        if (this.min != null && this.max != null && this.min.floatValue() > this.max.floatValue() && (double)(this.min.floatValue() * this.min.floatValue()) > d && (double)(this.max.floatValue() * this.max.floatValue()) < d) {
+            return false;
+        }
+        if (this.min != null && (double)(this.min.floatValue() * this.min.floatValue()) > d) {
+            return false;
+        }
+        return this.max == null || !((double)(this.max.floatValue() * this.max.floatValue()) < d);
+    }
+
     @Nullable
     public Float getMin() {
         return this.min;
@@ -30,6 +71,41 @@ public class WrappedMinMaxBounds {
     @Nullable
     public Float getMax() {
         return this.max;
+    }
+
+    public JsonElement serializeToJson() {
+        if (this == ANY) {
+            return JsonNull.INSTANCE;
+        }
+        if (this.min != null && this.max != null && this.min.equals(this.max)) {
+            return new JsonPrimitive(this.min);
+        }
+        JsonObject jsonObject = new JsonObject();
+        if (this.min != null) {
+            jsonObject.addProperty("min", this.min);
+        }
+        if (this.max != null) {
+            jsonObject.addProperty("max", this.min);
+        }
+        return jsonObject;
+    }
+
+    public static WrappedMinMaxBounds fromJson(@Nullable JsonElement jsonElement) {
+        if (jsonElement == null || jsonElement.isJsonNull()) {
+            return ANY;
+        }
+        if (GsonHelper.isNumberValue(jsonElement)) {
+            float f = GsonHelper.convertToFloat(jsonElement, "value");
+            return new WrappedMinMaxBounds(Float.valueOf(f), Float.valueOf(f));
+        }
+        JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "value");
+        Float float_ = jsonObject.has("min") ? Float.valueOf(GsonHelper.getAsFloat(jsonObject, "min")) : null;
+        Float float2 = jsonObject.has("max") ? Float.valueOf(GsonHelper.getAsFloat(jsonObject, "max")) : null;
+        return new WrappedMinMaxBounds(float_, float2);
+    }
+
+    public static WrappedMinMaxBounds fromReader(StringReader stringReader, boolean bl) throws CommandSyntaxException {
+        return WrappedMinMaxBounds.fromReader(stringReader, bl, float_ -> float_);
     }
 
     public static WrappedMinMaxBounds fromReader(StringReader stringReader, boolean bl, Function<Float, Float> function) throws CommandSyntaxException {

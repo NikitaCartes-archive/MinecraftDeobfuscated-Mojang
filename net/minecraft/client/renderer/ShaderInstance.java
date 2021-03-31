@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Program;
@@ -35,7 +36,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.minecraft.util.GlslPreprocessor;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -46,8 +46,11 @@ import org.jetbrains.annotations.Nullable;
 public class ShaderInstance
 implements Shader,
 AutoCloseable {
+    private static final String SHADER_PATH = "shaders/core/";
+    private static final String SHADER_INCLUDE_PATH = "shaders/include/";
     private static final Logger LOGGER = LogManager.getLogger();
     private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
+    private static final boolean ALWAYS_REAPPLY = true;
     private static ShaderInstance lastAppliedShader;
     private static int lastProgramId;
     private final Map<String, Object> samplerMap = Maps.newHashMap();
@@ -95,7 +98,7 @@ AutoCloseable {
     public ShaderInstance(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) throws IOException {
         this.name = string;
         this.vertexFormat = vertexFormat;
-        ResourceLocation resourceLocation = new ResourceLocation("shaders/core/" + string + ".json");
+        ResourceLocation resourceLocation = new ResourceLocation(SHADER_PATH + string + ".json");
         Resource resource = null;
         try {
             JsonArray jsonArray3;
@@ -193,7 +196,7 @@ AutoCloseable {
         Program program2;
         Program program = type.getPrograms().get(string);
         if (program == null) {
-            String string2 = "shaders/core/" + string + type.getExtension();
+            String string2 = SHADER_PATH + string + type.getExtension();
             ResourceLocation resourceLocation = new ResourceLocation(string2);
             Resource resource = resourceProvider.getResource(resourceLocation);
             final String string3 = FileUtil.getFullResourcePath(string2);
@@ -208,7 +211,7 @@ AutoCloseable {
                      */
                     @Override
                     public String applyImport(boolean bl, String string) {
-                        string = FileUtil.normalizeResourcePath((bl ? string3 : "shaders/include/") + string);
+                        string = FileUtil.normalizeResourcePath((bl ? string3 : ShaderInstance.SHADER_INCLUDE_PATH) + string);
                         if (!this.importedPaths.add(string)) {
                             return null;
                         }
@@ -342,6 +345,12 @@ AutoCloseable {
         return this.uniformMap.get(string);
     }
 
+    public AbstractUniform safeGetUniform(String string) {
+        RenderSystem.assertThread(RenderSystem::isOnGameThread);
+        Uniform uniform = this.getUniform(string);
+        return uniform == null ? DUMMY_UNIFORM : uniform;
+    }
+
     private void updateLocations() {
         int i;
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
@@ -443,6 +452,14 @@ AutoCloseable {
     public void attachToProgram() {
         this.fragmentProgram.attachToShader(this);
         this.vertexProgram.attachToShader(this);
+    }
+
+    public VertexFormat getVertexFormat() {
+        return this.vertexFormat;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     @Override

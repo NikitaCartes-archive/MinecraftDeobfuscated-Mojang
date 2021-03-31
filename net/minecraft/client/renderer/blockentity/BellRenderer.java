@@ -29,17 +29,18 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 public class BellRenderer
 implements BlockEntityRenderer<BellBlockEntity> {
     public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
+    private static final String BELL_BODY = "bell_body";
     private final ModelPart bellBody;
 
     public BellRenderer(BlockEntityRendererProvider.Context context) {
         ModelPart modelPart = context.bakeLayer(ModelLayers.BELL);
-        this.bellBody = modelPart.getChild("bell_body");
+        this.bellBody = modelPart.getChild(BELL_BODY);
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bell_body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -6.0f, -3.0f, 6.0f, 7.0f, 6.0f), PartPose.offset(8.0f, 12.0f, 8.0f));
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(BELL_BODY, CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -6.0f, -3.0f, 6.0f, 7.0f, 6.0f), PartPose.offset(8.0f, 12.0f, 8.0f));
         partDefinition2.addOrReplaceChild("bell_base", CubeListBuilder.create().texOffs(0, 13).addBox(4.0f, 4.0f, 4.0f, 8.0f, 2.0f, 8.0f), PartPose.offset(-8.0f, -12.0f, -8.0f));
         return LayerDefinition.create(meshDefinition, 32, 32);
     }

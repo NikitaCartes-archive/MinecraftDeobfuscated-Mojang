@@ -28,6 +28,17 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractClientPlayer
 extends Player {
+    private static final String SKIN_URL_TEMPLATE = "http://skins.minecraft.net/MinecraftSkins/%s.png";
+    public static final int SKIN_HEAD_U = 8;
+    public static final int SKIN_HEAD_V = 8;
+    public static final int SKIN_HEAD_WIDTH = 8;
+    public static final int SKIN_HEAD_HEIGHT = 8;
+    public static final int SKIN_HAT_U = 40;
+    public static final int SKIN_HAT_V = 8;
+    public static final int SKIN_HAT_WIDTH = 8;
+    public static final int SKIN_HAT_HEIGHT = 8;
+    public static final int SKIN_TEX_WIDTH = 64;
+    public static final int SKIN_TEX_HEIGHT = 64;
     private PlayerInfo playerInfo;
     public float elytraRotX;
     public float elytraRotY;
@@ -93,7 +104,7 @@ extends Player {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
         AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
         if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
-            abstractTexture = new HttpTexture(null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
+            abstractTexture = new HttpTexture(null, String.format(SKIN_URL_TEMPLATE, StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
             textureManager.register(resourceLocation, abstractTexture);
         }
     }

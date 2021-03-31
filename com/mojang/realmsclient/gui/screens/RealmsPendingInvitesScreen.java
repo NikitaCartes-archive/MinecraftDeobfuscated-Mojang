@@ -185,6 +185,7 @@ extends RealmsScreen {
     @Environment(value=EnvType.CLIENT)
     class Entry
     extends ObjectSelectionList.Entry<Entry> {
+        private static final int TEXT_LEFT = 38;
         private final PendingInvite pendingInvite;
         private final List<RowButton> rowButtons;
 

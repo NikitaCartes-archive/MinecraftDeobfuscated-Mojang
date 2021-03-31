@@ -16,8 +16,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.lang.reflect.Type;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.GsonHelper;
@@ -28,11 +26,14 @@ public class ResourceLocation
 implements Comparable<ResourceLocation> {
     public static final Codec<ResourceLocation> CODEC = Codec.STRING.comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
     private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
+    public static final char NAMESPACE_SEPARATOR = ':';
+    public static final String DEFAULT_NAMESPACE = "minecraft";
+    public static final String REALMS_NAMESPACE = "realms";
     protected final String namespace;
     protected final String path;
 
     protected ResourceLocation(String[] strings) {
-        this.namespace = StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0];
+        this.namespace = StringUtils.isEmpty(strings[0]) ? DEFAULT_NAMESPACE : strings[0];
         this.path = strings[1];
         if (!ResourceLocation.isValidNamespace(this.namespace)) {
             throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ':' + this.path);
@@ -64,7 +65,7 @@ implements Comparable<ResourceLocation> {
     }
 
     protected static String[] decompose(String string, char c) {
-        String[] strings = new String[]{"minecraft", string};
+        String[] strings = new String[]{DEFAULT_NAMESPACE, string};
         int i = string.indexOf(c);
         if (i >= 0) {
             strings[1] = string.substring(i + 1, string.length());
@@ -119,6 +120,10 @@ implements Comparable<ResourceLocation> {
         return i;
     }
 
+    public String toDebugFileName() {
+        return this.toString().replace('/', '_').replace(':', '_');
+    }
+
     public static ResourceLocation read(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
         while (stringReader.canRead() && ResourceLocation.isAllowedInResourceLocation(stringReader.peek())) {
@@ -161,10 +166,9 @@ implements Comparable<ResourceLocation> {
         return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '.';
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean isValidResourceLocation(String string) {
         String[] strings = ResourceLocation.decompose(string, ':');
-        return ResourceLocation.isValidNamespace(StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0]) && ResourceLocation.isValidPath(strings[1]);
+        return ResourceLocation.isValidNamespace(StringUtils.isEmpty(strings[0]) ? DEFAULT_NAMESPACE : strings[0]) && ResourceLocation.isValidPath(strings[1]);
     }
 
     @Override

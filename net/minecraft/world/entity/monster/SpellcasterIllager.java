@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -49,7 +47,6 @@ extends AbstractIllager {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AbstractIllager.IllagerArmPose getArmPose() {
         if (this.isCastingSpell()) {
             return AbstractIllager.IllagerArmPose.SPELLCASTING;

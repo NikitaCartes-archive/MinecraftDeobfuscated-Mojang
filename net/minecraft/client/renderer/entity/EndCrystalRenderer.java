@@ -34,6 +34,8 @@ extends EntityRenderer<EndCrystal> {
     private static final ResourceLocation END_CRYSTAL_LOCATION = new ResourceLocation("textures/entity/end_crystal/end_crystal.png");
     private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(END_CRYSTAL_LOCATION);
     private static final float SIN_45 = (float)Math.sin(0.7853981633974483);
+    private static final String GLASS = "glass";
+    private static final String BASE = "base";
     private final ModelPart cube;
     private final ModelPart glass;
     private final ModelPart base;
@@ -42,17 +44,17 @@ extends EntityRenderer<EndCrystal> {
         super(context);
         this.shadowRadius = 0.5f;
         ModelPart modelPart = context.bakeLayer(ModelLayers.END_CRYSTAL);
-        this.glass = modelPart.getChild("glass");
+        this.glass = modelPart.getChild(GLASS);
         this.cube = modelPart.getChild("cube");
-        this.base = modelPart.getChild("base");
+        this.base = modelPart.getChild(BASE);
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("glass", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(GLASS, CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
         partDefinition.addOrReplaceChild("cube", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 16).addBox(-6.0f, 0.0f, -6.0f, 12.0f, 4.0f, 12.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(BASE, CubeListBuilder.create().texOffs(0, 16).addBox(-6.0f, 0.0f, -6.0f, 12.0f, 4.0f, 12.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 

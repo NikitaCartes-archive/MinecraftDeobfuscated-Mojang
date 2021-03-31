@@ -4,8 +4,6 @@
 package net.minecraft.world.inventory;
 
 import com.mojang.datafixers.util.Pair;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -26,6 +24,17 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class InventoryMenu
 extends RecipeBookMenu<CraftingContainer> {
+    public static final int CONTAINER_ID = 0;
+    public static final int RESULT_SLOT = 0;
+    public static final int CRAFT_SLOT_START = 1;
+    public static final int CRAFT_SLOT_END = 5;
+    public static final int ARMOR_SLOT_START = 5;
+    public static final int ARMOR_SLOT_END = 9;
+    public static final int INV_SLOT_START = 9;
+    public static final int INV_SLOT_END = 36;
+    public static final int USE_ROW_SLOT_START = 36;
+    public static final int USE_ROW_SLOT_END = 45;
+    public static final int SHIELD_SLOT = 45;
     public static final ResourceLocation BLOCK_ATLAS = new ResourceLocation("textures/atlas/blocks.png");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_HELMET = new ResourceLocation("item/empty_armor_slot_helmet");
     public static final ResourceLocation EMPTY_ARMOR_SLOT_CHESTPLATE = new ResourceLocation("item/empty_armor_slot_chestplate");
@@ -74,7 +83,6 @@ extends RecipeBookMenu<CraftingContainer> {
                 }
 
                 @Override
-                @Environment(value=EnvType.CLIENT)
                 public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                     return Pair.of(BLOCK_ATLAS, TEXTURE_EMPTY_SLOTS[equipmentSlot.getIndex()]);
                 }
@@ -91,7 +99,6 @@ extends RecipeBookMenu<CraftingContainer> {
         this.addSlot(new Slot(inventory, 40, 77, 62){
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                 return Pair.of(BLOCK_ATLAS, EMPTY_ARMOR_SLOT_SHIELD);
             }
@@ -197,7 +204,6 @@ extends RecipeBookMenu<CraftingContainer> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public RecipeBookType getRecipeBookType() {
         return RecipeBookType.CRAFTING;
     }

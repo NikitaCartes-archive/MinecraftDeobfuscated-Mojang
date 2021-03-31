@@ -226,5 +226,9 @@ implements RangedAttackMob {
     public double getMyRidingOffset() {
         return -0.6;
     }
+
+    public boolean isShaking() {
+        return this.isFullyFrozen();
+    }
 }
 

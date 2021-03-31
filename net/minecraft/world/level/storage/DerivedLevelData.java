@@ -210,6 +210,11 @@ implements ServerLevelData {
     }
 
     @Override
+    public UUID getWanderingTraderId() {
+        return null;
+    }
+
+    @Override
     public void setWanderingTraderId(UUID uUID) {
     }
 

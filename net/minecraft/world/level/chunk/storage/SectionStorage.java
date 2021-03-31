@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public class SectionStorage<R>
 implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String SECTIONS_TAG = "Sections";
     private final IOWorker worker;
     private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<Optional<R>>();
     private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
@@ -126,7 +127,7 @@ implements AutoCloseable {
             int j = SectionStorage.getVersion(dynamic2);
             boolean bl = j != (k = SharedConstants.getCurrentVersion().getWorldVersion());
             Dynamic<T> dynamic22 = this.fixerUpper.update(this.type.getType(), dynamic2, j, k);
-            OptionalDynamic<T> optionalDynamic = dynamic22.get("Sections");
+            OptionalDynamic<T> optionalDynamic = dynamic22.get(SECTIONS_TAG);
             for (int l = this.levelHeightAccessor.getMinSection(); l < this.levelHeightAccessor.getMaxSection(); ++l) {
                 long m = SectionStorage.getKey(chunkPos, l);
                 Optional optional = optionalDynamic.get(Integer.toString(l)).result().flatMap(dynamic -> this.codec.apply(() -> this.setDirty(m)).parse(dynamic).resultOrPartial(LOGGER::error));
@@ -162,7 +163,7 @@ implements AutoCloseable {
             String string = Integer.toString(i);
             dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
         }
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("Sections"), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
+        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString(SECTIONS_TAG), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
     }
 
     private static long getKey(ChunkPos chunkPos, int i) {

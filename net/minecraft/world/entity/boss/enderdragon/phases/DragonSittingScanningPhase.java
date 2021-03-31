@@ -13,6 +13,10 @@ import net.minecraft.world.phys.Vec3;
 
 public class DragonSittingScanningPhase
 extends AbstractDragonSittingPhase {
+    private static final int SITTING_SCANNING_IDLE_TICKS = 100;
+    private static final int SITTING_ATTACK_Y_VIEW_RANGE = 10;
+    private static final int SITTING_ATTACK_VIEW_RANGE = 20;
+    private static final int SITTING_CHARGE_VIEW_RANGE = 150;
     private static final TargetingConditions CHARGE_TARGETING = new TargetingConditions().range(150.0);
     private final TargetingConditions scanTargeting = new TargetingConditions().range(20.0).selector(livingEntity -> Math.abs(livingEntity.getY() - enderDragon.getY()) <= 10.0);
     private int scanningTime;

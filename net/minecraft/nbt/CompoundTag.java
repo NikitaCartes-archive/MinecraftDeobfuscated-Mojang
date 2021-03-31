@@ -50,6 +50,8 @@ implements Tag {
         }
         return DataResult.error("Not a compound tag: " + tag);
     }, compoundTag -> new Dynamic<CompoundTag>(NbtOps.INSTANCE, (CompoundTag)compoundTag));
+    private static final int SELF_SIZE_IN_BITS = 384;
+    private static final int MAP_ENTRY_SIZE_IN_BITS = 256;
     public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>(){
 
         @Override
@@ -169,6 +171,10 @@ implements Tag {
 
     public void putByteArray(String string, byte[] bs) {
         this.tags.put(string, new ByteArrayTag(bs));
+    }
+
+    public void putByteArray(String string, List<Byte> list) {
+        this.tags.put(string, new ByteArrayTag(list));
     }
 
     public void putIntArray(String string, int[] is) {

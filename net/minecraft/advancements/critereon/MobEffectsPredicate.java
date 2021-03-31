@@ -38,6 +38,11 @@ public class MobEffectsPredicate {
         return this;
     }
 
+    public MobEffectsPredicate and(MobEffect mobEffect, MobEffectInstancePredicate mobEffectInstancePredicate) {
+        this.effects.put(mobEffect, mobEffectInstancePredicate);
+        return this;
+    }
+
     public boolean matches(Entity entity) {
         if (this == ANY) {
             return true;

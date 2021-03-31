@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -33,6 +31,17 @@ import org.jetbrains.annotations.Nullable;
 
 public class FireworkRocketItem
 extends Item {
+    public static final String TAG_FIREWORKS = "Fireworks";
+    public static final String TAG_EXPLOSION = "Explosion";
+    public static final String TAG_EXPLOSIONS = "Explosions";
+    public static final String TAG_FLIGHT = "Flight";
+    public static final String TAG_EXPLOSION_TYPE = "Type";
+    public static final String TAG_EXPLOSION_TRAIL = "Trail";
+    public static final String TAG_EXPLOSION_FLICKER = "Flicker";
+    public static final String TAG_EXPLOSION_COLORS = "Colors";
+    public static final String TAG_EXPLOSION_FADECOLORS = "FadeColors";
+    public static final double ROCKET_PLACEMENT_OFFSET = 0.15;
+
     public FireworkRocketItem(Item.Properties properties) {
         super(properties);
     }
@@ -68,17 +77,16 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         ListTag listTag;
-        CompoundTag compoundTag = itemStack.getTagElement("Fireworks");
+        CompoundTag compoundTag = itemStack.getTagElement(TAG_FIREWORKS);
         if (compoundTag == null) {
             return;
         }
-        if (compoundTag.contains("Flight", 99)) {
-            list.add(new TranslatableComponent("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte("Flight"))).withStyle(ChatFormatting.GRAY));
+        if (compoundTag.contains(TAG_FLIGHT, 99)) {
+            list.add(new TranslatableComponent("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte(TAG_FLIGHT))).withStyle(ChatFormatting.GRAY));
         }
-        if (!(listTag = compoundTag.getList("Explosions", 10)).isEmpty()) {
+        if (!(listTag = compoundTag.getList(TAG_EXPLOSIONS, 10)).isEmpty()) {
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag2 = listTag.getCompound(i);
                 ArrayList<Component> list2 = Lists.newArrayList();
@@ -95,7 +103,7 @@ extends Item {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack itemStack = new ItemStack(this);
-        itemStack.getOrCreateTag().putByte("Flight", (byte)1);
+        itemStack.getOrCreateTag().putByte(TAG_FLIGHT, (byte)1);
         return itemStack;
     }
 
@@ -119,12 +127,10 @@ extends Item {
             return this.id;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public String getName() {
             return this.name;
         }
 
-        @Environment(value=EnvType.CLIENT)
         public static Shape byId(int i) {
             if (i < 0 || i >= BY_ID.length) {
                 return SMALL_BALL;

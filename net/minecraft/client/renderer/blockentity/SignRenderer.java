@@ -42,6 +42,9 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 @Environment(value=EnvType.CLIENT)
 public class SignRenderer
 implements BlockEntityRenderer<SignBlockEntity> {
+    public static final int MAX_LINE_WIDTH = 90;
+    private static final int LINE_HEIGHT = 10;
+    private static final String STICK = "stick";
     private final Map<WoodType, SignModel> signModels = WoodType.values().collect(ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignModel(context.bakeLayer(ModelLayers.createSignModelName(woodType)))));
     private final Font font;
 
@@ -111,7 +114,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
         partDefinition.addOrReplaceChild("sign", CubeListBuilder.create().texOffs(0, 0).addBox(-12.0f, -14.0f, -1.0f, 24.0f, 12.0f, 2.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("stick", CubeListBuilder.create().texOffs(0, 14).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(STICK, CubeListBuilder.create().texOffs(0, 14).addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 
@@ -124,7 +127,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
         public SignModel(ModelPart modelPart) {
             super(RenderType::entityCutoutNoCull);
             this.root = modelPart;
-            this.stick = modelPart.getChild("stick");
+            this.stick = modelPart.getChild(SignRenderer.STICK);
         }
 
         @Override

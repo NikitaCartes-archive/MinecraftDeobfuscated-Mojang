@@ -10,8 +10,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.util.profiling.registry.MeasuredMetric;
 import net.minecraft.util.profiling.registry.MeasurementCategory;
@@ -29,6 +27,8 @@ ProcessorHandle<T>,
 AutoCloseable,
 Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int CLOSED_BIT = 1;
+    private static final int SCHEDULED_BIT = 2;
     private final AtomicInteger status = new AtomicInteger(0);
     private final StrictQueue<? super T, ? extends Runnable> queue;
     private final Executor dispatcher;
@@ -128,6 +128,10 @@ Runnable {
         return i;
     }
 
+    public int size() {
+        return this.queue.size();
+    }
+
     public String toString() {
         return this.name + " " + this.status.get() + " " + this.queue.isEmpty();
     }
@@ -138,7 +142,6 @@ Runnable {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public List<MeasuredMetric> metrics() {
         return ImmutableList.of(new MeasuredMetric(new Metric(this.name + "-queuesize"), this.queue::size, MeasurementCategory.MAIL_BOX));
     }

@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class Endermite
 extends Monster {
+    private static final int MAX_LIFE = 2400;
     private int life;
 
     public Endermite(EntityType<? extends Endermite> entityType, Level level) {

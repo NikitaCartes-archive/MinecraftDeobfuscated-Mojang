@@ -43,6 +43,9 @@ extends AbstractFish {
         }
         return livingEntity.getMobType() != MobType.WATER;
     };
+    public static final int STATE_SMALL = 0;
+    public static final int STATE_MID = 1;
+    public static final int STATE_FULL = 2;
 
     public Pufferfish(EntityType<? extends Pufferfish> entityType, Level level) {
         super((EntityType<? extends AbstractFish>)entityType, level);
@@ -84,7 +87,7 @@ extends AbstractFish {
     }
 
     @Override
-    protected ItemStack getBucketItemStack() {
+    public ItemStack getBucketItemStack() {
         return new ItemStack(Items.PUFFERFISH_BUCKET);
     }
 

@@ -40,6 +40,10 @@ implements LootItemCondition {
         return this.isThundering == null || this.isThundering.booleanValue() == serverLevel.isThundering();
     }
 
+    public static Builder weather() {
+        return new Builder();
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);
@@ -63,6 +67,34 @@ implements LootItemCondition {
         @Override
         public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
+        }
+    }
+
+    public static class Builder
+    implements LootItemCondition.Builder {
+        @Nullable
+        private Boolean isRaining;
+        @Nullable
+        private Boolean isThundering;
+
+        public Builder setRaining(@Nullable Boolean boolean_) {
+            this.isRaining = boolean_;
+            return this;
+        }
+
+        public Builder setThundering(@Nullable Boolean boolean_) {
+            this.isThundering = boolean_;
+            return this;
+        }
+
+        @Override
+        public WeatherCheck build() {
+            return new WeatherCheck(this.isRaining, this.isThundering);
+        }
+
+        @Override
+        public /* synthetic */ LootItemCondition build() {
+            return this.build();
         }
     }
 }

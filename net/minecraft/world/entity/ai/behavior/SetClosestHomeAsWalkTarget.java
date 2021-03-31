@@ -24,6 +24,10 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class SetClosestHomeAsWalkTarget
 extends Behavior<LivingEntity> {
+    private static final int CACHE_TIMEOUT = 40;
+    private static final int BATCH_SIZE = 5;
+    private static final int RATE = 20;
+    private static final int OK_DISTANCE_SQR = 4;
     private final float speedModifier;
     private final Long2LongMap batchCache = new Long2LongOpenHashMap();
     private int triedCount;

@@ -5,13 +5,17 @@ package net.minecraft.nbt;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -23,14 +27,17 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SerializableUUID;
+import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.SnbtPrinterTagVisitor;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.TagTypes;
 import net.minecraft.nbt.TextComponentTagVisitor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +48,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.StateHolder;
+import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -48,9 +56,19 @@ import org.jetbrains.annotations.Nullable;
 public final class NbtUtils {
     private static final Comparator<ListTag> YXZ_LISTTAG_INT_COMPARATOR = Comparator.comparingInt(listTag -> listTag.getInt(1)).thenComparingInt(listTag -> listTag.getInt(0)).thenComparingInt(listTag -> listTag.getInt(2));
     private static final Comparator<ListTag> YXZ_LISTTAG_DOUBLE_COMPARATOR = Comparator.comparingDouble(listTag -> listTag.getDouble(1)).thenComparingDouble(listTag -> listTag.getDouble(0)).thenComparingDouble(listTag -> listTag.getDouble(2));
+    public static final String SNBT_DATA_TAG = "data";
+    private static final char PROPERTIES_START = '{';
+    private static final char PROPERTIES_END = '}';
+    private static final String ELEMENT_SEPARATOR = ",";
+    private static final char KEY_VALUE_SEPARATOR = ':';
     private static final Splitter COMMA_SPLITTER = Splitter.on(",");
     private static final Splitter COLON_SPLITTER = Splitter.on(':').limit(2);
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int INDENT = 2;
+    private static final int NOT_FOUND = -1;
+
+    private NbtUtils() {
+    }
 
     @Nullable
     public static GameProfile readGameProfile(CompoundTag compoundTag) {
@@ -226,8 +244,208 @@ public final class NbtUtils {
         return compoundTag;
     }
 
+    public static CompoundTag writeFluidState(FluidState fluidState) {
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putString("Name", Registry.FLUID.getKey(fluidState.getType()).toString());
+        ImmutableMap<net.minecraft.world.level.block.state.properties.Property<?>, Comparable<?>> immutableMap = fluidState.getValues();
+        if (!immutableMap.isEmpty()) {
+            CompoundTag compoundTag2 = new CompoundTag();
+            for (Map.Entry entry : immutableMap.entrySet()) {
+                net.minecraft.world.level.block.state.properties.Property property = (net.minecraft.world.level.block.state.properties.Property)entry.getKey();
+                compoundTag2.putString(property.getName(), NbtUtils.getName(property, (Comparable)entry.getValue()));
+            }
+            compoundTag.put("Properties", compoundTag2);
+        }
+        return compoundTag;
+    }
+
     private static <T extends Comparable<T>> String getName(net.minecraft.world.level.block.state.properties.Property<T> property, Comparable<?> comparable) {
         return property.getName(comparable);
+    }
+
+    public static String prettyPrint(Tag tag) {
+        return NbtUtils.prettyPrint(tag, false);
+    }
+
+    public static String prettyPrint(Tag tag, boolean bl) {
+        return NbtUtils.prettyPrint(new StringBuilder(), tag, 0, bl).toString();
+    }
+
+    public static StringBuilder prettyPrint(StringBuilder stringBuilder, Tag tag, int i, boolean bl) {
+        switch (tag.getId()) {
+            case 1: 
+            case 2: 
+            case 3: 
+            case 4: 
+            case 5: 
+            case 6: 
+            case 8: {
+                stringBuilder.append(tag);
+                break;
+            }
+            case 0: {
+                break;
+            }
+            case 7: {
+                ByteArrayTag byteArrayTag = (ByteArrayTag)tag;
+                byte[] bs = byteArrayTag.getAsByteArray();
+                int j = bs.length;
+                NbtUtils.indent(i, stringBuilder).append("byte[").append(j).append("] {\n");
+                if (bl) {
+                    NbtUtils.indent(i + 1, stringBuilder);
+                    for (int k = 0; k < bs.length; ++k) {
+                        if (k != 0) {
+                            stringBuilder.append(',');
+                        }
+                        if (k % 16 == 0 && k / 16 > 0) {
+                            stringBuilder.append('\n');
+                            if (k < bs.length) {
+                                NbtUtils.indent(i + 1, stringBuilder);
+                            }
+                        } else if (k != 0) {
+                            stringBuilder.append(' ');
+                        }
+                        stringBuilder.append(String.format("0x%02X", bs[k] & 0xFF));
+                    }
+                } else {
+                    NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+                }
+                stringBuilder.append('\n');
+                NbtUtils.indent(i, stringBuilder).append('}');
+                break;
+            }
+            case 9: {
+                ListTag listTag = (ListTag)tag;
+                int l = listTag.size();
+                byte j = listTag.getElementType();
+                String string = j == 0 ? "undefined" : TagTypes.getType(j).getPrettyName();
+                NbtUtils.indent(i, stringBuilder).append("list<").append(string).append(">[").append(l).append("] [");
+                if (l != 0) {
+                    stringBuilder.append('\n');
+                }
+                for (int m = 0; m < l; ++m) {
+                    if (m != 0) {
+                        stringBuilder.append(",\n");
+                    }
+                    NbtUtils.indent(i + 1, stringBuilder);
+                    NbtUtils.prettyPrint(stringBuilder, listTag.get(m), i + 1, bl);
+                }
+                if (l != 0) {
+                    stringBuilder.append('\n');
+                }
+                NbtUtils.indent(i, stringBuilder).append(']');
+                break;
+            }
+            case 11: {
+                IntArrayTag intArrayTag = (IntArrayTag)tag;
+                int[] is = intArrayTag.getAsIntArray();
+                int j = 0;
+                int[] string = is;
+                int m = string.length;
+                for (int k = 0; k < m; ++k) {
+                    int n = string[k];
+                    j = Math.max(j, String.format("%X", n).length());
+                }
+                int k = is.length;
+                NbtUtils.indent(i, stringBuilder).append("int[").append(k).append("] {\n");
+                if (bl) {
+                    NbtUtils.indent(i + 1, stringBuilder);
+                    for (m = 0; m < is.length; ++m) {
+                        if (m != 0) {
+                            stringBuilder.append(',');
+                        }
+                        if (m % 16 == 0 && m / 16 > 0) {
+                            stringBuilder.append('\n');
+                            if (m < is.length) {
+                                NbtUtils.indent(i + 1, stringBuilder);
+                            }
+                        } else if (m != 0) {
+                            stringBuilder.append(' ');
+                        }
+                        stringBuilder.append(String.format("0x%0" + j + "X", is[m]));
+                    }
+                } else {
+                    NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+                }
+                stringBuilder.append('\n');
+                NbtUtils.indent(i, stringBuilder).append('}');
+                break;
+            }
+            case 10: {
+                CompoundTag compoundTag = (CompoundTag)tag;
+                ArrayList<String> list = Lists.newArrayList(compoundTag.getAllKeys());
+                Collections.sort(list);
+                NbtUtils.indent(i, stringBuilder).append('{');
+                if (stringBuilder.length() - stringBuilder.lastIndexOf("\n") > 2 * (i + 1)) {
+                    stringBuilder.append('\n');
+                    NbtUtils.indent(i + 1, stringBuilder);
+                }
+                int j = list.stream().mapToInt(String::length).max().orElse(0);
+                String string = Strings.repeat(" ", j);
+                for (int m = 0; m < list.size(); ++m) {
+                    if (m != 0) {
+                        stringBuilder.append(",\n");
+                    }
+                    String string2 = (String)list.get(m);
+                    NbtUtils.indent(i + 1, stringBuilder).append('\"').append(string2).append('\"').append(string, 0, string.length() - string2.length()).append(": ");
+                    NbtUtils.prettyPrint(stringBuilder, compoundTag.get(string2), i + 1, bl);
+                }
+                if (!list.isEmpty()) {
+                    stringBuilder.append('\n');
+                }
+                NbtUtils.indent(i, stringBuilder).append('}');
+                break;
+            }
+            case 12: {
+                int n;
+                LongArrayTag longArrayTag = (LongArrayTag)tag;
+                long[] ls = longArrayTag.getAsLongArray();
+                long o = 0L;
+                long[] m = ls;
+                int n2 = m.length;
+                for (n = 0; n < n2; ++n) {
+                    long p = m[n];
+                    o = Math.max(o, (long)String.format("%X", p).length());
+                }
+                long q = ls.length;
+                NbtUtils.indent(i, stringBuilder).append("long[").append(q).append("] {\n");
+                if (bl) {
+                    NbtUtils.indent(i + 1, stringBuilder);
+                    for (n = 0; n < ls.length; ++n) {
+                        if (n != 0) {
+                            stringBuilder.append(',');
+                        }
+                        if (n % 16 == 0 && n / 16 > 0) {
+                            stringBuilder.append('\n');
+                            if (n < ls.length) {
+                                NbtUtils.indent(i + 1, stringBuilder);
+                            }
+                        } else if (n != 0) {
+                            stringBuilder.append(' ');
+                        }
+                        stringBuilder.append(String.format("0x%0" + o + "X", ls[n]));
+                    }
+                } else {
+                    NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+                }
+                stringBuilder.append('\n');
+                NbtUtils.indent(i, stringBuilder).append('}');
+                break;
+            }
+            default: {
+                stringBuilder.append("<UNKNOWN :(>");
+            }
+        }
+        return stringBuilder;
+    }
+
+    private static StringBuilder indent(int i, StringBuilder stringBuilder) {
+        int j = stringBuilder.lastIndexOf("\n") + 1;
+        int k = stringBuilder.length() - j;
+        for (int l = 0; l < 2 * i - k; ++l) {
+            stringBuilder.append(' ');
+        }
+        return stringBuilder;
     }
 
     public static CompoundTag update(DataFixer dataFixer, DataFixTypes dataFixTypes, CompoundTag compoundTag, int i) {
@@ -276,7 +494,7 @@ public final class NbtUtils {
             compoundTag2.put("entities", listTag4);
         }
         listTag32 = compoundTag2.getList("blocks", 10).stream().map(CompoundTag.class::cast).sorted(Comparator.comparing(compoundTag -> compoundTag.getList("pos", 3), YXZ_LISTTAG_INT_COMPARATOR)).peek(compoundTag -> compoundTag.putString("state", listTag2.getString(compoundTag.getInt("state")))).collect(Collectors.toCollection(ListTag::new));
-        compoundTag2.put("data", listTag32);
+        compoundTag2.put(SNBT_DATA_TAG, listTag32);
         compoundTag2.remove("blocks");
         return compoundTag2;
     }
@@ -291,13 +509,13 @@ public final class NbtUtils {
         } else {
             compoundTag2.put("palette", map.values().stream().collect(Collectors.toCollection(ListTag::new)));
         }
-        if (compoundTag2.contains("data", 9)) {
+        if (compoundTag2.contains(SNBT_DATA_TAG, 9)) {
             Object2IntOpenHashMap<String> object2IntMap = new Object2IntOpenHashMap<String>();
             object2IntMap.defaultReturnValue(-1);
             for (int i = 0; i < listTag.size(); ++i) {
                 object2IntMap.put(listTag.getString(i), i);
             }
-            ListTag listTag2 = compoundTag2.getList("data", 10);
+            ListTag listTag2 = compoundTag2.getList(SNBT_DATA_TAG, 10);
             for (int j = 0; j < listTag2.size(); ++j) {
                 CompoundTag compoundTag22 = listTag2.getCompound(j);
                 String string = compoundTag22.getString("state");
@@ -308,7 +526,7 @@ public final class NbtUtils {
                 compoundTag22.putInt("state", k);
             }
             compoundTag2.put("blocks", listTag2);
-            compoundTag2.remove("data");
+            compoundTag2.remove(SNBT_DATA_TAG);
         }
         return compoundTag2;
     }
@@ -318,7 +536,7 @@ public final class NbtUtils {
         StringBuilder stringBuilder = new StringBuilder(compoundTag.getString("Name"));
         if (compoundTag.contains("Properties", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
-            String string2 = compoundTag2.getAllKeys().stream().sorted().map(string -> string + ':' + compoundTag2.get((String)string).getAsString()).collect(Collectors.joining(","));
+            String string2 = compoundTag2.getAllKeys().stream().sorted().map(string -> string + ':' + compoundTag2.get((String)string).getAsString()).collect(Collectors.joining(ELEMENT_SEPARATOR));
             stringBuilder.append('{').append(string2).append('}');
         }
         return stringBuilder.toString();

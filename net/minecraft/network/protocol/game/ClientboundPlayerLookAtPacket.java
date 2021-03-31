@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -78,13 +76,11 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleLookAt(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public EntityAnchorArgument.Anchor getFromAnchor() {
         return this.fromAnchor;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getPosition(Level level) {
         if (this.atEntity) {
             Entity entity = level.getEntity(this.entity);

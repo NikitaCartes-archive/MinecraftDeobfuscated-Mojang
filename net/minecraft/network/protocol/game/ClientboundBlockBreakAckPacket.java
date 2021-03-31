@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -50,22 +48,18 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleBlockBreakAck(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockState getState() {
         return this.state;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos getPos() {
         return this.pos;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean allGood() {
         return this.allGood;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerActionPacket.Action action() {
         return this.action;
     }

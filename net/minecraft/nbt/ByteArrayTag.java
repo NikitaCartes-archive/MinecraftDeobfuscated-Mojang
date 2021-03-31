@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class ByteArrayTag
 extends CollectionTag<ByteTag> {
+    private static final int SELF_SIZE_IN_BITS = 192;
     public static final TagType<ByteArrayTag> TYPE = new TagType<ByteArrayTag>(){
 
         @Override

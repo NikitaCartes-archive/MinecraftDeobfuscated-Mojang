@@ -49,6 +49,7 @@ public class SoundManager
 extends SimplePreparableReloadListener<Preparations> {
     public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0f, 1.0f, 1, Sound.Type.FILE, false, false, 16);
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String SOUNDS_PATH = "sounds.json";
     private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Component.class, new Component.Serializer()).registerTypeAdapter((Type)((Object)SoundEventRegistration.class), new SoundEventRegistrationSerializer()).create();
     private static final TypeToken<Map<String, SoundEventRegistration>> SOUND_EVENT_REGISTRATION_TYPE = new TypeToken<Map<String, SoundEventRegistration>>(){};
     private final Map<ResourceLocation, WeighedSoundEvents> registry = Maps.newHashMap();
@@ -65,7 +66,7 @@ extends SimplePreparableReloadListener<Preparations> {
         for (String string : resourceManager.getNamespaces()) {
             profilerFiller.push(string);
             try {
-                List<Resource> list = resourceManager.getResources(new ResourceLocation(string, "sounds.json"));
+                List<Resource> list = resourceManager.getResources(new ResourceLocation(string, SOUNDS_PATH));
                 for (Resource resource : list) {
                     profilerFiller.push(resource.getSourceName());
                     try (InputStream inputStream = resource.getInputStream();
@@ -78,7 +79,7 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
                         profilerFiller.pop();
                     } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Invalid {} in resourcepack: '{}'", (Object)"sounds.json", (Object)resource.getSourceName(), (Object)runtimeException);
+                        LOGGER.warn("Invalid {} in resourcepack: '{}'", (Object)SOUNDS_PATH, (Object)resource.getSourceName(), (Object)runtimeException);
                     }
                     profilerFiller.pop();
                 }

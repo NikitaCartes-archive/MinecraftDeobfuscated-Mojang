@@ -28,5 +28,9 @@ implements Packet<ClientGamePacketListener> {
     public void handle(ClientGamePacketListener clientGamePacketListener) {
         clientGamePacketListener.handleContainerClose(this);
     }
+
+    public int getContainerId() {
+        return this.containerId;
+    }
 }
 

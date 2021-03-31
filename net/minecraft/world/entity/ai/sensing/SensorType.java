@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.sensing.AdultSensor;
-import net.minecraft.world.entity.ai.sensing.AxolotlHostileSensor;
+import net.minecraft.world.entity.ai.sensing.AxolotlAttackablesSensor;
 import net.minecraft.world.entity.ai.sensing.DummySensor;
 import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.HoglinSpecificSensor;
@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.sensing.TemptingSensor;
 import net.minecraft.world.entity.ai.sensing.VillagerBabiesSensor;
 import net.minecraft.world.entity.ai.sensing.VillagerHostilesSensor;
 import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
+import net.minecraft.world.entity.animal.goat.GoatAi;
 
 public class SensorType<U extends Sensor<?>> {
     public static final SensorType<DummySensor> DUMMY = SensorType.register("dummy", DummySensor::new);
@@ -40,8 +41,9 @@ public class SensorType<U extends Sensor<?>> {
     public static final SensorType<PiglinBruteSpecificSensor> PIGLIN_BRUTE_SPECIFIC_SENSOR = SensorType.register("piglin_brute_specific_sensor", PiglinBruteSpecificSensor::new);
     public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = SensorType.register("hoglin_specific_sensor", HoglinSpecificSensor::new);
     public static final SensorType<AdultSensor> NEAREST_ADULT = SensorType.register("nearest_adult", AdultSensor::new);
-    public static final SensorType<AxolotlHostileSensor> AXOLOTL_HOSTILES = SensorType.register("axolotl_hostiles", AxolotlHostileSensor::new);
+    public static final SensorType<AxolotlAttackablesSensor> AXOLOTL_ATTACKABLES = SensorType.register("axolotl_attackables", AxolotlAttackablesSensor::new);
     public static final SensorType<TemptingSensor> AXOLOTL_TEMPTATIONS = SensorType.register("axolotl_temptations", () -> new TemptingSensor(AxolotlAi.getTemptations()));
+    public static final SensorType<TemptingSensor> GOAT_TEMPTATIONS = SensorType.register("goat_temptations", () -> new TemptingSensor(GoatAi.getTemptations()));
     private final Supplier<U> factory;
 
     private SensorType(Supplier<U> supplier) {

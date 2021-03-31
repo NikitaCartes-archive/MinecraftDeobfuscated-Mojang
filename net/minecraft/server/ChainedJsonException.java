@@ -7,12 +7,9 @@ import com.google.common.collect.Lists;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(value=EnvType.CLIENT)
 public class ChainedJsonException
 extends IOException {
     private final List<Entry> entries = Lists.newArrayList();
@@ -54,7 +51,6 @@ extends IOException {
         return new ChainedJsonException(string, exception);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static class Entry {
         @Nullable
         private String filename;
@@ -65,6 +61,11 @@ extends IOException {
 
         private void addJsonKey(String string) {
             this.jsonKeys.add(0, string);
+        }
+
+        @Nullable
+        public String getFilename() {
+            return this.filename;
         }
 
         public String getJsonKeys() {

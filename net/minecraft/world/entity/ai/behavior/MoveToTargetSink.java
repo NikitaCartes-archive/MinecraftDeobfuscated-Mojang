@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MoveToTargetSink
 extends Behavior<Mob> {
+    private static final int MAX_COOLDOWN_BEFORE_RETRYING = 40;
     private int remainingCooldown;
     @Nullable
     private Path path;

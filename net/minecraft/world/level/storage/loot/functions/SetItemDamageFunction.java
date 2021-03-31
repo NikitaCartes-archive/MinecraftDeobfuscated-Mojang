@@ -59,6 +59,10 @@ extends LootItemConditionalFunction {
         return SetItemDamageFunction.simpleBuilder(lootItemConditions -> new SetItemDamageFunction((LootItemCondition[])lootItemConditions, numberProvider, false));
     }
 
+    public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider numberProvider, boolean bl) {
+        return SetItemDamageFunction.simpleBuilder(lootItemConditions -> new SetItemDamageFunction((LootItemCondition[])lootItemConditions, numberProvider, bl));
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetItemDamageFunction> {
         @Override

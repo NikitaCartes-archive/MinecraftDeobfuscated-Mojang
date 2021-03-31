@@ -9,13 +9,18 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.Control;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class MoveControl {
+public class MoveControl
+implements Control {
+    public static final float MIN_SPEED = 5.0E-4f;
+    public static final float MIN_SPEED_SQR = 2.5000003E-7f;
+    protected static final int MAX_TURN = 90;
     protected final Mob mob;
     protected double wantedX;
     protected double wantedY;

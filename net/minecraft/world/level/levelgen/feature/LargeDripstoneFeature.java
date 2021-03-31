@@ -9,8 +9,8 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.FloatProvider;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -46,8 +46,8 @@ extends Feature<LargeDripstoneConfiguration> {
             return false;
         }
         int i = (int)((float)range.height() * largeDripstoneConfiguration.maxColumnRadiusToCaveHeightRatio);
-        int j = Mth.clamp(i, largeDripstoneConfiguration.columnRadius.getBaseValue(), largeDripstoneConfiguration.columnRadius.getMaxValue());
-        int k = Mth.randomBetweenInclusive(random, largeDripstoneConfiguration.columnRadius.getBaseValue(), j);
+        int j = Mth.clamp(i, largeDripstoneConfiguration.columnRadius.getMinValue(), largeDripstoneConfiguration.columnRadius.getMaxValue());
+        int k = Mth.randomBetweenInclusive(random, largeDripstoneConfiguration.columnRadius.getMinValue(), j);
         LargeDripstone largeDripstone = LargeDripstoneFeature.makeDripstone(blockPos.atY(range.ceiling() - 1), false, random, k, largeDripstoneConfiguration.stalactiteBluntness, largeDripstoneConfiguration.heightScale);
         LargeDripstone largeDripstone2 = LargeDripstoneFeature.makeDripstone(blockPos.atY(range.floor() + 1), true, random, k, largeDripstoneConfiguration.stalagmiteBluntness, largeDripstoneConfiguration.heightScale);
         WindOffsetter windOffsetter = largeDripstone.isSuitableForWind(largeDripstoneConfiguration) && largeDripstone2.isSuitableForWind(largeDripstoneConfiguration) ? new WindOffsetter(blockPos.getY(), random, largeDripstoneConfiguration.windSpeed) : WindOffsetter.noWind();
@@ -64,6 +64,19 @@ extends Feature<LargeDripstoneConfiguration> {
 
     private static LargeDripstone makeDripstone(BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2) {
         return new LargeDripstone(blockPos, bl, i, floatProvider.sample(random), floatProvider2.sample(random));
+    }
+
+    private void placeDebugMarkers(WorldGenLevel worldGenLevel, BlockPos blockPos, Column.Range range, WindOffsetter windOffsetter) {
+        worldGenLevel.setBlock(windOffsetter.offset(blockPos.atY(range.ceiling() - 1)), Blocks.DIAMOND_BLOCK.defaultBlockState(), 2);
+        worldGenLevel.setBlock(windOffsetter.offset(blockPos.atY(range.floor() + 1)), Blocks.GOLD_BLOCK.defaultBlockState(), 2);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.atY(range.floor() + 2).mutable();
+        while (mutableBlockPos.getY() < range.ceiling() - 1) {
+            BlockPos blockPos2 = windOffsetter.offset(mutableBlockPos);
+            if (DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos2) || worldGenLevel.getBlockState(blockPos2).is(Blocks.DRIPSTONE_BLOCK)) {
+                worldGenLevel.setBlock(blockPos2, Blocks.CREEPER_HEAD.defaultBlockState(), 2);
+            }
+            mutableBlockPos.move(Direction.UP);
+        }
     }
 
     static final class WindOffsetter {
@@ -114,6 +127,20 @@ extends Feature<LargeDripstoneConfiguration> {
 
         private int getHeight() {
             return this.getHeightAtRadius(0.0f);
+        }
+
+        private int getMinY() {
+            if (this.pointingUp) {
+                return this.root.getY();
+            }
+            return this.root.getY() - this.getHeight();
+        }
+
+        private int getMaxY() {
+            if (!this.pointingUp) {
+                return this.root.getY();
+            }
+            return this.root.getY() + this.getHeight();
         }
 
         private boolean moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(WorldGenLevel worldGenLevel, WindOffsetter windOffsetter) {

@@ -4,8 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -37,24 +35,20 @@ implements Packet<ServerGamePacketListener> {
         }
     };
 
-    @Environment(value=EnvType.CLIENT)
     private ServerboundInteractPacket(int i, boolean bl, Action action) {
         this.entityId = i;
         this.action = action;
         this.usingSecondaryAction = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static ServerboundInteractPacket createAttackPacket(Entity entity, boolean bl) {
         return new ServerboundInteractPacket(entity.getId(), bl, ATTACK_ACTION);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand) {
         return new ServerboundInteractPacket(entity.getId(), bl, new InteractionAction(interactionHand));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static ServerboundInteractPacket createInteractionPacket(Entity entity, boolean bl, InteractionHand interactionHand, Vec3 vec3) {
         return new ServerboundInteractPacket(entity.getId(), bl, new InteractionAtLocationAction(interactionHand, vec3));
     }
@@ -97,7 +91,6 @@ implements Packet<ServerGamePacketListener> {
         private final InteractionHand hand;
         private final Vec3 location;
 
-        @Environment(value=EnvType.CLIENT)
         private InteractionAtLocationAction(InteractionHand interactionHand, Vec3 vec3) {
             this.hand = interactionHand;
             this.location = vec3;
@@ -131,7 +124,6 @@ implements Packet<ServerGamePacketListener> {
     implements Action {
         private final InteractionHand hand;
 
-        @Environment(value=EnvType.CLIENT)
         private InteractionAction(InteractionHand interactionHand) {
             this.hand = interactionHand;
         }

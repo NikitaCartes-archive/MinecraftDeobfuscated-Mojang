@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -96,14 +94,12 @@ public class TagContainer {
         return map;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static TagContainer deserializeFromNetwork(RegistryAccess registryAccess, Map<ResourceKey<? extends Registry<?>>, TagCollection.NetworkPayload> map) {
         Builder builder = new Builder();
         map.forEach((resourceKey, networkPayload) -> TagContainer.addTagsFromPayload(registryAccess, builder, resourceKey, networkPayload));
         return builder.build();
     }
 
-    @Environment(value=EnvType.CLIENT)
     private static <T> void addTagsFromPayload(RegistryAccess registryAccess, Builder builder, ResourceKey<? extends Registry<? extends T>> resourceKey, TagCollection.NetworkPayload networkPayload) {
         Optional optional = registryAccess.registry(resourceKey);
         if (optional.isPresent()) {

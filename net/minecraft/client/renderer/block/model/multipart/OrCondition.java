@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 @Environment(value=EnvType.CLIENT)
 public class OrCondition
 implements Condition {
+    public static final String TOKEN = "OR";
     private final Iterable<? extends Condition> conditions;
 
     public OrCondition(Iterable<? extends Condition> iterable) {

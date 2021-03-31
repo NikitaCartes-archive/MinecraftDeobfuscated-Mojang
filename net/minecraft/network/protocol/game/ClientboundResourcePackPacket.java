@@ -3,14 +3,13 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundResourcePackPacket
 implements Packet<ClientGamePacketListener> {
+    public static final int MAX_HASH_LENGTH = 40;
     private final String url;
     private final String hash;
     private final boolean required;
@@ -42,17 +41,14 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleResourcePack(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getUrl() {
         return this.url;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getHash() {
         return this.hash;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isRequired() {
         return this.required;
     }

@@ -51,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WanderingTrader
 extends AbstractVillager {
+    private static final int NUMBER_OF_TRADE_OFFERS = 5;
     @Nullable
     private BlockPos wanderTarget;
     private int despawnDelay;

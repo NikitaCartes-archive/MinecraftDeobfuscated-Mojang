@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -40,17 +38,14 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetBorderLerpSize(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getOldSize() {
         return this.oldSize;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public double getNewSize() {
         return this.newSize;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getLerpTime() {
         return this.lerpTime;
     }

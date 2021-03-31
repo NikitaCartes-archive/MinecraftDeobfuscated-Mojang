@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 public class Skeleton
 extends AbstractSkeleton {
     private static final EntityDataAccessor<Boolean> DATA_STRAY_CONVERSION_ID = SynchedEntityData.defineId(Skeleton.class, EntityDataSerializers.BOOLEAN);
+    public static final String CONVERSION_TAG = "StrayConversionTime";
     private int inPowderSnowTime;
     private int conversionTime;
 
@@ -37,6 +38,15 @@ extends AbstractSkeleton {
         return this.getEntityData().get(DATA_STRAY_CONVERSION_ID);
     }
 
+    public void setFreezeConverting(boolean bl) {
+        this.entityData.set(DATA_STRAY_CONVERSION_ID, bl);
+    }
+
+    @Override
+    public boolean isShaking() {
+        return this.isFreezeConverting();
+    }
+
     @Override
     public void tick() {
         if (!this.level.isClientSide && this.isAlive() && !this.isNoAi()) {
@@ -47,7 +57,7 @@ extends AbstractSkeleton {
                 }
             } else if (this.isInPowderSnow) {
                 ++this.inPowderSnowTime;
-                if (this.inPowderSnowTime >= 600) {
+                if (this.inPowderSnowTime >= 140) {
                     this.startFreezeConversion(300);
                 }
             } else {
@@ -60,14 +70,14 @@ extends AbstractSkeleton {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("StrayConversionTime", this.isFreezeConverting() ? this.conversionTime : -1);
+        compoundTag.putInt(CONVERSION_TAG, this.isFreezeConverting() ? this.conversionTime : -1);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("StrayConversionTime", 99) && compoundTag.getInt("StrayConversionTime") > -1) {
-            this.startFreezeConversion(compoundTag.getInt("StrayConversionTime"));
+        if (compoundTag.contains(CONVERSION_TAG, 99) && compoundTag.getInt(CONVERSION_TAG) > -1) {
+            this.startFreezeConversion(compoundTag.getInt(CONVERSION_TAG));
         }
     }
 

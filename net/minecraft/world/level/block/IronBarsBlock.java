@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -64,7 +62,6 @@ extends CrossCollisionBlock {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
         if (blockState2.is(this)) {
             if (!direction.getAxis().isHorizontal()) {

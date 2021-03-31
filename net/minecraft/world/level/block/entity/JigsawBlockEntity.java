@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -36,6 +34,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class JigsawBlockEntity
 extends BlockEntity {
+    public static final String TARGET = "target";
+    public static final String POOL = "pool";
+    public static final String JOINT = "joint";
+    public static final String NAME = "name";
+    public static final String FINAL_STATE = "final_state";
     private ResourceLocation name = new ResourceLocation("empty");
     private ResourceLocation target = new ResourceLocation("empty");
     private ResourceLocation pool = new ResourceLocation("empty");
@@ -46,27 +49,22 @@ extends BlockEntity {
         super(BlockEntityType.JIGSAW, blockPos, blockState);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getName() {
         return this.name;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getTarget() {
         return this.target;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ResourceLocation getPool() {
         return this.pool;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getFinalState() {
         return this.finalState;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public JointType getJoint() {
         return this.joint;
     }
@@ -94,22 +92,22 @@ extends BlockEntity {
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
         super.save(compoundTag);
-        compoundTag.putString("name", this.name.toString());
-        compoundTag.putString("target", this.target.toString());
-        compoundTag.putString("pool", this.pool.toString());
-        compoundTag.putString("final_state", this.finalState);
-        compoundTag.putString("joint", this.joint.getSerializedName());
+        compoundTag.putString(NAME, this.name.toString());
+        compoundTag.putString(TARGET, this.target.toString());
+        compoundTag.putString(POOL, this.pool.toString());
+        compoundTag.putString(FINAL_STATE, this.finalState);
+        compoundTag.putString(JOINT, this.joint.getSerializedName());
         return compoundTag;
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
-        this.name = new ResourceLocation(compoundTag.getString("name"));
-        this.target = new ResourceLocation(compoundTag.getString("target"));
-        this.pool = new ResourceLocation(compoundTag.getString("pool"));
-        this.finalState = compoundTag.getString("final_state");
-        this.joint = JointType.byName(compoundTag.getString("joint")).orElseGet(() -> JigsawBlock.getFrontFacing(this.getBlockState()).getAxis().isHorizontal() ? JointType.ALIGNED : JointType.ROLLABLE);
+        this.name = new ResourceLocation(compoundTag.getString(NAME));
+        this.target = new ResourceLocation(compoundTag.getString(TARGET));
+        this.pool = new ResourceLocation(compoundTag.getString(POOL));
+        this.finalState = compoundTag.getString(FINAL_STATE);
+        this.joint = JointType.byName(compoundTag.getString(JOINT)).orElseGet(() -> JigsawBlock.getFrontFacing(this.getBlockState()).getAxis().isHorizontal() ? JointType.ALIGNED : JointType.ROLLABLE);
     }
 
     @Override
@@ -160,7 +158,6 @@ extends BlockEntity {
             return Arrays.stream(JointType.values()).filter(jointType -> jointType.getSerializedName().equals(string)).findFirst();
         }
 
-        @Environment(value=EnvType.CLIENT)
         public Component getTranslatedName() {
             return new TranslatableComponent("jigsaw_block.joint." + this.name);
         }

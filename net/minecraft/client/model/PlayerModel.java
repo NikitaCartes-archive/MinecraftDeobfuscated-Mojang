@@ -27,6 +27,12 @@ import net.minecraft.world.entity.LivingEntity;
 @Environment(value=EnvType.CLIENT)
 public class PlayerModel<T extends LivingEntity>
 extends HumanoidModel<T> {
+    private static final String EAR = "ear";
+    private static final String CLOAK = "cloak";
+    private static final String LEFT_SLEEVE = "left_sleeve";
+    private static final String RIGHT_SLEEVE = "right_sleeve";
+    private static final String LEFT_PANTS = "left_pants";
+    private static final String RIGHT_PANTS = "right_pants";
     private final List<ModelPart> parts;
     public final ModelPart leftSleeve;
     public final ModelPart rightSleeve;
@@ -40,12 +46,12 @@ extends HumanoidModel<T> {
     public PlayerModel(ModelPart modelPart2, boolean bl) {
         super(modelPart2, RenderType::entityTranslucent);
         this.slim = bl;
-        this.ear = modelPart2.getChild("ear");
-        this.cloak = modelPart2.getChild("cloak");
-        this.leftSleeve = modelPart2.getChild("left_sleeve");
-        this.rightSleeve = modelPart2.getChild("right_sleeve");
-        this.leftPants = modelPart2.getChild("left_pants");
-        this.rightPants = modelPart2.getChild("right_pants");
+        this.ear = modelPart2.getChild(EAR);
+        this.cloak = modelPart2.getChild(CLOAK);
+        this.leftSleeve = modelPart2.getChild(LEFT_SLEEVE);
+        this.rightSleeve = modelPart2.getChild(RIGHT_SLEEVE);
+        this.leftPants = modelPart2.getChild(LEFT_PANTS);
+        this.rightPants = modelPart2.getChild(RIGHT_PANTS);
         this.jacket = modelPart2.getChild("jacket");
         this.parts = modelPart2.getAllParts().filter(modelPart -> !modelPart.isEmpty()).collect(ImmutableList.toImmutableList());
     }
@@ -53,22 +59,22 @@ extends HumanoidModel<T> {
     public static MeshDefinition createMesh(CubeDeformation cubeDeformation, boolean bl) {
         MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0f);
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("ear", CubeListBuilder.create().texOffs(24, 0).addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, cubeDeformation), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("cloak", CubeListBuilder.create().texOffs(0, 0).addBox(-5.0f, 0.0f, -1.0f, 10.0f, 16.0f, 1.0f, cubeDeformation, 1.0f, 0.5f), PartPose.offset(0.0f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(EAR, CubeListBuilder.create().texOffs(24, 0).addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, cubeDeformation), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(CLOAK, CubeListBuilder.create().texOffs(0, 0).addBox(-5.0f, 0.0f, -1.0f, 10.0f, 16.0f, 1.0f, cubeDeformation, 1.0f, 0.5f), PartPose.offset(0.0f, 0.0f, 0.0f));
         float f = 0.25f;
         if (bl) {
             partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.5f, 0.0f));
             partDefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(-5.0f, 2.5f, 0.0f));
-            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.5f, 0.0f));
-            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.5f, 0.0f));
+            partDefinition.addOrReplaceChild(LEFT_SLEEVE, CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.5f, 0.0f));
+            partDefinition.addOrReplaceChild(RIGHT_SLEEVE, CubeListBuilder.create().texOffs(40, 32).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.5f, 0.0f));
         } else {
             partDefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(5.0f, 2.0f, 0.0f));
-            partDefinition.addOrReplaceChild("left_sleeve", CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.0f, 0.0f));
-            partDefinition.addOrReplaceChild("right_sleeve", CubeListBuilder.create().texOffs(40, 32).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.0f, 0.0f));
+            partDefinition.addOrReplaceChild(LEFT_SLEEVE, CubeListBuilder.create().texOffs(48, 48).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(5.0f, 2.0f, 0.0f));
+            partDefinition.addOrReplaceChild(RIGHT_SLEEVE, CubeListBuilder.create().texOffs(40, 32).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-5.0f, 2.0f, 0.0f));
         }
         partDefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation), PartPose.offset(1.9f, 12.0f, 0.0f));
-        partDefinition.addOrReplaceChild("left_pants", CubeListBuilder.create().texOffs(0, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(1.9f, 12.0f, 0.0f));
-        partDefinition.addOrReplaceChild("right_pants", CubeListBuilder.create().texOffs(0, 32).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild(LEFT_PANTS, CubeListBuilder.create().texOffs(0, 48).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(1.9f, 12.0f, 0.0f));
+        partDefinition.addOrReplaceChild(RIGHT_PANTS, CubeListBuilder.create().texOffs(0, 32).addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.offset(-1.9f, 12.0f, 0.0f));
         partDefinition.addOrReplaceChild("jacket", CubeListBuilder.create().texOffs(16, 32).addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, cubeDeformation.extend(0.25f)), PartPose.ZERO);
         return meshDefinition;
     }

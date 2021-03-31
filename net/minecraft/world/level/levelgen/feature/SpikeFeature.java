@@ -36,6 +36,8 @@ import net.minecraft.world.phys.AABB;
 
 public class SpikeFeature
 extends Feature<SpikeConfiguration> {
+    public static final int NUMBER_OF_SPIKES = 10;
+    private static final int SPIKE_DISTANCE = 42;
     private static final LoadingCache<Long, List<EndSpike>> SPIKE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5L, TimeUnit.MINUTES).build(new SpikeCacheLoader());
 
     public SpikeFeature(Codec<SpikeConfiguration> codec) {

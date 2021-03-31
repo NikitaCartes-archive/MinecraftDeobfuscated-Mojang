@@ -39,6 +39,8 @@ public class MinecraftServerGui
 extends JComponent {
     private static final Font MONOSPACED = new Font("Monospaced", 0, 12);
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String TITLE = "Minecraft server";
+    private static final String SHUTDOWN_TITLE = "Minecraft server - shutting down!";
     private final DedicatedServer server;
     private Thread logAppenderThread;
     private final Collection<Runnable> finalizers = Lists.newArrayList();
@@ -50,7 +52,7 @@ extends JComponent {
         } catch (Exception exception) {
             // empty catch block
         }
-        final JFrame jFrame = new JFrame("Minecraft server");
+        final JFrame jFrame = new JFrame(TITLE);
         final MinecraftServerGui minecraftServerGui = new MinecraftServerGui(dedicatedServer);
         jFrame.setDefaultCloseOperation(2);
         jFrame.add(minecraftServerGui);
@@ -62,7 +64,7 @@ extends JComponent {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 if (!minecraftServerGui.isClosing.getAndSet(true)) {
-                    jFrame.setTitle("Minecraft server - shutting down!");
+                    jFrame.setTitle(MinecraftServerGui.SHUTDOWN_TITLE);
                     dedicatedServer.halt(true);
                     minecraftServerGui.runFinalizers();
                 }

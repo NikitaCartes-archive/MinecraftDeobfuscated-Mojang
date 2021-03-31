@@ -58,6 +58,10 @@ implements Weighted<Sound> {
         this.list.add(weighted);
     }
 
+    public ResourceLocation getResourceLocation() {
+        return this.location;
+    }
+
     @Nullable
     public Component getSubtitle() {
         return this.subtitle;

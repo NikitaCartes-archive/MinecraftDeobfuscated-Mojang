@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
@@ -32,8 +33,11 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelBlockRenderer {
+    private static final int FACE_CUBIC = 0;
+    private static final int FACE_PARTIAL = 1;
     private static final Direction[] DIRECTIONS = Direction.values();
     private final BlockColors blockColors;
+    private static final int CACHE_SIZE = 100;
     private static final ThreadLocal<Cache> CACHE = ThreadLocal.withInitial(() -> new Cache());
 
     public ModelBlockRenderer(BlockColors blockColors) {
@@ -68,7 +72,7 @@ public class ModelBlockRenderer {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
             if (list.isEmpty()) continue;
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             if (bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) continue;
             this.renderModelFaceAO(blockAndTintGetter, blockState, blockPos, poseStack, vertexConsumer, list, fs, bitSet, ambientOcclusionFace, i);
             bl2 = true;
@@ -90,7 +94,7 @@ public class ModelBlockRenderer {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
             if (list.isEmpty()) continue;
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             if (bl && !Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) continue;
             int j = LevelRenderer.getLightColor(blockAndTintGetter, blockState, mutableBlockPos);
             this.renderModelFaceFlat(blockAndTintGetter, blockState, blockPos, j, i, false, poseStack, vertexConsumer, list, bitSet);
@@ -337,32 +341,32 @@ public class ModelBlockRenderer {
             AdjacencyInfo adjacencyInfo = AdjacencyInfo.fromFacing(direction);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             Cache cache = (Cache)CACHE.get();
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]);
             BlockState blockState2 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int i = cache.getLightColor(blockState2, blockAndTintGetter, mutableBlockPos);
             float f = cache.getShadeBrightness(blockState2, blockAndTintGetter, mutableBlockPos);
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]);
             BlockState blockState3 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int j = cache.getLightColor(blockState3, blockAndTintGetter, mutableBlockPos);
             float g = cache.getShadeBrightness(blockState3, blockAndTintGetter, mutableBlockPos);
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[2]);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[2]);
             BlockState blockState4 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int k = cache.getLightColor(blockState4, blockAndTintGetter, mutableBlockPos);
             float h = cache.getShadeBrightness(blockState4, blockAndTintGetter, mutableBlockPos);
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[3]);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[3]);
             BlockState blockState5 = blockAndTintGetter.getBlockState(mutableBlockPos);
             int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
             float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]).move(direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(direction);
             boolean bl2 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]).move(direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(direction);
             boolean bl3 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[2]).move(direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[2]).move(direction);
             boolean bl4 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[3]).move(direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[3]).move(direction);
             boolean bl6 = bl5 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
             if (bl4 || bl2) {
-                mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[2]);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[2]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 n = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
                 o = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -371,7 +375,7 @@ public class ModelBlockRenderer {
                 o = i;
             }
             if (bl5 || bl2) {
-                mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[3]);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[0]).move(adjacencyInfo.corners[3]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 p = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
                 q = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -380,7 +384,7 @@ public class ModelBlockRenderer {
                 q = i;
             }
             if (bl4 || bl3) {
-                mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[2]);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[2]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 r = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
                 s = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -389,7 +393,7 @@ public class ModelBlockRenderer {
                 s = i;
             }
             if (bl5 || bl3) {
-                mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[3]);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos2, adjacencyInfo.corners[1]).move(adjacencyInfo.corners[3]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 t = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
                 u = cache.getLightColor(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -398,7 +402,7 @@ public class ModelBlockRenderer {
                 u = i;
             }
             int v = cache.getLightColor(blockState, blockAndTintGetter, blockPos);
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             BlockState blockState7 = blockAndTintGetter.getBlockState(mutableBlockPos);
             if (bitSet.get(0) || !blockState7.isSolidRender(blockAndTintGetter, mutableBlockPos)) {
                 v = cache.getLightColor(blockState7, blockAndTintGetter, mutableBlockPos);

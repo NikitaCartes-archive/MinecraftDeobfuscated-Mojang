@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,7 +45,7 @@ extends VegetationPatchFeature {
     }
 
     private static boolean isExposedDirection(WorldGenLevel worldGenLevel, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos, Direction direction) {
-        mutableBlockPos.setWithOffset(blockPos, direction);
+        mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
         return !worldGenLevel.getBlockState(mutableBlockPos).isFaceSturdy(worldGenLevel, mutableBlockPos, direction.getOpposite());
     }
 

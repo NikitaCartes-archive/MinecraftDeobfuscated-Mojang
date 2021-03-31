@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -134,7 +132,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void lerpMotion(double d, double e, double f) {
         this.setDeltaMovement(d, e, f);
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
@@ -179,7 +176,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
         super.recreateFromPacket(clientboundAddEntityPacket);
         Entity entity = this.level.getEntity(clientboundAddEntityPacket.getData());

@@ -35,6 +35,18 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EntitySelectorParser {
+    public static final char SYNTAX_SELECTOR_START = '@';
+    private static final char SYNTAX_OPTIONS_START = '[';
+    private static final char SYNTAX_OPTIONS_END = ']';
+    public static final char SYNTAX_OPTIONS_KEY_VALUE_SEPARATOR = '=';
+    private static final char SYNTAX_OPTIONS_SEPARATOR = ',';
+    public static final char SYNTAX_NOT = '!';
+    public static final char SYNTAX_TAG = '#';
+    private static final char SELECTOR_NEAREST_PLAYER = 'p';
+    private static final char SELECTOR_ALL_PLAYERS = 'a';
+    private static final char SELECTOR_RANDOM_PLAYERS = 'r';
+    private static final char SELECTOR_CURRENT_ENTITY = 's';
+    private static final char SELECTOR_ALL_ENTITIES = 'e';
     public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.invalid"));
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.entity.selector.unknown", object));
     public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.not_allowed"));
@@ -381,6 +393,10 @@ public class EntitySelectorParser {
         this.includesEntities = bl;
     }
 
+    public BiConsumer<Vec3, List<? extends Entity>> getOrder() {
+        return this.order;
+    }
+
     public void setOrder(BiConsumer<Vec3, List<? extends Entity>> biConsumer) {
         this.order = biConsumer;
     }
@@ -452,6 +468,11 @@ public class EntitySelectorParser {
         return suggestionsBuilder.buildFuture();
     }
 
+    private CompletableFuture<Suggestions> suggestEquals(SuggestionsBuilder suggestionsBuilder, Consumer<SuggestionsBuilder> consumer) {
+        suggestionsBuilder.suggest(String.valueOf('='));
+        return suggestionsBuilder.buildFuture();
+    }
+
     public boolean isCurrentEntity() {
         return this.currentEntity;
     }
@@ -518,6 +539,10 @@ public class EntitySelectorParser {
 
     public void setHasTeamEquals(boolean bl) {
         this.hasTeamEquals = bl;
+    }
+
+    public boolean hasTeamNotEquals() {
+        return this.hasTeamNotEquals;
     }
 
     public void setHasTeamNotEquals(boolean bl) {

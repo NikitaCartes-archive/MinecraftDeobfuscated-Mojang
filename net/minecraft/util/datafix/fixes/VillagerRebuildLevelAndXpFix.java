@@ -18,6 +18,7 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class VillagerRebuildLevelAndXpFix
 extends DataFix {
+    private static final int TRADES_PER_LEVEL = 2;
     private static final int[] LEVEL_XP_THRESHOLDS = new int[]{0, 10, 50, 100, 150};
 
     public static int getMinXpPerLevel(int i) {

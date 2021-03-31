@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import net.minecraft.util.VisibleForDebug;
 
 public class ExpirableValue<T> {
     private final T value;
@@ -32,6 +33,10 @@ public class ExpirableValue<T> {
         return new ExpirableValue<T>(object, l);
     }
 
+    public long getTimeToLive() {
+        return this.timeToLive;
+    }
+
     public T getValue() {
         return this.value;
     }
@@ -44,6 +49,7 @@ public class ExpirableValue<T> {
         return this.value + (this.canExpire() ? " (ttl: " + this.timeToLive + ")" : "");
     }
 
+    @VisibleForDebug
     public boolean canExpire() {
         return this.timeToLive != Long.MAX_VALUE;
     }

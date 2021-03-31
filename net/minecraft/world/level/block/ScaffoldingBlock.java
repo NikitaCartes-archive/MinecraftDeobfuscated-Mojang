@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -32,10 +33,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class ScaffoldingBlock
 extends Block
 implements SimpleWaterloggedBlock {
+    private static final int TICK_DELAY = 1;
     private static final VoxelShape STABLE_SHAPE;
     private static final VoxelShape UNSTABLE_SHAPE;
     private static final VoxelShape UNSTABLE_SHAPE_BOTTOM;
     private static final VoxelShape BELOW_BLOCK;
+    public static final int STABILITY_MAX_DISTANCE = 7;
     public static final IntegerProperty DISTANCE;
     public static final BooleanProperty WATERLOGGED;
     public static final BooleanProperty BOTTOM;
@@ -149,7 +152,7 @@ implements SimpleWaterloggedBlock {
             return 0;
         }
         Iterator<Direction> iterator = Direction.Plane.HORIZONTAL.iterator();
-        while (iterator.hasNext() && (!(blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction = iterator.next()))).is(Blocks.SCAFFOLDING) || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1)) {
+        while (iterator.hasNext() && (!(blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset((Vec3i)blockPos, direction = iterator.next()))).is(Blocks.SCAFFOLDING) || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1)) {
         }
         return i;
     }

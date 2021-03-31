@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -43,18 +41,15 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleOpenScreen(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getContainerId() {
         return this.containerId;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public MenuType<?> getType() {
         return (MenuType)Registry.MENU.byId(this.type);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getTitle() {
         return this.title;
     }

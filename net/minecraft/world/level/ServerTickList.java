@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ServerTickList<T>
 implements TickList<T> {
+    public static final int MAX_TICK_BLOCKS_PER_TICK = 65536;
     protected final Predicate<T> ignore;
     private final Function<T, ResourceLocation> toId;
     private final Set<TickNextTickData<T>> tickNextTickSet = Sets.newHashSet();
@@ -122,7 +123,7 @@ implements TickList<T> {
         while (iterator.hasNext()) {
             TickNextTickData<T> tickNextTickData = iterator.next();
             BlockPos blockPos = tickNextTickData.pos;
-            if (blockPos.getX() < boundingBox.x0 || blockPos.getX() >= boundingBox.x1 || blockPos.getZ() < boundingBox.z0 || blockPos.getZ() >= boundingBox.z1) continue;
+            if (blockPos.getX() < boundingBox.minX() || blockPos.getX() >= boundingBox.maxX() || blockPos.getZ() < boundingBox.minZ() || blockPos.getZ() >= boundingBox.maxZ()) continue;
             if (bl) {
                 iterator.remove();
             }
@@ -183,6 +184,7 @@ implements TickList<T> {
         }
     }
 
+    @Override
     public int size() {
         return this.tickNextTickSet.size();
     }

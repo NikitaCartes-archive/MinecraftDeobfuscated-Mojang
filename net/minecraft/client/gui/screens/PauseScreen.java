@@ -24,6 +24,9 @@ import net.minecraft.realms.RealmsBridge;
 @Environment(value=EnvType.CLIENT)
 public class PauseScreen
 extends Screen {
+    private static final String URL_FEEDBACK_SNAPSHOT = "https://aka.ms/snapshotfeedback?ref=game";
+    private static final String URL_FEEDBACK_RELEASE = "https://aka.ms/javafeedback?ref=game";
+    private static final String URL_BUGS = "https://aka.ms/snapshotbugs?ref=game";
     private final boolean showPauseMenu;
 
     public PauseScreen(boolean bl) {
@@ -47,7 +50,7 @@ extends Screen {
         }));
         this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.advancements"), button -> this.minecraft.setScreen(new AdvancementsScreen(this.minecraft.player.connection.getAdvancements()))));
         this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 48 + -16, 98, 20, new TranslatableComponent("gui.stats"), button -> this.minecraft.setScreen(new StatsScreen(this, this.minecraft.player.getStats()))));
-        String string = SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game";
+        String string = SharedConstants.getCurrentVersion().isStable() ? URL_FEEDBACK_RELEASE : URL_FEEDBACK_SNAPSHOT;
         this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.sendFeedback"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(string);
@@ -56,10 +59,10 @@ extends Screen {
         }, string, true))));
         this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 72 + -16, 98, 20, new TranslatableComponent("menu.reportBugs"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
-                Util.getPlatform().openUri("https://aka.ms/snapshotbugs?ref=game");
+                Util.getPlatform().openUri(URL_BUGS);
             }
             this.minecraft.setScreen(this);
-        }, "https://aka.ms/snapshotbugs?ref=game", true))));
+        }, URL_BUGS, true))));
         this.addButton(new Button(this.width / 2 - 102, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
         Button button2 = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, new TranslatableComponent("menu.shareToLan"), button -> this.minecraft.setScreen(new ShareToLanScreen(this))));
         button2.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();

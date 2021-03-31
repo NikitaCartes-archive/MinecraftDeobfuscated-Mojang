@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -39,12 +37,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleSetTime(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getGameTime() {
         return this.gameTime;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getDayTime() {
         return this.dayTime;
     }

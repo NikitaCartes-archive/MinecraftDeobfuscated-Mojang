@@ -5,6 +5,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -21,6 +22,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.functions.SetNameFunction;
@@ -96,6 +98,10 @@ extends LootItemConditionalFunction {
         return null;
     }
 
+    public static Builder setLore() {
+        return new Builder();
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetLoreFunction> {
         @Override
@@ -123,6 +129,43 @@ extends LootItemConditionalFunction {
         @Override
         public /* synthetic */ LootItemConditionalFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        }
+    }
+
+    public static class Builder
+    extends LootItemConditionalFunction.Builder<Builder> {
+        private boolean replace;
+        private LootContext.EntityTarget resolutionContext;
+        private final List<Component> lore = Lists.newArrayList();
+
+        public Builder setReplace(boolean bl) {
+            this.replace = bl;
+            return this;
+        }
+
+        public Builder setResolutionContext(LootContext.EntityTarget entityTarget) {
+            this.resolutionContext = entityTarget;
+            return this;
+        }
+
+        public Builder addLine(Component component) {
+            this.lore.add(component);
+            return this;
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
+        @Override
+        public LootItemFunction build() {
+            return new SetLoreFunction(this.getConditions(), this.replace, this.lore, this.resolutionContext);
+        }
+
+        @Override
+        protected /* synthetic */ LootItemConditionalFunction.Builder getThis() {
+            return this.getThis();
         }
     }
 }

@@ -67,6 +67,7 @@ import org.jetbrains.annotations.Nullable;
 public class CreateWorldScreen
 extends Screen {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String TEMP_WORLD_PREFIX = "mcworld-";
     private static final Component GAME_MODEL_LABEL = new TranslatableComponent("selectWorld.gameMode");
     private static final Component SEED_LABEL = new TranslatableComponent("selectWorld.enterSeed");
     private static final Component SEED_INFO = new TranslatableComponent("selectWorld.seedInfo");
@@ -362,7 +363,7 @@ extends Screen {
     protected Path getTempDataPackDir() {
         if (this.tempDataPackDir == null) {
             try {
-                this.tempDataPackDir = Files.createTempDirectory("mcworld-", new FileAttribute[0]);
+                this.tempDataPackDir = Files.createTempDirectory(TEMP_WORLD_PREFIX, new FileAttribute[0]);
             } catch (IOException iOException) {
                 LOGGER.warn("Failed to create temporary dir", (Throwable)iOException);
                 SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
@@ -462,7 +463,7 @@ extends Screen {
                 Path path3 = (Path)mutableObject.getValue();
                 if (path3 == null) {
                     try {
-                        path3 = Files.createTempDirectory("mcworld-", new FileAttribute[0]);
+                        path3 = Files.createTempDirectory(TEMP_WORLD_PREFIX, new FileAttribute[0]);
                     } catch (IOException iOException) {
                         LOGGER.warn("Failed to create temporary dir");
                         throw new OperationFailedException(iOException);

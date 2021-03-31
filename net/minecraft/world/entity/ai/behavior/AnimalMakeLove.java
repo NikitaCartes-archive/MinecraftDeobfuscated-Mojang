@@ -18,12 +18,15 @@ import net.minecraft.world.entity.animal.Animal;
 
 public class AnimalMakeLove
 extends Behavior<Animal> {
+    private static final int BREED_RANGE = 3;
+    private static final int MIN_DURATION = 60;
+    private static final int MAX_DURATION = 110;
     private final EntityType<? extends Animal> partnerType;
     private final float speedModifier;
     private long spawnChildAtTime;
 
     public AnimalMakeLove(EntityType<? extends Animal> entityType, float f) {
-        super(ImmutableMap.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED), 325);
+        super(ImmutableMap.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED), 110);
         this.partnerType = entityType;
         this.speedModifier = f;
     }
@@ -39,7 +42,7 @@ extends Behavior<Animal> {
         animal.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal2);
         animal2.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal);
         BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier);
-        int i = 275 + animal.getRandom().nextInt(50);
+        int i = 60 + animal.getRandom().nextInt(50);
         this.spawnChildAtTime = l + (long)i;
     }
 

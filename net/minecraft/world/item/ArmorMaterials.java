@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.LazyLoadedValue;
@@ -71,7 +69,6 @@ public enum ArmorMaterials implements ArmorMaterial
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public String getName() {
         return this.name;
     }

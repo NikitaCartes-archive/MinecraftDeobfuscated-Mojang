@@ -21,6 +21,10 @@ public class KeyCombo {
         this.chars = cs;
     }
 
+    public KeyCombo(char[] cs) {
+        this(cs, () -> {});
+    }
+
     public boolean keyPressed(char c) {
         if (c == this.chars[this.matchIndex++]) {
             if (this.matchIndex == this.chars.length) {

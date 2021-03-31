@@ -6,14 +6,27 @@ package net.minecraft.util;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.IntPredicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class Mth {
+    private static final int BIG_ENOUGH_INT = 1024;
+    private static final float BIG_ENOUGH_FLOAT = 1024.0f;
+    private static final long UUID_VERSION = 61440L;
+    private static final long UUID_VERSION_TYPE_4 = 16384L;
+    private static final long UUID_VARIANT = -4611686018427387904L;
+    private static final long UUID_VARIANT_2 = Long.MIN_VALUE;
+    public static final float PI = (float)Math.PI;
+    public static final float HALF_PI = 1.5707964f;
+    public static final float TWO_PI = (float)Math.PI * 2;
+    public static final float DEG_TO_RAD = (float)Math.PI / 180;
+    public static final float RAD_TO_DEG = 57.295776f;
+    public static final float EPSILON = 1.0E-5f;
     public static final float SQRT_OF_TWO = Mth.sqrt(2.0f);
+    private static final float SIN_SCALE = 10430.378f;
     private static final float[] SIN = Util.make(new float[65536], fs -> {
         for (int i = 0; i < ((float[])fs).length; ++i) {
             fs[i] = (float)Math.sin((double)i * Math.PI * 2.0 / 65536.0);
@@ -21,6 +34,9 @@ public class Mth {
     });
     private static final Random RANDOM = new Random();
     private static final int[] MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9};
+    private static final double ONE_SIXTH = 0.16666666666666666;
+    private static final int FRAC_EXP = 8;
+    private static final int LUT_SIZE = 257;
     private static final double FRAC_BIAS = Double.longBitsToDouble(4805340802404319232L);
     private static final double[] ASIN_TAB = new double[257];
     private static final double[] COS_TAB = new double[257];
@@ -46,7 +62,6 @@ public class Mth {
         return f < (float)i ? i - 1 : i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int fastFloor(double d) {
         return (int)(d + 1024.0) - 1024;
     }
@@ -59,6 +74,10 @@ public class Mth {
     public static long lfloor(double d) {
         long l = (long)d;
         return d < (double)l ? l - 1L : l;
+    }
+
+    public static int absFloor(double d) {
+        return (int)(d >= 0.0 ? d : -d + 1.0);
     }
 
     public static float abs(float f) {
@@ -79,6 +98,16 @@ public class Mth {
         return d > (double)i ? i + 1 : i;
     }
 
+    public static byte clamp(byte b, byte c, byte d) {
+        if (b < c) {
+            return c;
+        }
+        if (b > d) {
+            return d;
+        }
+        return b;
+    }
+
     public static int clamp(int i, int j, int k) {
         if (i < j) {
             return j;
@@ -89,7 +118,6 @@ public class Mth {
         return i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static long clamp(long l, long m, long n) {
         if (l < m) {
             return m;
@@ -173,7 +201,6 @@ public class Mth {
         return (double)l / (double)ls.length;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static boolean equal(float f, float g) {
         return Math.abs(g - f) < 1.0E-5f;
     }
@@ -186,17 +213,14 @@ public class Mth {
         return Math.floorMod(i, j);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float positiveModulo(float f, float g) {
         return (f % g + g) % g;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static double positiveModulo(double d, double e) {
         return (d % e + e) % e;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int wrapDegrees(int i) {
         int j = i % 360;
         if (j >= 180) {
@@ -257,9 +281,24 @@ public class Mth {
         return Mth.approach(f, f + i, h);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int getInt(String string, int i) {
         return NumberUtils.toInt(string, i);
+    }
+
+    public static int getInt(String string, int i, int j) {
+        return Math.max(j, Mth.getInt(string, i));
+    }
+
+    public static double getDouble(String string, double d) {
+        try {
+            return Double.parseDouble(string);
+        } catch (Throwable throwable) {
+            return d;
+        }
+    }
+
+    public static double getDouble(String string, double d, double e) {
+        return Math.max(e, Mth.getDouble(string, d));
     }
 
     public static int smallestEncompassingPowerOfTwo(int i) {
@@ -296,12 +335,43 @@ public class Mth {
         return l;
     }
 
+    public static int colorMultiply(int i, int j) {
+        int k = (i & 0xFF0000) >> 16;
+        int l = (j & 0xFF0000) >> 16;
+        int m = (i & 0xFF00) >> 8;
+        int n = (j & 0xFF00) >> 8;
+        int o = (i & 0xFF) >> 0;
+        int p = (j & 0xFF) >> 0;
+        int q = (int)((float)k * (float)l / 255.0f);
+        int r = (int)((float)m * (float)n / 255.0f);
+        int s = (int)((float)o * (float)p / 255.0f);
+        return i & 0xFF000000 | q << 16 | r << 8 | s;
+    }
+
+    public static int colorMultiply(int i, float f, float g, float h) {
+        int j = (i & 0xFF0000) >> 16;
+        int k = (i & 0xFF00) >> 8;
+        int l = (i & 0xFF) >> 0;
+        int m = (int)((float)j * f);
+        int n = (int)((float)k * g);
+        int o = (int)((float)l * h);
+        return i & 0xFF000000 | m << 16 | n << 8 | o;
+    }
+
     public static float frac(float f) {
         return f - (float)Mth.floor(f);
     }
 
     public static double frac(double d) {
         return d - (double)Mth.lfloor(d);
+    }
+
+    public static Vec3 catmullRomSplinePos(Vec3 vec3, Vec3 vec32, Vec3 vec33, Vec3 vec34, double d) {
+        double e = ((-d + 2.0) * d - 1.0) * d * 0.5;
+        double f = ((3.0 * d - 5.0) * d * d + 2.0) * 0.5;
+        double g = ((-3.0 * d + 4.0) * d + 1.0) * d * 0.5;
+        double h = (d - 1.0) * d * d * 0.5;
+        return new Vec3(vec3.x * e + vec32.x * f + vec33.x * g + vec34.x * h, vec3.y * e + vec32.y * f + vec33.y * g + vec34.y * h, vec3.z * e + vec32.z * f + vec33.z * g + vec34.z * h);
     }
 
     public static long getSeed(Vec3i vec3i) {
@@ -326,6 +396,40 @@ public class Mth {
 
     public static double inverseLerp(double d, double e, double f) {
         return (d - e) / (f - e);
+    }
+
+    public static boolean rayIntersectsAABB(Vec3 vec3, Vec3 vec32, AABB aABB) {
+        double d = (aABB.minX + aABB.maxX) * 0.5;
+        double e = (aABB.maxX - aABB.minX) * 0.5;
+        double f = vec3.x - d;
+        if (Math.abs(f) > e && f * vec32.x >= 0.0) {
+            return false;
+        }
+        double g = (aABB.minY + aABB.maxY) * 0.5;
+        double h = (aABB.maxY - aABB.minY) * 0.5;
+        double i = vec3.y - g;
+        if (Math.abs(i) > h && i * vec32.y >= 0.0) {
+            return false;
+        }
+        double j = (aABB.minZ + aABB.maxZ) * 0.5;
+        double k = (aABB.maxZ - aABB.minZ) * 0.5;
+        double l = vec3.z - j;
+        if (Math.abs(l) > k && l * vec32.z >= 0.0) {
+            return false;
+        }
+        double m = Math.abs(vec32.x);
+        double n = Math.abs(vec32.y);
+        double o = Math.abs(vec32.z);
+        double p = vec32.y * l - vec32.z * i;
+        if (Math.abs(p) > h * o + k * n) {
+            return false;
+        }
+        p = vec32.z * f - vec32.x * l;
+        if (Math.abs(p) > e * o + k * m) {
+            return false;
+        }
+        p = vec32.x * i - vec32.y * f;
+        return Math.abs(p) < e * n + h * m;
     }
 
     public static double atan2(double d, double e) {
@@ -373,7 +477,6 @@ public class Mth {
         return o;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float fastInvSqrt(float f) {
         float g = 0.5f * f;
         int i = Float.floatToIntBits(f);
@@ -392,7 +495,6 @@ public class Mth {
         return d;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float fastInvCubeRoot(float f) {
         int i = Float.floatToIntBits(f);
         i = 1419967116 - i / 3;
@@ -467,6 +569,70 @@ public class Mth {
         return i;
     }
 
+    public static long murmurHash3Mixer(long l) {
+        l ^= l >>> 33;
+        l *= -49064778989728563L;
+        l ^= l >>> 33;
+        l *= -4265267296055464877L;
+        l ^= l >>> 33;
+        return l;
+    }
+
+    public static double[] cumulativeSum(double ... ds) {
+        float f = 0.0f;
+        for (double d : ds) {
+            f = (float)((double)f + d);
+        }
+        int i = 0;
+        while (i < ds.length) {
+            int n = i++;
+            ds[n] = ds[n] / (double)f;
+        }
+        for (i = 0; i < ds.length; ++i) {
+            ds[i] = (i == 0 ? 0.0 : ds[i - 1]) + ds[i];
+        }
+        return ds;
+    }
+
+    public static int getRandomForDistributionIntegral(Random random, double[] ds) {
+        double d = random.nextDouble();
+        for (int i = 0; i < ds.length; ++i) {
+            if (!(d < ds[i])) continue;
+            return i;
+        }
+        return ds.length;
+    }
+
+    public static double[] binNormalDistribution(double d, double e, double f, int i, int j) {
+        double[] ds = new double[j - i + 1];
+        int k = 0;
+        for (int l = i; l <= j; ++l) {
+            ds[k] = Math.max(0.0, d * StrictMath.exp(-((double)l - f) * ((double)l - f) / (2.0 * e * e)));
+            ++k;
+        }
+        return ds;
+    }
+
+    public static double[] binBiModalNormalDistribution(double d, double e, double f, double g, double h, double i, int j, int k) {
+        double[] ds = new double[k - j + 1];
+        int l = 0;
+        for (int m = j; m <= k; ++m) {
+            ds[l] = Math.max(0.0, d * StrictMath.exp(-((double)m - f) * ((double)m - f) / (2.0 * e * e)) + g * StrictMath.exp(-((double)m - i) * ((double)m - i) / (2.0 * h * h)));
+            ++l;
+        }
+        return ds;
+    }
+
+    public static double[] binLogDistribution(double d, double e, int i, int j) {
+        double[] ds = new double[j - i + 1];
+        int k = 0;
+        for (int l = i; l <= j; ++l) {
+            ds[k] = Math.max(d * StrictMath.log(l) + e, 0.0);
+            ++k;
+        }
+        return ds;
+    }
+
     public static int binarySearch(int i, int j, IntPredicate intPredicate) {
         int k = j - i;
         while (k > 0) {
@@ -502,6 +668,10 @@ public class Mth {
         return d * d * d * (d * (d * 6.0 - 15.0) + 10.0);
     }
 
+    public static double smoothstepDerivative(double d) {
+        return 30.0 * d * d * (d - 1.0) * (d - 1.0);
+    }
+
     public static int sign(double d) {
         if (d == 0.0) {
             return 0;
@@ -509,9 +679,12 @@ public class Mth {
         return d > 0.0 ? 1 : -1;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float rotLerp(float f, float g, float h) {
         return g + f * Mth.wrapDegrees(h - g);
+    }
+
+    public static float diffuseLight(float f, float g, float h) {
+        return Math.min(f * f * 0.6f + g * g * ((3.0f + g) / 4.0f) + h * h * 0.8f, 1.0f);
     }
 
     @Deprecated
@@ -526,7 +699,6 @@ public class Mth {
     }
 
     @Deprecated
-    @Environment(value=EnvType.CLIENT)
     public static float rotWrap(double d) {
         while (d >= 180.0) {
             d -= 360.0;
@@ -537,7 +709,6 @@ public class Mth {
         return (float)d;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float triangleWave(float f, float g) {
         return (Math.abs(f % g - g * 0.5f) - g * 0.25f) / (g * 0.25f);
     }
@@ -550,12 +721,20 @@ public class Mth {
         return d * d;
     }
 
+    public static int square(int i) {
+        return i * i;
+    }
+
     public static double clampedMap(double d, double e, double f, double g, double h) {
         return Mth.clampedLerp(g, h, Mth.inverseLerp(d, e, f));
     }
 
     public static double map(double d, double e, double f, double g, double h) {
         return Mth.lerp(Mth.inverseLerp(d, e, f), g, h);
+    }
+
+    public static double wobble(double d) {
+        return d + (2.0 * new Random(Mth.floor(d * 3000.0)).nextDouble() - 1.0) * 1.0E-7 / 2.0;
     }
 
     public static int roundToward(int i, int j) {

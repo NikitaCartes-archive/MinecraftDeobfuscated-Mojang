@@ -84,5 +84,39 @@ public class FluidPredicate {
         jsonObject.add("state", this.properties.serializeToJson());
         return jsonObject;
     }
+
+    public static class Builder {
+        @Nullable
+        private Fluid fluid;
+        @Nullable
+        private Tag<Fluid> fluids;
+        private StatePropertiesPredicate properties = StatePropertiesPredicate.ANY;
+
+        private Builder() {
+        }
+
+        public static Builder fluid() {
+            return new Builder();
+        }
+
+        public Builder of(Fluid fluid) {
+            this.fluid = fluid;
+            return this;
+        }
+
+        public Builder of(Tag<Fluid> tag) {
+            this.fluids = tag;
+            return this;
+        }
+
+        public Builder setProperties(StatePropertiesPredicate statePropertiesPredicate) {
+            this.properties = statePropertiesPredicate;
+            return this;
+        }
+
+        public FluidPredicate build() {
+            return new FluidPredicate(this.fluids, this.fluid, this.properties);
+        }
+    }
 }
 

@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public class ScoreComponent
 extends BaseComponent
 implements ContextAwareComponent {
+    private static final String SCORER_PLACEHOLDER = "*";
     private final String name;
     @Nullable
     private final EntitySelector selector;
@@ -50,6 +51,11 @@ implements ContextAwareComponent {
 
     public String getName() {
         return this.name;
+    }
+
+    @Nullable
+    public EntitySelector getSelector() {
+        return this.selector;
     }
 
     public String getObjective() {
@@ -89,7 +95,7 @@ implements ContextAwareComponent {
             return new TextComponent("");
         }
         String string = this.findTargetName(commandSourceStack);
-        String string2 = entity != null && string.equals("*") ? entity.getScoreboardName() : string;
+        String string2 = entity != null && string.equals(SCORER_PLACEHOLDER) ? entity.getScoreboardName() : string;
         return new TextComponent(this.getScore(string2, commandSourceStack));
     }
 

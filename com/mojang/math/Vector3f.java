@@ -3,21 +3,18 @@
  */
 package com.mojang.math;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
-import java.util.stream.DoubleStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class Vector3f {
-    public static final Codec<Vector3f> CODEC = ExtraCodecs.DOUBLE_STREAM.comapFlatMap(doubleStream -> Util.fixedSize(doubleStream, 3).map((? super R ds) -> new Vector3f((float)ds[0], (float)ds[1], (float)ds[2])), vector3f -> DoubleStream.of(vector3f.x, vector3f.y, vector3f.z)).stable();
+    public static final Codec<Vector3f> CODEC = Codec.FLOAT.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 3).map((? super R list) -> new Vector3f(((Float)list.get(0)).floatValue(), ((Float)list.get(1)).floatValue(), ((Float)list.get(2)).floatValue())), vector3f -> ImmutableList.of(Float.valueOf(vector3f.x), Float.valueOf(vector3f.y), Float.valueOf(vector3f.z)));
     public static Vector3f XN = new Vector3f(-1.0f, 0.0f, 0.0f);
     public static Vector3f XP = new Vector3f(1.0f, 0.0f, 0.0f);
     public static Vector3f YN = new Vector3f(0.0f, -1.0f, 0.0f);
@@ -38,7 +35,6 @@ public final class Vector3f {
         this.z = h;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vector3f(Vector4f vector4f) {
         this(vector4f.x(), vector4f.y(), vector4f.z());
     }
@@ -83,21 +79,24 @@ public final class Vector3f {
         return this.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void mul(float f) {
         this.x *= f;
         this.y *= f;
         this.z *= f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void mul(float f, float g, float h) {
         this.x *= f;
         this.y *= g;
         this.z *= h;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public void clamp(Vector3f vector3f, Vector3f vector3f2) {
+        this.x = Mth.clamp(this.x, vector3f.x(), vector3f2.x());
+        this.y = Mth.clamp(this.y, vector3f.x(), vector3f2.y());
+        this.z = Mth.clamp(this.z, vector3f.z(), vector3f2.z());
+    }
+
     public void clamp(float f, float g) {
         this.x = Mth.clamp(this.x, f, g);
         this.y = Mth.clamp(this.y, f, g);
@@ -110,33 +109,34 @@ public final class Vector3f {
         this.z = h;
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public void load(Vector3f vector3f) {
+        this.x = vector3f.x;
+        this.y = vector3f.y;
+        this.z = vector3f.z;
+    }
+
     public void add(float f, float g, float h) {
         this.x += f;
         this.y += g;
         this.z += h;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void add(Vector3f vector3f) {
         this.x += vector3f.x;
         this.y += vector3f.y;
         this.z += vector3f.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void sub(Vector3f vector3f) {
         this.x -= vector3f.x;
         this.y -= vector3f.y;
         this.z -= vector3f.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float dot(Vector3f vector3f) {
         return this.x * vector3f.x + this.y * vector3f.y + this.z * vector3f.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean normalize() {
         float f = this.x * this.x + this.y * this.y + this.z * this.z;
         if ((double)f < 1.0E-5) {
@@ -149,7 +149,6 @@ public final class Vector3f {
         return true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void cross(Vector3f vector3f) {
         float f = this.x;
         float g = this.y;
@@ -162,7 +161,6 @@ public final class Vector3f {
         this.z = f * j - g * i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void transform(Matrix3f matrix3f) {
         float f = this.x;
         float g = this.y;
@@ -181,7 +179,6 @@ public final class Vector3f {
         this.set(quaternion2.i(), quaternion2.j(), quaternion2.k());
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void lerp(Vector3f vector3f, float f) {
         float g = 1.0f - f;
         this.x = this.x * g + vector3f.x * f;
@@ -189,22 +186,18 @@ public final class Vector3f {
         this.z = this.z * g + vector3f.z * f;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Quaternion rotation(float f) {
         return new Quaternion(this, f, false);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Quaternion rotationDegrees(float f) {
         return new Quaternion(this, f, true);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vector3f copy() {
         return new Vector3f(this.x, this.y, this.z);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void map(Float2FloatFunction float2FloatFunction) {
         this.x = float2FloatFunction.get(this.x);
         this.y = float2FloatFunction.get(this.y);

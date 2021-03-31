@@ -24,7 +24,7 @@ extends Feature<GrowingPlantConfiguration> {
         WorldGenLevel levelAccessor = featurePlaceContext.level();
         GrowingPlantConfiguration growingPlantConfiguration = featurePlaceContext.config();
         Random random = featurePlaceContext.random();
-        int i = growingPlantConfiguration.heightDistribution.getOne(random).sample(random);
+        int i = growingPlantConfiguration.heightDistribution.getRandomValue(random).orElseThrow(IllegalStateException::new).sample(random);
         BlockPos.MutableBlockPos mutableBlockPos = featurePlaceContext.origin().mutable();
         BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos.mutable().move(growingPlantConfiguration.direction);
         BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);

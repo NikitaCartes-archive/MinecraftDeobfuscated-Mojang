@@ -3,12 +3,11 @@
  */
 package net.minecraft.world.level.pathfinder;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 
 public class Node {
     public final int x;
@@ -57,10 +56,24 @@ public class Node {
         return Mth.sqrt(f * f + g * g + h * h);
     }
 
+    public float distanceTo(BlockPos blockPos) {
+        float f = blockPos.getX() - this.x;
+        float g = blockPos.getY() - this.y;
+        float h = blockPos.getZ() - this.z;
+        return Mth.sqrt(f * f + g * g + h * h);
+    }
+
     public float distanceToSqr(Node node) {
         float f = node.x - this.x;
         float g = node.y - this.y;
         float h = node.z - this.z;
+        return f * f + g * g + h * h;
+    }
+
+    public float distanceToSqr(BlockPos blockPos) {
+        float f = blockPos.getX() - this.x;
+        float g = blockPos.getY() - this.y;
+        float h = blockPos.getZ() - this.z;
         return f * f + g * g + h * h;
     }
 
@@ -80,6 +93,10 @@ public class Node {
 
     public BlockPos asBlockPos() {
         return new BlockPos(this.x, this.y, this.z);
+    }
+
+    public Vec3 asVec3() {
+        return new Vec3(this.x, this.y, this.z);
     }
 
     public boolean equals(Object object) {
@@ -102,7 +119,17 @@ public class Node {
         return "Node{x=" + this.x + ", y=" + this.y + ", z=" + this.z + '}';
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public void writeToStream(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeInt(this.x);
+        friendlyByteBuf.writeInt(this.y);
+        friendlyByteBuf.writeInt(this.z);
+        friendlyByteBuf.writeFloat(this.walkedDistance);
+        friendlyByteBuf.writeFloat(this.costMalus);
+        friendlyByteBuf.writeBoolean(this.closed);
+        friendlyByteBuf.writeInt(this.type.ordinal());
+        friendlyByteBuf.writeFloat(this.f);
+    }
+
     public static Node createFromStream(FriendlyByteBuf friendlyByteBuf) {
         Node node = new Node(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
         node.walkedDistance = friendlyByteBuf.readFloat();

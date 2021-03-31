@@ -59,6 +59,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlayerAdvancements {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int VISIBILITY_DEPTH = 2;
     private static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)AdvancementProgress.class), new AdvancementProgress.Serializer()).registerTypeAdapter((Type)((Object)ResourceLocation.class), new ResourceLocation.Serializer()).setPrettyPrinting().create();
     private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> TYPE_TOKEN = new TypeToken<Map<ResourceLocation, AdvancementProgress>>(){};
     private final DataFixer dataFixer;

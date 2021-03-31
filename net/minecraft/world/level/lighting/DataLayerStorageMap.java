@@ -8,6 +8,7 @@ import net.minecraft.world.level.chunk.DataLayer;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class DataLayerStorageMap<M extends DataLayerStorageMap<M>> {
+    private static final int CACHE_SIZE = 2;
     private final long[] lastSectionKeys = new long[2];
     private final DataLayer[] lastSections = new DataLayer[2];
     private boolean cacheEnabled;

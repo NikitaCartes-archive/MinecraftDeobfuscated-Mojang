@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.vehicle;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -29,6 +27,7 @@ extends AbstractMinecart {
     private static final EntityDataAccessor<String> DATA_ID_COMMAND_NAME = SynchedEntityData.defineId(MinecartCommandBlock.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Component> DATA_ID_LAST_OUTPUT = SynchedEntityData.defineId(MinecartCommandBlock.class, EntityDataSerializers.COMPONENT);
     private final BaseCommandBlock commandBlock = new MinecartCommandBase();
+    private static final int ACTIVATION_DELAY = 4;
     private int lastActivated;
 
     public MinecartCommandBlock(EntityType<? extends MinecartCommandBlock> entityType, Level level) {
@@ -118,12 +117,10 @@ extends AbstractMinecart {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         public Vec3 getPosition() {
             return MinecartCommandBlock.this.position();
         }
 
-        @Environment(value=EnvType.CLIENT)
         public MinecartCommandBlock getMinecart() {
             return MinecartCommandBlock.this;
         }

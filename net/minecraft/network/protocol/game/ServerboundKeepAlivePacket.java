@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -13,7 +11,6 @@ public class ServerboundKeepAlivePacket
 implements Packet<ServerGamePacketListener> {
     private final long id;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundKeepAlivePacket(long l) {
         this.id = l;
     }

@@ -6,8 +6,6 @@ package net.minecraft.stats;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -20,14 +18,12 @@ implements Iterable<Stat<T>> {
     private final Registry<T> registry;
     private final Map<T, Stat<T>> map = new IdentityHashMap<T, Stat<T>>();
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     private Component displayName;
 
     public StatType(Registry<T> registry) {
         this.registry = registry;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean contains(T object) {
         return this.map.containsKey(object);
     }
@@ -49,12 +45,10 @@ implements Iterable<Stat<T>> {
         return this.get(object, StatFormatter.DEFAULT);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getTranslationKey() {
         return "stat_type." + Registry.STAT_TYPE.getKey(this).toString().replace(':', '.');
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getDisplayName() {
         if (this.displayName == null) {
             this.displayName = new TranslatableComponent(this.getTranslationKey());

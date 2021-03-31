@@ -20,6 +20,7 @@ import net.minecraft.world.item.crafting.Recipe;
 @Environment(value=EnvType.CLIENT)
 public class RecipeToast
 implements Toast {
+    private static final long DISPLAY_TIME = 5000L;
     private static final Component TITLE_TEXT = new TranslatableComponent("recipe.toast.title");
     private static final Component DESCRIPTION_TEXT = new TranslatableComponent("recipe.toast.description");
     private final List<Recipe<?>> recipes = Lists.newArrayList();

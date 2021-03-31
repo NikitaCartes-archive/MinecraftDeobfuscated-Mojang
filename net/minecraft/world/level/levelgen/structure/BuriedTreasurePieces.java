@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.structure;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -25,8 +26,7 @@ public class BuriedTreasurePieces {
     public static class BuriedTreasurePiece
     extends StructurePiece {
         public BuriedTreasurePiece(BlockPos blockPos) {
-            super(StructurePieceType.BURIED_TREASURE_PIECE, 0);
-            this.boundingBox = new BoundingBox(blockPos);
+            super(StructurePieceType.BURIED_TREASURE_PIECE, 0, new BoundingBox(blockPos));
         }
 
         public BuriedTreasurePiece(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -39,24 +39,24 @@ public class BuriedTreasurePieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.x0, this.boundingBox.z0);
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.x0, i, this.boundingBox.z0);
+            int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.minX(), this.boundingBox.minZ());
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.minX(), i, this.boundingBox.minZ());
             while (mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight()) {
                 BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
                 BlockState blockState2 = worldGenLevel.getBlockState((BlockPos)mutableBlockPos.below());
                 if (blockState2 == Blocks.SANDSTONE.defaultBlockState() || blockState2 == Blocks.STONE.defaultBlockState() || blockState2 == Blocks.ANDESITE.defaultBlockState() || blockState2 == Blocks.GRANITE.defaultBlockState() || blockState2 == Blocks.DIORITE.defaultBlockState()) {
                     BlockState blockState3 = blockState.isAir() || this.isLiquid(blockState) ? Blocks.SAND.defaultBlockState() : blockState;
                     for (Direction direction : Direction.values()) {
-                        BlockPos blockPos2 = mutableBlockPos.relative(direction);
-                        BlockState blockState4 = worldGenLevel.getBlockState(blockPos2);
+                        Vec3i blockPos2 = mutableBlockPos.relative(direction);
+                        BlockState blockState4 = worldGenLevel.getBlockState((BlockPos)blockPos2);
                         if (!blockState4.isAir() && !this.isLiquid(blockState4)) continue;
-                        BlockPos blockPos3 = blockPos2.below();
+                        BlockPos blockPos3 = ((BlockPos)blockPos2).below();
                         BlockState blockState5 = worldGenLevel.getBlockState(blockPos3);
                         if ((blockState5.isAir() || this.isLiquid(blockState5)) && direction != Direction.UP) {
-                            worldGenLevel.setBlock(blockPos2, blockState2, 3);
+                            worldGenLevel.setBlock((BlockPos)blockPos2, blockState2, 3);
                             continue;
                         }
-                        worldGenLevel.setBlock(blockPos2, blockState3, 3);
+                        worldGenLevel.setBlock((BlockPos)blockPos2, blockState3, 3);
                     }
                     this.boundingBox = new BoundingBox(mutableBlockPos);
                     return this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);

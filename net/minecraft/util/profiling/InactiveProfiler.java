@@ -4,8 +4,6 @@
 package net.minecraft.util.profiling;
 
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.profiling.ActiveProfiler;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileCollector;
@@ -44,7 +42,6 @@ implements ProfileCollector {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void popPush(Supplier<String> supplier) {
     }
 
@@ -63,7 +60,6 @@ implements ProfileCollector {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ActiveProfiler.PathEntry getEntry(String string) {
         return null;
     }

@@ -17,18 +17,19 @@ import net.minecraft.world.entity.Entity;
 @Environment(value=EnvType.CLIENT)
 public class ShulkerBulletModel<T extends Entity>
 extends HierarchicalModel<T> {
+    private static final String MAIN = "main";
     private final ModelPart root;
     private final ModelPart main;
 
     public ShulkerBulletModel(ModelPart modelPart) {
         this.root = modelPart;
-        this.main = modelPart.getChild("main");
+        this.main = modelPart.getChild(MAIN);
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("main", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -1.0f, 8.0f, 8.0f, 2.0f).texOffs(0, 10).addBox(-1.0f, -4.0f, -4.0f, 2.0f, 8.0f, 8.0f).texOffs(20, 0).addBox(-4.0f, -1.0f, -4.0f, 8.0f, 2.0f, 8.0f), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(MAIN, CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -1.0f, 8.0f, 8.0f, 2.0f).texOffs(0, 10).addBox(-1.0f, -4.0f, -4.0f, 2.0f, 8.0f, 8.0f).texOffs(20, 0).addBox(-4.0f, -1.0f, -4.0f, 8.0f, 2.0f, 8.0f), PartPose.ZERO);
         return LayerDefinition.create(meshDefinition, 64, 32);
     }
 

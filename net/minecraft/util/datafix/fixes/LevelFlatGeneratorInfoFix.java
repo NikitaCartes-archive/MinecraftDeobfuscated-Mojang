@@ -22,6 +22,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 public class LevelFlatGeneratorInfoFix
 extends DataFix {
+    private static final String GENERATOR_OPTIONS = "generatorOptions";
+    @VisibleForTesting
+    static final String DEFAULT = "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;1;village";
     private static final Splitter SPLITTER = Splitter.on(';').limit(5);
     private static final Splitter LAYER_SPLITTER = Splitter.on(',');
     private static final Splitter OLD_AMOUNT_SPLITTER = Splitter.on('x').limit(2);
@@ -39,7 +42,7 @@ extends DataFix {
 
     private Dynamic<?> fix(Dynamic<?> dynamic2) {
         if (dynamic2.get("generatorName").asString("").equalsIgnoreCase("flat")) {
-            return dynamic2.update("generatorOptions", dynamic -> DataFixUtils.orElse(dynamic.asString().map(this::fixString).map(dynamic::createString).result(), dynamic));
+            return dynamic2.update(GENERATOR_OPTIONS, dynamic -> DataFixUtils.orElse(dynamic.asString().map(this::fixString).map(dynamic::createString).result(), dynamic));
         }
         return dynamic2;
     }
@@ -49,7 +52,7 @@ extends DataFix {
         String string3;
         int i;
         if (string2.isEmpty()) {
-            return "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;1;village";
+            return DEFAULT;
         }
         Iterator<String> iterator = SPLITTER.split(string2).iterator();
         String string22 = iterator.next();
@@ -61,7 +64,7 @@ extends DataFix {
             string3 = string22;
         }
         if (i < 0 || i > 3) {
-            return "minecraft:bedrock,2*minecraft:dirt,minecraft:grass_block;1;village";
+            return DEFAULT;
         }
         StringBuilder stringBuilder = new StringBuilder();
         Splitter splitter = i < 3 ? OLD_AMOUNT_SPLITTER : AMOUNT_SPLITTER;

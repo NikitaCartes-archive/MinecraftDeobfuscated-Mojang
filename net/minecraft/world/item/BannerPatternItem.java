@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -31,12 +29,10 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         list.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MutableComponent getDisplayName() {
         return new TranslatableComponent(this.getDescriptionId() + ".desc");
     }

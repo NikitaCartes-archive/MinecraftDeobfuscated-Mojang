@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,6 +24,13 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.jetbrains.annotations.Nullable;
 
 public class Scoreboard {
+    public static final int DISPLAY_SLOT_LIST = 0;
+    public static final int DISPLAY_SLOT_SIDEBAR = 1;
+    public static final int DISPLAY_SLOT_BELOW_NAME = 2;
+    public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_START = 3;
+    public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_END = 18;
+    public static final int DISPLAY_SLOTS = 19;
+    public static final int MAX_NAME_LENGTH = 40;
     private final Map<String, Objective> objectivesByName = Maps.newHashMap();
     private final Map<ObjectiveCriteria, List<Objective>> objectivesByCriteria = Maps.newHashMap();
     private final Map<String, Map<Objective, Score>> playerScores = Maps.newHashMap();
@@ -34,7 +39,6 @@ public class Scoreboard {
     private final Map<String, PlayerTeam> teamsByPlayer = Maps.newHashMap();
     private static String[] displaySlotNames;
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasObjective(String string) {
         return this.objectivesByName.containsKey(string);
     }

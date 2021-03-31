@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.monster;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
@@ -52,6 +50,9 @@ import org.jetbrains.annotations.Nullable;
 public class Illusioner
 extends SpellcasterIllager
 implements RangedAttackMob {
+    private static final int NUM_ILLUSIONS = 4;
+    private static final int ILLUSION_TRANSITION_TICKS = 3;
+    private static final int ILLUSION_SPREAD = 3;
     private int clientSideIllusionTicks;
     private final Vec3[][] clientSideIllusionOffsets;
 
@@ -98,7 +99,6 @@ implements RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(3.0, 0.0, 3.0);
     }
@@ -139,7 +139,6 @@ implements RangedAttackMob {
         return SoundEvents.ILLUSIONER_AMBIENT;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vec3[] getIllusionOffsets(float f) {
         if (this.clientSideIllusionTicks <= 0) {
             return this.clientSideIllusionOffsets[1];
@@ -202,7 +201,6 @@ implements RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public AbstractIllager.IllagerArmPose getArmPose() {
         if (this.isCastingSpell()) {
             return AbstractIllager.IllagerArmPose.SPELLCASTING;

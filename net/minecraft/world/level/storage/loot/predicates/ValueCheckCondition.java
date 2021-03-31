@@ -42,6 +42,10 @@ implements LootItemCondition {
         return this.range.test(lootContext, this.provider.getInt(lootContext));
     }
 
+    public static LootItemCondition.Builder hasValue(NumberProvider numberProvider, IntRange intRange) {
+        return () -> new ValueCheckCondition(numberProvider, intRange);
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);

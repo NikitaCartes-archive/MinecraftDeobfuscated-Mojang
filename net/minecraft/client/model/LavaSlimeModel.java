@@ -19,6 +19,7 @@ import net.minecraft.world.entity.monster.Slime;
 @Environment(value=EnvType.CLIENT)
 public class LavaSlimeModel<T extends Slime>
 extends HierarchicalModel<T> {
+    private static final int SEGMENT_COUNT = 8;
     private final ModelPart root;
     private final ModelPart[] bodyCubes = new ModelPart[8];
 

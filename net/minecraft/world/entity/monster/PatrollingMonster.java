@@ -143,6 +143,7 @@ extends Monster {
 
     public static class LongDistancePatrolGoal<T extends PatrollingMonster>
     extends Goal {
+        private static final int NAVIGATION_FAILED_COOLDOWN = 200;
         private final T mob;
         private final double speedModifier;
         private final double leaderSpeedModifier;

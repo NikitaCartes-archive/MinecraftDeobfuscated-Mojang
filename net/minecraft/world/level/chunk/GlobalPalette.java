@@ -4,8 +4,6 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -39,7 +37,6 @@ implements Palette<T> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void read(FriendlyByteBuf friendlyByteBuf) {
     }
 
@@ -50,6 +47,11 @@ implements Palette<T> {
     @Override
     public int getSerializedSize() {
         return FriendlyByteBuf.getVarIntSize(0);
+    }
+
+    @Override
+    public int getSize() {
+        return this.registry.size();
     }
 
     @Override

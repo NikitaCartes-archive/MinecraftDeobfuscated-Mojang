@@ -5,8 +5,6 @@ package net.minecraft.world.level.storage;
 
 import com.mojang.bridge.game.GameVersion;
 import java.io.File;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
@@ -29,7 +27,6 @@ implements Comparable<LevelSummary> {
     private final boolean locked;
     private final File icon;
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     private Component info;
 
     public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, File file) {
@@ -41,27 +38,22 @@ implements Comparable<LevelSummary> {
         this.requiresConversion = bl;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getLevelId() {
         return this.levelId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getLevelName() {
         return StringUtils.isEmpty(this.settings.levelName()) ? this.levelId : this.settings.levelName();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public File getIcon() {
         return this.icon;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isRequiresConversion() {
         return this.requiresConversion;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public long getLastPlayed() {
         return this.levelVersion.lastPlayed();
     }
@@ -77,22 +69,22 @@ implements Comparable<LevelSummary> {
         return this.levelId.compareTo(levelSummary.levelId);
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public LevelSettings getSettings() {
+        return this.settings;
+    }
+
     public GameType getGameMode() {
         return this.settings.gameType();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isHardcore() {
         return this.settings.hardcore();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasCheats() {
         return this.settings.allowCommands();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public MutableComponent getWorldVersionName() {
         if (StringUtil.isNullOrEmpty(this.levelVersion.minecraftVersionName())) {
             return new TranslatableComponent("selectWorld.versionUnknown");
@@ -104,17 +96,14 @@ implements Comparable<LevelSummary> {
         return this.levelVersion;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean markVersionInList() {
         return this.askToOpenWorld() || !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot() || this.backupStatus().shouldBackup();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean askToOpenWorld() {
         return this.levelVersion.minecraftVersion() > SharedConstants.getCurrentVersion().getWorldVersion();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BackupStatus backupStatus() {
         GameVersion gameVersion = SharedConstants.getCurrentVersion();
         int i = gameVersion.getWorldVersion();
@@ -128,21 +117,18 @@ implements Comparable<LevelSummary> {
         return BackupStatus.NONE;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isLocked() {
         return this.locked;
     }
 
     public boolean isIncompatibleWorldHeight() {
-        return false != this.levelVersion.minecraftVersion() <= 2692;
+        return true != this.levelVersion.minecraftVersion() > 2692;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isDisabled() {
         return this.isLocked() || this.isIncompatibleWorldHeight();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Component getInfo() {
         if (this.info == null) {
             this.info = this.createInfo();
@@ -150,7 +136,6 @@ implements Comparable<LevelSummary> {
         return this.info;
     }
 
-    @Environment(value=EnvType.CLIENT)
     private Component createInfo() {
         MutableComponent mutableComponent;
         if (this.isLocked()) {
@@ -182,7 +167,6 @@ implements Comparable<LevelSummary> {
         return this.compareTo((LevelSummary)object);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static enum BackupStatus {
         NONE(false, false, ""),
         DOWNGRADE(true, true, "downgrade"),

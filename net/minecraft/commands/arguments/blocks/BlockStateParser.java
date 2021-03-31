@@ -40,6 +40,12 @@ public class BlockStateParser {
     public static final Dynamic3CommandExceptionType ERROR_INVALID_VALUE = new Dynamic3CommandExceptionType((object, object2, object3) -> new TranslatableComponent("argument.block.property.invalid", object, object3, object2));
     public static final Dynamic2CommandExceptionType ERROR_EXPECTED_VALUE = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("argument.block.property.novalue", object, object2));
     public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_PROPERTIES = new SimpleCommandExceptionType(new TranslatableComponent("argument.block.property.unclosed"));
+    private static final char SYNTAX_START_PROPERTIES = '[';
+    private static final char SYNTAX_START_NBT = '{';
+    private static final char SYNTAX_END_PROPERTIES = ']';
+    private static final char SYNTAX_EQUALS = '=';
+    private static final char SYNTAX_PROPERTY_SEPARATOR = ',';
+    private static final char SYNTAX_TAG = '#';
     private static final BiFunction<SuggestionsBuilder, TagCollection<Block>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
     private final StringReader reader;
     private final boolean forTesting;

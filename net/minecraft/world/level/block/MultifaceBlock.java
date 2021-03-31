@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MultifaceBlock
 extends Block {
+    private static final float AABB_OFFSET = 1.0f;
     private static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
     private static final VoxelShape DOWN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
     private static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);

@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.monster;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
@@ -27,7 +25,6 @@ extends Raider {
         return MobType.ILLAGER;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public IllagerArmPose getArmPose() {
         return IllagerArmPose.CROSSED;
     }
@@ -44,7 +41,6 @@ extends Raider {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static enum IllagerArmPose {
         CROSSED,
         ATTACKING,

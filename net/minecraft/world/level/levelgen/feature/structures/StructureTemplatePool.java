@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -36,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 
 public class StructureTemplatePool {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int SIZE_UNSET = Integer.MIN_VALUE;
     public static final Codec<StructureTemplatePool> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.fieldOf("name")).forGetter(StructureTemplatePool::getName), ((MapCodec)ResourceLocation.CODEC.fieldOf("fallback")).forGetter(StructureTemplatePool::getFallback), ((MapCodec)Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.INT.fieldOf("weight")).codec().listOf().promotePartial((Consumer)Util.prefix("Pool element: ", LOGGER::error)).fieldOf("elements")).forGetter(structureTemplatePool -> structureTemplatePool.rawTemplates)).apply((Applicative<StructureTemplatePool, ?>)instance, StructureTemplatePool::new));
     public static final Codec<Supplier<StructureTemplatePool>> CODEC = RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC);
     private final ResourceLocation name;
@@ -73,7 +75,7 @@ public class StructureTemplatePool {
 
     public int getMaxSize(StructureManager structureManager) {
         if (this.maxSize == Integer.MIN_VALUE) {
-            this.maxSize = this.templates.stream().mapToInt(structurePoolElement -> structurePoolElement.getBoundingBox(structureManager, BlockPos.ZERO, Rotation.NONE).getYSpan()).max().orElse(0);
+            this.maxSize = this.templates.stream().filter(structurePoolElement -> structurePoolElement != EmptyPoolElement.INSTANCE).mapToInt(structurePoolElement -> structurePoolElement.getBoundingBox(structureManager, BlockPos.ZERO, Rotation.NONE).getYSpan()).max().orElse(0);
         }
         return this.maxSize;
     }

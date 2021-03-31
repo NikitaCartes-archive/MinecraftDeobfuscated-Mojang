@@ -4,10 +4,9 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -27,8 +26,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeavesBlock
 extends Block {
+    public static final int DECAY_DISTANCE = 7;
     public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
     public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
+    private static final int TICK_DELAY = 1;
 
     public LeavesBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -76,7 +77,7 @@ extends Block {
         int i = 7;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             i = Math.min(i, LeavesBlock.getDistanceAt(levelAccessor.getBlockState(mutableBlockPos)) + 1);
             if (i == 1) break;
         }
@@ -94,7 +95,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         if (!level.isRainingAt(blockPos.above())) {
             return;

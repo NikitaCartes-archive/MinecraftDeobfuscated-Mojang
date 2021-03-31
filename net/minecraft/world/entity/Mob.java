@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -85,6 +83,15 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Mob
 extends LivingEntity {
     private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
+    private static final int MOB_FLAG_NO_AI = 1;
+    private static final int MOB_FLAG_LEFTHANDED = 2;
+    private static final int MOB_FLAG_AGGRESSIVE = 4;
+    public static final float MAX_WEARING_ARMOR_CHANCE = 0.15f;
+    public static final float MAX_PICKUP_LOOT_CHANCE = 0.55f;
+    public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5f;
+    public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25f;
+    public static final String LEASH_TAG = "Leash";
+    private static final int PICKUP_REACH = 1;
     public int ambientSoundTime;
     protected int xpReward;
     protected LookControl lookControl;
@@ -283,7 +290,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 20) {
             this.spawnAnim();
@@ -366,9 +372,9 @@ extends LivingEntity {
                 ((CompoundTag)compoundTag3).putInt("Y", blockPos.getY());
                 ((CompoundTag)compoundTag3).putInt("Z", blockPos.getZ());
             }
-            compoundTag.put("Leash", (net.minecraft.nbt.Tag)compoundTag3);
+            compoundTag.put(LEASH_TAG, (net.minecraft.nbt.Tag)compoundTag3);
         } else if (this.leashInfoTag != null) {
-            compoundTag.put("Leash", this.leashInfoTag.copy());
+            compoundTag.put(LEASH_TAG, this.leashInfoTag.copy());
         }
         compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
         if (this.lootTable != null) {
@@ -415,8 +421,8 @@ extends LivingEntity {
                 this.handDropChances[i] = listTag.getFloat(i);
             }
         }
-        if (compoundTag.contains("Leash", 10)) {
-            this.leashInfoTag = compoundTag.getCompound("Leash");
+        if (compoundTag.contains(LEASH_TAG, 10)) {
+            this.leashInfoTag = compoundTag.getCompound(LEASH_TAG);
         }
         this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
         if (compoundTag.contains("DeathLootTable", 8)) {
@@ -1060,6 +1066,10 @@ extends LivingEntity {
         return this.restrictRadius;
     }
 
+    public void clearRestriction() {
+        this.restrictRadius = -1.0f;
+    }
+
     public boolean hasRestriction() {
         return this.restrictRadius != -1.0f;
     }
@@ -1153,7 +1163,6 @@ extends LivingEntity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setDelayedLeashHolderId(int i) {
         this.delayedLeashHolderId = i;
         this.dropLeash(false, false);
@@ -1309,6 +1318,11 @@ extends LivingEntity {
         }
     }
 
+    public void removeFreeWill() {
+        this.goalSelector.removeAllGoals();
+        this.getBrain().removeAllBehaviors();
+    }
+
     @Override
     protected void removeAfterChangingDimensions() {
         super.removeAfterChangingDimensions();
@@ -1317,7 +1331,6 @@ extends LivingEntity {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getPickResult() {
         SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
         if (spawnEggItem == null) {

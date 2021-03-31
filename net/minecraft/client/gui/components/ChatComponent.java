@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public class ChatComponent
 extends GuiComponent {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MAX_CHAT_HISTORY = 100;
     private final Minecraft minecraft;
     private final List<String> recentChat = Lists.newArrayList();
     private final List<GuiMessage<Component>> allMessages = Lists.newArrayList();

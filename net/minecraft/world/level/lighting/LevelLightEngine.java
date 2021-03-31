@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.lighting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -21,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class LevelLightEngine
 implements LightEventListener {
+    public static final int MAX_SOURCE_LEVEL = 15;
+    public static final int LIGHT_SECTION_PADDING = 1;
     protected final LevelHeightAccessor levelHeightAccessor;
     @Nullable
     private final LayerLightEngine<?, ?> blockEngine;
@@ -33,6 +33,7 @@ implements LightEventListener {
         this.skyEngine = bl2 ? new SkyLightEngine(lightChunkGetter) : null;
     }
 
+    @Override
     public void checkBlock(BlockPos blockPos) {
         if (this.blockEngine != null) {
             this.blockEngine.checkBlock(blockPos);
@@ -42,12 +43,14 @@ implements LightEventListener {
         }
     }
 
+    @Override
     public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
         if (this.blockEngine != null) {
             this.blockEngine.onBlockEmissionIncrease(blockPos, i);
         }
     }
 
+    @Override
     public boolean hasLightWork() {
         if (this.skyEngine != null && this.skyEngine.hasLightWork()) {
             return true;
@@ -55,6 +58,7 @@ implements LightEventListener {
         return this.blockEngine != null && this.blockEngine.hasLightWork();
     }
 
+    @Override
     public int runUpdates(int i, boolean bl, boolean bl2) {
         if (this.blockEngine != null && this.skyEngine != null) {
             int j = i / 2;
@@ -85,6 +89,7 @@ implements LightEventListener {
         }
     }
 
+    @Override
     public void enableLightSources(ChunkPos chunkPos, boolean bl) {
         if (this.blockEngine != null) {
             this.blockEngine.enableLightSources(chunkPos, bl);
@@ -107,7 +112,6 @@ implements LightEventListener {
         return this.skyEngine;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getDebugData(LightLayer lightLayer, SectionPos sectionPos) {
         if (lightLayer == LightLayer.BLOCK) {
             if (this.blockEngine != null) {

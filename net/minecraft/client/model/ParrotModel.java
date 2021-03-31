@@ -20,6 +20,7 @@ import net.minecraft.world.entity.animal.Parrot;
 @Environment(value=EnvType.CLIENT)
 public class ParrotModel
 extends HierarchicalModel<Parrot> {
+    private static final String FEATHER = "feather";
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart tail;
@@ -37,7 +38,7 @@ extends HierarchicalModel<Parrot> {
         this.leftWing = modelPart.getChild("left_wing");
         this.rightWing = modelPart.getChild("right_wing");
         this.head = modelPart.getChild("head");
-        this.feather = this.head.getChild("feather");
+        this.feather = this.head.getChild(FEATHER);
         this.leftLeg = modelPart.getChild("left_leg");
         this.rightLeg = modelPart.getChild("right_leg");
     }
@@ -53,7 +54,7 @@ extends HierarchicalModel<Parrot> {
         partDefinition2.addOrReplaceChild("head2", CubeListBuilder.create().texOffs(10, 0).addBox(-1.0f, -0.5f, -2.0f, 2.0f, 1.0f, 4.0f), PartPose.offset(0.0f, -2.0f, -1.0f));
         partDefinition2.addOrReplaceChild("beak1", CubeListBuilder.create().texOffs(11, 7).addBox(-0.5f, -1.0f, -0.5f, 1.0f, 2.0f, 1.0f), PartPose.offset(0.0f, -0.5f, -1.5f));
         partDefinition2.addOrReplaceChild("beak2", CubeListBuilder.create().texOffs(16, 7).addBox(-0.5f, 0.0f, -0.5f, 1.0f, 2.0f, 1.0f), PartPose.offset(0.0f, -1.75f, -2.45f));
-        partDefinition2.addOrReplaceChild("feather", CubeListBuilder.create().texOffs(2, 18).addBox(0.0f, -4.0f, -2.0f, 0.0f, 5.0f, 4.0f), PartPose.offset(0.0f, -2.15f, 0.15f));
+        partDefinition2.addOrReplaceChild(FEATHER, CubeListBuilder.create().texOffs(2, 18).addBox(0.0f, -4.0f, -2.0f, 0.0f, 5.0f, 4.0f), PartPose.offset(0.0f, -2.15f, 0.15f));
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(14, 18).addBox(-0.5f, 0.0f, -0.5f, 1.0f, 2.0f, 1.0f);
         partDefinition.addOrReplaceChild("left_leg", cubeListBuilder, PartPose.offset(1.0f, 22.0f, -1.05f));
         partDefinition.addOrReplaceChild("right_leg", cubeListBuilder, PartPose.offset(-1.0f, 22.0f, -1.05f));

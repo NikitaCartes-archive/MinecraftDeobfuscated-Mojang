@@ -3,12 +3,24 @@
  */
 package net.minecraft;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.Objects;
 
 @FunctionalInterface
-@Environment(value=EnvType.CLIENT)
 public interface CharPredicate {
     public boolean test(char var1);
+
+    default public CharPredicate and(CharPredicate charPredicate) {
+        Objects.requireNonNull(charPredicate);
+        return c -> this.test(c) && charPredicate.test(c);
+    }
+
+    default public CharPredicate negate() {
+        return c -> !this.test(c);
+    }
+
+    default public CharPredicate or(CharPredicate charPredicate) {
+        Objects.requireNonNull(charPredicate);
+        return c -> this.test(c) || charPredicate.test(c);
+    }
 }
 

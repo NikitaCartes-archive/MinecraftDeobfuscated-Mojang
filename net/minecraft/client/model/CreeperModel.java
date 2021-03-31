@@ -25,6 +25,7 @@ extends HierarchicalModel<T> {
     private final ModelPart leftHindLeg;
     private final ModelPart rightFrontLeg;
     private final ModelPart leftFrontLeg;
+    private static final int Y_OFFSET = 6;
 
     public CreeperModel(ModelPart modelPart) {
         this.root = modelPart;

@@ -96,8 +96,28 @@ public class DamagePredicate {
             return new Builder();
         }
 
+        public Builder dealtDamage(MinMaxBounds.Floats floats) {
+            this.dealtDamage = floats;
+            return this;
+        }
+
+        public Builder takenDamage(MinMaxBounds.Floats floats) {
+            this.takenDamage = floats;
+            return this;
+        }
+
+        public Builder sourceEntity(EntityPredicate entityPredicate) {
+            this.sourceEntity = entityPredicate;
+            return this;
+        }
+
         public Builder blocked(Boolean boolean_) {
             this.blocked = boolean_;
+            return this;
+        }
+
+        public Builder type(DamageSourcePredicate damageSourcePredicate) {
+            this.type = damageSourcePredicate;
             return this;
         }
 

@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -52,7 +50,6 @@ implements PackResources {
     protected abstract InputStream getResource(String var1) throws IOException;
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public InputStream getRootResource(String string) throws IOException {
         if (string.contains("/") || string.contains("\\")) {
             throw new IllegalArgumentException("Root resources can only be filenames, not paths (no / allowed!)");

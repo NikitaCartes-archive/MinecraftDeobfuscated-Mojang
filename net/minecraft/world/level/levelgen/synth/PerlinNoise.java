@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PerlinNoise
 implements SurfaceNoise {
+    private static final int ROUND_OFF = 0x2000000;
     private final ImprovedNoise[] noiseLevels;
     private final DoubleList amplitudes;
     private final double lowestFreqValueFactor;
@@ -33,6 +34,10 @@ implements SurfaceNoise {
 
     public PerlinNoise(RandomSource randomSource, List<Integer> list) {
         this(randomSource, new IntRBTreeSet(list));
+    }
+
+    public static PerlinNoise create(RandomSource randomSource, int i, double ... ds) {
+        return PerlinNoise.create(randomSource, i, new DoubleArrayList(ds));
     }
 
     public static PerlinNoise create(RandomSource randomSource, int i, DoubleList doubleList) {

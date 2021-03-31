@@ -63,6 +63,10 @@ implements LootItemCondition {
         return false;
     }
 
+    public static LootItemCondition.Builder conditionReference(ResourceLocation resourceLocation) {
+        return () -> new ConditionReference(resourceLocation);
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);

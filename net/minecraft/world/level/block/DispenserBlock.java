@@ -52,6 +52,7 @@ extends BaseEntityBlock {
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
     public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
     private static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = Util.make(new Object2ObjectOpenHashMap(), object2ObjectOpenHashMap -> object2ObjectOpenHashMap.defaultReturnValue(new DefaultDispenseItemBehavior()));
+    private static final int TRIGGER_DURATION = 4;
 
     public static void registerBehavior(ItemLike itemLike, DispenseItemBehavior dispenseItemBehavior) {
         DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);

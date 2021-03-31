@@ -6,8 +6,6 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -44,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class RespawnAnchorBlock
 extends Block {
+    public static final int MIN_CHARGES = 0;
+    public static final int MAX_CHARGES = 4;
     public static final IntegerProperty CHARGE = BlockStateProperties.RESPAWN_ANCHOR_CHARGES;
     private static final ImmutableList<Vec3i> RESPAWN_HORIZONTAL_OFFSETS = ImmutableList.of(new Vec3i(0, 0, -1), new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(1, 0, 0), new Vec3i(-1, 0, -1), new Vec3i(1, 0, -1), new Vec3i(-1, 0, 1), new Vec3i(1, 0, 1));
     private static final ImmutableList<Vec3i> RESPAWN_OFFSETS = ((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)new ImmutableList.Builder().addAll(RESPAWN_HORIZONTAL_OFFSETS)).addAll(RESPAWN_HORIZONTAL_OFFSETS.stream().map(Vec3i::below).iterator())).addAll(RESPAWN_HORIZONTAL_OFFSETS.stream().map(Vec3i::above).iterator())).add(new Vec3i(0, 1, 0))).build();
@@ -135,7 +135,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         if (blockState.getValue(CHARGE) == 0) {
             return;

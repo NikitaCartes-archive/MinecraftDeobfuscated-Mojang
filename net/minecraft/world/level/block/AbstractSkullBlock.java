@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.BlockGetter;
@@ -45,7 +43,6 @@ implements Wearable {
         return null;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public SkullBlock.Type getType() {
         return this.type;
     }

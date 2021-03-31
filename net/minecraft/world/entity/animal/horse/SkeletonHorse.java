@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 public class SkeletonHorse
 extends AbstractHorse {
     private final SkeletonTrapGoal skeletonTrapGoal = new SkeletonTrapGoal(this);
+    private static final int TRAP_MAX_LIFE = 18000;
     private boolean isTrap;
     private int trapTime;
 

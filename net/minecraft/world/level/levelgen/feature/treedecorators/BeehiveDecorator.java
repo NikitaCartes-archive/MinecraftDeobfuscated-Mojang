@@ -7,23 +7,21 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class BeehiveDecorator
 extends TreeDecorator {
@@ -40,7 +38,7 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(WorldGenLevel worldGenLevel, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
+    public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2) {
         if (random.nextFloat() >= this.probability) {
             return;
         }
@@ -52,20 +50,18 @@ extends TreeDecorator {
         }
         BlockPos blockPos2 = (BlockPos)list3.get(random.nextInt(list3.size()));
         BlockPos blockPos22 = blockPos2.relative(direction);
-        if (!Feature.isAir(worldGenLevel, blockPos22) || !Feature.isAir(worldGenLevel, blockPos22.relative(Direction.SOUTH))) {
+        if (!Feature.isAir(levelSimulatedReader, blockPos22) || !Feature.isAir(levelSimulatedReader, blockPos22.relative(Direction.SOUTH))) {
             return;
         }
-        BlockState blockState = (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
-        this.setBlock(worldGenLevel, blockPos22, blockState, set, boundingBox);
-        BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos22);
-        if (blockEntity instanceof BeehiveBlockEntity) {
-            BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-            int j = 2 + random.nextInt(2);
-            for (int k = 0; k < j; ++k) {
-                Bee bee = new Bee((EntityType<? extends Bee>)EntityType.BEE, (Level)worldGenLevel.getLevel());
-                beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
+        biConsumer.accept(blockPos22, (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH));
+        levelSimulatedReader.getBlockEntity(blockPos22, BlockEntityType.BEEHIVE).ifPresent(beehiveBlockEntity -> {
+            int i = 2 + random.nextInt(2);
+            for (int j = 0; j < i; ++j) {
+                CompoundTag compoundTag = new CompoundTag();
+                compoundTag.putString("id", Registry.ENTITY_TYPE.getKey(EntityType.BEE).toString());
+                beehiveBlockEntity.storeBee(compoundTag, random.nextInt(599), false);
             }
-        }
+        });
     }
 }
 

@@ -30,7 +30,7 @@ extends HumanoidMobRenderer<T, M> {
 
     @Override
     protected boolean isShaking(T zombie) {
-        return ((Zombie)zombie).isUnderWaterConverting();
+        return super.isShaking(zombie) || ((Zombie)zombie).isUnderWaterConverting();
     }
 
     @Override

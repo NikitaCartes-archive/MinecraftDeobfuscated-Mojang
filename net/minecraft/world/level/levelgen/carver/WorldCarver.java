@@ -13,6 +13,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.levelgen.carver.CanyonCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
+import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.NetherWorldCarver;
@@ -34,8 +36,8 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
-    public static final WorldCarver<CarverConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(CarverConfiguration.CODEC));
-    public static final WorldCarver<CarverConfiguration> NETHER_CAVE = WorldCarver.register("nether_cave", new NetherWorldCarver(CarverConfiguration.CODEC));
+    public static final WorldCarver<CaveCarverConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(CaveCarverConfiguration.CODEC));
+    public static final WorldCarver<CaveCarverConfiguration> NETHER_CAVE = WorldCarver.register("nether_cave", new NetherWorldCarver(CaveCarverConfiguration.CODEC));
     public static final WorldCarver<CanyonCarverConfiguration> CANYON = WorldCarver.register("canyon", new CanyonWorldCarver(CanyonCarverConfiguration.CODEC));
     protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
     protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
@@ -114,19 +116,19 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
     protected boolean carveBlock(CarvingContext carvingContext, C carverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, int i, MutableBoolean mutableBoolean) {
         BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-        BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
+        BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.UP));
         if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
             mutableBoolean.setTrue();
         }
         if (!this.canReplaceBlock(blockState, blockState2) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
             return false;
         }
-        if (mutableBlockPos.getY() < carvingContext.getMinGenY() + 9 && !WorldCarver.isDebugEnabled(carverConfiguration)) {
+        if (mutableBlockPos.getY() < ((CarverConfiguration)carverConfiguration).lavaLevel.resolveY(carvingContext) && !WorldCarver.isDebugEnabled(carverConfiguration)) {
             chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
         } else {
             chunkAccess.setBlockState(mutableBlockPos, WorldCarver.getCaveAirState(carverConfiguration), false);
             if (mutableBoolean.isTrue()) {
-                mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
+                mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, Direction.DOWN);
                 if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
                     chunkAccess.setBlockState(mutableBlockPos2, function.apply(mutableBlockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false);
                 }
@@ -136,7 +138,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     }
 
     private static BlockState getCaveAirState(CarverConfiguration carverConfiguration) {
-        return WorldCarver.isDebugEnabled(carverConfiguration) ? carverConfiguration.getDebugSettings().getAirState() : CAVE_AIR;
+        return WorldCarver.isDebugEnabled(carverConfiguration) ? carverConfiguration.debugSettings.getAirState() : CAVE_AIR;
     }
 
     public abstract boolean carve(CarvingContext var1, C var2, ChunkAccess var3, Function<BlockPos, Biome> var4, Random var5, int var6, ChunkPos var7, BitSet var8);
@@ -186,7 +188,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     }
 
     private static boolean isDebugEnabled(CarverConfiguration carverConfiguration) {
-        return carverConfiguration.getDebugSettings().isDebugMode();
+        return carverConfiguration.debugSettings.isDebugMode();
     }
 
     public static interface CarveSkipChecker {

@@ -3,11 +3,10 @@
  */
 package net.minecraft.world.entity;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.world.entity.PlayerRideable;
 
-public interface PlayerRideableJumping {
-    @Environment(value=EnvType.CLIENT)
+public interface PlayerRideableJumping
+extends PlayerRideable {
     public void onPlayerJump(int var1);
 
     public boolean canJump();

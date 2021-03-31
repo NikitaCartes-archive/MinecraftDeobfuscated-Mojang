@@ -6,8 +6,6 @@ package net.minecraft.world.item;
 import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 
@@ -47,7 +45,6 @@ public class ItemCooldowns {
         this.onCooldownStarted(item, i);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void removeCooldown(Item item) {
         this.cooldowns.remove(item);
         this.onCooldownEnded(item);

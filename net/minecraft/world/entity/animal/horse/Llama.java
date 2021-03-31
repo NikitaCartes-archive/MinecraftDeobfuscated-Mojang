@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -62,6 +60,8 @@ import org.jetbrains.annotations.Nullable;
 public class Llama
 extends AbstractChestedHorse
 implements RangedAttackMob {
+    private static final int MAX_STRENGTH = 5;
+    private static final int VARIANTS = 4;
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
     private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
@@ -76,7 +76,6 @@ implements RangedAttackMob {
         super((EntityType<? extends AbstractChestedHorse>)entityType, level);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isTraderLlama() {
         return false;
     }
@@ -470,7 +469,6 @@ implements RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.75 * (double)this.getEyeHeight(), (double)this.getBbWidth() * 0.5);
     }

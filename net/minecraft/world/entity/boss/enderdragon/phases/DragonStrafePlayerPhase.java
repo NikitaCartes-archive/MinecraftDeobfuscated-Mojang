@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class DragonStrafePlayerPhase
 extends AbstractDragonPhaseInstance {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int FIREBALL_CHARGE_AMOUNT = 5;
     private int fireballCharge;
     private Path currentPath;
     private Vec3 targetLocation;

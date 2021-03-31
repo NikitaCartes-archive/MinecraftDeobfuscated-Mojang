@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.animal;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -51,6 +49,8 @@ extends AbstractGolem
 implements Shearable,
 RangedAttackMob {
     private static final EntityDataAccessor<Byte> DATA_PUMPKIN_ID = SynchedEntityData.defineId(SnowGolem.class, EntityDataSerializers.BYTE);
+    private static final byte PUMPKIN_FLAG = 16;
+    private static final float EYE_HEIGHT = 1.7f;
 
     public SnowGolem(EntityType<? extends SnowGolem> entityType, Level level) {
         super((EntityType<? extends AbstractGolem>)entityType, level);
@@ -197,7 +197,6 @@ RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.75f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }

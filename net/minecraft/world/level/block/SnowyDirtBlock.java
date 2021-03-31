@@ -5,10 +5,10 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -27,7 +27,7 @@ extends Block {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == Direction.UP) {
-            return (BlockState)blockState.setValue(SNOWY, blockState2.is(Blocks.SNOW_BLOCK) || blockState2.is(Blocks.SNOW));
+            return (BlockState)blockState.setValue(SNOWY, SnowyDirtBlock.isSnowySetting(blockState2));
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -35,7 +35,11 @@ extends Block {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().above());
-        return (BlockState)this.defaultBlockState().setValue(SNOWY, blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.SNOW));
+        return (BlockState)this.defaultBlockState().setValue(SNOWY, SnowyDirtBlock.isSnowySetting(blockState));
+    }
+
+    private static boolean isSnowySetting(BlockState blockState) {
+        return blockState.is(BlockTags.SNOW);
     }
 
     @Override

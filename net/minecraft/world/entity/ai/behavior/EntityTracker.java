@@ -41,6 +41,10 @@ implements PositionTracker {
         return true;
     }
 
+    public Entity getEntity() {
+        return this.entity;
+    }
+
     public String toString() {
         return "EntityTracker for " + this.entity;
     }

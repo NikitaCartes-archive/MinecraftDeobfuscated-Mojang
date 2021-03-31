@@ -7,13 +7,13 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 
 public class VillagerData {
+    public static final int MIN_VILLAGER_LEVEL = 1;
+    public static final int MAX_VILLAGER_LEVEL = 5;
     private static final int[] NEXT_LEVEL_XP_THRESHOLDS = new int[]{0, 10, 70, 150, 250};
     public static final Codec<VillagerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.VILLAGER_TYPE.fieldOf("type")).orElseGet(() -> VillagerType.PLAINS).forGetter(villagerData -> villagerData.type), ((MapCodec)Registry.VILLAGER_PROFESSION.fieldOf("profession")).orElseGet(() -> VillagerProfession.NONE).forGetter(villagerData -> villagerData.profession), ((MapCodec)Codec.INT.fieldOf("level")).orElse(1).forGetter(villagerData -> villagerData.level)).apply((Applicative<VillagerData, ?>)instance, VillagerData::new));
     private final VillagerType type;
@@ -50,7 +50,6 @@ public class VillagerData {
         return new VillagerData(this.type, this.profession, i);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int getMinXpPerLevel(int i) {
         return VillagerData.canLevelUp(i) ? NEXT_LEVEL_XP_THRESHOLDS[i - 1] : 0;
     }

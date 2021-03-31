@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -46,22 +44,18 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleBlockEvent(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos getPos() {
         return this.pos;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getB0() {
         return this.b0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getB1() {
         return this.b1;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Block getBlock() {
         return this.block;
     }

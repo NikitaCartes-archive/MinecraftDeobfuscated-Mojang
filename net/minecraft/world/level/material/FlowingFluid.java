@@ -41,6 +41,7 @@ public abstract class FlowingFluid
 extends Fluid {
     public static final BooleanProperty FALLING = BlockStateProperties.FALLING;
     public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_FLOWING;
+    private static final int CACHE_SIZE = 200;
     private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
         Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(200){
 
@@ -64,7 +65,7 @@ extends Fluid {
         double e = 0.0;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            mutableBlockPos.setWithOffset(blockPos, direction);
+            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
             FluidState fluidState2 = blockGetter.getFluidState(mutableBlockPos);
             if (!this.affectsFlow(fluidState2)) continue;
             float f = fluidState2.getOwnHeight();
@@ -85,7 +86,7 @@ extends Fluid {
         Vec3 vec3 = new Vec3(d, 0.0, e);
         if (fluidState.getValue(FALLING).booleanValue()) {
             for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                mutableBlockPos.setWithOffset(blockPos, direction2);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction2);
                 if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, (BlockPos)mutableBlockPos.above(), direction2)) continue;
                 vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
                 break;
@@ -399,6 +400,9 @@ extends Fluid {
     public float getOwnHeight(FluidState fluidState) {
         return (float)fluidState.getAmount() / 9.0f;
     }
+
+    @Override
+    public abstract int getAmount(FluidState var1);
 
     @Override
     public VoxelShape getShape(FluidState fluidState2, BlockGetter blockGetter, BlockPos blockPos) {

@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 
 public interface Container
 extends Clearable {
+    public static final int LARGE_MAX_STACK_SIZE = 64;
+
     public int getContainerSize();
 
     public boolean isEmpty();

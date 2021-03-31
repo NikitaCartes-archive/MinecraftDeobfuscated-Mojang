@@ -37,8 +37,6 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -76,6 +74,7 @@ import org.jetbrains.annotations.Nullable;
 public class LevelStorageSource {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendLiteral('-').appendValue(ChronoField.MONTH_OF_YEAR, 2).appendLiteral('-').appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral('_').appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral('-').appendValue(ChronoField.MINUTE_OF_HOUR, 2).appendLiteral('-').appendValue(ChronoField.SECOND_OF_MINUTE, 2).toFormatter();
+    private static final String ICON_FILENAME = "icon.png";
     private static final ImmutableList<String> OLD_SETTINGS_KEYS = ImmutableList.of("RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest");
     private final Path baseDir;
     private final Path backupDir;
@@ -117,7 +116,10 @@ public class LevelStorageSource {
         return DataPackConfig.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElse(DataPackConfig.DEFAULT);
     }
 
-    @Environment(value=EnvType.CLIENT)
+    public String getName() {
+        return "Anvil";
+    }
+
     public List<LevelSummary> getLevelList() throws LevelStorageException {
         File[] files;
         if (!Files.isDirectory(this.baseDir, new LinkOption[0])) {
@@ -208,7 +210,7 @@ public class LevelStorageSource {
                 int j = levelVersion.levelDataVersion();
                 if (j == 19132 || j == 19133) {
                     boolean bl2 = j != this.getStorageVersion();
-                    File file3 = new File(file, "icon.png");
+                    File file3 = new File(file, ICON_FILENAME);
                     DataPackConfig dataPackConfig = dynamic.get("DataPacks").result().map(LevelStorageSource::readDataPackConfig).orElse(DataPackConfig.DEFAULT);
                     LevelSettings levelSettings = LevelSettings.parse(dynamic, dataPackConfig);
                     return new LevelSummary(levelSettings, levelVersion, file.getName(), bl2, bl, file3);
@@ -221,7 +223,6 @@ public class LevelStorageSource {
         };
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean isNewLevelIdAcceptable(String string) {
         try {
             Path path = this.baseDir.resolve(string);
@@ -233,17 +234,14 @@ public class LevelStorageSource {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean levelExists(String string) {
         return Files.isDirectory(this.baseDir.resolve(string), new LinkOption[0]);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Path getBaseDir() {
         return this.baseDir;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Path getBackupPath() {
         return this.backupDir;
     }
@@ -338,10 +336,9 @@ public class LevelStorageSource {
 
         public File getIconFile() {
             this.checkLock();
-            return this.levelPath.resolve("icon.png").toFile();
+            return this.levelPath.resolve(LevelStorageSource.ICON_FILENAME).toFile();
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void deleteLevel() throws IOException {
             this.checkLock();
             final Path path = this.levelPath.resolve("session.lock");
@@ -396,7 +393,6 @@ public class LevelStorageSource {
             }
         }
 
-        @Environment(value=EnvType.CLIENT)
         public void renameLevel(String string) throws IOException {
             this.checkLock();
             File file = new File(LevelStorageSource.this.baseDir.toFile(), this.levelId);
@@ -412,7 +408,6 @@ public class LevelStorageSource {
             }
         }
 
-        @Environment(value=EnvType.CLIENT)
         public long makeWorldBackup() throws IOException {
             this.checkLock();
             String string = LocalDateTime.now().format(FORMATTER) + "_" + this.levelId;

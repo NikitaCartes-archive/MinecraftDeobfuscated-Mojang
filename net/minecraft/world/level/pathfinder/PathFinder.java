@@ -25,9 +25,11 @@ import net.minecraft.world.level.pathfinder.Target;
 import org.jetbrains.annotations.Nullable;
 
 public class PathFinder {
+    private static final float FUDGING = 1.5f;
     private final Node[] neighbors = new Node[32];
     private final int maxVisitedNodes;
     private final NodeEvaluator nodeEvaluator;
+    private static final boolean DEBUG = false;
     private final BinaryHeap openSet = new BinaryHeap();
 
     public PathFinder(NodeEvaluator nodeEvaluator, int i) {

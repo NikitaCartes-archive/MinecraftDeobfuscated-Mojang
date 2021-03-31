@@ -22,8 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -52,6 +50,10 @@ extends BiomeSource {
     private final long seed;
     private final Optional<Pair<Registry<Biome>, Preset>> preset;
 
+    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list) {
+        this(l, list, Optional.empty());
+    }
+
     private MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Pair<Registry<Biome>, Preset>> optional) {
         this(l, list, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, optional);
     }
@@ -76,13 +78,21 @@ extends BiomeSource {
         this.useY = false;
     }
 
+    public static MultiNoiseBiomeSource overworld(Registry<Biome> registry, long l) {
+        ImmutableList<Pair<Biome.ClimateParameters, Supplier<Biome>>> immutableList = MultiNoiseBiomeSource.parameters(registry);
+        NoiseParameters noiseParameters = new NoiseParameters(-9, 1.0, 0.0, 3.0, 3.0, 3.0, 3.0);
+        NoiseParameters noiseParameters2 = new NoiseParameters(-7, 1.0, 2.0, 4.0, 4.0);
+        NoiseParameters noiseParameters3 = new NoiseParameters(-9, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0);
+        NoiseParameters noiseParameters4 = new NoiseParameters(-8, 1.2, 0.6, 0.0, 0.0, 1.0, 0.0);
+        return new MultiNoiseBiomeSource(l, immutableList, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, Optional.empty());
+    }
+
     @Override
     protected Codec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public BiomeSource withSeed(long l) {
         return new MultiNoiseBiomeSource(l, this.parameters, this.temperatureParams, this.humidityParams, this.altitudeParams, this.weirdnessParams, this.preset);
     }
@@ -96,6 +106,10 @@ extends BiomeSource {
         int l = this.useY ? j : 0;
         Biome.ClimateParameters climateParameters = new Biome.ClimateParameters((float)this.temperatureNoise.getValue(i, l, k), (float)this.humidityNoise.getValue(i, l, k), (float)this.altitudeNoise.getValue(i, l, k), (float)this.weirdnessNoise.getValue(i, l, k), 0.0f);
         return this.parameters.stream().min(Comparator.comparing(pair -> Float.valueOf(((Biome.ClimateParameters)pair.getFirst()).fitness(climateParameters)))).map(Pair::getSecond).map(Supplier::get).orElse(net.minecraft.data.worldgen.biome.Biomes.THE_VOID);
+    }
+
+    public static ImmutableList<Pair<Biome.ClimateParameters, Supplier<Biome>>> parameters(Registry<Biome> registry) {
+        return ImmutableList.of(Pair.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), () -> registry.getOrThrow(Biomes.PLAINS)));
     }
 
     public boolean stable(long l) {
@@ -156,6 +170,11 @@ extends BiomeSource {
         public NoiseParameters(int i, List<Double> list) {
             this.firstOctave = i;
             this.amplitudes = new DoubleArrayList(list);
+        }
+
+        public NoiseParameters(int i, double ... ds) {
+            this.firstOctave = i;
+            this.amplitudes = new DoubleArrayList(ds);
         }
 
         public int firstOctave() {

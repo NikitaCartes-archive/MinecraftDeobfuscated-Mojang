@@ -52,6 +52,10 @@ extends LootItemConditionalFunction {
         return itemStack;
     }
 
+    public static LootItemConditionalFunction.Builder<?> fillPlayerHead(LootContext.EntityTarget entityTarget) {
+        return FillPlayerHead.simpleBuilder(lootItemConditions -> new FillPlayerHead((LootItemCondition[])lootItemConditions, entityTarget));
+    }
+
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<FillPlayerHead> {
         @Override

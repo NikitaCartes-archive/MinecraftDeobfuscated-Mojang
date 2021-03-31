@@ -6,8 +6,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.BitSet;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -91,47 +89,38 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleLightUpdatePacked(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getX() {
         return this.x;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getZ() {
         return this.z;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BitSet getSkyYMask() {
         return this.skyYMask;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BitSet getEmptySkyYMask() {
         return this.emptySkyYMask;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<byte[]> getSkyUpdates() {
         return this.skyUpdates;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BitSet getBlockYMask() {
         return this.blockYMask;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BitSet getEmptyBlockYMask() {
         return this.emptyBlockYMask;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public List<byte[]> getBlockUpdates() {
         return this.blockUpdates;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean getTrustEdges() {
         return this.trustEdges;
     }

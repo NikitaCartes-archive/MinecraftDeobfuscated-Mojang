@@ -6,8 +6,6 @@ package net.minecraft.world.entity.monster;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -49,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 public class Phantom
 extends FlyingMob
 implements Enemy {
+    public static final float FLAP_DEGREES_PER_TICK = 7.448451f;
     public static final int TICKS_PER_FLAP = Mth.ceil(24.166098f);
     private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Phantom.class, EntityDataSerializers.INT);
     private Vec3 moveTargetPoint = Vec3.ZERO;
@@ -178,7 +177,6 @@ implements Enemy {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double d) {
         return true;
     }

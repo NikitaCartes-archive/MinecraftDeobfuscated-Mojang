@@ -82,6 +82,8 @@ FeatureAccess {
 
     public int getHeight(Heightmap.Types var1, int var2, int var3);
 
+    public BlockPos getHeighestPosition(Heightmap.Types var1);
+
     public ChunkPos getPos();
 
     public Map<StructureFeature<?>, StructureStart<?>> getAllStarts();

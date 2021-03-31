@@ -14,6 +14,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 public class CompressionDecoder
 extends ByteToMessageDecoder {
+    public static final int MAXIMUM_DECOMPRESSED_LENGTH = 0x200000;
     private final Inflater inflater;
     private int threshold;
 
@@ -46,6 +47,10 @@ extends ByteToMessageDecoder {
             list.add(Unpooled.wrappedBuffer(cs));
             this.inflater.reset();
         }
+    }
+
+    public int getThreshold() {
+        return this.threshold;
     }
 
     public void setThreshold(int i) {

@@ -9,8 +9,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -20,7 +18,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.IntRange;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -61,6 +59,16 @@ extends Monster
 implements Enemy,
 HoglinBase {
     private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zoglin.class, EntityDataSerializers.BOOLEAN);
+    private static final int MAX_HEALTH = 40;
+    private static final int ATTACK_KNOCKBACK = 1;
+    private static final float KNOCKBACK_RESISTANCE = 0.6f;
+    private static final int ATTACK_DAMAGE = 6;
+    private static final float BABY_ATTACK_DAMAGE = 0.5f;
+    private static final int ATTACK_INTERVAL = 40;
+    private static final int BABY_ATTACK_INTERVAL = 15;
+    private static final int ATTACK_DURATION = 200;
+    private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.3f;
+    private static final float SPEED_MULTIPLIER_WHEN_IDLING = 0.4f;
     private int attackAnimationRemainingTicks;
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Zoglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS);
     protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN);
@@ -91,7 +99,7 @@ HoglinBase {
     }
 
     private static void initIdleActivity(Brain<Zoglin> brain) {
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new StartAttacking<Zoglin>(Zoglin::findNearestValidAttackTarget), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), new RunOne(ImmutableList.of(Pair.of(new RandomStroll(0.4f), 2), Pair.of(new SetWalkTargetFromLookTarget(0.4f, 3), 2), Pair.of(new DoNothing(30, 60), 1)))));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new StartAttacking<Zoglin>(Zoglin::findNearestValidAttackTarget), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), UniformInt.of(30, 60)), new RunOne(ImmutableList.of(Pair.of(new RandomStroll(0.4f), 2), Pair.of(new SetWalkTargetFromLookTarget(0.4f, 3), 2), Pair.of(new DoNothing(30, 60), 1)))));
     }
 
     private static void initFightActivity(Brain<Zoglin> brain) {
@@ -222,7 +230,6 @@ HoglinBase {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 4) {
             this.attackAnimationRemainingTicks = 10;
@@ -233,7 +240,6 @@ HoglinBase {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public int getAttackAnimationRemainingTicks() {
         return this.attackAnimationRemainingTicks;
     }

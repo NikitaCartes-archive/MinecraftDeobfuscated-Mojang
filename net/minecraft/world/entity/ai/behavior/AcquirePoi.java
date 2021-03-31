@@ -25,6 +25,9 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class AcquirePoi
 extends Behavior<PathfinderMob> {
+    private static final int BATCH_SIZE = 5;
+    private static final int RATE = 20;
+    public static final int SCAN_RANGE = 48;
     private final PoiType poiType;
     private final MemoryModuleType<GlobalPos> memoryToAcquire;
     private final boolean onlyIfAdult;
@@ -100,6 +103,9 @@ extends Behavior<PathfinderMob> {
     }
 
     static class JitteredLinearRetry {
+        private static final int MIN_INTERVAL_INCREASE = 40;
+        private static final int MAX_INTERVAL_INCREASE = 80;
+        private static final int MAX_RETRY_PATHFINDING_INTERVAL = 400;
         private final Random random;
         private long previousAttemptTimestamp;
         private long nextScheduledAttemptTimestamp;

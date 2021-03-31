@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,7 +15,6 @@ implements Packet<ServerGamePacketListener> {
     private final Direction direction;
     private final Action action;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundPlayerActionPacket(Action action, BlockPos blockPos, Direction direction) {
         this.action = action;
         this.pos = blockPos.immutable();

@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -24,6 +22,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class ShieldItem
 extends Item {
+    public static final int EFFECTIVE_BLOCK_DELAY = 5;
+    public static final float MINIMUM_DURABILITY_DAMAGE = 3.0f;
+    public static final String TAG_BASE_COLOR = "Base";
+
     public ShieldItem(Item.Properties properties) {
         super(properties);
         DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
@@ -38,7 +40,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         BannerItem.appendHoverTextFromBannerBlockEntityTag(itemStack, list);
     }
@@ -66,7 +67,7 @@ extends Item {
     }
 
     public static DyeColor getColor(ItemStack itemStack) {
-        return DyeColor.byId(itemStack.getOrCreateTagElement("BlockEntityTag").getInt("Base"));
+        return DyeColor.byId(itemStack.getOrCreateTagElement("BlockEntityTag").getInt(TAG_BASE_COLOR));
     }
 }
 

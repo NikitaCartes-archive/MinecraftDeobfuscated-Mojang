@@ -26,6 +26,9 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BlockElement {
+    private static final boolean DEFAULT_RESCALE = false;
+    private static final float MIN_EXTENT = -16.0f;
+    private static final float MAX_EXTENT = 32.0f;
     public final Vector3f from;
     public final Vector3f to;
     public final Map<Direction, BlockElementFace> faces;
@@ -73,6 +76,8 @@ public class BlockElement {
     @Environment(value=EnvType.CLIENT)
     public static class Deserializer
     implements JsonDeserializer<BlockElement> {
+        private static final boolean DEFAULT_SHADE = true;
+
         protected Deserializer() {
         }
 

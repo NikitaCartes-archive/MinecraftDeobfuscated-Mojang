@@ -39,7 +39,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.AshParticle;
 import net.minecraft.client.particle.AttackSweepParticle;
-import net.minecraft.client.particle.BarrierParticle;
 import net.minecraft.client.particle.BreakingItemParticle;
 import net.minecraft.client.particle.BubbleColumnUpParticle;
 import net.minecraft.client.particle.BubbleParticle;
@@ -79,6 +78,7 @@ import net.minecraft.client.particle.SpitParticle;
 import net.minecraft.client.particle.SplashParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.SquidInkParticle;
+import net.minecraft.client.particle.StationaryItemParticle;
 import net.minecraft.client.particle.SuspendedParticle;
 import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.particle.TerrainParticle;
@@ -120,6 +120,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ParticleEngine
 implements PreparableReloadListener {
+    private static final int MAX_PARTICLES_PER_LAYER = 16384;
     private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(ParticleRenderType.TERRAIN_SHEET, ParticleRenderType.PARTICLE_SHEET_OPAQUE, ParticleRenderType.PARTICLE_SHEET_LIT, ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT, ParticleRenderType.CUSTOM);
     protected ClientLevel level;
     private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.newIdentityHashMap();
@@ -143,7 +144,8 @@ implements PreparableReloadListener {
     private void registerProviders() {
         this.register(ParticleTypes.AMBIENT_ENTITY_EFFECT, SpellParticle.AmbientMobProvider::new);
         this.register(ParticleTypes.ANGRY_VILLAGER, HeartParticle.AngryVillagerProvider::new);
-        this.register(ParticleTypes.BARRIER, new BarrierParticle.Provider());
+        this.register(ParticleTypes.BARRIER, new StationaryItemParticle.BarrierProvider());
+        this.register(ParticleTypes.LIGHT, new StationaryItemParticle.LightProvider());
         this.register(ParticleTypes.BLOCK, new TerrainParticle.Provider());
         this.register(ParticleTypes.BUBBLE, BubbleParticle.Provider::new);
         this.register(ParticleTypes.BUBBLE_COLUMN_UP, BubbleColumnUpParticle.Provider::new);

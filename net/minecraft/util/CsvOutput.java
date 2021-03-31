@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class CsvOutput {
+    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String FIELD_SEPARATOR = ",";
     private final Writer output;
     private final int columnCount;
 
@@ -34,7 +36,7 @@ public class CsvOutput {
     }
 
     private void writeLine(Stream<?> stream) throws IOException {
-        this.output.write(stream.map(CsvOutput::getStringValue).collect(Collectors.joining(",")) + "\r\n");
+        this.output.write(stream.map(CsvOutput::getStringValue).collect(Collectors.joining(FIELD_SEPARATOR)) + LINE_SEPARATOR);
     }
 
     private static String getStringValue(@Nullable Object object) {

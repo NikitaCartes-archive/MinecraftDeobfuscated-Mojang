@@ -31,6 +31,11 @@ public class HumanoidModel<T extends LivingEntity>
 extends AgeableListModel<T>
 implements ArmedModel,
 HeadedModel {
+    public static final float OVERLAY_SCALE = 0.25f;
+    public static final float HAT_OVERLAY_SCALE = 0.5f;
+    private static final float SPYGLASS_ARM_ROT_Y = 0.2617994f;
+    private static final float SPYGLASS_ARM_ROT_X = 1.9198622f;
+    private static final float SPYGLASS_ARM_CROUCH_ROT_X = 0.2617994f;
     public final ModelPart head;
     public final ModelPart hat;
     public final ModelPart body;
@@ -90,6 +95,7 @@ HeadedModel {
     @Override
     public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
         boolean bl4;
+        boolean bl3;
         boolean bl = ((LivingEntity)livingEntity).getFallFlyingTicks() > 4;
         boolean bl2 = ((LivingEntity)livingEntity).isVisuallySwimming();
         this.head.yRot = i * ((float)Math.PI / 180);
@@ -130,14 +136,23 @@ HeadedModel {
         }
         this.rightArm.yRot = 0.0f;
         this.leftArm.yRot = 0.0f;
-        boolean bl3 = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
-        boolean bl5 = bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
-        if (bl3 != bl4) {
-            this.poseLeftArm(livingEntity);
-            this.poseRightArm(livingEntity);
+        boolean bl5 = bl3 = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
+        if (((LivingEntity)livingEntity).isUsingItem()) {
+            boolean bl6 = bl4 = ((LivingEntity)livingEntity).getUsedItemHand() == InteractionHand.MAIN_HAND;
+            if (bl4 == bl3) {
+                this.poseRightArm(livingEntity);
+            } else {
+                this.poseLeftArm(livingEntity);
+            }
         } else {
-            this.poseRightArm(livingEntity);
-            this.poseLeftArm(livingEntity);
+            boolean bl7 = bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
+            if (bl3 != bl4) {
+                this.poseLeftArm(livingEntity);
+                this.poseRightArm(livingEntity);
+            } else {
+                this.poseRightArm(livingEntity);
+                this.poseLeftArm(livingEntity);
+            }
         }
         this.setupAttackAnimation(livingEntity, h);
         if (this.crouching) {

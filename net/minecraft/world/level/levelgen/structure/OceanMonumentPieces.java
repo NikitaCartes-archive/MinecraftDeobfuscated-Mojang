@@ -29,6 +29,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 
 public class OceanMonumentPieces {
+    private OceanMonumentPieces() {
+    }
 
     static class FitDoubleYZRoom
     implements MonumentRoomFitter {
@@ -228,7 +230,7 @@ public class OceanMonumentPieces {
     public static class OceanMonumentPenthouse
     extends OceanMonumentPiece {
         public OceanMonumentPenthouse(Direction direction, BoundingBox boundingBox) {
-            super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, direction, boundingBox);
+            super(StructurePieceType.OCEAN_MONUMENT_PENTHOUSE, direction, 1, boundingBox);
         }
 
         public OceanMonumentPenthouse(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -283,7 +285,7 @@ public class OceanMonumentPieces {
         private int mainDesign;
 
         public OceanMonumentWingRoom(Direction direction, BoundingBox boundingBox, int i) {
-            super(StructurePieceType.OCEAN_MONUMENT_WING_ROOM, direction, boundingBox);
+            super(StructurePieceType.OCEAN_MONUMENT_WING_ROOM, direction, 1, boundingBox);
             this.mainDesign = i & 1;
         }
 
@@ -1108,19 +1110,22 @@ public class OceanMonumentPieces {
 
     public static class MonumentBuilding
     extends OceanMonumentPiece {
+        private static final int WIDTH = 58;
+        private static final int HEIGHT = 22;
+        private static final int DEPTH = 58;
+        public static final int BIOME_RANGE_CHECK = 29;
+        private static final int TOP_POSITION = 61;
         private RoomDefinition sourceRoom;
         private RoomDefinition coreRoom;
         private final List<OceanMonumentPiece> childPieces = Lists.newArrayList();
 
         public MonumentBuilding(Random random, int i, int j, Direction direction) {
-            super(StructurePieceType.OCEAN_MONUMENT_BUILDING, 0);
+            super(StructurePieceType.OCEAN_MONUMENT_BUILDING, direction, 0, MonumentBuilding.makeBoundingBox(i, 39, j, direction, 58, 23, 58));
             this.setOrientation(direction);
-            Direction direction2 = this.getOrientation();
-            this.boundingBox = direction2.getAxis() == Direction.Axis.Z ? new BoundingBox(i, 39, j, i + 58 - 1, 61, j + 58 - 1) : new BoundingBox(i, 39, j, i + 58 - 1, 61, j + 58 - 1);
             List<RoomDefinition> list = this.generateRoomGraph(random);
             this.sourceRoom.claimed = true;
-            this.childPieces.add(new OceanMonumentEntryRoom(direction2, this.sourceRoom));
-            this.childPieces.add(new OceanMonumentCoreRoom(direction2, this.coreRoom));
+            this.childPieces.add(new OceanMonumentEntryRoom(direction, this.sourceRoom));
+            this.childPieces.add(new OceanMonumentCoreRoom(direction, this.coreRoom));
             ArrayList<MonumentRoomFitter> list2 = Lists.newArrayList();
             list2.add(new FitDoubleXYRoom());
             list2.add(new FitDoubleYZRoom());
@@ -1133,23 +1138,21 @@ public class OceanMonumentPieces {
                 if (roomDefinition.claimed || roomDefinition.isSpecial()) continue;
                 for (MonumentRoomFitter monumentRoomFitter : list2) {
                     if (!monumentRoomFitter.fits(roomDefinition)) continue;
-                    this.childPieces.add(monumentRoomFitter.create(direction2, roomDefinition, random));
+                    this.childPieces.add(monumentRoomFitter.create(direction, roomDefinition, random));
                     continue block0;
                 }
             }
-            int k = this.boundingBox.y0;
-            int l = this.getWorldX(9, 22);
-            int m = this.getWorldZ(9, 22);
+            BlockPos.MutableBlockPos blockPos = this.getWorldPos(9, 0, 22);
             for (OceanMonumentPiece oceanMonumentPiece : this.childPieces) {
-                oceanMonumentPiece.getBoundingBox().move(l, k, m);
+                oceanMonumentPiece.getBoundingBox().move(blockPos);
             }
-            BoundingBox boundingBox = BoundingBox.createProper(this.getWorldX(1, 1), this.getWorldY(1), this.getWorldZ(1, 1), this.getWorldX(23, 21), this.getWorldY(8), this.getWorldZ(23, 21));
-            BoundingBox boundingBox2 = BoundingBox.createProper(this.getWorldX(34, 1), this.getWorldY(1), this.getWorldZ(34, 1), this.getWorldX(56, 21), this.getWorldY(8), this.getWorldZ(56, 21));
-            BoundingBox boundingBox3 = BoundingBox.createProper(this.getWorldX(22, 22), this.getWorldY(13), this.getWorldZ(22, 22), this.getWorldX(35, 35), this.getWorldY(17), this.getWorldZ(35, 35));
-            int n = random.nextInt();
-            this.childPieces.add(new OceanMonumentWingRoom(direction2, boundingBox, n++));
-            this.childPieces.add(new OceanMonumentWingRoom(direction2, boundingBox2, n++));
-            this.childPieces.add(new OceanMonumentPenthouse(direction2, boundingBox3));
+            BoundingBox boundingBox = BoundingBox.fromCorners(this.getWorldPos(1, 1, 1), this.getWorldPos(23, 8, 21));
+            BoundingBox boundingBox2 = BoundingBox.fromCorners(this.getWorldPos(34, 1, 1), this.getWorldPos(56, 8, 21));
+            BoundingBox boundingBox3 = BoundingBox.fromCorners(this.getWorldPos(22, 13, 22), this.getWorldPos(35, 17, 35));
+            int k = random.nextInt();
+            this.childPieces.add(new OceanMonumentWingRoom(direction, boundingBox, k++));
+            this.childPieces.add(new OceanMonumentWingRoom(direction, boundingBox2, k++));
+            this.childPieces.add(new OceanMonumentPenthouse(direction, boundingBox3));
         }
 
         public MonumentBuilding(ServerLevel serverLevel, CompoundTag compoundTag) {
@@ -1260,7 +1263,7 @@ public class OceanMonumentPieces {
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
-            int i = Math.max(worldGenLevel.getSeaLevel(), 64) - this.boundingBox.y0;
+            int i = Math.max(worldGenLevel.getSeaLevel(), 64) - this.boundingBox.minY();
             this.generateWaterBox(worldGenLevel, boundingBox, 0, 0, 0, 58, i, 58);
             this.generateWing(false, 0, worldGenLevel, random, boundingBox);
             this.generateWing(true, 33, worldGenLevel, random, boundingBox);
@@ -1591,54 +1594,65 @@ public class OceanMonumentPieces {
         protected static final BlockState BASE_BLACK = Blocks.DARK_PRISMARINE.defaultBlockState();
         protected static final BlockState DOT_DECO_DATA = BASE_LIGHT;
         protected static final BlockState LAMP_BLOCK = Blocks.SEA_LANTERN.defaultBlockState();
+        protected static final boolean DO_FILL = true;
         protected static final BlockState FILL_BLOCK = Blocks.WATER.defaultBlockState();
         protected static final Set<Block> FILL_KEEP = ((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().add(Blocks.ICE)).add(Blocks.PACKED_ICE)).add(Blocks.BLUE_ICE)).add(FILL_BLOCK.getBlock())).build();
+        protected static final int GRIDROOM_WIDTH = 8;
+        protected static final int GRIDROOM_DEPTH = 8;
+        protected static final int GRIDROOM_HEIGHT = 4;
+        protected static final int GRID_WIDTH = 5;
+        protected static final int GRID_DEPTH = 5;
+        protected static final int GRID_HEIGHT = 3;
+        protected static final int GRID_FLOOR_COUNT = 25;
+        protected static final int GRID_SIZE = 75;
         protected static final int GRIDROOM_SOURCE_INDEX = OceanMonumentPiece.getRoomIndex(2, 0, 0);
         protected static final int GRIDROOM_TOP_CONNECT_INDEX = OceanMonumentPiece.getRoomIndex(2, 2, 0);
         protected static final int GRIDROOM_LEFTWING_CONNECT_INDEX = OceanMonumentPiece.getRoomIndex(0, 1, 0);
         protected static final int GRIDROOM_RIGHTWING_CONNECT_INDEX = OceanMonumentPiece.getRoomIndex(4, 1, 0);
+        protected static final int LEFTWING_INDEX = 1001;
+        protected static final int RIGHTWING_INDEX = 1002;
+        protected static final int PENTHOUSE_INDEX = 1003;
         protected RoomDefinition roomDefinition;
 
         protected static int getRoomIndex(int i, int j, int k) {
             return j * 25 + k * 5 + i;
         }
 
-        public OceanMonumentPiece(StructurePieceType structurePieceType, int i) {
-            super(structurePieceType, i);
-        }
-
-        public OceanMonumentPiece(StructurePieceType structurePieceType, Direction direction, BoundingBox boundingBox) {
-            super(structurePieceType, 1);
+        public OceanMonumentPiece(StructurePieceType structurePieceType, Direction direction, int i, BoundingBox boundingBox) {
+            super(structurePieceType, i, boundingBox);
             this.setOrientation(direction);
-            this.boundingBox = boundingBox;
         }
 
         protected OceanMonumentPiece(StructurePieceType structurePieceType, int i, Direction direction, RoomDefinition roomDefinition, int j, int k, int l) {
-            super(structurePieceType, i);
+            super(structurePieceType, i, OceanMonumentPiece.makeBoundingBox(direction, roomDefinition, j, k, l));
             this.setOrientation(direction);
             this.roomDefinition = roomDefinition;
-            int m = roomDefinition.index;
-            int n = m % 5;
-            int o = m / 5 % 5;
-            int p = m / 25;
-            this.boundingBox = direction == Direction.NORTH || direction == Direction.SOUTH ? new BoundingBox(0, 0, 0, j * 8 - 1, k * 4 - 1, l * 8 - 1) : new BoundingBox(0, 0, 0, l * 8 - 1, k * 4 - 1, j * 8 - 1);
+        }
+
+        private static BoundingBox makeBoundingBox(Direction direction, RoomDefinition roomDefinition, int i, int j, int k) {
+            int l = roomDefinition.index;
+            int m = l % 5;
+            int n = l / 5 % 5;
+            int o = l / 25;
+            BoundingBox boundingBox = OceanMonumentPiece.makeBoundingBox(0, 0, 0, direction, i * 8, j * 4, k * 8);
             switch (direction) {
                 case NORTH: {
-                    this.boundingBox.move(n * 8, p * 4, -(o + l) * 8 + 1);
+                    boundingBox.move(m * 8, o * 4, -(n + k) * 8 + 1);
                     break;
                 }
                 case SOUTH: {
-                    this.boundingBox.move(n * 8, p * 4, o * 8);
+                    boundingBox.move(m * 8, o * 4, n * 8);
                     break;
                 }
                 case WEST: {
-                    this.boundingBox.move(-(o + l) * 8 + 1, p * 4, n * 8);
+                    boundingBox.move(-(n + k) * 8 + 1, o * 4, m * 8);
                     break;
                 }
                 default: {
-                    this.boundingBox.move(o * 8, p * 4, n * 8);
+                    boundingBox.move(n * 8, o * 4, m * 8);
                 }
             }
+            return boundingBox;
         }
 
         public OceanMonumentPiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
@@ -1700,13 +1714,11 @@ public class OceanMonumentPieces {
         }
 
         protected boolean spawnElder(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
-            int n;
-            int m;
-            int l = this.getWorldX(i, k);
-            if (boundingBox.isInside(new BlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k)))) {
+            BlockPos.MutableBlockPos blockPos = this.getWorldPos(i, j, k);
+            if (boundingBox.isInside(blockPos)) {
                 ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(worldGenLevel.getLevel());
                 elderGuardian.heal(elderGuardian.getMaxHealth());
-                elderGuardian.moveTo((double)l + 0.5, m, (double)n + 0.5, 0.0f, 0.0f);
+                elderGuardian.moveTo((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
                 elderGuardian.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(elderGuardian.blockPosition()), MobSpawnType.STRUCTURE, null, null);
                 worldGenLevel.addFreshEntityWithPassengers(elderGuardian);
                 return true;

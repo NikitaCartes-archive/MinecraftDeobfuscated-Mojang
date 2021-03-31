@@ -3,9 +3,6 @@
  */
 package net.minecraft.network.chat;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 public enum ChatType {
     CHAT(0, false),
     SYSTEM(1, true),
@@ -31,7 +28,6 @@ public enum ChatType {
         return CHAT;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean shouldInterrupt() {
         return this.interrupt;
     }

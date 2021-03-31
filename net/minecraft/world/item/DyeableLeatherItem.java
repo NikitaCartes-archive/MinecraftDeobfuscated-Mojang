@@ -10,28 +10,32 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public interface DyeableLeatherItem {
+    public static final String TAG_COLOR = "color";
+    public static final String TAG_DISPLAY = "display";
+    public static final int DEFAULT_LEATHER_COLOR = 10511680;
+
     default public boolean hasCustomColor(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getTagElement("display");
-        return compoundTag != null && compoundTag.contains("color", 99);
+        CompoundTag compoundTag = itemStack.getTagElement(TAG_DISPLAY);
+        return compoundTag != null && compoundTag.contains(TAG_COLOR, 99);
     }
 
     default public int getColor(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getTagElement("display");
-        if (compoundTag != null && compoundTag.contains("color", 99)) {
-            return compoundTag.getInt("color");
+        CompoundTag compoundTag = itemStack.getTagElement(TAG_DISPLAY);
+        if (compoundTag != null && compoundTag.contains(TAG_COLOR, 99)) {
+            return compoundTag.getInt(TAG_COLOR);
         }
         return 10511680;
     }
 
     default public void clearColor(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getTagElement("display");
-        if (compoundTag != null && compoundTag.contains("color")) {
-            compoundTag.remove("color");
+        CompoundTag compoundTag = itemStack.getTagElement(TAG_DISPLAY);
+        if (compoundTag != null && compoundTag.contains(TAG_COLOR)) {
+            compoundTag.remove(TAG_COLOR);
         }
     }
 
     default public void setColor(ItemStack itemStack, int i) {
-        itemStack.getOrCreateTagElement("display").putInt("color", i);
+        itemStack.getOrCreateTagElement(TAG_DISPLAY).putInt(TAG_COLOR, i);
     }
 
     public static ItemStack dyeArmor(ItemStack itemStack, List<DyeItem> list) {

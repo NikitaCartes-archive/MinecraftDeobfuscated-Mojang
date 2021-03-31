@@ -4,7 +4,9 @@
 package net.minecraft.world.entity.ai.memory;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.phys.Vec3;
 
@@ -19,6 +21,10 @@ public class WalkTarget {
 
     public WalkTarget(Vec3 vec3, float f, int i) {
         this(new BlockPosTracker(new BlockPos(vec3)), f, i);
+    }
+
+    public WalkTarget(Entity entity, float f, int i) {
+        this(new EntityTracker(entity, false), f, i);
     }
 
     public WalkTarget(PositionTracker positionTracker, float f, int i) {

@@ -6,8 +6,6 @@ package net.minecraft.network.chat;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -20,7 +18,6 @@ implements MutableComponent {
     protected final List<Component> siblings = Lists.newArrayList();
     private FormattedCharSequence visualOrderText = FormattedCharSequence.EMPTY;
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     private Language decomposedWith;
     private Style style = Style.EMPTY;
 
@@ -63,7 +60,6 @@ implements MutableComponent {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public FormattedCharSequence getVisualOrderText() {
         Language language = Language.getInstance();
         if (this.decomposedWith != language) {

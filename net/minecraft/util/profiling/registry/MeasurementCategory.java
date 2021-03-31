@@ -3,10 +3,6 @@
  */
 package net.minecraft.util.profiling.registry;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
-@Environment(value=EnvType.CLIENT)
 public enum MeasurementCategory {
     EVENT_LOOP("eventLoops"),
     MAIL_BOX("mailBoxes");

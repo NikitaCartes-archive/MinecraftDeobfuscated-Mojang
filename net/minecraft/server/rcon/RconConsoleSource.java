@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class RconConsoleSource
 implements CommandSource {
+    private static final String RCON = "Rcon";
     private static final Component RCON_COMPONENT = new TextComponent("Rcon");
     private final StringBuffer buffer = new StringBuffer();
     private final MinecraftServer server;
@@ -33,7 +34,7 @@ implements CommandSource {
 
     public CommandSourceStack createCommandSourceStack() {
         ServerLevel serverLevel = this.server.overworld();
-        return new CommandSourceStack(this, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "Rcon", RCON_COMPONENT, this.server, null);
+        return new CommandSourceStack(this, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, RCON, RCON_COMPONENT, this.server, null);
     }
 
     @Override

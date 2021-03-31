@@ -8,8 +8,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -119,13 +117,11 @@ extends Item {
         return Objects.equals(this.getType(compoundTag), entityType);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getColor(int i) {
         return i == 0 ? this.backgroundColor : this.highlightColor;
     }
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public static SpawnEggItem byId(@Nullable EntityType<?> entityType) {
         return BY_ID.get(entityType);
     }

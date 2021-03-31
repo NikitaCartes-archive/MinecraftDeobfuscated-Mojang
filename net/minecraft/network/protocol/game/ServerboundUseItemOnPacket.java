@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -16,7 +14,6 @@ implements Packet<ServerGamePacketListener> {
     private final BlockHitResult blockHit;
     private final InteractionHand hand;
 
-    @Environment(value=EnvType.CLIENT)
     public ServerboundUseItemOnPacket(InteractionHand interactionHand, BlockHitResult blockHitResult) {
         this.hand = interactionHand;
         this.blockHit = blockHitResult;

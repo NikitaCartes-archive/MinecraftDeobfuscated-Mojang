@@ -12,12 +12,11 @@ import com.mojang.serialization.Keyable;
 import com.mojang.serialization.Lifecycle;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.IdMap;
@@ -32,7 +31,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.FloatProviderType;
+import net.minecraft.util.valueproviders.FloatProviderType;
+import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -83,6 +83,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
@@ -191,6 +192,12 @@ IdMap<T> {
     public static final Registry<LootNumberProviderType> LOOT_NUMBER_PROVIDER_TYPE = Registry.registerSimple(LOOT_NUMBER_PROVIDER_REGISTRY, () -> NumberProviders.CONSTANT);
     public static final Registry<LootNbtProviderType> LOOT_NBT_PROVIDER_TYPE = Registry.registerSimple(LOOT_NBT_PROVIDER_REGISTRY, () -> NbtProviders.CONTEXT);
     public static final Registry<LootScoreProviderType> LOOT_SCORE_PROVIDER_TYPE = Registry.registerSimple(LOOT_SCORE_PROVIDER_REGISTRY, () -> ScoreboardNameProviders.CONTEXT);
+    public static final ResourceKey<Registry<FloatProviderType<?>>> FLOAT_PROVIDER_TYPE_REGISTRY = Registry.createRegistryKey("float_provider_type");
+    public static final Registry<FloatProviderType<?>> FLOAT_PROVIDER_TYPES = Registry.registerSimple(FLOAT_PROVIDER_TYPE_REGISTRY, () -> FloatProviderType.CONSTANT);
+    public static final ResourceKey<Registry<IntProviderType<?>>> INT_PROVIDER_TYPE_REGISTRY = Registry.createRegistryKey("int_provider_type");
+    public static final Registry<IntProviderType<?>> INT_PROVIDER_TYPES = Registry.registerSimple(INT_PROVIDER_TYPE_REGISTRY, () -> IntProviderType.CONSTANT);
+    public static final ResourceKey<Registry<HeightProviderType<?>>> HEIGHT_PROVIDER_TYPE_REGISTRY = Registry.createRegistryKey("height_provider_type");
+    public static final Registry<HeightProviderType<?>> HEIGHT_PROVIDER_TYPES = Registry.registerSimple(HEIGHT_PROVIDER_TYPE_REGISTRY, () -> HeightProviderType.CONSTANT);
     public static final ResourceKey<Registry<NoiseGeneratorSettings>> NOISE_GENERATOR_SETTINGS_REGISTRY = Registry.createRegistryKey("worldgen/noise_settings");
     public static final ResourceKey<Registry<ConfiguredSurfaceBuilder<?>>> CONFIGURED_SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/configured_surface_builder");
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = Registry.createRegistryKey("worldgen/configured_carver");
@@ -201,8 +208,6 @@ IdMap<T> {
     public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = Registry.createRegistryKey("worldgen/biome");
     public static final ResourceKey<Registry<SurfaceBuilder<?>>> SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/surface_builder");
     public static final Registry<SurfaceBuilder<?>> SURFACE_BUILDER = Registry.registerSimple(SURFACE_BUILDER_REGISTRY, () -> SurfaceBuilder.DEFAULT);
-    public static final ResourceKey<Registry<FloatProviderType<?>>> FLOAT_PROVIDER_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/float_provider_type");
-    public static final Registry<FloatProviderType<?>> FLOAT_PROVIDER_TYPES = Registry.registerSimple(FLOAT_PROVIDER_TYPE_REGISTRY, () -> FloatProviderType.CONSTANT);
     public static final ResourceKey<Registry<WorldCarver<?>>> CARVER_REGISTRY = Registry.createRegistryKey("worldgen/carver");
     public static final Registry<WorldCarver<?>> CARVER = Registry.registerSimple(CARVER_REGISTRY, () -> WorldCarver.CAVE);
     public static final ResourceKey<Registry<Feature<?>>> FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/feature");
@@ -346,7 +351,6 @@ IdMap<T> {
         return Optional.ofNullable(this.get(resourceLocation));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Optional<T> getOptional(@Nullable ResourceKey<T> resourceKey) {
         return Optional.ofNullable(this.get(resourceKey));
     }
@@ -363,11 +367,16 @@ IdMap<T> {
 
     public abstract Set<Map.Entry<ResourceKey<T>, T>> entrySet();
 
+    @Nullable
+    public abstract T getRandom(Random var1);
+
     public Stream<T> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
     public abstract boolean containsKey(ResourceLocation var1);
+
+    public abstract boolean containsKey(ResourceKey<T> var1);
 
     public static <T> T register(Registry<? super T> registry, String string, T object) {
         return Registry.register(registry, new ResourceLocation(string), object);

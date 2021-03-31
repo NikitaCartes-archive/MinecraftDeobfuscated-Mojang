@@ -19,6 +19,12 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 @Environment(value=EnvType.CLIENT)
 public class WitherBossModel<T extends WitherBoss>
 extends HierarchicalModel<T> {
+    private static final String RIBCAGE = "ribcage";
+    private static final String CENTER_HEAD = "center_head";
+    private static final String RIGHT_HEAD = "right_head";
+    private static final String LEFT_HEAD = "left_head";
+    private static final float RIBCAGE_X_ROT_OFFSET = 0.065f;
+    private static final float TAIL_X_ROT_OFFSET = 0.265f;
     private final ModelPart root;
     private final ModelPart centerHead;
     private final ModelPart rightHead;
@@ -28,11 +34,11 @@ extends HierarchicalModel<T> {
 
     public WitherBossModel(ModelPart modelPart) {
         this.root = modelPart;
-        this.ribcage = modelPart.getChild("ribcage");
+        this.ribcage = modelPart.getChild(RIBCAGE);
         this.tail = modelPart.getChild("tail");
-        this.centerHead = modelPart.getChild("center_head");
-        this.rightHead = modelPart.getChild("right_head");
-        this.leftHead = modelPart.getChild("left_head");
+        this.centerHead = modelPart.getChild(CENTER_HEAD);
+        this.rightHead = modelPart.getChild(RIGHT_HEAD);
+        this.leftHead = modelPart.getChild(LEFT_HEAD);
     }
 
     public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
@@ -40,12 +46,12 @@ extends HierarchicalModel<T> {
         PartDefinition partDefinition = meshDefinition.getRoot();
         partDefinition.addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 16).addBox(-10.0f, 3.9f, -0.5f, 20.0f, 3.0f, 3.0f, cubeDeformation), PartPose.ZERO);
         float f = 0.20420352f;
-        partDefinition.addOrReplaceChild("ribcage", CubeListBuilder.create().texOffs(0, 22).addBox(0.0f, 0.0f, 0.0f, 3.0f, 10.0f, 3.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 1.5f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 4.0f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 6.5f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation), PartPose.offsetAndRotation(-2.0f, 6.9f, -0.5f, 0.20420352f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(RIBCAGE, CubeListBuilder.create().texOffs(0, 22).addBox(0.0f, 0.0f, 0.0f, 3.0f, 10.0f, 3.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 1.5f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 4.0f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation).texOffs(24, 22).addBox(-4.0f, 6.5f, 0.5f, 11.0f, 2.0f, 2.0f, cubeDeformation), PartPose.offsetAndRotation(-2.0f, 6.9f, -0.5f, 0.20420352f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(12, 22).addBox(0.0f, 0.0f, 0.0f, 3.0f, 6.0f, 3.0f, cubeDeformation), PartPose.offsetAndRotation(-2.0f, 6.9f + Mth.cos(0.20420352f) * 10.0f, -0.5f + Mth.sin(0.20420352f) * 10.0f, 0.83252203f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild("center_head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation), PartPose.ZERO);
+        partDefinition.addOrReplaceChild(CENTER_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f, cubeDeformation), PartPose.ZERO);
         CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(32, 0).addBox(-4.0f, -4.0f, -4.0f, 6.0f, 6.0f, 6.0f, cubeDeformation);
-        partDefinition.addOrReplaceChild("right_head", cubeListBuilder, PartPose.offset(-8.0f, 4.0f, 0.0f));
-        partDefinition.addOrReplaceChild("left_head", cubeListBuilder, PartPose.offset(10.0f, 4.0f, 0.0f));
+        partDefinition.addOrReplaceChild(RIGHT_HEAD, cubeListBuilder, PartPose.offset(-8.0f, 4.0f, 0.0f));
+        partDefinition.addOrReplaceChild(LEFT_HEAD, cubeListBuilder, PartPose.offset(10.0f, 4.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 64, 64);
     }
 

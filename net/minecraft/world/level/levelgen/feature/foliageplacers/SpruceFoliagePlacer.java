@@ -8,23 +8,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.UniformInt;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class SpruceFoliagePlacer
 extends FoliagePlacer {
-    public static final Codec<SpruceFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> SpruceFoliagePlacer.foliagePlacerParts(instance).and(((MapCodec)UniformInt.codec(0, 16, 8).fieldOf("trunk_height")).forGetter(spruceFoliagePlacer -> spruceFoliagePlacer.trunkHeight)).apply((Applicative<SpruceFoliagePlacer, ?>)instance, SpruceFoliagePlacer::new));
-    private final UniformInt trunkHeight;
+    public static final Codec<SpruceFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> SpruceFoliagePlacer.foliagePlacerParts(instance).and(((MapCodec)IntProvider.codec(0, 24).fieldOf("trunk_height")).forGetter(spruceFoliagePlacer -> spruceFoliagePlacer.trunkHeight)).apply((Applicative<SpruceFoliagePlacer, ?>)instance, SpruceFoliagePlacer::new));
+    private final IntProvider trunkHeight;
 
-    public SpruceFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3) {
-        super(uniformInt, uniformInt2);
-        this.trunkHeight = uniformInt3;
+    public SpruceFoliagePlacer(IntProvider intProvider, IntProvider intProvider2, IntProvider intProvider3) {
+        super(intProvider, intProvider2);
+        this.trunkHeight = intProvider3;
     }
 
     @Override
@@ -33,13 +33,13 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l, BoundingBox boundingBox) {
-        BlockPos blockPos = foliageAttachment.foliagePos();
+    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
+        BlockPos blockPos = foliageAttachment.pos();
         int m = random.nextInt(2);
         int n = 1;
         int o = 0;
         for (int p = l; p >= -j; --p) {
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, m, set, p, foliageAttachment.doubleTrunk(), boundingBox);
+            this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, m, p, foliageAttachment.doubleTrunk());
             if (m >= n) {
                 m = o;
                 o = 1;

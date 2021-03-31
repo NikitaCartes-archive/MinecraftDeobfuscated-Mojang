@@ -22,6 +22,9 @@ import net.minecraft.world.level.material.Material;
 
 public class SpongeBlock
 extends Block {
+    public static final int MAX_DEPTH = 6;
+    public static final int MAX_COUNT = 64;
+
     protected SpongeBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }

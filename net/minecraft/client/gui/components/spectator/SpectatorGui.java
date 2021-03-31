@@ -24,6 +24,8 @@ extends GuiComponent
 implements SpectatorMenuListener {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     public static final ResourceLocation SPECTATOR_LOCATION = new ResourceLocation("textures/gui/spectator_widgets.png");
+    private static final long FADE_OUT_DELAY = 5000L;
+    private static final long FADE_OUT_TIME = 2000L;
     private final Minecraft minecraft;
     private long lastSelectionTime;
     private SpectatorMenu menu;

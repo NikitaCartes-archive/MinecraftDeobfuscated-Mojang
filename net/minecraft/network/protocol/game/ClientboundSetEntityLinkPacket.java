@@ -3,8 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -37,12 +35,10 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleEntityLinkPacket(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getSourceId() {
         return this.sourceId;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public int getDestId() {
         return this.destId;
     }

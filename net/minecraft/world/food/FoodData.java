@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.food;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -93,12 +91,20 @@ public class FoodData {
         return this.foodLevel;
     }
 
+    public int getLastFoodLevel() {
+        return this.lastFoodLevel;
+    }
+
     public boolean needsFood() {
         return this.foodLevel < 20;
     }
 
     public void addExhaustion(float f) {
         this.exhaustionLevel = Math.min(this.exhaustionLevel + f, 40.0f);
+    }
+
+    public float getExhaustionLevel() {
+        return this.exhaustionLevel;
     }
 
     public float getSaturationLevel() {
@@ -109,9 +115,12 @@ public class FoodData {
         this.foodLevel = i;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setSaturation(float f) {
         this.saturationLevel = f;
+    }
+
+    public void setExhaustion(float f) {
+        this.exhaustionLevel = f;
     }
 }
 

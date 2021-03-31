@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -198,7 +196,6 @@ extends WaterAnimal {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 19) {
             this.tentacleMovement = 0.0f;
@@ -219,6 +216,9 @@ extends WaterAnimal {
 
     class SquidFleeGoal
     extends Goal {
+        private static final float SQUID_FLEE_SPEED = 3.0f;
+        private static final float SQUID_FLEE_MIN_DISTANCE = 5.0f;
+        private static final float SQUID_FLEE_MAX_DISTANCE = 10.0f;
         private int fleeTicks;
 
         private SquidFleeGoal() {

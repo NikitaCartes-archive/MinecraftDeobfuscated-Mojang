@@ -40,8 +40,13 @@ extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
     }
 
     @Override
-    protected float getOffset() {
+    protected float getOffsetUp() {
         return 1.0f;
+    }
+
+    @Override
+    protected float getOffsetDown() {
+        return 0.0f;
     }
 
     @Override

@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 public class ServerFunctionLibrary
 implements PreparableReloadListener {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String FILE_EXTENSION = ".mcfunction";
     private static final int PATH_PREFIX_LENGTH = "functions/".length();
     private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
     private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
@@ -70,7 +71,7 @@ implements PreparableReloadListener {
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
         CompletableFuture<Map> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
-        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", string -> string.endsWith(".mcfunction")), executor).thenCompose(collection -> {
+        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", string -> string.endsWith(FILE_EXTENSION)), executor).thenCompose(collection -> {
             HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map = Maps.newHashMap();
             CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null);
             for (ResourceLocation resourceLocation : collection) {

@@ -17,6 +17,8 @@ import net.minecraft.world.entity.npc.Villager;
 
 public class WorkAtPoi
 extends Behavior<Villager> {
+    private static final int CHECK_COOLDOWN = 300;
+    private static final double DISTANCE = 1.73;
     private long lastCheck;
 
     public WorkAtPoi() {

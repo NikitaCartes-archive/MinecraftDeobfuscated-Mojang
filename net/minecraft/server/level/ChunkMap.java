@@ -40,8 +40,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -103,8 +101,15 @@ import org.jetbrains.annotations.Nullable;
 public class ChunkMap
 extends ChunkStorage
 implements ChunkHolder.PlayerProvider {
+    private static final byte CHUNK_TYPE_REPLACEABLE = -1;
+    private static final byte CHUNK_TYPE_UNKNOWN = 0;
+    private static final byte CHUNK_TYPE_FULL = 1;
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int CHUNK_SAVED_PER_TICK = 200;
+    private static final int MIN_VIEW_DISTANCE = 3;
+    public static final int MAX_VIEW_DISTANCE = 33;
     public static final int MAX_CHUNK_DISTANCE = 33 + ChunkStatus.maxDistance();
+    public static final int FORCED_TICKET_LEVEL = 31;
     private final Long2ObjectLinkedOpenHashMap<ChunkHolder> updatingChunkMap = new Long2ObjectLinkedOpenHashMap();
     private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> visibleChunkMap = this.updatingChunkMap.clone();
     private final Long2ObjectLinkedOpenHashMap<ChunkHolder> pendingUnloads = new Long2ObjectLinkedOpenHashMap();
@@ -176,6 +181,10 @@ implements ChunkHolder.PlayerProvider {
         return ChunkMap.checkerboardDistance(chunkPos, i, j);
     }
 
+    private static int checkerboardDistance(ChunkPos chunkPos, Entity entity) {
+        return ChunkMap.checkerboardDistance(chunkPos, SectionPos.blockToSectionCoord(entity.getBlockX()), SectionPos.blockToSectionCoord(entity.getBlockZ()));
+    }
+
     private static int checkerboardDistance(ChunkPos chunkPos, int i, int j) {
         int k = chunkPos.x - i;
         int l = chunkPos.z - j;
@@ -206,7 +215,6 @@ implements ChunkHolder.PlayerProvider {
         };
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String getChunkDebugData(ChunkPos chunkPos) {
         ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
         if (chunkHolder == null) {

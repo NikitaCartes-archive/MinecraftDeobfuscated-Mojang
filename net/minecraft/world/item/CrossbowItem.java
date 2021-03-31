@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
@@ -49,8 +47,16 @@ import org.jetbrains.annotations.Nullable;
 public class CrossbowItem
 extends ProjectileWeaponItem
 implements Vanishable {
+    private static final String TAG_CHARGED = "Charged";
+    private static final String TAG_CHARGED_PROJECTILES = "ChargedProjectiles";
+    private static final int MAX_CHARGE_DURATION = 25;
+    public static final int DEFAULT_RANGE = 8;
     private boolean startSoundPlayed = false;
     private boolean midLoadSoundPlayed = false;
+    private static final float START_SOUND_PERCENT = 0.2f;
+    private static final float MID_SOUND_PERCENT = 0.5f;
+    private static final float ARROW_POWER = 3.15f;
+    private static final float FIREWORK_POWER = 1.6f;
 
     public CrossbowItem(Item.Properties properties) {
         super(properties);
@@ -144,28 +150,28 @@ implements Vanishable {
 
     public static boolean isCharged(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
-        return compoundTag != null && compoundTag.getBoolean("Charged");
+        return compoundTag != null && compoundTag.getBoolean(TAG_CHARGED);
     }
 
     public static void setCharged(ItemStack itemStack, boolean bl) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
-        compoundTag.putBoolean("Charged", bl);
+        compoundTag.putBoolean(TAG_CHARGED, bl);
     }
 
     private static void addChargedProjectile(ItemStack itemStack, ItemStack itemStack2) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
-        ListTag listTag = compoundTag.contains("ChargedProjectiles", 9) ? compoundTag.getList("ChargedProjectiles", 10) : new ListTag();
+        ListTag listTag = compoundTag.contains(TAG_CHARGED_PROJECTILES, 9) ? compoundTag.getList(TAG_CHARGED_PROJECTILES, 10) : new ListTag();
         CompoundTag compoundTag2 = new CompoundTag();
         itemStack2.save(compoundTag2);
         listTag.add(compoundTag2);
-        compoundTag.put("ChargedProjectiles", listTag);
+        compoundTag.put(TAG_CHARGED_PROJECTILES, listTag);
     }
 
     private static List<ItemStack> getChargedProjectiles(ItemStack itemStack) {
         ListTag listTag;
         ArrayList<ItemStack> list = Lists.newArrayList();
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null && compoundTag.contains("ChargedProjectiles", 9) && (listTag = compoundTag.getList("ChargedProjectiles", 10)) != null) {
+        if (compoundTag != null && compoundTag.contains(TAG_CHARGED_PROJECTILES, 9) && (listTag = compoundTag.getList(TAG_CHARGED_PROJECTILES, 10)) != null) {
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag2 = listTag.getCompound(i);
                 list.add(ItemStack.of(compoundTag2));
@@ -177,9 +183,9 @@ implements Vanishable {
     private static void clearChargedProjectiles(ItemStack itemStack) {
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag != null) {
-            ListTag listTag = compoundTag.getList("ChargedProjectiles", 9);
+            ListTag listTag = compoundTag.getList(TAG_CHARGED_PROJECTILES, 9);
             listTag.clear();
-            compoundTag.put("ChargedProjectiles", listTag);
+            compoundTag.put(TAG_CHARGED_PROJECTILES, listTag);
         }
     }
 
@@ -336,7 +342,6 @@ implements Vanishable {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         List<ItemStack> list2 = CrossbowItem.getChargedProjectiles(itemStack);
         if (!CrossbowItem.isCharged(itemStack) || list2.isEmpty()) {

@@ -7,6 +7,8 @@ import net.minecraft.world.level.chunk.DataLayer;
 
 public class FlatDataLayer
 extends DataLayer {
+    public static final int SIZE = 128;
+
     public FlatDataLayer() {
         super(128);
     }

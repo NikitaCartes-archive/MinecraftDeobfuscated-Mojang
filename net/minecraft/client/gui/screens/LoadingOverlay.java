@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -30,8 +31,17 @@ import net.minecraft.util.Mth;
 public class LoadingOverlay
 extends Overlay {
     private static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
-    private static final int BRAND_BACKGROUND = FastColor.ARGB32.color(255, 239, 50, 61);
-    private static final int BRAND_BACKGROUND_NO_ALPHA = BRAND_BACKGROUND & 0xFFFFFF;
+    private static final int LOGO_BACKGROUND_COLOR = FastColor.ARGB32.color(255, 239, 50, 61);
+    private static final int LOGO_BACKGROUND_COLOR_DARK = FastColor.ARGB32.color(255, 0, 0, 0);
+    private static final IntSupplier BRAND_BACKGROUND = () -> Minecraft.getInstance().options.darkMojangStudiosBackground ? LOGO_BACKGROUND_COLOR_DARK : LOGO_BACKGROUND_COLOR;
+    private static final int LOGO_SCALE = 240;
+    private static final float LOGO_QUARTER_FLOAT = 60.0f;
+    private static final int LOGO_QUARTER = 60;
+    private static final int LOGO_HALF = 120;
+    private static final float LOGO_OVERLAP = 0.0625f;
+    private static final float SMOOTHING = 0.95f;
+    public static final long FADE_OUT_TIME = 1000L;
+    public static final long FADE_IN_TIME = 500L;
     private final Minecraft minecraft;
     private final ReloadInstance reload;
     private final Consumer<Optional<Throwable>> onFinish;
@@ -49,6 +59,10 @@ extends Overlay {
 
     public static void registerTextures(Minecraft minecraft) {
         minecraft.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new LogoTexture());
+    }
+
+    private static int replaceAlpha(int i, int j) {
+        return i & 0xFFFFFF | j << 24;
     }
 
     @Override
@@ -69,17 +83,17 @@ extends Overlay {
                 this.minecraft.screen.render(poseStack, 0, 0, f);
             }
             n = Mth.ceil((1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f)) * 255.0f);
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, LoadingOverlay.replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
             o = 1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f);
         } else if (this.fadeIn) {
             if (this.minecraft.screen != null && h < 1.0f) {
                 this.minecraft.screen.render(poseStack, i, j, f);
             }
             n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, LoadingOverlay.replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
             o = Mth.clamp(h, 0.0f, 1.0f);
         } else {
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND.getAsInt());
             o = 1.0f;
         }
         n = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5);

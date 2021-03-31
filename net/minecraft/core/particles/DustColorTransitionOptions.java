@@ -11,8 +11,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.DustParticleOptionsBase;
@@ -63,12 +61,10 @@ extends DustParticleOptionsBase {
         this.toColor = vector3f2;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vector3f getFromColor() {
         return this.color;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vector3f getToColor() {
         return this.toColor;
     }

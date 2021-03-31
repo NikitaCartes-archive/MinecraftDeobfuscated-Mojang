@@ -64,6 +64,7 @@ import org.jetbrains.annotations.Nullable;
 public class Drowned
 extends Zombie
 implements RangedAttackMob {
+    public static final float NAUTILUS_SHELL_CHANCE = 0.03f;
     private boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
     protected final GroundPathNavigation groundNavigation;

@@ -26,6 +26,7 @@ import net.minecraft.world.phys.HitResult;
 @Environment(value=EnvType.CLIENT)
 public class FindTreeTutorialStepInstance
 implements TutorialStepInstance {
+    private static final int HINT_DELAY = 6000;
     private static final Set<Block> TREE_BLOCKS = Sets.newHashSet(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.WARPED_STEM, Blocks.CRIMSON_STEM, Blocks.OAK_WOOD, Blocks.SPRUCE_WOOD, Blocks.BIRCH_WOOD, Blocks.JUNGLE_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.WARPED_HYPHAE, Blocks.CRIMSON_HYPHAE, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.BIRCH_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK, Blocks.AZALEA_LEAVES, Blocks.AZALEA_LEAVES_FLOWERS);
     private static final Component TITLE = new TranslatableComponent("tutorial.find_tree.title");
     private static final Component DESCRIPTION = new TranslatableComponent("tutorial.find_tree.description");

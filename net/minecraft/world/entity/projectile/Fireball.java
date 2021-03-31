@@ -3,10 +3,6 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.api.EnvironmentInterface;
-import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-@EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public abstract class Fireball
 extends AbstractHurtingProjectile
 implements ItemSupplier {
@@ -49,7 +44,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getItem() {
         ItemStack itemStack = this.getItemRaw();
         return itemStack.isEmpty() ? new ItemStack(Items.FIRE_CHARGE) : itemStack;

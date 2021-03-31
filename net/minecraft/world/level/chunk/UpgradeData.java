@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -42,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 public class UpgradeData {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final UpgradeData EMPTY = new UpgradeData(EmptyBlockGetter.INSTANCE);
+    private static final String TAG_INDICES = "Indices";
     private static final Direction8[] DIRECTIONS = Direction8.values();
     private final EnumSet<Direction8> sides = EnumSet.noneOf(Direction8.class);
     private final int[][] index;
@@ -54,8 +56,8 @@ public class UpgradeData {
 
     public UpgradeData(CompoundTag compoundTag, LevelHeightAccessor levelHeightAccessor) {
         this(levelHeightAccessor);
-        if (compoundTag.contains("Indices", 10)) {
-            CompoundTag compoundTag2 = compoundTag.getCompound("Indices");
+        if (compoundTag.contains(TAG_INDICES, 10)) {
+            CompoundTag compoundTag2 = compoundTag.getCompound(TAG_INDICES);
             for (int i = 0; i < this.index.length; ++i) {
                 String string = String.valueOf(i);
                 if (!compoundTag2.contains(string, 11)) continue;
@@ -102,7 +104,7 @@ public class UpgradeData {
             BlockState blockState;
             BlockState blockState2 = blockState = level.getBlockState(blockPos);
             for (Direction direction : directions) {
-                mutableBlockPos.setWithOffset(blockPos, direction);
+                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
                 blockState2 = UpgradeData.updateState(blockState2, direction, level, blockPos, mutableBlockPos);
             }
             Block.updateOrDestroy(blockState, blockState2, level, blockPos, 18);
@@ -134,7 +136,7 @@ public class UpgradeData {
                 mutableBlockPos.set(chunkPos.getMinBlockX() + k, levelChunkSection.bottomBlockY() + l, chunkPos.getMinBlockZ() + m);
                 BlockState blockState2 = blockState = palettedContainer.get(j);
                 for (Direction direction : directions) {
-                    mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+                    mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, direction);
                     if (SectionPos.blockToSectionCoord(mutableBlockPos.getX()) != chunkPos.x || SectionPos.blockToSectionCoord(mutableBlockPos.getZ()) != chunkPos.z) continue;
                     blockState2 = UpgradeData.updateState(blockState2, direction, levelAccessor, mutableBlockPos, mutableBlockPos2);
                 }
@@ -167,7 +169,7 @@ public class UpgradeData {
             compoundTag2.putIntArray(string, this.index[i]);
         }
         if (!compoundTag2.isEmpty()) {
-            compoundTag.put("Indices", compoundTag2);
+            compoundTag.put(TAG_INDICES, compoundTag2);
         }
         i = 0;
         for (Direction8 direction8 : this.sides) {
@@ -251,7 +253,7 @@ public class UpgradeData {
                         levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.DISTANCE, j), 18);
                         if (i == 7) continue;
                         for (Direction direction : DIRECTIONS) {
-                            mutableBlockPos.setWithOffset(blockPos, direction);
+                            mutableBlockPos.setWithOffset((Vec3i)blockPos, direction);
                             BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
                             if (!blockState2.hasProperty(BlockStateProperties.DISTANCE) || blockState.getValue(BlockStateProperties.DISTANCE) <= i) continue;
                             objectSet2.add(mutableBlockPos.immutable());

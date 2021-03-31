@@ -41,6 +41,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -52,14 +53,20 @@ implements BonemealableBlock,
 SimpleWaterloggedBlock {
     private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private static final EnumProperty<Tilt> TILT = BlockStateProperties.TILT;
+    private static final int NO_TICK = -1;
     private static final Object2IntMap<Tilt> DELAY_UNTIL_NEXT_TILT_STATE = Util.make(new Object2IntArrayMap(), object2IntArrayMap -> {
         object2IntArrayMap.defaultReturnValue(-1);
         object2IntArrayMap.put(Tilt.UNSTABLE, 10);
         object2IntArrayMap.put(Tilt.PARTIAL, 10);
         object2IntArrayMap.put(Tilt.FULL, 100);
     });
+    private static final int MAX_GEN_HEIGHT = 5;
+    private static final int STEM_WIDTH = 6;
+    private static final int ENTITY_DETECTION_MIN_Y = 11;
+    private static final int LOWEST_LEAF_TOP = 13;
     private static final Map<Tilt, VoxelShape> LEAF_SHAPES = ImmutableMap.of(Tilt.NONE, Block.box(0.0, 11.0, 0.0, 16.0, 15.0, 16.0), Tilt.UNSTABLE, Block.box(0.0, 11.0, 0.0, 16.0, 15.0, 16.0), Tilt.PARTIAL, Block.box(0.0, 11.0, 0.0, 16.0, 13.0, 16.0), Tilt.FULL, Shapes.empty());
-    private static final Map<Direction, VoxelShape> STEM_SHAPES = ImmutableMap.of(Direction.NORTH, Block.box(5.0, 0.0, 8.0, 11.0, 11.0, 14.0), Direction.SOUTH, Block.box(5.0, 0.0, 2.0, 11.0, 11.0, 8.0), Direction.EAST, Block.box(2.0, 0.0, 5.0, 8.0, 11.0, 11.0), Direction.WEST, Block.box(8.0, 0.0, 5.0, 14.0, 11.0, 11.0));
+    private static final VoxelShape STEM_SLICER = Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0);
+    private static final Map<Direction, VoxelShape> STEM_SHAPES = ImmutableMap.of(Direction.NORTH, Shapes.joinUnoptimized(BigDripleafStemBlock.NORTH_SHAPE, STEM_SLICER, BooleanOp.ONLY_FIRST), Direction.SOUTH, Shapes.joinUnoptimized(BigDripleafStemBlock.SOUTH_SHAPE, STEM_SLICER, BooleanOp.ONLY_FIRST), Direction.EAST, Shapes.joinUnoptimized(BigDripleafStemBlock.EAST_SHAPE, STEM_SLICER, BooleanOp.ONLY_FIRST), Direction.WEST, Shapes.joinUnoptimized(BigDripleafStemBlock.WEST_SHAPE, STEM_SLICER, BooleanOp.ONLY_FIRST));
     private final Map<BlockState, VoxelShape> shapesCache;
 
     protected BigDripleafBlock(BlockBehaviour.Properties properties) {
@@ -69,15 +76,7 @@ SimpleWaterloggedBlock {
     }
 
     private static VoxelShape calculateShape(BlockState blockState) {
-        return Shapes.or(BigDripleafBlock.getLeafShape(blockState), BigDripleafBlock.getStemShape(blockState));
-    }
-
-    private static VoxelShape getStemShape(BlockState blockState) {
-        return STEM_SHAPES.get(blockState.getValue(FACING));
-    }
-
-    private static VoxelShape getLeafShape(BlockState blockState) {
-        return LEAF_SHAPES.get(blockState.getValue(TILT));
+        return Shapes.or(LEAF_SHAPES.get(blockState.getValue(TILT)), STEM_SHAPES.get(blockState.getValue(FACING)));
     }
 
     public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos, Direction direction) {
@@ -132,7 +131,7 @@ SimpleWaterloggedBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
-            return blockState.getValue(WATERLOGGED) != false ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+            return Blocks.AIR.defaultBlockState();
         }
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
@@ -167,7 +166,7 @@ SimpleWaterloggedBlock {
         if (level.isClientSide) {
             return;
         }
-        if (blockState.getValue(TILT) == Tilt.NONE && BigDripleafBlock.canEntityTilt(blockPos, entity)) {
+        if (blockState.getValue(TILT) == Tilt.NONE && BigDripleafBlock.canEntityTilt(blockPos, entity) && !level.hasNeighborSignal(blockPos)) {
             this.setTiltAndScheduleTick(blockState, level, blockPos, Tilt.UNSTABLE, null);
         }
     }
@@ -217,7 +216,9 @@ SimpleWaterloggedBlock {
 
     private static void resetTilt(BlockState blockState, Level level, BlockPos blockPos) {
         BigDripleafBlock.setTilt(blockState, level, blockPos, Tilt.NONE);
-        BigDripleafBlock.playTiltSound(level, blockPos, SoundEvents.BIG_DRIPLEAF_TILT_UP);
+        if (blockState.getValue(TILT) != Tilt.NONE) {
+            BigDripleafBlock.playTiltSound(level, blockPos, SoundEvents.BIG_DRIPLEAF_TILT_UP);
+        }
     }
 
     private static void setTilt(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt) {
@@ -229,7 +230,7 @@ SimpleWaterloggedBlock {
 
     @Override
     public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        return BigDripleafBlock.getLeafShape(blockState);
+        return LEAF_SHAPES.get(blockState.getValue(TILT));
     }
 
     @Override
@@ -240,7 +241,9 @@ SimpleWaterloggedBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-        return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
+        BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().below());
+        Direction direction = blockState.is(Blocks.BIG_DRIPLEAF_STEM) ? blockState.getValue(BigDripleafStemBlock.FACING) : blockPlaceContext.getHorizontalDirection().getOpposite();
+        return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, direction);
     }
 
     @Override

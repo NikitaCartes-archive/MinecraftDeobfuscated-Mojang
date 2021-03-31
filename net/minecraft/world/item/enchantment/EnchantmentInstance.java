@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.item.enchantment;
 
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EnchantmentInstance
-extends WeighedRandom.WeighedRandomItem {
+extends WeightedEntry.IntrusiveBase {
     public final Enchantment enchantment;
     public final int level;
 

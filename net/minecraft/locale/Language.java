@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -33,6 +31,7 @@ public abstract class Language {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
     private static final Pattern UNSUPPORTED_FORMAT_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d.]*[df]");
+    public static final String DEFAULT = "en_us";
     private static volatile Language instance = Language.loadDefault();
 
     private static Language loadDefault() {
@@ -58,13 +57,11 @@ public abstract class Language {
             }
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public boolean isDefaultRightToLeft() {
                 return false;
             }
 
             @Override
-            @Environment(value=EnvType.CLIENT)
             public FormattedCharSequence getVisualOrder(FormattedText formattedText) {
                 return formattedCharSink -> formattedText.visit((style, string) -> StringDecomposer.iterateFormatted(string, style, formattedCharSink) ? Optional.empty() : FormattedText.STOP_ITERATION, Style.EMPTY).isPresent();
             }
@@ -83,7 +80,6 @@ public abstract class Language {
         return instance;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static void inject(Language language) {
         instance = language;
     }
@@ -92,13 +88,10 @@ public abstract class Language {
 
     public abstract boolean has(String var1);
 
-    @Environment(value=EnvType.CLIENT)
     public abstract boolean isDefaultRightToLeft();
 
-    @Environment(value=EnvType.CLIENT)
     public abstract FormattedCharSequence getVisualOrder(FormattedText var1);
 
-    @Environment(value=EnvType.CLIENT)
     public List<FormattedCharSequence> getVisualOrder(List<FormattedText> list) {
         return list.stream().map(this::getVisualOrder).collect(ImmutableList.toImmutableList());
     }

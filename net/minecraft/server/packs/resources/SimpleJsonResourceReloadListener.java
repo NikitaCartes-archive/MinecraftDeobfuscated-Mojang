@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class SimpleJsonResourceReloadListener
 extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final String PATH_SUFFIX = ".json";
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
     private final Gson gson;
     private final String directory;
@@ -40,7 +41,7 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         HashMap<ResourceLocation, JsonElement> map = Maps.newHashMap();
         int i = this.directory.length() + 1;
-        for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, string -> string.endsWith(".json"))) {
+        for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, string -> string.endsWith(PATH_SUFFIX))) {
             String string2 = resourceLocation.getPath();
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string2.substring(i, string2.length() - PATH_SUFFIX_LENGTH));
             try {

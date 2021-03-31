@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.util.ClassInstanceMultiMap;
+import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.Visibility;
 import org.apache.logging.log4j.LogManager;
@@ -63,6 +64,7 @@ public class EntitySection<T> {
         return visibility2;
     }
 
+    @VisibleForDebug
     public int size() {
         return this.storage.size();
     }

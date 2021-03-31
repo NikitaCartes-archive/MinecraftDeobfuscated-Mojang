@@ -6,8 +6,6 @@ package net.minecraft.world.entity.monster;
 import java.util.EnumSet;
 import java.util.Random;
 import java.util.function.Predicate;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -53,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Guardian
 extends Monster {
+    protected static final int ATTACK_TIME = 80;
     private static final EntityDataAccessor<Boolean> DATA_ID_MOVING = SynchedEntityData.defineId(Guardian.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_ID_ATTACK_TARGET = SynchedEntityData.defineId(Guardian.class, EntityDataSerializers.INT);
     private float clientSideTailAnimation;
@@ -267,12 +266,10 @@ extends Monster {
         return SoundEvents.GUARDIAN_FLOP;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getTailAnimation(float f) {
         return Mth.lerp(f, this.clientSideTailAnimationO, this.clientSideTailAnimation);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public float getSpikesAnimation(float f) {
         return Mth.lerp(f, this.clientSideSpikesAnimationO, this.clientSideSpikesAnimation);
     }
