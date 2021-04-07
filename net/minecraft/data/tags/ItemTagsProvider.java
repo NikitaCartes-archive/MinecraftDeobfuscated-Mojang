@@ -64,6 +64,9 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.FENCES, ItemTags.FENCES);
         this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
         this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
+        this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
+        this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
+        this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
         this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
         this.copy(BlockTags.IRON_ORES, ItemTags.IRON_ORES);
         this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
@@ -72,9 +75,6 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.COAL_ORES, ItemTags.COAL_ORES);
         this.copy(BlockTags.EMERALD_ORES, ItemTags.EMERALD_ORES);
         this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
-        this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
-        this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
-        this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
         this.tag(ItemTags.BANNERS).add((Item[])new Item[]{Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER});
         this.tag(ItemTags.BOATS).add((Item[])new Item[]{Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT});
         this.tag(ItemTags.FISHES).add((Item[])new Item[]{Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH});
@@ -86,7 +86,7 @@ extends TagsProvider<Item> {
         this.tag(ItemTags.LECTERN_BOOKS).add((Item[])new Item[]{Items.WRITTEN_BOOK, Items.WRITABLE_BOOK});
         this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add((Item[])new Item[]{Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT});
         this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_TORCH).add(Items.SOUL_LANTERN).add(Items.SOUL_CAMPFIRE);
-        this.tag(ItemTags.PIGLIN_LOVED).addTag(ItemTags.GOLD_ORES).add((Item[])new Item[]{Items.GOLD_BLOCK, Items.GILDED_BLACKSTONE, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.GOLD_INGOT, Items.BELL, Items.CLOCK, Items.GOLDEN_CARROT, Items.GLISTERING_MELON_SLICE, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_SWORD, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_AXE, Items.GOLDEN_HOE});
+        this.tag(ItemTags.PIGLIN_LOVED).addTag(ItemTags.GOLD_ORES).add((Item[])new Item[]{Items.GOLD_BLOCK, Items.GILDED_BLACKSTONE, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.GOLD_INGOT, Items.BELL, Items.CLOCK, Items.GOLDEN_CARROT, Items.GLISTERING_MELON_SLICE, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_SWORD, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_AXE, Items.GOLDEN_HOE, Items.RAW_GOLD});
         this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
         this.tag(ItemTags.PIGLIN_FOOD).add((Item[])new Item[]{Items.PORKCHOP, Items.COOKED_PORKCHOP});
         this.tag(ItemTags.FOX_FOOD).add((Item[])new Item[]{Items.SWEET_BERRIES, Items.GLOW_BERRIES});

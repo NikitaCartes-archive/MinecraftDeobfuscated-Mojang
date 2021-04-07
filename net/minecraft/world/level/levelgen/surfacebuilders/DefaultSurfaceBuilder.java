@@ -15,24 +15,22 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConf
 
 public class DefaultSurfaceBuilder
 extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
-    private static final int LOWEST_Y_TO_BUILD_SURFACE_ON = 50;
-
     public DefaultSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
-        this.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, surfaceBuilderBaseConfiguration.getTopMaterial(), surfaceBuilderBaseConfiguration.getUnderMaterial(), surfaceBuilderBaseConfiguration.getUnderwaterMaterial(), l);
+    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+        this.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, surfaceBuilderBaseConfiguration.getTopMaterial(), surfaceBuilderBaseConfiguration.getUnderMaterial(), surfaceBuilderBaseConfiguration.getUnderwaterMaterial(), l, m);
     }
 
-    protected void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, BlockState blockState3, BlockState blockState4, BlockState blockState5, int l) {
+    protected void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, BlockState blockState3, BlockState blockState4, BlockState blockState5, int l, int m) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        int m = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-        if (m == 0) {
+        int n = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        if (n == 0) {
             boolean bl = false;
-            for (int n = k; n >= 50; --n) {
-                mutableBlockPos.set(i, n, j);
+            for (int o = k; o >= m; --o) {
+                mutableBlockPos.set(i, o, j);
                 BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
                 if (blockState6.isAir()) {
                     bl = false;
@@ -40,34 +38,34 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 }
                 if (!blockState6.is(blockState.getBlock())) continue;
                 if (!bl) {
-                    BlockState blockState7 = n >= l ? Blocks.AIR.defaultBlockState() : (n == l - 1 ? (biome.getTemperature(mutableBlockPos) < 0.15f ? Blocks.ICE.defaultBlockState() : blockState2) : (n >= l - (7 + m) ? blockState : blockState5));
+                    BlockState blockState7 = o >= l ? Blocks.AIR.defaultBlockState() : (o == l - 1 ? (biome.getTemperature(mutableBlockPos) < 0.15f ? Blocks.ICE.defaultBlockState() : blockState2) : (o >= l - (7 + n) ? blockState : blockState5));
                     chunkAccess.setBlockState(mutableBlockPos, blockState7, false);
                 }
                 bl = true;
             }
         } else {
             BlockState blockState8 = blockState4;
-            int n = -1;
-            for (int o = k; o >= 50; --o) {
-                mutableBlockPos.set(i, o, j);
+            int o = -1;
+            for (int p = k; p >= m; --p) {
+                mutableBlockPos.set(i, p, j);
                 BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
                 if (blockState7.isAir()) {
-                    n = -1;
+                    o = -1;
                     continue;
                 }
                 if (!blockState7.is(blockState.getBlock())) continue;
-                if (n == -1) {
+                if (o == -1) {
                     BlockState blockState9;
-                    n = m;
-                    if (o >= l + 2) {
+                    o = n;
+                    if (p >= l + 2) {
                         blockState9 = blockState3;
-                    } else if (o >= l - 1) {
+                    } else if (p >= l - 1) {
                         blockState8 = blockState4;
                         blockState9 = blockState3;
-                    } else if (o >= l - 4) {
+                    } else if (p >= l - 4) {
                         blockState8 = blockState4;
                         blockState9 = blockState4;
-                    } else if (o >= l - (7 + m)) {
+                    } else if (p >= l - (7 + n)) {
                         blockState9 = blockState8;
                     } else {
                         blockState8 = blockState;
@@ -76,10 +74,10 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                     chunkAccess.setBlockState(mutableBlockPos, blockState9, false);
                     continue;
                 }
-                if (n <= 0) continue;
+                if (o <= 0) continue;
                 chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
-                if (--n != 0 || !blockState8.is(Blocks.SAND) || m <= 1) continue;
-                n = random.nextInt(4) + Math.max(0, o - l);
+                if (--o != 0 || !blockState8.is(Blocks.SAND) || n <= 1) continue;
+                o = random.nextInt(4) + Math.max(0, p - l);
                 blockState8 = blockState8.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
             }
         }

@@ -1093,12 +1093,16 @@ public class Blocks {
     public static final Block WAXED_COPPER_BLOCK = Blocks.register("waxed_copper_block", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
     public static final Block WAXED_WEATHERED_COPPER = Blocks.register("waxed_weathered_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
     public static final Block WAXED_EXPOSED_COPPER = Blocks.register("waxed_exposed_copper", new Block(BlockBehaviour.Properties.copy(EXPOSED_COPPER)));
+    public static final Block WAXED_OXIDIZED_COPPER = Blocks.register("waxed_oxidized_copper", new Block(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
+    public static final Block WAXED_OXIDIZED_CUT_COPPER = Blocks.register("waxed_oxidized_cut_copper", new Block(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
     public static final Block WAXED_WEATHERED_CUT_COPPER = Blocks.register("waxed_weathered_cut_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
     public static final Block WAXED_EXPOSED_CUT_COPPER = Blocks.register("waxed_exposed_cut_copper", new Block(BlockBehaviour.Properties.copy(EXPOSED_COPPER)));
     public static final Block WAXED_CUT_COPPER = Blocks.register("waxed_cut_copper", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
+    public static final Block WAXED_OXIDIZED_CUT_COPPER_STAIRS = Blocks.register("waxed_oxidized_cut_copper_stairs", new StairBlock(WAXED_OXIDIZED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
     public static final Block WAXED_WEATHERED_CUT_COPPER_STAIRS = Blocks.register("waxed_weathered_cut_copper_stairs", new StairBlock(WAXED_WEATHERED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
     public static final Block WAXED_EXPOSED_CUT_COPPER_STAIRS = Blocks.register("waxed_exposed_cut_copper_stairs", new StairBlock(WAXED_EXPOSED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(EXPOSED_COPPER)));
     public static final Block WAXED_CUT_COPPER_STAIRS = Blocks.register("waxed_cut_copper_stairs", new StairBlock(WAXED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(COPPER_BLOCK)));
+    public static final Block WAXED_OXIDIZED_CUT_COPPER_SLAB = Blocks.register("waxed_oxidized_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops()));
     public static final Block WAXED_WEATHERED_CUT_COPPER_SLAB = Blocks.register("waxed_weathered_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_WEATHERED_CUT_COPPER).requiresCorrectToolForDrops()));
     public static final Block WAXED_EXPOSED_CUT_COPPER_SLAB = Blocks.register("waxed_exposed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_EXPOSED_CUT_COPPER).requiresCorrectToolForDrops()));
     public static final Block WAXED_CUT_COPPER_SLAB = Blocks.register("waxed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_CUT_COPPER).requiresCorrectToolForDrops()));

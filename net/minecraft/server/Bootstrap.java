@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
@@ -34,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 public class Bootstrap {
     public static final PrintStream STDOUT = System.out;
-    private static boolean isBootstrapped;
+    private static volatile boolean isBootstrapped;
     private static final Logger LOGGER;
 
     public static void bootStrap() {
@@ -95,10 +96,25 @@ public class Bootstrap {
         return set;
     }
 
-    public static void validate() {
+    public static void checkBootstrapCalled(Supplier<String> supplier) {
         if (!isBootstrapped) {
-            throw new IllegalArgumentException("Not bootstrapped");
+            throw Bootstrap.createBootstrapException(supplier);
         }
+    }
+
+    private static RuntimeException createBootstrapException(Supplier<String> supplier) {
+        try {
+            String string = supplier.get();
+            return new IllegalArgumentException("Not bootstrapped (called from " + string + ")");
+        } catch (Exception exception) {
+            IllegalArgumentException runtimeException = new IllegalArgumentException("Not bootstrapped (failed to resolve location)");
+            runtimeException.addSuppressed(exception);
+            return runtimeException;
+        }
+    }
+
+    public static void validate() {
+        Bootstrap.checkBootstrapCalled(() -> "validate");
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             Bootstrap.getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: {}", string));
             Commands.validate();

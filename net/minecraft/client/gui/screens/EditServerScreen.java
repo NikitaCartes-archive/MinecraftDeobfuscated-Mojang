@@ -5,8 +5,6 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import java.net.IDN;
-import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -14,11 +12,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.StringUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class EditServerScreen
@@ -31,21 +29,6 @@ extends Screen {
     private EditBox ipEdit;
     private EditBox nameEdit;
     private final Screen lastScreen;
-    private final Predicate<String> addressFilter = string -> {
-        if (StringUtil.isNullOrEmpty(string)) {
-            return true;
-        }
-        String[] strings = string.split(":");
-        if (strings.length == 0) {
-            return true;
-        }
-        try {
-            String string2 = IDN.toASCII(strings[0]);
-            return true;
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return false;
-        }
-    };
 
     public EditServerScreen(Screen screen, BooleanConsumer booleanConsumer, ServerData serverData) {
         super(new TranslatableComponent("addServer.title"));
@@ -66,18 +49,17 @@ extends Screen {
         this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 66, 200, 20, new TranslatableComponent("addServer.enterName"));
         this.nameEdit.setFocus(true);
         this.nameEdit.setValue(this.serverData.name);
-        this.nameEdit.setResponder(this::onEdited);
+        this.nameEdit.setResponder(string -> this.updateAddButtonStatus());
         this.children.add(this.nameEdit);
         this.ipEdit = new EditBox(this.font, this.width / 2 - 100, 106, 200, 20, new TranslatableComponent("addServer.enterIp"));
         this.ipEdit.setMaxLength(128);
         this.ipEdit.setValue(this.serverData.ip);
-        this.ipEdit.setFilter(this.addressFilter);
-        this.ipEdit.setResponder(this::onEdited);
+        this.ipEdit.setResponder(string -> this.updateAddButtonStatus());
         this.children.add(this.ipEdit);
         this.addButton(CycleButton.builder(ServerData.ServerPackStatus::getName).withValues((ServerData.ServerPackStatus[])ServerData.ServerPackStatus.values()).withInitialValue(this.serverData.getResourcePackStatus()).create(this.width / 2 - 100, this.height / 4 + 72, 200, 20, new TranslatableComponent("addServer.resourcePack"), (cycleButton, serverPackStatus) -> this.serverData.setResourcePackStatus((ServerData.ServerPackStatus)((Object)serverPackStatus))));
         this.addButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20, new TranslatableComponent("addServer.add"), button -> this.onAdd()));
         this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
-        this.cleanUp();
+        this.updateAddButtonStatus();
     }
 
     @Override
@@ -87,10 +69,6 @@ extends Screen {
         this.init(minecraft, i, j);
         this.ipEdit.setValue(string);
         this.nameEdit.setValue(string2);
-    }
-
-    private void onEdited(String string) {
-        this.cleanUp();
     }
 
     @Override
@@ -106,14 +84,11 @@ extends Screen {
 
     @Override
     public void onClose() {
-        this.cleanUp();
         this.minecraft.setScreen(this.lastScreen);
     }
 
-    private void cleanUp() {
-        String string = this.ipEdit.getValue();
-        boolean bl = !string.isEmpty() && string.split(":").length > 0 && string.indexOf(32) == -1;
-        this.addButton.active = bl && !this.nameEdit.getValue().isEmpty();
+    private void updateAddButtonStatus() {
+        this.addButton.active = ServerAddress.isValidAddress(this.ipEdit.getValue()) && !this.nameEdit.getValue().isEmpty();
     }
 
     @Override

@@ -64,17 +64,21 @@ implements StructurePieceAccessor {
 
     public abstract void generatePieces(RegistryAccess var1, ChunkGenerator var2, StructureManager var3, ChunkPos var4, Biome var5, C var6, LevelHeightAccessor var7);
 
+    public final BoundingBox getBoundingBox() {
+        if (this.cachedBoundingBox == null) {
+            this.cachedBoundingBox = this.createBoundingBox();
+        }
+        return this.cachedBoundingBox;
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public BoundingBox getBoundingBox() {
-        if (this.cachedBoundingBox == null) {
-            List<StructurePiece> list = this.pieces;
-            synchronized (list) {
-                this.cachedBoundingBox = BoundingBox.encapsulatingBoxes(this.pieces.stream().map(StructurePiece::getBoundingBox)::iterator).orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox without pieces"));
-            }
+    protected BoundingBox createBoundingBox() {
+        List<StructurePiece> list = this.pieces;
+        synchronized (list) {
+            return BoundingBox.encapsulatingBoxes(this.pieces.stream().map(StructurePiece::getBoundingBox)::iterator).orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox without pieces"));
         }
-        return this.cachedBoundingBox;
     }
 
     public List<StructurePiece> getPieces() {

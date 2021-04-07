@@ -25,6 +25,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpecBuilder;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
@@ -69,6 +70,7 @@ public class Main {
 
     @DontObfuscate
     public static void main(String[] strings) {
+        SharedConstants.tryDetectVersion();
         OptionParser optionParser = new OptionParser();
         OptionSpecBuilder optionSpec = optionParser.accepts("nogui");
         OptionSpecBuilder optionSpec2 = optionParser.accepts("initSettings", "Initializes 'server.properties' and 'eula.txt', then quits");

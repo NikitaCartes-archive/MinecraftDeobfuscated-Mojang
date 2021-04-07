@@ -65,7 +65,9 @@ extends Projectile {
     private double baseDamage = 2.0;
     private int knockback;
     private SoundEvent soundEvent = this.getDefaultHitGroundSoundEvent();
+    @Nullable
     private IntOpenHashSet piercingIgnoreEntityIds;
+    @Nullable
     private List<Entity> piercedAndKilledEntities;
 
     protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level) {

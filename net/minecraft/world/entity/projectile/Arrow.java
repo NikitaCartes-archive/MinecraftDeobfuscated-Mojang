@@ -140,7 +140,7 @@ extends AbstractArrow {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        if (this.potion != Potions.EMPTY && this.potion != null) {
+        if (this.potion != Potions.EMPTY) {
             compoundTag.putString("Potion", Registry.POTION.getKey(this.potion).toString());
         }
         if (this.fixedColor) {

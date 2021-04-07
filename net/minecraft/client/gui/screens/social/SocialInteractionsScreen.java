@@ -176,7 +176,6 @@ extends Screen {
                 collection = ImmutableList.of();
             }
         }
-        this.page = page;
         this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
             NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH.getString());
@@ -219,16 +218,10 @@ extends Screen {
             this.socialInteractionsPlayerList.render(poseStack, i, j, f);
         } else if (!this.searchBox.getValue().isEmpty()) {
             SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_SEARCH, this.width / 2, (78 + this.listEnd()) / 2, -1);
-        } else {
-            switch (this.page) {
-                case HIDDEN: {
-                    SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (78 + this.listEnd()) / 2, -1);
-                    break;
-                }
-                case BLOCKED: {
-                    SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (78 + this.listEnd()) / 2, -1);
-                }
-            }
+        } else if (this.page == Page.HIDDEN) {
+            SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (78 + this.listEnd()) / 2, -1);
+        } else if (this.page == Page.BLOCKED) {
+            SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (78 + this.listEnd()) / 2, -1);
         }
         if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
             SocialInteractionsScreen.drawString(poseStack, this.minecraft.font, SEARCH_HINT, this.searchBox.x, this.searchBox.y, -1);

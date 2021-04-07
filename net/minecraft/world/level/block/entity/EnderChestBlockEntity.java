@@ -61,13 +61,13 @@ implements LidBlockEntity {
     }
 
     public void startOpen(Player player) {
-        if (!player.isSpectator()) {
+        if (!this.remove && !player.isSpectator()) {
             this.openersCounter.incrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
 
     public void stopOpen(Player player) {
-        if (!player.isSpectator()) {
+        if (!this.remove && !player.isSpectator()) {
             this.openersCounter.decrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
         }
     }
@@ -80,7 +80,9 @@ implements LidBlockEntity {
     }
 
     public void recheckOpen() {
-        this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        if (!this.remove) {
+            this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
     }
 
     @Override

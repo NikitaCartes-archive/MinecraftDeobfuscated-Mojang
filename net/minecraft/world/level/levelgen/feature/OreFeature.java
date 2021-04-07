@@ -14,6 +14,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -116,6 +117,7 @@ extends Feature<OreConfiguration> {
                             bitSet.set(ap);
                             mutableBlockPos.set(aj, al, an);
                             LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
+                            if (levelChunkSection == LevelChunk.EMPTY_SECTION) continue;
                             int aq = SectionPos.sectionRelative(aj);
                             int ar = SectionPos.sectionRelative(al);
                             int as = SectionPos.sectionRelative(an);

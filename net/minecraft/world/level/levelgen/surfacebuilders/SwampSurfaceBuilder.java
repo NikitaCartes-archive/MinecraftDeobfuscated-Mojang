@@ -19,21 +19,21 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         double e = Biome.BIOME_INFO_NOISE.getValue((double)i * 0.25, (double)j * 0.25, false);
         if (e > 0.0) {
-            int n = i & 0xF;
-            int o = j & 0xF;
+            int o = i & 0xF;
+            int p = j & 0xF;
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            for (int p = k; p >= 0; --p) {
-                mutableBlockPos.set(n, p, o);
+            for (int q = k; q >= m; --q) {
+                mutableBlockPos.set(o, q, p);
                 if (chunkAccess.getBlockState(mutableBlockPos).isAir()) continue;
-                if (p != 62 || chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) break;
+                if (q != 62 || chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) break;
                 chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
                 break;
             }
         }
-        SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, surfaceBuilderBaseConfiguration);
+        SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, surfaceBuilderBaseConfiguration);
     }
 }
 

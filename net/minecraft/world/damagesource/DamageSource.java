@@ -65,7 +65,7 @@ public class DamageSource {
         return new EntityDamageSource("mob", livingEntity);
     }
 
-    public static DamageSource indirectMobAttack(Entity entity, LivingEntity livingEntity) {
+    public static DamageSource indirectMobAttack(Entity entity, @Nullable LivingEntity livingEntity) {
         return new IndirectEntityDamageSource("mob", entity, livingEntity);
     }
 

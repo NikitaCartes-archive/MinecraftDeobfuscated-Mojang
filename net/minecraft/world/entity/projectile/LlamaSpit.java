@@ -28,7 +28,7 @@ extends Projectile {
 
     public LlamaSpit(Level level, Llama llama) {
         this((EntityType<? extends LlamaSpit>)EntityType.LLAMA_SPIT, level);
-        super.setOwner(llama);
+        this.setOwner(llama);
         this.setPos(llama.getX() - (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.sin(llama.yBodyRot * ((float)Math.PI / 180)), llama.getEyeY() - (double)0.1f, llama.getZ() + (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.cos(llama.yBodyRot * ((float)Math.PI / 180)));
     }
 
@@ -37,9 +37,7 @@ extends Projectile {
         super.tick();
         Vec3 vec3 = this.getDeltaMovement();
         HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
-        if (hitResult != null) {
-            this.onHit(hitResult);
-        }
+        this.onHit(hitResult);
         double d = this.getX() + vec3.x;
         double e = this.getY() + vec3.y;
         double f = this.getZ() + vec3.z;

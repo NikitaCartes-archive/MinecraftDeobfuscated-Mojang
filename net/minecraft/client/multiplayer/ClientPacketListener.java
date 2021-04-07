@@ -243,6 +243,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
@@ -924,7 +925,7 @@ implements ClientGamePacketListener {
                 CreativeModeInventoryScreen creativeModeInventoryScreen = (CreativeModeInventoryScreen)this.minecraft.screen;
                 boolean bl2 = bl = creativeModeInventoryScreen.getSelectedTab() != CreativeModeTab.TAB_INVENTORY.getId();
             }
-            if (clientboundContainerSetSlotPacket.getContainerId() == 0 && clientboundContainerSetSlotPacket.getSlot() >= 36 && i < 45) {
+            if (clientboundContainerSetSlotPacket.getContainerId() == 0 && InventoryMenu.isHotbarSlot(i)) {
                 ItemStack itemStack2;
                 if (!itemStack.isEmpty() && ((itemStack2 = player.inventoryMenu.getSlot(i).getItem()).isEmpty() || itemStack2.getCount() < itemStack.getCount())) {
                     itemStack.setPopTime(5);

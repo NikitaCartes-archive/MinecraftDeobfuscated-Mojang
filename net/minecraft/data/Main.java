@@ -13,6 +13,7 @@ import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpecBuilder;
+import net.minecraft.SharedConstants;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.data.info.BlockListReport;
@@ -35,6 +36,7 @@ import net.minecraft.obfuscate.DontObfuscate;
 public class Main {
     @DontObfuscate
     public static void main(String[] strings) throws IOException {
+        SharedConstants.tryDetectVersion();
         OptionParser optionParser = new OptionParser();
         AbstractOptionSpec optionSpec = optionParser.accepts("help", "Show the help menu").forHelp();
         OptionSpecBuilder optionSpec2 = optionParser.accepts("server", "Include server generators");

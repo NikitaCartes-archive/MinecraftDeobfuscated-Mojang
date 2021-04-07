@@ -41,45 +41,45 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
-        int n = i & 0xF;
-        int o = j & 0xF;
+    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+        int o = i & 0xF;
+        int p = j & 0xF;
         BlockState blockState3 = WHITE_TERRACOTTA;
         SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
         BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
         BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
         BlockState blockState6 = blockState4;
-        int p = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
-        int q = -1;
+        int r = -1;
         boolean bl2 = false;
-        int r = 0;
+        int s = 0;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (int s = k; s >= 0; --s) {
-            if (r >= 15) continue;
-            mutableBlockPos.set(n, s, o);
+        for (int t = k; t >= m; --t) {
+            if (s >= 15) continue;
+            mutableBlockPos.set(o, t, p);
             BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
             if (blockState7.isAir()) {
-                q = -1;
+                r = -1;
                 continue;
             }
             if (!blockState7.is(blockState.getBlock())) continue;
-            if (q == -1) {
+            if (r == -1) {
                 bl2 = false;
-                if (p <= 0) {
+                if (q <= 0) {
                     blockState3 = Blocks.AIR.defaultBlockState();
                     blockState6 = blockState;
-                } else if (s >= l - 4 && s <= l + 1) {
+                } else if (t >= l - 4 && t <= l + 1) {
                     blockState3 = WHITE_TERRACOTTA;
                     blockState6 = blockState4;
                 }
-                if (s < l && (blockState3 == null || blockState3.isAir())) {
+                if (t < l && (blockState3 == null || blockState3.isAir())) {
                     blockState3 = blockState2;
                 }
-                q = p + Math.max(0, s - l);
-                if (s >= l - 1) {
-                    if (s > l + 3 + p) {
-                        BlockState blockState8 = s < 64 || s > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, s, j));
+                r = q + Math.max(0, t - l);
+                if (t >= l - 1) {
+                    if (t > l + 3 + q) {
+                        BlockState blockState8 = t < 64 || t > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, t, j));
                         chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
                     } else {
                         chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
@@ -91,15 +91,15 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                         chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
                     }
                 }
-            } else if (q > 0) {
-                --q;
+            } else if (r > 0) {
+                --r;
                 if (bl2) {
                     chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
                 } else {
-                    chunkAccess.setBlockState(mutableBlockPos, this.getBand(i, s, j), false);
+                    chunkAccess.setBlockState(mutableBlockPos, this.getBand(i, t, j), false);
                 }
             }
-            ++r;
+            ++s;
         }
     }
 

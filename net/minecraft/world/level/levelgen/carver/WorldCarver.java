@@ -30,6 +30,8 @@ import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.NetherWorldCarver;
+import net.minecraft.world.level.levelgen.carver.UnderwaterCanyonWorldCarver;
+import net.minecraft.world.level.levelgen.carver.UnderwaterCaveWorldCarver;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -39,6 +41,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     public static final WorldCarver<CaveCarverConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(CaveCarverConfiguration.CODEC));
     public static final WorldCarver<CaveCarverConfiguration> NETHER_CAVE = WorldCarver.register("nether_cave", new NetherWorldCarver(CaveCarverConfiguration.CODEC));
     public static final WorldCarver<CanyonCarverConfiguration> CANYON = WorldCarver.register("canyon", new CanyonWorldCarver(CanyonCarverConfiguration.CODEC));
+    public static final WorldCarver<CanyonCarverConfiguration> UNDERWATER_CANYON = WorldCarver.register("underwater_canyon", new UnderwaterCanyonWorldCarver(CanyonCarverConfiguration.CODEC));
+    public static final WorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = WorldCarver.register("underwater_cave", new UnderwaterCaveWorldCarver(CaveCarverConfiguration.CODEC));
     protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
     protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
     protected static final FluidState WATER = Fluids.WATER.defaultFluidState();

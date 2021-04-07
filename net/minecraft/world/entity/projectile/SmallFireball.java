@@ -53,14 +53,13 @@ extends Fireball {
 
     @Override
     protected void onHitBlock(BlockHitResult blockHitResult) {
-        BlockHitResult blockHitResult2;
         BlockPos blockPos;
         super.onHitBlock(blockHitResult);
         if (this.level.isClientSide) {
             return;
         }
         Entity entity = this.getOwner();
-        if ((entity == null || !(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && this.level.isEmptyBlock(blockPos = (blockHitResult2 = blockHitResult).getBlockPos().relative(blockHitResult2.getDirection()))) {
+        if ((!(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && this.level.isEmptyBlock(blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection()))) {
             this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
         }
     }

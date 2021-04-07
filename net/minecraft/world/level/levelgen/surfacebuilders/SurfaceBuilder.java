@@ -100,7 +100,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
         return new ConfiguredSurfaceBuilder<C>(this, surfaceBuilderConfiguration);
     }
 
-    public abstract void apply(Random var1, ChunkAccess var2, Biome var3, int var4, int var5, int var6, double var7, BlockState var9, BlockState var10, int var11, long var12, C var14);
+    public abstract void apply(Random var1, ChunkAccess var2, Biome var3, int var4, int var5, int var6, double var7, BlockState var9, BlockState var10, int var11, int var12, long var13, C var15);
 
     public void initNoise(long l) {
     }

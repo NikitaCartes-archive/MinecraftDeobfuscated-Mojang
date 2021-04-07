@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 public class ShulkerBullet
 extends Projectile {
     private static final double SPEED = 0.15;
+    @Nullable
     private Entity finalTarget;
     @Nullable
     private Direction currentMoveDirection;
@@ -196,7 +197,7 @@ extends Projectile {
                     this.targetId = null;
                 }
             }
-            if (!(this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator())) {
+            if (!(this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && this.finalTarget.isSpectator())) {
                 this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
                 this.targetDeltaY = Mth.clamp(this.targetDeltaY * 1.025, -1.0, 1.0);
                 this.targetDeltaZ = Mth.clamp(this.targetDeltaZ * 1.025, -1.0, 1.0);

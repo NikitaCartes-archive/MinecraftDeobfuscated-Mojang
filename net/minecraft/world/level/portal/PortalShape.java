@@ -189,7 +189,7 @@ public class PortalShape {
     public static PortalInfo createPortalInfo(ServerLevel serverLevel, BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, EntityDimensions entityDimensions, Vec3 vec32, float f, float g) {
         BlockPos blockPos = foundRectangle.minCorner;
         BlockState blockState = serverLevel.getBlockState(blockPos);
-        Direction.Axis axis2 = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+        Direction.Axis axis2 = blockState.getOptionalValue(BlockStateProperties.HORIZONTAL_AXIS).orElse(Direction.Axis.X);
         double d = foundRectangle.axis1Size;
         double e = foundRectangle.axis2Size;
         int i = axis == axis2 ? 0 : 90;

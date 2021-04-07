@@ -36,19 +36,19 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     }
 
     @Override
-    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
+    public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         double e = 0.0;
         double f = 0.0;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         float g = biome.getTemperature(mutableBlockPos.set(i, 63, j));
         double h = Math.min(Math.abs(d), this.icebergNoise.getValue((double)i * 0.1, (double)j * 0.1, false) * 15.0);
         if (h > 1.8) {
-            double n = 0.09765625;
+            double o = 0.09765625;
             e = h * h * 1.2;
-            double o = Math.abs(this.icebergRoofNoise.getValue((double)i * 0.09765625, (double)j * 0.09765625, false));
-            double p = Math.ceil(o * 40.0) + 14.0;
-            if (e > p) {
-                e = p;
+            double p = Math.abs(this.icebergRoofNoise.getValue((double)i * 0.09765625, (double)j * 0.09765625, false));
+            double q = Math.ceil(p * 40.0) + 14.0;
+            if (e > q) {
+                e = q;
             }
             if (g > 0.1f) {
                 e -= 2.0;
@@ -60,48 +60,48 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 e = 0.0;
             }
         }
-        int q = i & 0xF;
-        int r = j & 0xF;
+        int r = i & 0xF;
+        int s = j & 0xF;
         SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
         BlockState blockState3 = surfaceBuilderConfiguration.getUnderMaterial();
         BlockState blockState4 = surfaceBuilderConfiguration.getTopMaterial();
         BlockState blockState5 = blockState3;
         BlockState blockState6 = blockState4;
-        int s = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-        int t = -1;
-        int u = 0;
-        int v = 2 + random.nextInt(4);
-        int w = l + 18 + random.nextInt(10);
-        for (int x = Math.max(k, (int)e + 1); x >= 0; --x) {
-            mutableBlockPos.set(q, x, r);
-            if (chunkAccess.getBlockState(mutableBlockPos).isAir() && x < (int)e && random.nextDouble() > 0.01) {
+        int t = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+        int u = -1;
+        int v = 0;
+        int w = 2 + random.nextInt(4);
+        int x = l + 18 + random.nextInt(10);
+        for (int y = Math.max(k, (int)e + 1); y >= m; --y) {
+            mutableBlockPos.set(r, y, s);
+            if (chunkAccess.getBlockState(mutableBlockPos).isAir() && y < (int)e && random.nextDouble() > 0.01) {
                 chunkAccess.setBlockState(mutableBlockPos, PACKED_ICE, false);
-            } else if (chunkAccess.getBlockState(mutableBlockPos).getMaterial() == Material.WATER && x > (int)f && x < l && f != 0.0 && random.nextDouble() > 0.15) {
+            } else if (chunkAccess.getBlockState(mutableBlockPos).getMaterial() == Material.WATER && y > (int)f && y < l && f != 0.0 && random.nextDouble() > 0.15) {
                 chunkAccess.setBlockState(mutableBlockPos, PACKED_ICE, false);
             }
             BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
             if (blockState7.isAir()) {
-                t = -1;
+                u = -1;
                 continue;
             }
             if (blockState7.is(blockState.getBlock())) {
-                if (t == -1) {
-                    if (s <= 0) {
+                if (u == -1) {
+                    if (t <= 0) {
                         blockState6 = AIR;
                         blockState5 = blockState;
-                    } else if (x >= l - 4 && x <= l + 1) {
+                    } else if (y >= l - 4 && y <= l + 1) {
                         blockState6 = blockState4;
                         blockState5 = blockState3;
                     }
-                    if (x < l && (blockState6 == null || blockState6.isAir())) {
-                        blockState6 = biome.getTemperature(mutableBlockPos.set(i, x, j)) < 0.15f ? ICE : blockState2;
+                    if (y < l && (blockState6 == null || blockState6.isAir())) {
+                        blockState6 = biome.getTemperature(mutableBlockPos.set(i, y, j)) < 0.15f ? ICE : blockState2;
                     }
-                    t = s;
-                    if (x >= l - 1) {
+                    u = t;
+                    if (y >= l - 1) {
                         chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
                         continue;
                     }
-                    if (x < l - 7 - s) {
+                    if (y < l - 7 - t) {
                         blockState6 = AIR;
                         blockState5 = blockState;
                         chunkAccess.setBlockState(mutableBlockPos, GRAVEL, false);
@@ -110,16 +110,16 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                     chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
                     continue;
                 }
-                if (t <= 0) continue;
+                if (u <= 0) continue;
                 chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
-                if (--t != 0 || !blockState5.is(Blocks.SAND) || s <= 1) continue;
-                t = random.nextInt(4) + Math.max(0, x - 63);
+                if (--u != 0 || !blockState5.is(Blocks.SAND) || t <= 1) continue;
+                u = random.nextInt(4) + Math.max(0, y - 63);
                 blockState5 = blockState5.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
                 continue;
             }
-            if (!blockState7.is(Blocks.PACKED_ICE) || u > v || x <= w) continue;
+            if (!blockState7.is(Blocks.PACKED_ICE) || v > w || y <= x) continue;
             chunkAccess.setBlockState(mutableBlockPos, SNOW_BLOCK, false);
-            ++u;
+            ++v;
         }
     }
 
