@@ -9,8 +9,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
-	private static final int LOWEST_Y_TO_BUILD_SURFACE_ON = 50;
-
 	public DefaultSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
 		super(codec);
 	}
@@ -26,7 +24,8 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
 		this.apply(
@@ -42,7 +41,8 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 			surfaceBuilderBaseConfiguration.getTopMaterial(),
 			surfaceBuilderBaseConfiguration.getUnderMaterial(),
 			surfaceBuilderBaseConfiguration.getUnderwaterMaterial(),
-			l
+			l,
+			m
 		);
 	}
 
@@ -59,26 +59,27 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 		BlockState blockState3,
 		BlockState blockState4,
 		BlockState blockState5,
-		int l
+		int l,
+		int m
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int m = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
-		if (m == 0) {
+		int n = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		if (n == 0) {
 			boolean bl = false;
 
-			for (int n = k; n >= 50; n--) {
-				mutableBlockPos.set(i, n, j);
+			for (int o = k; o >= m; o--) {
+				mutableBlockPos.set(i, o, j);
 				BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
 				if (blockState6.isAir()) {
 					bl = false;
 				} else if (blockState6.is(blockState.getBlock())) {
 					if (!bl) {
 						BlockState blockState7;
-						if (n >= l) {
+						if (o >= l) {
 							blockState7 = Blocks.AIR.defaultBlockState();
-						} else if (n == l - 1) {
+						} else if (o == l - 1) {
 							blockState7 = biome.getTemperature(mutableBlockPos) < 0.15F ? Blocks.ICE.defaultBlockState() : blockState2;
-						} else if (n >= l - (7 + m)) {
+						} else if (o >= l - (7 + n)) {
 							blockState7 = blockState;
 						} else {
 							blockState7 = blockState5;
@@ -92,26 +93,26 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 			}
 		} else {
 			BlockState blockState8 = blockState4;
-			int nx = -1;
+			int ox = -1;
 
-			for (int o = k; o >= 50; o--) {
-				mutableBlockPos.set(i, o, j);
+			for (int p = k; p >= m; p--) {
+				mutableBlockPos.set(i, p, j);
 				BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
 				if (blockState7.isAir()) {
-					nx = -1;
+					ox = -1;
 				} else if (blockState7.is(blockState.getBlock())) {
-					if (nx == -1) {
-						nx = m;
+					if (ox == -1) {
+						ox = n;
 						BlockState blockState9;
-						if (o >= l + 2) {
+						if (p >= l + 2) {
 							blockState9 = blockState3;
-						} else if (o >= l - 1) {
+						} else if (p >= l - 1) {
 							blockState8 = blockState4;
 							blockState9 = blockState3;
-						} else if (o >= l - 4) {
+						} else if (p >= l - 4) {
 							blockState8 = blockState4;
 							blockState9 = blockState4;
-						} else if (o >= l - (7 + m)) {
+						} else if (p >= l - (7 + n)) {
 							blockState9 = blockState8;
 						} else {
 							blockState8 = blockState;
@@ -119,11 +120,11 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 						}
 
 						chunkAccess.setBlockState(mutableBlockPos, blockState9, false);
-					} else if (nx > 0) {
-						nx--;
+					} else if (ox > 0) {
+						ox--;
 						chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
-						if (nx == 0 && blockState8.is(Blocks.SAND) && m > 1) {
-							nx = random.nextInt(4) + Math.max(0, o - l);
+						if (ox == 0 && blockState8.is(Blocks.SAND) && n > 1) {
+							ox = random.nextInt(4) + Math.max(0, p - l);
 							blockState8 = blockState8.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
 						}
 					}

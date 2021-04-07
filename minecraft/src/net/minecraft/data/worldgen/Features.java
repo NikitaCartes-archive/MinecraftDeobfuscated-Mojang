@@ -921,6 +921,14 @@ public class Features {
 			.squared()
 			.count(2)
 	);
+	public static final ConfiguredFeature<?, ?> OLD_TUFF = register(
+		"old_tuff",
+		Feature.ORE
+			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.TUFF, 33))
+			.range(VerticalAnchor.absolute(0), VerticalAnchor.absolute(16))
+			.squared()
+			.count(1)
+	);
 	public static final ConfiguredFeature<?, ?> OLD_ORE_COAL = register(
 		"old_ore_coal",
 		Feature.ORE

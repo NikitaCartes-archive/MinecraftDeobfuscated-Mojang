@@ -96,7 +96,7 @@ public final class ProjectileUtil {
 		return entity2 == null ? null : new EntityHitResult(entity2);
 	}
 
-	public static final void rotateTowardsMovement(Entity entity, float f) {
+	public static void rotateTowardsMovement(Entity entity, float f) {
 		Vec3 vec3 = entity.getDeltaMovement();
 		if (vec3.lengthSqr() != 0.0) {
 			float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));

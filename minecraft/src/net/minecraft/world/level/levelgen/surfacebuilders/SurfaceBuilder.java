@@ -115,7 +115,8 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		C surfaceBuilderConfiguration
 	);
 

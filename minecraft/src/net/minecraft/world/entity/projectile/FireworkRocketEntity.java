@@ -36,6 +36,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	private static final EntityDataAccessor<Boolean> DATA_SHOT_AT_ANGLE = SynchedEntityData.defineId(FireworkRocketEntity.class, EntityDataSerializers.BOOLEAN);
 	private int life;
 	private int lifetime;
+	@Nullable
 	private LivingEntity attachedToEntity;
 
 	public FireworkRocketEntity(EntityType<? extends FireworkRocketEntity> entityType, Level level) {

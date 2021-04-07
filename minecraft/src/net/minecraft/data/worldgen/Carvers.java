@@ -114,6 +114,39 @@ public class Carvers {
 				)
 			)
 	);
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> OLD_UNDERWATER_CANYON = register(
+		"old_underwater_canyon",
+		WorldCarver.UNDERWATER_CANYON
+			.configured(
+				new CanyonCarverConfiguration(
+					0.02F,
+					BiasedToBottomHeight.of(VerticalAnchor.absolute(20), VerticalAnchor.absolute(67), 8),
+					ConstantFloat.of(3.0F),
+					VerticalAnchor.aboveBottom(11),
+					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
+					UniformFloat.of(-0.125F, 0.125F),
+					new CanyonCarverConfiguration.CanyonShapeConfiguration(
+						UniformFloat.of(0.75F, 1.0F), TrapezoidFloat.of(0.0F, 6.0F, 2.0F), 3, UniformFloat.of(0.75F, 1.0F), 1.0F, 0.0F
+					)
+				)
+			)
+	);
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OLD_UNDERWATER_CAVE = register(
+		"old_underwater_cave",
+		WorldCarver.UNDERWATER_CAVE
+			.configured(
+				new CaveCarverConfiguration(
+					0.06666667F,
+					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
+					ConstantFloat.of(0.5F),
+					VerticalAnchor.aboveBottom(11),
+					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
+					ConstantFloat.of(1.0F),
+					ConstantFloat.of(1.0F),
+					ConstantFloat.of(-0.7F)
+				)
+			)
+	);
 	public static final ConfiguredWorldCarver<CaveCarverConfiguration> NETHER_CAVE = register(
 		"nether_cave",
 		WorldCarver.NETHER_CAVE

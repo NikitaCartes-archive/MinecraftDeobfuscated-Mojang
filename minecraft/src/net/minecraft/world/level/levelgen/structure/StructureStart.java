@@ -71,15 +71,19 @@ public abstract class StructureStart<C extends FeatureConfiguration> implements 
 		LevelHeightAccessor levelHeightAccessor
 	);
 
-	public BoundingBox getBoundingBox() {
+	public final BoundingBox getBoundingBox() {
 		if (this.cachedBoundingBox == null) {
-			synchronized (this.pieces) {
-				this.cachedBoundingBox = (BoundingBox)BoundingBox.encapsulatingBoxes(this.pieces.stream().map(StructurePiece::getBoundingBox)::iterator)
-					.orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox without pieces"));
-			}
+			this.cachedBoundingBox = this.createBoundingBox();
 		}
 
 		return this.cachedBoundingBox;
+	}
+
+	protected BoundingBox createBoundingBox() {
+		synchronized (this.pieces) {
+			return (BoundingBox)BoundingBox.encapsulatingBoxes(this.pieces.stream().map(StructurePiece::getBoundingBox)::iterator)
+				.orElseThrow(() -> new IllegalStateException("Unable to calculate boundingbox without pieces"));
+		}
 	}
 
 	public List<StructurePiece> getPieces() {

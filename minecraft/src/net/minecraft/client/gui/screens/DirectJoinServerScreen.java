@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -35,7 +36,7 @@ public class DirectJoinServerScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
-		if (this.getFocused() != this.ipEdit || i != 257 && i != 335) {
+		if (!this.selectButton.active || this.getFocused() != this.ipEdit || i != 257 && i != 335) {
 			return super.keyPressed(i, j, k);
 		} else {
 			this.onSelect();
@@ -85,8 +86,7 @@ public class DirectJoinServerScreen extends Screen {
 	}
 
 	private void updateSelectButtonStatus() {
-		String string = this.ipEdit.getValue();
-		this.selectButton.active = !string.isEmpty() && string.split(":").length > 0 && string.indexOf(32) == -1;
+		this.selectButton.active = ServerAddress.isValidAddress(this.ipEdit.getValue());
 	}
 
 	@Override

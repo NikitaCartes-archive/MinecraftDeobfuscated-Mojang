@@ -1,6 +1,7 @@
 package net.minecraft.data.recipes;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -49,6 +51,14 @@ import org.apache.logging.log4j.Logger;
 public class RecipeProvider implements DataProvider {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	private static final ImmutableList<ItemLike> COAL_SMELTABLES = ImmutableList.of(Items.COAL_ORE, Items.DEEPSLATE_COAL_ORE);
+	private static final ImmutableList<ItemLike> IRON_SMELTABLES = ImmutableList.of(Items.IRON_ORE, Items.DEEPSLATE_IRON_ORE, Items.RAW_IRON);
+	private static final ImmutableList<ItemLike> COPPER_SMELTABLES = ImmutableList.of(Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE, Items.RAW_COPPER);
+	private static final ImmutableList<ItemLike> GOLD_SMELTABLES = ImmutableList.of(Items.GOLD_ORE, Items.DEEPSLATE_GOLD_ORE, Items.RAW_GOLD);
+	private static final ImmutableList<ItemLike> DIAMOND_SMELTABLES = ImmutableList.of(Items.DIAMOND_ORE, Items.DEEPSLATE_DIAMOND_ORE);
+	private static final ImmutableList<ItemLike> LAPIS_SMELTABLES = ImmutableList.of(Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE);
+	private static final ImmutableList<ItemLike> REDSTONE_SMELTABLES = ImmutableList.of(Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE);
+	private static final ImmutableList<ItemLike> EMERALD_SMELTABLES = ImmutableList.of(Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE);
 	private final DataGenerator generator;
 	private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> shapeBuilders = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder()
 		.put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> buttonBuilder(itemLike, Ingredient.of(itemLike2)))
@@ -727,6 +737,7 @@ public class RecipeProvider implements DataProvider {
 		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
 		cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
 		cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
+		cut(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_OXIDIZED_COPPER);
 		ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.GREEN_DYE)
@@ -2282,9 +2293,6 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CHORUS_FRUIT), Items.POPPED_CHORUS_FRUIT, 0.1F, 200)
 			.unlockedBy("has_chorus_fruit", has(Items.CHORUS_FRUIT))
 			.save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.COAL_ORES), Items.COAL, 0.1F, 200)
-			.unlockedBy("has_coal_ore", has(ItemTags.COAL_ORES))
-			.save(consumer, "coal_from_smelting");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.BEEF), Items.COOKED_BEEF, 0.35F, 200).unlockedBy("has_beef", has(Items.BEEF)).save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CHICKEN), Items.COOKED_CHICKEN, 0.35F, 200)
 			.unlockedBy("has_chicken", has(Items.CHICKEN))
@@ -2299,19 +2307,15 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_porkchop", has(Items.PORKCHOP))
 			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.RABBIT), Items.COOKED_RABBIT, 0.35F, 200).unlockedBy("has_rabbit", has(Items.RABBIT)).save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.DIAMOND_ORES), Items.DIAMOND, 1.0F, 200)
-			.unlockedBy("has_diamond_ore", has(ItemTags.DIAMOND_ORES))
-			.save(consumer, "diamond_from_smelting");
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.LAPIS_ORES), Items.LAPIS_LAZULI, 0.2F, 200)
-			.unlockedBy("has_lapis_ore", has(ItemTags.LAPIS_ORES))
-			.save(consumer, "lapis_from_smelting");
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.EMERALD_ORES), Items.EMERALD, 1.0F, 200)
-			.unlockedBy("has_emerald_ore", has(ItemTags.EMERALD_ORES))
-			.save(consumer, "emerald_from_smelting");
+		oreSmelting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 200);
+		oreSmelting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 200);
+		oreSmelting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 200);
+		oreSmelting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 200);
+		oreSmelting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 200);
+		oreSmelting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 200);
+		oreSmelting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 200);
+		oreSmelting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 200);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.SAND), Blocks.GLASS.asItem(), 0.1F, 200).unlockedBy("has_sand", has(ItemTags.SAND)).save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.GOLD_ORES), Items.GOLD_INGOT, 1.0F, 200)
-			.unlockedBy("has_gold_ore", has(ItemTags.GOLD_ORES))
-			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.SEA_PICKLE.asItem()), Items.LIME_DYE, 0.1F, 200)
 			.unlockedBy("has_sea_pickle", has(Blocks.SEA_PICKLE))
 			.save(consumer, "lime_dye_from_smelting");
@@ -2382,12 +2386,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_chainmail_leggings", has(Items.CHAINMAIL_LEGGINGS))
 			.unlockedBy("has_chainmail_boots", has(Items.CHAINMAIL_BOOTS))
 			.save(consumer, "iron_nugget_from_smelting");
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.IRON_ORES), Items.IRON_INGOT, 0.7F, 200)
-			.unlockedBy("has_iron_ore", has(ItemTags.IRON_ORES))
-			.save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.COPPER_ORES), Items.COPPER_INGOT, 0.7F, 200)
-			.unlockedBy("has_copper_ore", has(ItemTags.COPPER_ORES))
-			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.CLAY), Blocks.TERRACOTTA.asItem(), 0.35F, 200)
 			.unlockedBy("has_clay_block", has(Blocks.CLAY))
 			.save(consumer);
@@ -2397,9 +2395,6 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.NETHER_QUARTZ_ORE), Items.QUARTZ, 0.2F, 200)
 			.unlockedBy("has_nether_quartz_ore", has(Blocks.NETHER_QUARTZ_ORE))
 			.save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.REDSTONE_ORES), Items.REDSTONE, 0.7F, 200)
-			.unlockedBy("has_redstone_ore", has(ItemTags.REDSTONE_ORES))
-			.save(consumer, "redstone_from_smelting");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.WET_SPONGE), Blocks.SPONGE.asItem(), 0.15F, 200)
 			.unlockedBy("has_wet_sponge", has(Blocks.WET_SPONGE))
 			.save(consumer);
@@ -2478,30 +2473,14 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.COBBLED_DEEPSLATE), Blocks.DEEPSLATE, 0.1F, 200)
 			.unlockedBy("has_cobbled_deepslate", has(Blocks.COBBLED_DEEPSLATE))
 			.save(consumer);
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.IRON_ORES), Items.IRON_INGOT, 0.7F, 100)
-			.unlockedBy("has_iron_ore", has(ItemTags.IRON_ORES))
-			.save(consumer, "iron_ingot_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.COPPER_ORES), Items.COPPER_INGOT, 0.7F, 100)
-			.unlockedBy("has_copper_ore", has(ItemTags.COPPER_ORES))
-			.save(consumer, "copper_ingot_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.GOLD_ORES), Items.GOLD_INGOT, 1.0F, 100)
-			.unlockedBy("has_gold_ore", has(ItemTags.GOLD_ORES))
-			.save(consumer, "gold_ingot_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.DIAMOND_ORES), Items.DIAMOND, 1.0F, 100)
-			.unlockedBy("has_diamond_ore", has(ItemTags.DIAMOND_ORES))
-			.save(consumer, "diamond_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.LAPIS_ORES), Items.LAPIS_LAZULI, 0.2F, 100)
-			.unlockedBy("has_lapis_ore", has(ItemTags.LAPIS_ORES))
-			.save(consumer, "lapis_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.REDSTONE_ORES), Items.REDSTONE, 0.7F, 100)
-			.unlockedBy("has_redstone_ore", has(ItemTags.REDSTONE_ORES))
-			.save(consumer, "redstone_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.COAL_ORES), Items.COAL, 0.1F, 100)
-			.unlockedBy("has_coal_ore", has(ItemTags.COAL_ORES))
-			.save(consumer, "coal_from_blasting");
-		SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.EMERALD_ORES), Items.EMERALD, 1.0F, 100)
-			.unlockedBy("has_emerald_ore", has(ItemTags.EMERALD_ORES))
-			.save(consumer, "emerald_from_blasting");
+		oreBlasting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 100);
+		oreBlasting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 100);
+		oreBlasting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 100);
+		oreBlasting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 100);
+		oreBlasting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 100);
+		oreBlasting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 100);
+		oreBlasting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 100);
+		oreBlasting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 100);
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.NETHER_QUARTZ_ORE), Items.QUARTZ, 0.2F, 100)
 			.unlockedBy("has_nether_quartz_ore", has(Blocks.NETHER_QUARTZ_ORE))
 			.save(consumer, "quartz_from_blasting");
@@ -2951,6 +2930,8 @@ public class RecipeProvider implements DataProvider {
 		stonecutterResultFromBase(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CUT_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER, 2);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_CUT_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_CUT_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_STAIRS, Blocks.COPPER_BLOCK);
 		stonecutterResultFromBase(consumer, Blocks.CUT_COPPER_SLAB, Blocks.COPPER_BLOCK, 2);
@@ -2972,6 +2953,9 @@ public class RecipeProvider implements DataProvider {
 		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_COPPER);
 		stonecutterResultFromBase(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_COPPER, 2);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_OXIDIZED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_COPPER);
+		stonecutterResultFromBase(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_COPPER, 2);
 		stonecutterResultFromBase(consumer, Blocks.COBBLED_DEEPSLATE_SLAB, Blocks.COBBLED_DEEPSLATE, 2);
 		stonecutterResultFromBase(consumer, Blocks.COBBLED_DEEPSLATE_STAIRS, Blocks.COBBLED_DEEPSLATE);
 		stonecutterResultFromBase(consumer, Blocks.COBBLED_DEEPSLATE_WALL, Blocks.COBBLED_DEEPSLATE);
@@ -3018,6 +3002,24 @@ public class RecipeProvider implements DataProvider {
 		netheriteSmithing(consumer, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE);
 		netheriteSmithing(consumer, Items.DIAMOND_HOE, Items.NETHERITE_HOE);
 		netheriteSmithing(consumer, Items.DIAMOND_SHOVEL, Items.NETHERITE_SHOVEL);
+	}
+
+	private static void oreSmelting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i) {
+		oreCooking(consumer, RecipeSerializer.SMELTING_RECIPE, list, itemLike, f, i, "_from_smelting");
+	}
+
+	private static void oreBlasting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i) {
+		oreCooking(consumer, RecipeSerializer.BLASTING_RECIPE, list, itemLike, f, i, "_from_blasting");
+	}
+
+	private static void oreCooking(
+		Consumer<FinishedRecipe> consumer, SimpleCookingSerializer<?> simpleCookingSerializer, List<ItemLike> list, ItemLike itemLike, float f, int i, String string
+	) {
+		for (ItemLike itemLike2 : list) {
+			SimpleCookingRecipeBuilder.cooking(Ingredient.of(itemLike2), itemLike, f, i, simpleCookingSerializer)
+				.unlockedBy(getHasName(itemLike2), has(itemLike2))
+				.save(consumer, getBlockName(itemLike) + string + "_" + getBlockName(itemLike2));
+		}
 	}
 
 	private static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, Item item2) {
@@ -3080,10 +3082,6 @@ public class RecipeProvider implements DataProvider {
 
 	private static RecipeBuilder slabBuilder(ItemLike itemLike, Ingredient ingredient) {
 		return ShapedRecipeBuilder.shaped(itemLike, 6).define('#', ingredient).pattern("###");
-	}
-
-	private static void stair(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		stairBuilder(itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(consumer);
 	}
 
 	private static RecipeBuilder stairBuilder(ItemLike itemLike, Ingredient ingredient) {

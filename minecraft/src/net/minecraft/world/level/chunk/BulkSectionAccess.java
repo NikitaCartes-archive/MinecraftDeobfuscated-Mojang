@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BulkSectionAccess implements AutoCloseable {
@@ -19,28 +20,37 @@ public class BulkSectionAccess implements AutoCloseable {
 		this.level = levelAccessor;
 	}
 
+	@Nullable
 	public LevelChunkSection getSection(BlockPos blockPos) {
-		long l = SectionPos.asLong(blockPos);
-		if (this.lastSection != null && this.lastSectionKey == l) {
+		int i = this.level.getSectionIndex(blockPos.getY());
+		if (i >= 0 && i < this.level.getSectionsCount()) {
+			long l = SectionPos.asLong(blockPos);
+			if (this.lastSection == null || this.lastSectionKey != l) {
+				this.lastSection = this.acquiredSections.computeIfAbsent(l, lx -> {
+					ChunkAccess chunkAccess = this.level.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+					LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(i);
+					levelChunkSection.acquire();
+					return levelChunkSection;
+				});
+				this.lastSectionKey = l;
+			}
+
 			return this.lastSection;
 		} else {
-			this.lastSection = this.acquiredSections.computeIfAbsent(l, lx -> {
-				ChunkAccess chunkAccess = this.level.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
-				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(chunkAccess.getSectionIndex(blockPos.getY()));
-				levelChunkSection.acquire();
-				return levelChunkSection;
-			});
-			this.lastSectionKey = l;
-			return this.lastSection;
+			return LevelChunk.EMPTY_SECTION;
 		}
 	}
 
 	public BlockState getBlockState(BlockPos blockPos) {
 		LevelChunkSection levelChunkSection = this.getSection(blockPos);
-		int i = SectionPos.sectionRelative(blockPos.getX());
-		int j = SectionPos.sectionRelative(blockPos.getY());
-		int k = SectionPos.sectionRelative(blockPos.getZ());
-		return levelChunkSection.getBlockState(i, j, k);
+		if (levelChunkSection == LevelChunk.EMPTY_SECTION) {
+			return Blocks.AIR.defaultBlockState();
+		} else {
+			int i = SectionPos.sectionRelative(blockPos.getX());
+			int j = SectionPos.sectionRelative(blockPos.getY());
+			int k = SectionPos.sectionRelative(blockPos.getZ());
+			return levelChunkSection.getBlockState(i, j, k);
+		}
 	}
 
 	public void close() {

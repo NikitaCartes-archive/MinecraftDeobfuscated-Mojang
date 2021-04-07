@@ -59,6 +59,9 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.FENCES, ItemTags.FENCES);
 		this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
+		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
+		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
+		this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
 		this.copy(BlockTags.IRON_ORES, ItemTags.IRON_ORES);
 		this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
@@ -67,9 +70,6 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.COAL_ORES, ItemTags.COAL_ORES);
 		this.copy(BlockTags.EMERALD_ORES, ItemTags.EMERALD_ORES);
 		this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
-		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
-		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
-		this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,
@@ -135,7 +135,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.GOLDEN_PICKAXE,
 				Items.GOLDEN_SHOVEL,
 				Items.GOLDEN_AXE,
-				Items.GOLDEN_HOE
+				Items.GOLDEN_HOE,
+				Items.RAW_GOLD
 			);
 		this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
 		this.tag(ItemTags.PIGLIN_FOOD).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);

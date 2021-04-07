@@ -87,6 +87,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.COOKED_RABBIT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_SALMON, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKIE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RAW_COPPER, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COPPER_INGOT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CREEPER_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CYAN_DYE, ModelTemplates.FLAT_ITEM);
@@ -126,6 +127,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.GLOWSTONE_DUST, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOW_INK_SAC, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOW_ITEM_FRAME, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RAW_GOLD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GOLDEN_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.GOLDEN_BOOTS, ModelTemplates.FLAT_ITEM);
@@ -148,6 +150,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.HONEY_BOTTLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HOPPER_MINECART, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.INK_SAC, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RAW_IRON, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.IRON_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.IRON_BOOTS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.IRON_CHESTPLATE, ModelTemplates.FLAT_ITEM);

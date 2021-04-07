@@ -34,7 +34,7 @@ public class Aquifer {
 	private final int gridSizeZ;
 
 	public Aquifer(
-		int i, int j, NormalNoise normalNoise, NormalNoise normalNoise2, NoiseGeneratorSettings noiseGeneratorSettings, NoiseSampler noiseSampler, int k
+		int i, int j, NormalNoise normalNoise, NormalNoise normalNoise2, NoiseGeneratorSettings noiseGeneratorSettings, NoiseSampler noiseSampler, int k, int l
 	) {
 		this.barrierNoise = normalNoise;
 		this.waterLevelNoise = normalNoise2;
@@ -42,11 +42,10 @@ public class Aquifer {
 		this.sampler = noiseSampler;
 		ChunkPos chunkPos = new ChunkPos(i, j);
 		this.minGridX = this.gridX(chunkPos.getMinBlockX()) - 1;
-		int l = this.gridX(chunkPos.getMaxBlockX()) + 1;
-		this.gridSizeX = l - this.minGridX + 1;
-		int m = noiseGeneratorSettings.noiseSettings().minY();
-		this.minGridY = this.gridY(m) - 1;
-		int n = this.gridY(m + k) + 1;
+		int m = this.gridX(chunkPos.getMaxBlockX()) + 1;
+		this.gridSizeX = m - this.minGridX + 1;
+		this.minGridY = this.gridY(k) - 1;
+		int n = this.gridY(k + l) + 1;
 		int o = n - this.minGridY + 1;
 		this.minGridZ = this.gridZ(chunkPos.getMinBlockZ()) - 1;
 		int p = this.gridZ(chunkPos.getMaxBlockZ()) + 1;

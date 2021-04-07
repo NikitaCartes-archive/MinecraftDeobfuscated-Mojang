@@ -204,7 +204,7 @@ public class PortalShape {
 	) {
 		BlockPos blockPos = foundRectangle.minCorner;
 		BlockState blockState = serverLevel.getBlockState(blockPos);
-		Direction.Axis axis2 = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+		Direction.Axis axis2 = (Direction.Axis)blockState.getOptionalValue(BlockStateProperties.HORIZONTAL_AXIS).orElse(Direction.Axis.X);
 		double d = (double)foundRectangle.axis1Size;
 		double e = (double)foundRectangle.axis2Size;
 		int i = axis == axis2 ? 0 : 90;

@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -167,8 +166,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		public void onPress() {
-			BeaconScreen.this.minecraft.player.connection.send(new ServerboundContainerClosePacket(BeaconScreen.this.minecraft.player.containerMenu.containerId));
-			BeaconScreen.this.minecraft.setScreen(null);
+			BeaconScreen.this.minecraft.player.closeContainer();
 		}
 
 		@Override
@@ -188,8 +186,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 			BeaconScreen.this.minecraft
 				.getConnection()
 				.send(new ServerboundSetBeaconPacket(MobEffect.getId(BeaconScreen.this.primary), MobEffect.getId(BeaconScreen.this.secondary)));
-			BeaconScreen.this.minecraft.player.connection.send(new ServerboundContainerClosePacket(BeaconScreen.this.minecraft.player.containerMenu.containerId));
-			BeaconScreen.this.minecraft.setScreen(null);
+			BeaconScreen.this.minecraft.player.closeContainer();
 		}
 
 		@Override

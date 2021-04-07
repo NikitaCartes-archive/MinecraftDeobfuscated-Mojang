@@ -31,31 +31,32 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int n = l;
-		int o = i & 15;
-		int p = j & 15;
+		int o = l;
+		int p = i & 15;
+		int q = j & 15;
 		double e = this.decorationNoise.getValue((double)i * 0.1, (double)l, (double)j * 0.1);
 		boolean bl = e > 0.15 + random.nextDouble() * 0.35;
 		double f = this.decorationNoise.getValue((double)i * 0.1, 109.0, (double)j * 0.1);
 		boolean bl2 = f > 0.25 + random.nextDouble() * 0.9;
-		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int r = -1;
+		int s = -1;
 		BlockState blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 
-		for (int s = 127; s >= 0; s--) {
-			mutableBlockPos.set(o, s, p);
+		for (int t = 127; t >= m; t--) {
+			mutableBlockPos.set(p, t, q);
 			BlockState blockState4 = surfaceBuilderBaseConfiguration.getTopMaterial();
 			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState5.isAir()) {
-				r = -1;
+				s = -1;
 			} else if (blockState5.is(blockState.getBlock())) {
-				if (r == -1) {
+				if (s == -1) {
 					boolean bl3 = false;
-					if (q <= 0) {
+					if (r <= 0) {
 						bl3 = true;
 						blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 					}
@@ -66,18 +67,18 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 						blockState4 = surfaceBuilderBaseConfiguration.getUnderwaterMaterial();
 					}
 
-					if (s < n && bl3) {
+					if (t < o && bl3) {
 						blockState4 = blockState2;
 					}
 
-					r = q;
-					if (s >= n - 1) {
+					s = r;
+					if (t >= o - 1) {
 						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
 					} else {
 						chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
 					}
-				} else if (r > 0) {
-					r--;
+				} else if (s > 0) {
+					s--;
 					chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
 				}
 			}

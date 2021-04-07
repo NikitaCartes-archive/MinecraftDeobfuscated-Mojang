@@ -22,7 +22,8 @@ public class NopeSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfigu
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
 	}

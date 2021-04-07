@@ -188,7 +188,8 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		if (this.isOpen(node22)
 			&& this.hasMalus(node18)
 			&& this.hasMalus(node5)
-			&& this.hasMalus(node3) & this.hasMalus(node6)
+			&& this.hasMalus(node3)
+			&& this.hasMalus(node6)
 			&& this.hasMalus(node11)
 			&& this.hasMalus(node9)) {
 			nodes[i++] = node22;
@@ -198,7 +199,8 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		if (this.isOpen(node23)
 			&& this.hasMalus(node19)
 			&& this.hasMalus(node2)
-			&& this.hasMalus(node3) & this.hasMalus(node6)
+			&& this.hasMalus(node3)
+			&& this.hasMalus(node6)
 			&& this.hasMalus(node8)
 			&& this.hasMalus(node9)) {
 			nodes[i++] = node23;

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 public class IndirectEntityDamageSource extends EntityDamageSource {
+	@Nullable
 	private final Entity owner;
 
 	public IndirectEntityDamageSource(String string, Entity entity, @Nullable Entity entity2) {

@@ -25,6 +25,7 @@ public class CombatTracker {
 	private int combatEndTime;
 	private boolean inCombat;
 	private boolean takingDamage;
+	@Nullable
 	private String nextLocation;
 
 	public CombatTracker(LivingEntity livingEntity) {
@@ -82,7 +83,7 @@ public class CombatTracker {
 				Component component2 = combatEntry.getAttackerName();
 				if (combatEntry.getSource() == DamageSource.FALL || combatEntry.getSource() == DamageSource.OUT_OF_WORLD) {
 					component3 = new TranslatableComponent("death.fell.accident." + this.getFallLocation(combatEntry), this.mob.getDisplayName());
-				} else if (component2 != null && (component == null || !component2.equals(component))) {
+				} else if (component2 != null && !component2.equals(component)) {
 					Entity entity2 = combatEntry.getSource().getEntity();
 					ItemStack itemStack = entity2 instanceof LivingEntity ? ((LivingEntity)entity2).getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {

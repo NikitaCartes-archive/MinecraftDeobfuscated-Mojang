@@ -3645,6 +3645,10 @@ public class BlockModelGenerators {
 			.generateFor(BlockFamilies.WEATHERED_CUT_COPPER)
 			.fullBlockCopies(Blocks.WAXED_WEATHERED_CUT_COPPER)
 			.generateFor(BlockFamilies.WAXED_WEATHERED_CUT_COPPER);
+		this.family(Blocks.OXIDIZED_CUT_COPPER)
+			.generateFor(BlockFamilies.OXIDIZED_CUT_COPPER)
+			.fullBlockCopies(Blocks.WAXED_OXIDIZED_CUT_COPPER)
+			.generateFor(BlockFamilies.WAXED_OXIDIZED_CUT_COPPER);
 		this.createNonTemplateModelBlock(Blocks.AIR);
 		this.createNonTemplateModelBlock(Blocks.CAVE_AIR, Blocks.AIR);
 		this.createNonTemplateModelBlock(Blocks.VOID_AIR, Blocks.AIR);
@@ -3763,6 +3767,7 @@ public class BlockModelGenerators {
 		this.copyModel(Blocks.COPPER_BLOCK, Blocks.WAXED_COPPER_BLOCK);
 		this.copyModel(Blocks.EXPOSED_COPPER, Blocks.WAXED_EXPOSED_COPPER);
 		this.copyModel(Blocks.WEATHERED_COPPER, Blocks.WAXED_WEATHERED_COPPER);
+		this.copyModel(Blocks.OXIDIZED_COPPER, Blocks.WAXED_OXIDIZED_COPPER);
 		this.createWeightedPressurePlate(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.GOLD_BLOCK);
 		this.createWeightedPressurePlate(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.IRON_BLOCK);
 		this.createAmethystClusters();

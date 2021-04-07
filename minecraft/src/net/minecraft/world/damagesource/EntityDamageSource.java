@@ -10,11 +10,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public class EntityDamageSource extends DamageSource {
-	@Nullable
 	protected final Entity entity;
 	private boolean isThorns;
 
-	public EntityDamageSource(String string, @Nullable Entity entity) {
+	public EntityDamageSource(String string, Entity entity) {
 		super(string);
 		this.entity = entity;
 	}
@@ -28,7 +27,6 @@ public class EntityDamageSource extends DamageSource {
 		return this.isThorns;
 	}
 
-	@Nullable
 	@Override
 	public Entity getEntity() {
 		return this.entity;
@@ -45,13 +43,13 @@ public class EntityDamageSource extends DamageSource {
 
 	@Override
 	public boolean scalesWithDifficulty() {
-		return this.entity != null && this.entity instanceof LivingEntity && !(this.entity instanceof Player);
+		return this.entity instanceof LivingEntity && !(this.entity instanceof Player);
 	}
 
 	@Nullable
 	@Override
 	public Vec3 getSourcePosition() {
-		return this.entity != null ? this.entity.position() : null;
+		return this.entity.position();
 	}
 
 	@Override

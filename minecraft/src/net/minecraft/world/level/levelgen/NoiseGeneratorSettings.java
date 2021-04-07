@@ -27,6 +27,7 @@ public final class NoiseGeneratorSettings {
 					Codec.INT.fieldOf("bedrock_roof_position").forGetter(NoiseGeneratorSettings::getBedrockRoofPosition),
 					Codec.INT.fieldOf("bedrock_floor_position").forGetter(NoiseGeneratorSettings::getBedrockFloorPosition),
 					Codec.INT.fieldOf("sea_level").forGetter(NoiseGeneratorSettings::seaLevel),
+					Codec.INT.fieldOf("min_surface_level").forGetter(NoiseGeneratorSettings::getMinSurfaceLevel),
 					Codec.BOOL.fieldOf("disable_mob_generation").forGetter(NoiseGeneratorSettings::disableMobGeneration),
 					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(NoiseGeneratorSettings::isAquifersEnabled),
 					Codec.BOOL.fieldOf("noise_caves_enabled").forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled),
@@ -42,6 +43,7 @@ public final class NoiseGeneratorSettings {
 	private final int bedrockRoofPosition;
 	private final int bedrockFloorPosition;
 	private final int seaLevel;
+	private final int minSurfaceLevel;
 	private final boolean disableMobGeneration;
 	private final boolean aquifersEnabled;
 	private final boolean noiseCavesEnabled;
@@ -68,6 +70,7 @@ public final class NoiseGeneratorSettings {
 		int i,
 		int j,
 		int k,
+		int l,
 		boolean bl,
 		boolean bl2,
 		boolean bl3,
@@ -80,6 +83,7 @@ public final class NoiseGeneratorSettings {
 		this.bedrockRoofPosition = i;
 		this.bedrockFloorPosition = j;
 		this.seaLevel = k;
+		this.minSurfaceLevel = l;
 		this.disableMobGeneration = bl;
 		this.aquifersEnabled = bl2;
 		this.noiseCavesEnabled = bl3;
@@ -112,6 +116,10 @@ public final class NoiseGeneratorSettings {
 
 	public int seaLevel() {
 		return this.seaLevel;
+	}
+
+	public int getMinSurfaceLevel() {
+		return this.minSurfaceLevel;
 	}
 
 	@Deprecated
@@ -151,7 +159,7 @@ public final class NoiseGeneratorSettings {
 			structureSettings,
 			NoiseSettings.create(
 				bl3 ? -64 : 0,
-				bl3 ? 384 : 256,
+				bl3 ? 384 : 128,
 				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
 				new NoiseSlideSettings(-3000, 64, -46),
 				new NoiseSlideSettings(-30, 7, 1),
@@ -168,6 +176,7 @@ public final class NoiseGeneratorSettings {
 			blockState2,
 			Integer.MIN_VALUE,
 			Integer.MIN_VALUE,
+			bl3 ? -64 : 0,
 			bl3 ? -64 : 0,
 			bl,
 			false,
@@ -201,6 +210,7 @@ public final class NoiseGeneratorSettings {
 			0,
 			0,
 			32,
+			bl ? -64 : 0,
 			false,
 			false,
 			false,
@@ -232,6 +242,7 @@ public final class NoiseGeneratorSettings {
 			Integer.MIN_VALUE,
 			0,
 			63,
+			50,
 			false,
 			true,
 			true,

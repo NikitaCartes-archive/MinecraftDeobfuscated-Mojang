@@ -11,6 +11,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -136,16 +137,18 @@ public class OreFeature extends Feature<OreConfiguration> {
 												bitSet.set(ap);
 												mutableBlockPos.set(aj, al, an);
 												LevelChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
-												int aq = SectionPos.sectionRelative(aj);
-												int ar = SectionPos.sectionRelative(al);
-												int as = SectionPos.sectionRelative(an);
-												BlockState blockState = levelChunkSection.getBlockState(aq, ar, as);
+												if (levelChunkSection != LevelChunk.EMPTY_SECTION) {
+													int aq = SectionPos.sectionRelative(aj);
+													int ar = SectionPos.sectionRelative(al);
+													int as = SectionPos.sectionRelative(an);
+													BlockState blockState = levelChunkSection.getBlockState(aq, ar, as);
 
-												for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
-													if (canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
-														levelChunkSection.setBlockState(aq, ar, as, targetBlockState.state, false);
-														o++;
-														break;
+													for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
+														if (canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) {
+															levelChunkSection.setBlockState(aq, ar, as, targetBlockState.state, false);
+															o++;
+															break;
+														}
 													}
 												}
 											}

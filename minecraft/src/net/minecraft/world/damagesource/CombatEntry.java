@@ -10,10 +10,11 @@ public class CombatEntry {
 	private final int time;
 	private final float damage;
 	private final float health;
+	@Nullable
 	private final String location;
 	private final float fallDistance;
 
-	public CombatEntry(DamageSource damageSource, int i, float f, float g, String string, float h) {
+	public CombatEntry(DamageSource damageSource, int i, float f, float g, @Nullable String string, float h) {
 		this.source = damageSource;
 		this.time = i;
 		this.damage = g;

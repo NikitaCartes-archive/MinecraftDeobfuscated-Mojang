@@ -23,19 +23,20 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
 		double e = Biome.BIOME_INFO_NOISE.getValue((double)i * 0.25, (double)j * 0.25, false);
 		if (e > 0.0) {
-			int n = i & 15;
-			int o = j & 15;
+			int o = i & 15;
+			int p = j & 15;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			for (int p = k; p >= 0; p--) {
-				mutableBlockPos.set(n, p, o);
+			for (int q = k; q >= m; q--) {
+				mutableBlockPos.set(o, q, p);
 				if (!chunkAccess.getBlockState(mutableBlockPos).isAir()) {
-					if (p == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) {
+					if (q == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) {
 						chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
 					}
 					break;
@@ -43,6 +44,6 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 			}
 		}
 
-		SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, surfaceBuilderBaseConfiguration);
+		SurfaceBuilder.DEFAULT.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, surfaceBuilderBaseConfiguration);
 	}
 }

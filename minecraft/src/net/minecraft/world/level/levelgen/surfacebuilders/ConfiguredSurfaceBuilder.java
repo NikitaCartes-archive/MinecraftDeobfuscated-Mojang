@@ -22,9 +22,9 @@ public class ConfiguredSurfaceBuilder<SC extends SurfaceBuilderConfiguration> {
 	}
 
 	public void apply(
-		Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m
+		Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, int m, long n
 	) {
-		this.surfaceBuilder.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, this.config);
+		this.surfaceBuilder.apply(random, chunkAccess, biome, i, j, k, d, blockState, blockState2, l, m, n, this.config);
 	}
 
 	public void initNoise(long l) {

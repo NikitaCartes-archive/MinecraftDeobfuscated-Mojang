@@ -36,14 +36,15 @@ public abstract class NetherCappedSurfaceBuilder extends SurfaceBuilder<SurfaceB
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int n = l + 1;
-		int o = i & 15;
-		int p = j & 15;
-		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int o = l + 1;
+		int p = i & 15;
+		int q = j & 15;
 		int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int s = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		double e = 0.03125;
 		boolean bl = this.patchNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) * 75.0 + random.nextDouble() > 0.0;
 		BlockState blockState3 = (BlockState)((Entry)this.ceilingNoises
@@ -59,13 +60,13 @@ public abstract class NetherCappedSurfaceBuilder extends SurfaceBuilder<SurfaceB
 				.get())
 			.getKey();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos.set(o, 128, p));
+		BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos.set(p, 128, q));
 
-		for (int s = 127; s >= 0; s--) {
-			mutableBlockPos.set(o, s, p);
+		for (int t = 127; t >= m; t--) {
+			mutableBlockPos.set(p, t, q);
 			BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState5.is(blockState.getBlock()) && (blockState6.isAir() || blockState6 == blockState2)) {
-				for (int t = 0; t < q; t++) {
+				for (int u = 0; u < r; u++) {
 					mutableBlockPos.move(Direction.UP);
 					if (!chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock())) {
 						break;
@@ -74,12 +75,12 @@ public abstract class NetherCappedSurfaceBuilder extends SurfaceBuilder<SurfaceB
 					chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
 				}
 
-				mutableBlockPos.set(o, s, p);
+				mutableBlockPos.set(p, t, q);
 			}
 
 			if ((blockState5.isAir() || blockState5 == blockState2) && blockState6.is(blockState.getBlock())) {
-				for (int t = 0; t < r && chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock()); t++) {
-					if (bl && s >= n - 4 && s <= n + 1) {
+				for (int u = 0; u < s && chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock()); u++) {
+					if (bl && t >= o - 4 && t <= o + 1) {
 						chunkAccess.setBlockState(mutableBlockPos, this.getPatchBlockState(), false);
 					} else {
 						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);

@@ -1041,7 +1041,7 @@ public class Fox extends Animal {
 
 		@Override
 		protected boolean resetXRotOnTick() {
-			return !Fox.this.isPouncing() && !Fox.this.isCrouching() && !Fox.this.isInterested() & !Fox.this.isFaceplanted();
+			return !Fox.this.isPouncing() && !Fox.this.isCrouching() && !Fox.this.isInterested() && !Fox.this.isFaceplanted();
 		}
 	}
 

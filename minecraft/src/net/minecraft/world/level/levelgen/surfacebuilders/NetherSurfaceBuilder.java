@@ -33,33 +33,34 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 		BlockState blockState,
 		BlockState blockState2,
 		int l,
-		long m,
+		int m,
+		long n,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int n = l;
-		int o = i & 15;
-		int p = j & 15;
+		int o = l;
+		int p = i & 15;
+		int q = j & 15;
 		double e = 0.03125;
 		boolean bl = this.decorationNoise.getValue((double)i * 0.03125, (double)j * 0.03125, 0.0) * 75.0 + random.nextDouble() > 0.0;
 		boolean bl2 = this.decorationNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) * 75.0 + random.nextDouble() > 0.0;
-		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		int r = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int r = -1;
+		int s = -1;
 		BlockState blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
 		BlockState blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 
-		for (int s = 127; s >= 0; s--) {
-			mutableBlockPos.set(o, s, p);
+		for (int t = 127; t >= m; t--) {
+			mutableBlockPos.set(p, t, q);
 			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState5.isAir()) {
-				r = -1;
+				s = -1;
 			} else if (blockState5.is(blockState.getBlock())) {
-				if (r == -1) {
+				if (s == -1) {
 					boolean bl3 = false;
-					if (q <= 0) {
+					if (r <= 0) {
 						bl3 = true;
 						blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
-					} else if (s >= n - 4 && s <= n + 1) {
+					} else if (t >= o - 4 && t <= o + 1) {
 						blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
 						blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 						if (bl2) {
@@ -73,18 +74,18 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 						}
 					}
 
-					if (s < n && bl3) {
+					if (t < o && bl3) {
 						blockState3 = blockState2;
 					}
 
-					r = q;
-					if (s >= n - 1) {
+					s = r;
+					if (t >= o - 1) {
 						chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
 					} else {
 						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
 					}
-				} else if (r > 0) {
-					r--;
+				} else if (s > 0) {
+					s--;
 					chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
 				}
 			}

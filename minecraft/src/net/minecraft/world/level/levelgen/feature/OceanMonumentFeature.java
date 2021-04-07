@@ -1,18 +1,22 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import java.util.Random;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -71,6 +75,8 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 	}
 
 	public static class OceanMonumentStart extends StructureStart<NoneFeatureConfiguration> {
+		private boolean isCreated;
+
 		public OceanMonumentStart(StructureFeature<NoneFeatureConfiguration> structureFeature, ChunkPos chunkPos, int i, long l) {
 			super(structureFeature, chunkPos, i, l);
 		}
@@ -84,10 +90,32 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 			NoneFeatureConfiguration noneFeatureConfiguration,
 			LevelHeightAccessor levelHeightAccessor
 		) {
+			this.generatePieces(chunkPos);
+		}
+
+		private void generatePieces(ChunkPos chunkPos) {
 			int i = chunkPos.getMinBlockX() - 29;
 			int j = chunkPos.getMinBlockZ() - 29;
 			Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(this.random);
 			this.addPiece(new OceanMonumentPieces.MonumentBuilding(this.random, i, j, direction));
+			this.isCreated = true;
+		}
+
+		@Override
+		public void placeInChunk(
+			WorldGenLevel worldGenLevel,
+			StructureFeatureManager structureFeatureManager,
+			ChunkGenerator chunkGenerator,
+			Random random,
+			BoundingBox boundingBox,
+			ChunkPos chunkPos
+		) {
+			if (!this.isCreated) {
+				this.pieces.clear();
+				this.generatePieces(this.getChunkPos());
+			}
+
+			super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
 		}
 	}
 }

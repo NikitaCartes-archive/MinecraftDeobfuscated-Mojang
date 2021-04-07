@@ -55,6 +55,7 @@ public class FishingHook extends Projectile {
 	private int timeUntilHooked;
 	private float fishAngle;
 	private boolean openWater = true;
+	@Nullable
 	private Entity hookedIn;
 	private FishingHook.FishHookState currentState = FishingHook.FishHookState.FLYING;
 	private final int luck;
@@ -259,8 +260,7 @@ public class FishingHook extends Projectile {
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
 		if (!this.level.isClientSide) {
-			this.hookedIn = entityHitResult.getEntity();
-			this.setHookedEntity();
+			this.setHookedEntity(entityHitResult.getEntity());
 		}
 	}
 
@@ -270,8 +270,9 @@ public class FishingHook extends Projectile {
 		this.setDeltaMovement(this.getDeltaMovement().normalize().scale(blockHitResult.distanceTo(this)));
 	}
 
-	private void setHookedEntity() {
-		this.getEntityData().set(DATA_HOOKED_ENTITY, this.hookedIn.getId() + 1);
+	private void setHookedEntity(Entity entity) {
+		this.hookedIn = entity;
+		this.getEntityData().set(DATA_HOOKED_ENTITY, entity.getId() + 1);
 	}
 
 	private void catchingFish(BlockPos blockPos) {
@@ -436,7 +437,7 @@ public class FishingHook extends Projectile {
 		if (!this.level.isClientSide && player != null) {
 			int i = 0;
 			if (this.hookedIn != null) {
-				this.bringInHookedEntity();
+				this.pullEntity(this.hookedIn);
 				CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, itemStack, this, Collections.emptyList());
 				this.level.broadcastEntityEvent(this, (byte)31);
 				i = this.hookedIn instanceof ItemEntity ? 3 : 5;
@@ -482,17 +483,17 @@ public class FishingHook extends Projectile {
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 31 && this.level.isClientSide && this.hookedIn instanceof Player && ((Player)this.hookedIn).isLocalPlayer()) {
-			this.bringInHookedEntity();
+			this.pullEntity(this.hookedIn);
 		}
 
 		super.handleEntityEvent(b);
 	}
 
-	protected void bringInHookedEntity() {
-		Entity entity = this.getOwner();
-		if (entity != null) {
-			Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getY() - this.getY(), entity.getZ() - this.getZ()).scale(0.1);
-			this.hookedIn.setDeltaMovement(this.hookedIn.getDeltaMovement().add(vec3));
+	protected void pullEntity(Entity entity) {
+		Entity entity2 = this.getOwner();
+		if (entity2 != null) {
+			Vec3 vec3 = new Vec3(entity2.getX() - this.getX(), entity2.getY() - this.getY(), entity2.getZ() - this.getZ()).scale(0.1);
+			entity.setDeltaMovement(entity.getDeltaMovement().add(vec3));
 		}
 	}
 
@@ -503,19 +504,25 @@ public class FishingHook extends Projectile {
 
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
+		this.updateOwnerInfo(null);
 		super.remove(removalReason);
-		Player player = this.getPlayerOwner();
-		if (player != null) {
-			player.fishing = null;
-		}
+	}
+
+	@Override
+	public void onClientRemoval() {
+		this.updateOwnerInfo(null);
 	}
 
 	@Override
 	public void setOwner(@Nullable Entity entity) {
 		super.setOwner(entity);
+		this.updateOwnerInfo(this);
+	}
+
+	private void updateOwnerInfo(@Nullable FishingHook fishingHook) {
 		Player player = this.getPlayerOwner();
 		if (player != null) {
-			player.fishing = this;
+			player.fishing = fishingHook;
 		}
 	}
 

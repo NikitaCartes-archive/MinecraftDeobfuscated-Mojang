@@ -190,6 +190,12 @@ public class BlockFamilies {
 	public static final BlockFamily OXIDIZED_CUT_COPPER = familyBuilder(Blocks.OXIDIZED_CUT_COPPER)
 		.slab(Blocks.OXIDIZED_CUT_COPPER_SLAB)
 		.stairs(Blocks.OXIDIZED_CUT_COPPER_STAIRS)
+		.dontGenerateModel()
+		.getFamily();
+	public static final BlockFamily WAXED_OXIDIZED_CUT_COPPER = familyBuilder(Blocks.WAXED_OXIDIZED_CUT_COPPER)
+		.slab(Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB)
+		.stairs(Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS)
+		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily COBBLESTONE = familyBuilder(Blocks.COBBLESTONE)
 		.wall(Blocks.COBBLESTONE_WALL)

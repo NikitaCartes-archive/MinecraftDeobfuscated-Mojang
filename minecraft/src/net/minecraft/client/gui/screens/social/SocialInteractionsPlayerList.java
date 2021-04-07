@@ -18,7 +18,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 @Environment(EnvType.CLIENT)
 public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<PlayerEntry> {
 	private final SocialInteractionsScreen socialInteractionsScreen;
-	private final Minecraft minecraft;
 	private final List<PlayerEntry> players = Lists.<PlayerEntry>newArrayList();
 	@Nullable
 	private String filter;
@@ -26,7 +25,6 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 	public SocialInteractionsPlayerList(SocialInteractionsScreen socialInteractionsScreen, Minecraft minecraft, int i, int j, int k, int l, int m) {
 		super(minecraft, i, j, k, l, m);
 		this.socialInteractionsScreen = socialInteractionsScreen;
-		this.minecraft = minecraft;
 		this.setRenderBackground(false);
 		this.setRenderTopAndBottom(false);
 	}

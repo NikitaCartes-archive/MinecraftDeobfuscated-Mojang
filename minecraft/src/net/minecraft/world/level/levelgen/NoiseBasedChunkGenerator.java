@@ -190,7 +190,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			this.makeAndFillNoiseColumn(o + 1, p + 1, k, l)
 		};
 		Aquifer aquifer = this.aquifersEnabled
-			? new Aquifer(m, n, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, l * this.cellHeight)
+			? new Aquifer(
+				m, n, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, k * this.cellHeight, l * this.cellHeight
+			)
 			: null;
 
 		for (int s = l - 1; s >= 0; s--) {
@@ -228,7 +230,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		double e = Mth.clamp(d / 200.0, -1.0, 1.0);
 		e = e / 2.0 - e * e * e / 24.0;
 		e += beardifier.beardifyOrBury(i, j, k);
-		if (aquifer != null) {
+		if (aquifer != null && e < 0.0) {
 			aquifer.computeAt(i, j, k);
 			e += aquifer.getLastBarrierDensity();
 		}
@@ -269,8 +271,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				int p = l + n;
 				int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
 				double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
+				int r = ((NoiseGeneratorSettings)this.settings.get()).getMinSurfaceLevel();
 				worldGenRegion.getBiome(mutableBlockPos.set(k + m, q, l + n))
-					.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), worldGenRegion.getSeed());
+					.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), r, worldGenRegion.getSeed());
 			}
 		}
 
@@ -343,70 +346,70 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	private ChunkAccess doFill(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, int i, int j) {
-		NoiseSettings noiseSettings = ((NoiseGeneratorSettings)this.settings.get()).noiseSettings();
-		int k = noiseSettings.minY();
 		Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
 		Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
 		ChunkPos chunkPos = chunkAccess.getPos();
-		int l = chunkPos.x;
-		int m = chunkPos.z;
-		int n = chunkPos.getMinBlockX();
-		int o = chunkPos.getMinBlockZ();
+		int k = chunkPos.x;
+		int l = chunkPos.z;
+		int m = chunkPos.getMinBlockX();
+		int n = chunkPos.getMinBlockZ();
 		Beardifier beardifier = new Beardifier(structureFeatureManager, chunkAccess);
 		Aquifer aquifer = this.aquifersEnabled
-			? new Aquifer(l, m, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, j * this.cellHeight)
+			? new Aquifer(
+				k, l, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, i * this.cellHeight, j * this.cellHeight
+			)
 			: null;
-		NoiseInterpolator noiseInterpolator = new NoiseInterpolator(this.cellCountX, j, this.cellCountZ, l, m, i, this::fillNoiseColumn);
+		NoiseInterpolator noiseInterpolator = new NoiseInterpolator(this.cellCountX, j, this.cellCountZ, k, l, i, this::fillNoiseColumn);
 		List<NoiseInterpolator> list = ImmutableList.of(noiseInterpolator);
 		list.forEach(NoiseInterpolator::initializeForFirstCellX);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int p = 0; p < this.cellCountX; p++) {
-			int q = p;
-			list.forEach(noiseInterpolatorx -> noiseInterpolatorx.advanceCellX(q));
+		for (int o = 0; o < this.cellCountX; o++) {
+			int p = o;
+			list.forEach(noiseInterpolatorx -> noiseInterpolatorx.advanceCellX(p));
 
-			for (int r = 0; r < this.cellCountZ; r++) {
+			for (int q = 0; q < this.cellCountZ; q++) {
 				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(chunkAccess.getSectionsCount() - 1);
 
-				for (int s = j - 1; s >= 0; s--) {
+				for (int r = j - 1; r >= 0; r--) {
+					int s = q;
 					int t = r;
-					int u = s;
-					list.forEach(noiseInterpolatorx -> noiseInterpolatorx.selectCellYZ(u, t));
+					list.forEach(noiseInterpolatorx -> noiseInterpolatorx.selectCellYZ(t, s));
 
-					for (int v = this.cellHeight - 1; v >= 0; v--) {
-						int w = s * this.cellHeight + v + k;
-						int x = w & 15;
-						int y = chunkAccess.getSectionIndex(w);
-						if (chunkAccess.getSectionIndex(levelChunkSection.bottomBlockY()) != y) {
-							levelChunkSection = chunkAccess.getOrCreateSection(y);
+					for (int u = this.cellHeight - 1; u >= 0; u--) {
+						int v = (i + r) * this.cellHeight + u;
+						int w = v & 15;
+						int x = chunkAccess.getSectionIndex(v);
+						if (chunkAccess.getSectionIndex(levelChunkSection.bottomBlockY()) != x) {
+							levelChunkSection = chunkAccess.getOrCreateSection(x);
 						}
 
-						double d = (double)v / (double)this.cellHeight;
+						double d = (double)u / (double)this.cellHeight;
 						list.forEach(noiseInterpolatorx -> noiseInterpolatorx.updateForY(d));
 
-						for (int z = 0; z < this.cellWidth; z++) {
-							int aa = n + p * this.cellWidth + z;
-							int ab = aa & 15;
-							double e = (double)z / (double)this.cellWidth;
+						for (int y = 0; y < this.cellWidth; y++) {
+							int z = m + o * this.cellWidth + y;
+							int aa = z & 15;
+							double e = (double)y / (double)this.cellWidth;
 							list.forEach(noiseInterpolatorx -> noiseInterpolatorx.updateForX(e));
 
-							for (int ac = 0; ac < this.cellWidth; ac++) {
-								int ad = o + r * this.cellWidth + ac;
-								int ae = ad & 15;
-								double f = (double)ac / (double)this.cellWidth;
+							for (int ab = 0; ab < this.cellWidth; ab++) {
+								int ac = n + q * this.cellWidth + ab;
+								int ad = ac & 15;
+								double f = (double)ab / (double)this.cellWidth;
 								double g = noiseInterpolator.calculateValue(f);
-								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, this.baseStoneSource, aa, w, ad, g);
+								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, this.baseStoneSource, z, v, ac, g);
 								if (blockState != AIR) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
-										mutableBlockPos.set(aa, w, ad);
+										mutableBlockPos.set(z, v, ac);
 										((ProtoChunk)chunkAccess).addLight(mutableBlockPos);
 									}
 
-									levelChunkSection.setBlockState(ab, x, ae, blockState, false);
-									heightmap.update(ab, w, ae, blockState);
-									heightmap2.update(ab, w, ae, blockState);
+									levelChunkSection.setBlockState(aa, w, ad, blockState, false);
+									heightmap.update(aa, v, ad, blockState);
+									heightmap2.update(aa, v, ad, blockState);
 									if (aquifer != null && aquifer.shouldScheduleWaterUpdate() && !blockState.getFluidState().isEmpty()) {
-										mutableBlockPos.set(aa, w, ad);
+										mutableBlockPos.set(z, v, ac);
 										chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState.getFluidState().getType(), 0);
 									}
 								}

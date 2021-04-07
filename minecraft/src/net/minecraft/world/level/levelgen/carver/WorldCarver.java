@@ -26,6 +26,12 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	public static final WorldCarver<CaveCarverConfiguration> CAVE = register("cave", new CaveWorldCarver(CaveCarverConfiguration.CODEC));
 	public static final WorldCarver<CaveCarverConfiguration> NETHER_CAVE = register("nether_cave", new NetherWorldCarver(CaveCarverConfiguration.CODEC));
 	public static final WorldCarver<CanyonCarverConfiguration> CANYON = register("canyon", new CanyonWorldCarver(CanyonCarverConfiguration.CODEC));
+	public static final WorldCarver<CanyonCarverConfiguration> UNDERWATER_CANYON = register(
+		"underwater_canyon", new UnderwaterCanyonWorldCarver(CanyonCarverConfiguration.CODEC)
+	);
+	public static final WorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = register(
+		"underwater_cave", new UnderwaterCaveWorldCarver(CaveCarverConfiguration.CODEC)
+	);
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();

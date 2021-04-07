@@ -5,21 +5,22 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 import java.time.Duration;
+import javax.annotation.Nullable;
 import net.minecraft.commands.BrigadierExceptions;
 
 public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2705;
+	public static final int WORLD_VERSION = 2706;
 	@Deprecated
-	public static final String VERSION_STRING = "21w13a";
+	public static final String VERSION_STRING = "21w14a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.17";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 755;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 20;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 21;
 	public static final int SNBT_NAG_VERSION = 2678;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
@@ -102,6 +103,7 @@ public class SharedConstants {
 	public static final float AVERAGE_GAME_TICKS_PER_RANDOM_TICK_PER_BLOCK = 1365.3334F;
 	public static final float AVERAGE_RANDOM_TICKS_PER_BLOCK_PER_MINUTE = 0.87890625F;
 	public static final float AVERAGE_RANDOM_TICKS_PER_BLOCK_PER_GAME_DAY = 17.578125F;
+	@Nullable
 	private static GameVersion CURRENT_VERSION;
 
 	public static boolean isAllowedChatCharacter(char c) {
@@ -128,16 +130,22 @@ public class SharedConstants {
 		}
 	}
 
-	public static GameVersion getCurrentVersion() {
+	public static void tryDetectVersion() {
 		if (CURRENT_VERSION == null) {
 			CURRENT_VERSION = DetectedVersion.tryDetectVersion();
 		}
+	}
 
-		return CURRENT_VERSION;
+	public static GameVersion getCurrentVersion() {
+		if (CURRENT_VERSION == null) {
+			throw new IllegalStateException("Game version not set");
+		} else {
+			return CURRENT_VERSION;
+		}
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741844;
+		return 1073741845;
 	}
 
 	static {

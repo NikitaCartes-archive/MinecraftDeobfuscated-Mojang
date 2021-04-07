@@ -50,7 +50,7 @@ public class SmallFireball extends Fireball {
 		super.onHitBlock(blockHitResult);
 		if (!this.level.isClientSide) {
 			Entity entity = this.getOwner();
-			if (entity == null || !(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			if (!(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
 				if (this.level.isEmptyBlock(blockPos)) {
 					this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));

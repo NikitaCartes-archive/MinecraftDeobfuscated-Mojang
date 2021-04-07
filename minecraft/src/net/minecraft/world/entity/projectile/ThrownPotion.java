@@ -68,11 +68,11 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			BlockPos blockPos2 = blockPos.relative(direction);
 			if (bl) {
-				this.dowseFire(blockPos2, direction);
-				this.dowseFire(blockPos2.relative(direction.getOpposite()), direction);
+				this.dowseFire(blockPos2);
+				this.dowseFire(blockPos2.relative(direction.getOpposite()));
 
 				for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-					this.dowseFire(blockPos2.relative(direction2), direction2);
+					this.dowseFire(blockPos2.relative(direction2));
 				}
 			}
 		}
@@ -176,7 +176,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		return this.getItem().is(Items.LINGERING_POTION);
 	}
 
-	private void dowseFire(BlockPos blockPos, Direction direction) {
+	private void dowseFire(BlockPos blockPos) {
 		BlockState blockState = this.level.getBlockState(blockPos);
 		if (blockState.is(BlockTags.FIRE)) {
 			this.level.removeBlock(blockPos, false);

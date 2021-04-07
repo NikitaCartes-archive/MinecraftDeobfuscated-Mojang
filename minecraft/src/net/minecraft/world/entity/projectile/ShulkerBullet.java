@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class ShulkerBullet extends Projectile {
 	private static final double SPEED = 0.15;
+	@Nullable
 	private Entity finalTarget;
 	@Nullable
 	private Direction currentMoveDirection;
@@ -200,7 +201,7 @@ public class ShulkerBullet extends Projectile {
 				}
 			}
 
-			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator()) {
+			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && this.finalTarget.isSpectator()) {
 				if (!this.isNoGravity()) {
 					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 				}

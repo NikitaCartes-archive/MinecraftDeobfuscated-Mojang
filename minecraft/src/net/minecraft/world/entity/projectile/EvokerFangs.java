@@ -22,7 +22,9 @@ public class EvokerFangs extends Entity {
 	private boolean sentSpikeEvent;
 	private int lifeTicks = 22;
 	private boolean clientSideAttackStarted;
+	@Nullable
 	private LivingEntity owner;
+	@Nullable
 	private UUID ownerUUID;
 
 	public EvokerFangs(EntityType<? extends EvokerFangs> entityType, Level level) {
