@@ -434,7 +434,7 @@ public interface DispenseItemBehavior {
 				if (!BoneMealItem.growCrop(itemStack, level, blockPos) && !BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
 					this.setSuccess(false);
 				} else if (!level.isClientSide) {
-					level.levelEvent(2005, blockPos, 0);
+					level.levelEvent(1505, blockPos, 0);
 				}
 
 				return itemStack;

@@ -297,6 +297,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	public static final EntityType<MagmaCube> MAGMA_CUBE = register(
 		"magma_cube", EntityType.Builder.of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(2.04F, 2.04F).clientTrackingRange(8)
 	);
+	public static final EntityType<Marker> MARKER = register(
+		"marker", EntityType.Builder.of(Marker::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(0)
+	);
 	public static final EntityType<Minecart> MINECART = register(
 		"minecart", EntityType.Builder.<Minecart>of(Minecart::new, MobCategory.MISC).sized(0.98F, 0.7F).clientTrackingRange(8)
 	);

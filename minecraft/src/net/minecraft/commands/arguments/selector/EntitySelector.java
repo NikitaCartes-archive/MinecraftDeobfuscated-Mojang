@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -236,7 +236,7 @@ public class EntitySelector {
 		return list.subList(0, Math.min(this.maxResults, list.size()));
 	}
 
-	public static MutableComponent joinNames(List<? extends Entity> list) {
+	public static Component joinNames(List<? extends Entity> list) {
 		return ComponentUtils.formatList(list, Entity::getDisplayName);
 	}
 }

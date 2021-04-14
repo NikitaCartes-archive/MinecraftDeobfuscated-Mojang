@@ -70,8 +70,8 @@ public class Axolotl extends Animal implements Bucketable {
 	);
 	protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.BREED_TARGET,
-		MemoryModuleType.LIVING_ENTITIES,
-		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
 		MemoryModuleType.LOOK_TARGET,
@@ -96,6 +96,7 @@ public class Axolotl extends Animal implements Bucketable {
 	public static final int RARE_VARIANT_CHANCE = 1200;
 	private static final int AXOLOTL_TOTAL_AIR_SUPPLY = 6000;
 	public static final String VARIANT_TAG = "Variant";
+	private static final int REHYDRATE_AIR_SUPPLY = 1800;
 	private static final int REGEN_BUFF_BASE_DURATION = 100;
 
 	public Axolotl(EntityType<? extends Axolotl> entityType, Level level) {
@@ -183,6 +184,11 @@ public class Axolotl extends Animal implements Bucketable {
 		} else {
 			this.setAirSupply(this.getMaxAirSupply());
 		}
+	}
+
+	public void rehydrate() {
+		int i = this.getAirSupply() + 1800;
+		this.setAirSupply(Math.min(i, this.getMaxAirSupply()));
 	}
 
 	public boolean isDryingOut() {

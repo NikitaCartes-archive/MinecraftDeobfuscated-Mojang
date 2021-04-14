@@ -161,7 +161,10 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.DEEPSLATE_BRICK_STAIRS,
 		Blocks.DEEPSLATE_BRICK_SLAB,
 		Blocks.DEEPSLATE_BRICK_WALL,
-		Blocks.CHISELED_DEEPSLATE
+		Blocks.CHISELED_DEEPSLATE,
+		Blocks.RAW_IRON_BLOCK,
+		Blocks.RAW_COPPER_BLOCK,
+		Blocks.RAW_GOLD_BLOCK
 	);
 	private static final int MISSING_LEVEL = -1;
 	private static final Object2IntMap<Block> MIN_LEVEL_FOR_DROPS = Util.make(
@@ -181,6 +184,7 @@ public class PickaxeItem extends DiggerItem {
 				Blocks.DEEPSLATE_EMERALD_ORE,
 				Blocks.EMERALD_BLOCK,
 				Blocks.GOLD_BLOCK,
+				Blocks.RAW_GOLD_BLOCK,
 				Blocks.GOLD_ORE,
 				Blocks.DEEPSLATE_GOLD_ORE,
 				Blocks.REDSTONE_ORE,
@@ -191,12 +195,14 @@ public class PickaxeItem extends DiggerItem {
 
 			for (Block block : ImmutableList.of(
 				Blocks.IRON_BLOCK,
+				Blocks.RAW_IRON_BLOCK,
 				Blocks.IRON_ORE,
 				Blocks.DEEPSLATE_IRON_ORE,
 				Blocks.LAPIS_BLOCK,
 				Blocks.LAPIS_ORE,
 				Blocks.DEEPSLATE_LAPIS_ORE,
 				Blocks.COPPER_BLOCK,
+				Blocks.RAW_COPPER_BLOCK,
 				Blocks.COPPER_ORE,
 				Blocks.DEEPSLATE_COPPER_ORE,
 				Blocks.CUT_COPPER_SLAB,

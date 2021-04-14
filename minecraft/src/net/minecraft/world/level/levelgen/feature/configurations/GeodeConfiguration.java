@@ -2,6 +2,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
@@ -19,12 +21,9 @@ public class GeodeConfiguration implements FeatureConfiguration {
 						.fieldOf("placements_require_layer0_alternate")
 						.orElse(true)
 						.forGetter(geodeConfiguration -> geodeConfiguration.placementsRequireLayer0Alternate),
-					Codec.intRange(1, 10).fieldOf("min_outer_wall_distance").orElse(4).forGetter(geodeConfiguration -> geodeConfiguration.minOuterWallDistance),
-					Codec.intRange(1, 20).fieldOf("max_outer_wall_distance").orElse(6).forGetter(geodeConfiguration -> geodeConfiguration.maxOuterWallDistance),
-					Codec.intRange(1, 10).fieldOf("min_distribution_points").orElse(3).forGetter(geodeConfiguration -> geodeConfiguration.minDistributionPoints),
-					Codec.intRange(1, 20).fieldOf("max_distribution_points").orElse(5).forGetter(geodeConfiguration -> geodeConfiguration.maxDistributionPoints),
-					Codec.intRange(0, 10).fieldOf("min_point_offset").orElse(1).forGetter(geodeConfiguration -> geodeConfiguration.minPointOffset),
-					Codec.intRange(0, 10).fieldOf("max_point_offset").orElse(3).forGetter(geodeConfiguration -> geodeConfiguration.maxPointOffset),
+					IntProvider.codec(1, 20).fieldOf("outer_wall_distance").orElse(UniformInt.of(4, 5)).forGetter(geodeConfiguration -> geodeConfiguration.outerWallDistance),
+					IntProvider.codec(1, 20).fieldOf("distribution_points").orElse(UniformInt.of(3, 4)).forGetter(geodeConfiguration -> geodeConfiguration.distributionPoints),
+					IntProvider.codec(0, 10).fieldOf("point_offset").orElse(UniformInt.of(1, 2)).forGetter(geodeConfiguration -> geodeConfiguration.pointOffset),
 					Codec.INT.fieldOf("min_gen_offset").orElse(-16).forGetter(geodeConfiguration -> geodeConfiguration.minGenOffset),
 					Codec.INT.fieldOf("max_gen_offset").orElse(16).forGetter(geodeConfiguration -> geodeConfiguration.maxGenOffset),
 					CHANCE_RANGE.fieldOf("noise_multiplier").orElse(0.05).forGetter(geodeConfiguration -> geodeConfiguration.noiseMultiplier),
@@ -38,12 +37,9 @@ public class GeodeConfiguration implements FeatureConfiguration {
 	public final double usePotentialPlacementsChance;
 	public final double useAlternateLayer0Chance;
 	public final boolean placementsRequireLayer0Alternate;
-	public final int minOuterWallDistance;
-	public final int maxOuterWallDistance;
-	public final int minDistributionPoints;
-	public final int maxDistributionPoints;
-	public final int minPointOffset;
-	public final int maxPointOffset;
+	public final IntProvider outerWallDistance;
+	public final IntProvider distributionPoints;
+	public final IntProvider pointOffset;
 	public final int minGenOffset;
 	public final int maxGenOffset;
 	public final double noiseMultiplier;
@@ -56,16 +52,13 @@ public class GeodeConfiguration implements FeatureConfiguration {
 		double d,
 		double e,
 		boolean bl,
+		IntProvider intProvider,
+		IntProvider intProvider2,
+		IntProvider intProvider3,
 		int i,
 		int j,
-		int k,
-		int l,
-		int m,
-		int n,
-		int o,
-		int p,
 		double f,
-		int q
+		int k
 	) {
 		this.geodeBlockSettings = geodeBlockSettings;
 		this.geodeLayerSettings = geodeLayerSettings;
@@ -73,15 +66,12 @@ public class GeodeConfiguration implements FeatureConfiguration {
 		this.usePotentialPlacementsChance = d;
 		this.useAlternateLayer0Chance = e;
 		this.placementsRequireLayer0Alternate = bl;
-		this.minOuterWallDistance = i;
-		this.maxOuterWallDistance = j;
-		this.minDistributionPoints = k;
-		this.maxDistributionPoints = l;
-		this.minPointOffset = m;
-		this.maxPointOffset = n;
-		this.minGenOffset = o;
-		this.maxGenOffset = p;
+		this.outerWallDistance = intProvider;
+		this.distributionPoints = intProvider2;
+		this.pointOffset = intProvider3;
+		this.minGenOffset = i;
+		this.maxGenOffset = j;
 		this.noiseMultiplier = f;
-		this.invalidBlocksThreshold = q;
+		this.invalidBlocksThreshold = k;
 	}
 }

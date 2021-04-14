@@ -18,15 +18,15 @@ public class NearestLivingEntitySensor extends Sensor<LivingEntity> {
 		List<LivingEntity> list = serverLevel.getEntitiesOfClass(LivingEntity.class, aABB, livingEntity2 -> livingEntity2 != livingEntity && livingEntity2.isAlive());
 		list.sort(Comparator.comparingDouble(livingEntity::distanceToSqr));
 		Brain<?> brain = livingEntity.getBrain();
-		brain.setMemory(MemoryModuleType.LIVING_ENTITIES, list);
+		brain.setMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES, list);
 		brain.setMemory(
-			MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+			MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 			(List<LivingEntity>)list.stream().filter(livingEntity2 -> isEntityTargetable(livingEntity, livingEntity2)).collect(Collectors.toList())
 		);
 	}
 
 	@Override
 	public Set<MemoryModuleType<?>> requires() {
-		return ImmutableSet.of(MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES);
+		return ImmutableSet.of(MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 	}
 }

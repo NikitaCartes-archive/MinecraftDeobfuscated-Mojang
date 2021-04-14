@@ -12,11 +12,11 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 public class AdultSensor extends Sensor<AgeableMob> {
 	@Override
 	public Set<MemoryModuleType<?>> requires() {
-		return ImmutableSet.of(MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.VISIBLE_LIVING_ENTITIES);
+		return ImmutableSet.of(MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 	}
 
 	protected void doTick(ServerLevel serverLevel, AgeableMob ageableMob) {
-		ageableMob.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> this.setNearestVisibleAdult(ageableMob, list));
+		ageableMob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> this.setNearestVisibleAdult(ageableMob, list));
 	}
 
 	private void setNearestVisibleAdult(AgeableMob ageableMob, List<LivingEntity> list) {

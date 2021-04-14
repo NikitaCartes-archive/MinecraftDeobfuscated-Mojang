@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.Collection;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PowerableMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -31,6 +33,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -150,6 +153,13 @@ public class Creeper extends Monster implements PowerableMob {
 		}
 
 		super.tick();
+	}
+
+	@Override
+	public void setTarget(@Nullable LivingEntity livingEntity) {
+		if (!(livingEntity instanceof Goat)) {
+			super.setTarget(livingEntity);
+		}
 	}
 
 	@Override

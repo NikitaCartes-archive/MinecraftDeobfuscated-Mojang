@@ -115,9 +115,9 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 
 	private static boolean areOtherMobsComingThroughDoor(ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
 		Brain<?> brain = livingEntity.getBrain();
-		return !brain.hasMemoryValue(MemoryModuleType.LIVING_ENTITIES)
+		return !brain.hasMemoryValue(MemoryModuleType.NEAREST_LIVING_ENTITIES)
 			? false
-			: ((List)brain.getMemory(MemoryModuleType.LIVING_ENTITIES).get())
+			: ((List)brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).get())
 				.stream()
 				.filter(livingEntity2 -> livingEntity2.getType() == livingEntity.getType())
 				.filter(livingEntityx -> blockPos.closerThan(livingEntityx.position(), 2.0))

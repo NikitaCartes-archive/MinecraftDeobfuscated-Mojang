@@ -4,8 +4,10 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.DataFixUtils;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -13,6 +15,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 
 public class ComponentUtils {
+	public static final String DEFAULT_SEPARATOR_TEXT = ", ";
+	public static final Component DEFAULT_SEPARATOR = new TextComponent(", ").withStyle(ChatFormatting.GRAY);
+	public static final Component DEFAULT_NO_STYLE_SEPARATOR = new TextComponent(", ");
+
 	public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
 		if (style.isEmpty()) {
 			return mutableComponent;
@@ -24,6 +30,12 @@ public class ComponentUtils {
 				return style2.equals(style) ? mutableComponent : mutableComponent.setStyle(style2.applyTo(style));
 			}
 		}
+	}
+
+	public static Optional<MutableComponent> updateForEntity(
+		@Nullable CommandSourceStack commandSourceStack, Optional<Component> optional, @Nullable Entity entity, int i
+	) throws CommandSyntaxException {
+		return optional.isPresent() ? Optional.of(updateForEntity(commandSourceStack, (Component)optional.get(), entity, i)) : Optional.empty();
 	}
 
 	public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
@@ -79,7 +91,15 @@ public class ComponentUtils {
 		}
 	}
 
-	public static <T> MutableComponent formatList(Collection<T> collection, Function<T, Component> function) {
+	public static <T> Component formatList(Collection<T> collection, Function<T, Component> function) {
+		return formatList(collection, DEFAULT_SEPARATOR, function);
+	}
+
+	public static <T> MutableComponent formatList(Collection<T> collection, Optional<? extends Component> optional, Function<T, Component> function) {
+		return formatList(collection, DataFixUtils.orElse(optional, DEFAULT_SEPARATOR), function);
+	}
+
+	public static <T> MutableComponent formatList(Collection<T> collection, Component component, Function<T, Component> function) {
 		if (collection.isEmpty()) {
 			return new TextComponent("");
 		} else if (collection.size() == 1) {
@@ -90,7 +110,7 @@ public class ComponentUtils {
 
 			for (T object : collection) {
 				if (!bl) {
-					mutableComponent.append(new TextComponent(", ").withStyle(ChatFormatting.GRAY));
+					mutableComponent.append(component);
 				}
 
 				mutableComponent.append((Component)function.apply(object));

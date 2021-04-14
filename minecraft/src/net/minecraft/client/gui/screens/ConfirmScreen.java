@@ -9,9 +9,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ConfirmScreen extends Screen {
+	private static final int LABEL_Y = 90;
 	private final Component title2;
 	private MultiLineLabel message = MultiLineLabel.EMPTY;
 	protected Component yesButton;
@@ -39,9 +41,11 @@ public class ConfirmScreen extends Screen {
 	@Override
 	protected void init() {
 		super.init();
-		this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96, 150, 20, this.yesButton, button -> this.callback.accept(true)));
-		this.addButton(new Button(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20, this.noButton, button -> this.callback.accept(false)));
 		this.message = MultiLineLabel.create(this.font, this.title2, this.width - 50);
+		int i = this.message.getLineCount() * 9;
+		int j = Mth.clamp(90 + i + 12, this.height / 6 + 96, this.height - 24);
+		this.addButton(new Button(this.width / 2 - 155, j, 150, 20, this.yesButton, button -> this.callback.accept(true)));
+		this.addButton(new Button(this.width / 2 - 155 + 160, j, 150, 20, this.noButton, button -> this.callback.accept(false)));
 	}
 
 	@Override

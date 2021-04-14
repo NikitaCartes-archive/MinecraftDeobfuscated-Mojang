@@ -82,9 +82,15 @@ public class MultifaceBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return hasFace(blockState, direction) && !canAttachTo(levelAccessor, direction, blockPos2, blockState2)
-			? removeFace(blockState, getFaceProperty(direction))
-			: blockState;
+		if (hasAnyFace(blockState)) {
+			return hasFace(blockState, direction) && !canAttachTo(levelAccessor, direction, blockPos2, blockState2)
+				? removeFace(blockState, getFaceProperty(direction))
+				: blockState;
+		} else {
+			return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
+				? Blocks.WATER.defaultBlockState()
+				: Blocks.AIR.defaultBlockState();
+		}
 	}
 
 	@Override
@@ -141,9 +147,9 @@ public class MultifaceBlock extends Block {
 
 				blockState2 = blockState;
 			} else if (this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER)) {
-				blockState2 = this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
+				blockState2 = getEmptyState(this).setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
 			} else {
-				blockState2 = this.defaultBlockState();
+				blockState2 = getEmptyState(this);
 			}
 
 			BlockPos blockPos2 = blockPos.relative(direction);
@@ -275,12 +281,18 @@ public class MultifaceBlock extends Block {
 		return (BooleanProperty)PROPERTY_BY_DIRECTION.get(direction);
 	}
 
-	private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> stateDefinition) {
-		BlockState blockState = stateDefinition.any();
+	public static BlockState getEmptyState(Block block) {
+		return getMultifaceStateWithAllFaces(block.defaultBlockState(), false);
+	}
 
+	private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> stateDefinition) {
+		return getMultifaceStateWithAllFaces(stateDefinition.any(), true);
+	}
+
+	private static BlockState getMultifaceStateWithAllFaces(BlockState blockState, boolean bl) {
 		for (BooleanProperty booleanProperty : PROPERTY_BY_DIRECTION.values()) {
 			if (blockState.hasProperty(booleanProperty)) {
-				blockState = blockState.setValue(booleanProperty, Boolean.valueOf(false));
+				blockState = blockState.setValue(booleanProperty, Boolean.valueOf(bl));
 			}
 		}
 

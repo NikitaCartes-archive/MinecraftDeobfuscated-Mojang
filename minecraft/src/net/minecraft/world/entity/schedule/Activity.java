@@ -20,6 +20,7 @@ public class Activity {
 	public static final Activity RIDE = register("ride");
 	public static final Activity PLAY_DEAD = register("play_dead");
 	public static final Activity LONG_JUMP = register("long_jump");
+	public static final Activity RAM = register("ram");
 	private final String name;
 	private final int hashCode;
 

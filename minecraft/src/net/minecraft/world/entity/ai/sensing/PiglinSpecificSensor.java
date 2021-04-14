@@ -30,8 +30,8 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 	@Override
 	public Set<MemoryModuleType<?>> requires() {
 		return ImmutableSet.of(
-			MemoryModuleType.VISIBLE_LIVING_ENTITIES,
-			MemoryModuleType.LIVING_ENTITIES,
+			MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
+			MemoryModuleType.NEAREST_LIVING_ENTITIES,
 			MemoryModuleType.NEAREST_VISIBLE_NEMESIS,
 			MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD,
 			MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM,
@@ -60,7 +60,7 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 		List<AbstractPiglin> list = Lists.<AbstractPiglin>newArrayList();
 		List<AbstractPiglin> list2 = Lists.<AbstractPiglin>newArrayList();
 
-		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
+		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
 			if (livingEntity2 instanceof Hoglin) {
 				Hoglin hoglin = (Hoglin)livingEntity2;
 				if (hoglin.isBaby() && !optional3.isPresent()) {
@@ -98,7 +98,7 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 			}
 		}
 
-		for (LivingEntity livingEntity3 : (List)brain.getMemory(MemoryModuleType.LIVING_ENTITIES).orElse(ImmutableList.of())) {
+		for (LivingEntity livingEntity3 : (List)brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of())) {
 			if (livingEntity3 instanceof AbstractPiglin && ((AbstractPiglin)livingEntity3).isAdult()) {
 				list2.add((AbstractPiglin)livingEntity3);
 			}

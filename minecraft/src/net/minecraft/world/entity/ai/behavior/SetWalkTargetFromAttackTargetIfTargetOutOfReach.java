@@ -27,7 +27,7 @@ public class SetWalkTargetFromAttackTargetIfTargetOutOfReach extends Behavior<Mo
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.ATTACK_TARGET,
 				MemoryStatus.VALUE_PRESENT,
-				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+				MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 				MemoryStatus.REGISTERED
 			)
 		);

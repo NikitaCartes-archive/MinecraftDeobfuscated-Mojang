@@ -18,7 +18,7 @@ import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 public class PiglinBruteSpecificSensor extends Sensor<LivingEntity> {
 	@Override
 	public Set<MemoryModuleType<?>> requires() {
-		return ImmutableSet.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEARBY_ADULT_PIGLINS);
+		return ImmutableSet.of(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEARBY_ADULT_PIGLINS);
 	}
 
 	@Override
@@ -27,14 +27,14 @@ public class PiglinBruteSpecificSensor extends Sensor<LivingEntity> {
 		Optional<Mob> optional = Optional.empty();
 		List<AbstractPiglin> list = Lists.<AbstractPiglin>newArrayList();
 
-		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
+		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
 			if (livingEntity2 instanceof WitherSkeleton || livingEntity2 instanceof WitherBoss) {
 				optional = Optional.of((Mob)livingEntity2);
 				break;
 			}
 		}
 
-		for (LivingEntity livingEntity3 : (List)brain.getMemory(MemoryModuleType.LIVING_ENTITIES).orElse(ImmutableList.of())) {
+		for (LivingEntity livingEntity3 : (List)brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of())) {
 			if (livingEntity3 instanceof AbstractPiglin && ((AbstractPiglin)livingEntity3).isAdult()) {
 				list.add((AbstractPiglin)livingEntity3);
 			}

@@ -22,7 +22,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 	public AnimalMakeLove(EntityType<? extends Animal> entityType, float f) {
 		super(
 			ImmutableMap.of(
-				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+				MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 				MemoryStatus.VALUE_PRESENT,
 				MemoryModuleType.BREED_TARGET,
 				MemoryStatus.VALUE_ABSENT,
@@ -89,7 +89,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 	}
 
 	private Optional<? extends Animal> findValidBreedPartner(Animal animal) {
-		return ((List)animal.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
+		return ((List)animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get())
 			.stream()
 			.filter(livingEntity -> livingEntity.getType() == this.partnerType)
 			.map(livingEntity -> (Animal)livingEntity)

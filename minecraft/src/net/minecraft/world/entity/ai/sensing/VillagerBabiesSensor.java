@@ -30,6 +30,6 @@ public class VillagerBabiesSensor extends Sensor<LivingEntity> {
 	}
 
 	private List<LivingEntity> getVisibleEntities(LivingEntity livingEntity) {
-		return (List<LivingEntity>)livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList());
+		return (List<LivingEntity>)livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList());
 	}
 }

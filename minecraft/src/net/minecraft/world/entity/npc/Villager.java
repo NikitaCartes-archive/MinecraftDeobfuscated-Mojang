@@ -121,8 +121,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		MemoryModuleType.JOB_SITE,
 		MemoryModuleType.POTENTIAL_JOB_SITE,
 		MemoryModuleType.MEETING_POINT,
-		MemoryModuleType.LIVING_ENTITIES,
-		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_VILLAGER_BABIES,
 		MemoryModuleType.NEAREST_PLAYERS,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
@@ -617,7 +617,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	private void tellWitnessesThatIWasMurdered(Entity entity) {
 		if (this.level instanceof ServerLevel) {
-			Optional<List<LivingEntity>> optional = this.brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES);
+			Optional<List<LivingEntity>> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
 			if (optional.isPresent()) {
 				ServerLevel serverLevel = (ServerLevel)this.level;
 				((List)optional.get())

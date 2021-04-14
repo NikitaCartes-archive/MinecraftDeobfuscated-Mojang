@@ -64,8 +64,8 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	);
 	protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.BREED_TARGET,
-		MemoryModuleType.LIVING_ENTITIES,
-		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
 		MemoryModuleType.LOOK_TARGET,

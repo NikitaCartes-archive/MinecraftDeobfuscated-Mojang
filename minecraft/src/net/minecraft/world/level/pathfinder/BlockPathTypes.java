@@ -6,6 +6,7 @@ public enum BlockPathTypes {
 	WALKABLE(0.0F),
 	WALKABLE_DOOR(0.0F),
 	TRAPDOOR(0.0F),
+	POWDER_SNOW(0.0F),
 	FENCE(-1.0F),
 	LAVA(-1.0F),
 	WATER(8.0F),

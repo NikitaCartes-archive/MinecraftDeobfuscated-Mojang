@@ -194,6 +194,7 @@ import net.minecraft.util.datafix.schemas.V2684;
 import net.minecraft.util.datafix.schemas.V2686;
 import net.minecraft.util.datafix.schemas.V2688;
 import net.minecraft.util.datafix.schemas.V2704;
+import net.minecraft.util.datafix.schemas.V2707;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -753,6 +754,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AbstractArrowPickupFix(schema137));
 		Schema schema138 = dataFixerBuilder.addSchema(2704, V2704::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema138, "Added Goat", References.ENTITY));
+		Schema schema139 = dataFixerBuilder.addSchema(2707, V2707::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema139, "Added Marker", References.ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

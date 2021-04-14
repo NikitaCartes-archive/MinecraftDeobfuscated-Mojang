@@ -4,13 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
+import net.minecraft.util.ExtraCodecs;
 
 public class StructureFeatureConfiguration {
 	public static final Codec<StructureFeatureConfiguration> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.intRange(0, 4096).fieldOf("spacing").forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.spacing),
 						Codec.intRange(0, 4096).fieldOf("separation").forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.separation),
-						Codec.intRange(0, Integer.MAX_VALUE).fieldOf("salt").forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.salt)
+						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("salt").forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.salt)
 					)
 					.apply(instance, StructureFeatureConfiguration::new)
 		)

@@ -15,6 +15,8 @@ public abstract class IntProvider {
 		either -> either.map(ConstantInt::of, intProvider -> intProvider),
 		intProvider -> intProvider.getType() == IntProviderType.CONSTANT ? Either.left(((ConstantInt)intProvider).getValue()) : Either.right(intProvider)
 	);
+	public static final Codec<IntProvider> NON_NEGATIVE_CODEC = codec(0, Integer.MAX_VALUE);
+	public static final Codec<IntProvider> POSITIVE_CODEC = codec(1, Integer.MAX_VALUE);
 
 	public static Codec<IntProvider> codec(int i, int j) {
 		Function<IntProvider, DataResult<IntProvider>> function = intProvider -> {

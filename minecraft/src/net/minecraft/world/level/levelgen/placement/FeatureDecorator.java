@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.feature.configurations.BiasedRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfiguration;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantD
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.nether.CountMultiLayerDecorator;
-import net.minecraft.world.level.levelgen.placement.nether.GlowstoneDecorator;
 
 public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	public static final FeatureDecorator<NoneDecoratorConfiguration> NOPE = register("nope", new NopePlacementDecorator(NoneDecoratorConfiguration.CODEC));
@@ -45,7 +43,6 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	public static final FeatureDecorator<ChanceDecoratorConfiguration> LAVA_LAKE = register(
 		"lava_lake", new LakeLavaPlacementDecorator(ChanceDecoratorConfiguration.CODEC)
 	);
-	public static final FeatureDecorator<CountConfiguration> GLOWSTONE = register("glowstone", new GlowstoneDecorator(CountConfiguration.CODEC));
 	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
 	public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = register(
 		"heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC)
@@ -57,15 +54,6 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 		"cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC)
 	);
 	public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
-	public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_BIASED_TO_BOTTOM = register(
-		"range_biased_to_bottom", new RangeBiasedToBottomDecorator(BiasedRangeDecoratorConfiguration.CODEC)
-	);
-	public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_VERY_BIASED_TO_BOTTOM = register(
-		"range_very_biased_to_bottom", new RangeVeryBiasedToBottomDecorator(BiasedRangeDecoratorConfiguration.CODEC)
-	);
-	public static final FeatureDecorator<DepthAverageConfiguration> DEPTH_AVERAGE = register(
-		"depth_average", new DepthAverageDecorator(DepthAverageConfiguration.CODEC)
-	);
 	public static final FeatureDecorator<NoneDecoratorConfiguration> SPREAD_32_ABOVE = register(
 		"spread_32_above", new Spread32Decorator(NoneDecoratorConfiguration.CODEC)
 	);

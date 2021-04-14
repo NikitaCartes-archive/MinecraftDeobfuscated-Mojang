@@ -3757,6 +3757,9 @@ public class BlockModelGenerators {
 		this.createTrivialCube(Blocks.CALCITE);
 		this.createTrivialCube(Blocks.TUFF);
 		this.createTrivialCube(Blocks.DRIPSTONE_BLOCK);
+		this.createTrivialCube(Blocks.RAW_IRON_BLOCK);
+		this.createTrivialCube(Blocks.RAW_COPPER_BLOCK);
+		this.createTrivialCube(Blocks.RAW_GOLD_BLOCK);
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.DEEPSLATE_COPPER_ORE);

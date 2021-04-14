@@ -1714,10 +1714,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 												}
 											},
 											bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line1") : new TranslatableComponent("multiplayer.texturePrompt.line1"),
-											(Component)(bl
-												? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD})
-												: new TranslatableComponent("multiplayer.texturePrompt.line2")),
-											(Component)(bl ? new TranslatableComponent("gui.proceed") : CommonComponents.GUI_YES),
+											preparePackPrompt(
+												(Component)(bl
+													? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(new ChatFormatting[]{ChatFormatting.YELLOW, ChatFormatting.BOLD})
+													: new TranslatableComponent("multiplayer.texturePrompt.line2")),
+												clientboundResourcePackPacket.getPrompt()
+											),
+											bl ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES,
 											(Component)(bl ? new TranslatableComponent("menu.disconnect") : CommonComponents.GUI_NO)
 										)
 									)
@@ -1725,6 +1728,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				}
 			}
 		}
+	}
+
+	private static Component preparePackPrompt(Component component, @Nullable Component component2) {
+		return (Component)(component2 == null ? component : new TranslatableComponent("multiplayer.texturePrompt.serverPrompt", component, component2));
 	}
 
 	private boolean validateResourcePackUrl(String string) {

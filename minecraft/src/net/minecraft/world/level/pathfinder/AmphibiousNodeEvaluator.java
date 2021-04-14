@@ -153,7 +153,8 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 					&& l > 0
 					&& blockPathTypes != BlockPathTypes.FENCE
 					&& blockPathTypes != BlockPathTypes.UNPASSABLE_RAIL
-					&& blockPathTypes != BlockPathTypes.TRAPDOOR) {
+					&& blockPathTypes != BlockPathTypes.TRAPDOOR
+					&& blockPathTypes != BlockPathTypes.POWDER_SNOW) {
 					node = this.getAcceptedNode(i, j + 1, k, l - 1, d);
 				}
 

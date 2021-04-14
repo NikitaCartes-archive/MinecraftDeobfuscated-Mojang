@@ -43,21 +43,6 @@ public class ConstantFloat extends FloatProvider {
 		return this.value + 1.0F;
 	}
 
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else if (object != null && this.getClass() == object.getClass()) {
-			ConstantFloat constantFloat = (ConstantFloat)object;
-			return this.value == constantFloat.value;
-		} else {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return Float.hashCode(this.value);
-	}
-
 	@Override
 	public FloatProviderType<?> getType() {
 		return FloatProviderType.CONSTANT;

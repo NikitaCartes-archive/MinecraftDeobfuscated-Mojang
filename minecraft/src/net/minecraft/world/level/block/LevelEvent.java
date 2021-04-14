@@ -55,6 +55,7 @@ public class LevelEvent {
 	public static final int REDSTONE_TORCH_BURNOUT = 1502;
 	public static final int END_PORTAL_FRAME_FILL = 1503;
 	public static final int DRIPSTONE_DRIP = 1504;
+	public static final int PARTICLES_AND_SOUND_PLANT_GROWTH = 1505;
 	public static final int PARTICLES_SHOOT = 2000;
 	public static final int PARTICLES_DESTROY_BLOCK = 2001;
 	public static final int PARTICLES_SPELL_POTION_SPLASH = 2002;

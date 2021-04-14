@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,7 +21,7 @@ public class BendingTrunkPlacer extends TrunkPlacer {
 		instance -> trunkPlacerParts(instance)
 				.<Integer, IntProvider>and(
 					instance.group(
-						Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("min_height_for_leaves", 1).forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.minHeightForLeaves),
+						ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_height_for_leaves", 1).forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.minHeightForLeaves),
 						IntProvider.codec(1, 64).fieldOf("bend_length").forGetter(bendingTrunkPlacer -> bendingTrunkPlacer.bendLength)
 					)
 				)

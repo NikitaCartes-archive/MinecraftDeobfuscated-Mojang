@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerFunctionManager;
 
@@ -111,9 +112,25 @@ public class CommandFunction {
 
 		@Override
 		public void execute(
-			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i
+			ServerFunctionManager serverFunctionManager,
+			CommandSourceStack commandSourceStack,
+			Deque<ServerFunctionManager.QueuedCommand> deque,
+			int i,
+			int j,
+			@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks
 		) throws CommandSyntaxException {
-			serverFunctionManager.getDispatcher()
+			if (traceCallbacks != null) {
+				String string = this.parse.getReader().getString();
+				traceCallbacks.onCommand(j, string);
+				int k = this.execute(serverFunctionManager, commandSourceStack);
+				traceCallbacks.onReturn(j, string, k);
+			} else {
+				this.execute(serverFunctionManager, commandSourceStack);
+			}
+		}
+
+		private int execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+			return serverFunctionManager.getDispatcher()
 				.execute(new ParseResults<>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
 		}
 
@@ -122,8 +139,16 @@ public class CommandFunction {
 		}
 	}
 
+	@FunctionalInterface
 	public interface Entry {
-		void execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i) throws CommandSyntaxException;
+		void execute(
+			ServerFunctionManager serverFunctionManager,
+			CommandSourceStack commandSourceStack,
+			Deque<ServerFunctionManager.QueuedCommand> deque,
+			int i,
+			int j,
+			@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks
+		) throws CommandSyntaxException;
 	}
 
 	public static class FunctionEntry implements CommandFunction.Entry {
@@ -135,15 +160,28 @@ public class CommandFunction {
 
 		@Override
 		public void execute(
-			ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, Deque<ServerFunctionManager.QueuedCommand> deque, int i
+			ServerFunctionManager serverFunctionManager,
+			CommandSourceStack commandSourceStack,
+			Deque<ServerFunctionManager.QueuedCommand> deque,
+			int i,
+			int j,
+			@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks
 		) {
-			this.function.get(serverFunctionManager).ifPresent(commandFunction -> {
+			Util.ifElse(this.function.get(serverFunctionManager), commandFunction -> {
 				CommandFunction.Entry[] entrys = commandFunction.getEntries();
-				int j = i - deque.size();
-				int k = Math.min(entrys.length, j);
+				if (traceCallbacks != null) {
+					traceCallbacks.onCall(j, commandFunction.getId(), entrys.length);
+				}
 
-				for (int l = k - 1; l >= 0; l--) {
-					deque.addFirst(new ServerFunctionManager.QueuedCommand(serverFunctionManager, commandSourceStack, entrys[l]));
+				int k = i - deque.size();
+				int l = Math.min(entrys.length, k);
+
+				for (int m = l - 1; m >= 0; m--) {
+					deque.addFirst(new ServerFunctionManager.QueuedCommand(commandSourceStack, j + 1, entrys[m]));
+				}
+			}, () -> {
+				if (traceCallbacks != null) {
+					traceCallbacks.onCall(j, this.function.getId(), -1);
 				}
 			});
 		}

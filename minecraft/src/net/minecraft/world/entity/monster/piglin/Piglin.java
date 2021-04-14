@@ -80,8 +80,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
 		MemoryModuleType.DOORS_TO_CLOSE,
-		MemoryModuleType.LIVING_ENTITIES,
-		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_LIVING_ENTITIES,
+		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS,

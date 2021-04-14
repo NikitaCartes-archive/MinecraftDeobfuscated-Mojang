@@ -158,8 +158,8 @@ public final class NoiseGeneratorSettings {
 		return new NoiseGeneratorSettings(
 			structureSettings,
 			NoiseSettings.create(
-				bl3 ? -64 : 0,
-				bl3 ? 384 : 128,
+				bl3 ? 0 : 0,
+				bl3 ? 256 : 128,
 				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
 				new NoiseSlideSettings(-3000, 64, -46),
 				new NoiseSlideSettings(-30, 7, 1),
@@ -176,8 +176,8 @@ public final class NoiseGeneratorSettings {
 			blockState2,
 			Integer.MIN_VALUE,
 			Integer.MIN_VALUE,
-			bl3 ? -64 : 0,
-			bl3 ? -64 : 0,
+			bl3 ? 0 : 0,
+			bl3 ? 0 : 0,
 			bl,
 			false,
 			false,
@@ -191,8 +191,8 @@ public final class NoiseGeneratorSettings {
 		return new NoiseGeneratorSettings(
 			new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map),
 			NoiseSettings.create(
-				bl ? -64 : 0,
-				bl ? 384 : 128,
+				bl ? 0 : 0,
+				bl ? 256 : 128,
 				new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0),
 				new NoiseSlideSettings(120, 3, 0),
 				new NoiseSlideSettings(320, 4, -1),
@@ -210,7 +210,7 @@ public final class NoiseGeneratorSettings {
 			0,
 			0,
 			32,
-			bl ? -64 : 0,
+			bl ? 0 : 0,
 			false,
 			false,
 			false,
@@ -223,8 +223,8 @@ public final class NoiseGeneratorSettings {
 		return new NoiseGeneratorSettings(
 			structureSettings,
 			NoiseSettings.create(
-				-64,
-				384,
+				0,
+				256,
 				new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0),
 				new NoiseSlideSettings(-10, 3, 0),
 				new NoiseSlideSettings(15, 3, 0),
@@ -242,11 +242,11 @@ public final class NoiseGeneratorSettings {
 			Integer.MIN_VALUE,
 			0,
 			63,
-			50,
+			0,
 			false,
-			true,
-			true,
-			true
+			false,
+			false,
+			false
 		);
 	}
 

@@ -940,20 +940,22 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		if (!(entity instanceof EnderDragonPart)) {
 			EntityType<?> entityType = entity.getType();
 			int i = entityType.clientTrackingRange() * 16;
-			int j = entityType.updateInterval();
-			if (this.entityMap.containsKey(entity.getId())) {
-				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
-			} else {
-				ChunkMap.TrackedEntity trackedEntity = new ChunkMap.TrackedEntity(entity, i, j, entityType.trackDeltas());
-				this.entityMap.put(entity.getId(), trackedEntity);
-				trackedEntity.updatePlayers(this.level.players());
-				if (entity instanceof ServerPlayer) {
-					ServerPlayer serverPlayer = (ServerPlayer)entity;
-					this.updatePlayerStatus(serverPlayer, true);
+			if (i != 0) {
+				int j = entityType.updateInterval();
+				if (this.entityMap.containsKey(entity.getId())) {
+					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
+				} else {
+					ChunkMap.TrackedEntity trackedEntity = new ChunkMap.TrackedEntity(entity, i, j, entityType.trackDeltas());
+					this.entityMap.put(entity.getId(), trackedEntity);
+					trackedEntity.updatePlayers(this.level.players());
+					if (entity instanceof ServerPlayer) {
+						ServerPlayer serverPlayer = (ServerPlayer)entity;
+						this.updatePlayerStatus(serverPlayer, true);
 
-					for (ChunkMap.TrackedEntity trackedEntity2 : this.entityMap.values()) {
-						if (trackedEntity2.entity != serverPlayer) {
-							trackedEntity2.updatePlayer(serverPlayer);
+						for (ChunkMap.TrackedEntity trackedEntity2 : this.entityMap.values()) {
+							if (trackedEntity2.entity != serverPlayer) {
+								trackedEntity2.updatePlayer(serverPlayer);
+							}
 						}
 					}
 				}

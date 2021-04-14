@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 
 public class Carvers {
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OLD_CAVE = register(
-		"old_cave",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> CAVE = register(
+		"cave",
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -32,8 +32,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> CAVE = register(
-		"cave",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> PROTOTYPE_CAVE = register(
+		"prototype_cave",
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -48,8 +48,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> OLD_CANYON = register(
-		"old_canyon",
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> CANYON = register(
+		"canyon",
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(
@@ -65,8 +65,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> CANYON = register(
-		"canyon",
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> PROTOTYPE_CANYON = register(
+		"prototype_canyon",
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(
@@ -82,8 +82,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OLD_OCEAN_CAVE = register(
-		"old_ocean_cave",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OCEAN_CAVE = register(
+		"ocean_cave",
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -98,8 +98,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OCEAN_CAVE = register(
-		"ocean_cave",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> PROTOTYPE_OCEAN_CAVE = register(
+		"prototype_ocean_cave",
 		WorldCarver.CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -114,8 +114,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> OLD_UNDERWATER_CANYON = register(
-		"old_underwater_canyon",
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> UNDERWATER_CANYON = register(
+		"underwater_canyon",
 		WorldCarver.UNDERWATER_CANYON
 			.configured(
 				new CanyonCarverConfiguration(
@@ -131,8 +131,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> OLD_UNDERWATER_CAVE = register(
-		"old_underwater_cave",
+	public static final ConfiguredWorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = register(
+		"underwater_cave",
 		WorldCarver.UNDERWATER_CAVE
 			.configured(
 				new CaveCarverConfiguration(
@@ -162,8 +162,8 @@ public class Carvers {
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> CRACK = register(
-		"crack",
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> PROTOTYPE_CRACK = register(
+		"prototype_crack",
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(

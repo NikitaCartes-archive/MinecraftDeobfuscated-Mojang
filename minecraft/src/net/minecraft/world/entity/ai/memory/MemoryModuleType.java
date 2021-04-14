@@ -21,6 +21,7 @@ import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Void> DUMMY = register("dummy");
@@ -29,8 +30,8 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<GlobalPos> POTENTIAL_JOB_SITE = register("potential_job_site", GlobalPos.CODEC);
 	public static final MemoryModuleType<GlobalPos> MEETING_POINT = register("meeting_point", GlobalPos.CODEC);
 	public static final MemoryModuleType<List<GlobalPos>> SECONDARY_JOB_SITE = register("secondary_job_site");
-	public static final MemoryModuleType<List<LivingEntity>> LIVING_ENTITIES = register("mobs");
-	public static final MemoryModuleType<List<LivingEntity>> VISIBLE_LIVING_ENTITIES = register("visible_mobs");
+	public static final MemoryModuleType<List<LivingEntity>> NEAREST_LIVING_ENTITIES = register("mobs");
+	public static final MemoryModuleType<List<LivingEntity>> NEAREST_VISIBLE_LIVING_ENTITIES = register("visible_mobs");
 	public static final MemoryModuleType<List<LivingEntity>> VISIBLE_VILLAGER_BABIES = register("visible_villager_babies");
 	public static final MemoryModuleType<List<Player>> NEAREST_PLAYERS = register("nearest_players");
 	public static final MemoryModuleType<Player> NEAREST_VISIBLE_PLAYER = register("nearest_visible_player");
@@ -68,6 +69,8 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Integer> LONG_JUMP_COOLDOWN_TICKS = register("long_jump_cooling_down", Codec.INT);
 	public static final MemoryModuleType<Boolean> LONG_JUMP_MID_JUMP = register("long_jump_mid_jump");
 	public static final MemoryModuleType<Boolean> HAS_HUNTING_COOLDOWN = register("has_hunting_cooldown", Codec.BOOL);
+	public static final MemoryModuleType<Integer> RAM_COOLDOWN_TICKS = register("ram_cooldown_ticks", Codec.INT);
+	public static final MemoryModuleType<Vec3> RAM_TARGET = register("ram_target");
 	public static final MemoryModuleType<UUID> ANGRY_AT = register("angry_at", SerializableUUID.CODEC);
 	public static final MemoryModuleType<Boolean> UNIVERSAL_ANGER = register("universal_anger", Codec.BOOL);
 	public static final MemoryModuleType<Boolean> ADMIRING_ITEM = register("admiring_item", Codec.BOOL);

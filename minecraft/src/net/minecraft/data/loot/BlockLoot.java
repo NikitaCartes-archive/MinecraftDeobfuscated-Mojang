@@ -1065,6 +1065,9 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.CHISELED_DEEPSLATE);
 		this.dropSelf(Blocks.CRACKED_DEEPSLATE_BRICKS);
 		this.dropSelf(Blocks.CRACKED_DEEPSLATE_TILES);
+		this.dropSelf(Blocks.RAW_IRON_BLOCK);
+		this.dropSelf(Blocks.RAW_COPPER_BLOCK);
+		this.dropSelf(Blocks.RAW_GOLD_BLOCK);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);

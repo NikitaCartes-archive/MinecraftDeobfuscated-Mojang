@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,10 +24,10 @@ public class RandomPatchConfiguration implements FeatureConfiguration {
 						.fieldOf("whitelist")
 						.forGetter(randomPatchConfiguration -> (List)randomPatchConfiguration.whitelist.stream().map(Block::defaultBlockState).collect(Collectors.toList())),
 					BlockState.CODEC.listOf().fieldOf("blacklist").forGetter(randomPatchConfiguration -> ImmutableList.copyOf(randomPatchConfiguration.blacklist)),
-					Codec.INT.fieldOf("tries").orElse(128).forGetter(randomPatchConfiguration -> randomPatchConfiguration.tries),
-					Codec.INT.fieldOf("xspread").orElse(7).forGetter(randomPatchConfiguration -> randomPatchConfiguration.xspread),
-					Codec.INT.fieldOf("yspread").orElse(3).forGetter(randomPatchConfiguration -> randomPatchConfiguration.yspread),
-					Codec.INT.fieldOf("zspread").orElse(7).forGetter(randomPatchConfiguration -> randomPatchConfiguration.zspread),
+					ExtraCodecs.POSITIVE_INT.fieldOf("tries").orElse(128).forGetter(randomPatchConfiguration -> randomPatchConfiguration.tries),
+					ExtraCodecs.NON_NEGATIVE_INT.fieldOf("xspread").orElse(7).forGetter(randomPatchConfiguration -> randomPatchConfiguration.xspread),
+					ExtraCodecs.NON_NEGATIVE_INT.fieldOf("yspread").orElse(3).forGetter(randomPatchConfiguration -> randomPatchConfiguration.yspread),
+					ExtraCodecs.NON_NEGATIVE_INT.fieldOf("zspread").orElse(7).forGetter(randomPatchConfiguration -> randomPatchConfiguration.zspread),
 					Codec.BOOL.fieldOf("can_replace").orElse(false).forGetter(randomPatchConfiguration -> randomPatchConfiguration.canReplace),
 					Codec.BOOL.fieldOf("project").orElse(true).forGetter(randomPatchConfiguration -> randomPatchConfiguration.project),
 					Codec.BOOL.fieldOf("need_water").orElse(false).forGetter(randomPatchConfiguration -> randomPatchConfiguration.needWater)

@@ -114,7 +114,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			biomeSource, this.cellWidth, this.cellHeight, this.cellCountY, noiseSettings, blendedNoise, simplexNoise, perlinNoise, cavifier
 		);
 		this.aquifersEnabled = noiseGeneratorSettings.isAquifersEnabled();
-		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState());
+		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState(), this.settings);
 	}
 
 	@Override
@@ -172,6 +172,11 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			this.iterateNoiseColumn(i, j, blockStates, null, m, n);
 			return new NoiseColumn(k, blockStates);
 		}
+	}
+
+	@Override
+	public BaseStoneSource getBaseStoneSource() {
+		return this.baseStoneSource;
 	}
 
 	private OptionalInt iterateNoiseColumn(int i, int j, @Nullable BlockState[] blockStates, @Nullable Predicate<BlockState> predicate, int k, int l) {
@@ -237,7 +242,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 		BlockState blockState;
 		if (e > 0.0) {
-			blockState = baseStoneSource.getBaseStone(i, j, k, (NoiseGeneratorSettings)this.settings.get());
+			blockState = baseStoneSource.getBaseStone(i, j, k);
 		} else if (this.aquifersEnabled && Aquifer.isLavaLevel(j - this.getMinY())) {
 			blockState = Blocks.LAVA.defaultBlockState();
 		} else {

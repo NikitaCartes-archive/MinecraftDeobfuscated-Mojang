@@ -24,7 +24,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.MEETING_POINT,
 				MemoryStatus.VALUE_PRESENT,
-				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
+				MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 				MemoryStatus.VALUE_PRESENT,
 				MemoryModuleType.INTERACTION_TARGET,
 				MemoryStatus.VALUE_ABSENT
@@ -40,7 +40,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 			&& optional.isPresent()
 			&& serverLevel.dimension() == ((GlobalPos)optional.get()).dimension()
 			&& ((GlobalPos)optional.get()).pos().closerThan(livingEntity.position(), 4.0)
-			&& ((List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
+			&& ((List)brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get())
 				.stream()
 				.anyMatch(livingEntityx -> EntityType.VILLAGER.equals(livingEntityx.getType()));
 	}
@@ -48,7 +48,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Brain<?> brain = livingEntity.getBrain();
-		brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES)
+		brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
 			.ifPresent(
 				list -> list.stream()
 						.filter(livingEntityxx -> EntityType.VILLAGER.equals(livingEntityxx.getType()))

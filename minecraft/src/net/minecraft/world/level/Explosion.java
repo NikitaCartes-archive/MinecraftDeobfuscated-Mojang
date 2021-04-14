@@ -163,6 +163,10 @@ public class Explosion {
 							BlockPos blockPos = new BlockPos(m, n, o);
 							BlockState blockState = this.level.getBlockState(blockPos);
 							FluidState fluidState = this.level.getFluidState(blockPos);
+							if (!this.level.isInWorldBounds(blockPos)) {
+								break;
+							}
+
 							Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance(this, this.level, blockPos, blockState, fluidState);
 							if (optional.isPresent()) {
 								h -= (optional.get() + 0.3F) * 0.3F;

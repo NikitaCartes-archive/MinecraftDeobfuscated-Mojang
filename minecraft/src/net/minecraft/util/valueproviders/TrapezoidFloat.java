@@ -3,7 +3,6 @@ package net.minecraft.util.valueproviders;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -28,9 +27,9 @@ public class TrapezoidFloat extends FloatProvider {
 			},
 			Function.identity()
 		);
-	private float min;
-	private float max;
-	private float plateau;
+	private final float min;
+	private final float max;
+	private final float plateau;
 
 	public static TrapezoidFloat of(float f, float g, float h) {
 		return new TrapezoidFloat(f, g, h);
@@ -63,21 +62,6 @@ public class TrapezoidFloat extends FloatProvider {
 	@Override
 	public FloatProviderType<?> getType() {
 		return FloatProviderType.TRAPEZOID;
-	}
-
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else if (object != null && this.getClass() == object.getClass()) {
-			TrapezoidFloat trapezoidFloat = (TrapezoidFloat)object;
-			return this.min == trapezoidFloat.min && this.max == trapezoidFloat.max && this.plateau == trapezoidFloat.plateau;
-		} else {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return Objects.hash(new Object[]{this.min, this.max, this.plateau});
 	}
 
 	public String toString() {

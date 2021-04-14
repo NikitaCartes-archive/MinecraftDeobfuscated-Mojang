@@ -22,7 +22,11 @@ public class TradeWithVillager extends Behavior<Villager> {
 	private Set<Item> trades = ImmutableSet.of();
 
 	public TradeWithVillager() {
-		super(ImmutableMap.of(MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+		super(
+			ImmutableMap.of(
+				MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT
+			)
+		);
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {

@@ -1202,7 +1202,7 @@ public abstract class LivingEntity extends Entity {
 		}
 	}
 
-	private boolean isDamageSourceBlocked(DamageSource damageSource) {
+	public boolean isDamageSourceBlocked(DamageSource damageSource) {
 		Entity entity = damageSource.getDirectEntity();
 		boolean bl = false;
 		if (entity instanceof AbstractArrow) {

@@ -23,7 +23,7 @@ public class YieldJobSite extends Behavior<Villager> {
 				MemoryStatus.VALUE_PRESENT,
 				MemoryModuleType.JOB_SITE,
 				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.LIVING_ENTITIES,
+				MemoryModuleType.NEAREST_LIVING_ENTITIES,
 				MemoryStatus.VALUE_PRESENT
 			)
 		);

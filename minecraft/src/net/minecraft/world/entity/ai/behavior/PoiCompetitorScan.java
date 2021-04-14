@@ -13,7 +13,7 @@ public class PoiCompetitorScan extends Behavior<Villager> {
 	final VillagerProfession profession;
 
 	public PoiCompetitorScan(VillagerProfession villagerProfession) {
-		super(ImmutableMap.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+		super(ImmutableMap.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
 		this.profession = villagerProfession;
 	}
 
