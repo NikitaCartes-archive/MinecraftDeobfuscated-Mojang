@@ -11,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.AreaEffectCloudRenderer;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.client.renderer.entity.AxolotlRenderer;
 import net.minecraft.client.renderer.entity.BatRenderer;
@@ -61,6 +60,7 @@ import net.minecraft.client.renderer.entity.LlamaSpitRenderer;
 import net.minecraft.client.renderer.entity.MagmaCubeRenderer;
 import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.client.renderer.entity.MushroomCowRenderer;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.OcelotRenderer;
 import net.minecraft.client.renderer.entity.PaintingRenderer;
 import net.minecraft.client.renderer.entity.PandaRenderer;
@@ -161,7 +161,7 @@ public class EntityRenderers {
     }
 
     static {
-        EntityRenderers.register(EntityType.AREA_EFFECT_CLOUD, AreaEffectCloudRenderer::new);
+        EntityRenderers.register(EntityType.AREA_EFFECT_CLOUD, NoopRenderer::new);
         EntityRenderers.register(EntityType.ARMOR_STAND, ArmorStandRenderer::new);
         EntityRenderers.register(EntityType.ARROW, TippableArrowRenderer::new);
         EntityRenderers.register(EntityType.AXOLOTL, AxolotlRenderer::new);
@@ -218,6 +218,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.LLAMA, context -> new LlamaRenderer(context, ModelLayers.LLAMA));
         EntityRenderers.register(EntityType.LLAMA_SPIT, LlamaSpitRenderer::new);
         EntityRenderers.register(EntityType.MAGMA_CUBE, MagmaCubeRenderer::new);
+        EntityRenderers.register(EntityType.MARKER, NoopRenderer::new);
         EntityRenderers.register(EntityType.MINECART, context -> new MinecartRenderer(context, ModelLayers.MINECART));
         EntityRenderers.register(EntityType.MOOSHROOM, MushroomCowRenderer::new);
         EntityRenderers.register(EntityType.MULE, context -> new ChestedHorseRenderer(context, 0.92f, ModelLayers.MULE));

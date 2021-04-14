@@ -30,6 +30,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
@@ -83,12 +84,15 @@ implements ServerInterface {
     private MinecraftServerGui gui;
     @Nullable
     private final TextFilterClient textFilterClient;
+    @Nullable
+    private final Component resourcePackPrompt;
 
     public DedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, WorldData worldData, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, registryHolder, levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
         this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+        this.resourcePackPrompt = DedicatedServer.parseResourcePackPrompt(dedicatedServerSettings);
     }
 
     @Override
@@ -556,6 +560,25 @@ implements ServerInterface {
     @Nullable
     public GameType getForcedGameType() {
         return this.settings.getProperties().forceGameMode ? this.worldData.getGameType() : null;
+    }
+
+    @Nullable
+    private static Component parseResourcePackPrompt(DedicatedServerSettings dedicatedServerSettings) {
+        String string = dedicatedServerSettings.getProperties().resourcePackPrompt;
+        if (!Strings.isNullOrEmpty(string)) {
+            try {
+                return Component.Serializer.fromJson(string);
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to parse resource pack prompt '{}'", (Object)string, (Object)exception);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public Component getResourcePackPrompt() {
+        return this.resourcePackPrompt;
     }
 
     @Override

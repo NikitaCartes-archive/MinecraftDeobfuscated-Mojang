@@ -30,9 +30,9 @@ implements GameVersion {
 
     private DetectedVersion() {
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.name = "21w14a";
+        this.name = "21w15a";
         this.stable = false;
-        this.worldVersion = 2706;
+        this.worldVersion = 2709;
         this.protocolVersion = SharedConstants.getProtocolVersion();
         this.resourcePackVersion = 7;
         this.dataPackVersion = 7;

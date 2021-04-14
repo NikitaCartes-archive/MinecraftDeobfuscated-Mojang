@@ -42,6 +42,10 @@ extends QuadrupedModel<T> {
         this.head.getChild((String)"left_horn").visible = !((AgeableMob)goat).isBaby();
         this.head.getChild((String)"right_horn").visible = !((AgeableMob)goat).isBaby();
         super.setupAnim(goat, f, g, h, i, j);
+        float k = ((Goat)goat).getRammingXHeadRot();
+        if (k != 0.0f) {
+            this.head.xRot = k;
+        }
     }
 }
 

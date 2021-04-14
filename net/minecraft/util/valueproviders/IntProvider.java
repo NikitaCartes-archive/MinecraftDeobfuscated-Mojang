@@ -15,6 +15,8 @@ import net.minecraft.util.valueproviders.IntProviderType;
 public abstract class IntProvider {
     private static final Codec<Either<Integer, IntProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.INT, Registry.INT_PROVIDER_TYPES.dispatch(IntProvider::getType, IntProviderType::codec));
     public static final Codec<IntProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap(either -> either.map(ConstantInt::of, intProvider -> intProvider), intProvider -> intProvider.getType() == IntProviderType.CONSTANT ? Either.left(((ConstantInt)intProvider).getValue()) : Either.right(intProvider));
+    public static final Codec<IntProvider> NON_NEGATIVE_CODEC = IntProvider.codec(0, Integer.MAX_VALUE);
+    public static final Codec<IntProvider> POSITIVE_CODEC = IntProvider.codec(1, Integer.MAX_VALUE);
 
     public static Codec<IntProvider> codec(int i, int j) {
         Function<IntProvider, DataResult> function = intProvider -> {

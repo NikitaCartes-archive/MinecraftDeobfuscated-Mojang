@@ -7,8 +7,8 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
@@ -19,7 +19,7 @@ public class GeodeBlockSettings {
     public final BlockStateProvider middleLayerProvider;
     public final BlockStateProvider outerLayerProvider;
     public final List<BlockState> innerPlacements;
-    public static final Codec<GeodeBlockSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("filling_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.fillingProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("inner_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.innerLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("alternate_inner_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.alternateInnerLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("middle_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.middleLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("outer_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.outerLayerProvider), ((MapCodec)BlockState.CODEC.listOf().fieldOf("inner_placements")).forGetter(geodeBlockSettings -> new ArrayList<BlockState>(geodeBlockSettings.innerPlacements))).apply((Applicative<GeodeBlockSettings, ?>)instance, GeodeBlockSettings::new));
+    public static final Codec<GeodeBlockSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("filling_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.fillingProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("inner_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.innerLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("alternate_inner_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.alternateInnerLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("middle_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.middleLayerProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("outer_layer_provider")).forGetter(geodeBlockSettings -> geodeBlockSettings.outerLayerProvider), ((MapCodec)BlockState.CODEC.listOf().flatXmap(ExtraCodecs.nonEmptyListCheck(), ExtraCodecs.nonEmptyListCheck()).fieldOf("inner_placements")).forGetter(geodeBlockSettings -> geodeBlockSettings.innerPlacements)).apply((Applicative<GeodeBlockSettings, ?>)instance, GeodeBlockSettings::new));
 
     public GeodeBlockSettings(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, BlockStateProvider blockStateProvider3, BlockStateProvider blockStateProvider4, BlockStateProvider blockStateProvider5, List<BlockState> list) {
         this.fillingProvider = blockStateProvider;

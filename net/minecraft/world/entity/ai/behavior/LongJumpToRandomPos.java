@@ -7,11 +7,15 @@ import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.WeighedRandom;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -27,11 +31,11 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class LongJumpToRandomPos
-extends Behavior<Mob> {
+public class LongJumpToRandomPos<E extends Mob>
+extends Behavior<E> {
     private static final int FIND_JUMP_TRIES = 20;
     private static final int PREPARE_JUMP_DURATION = 40;
-    private static final int MIN_PATHFIND_DISTANCE_TO_VALID_JUMP = 7;
+    private static final int MIN_PATHFIND_DISTANCE_TO_VALID_JUMP = 8;
     public static final int TIME_OUT_DURATION = 200;
     private final UniformInt timeBetweenLongJumps;
     private final int maxLongJumpHeight;
@@ -42,13 +46,15 @@ extends Behavior<Mob> {
     private Optional<PossibleJump> chosenJump = Optional.empty();
     private int findJumpTries;
     private long prepareJumpStart;
+    private Function<E, SoundEvent> getJumpSound;
 
-    public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f) {
+    public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
         this.timeBetweenLongJumps = uniformInt;
         this.maxLongJumpHeight = i;
         this.maxLongJumpWidth = j;
         this.maxJumpVelocity = f;
+        this.getJumpSound = function;
     }
 
     @Override
@@ -87,22 +93,23 @@ extends Behavior<Mob> {
     }
 
     @Override
-    protected void tick(ServerLevel serverLevel, Mob mob, long l) {
+    protected void tick(ServerLevel serverLevel, E mob, long l) {
         if (this.chosenJump.isPresent()) {
             if (l - this.prepareJumpStart >= 40L) {
-                mob.yRot = mob.yBodyRot;
-                mob.setDiscardFriction(true);
-                mob.setDeltaMovement(this.chosenJump.get().getJumpVector());
-                mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
+                ((Mob)mob).yRot = ((Mob)mob).yBodyRot;
+                ((LivingEntity)mob).setDiscardFriction(true);
+                ((Entity)mob).setDeltaMovement(this.chosenJump.get().getJumpVector());
+                ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
+                serverLevel.playSound(null, (Entity)mob, this.getJumpSound.apply(mob), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }
         } else {
             --this.findJumpTries;
             Optional<PossibleJump> optional = WeighedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
             if (optional.isPresent()) {
                 this.jumpCandidates.remove(optional.get());
-                mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(optional.get().getJumpTarget()));
-                PathNavigation pathNavigation = mob.getNavigation();
-                Path path = pathNavigation.createPath(optional.get().getJumpTarget(), 0, 7);
+                ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(optional.get().getJumpTarget()));
+                PathNavigation pathNavigation = ((Mob)mob).getNavigation();
+                Path path = pathNavigation.createPath(optional.get().getJumpTarget(), 0, 8);
                 if (path == null || !path.canReach()) {
                     this.chosenJump = optional;
                     this.prepareJumpStart = l;
@@ -187,7 +194,7 @@ extends Behavior<Mob> {
 
     @Override
     protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Mob)livingEntity, l);
+        this.tick(serverLevel, (E)((Mob)livingEntity), l);
     }
 
     @Override

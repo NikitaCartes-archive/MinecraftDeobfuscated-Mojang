@@ -3,11 +3,13 @@
  */
 package net.minecraft.network.chat;
 
-import com.google.common.base.Joiner;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.DataFixUtils;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.commands.CommandSourceStack;
@@ -37,8 +39,8 @@ public abstract class NbtComponent
 extends BaseComponent
 implements ContextAwareComponent {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String SEPARATOR = ", ";
     protected final boolean interpreting;
+    protected final Optional<Component> separator;
     protected final String nbtPathPattern;
     @Nullable
     protected final NbtPathArgument.NbtPath compiledNbtPath;
@@ -52,14 +54,15 @@ implements ContextAwareComponent {
         }
     }
 
-    public NbtComponent(String string, boolean bl) {
-        this(string, NbtComponent.compileNbtPath(string), bl);
+    public NbtComponent(String string, boolean bl, Optional<Component> optional) {
+        this(string, NbtComponent.compileNbtPath(string), bl, optional);
     }
 
-    protected NbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl) {
+    protected NbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, Optional<Component> optional) {
         this.nbtPathPattern = string;
         this.compiledNbtPath = nbtPath;
         this.interpreting = bl;
+        this.separator = optional;
     }
 
     protected abstract Stream<CompoundTag> getData(CommandSourceStack var1) throws CommandSyntaxException;
@@ -85,6 +88,7 @@ implements ContextAwareComponent {
             }
         }).map(Tag::getAsString);
         if (this.interpreting) {
+            Component component = DataFixUtils.orElse(ComponentUtils.updateForEntity(commandSourceStack, this.separator, entity, i), ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
             return stream.flatMap(string -> {
                 try {
                     MutableComponent mutableComponent = Component.Serializer.fromJson(string);
@@ -93,22 +97,22 @@ implements ContextAwareComponent {
                     LOGGER.warn("Failed to parse component: {}", string, (Object)exception);
                     return Stream.of(new MutableComponent[0]);
                 }
-            }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(SEPARATOR).append((Component)mutableComponent2)).orElse(new TextComponent(""));
+            }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(component).append((Component)mutableComponent2)).orElseGet(() -> new TextComponent(""));
         }
-        return new TextComponent(Joiner.on(SEPARATOR).join(stream.iterator()));
+        return ComponentUtils.updateForEntity(commandSourceStack, this.separator, entity, i).map(mutableComponent -> stream.map(string -> new TextComponent((String)string)).reduce((mutableComponent2, mutableComponent3) -> mutableComponent2.append((Component)mutableComponent).append((Component)mutableComponent3)).orElseGet(() -> new TextComponent(""))).orElseGet(() -> new TextComponent(stream.collect(Collectors.joining(", "))));
     }
 
     public static class StorageNbtComponent
     extends NbtComponent {
         private final ResourceLocation id;
 
-        public StorageNbtComponent(String string, boolean bl, ResourceLocation resourceLocation) {
-            super(string, bl);
+        public StorageNbtComponent(String string, boolean bl, ResourceLocation resourceLocation, Optional<Component> optional) {
+            super(string, bl, optional);
             this.id = resourceLocation;
         }
 
-        public StorageNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, ResourceLocation resourceLocation) {
-            super(string, nbtPath, bl);
+        public StorageNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, ResourceLocation resourceLocation, Optional<Component> optional) {
+            super(string, nbtPath, bl, optional);
             this.id = resourceLocation;
         }
 
@@ -118,7 +122,7 @@ implements ContextAwareComponent {
 
         @Override
         public StorageNbtComponent plainCopy() {
-            return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
+            return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id, this.separator);
         }
 
         @Override
@@ -161,8 +165,8 @@ implements ContextAwareComponent {
         @Nullable
         private final Coordinates compiledPos;
 
-        public BlockNbtComponent(String string, boolean bl, String string2) {
-            super(string, bl);
+        public BlockNbtComponent(String string, boolean bl, String string2, Optional<Component> optional) {
+            super(string, bl, optional);
             this.posPattern = string2;
             this.compiledPos = this.compilePos(this.posPattern);
         }
@@ -176,8 +180,8 @@ implements ContextAwareComponent {
             }
         }
 
-        private BlockNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, String string2, @Nullable Coordinates coordinates) {
-            super(string, nbtPath, bl);
+        private BlockNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, String string2, @Nullable Coordinates coordinates, Optional<Component> optional) {
+            super(string, nbtPath, bl, optional);
             this.posPattern = string2;
             this.compiledPos = coordinates;
         }
@@ -189,7 +193,7 @@ implements ContextAwareComponent {
 
         @Override
         public BlockNbtComponent plainCopy() {
-            return new BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos);
+            return new BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos, this.separator);
         }
 
         @Override
@@ -237,8 +241,8 @@ implements ContextAwareComponent {
         @Nullable
         private final EntitySelector compiledSelector;
 
-        public EntityNbtComponent(String string, boolean bl, String string2) {
-            super(string, bl);
+        public EntityNbtComponent(String string, boolean bl, String string2, Optional<Component> optional) {
+            super(string, bl, optional);
             this.selectorPattern = string2;
             this.compiledSelector = EntityNbtComponent.compileSelector(string2);
         }
@@ -253,8 +257,8 @@ implements ContextAwareComponent {
             }
         }
 
-        private EntityNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, String string2, @Nullable EntitySelector entitySelector) {
-            super(string, nbtPath, bl);
+        private EntityNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, String string2, @Nullable EntitySelector entitySelector, Optional<Component> optional) {
+            super(string, nbtPath, bl, optional);
             this.selectorPattern = string2;
             this.compiledSelector = entitySelector;
         }
@@ -265,7 +269,7 @@ implements ContextAwareComponent {
 
         @Override
         public EntityNbtComponent plainCopy() {
-            return new EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector);
+            return new EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector, this.separator);
         }
 
         @Override

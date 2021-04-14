@@ -7,6 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -30,7 +31,7 @@ extends CarverConfiguration {
     }
 
     public static class CanyonShapeConfiguration {
-        public static final Codec<CanyonShapeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)FloatProvider.CODEC.fieldOf("distance_factor")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.distanceFactor), ((MapCodec)FloatProvider.CODEC.fieldOf("thickness")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.thickness), ((MapCodec)Codec.intRange(0, Integer.MAX_VALUE).fieldOf("width_smoothness")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.widthSmoothness), ((MapCodec)FloatProvider.CODEC.fieldOf("horizontal_radius_factor")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.horizontalRadiusFactor), ((MapCodec)Codec.FLOAT.fieldOf("vertical_radius_default_factor")).forGetter(canyonShapeConfiguration -> Float.valueOf(canyonShapeConfiguration.verticalRadiusDefaultFactor)), ((MapCodec)Codec.FLOAT.fieldOf("vertical_radius_center_factor")).forGetter(canyonShapeConfiguration -> Float.valueOf(canyonShapeConfiguration.verticalRadiusCenterFactor))).apply((Applicative<CanyonShapeConfiguration, ?>)instance, CanyonShapeConfiguration::new));
+        public static final Codec<CanyonShapeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)FloatProvider.CODEC.fieldOf("distance_factor")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.distanceFactor), ((MapCodec)FloatProvider.CODEC.fieldOf("thickness")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.thickness), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("width_smoothness")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.widthSmoothness), ((MapCodec)FloatProvider.CODEC.fieldOf("horizontal_radius_factor")).forGetter(canyonShapeConfiguration -> canyonShapeConfiguration.horizontalRadiusFactor), ((MapCodec)Codec.FLOAT.fieldOf("vertical_radius_default_factor")).forGetter(canyonShapeConfiguration -> Float.valueOf(canyonShapeConfiguration.verticalRadiusDefaultFactor)), ((MapCodec)Codec.FLOAT.fieldOf("vertical_radius_center_factor")).forGetter(canyonShapeConfiguration -> Float.valueOf(canyonShapeConfiguration.verticalRadiusCenterFactor))).apply((Applicative<CanyonShapeConfiguration, ?>)instance, CanyonShapeConfiguration::new));
         public final FloatProvider distanceFactor;
         public final FloatProvider thickness;
         public final int widthSmoothness;

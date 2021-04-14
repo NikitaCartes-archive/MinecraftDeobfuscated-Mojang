@@ -24,7 +24,7 @@ extends Behavior<LivingEntity> {
     private final Predicate<LivingEntity> selfFilter;
 
     public SetLookAndInteract(EntityType<?> entityType, int i, Predicate<LivingEntity> predicate, Predicate<LivingEntity> predicate2) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.type = entityType;
         this.interactionRangeSqr = i * i;
         this.targetFilter = predicate2;
@@ -44,7 +44,7 @@ extends Behavior<LivingEntity> {
     public void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         super.start(serverLevel, livingEntity, l);
         Brain<?> brain = livingEntity.getBrain();
-        brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.interactionRangeSqr).filter(this::isMatchingTarget).findFirst().ifPresent(livingEntity -> {
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.interactionRangeSqr).filter(this::isMatchingTarget).findFirst().ifPresent(livingEntity -> {
             brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
             brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true));
         }));
@@ -55,7 +55,7 @@ extends Behavior<LivingEntity> {
     }
 
     private List<LivingEntity> getVisibleEntities(LivingEntity livingEntity) {
-        return livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get();
+        return livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get();
     }
 }
 

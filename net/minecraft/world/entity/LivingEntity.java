@@ -1078,7 +1078,7 @@ extends Entity {
         }
     }
 
-    private boolean isDamageSourceBlocked(DamageSource damageSource) {
+    public boolean isDamageSourceBlocked(DamageSource damageSource) {
         Vec3 vec3;
         AbstractArrow abstractArrow;
         Entity entity = damageSource.getDirectEntity();

@@ -37,21 +37,6 @@ extends HeightProvider {
         return this.value.resolveY(worldGenerationContext);
     }
 
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        ConstantHeight constantHeight = (ConstantHeight)object;
-        return this.value.equals(constantHeight.value);
-    }
-
-    public int hashCode() {
-        return this.value.hashCode();
-    }
-
     @Override
     public HeightProviderType<?> getType() {
         return HeightProviderType.CONSTANT;

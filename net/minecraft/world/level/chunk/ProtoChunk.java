@@ -444,7 +444,7 @@ implements ChunkAccess {
     }
 
     public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving2) {
-        return this.carvingMasks.computeIfAbsent(carving2, carving -> new BitSet(98304));
+        return this.carvingMasks.computeIfAbsent(carving2, carving -> new BitSet(65536));
     }
 
     public void setCarvingMask(GenerationStep.Carving carving, BitSet bitSet) {

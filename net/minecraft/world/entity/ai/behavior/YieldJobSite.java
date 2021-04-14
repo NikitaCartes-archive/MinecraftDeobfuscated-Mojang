@@ -24,7 +24,7 @@ extends Behavior<Villager> {
     private final float speedModifier;
 
     public YieldJobSite(float f) {
-        super(ImmutableMap.of(MemoryModuleType.POTENTIAL_JOB_SITE, MemoryStatus.VALUE_PRESENT, MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.POTENTIAL_JOB_SITE, MemoryStatus.VALUE_PRESENT, MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.speedModifier = f;
     }
 

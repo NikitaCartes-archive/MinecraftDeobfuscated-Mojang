@@ -23,9 +23,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.client.resources.DefaultClientPackResources;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
@@ -134,6 +137,17 @@ implements RepositorySource {
                 if (throwable != null) {
                     LOGGER.warn("Pack application failed: {}, deleting file {}", (Object)throwable.getMessage(), (Object)file);
                     ClientPackSource.deleteQuietly(file);
+                    Minecraft minecraft = Minecraft.getInstance();
+                    minecraft.execute(() -> minecraft.setScreen(new ConfirmScreen(bl -> {
+                        if (bl) {
+                            minecraft.setScreen(null);
+                        } else {
+                            ClientPacketListener clientPacketListener = minecraft.getConnection();
+                            if (clientPacketListener != null) {
+                                clientPacketListener.getConnection().disconnect(new TranslatableComponent("connect.aborted"));
+                            }
+                        }
+                    }, new TranslatableComponent("multiplayer.texturePrompt.failure.line1"), new TranslatableComponent("multiplayer.texturePrompt.failure.line2"), CommonComponents.GUI_PROCEED, new TranslatableComponent("menu.disconnect"))));
                 }
             });
             return completableFuture2;

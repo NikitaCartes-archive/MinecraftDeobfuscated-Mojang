@@ -120,7 +120,7 @@ extends ChunkGenerator {
         Cavifier cavifier = noiseGeneratorSettings.isNoiseCavesEnabled() ? new Cavifier(worldgenRandom, noiseSettings.minY() / this.cellHeight) : null;
         this.sampler = new NoiseSampler(biomeSource, this.cellWidth, this.cellHeight, this.cellCountY, noiseSettings, blendedNoise, simplexNoise, perlinNoise, cavifier);
         this.aquifersEnabled = noiseGeneratorSettings.isAquifersEnabled();
-        this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState());
+        this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState(), this.settings);
     }
 
     @Override
@@ -174,6 +174,11 @@ extends ChunkGenerator {
         return new NoiseColumn(k, blockStates);
     }
 
+    @Override
+    public BaseStoneSource getBaseStoneSource() {
+        return this.baseStoneSource;
+    }
+
     private OptionalInt iterateNoiseColumn(int i, int j, @Nullable BlockState[] blockStates, @Nullable Predicate<BlockState> predicate, int k, int l) {
         int m = SectionPos.blockToSectionCoord(i);
         int n = SectionPos.blockToSectionCoord(j);
@@ -220,7 +225,7 @@ extends ChunkGenerator {
             e += aquifer.getLastBarrierDensity();
         }
         if (e > 0.0) {
-            blockState = baseStoneSource.getBaseStone(i, j, k, this.settings.get());
+            blockState = baseStoneSource.getBaseStone(i, j, k);
         } else if (this.aquifersEnabled && Aquifer.isLavaLevel(j - this.getMinY())) {
             blockState = Blocks.LAVA.defaultBlockState();
         } else {

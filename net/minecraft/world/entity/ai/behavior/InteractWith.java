@@ -28,7 +28,7 @@ extends Behavior<E> {
     private final MemoryModuleType<T> memory;
 
     public InteractWith(EntityType<? extends T> entityType, int i, Predicate<E> predicate, Predicate<T> predicate2, MemoryModuleType<T> memoryModuleType, float f, int j) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.type = entityType;
         this.speedModifier = f;
         this.interactionRangeSqr = i * i;
@@ -52,7 +52,7 @@ extends Behavior<E> {
     }
 
     private boolean seesAtLeastOneValidTarget(E livingEntity) {
-        List<LivingEntity> list = ((LivingEntity)livingEntity).getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get();
+        List<LivingEntity> list = ((LivingEntity)livingEntity).getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get();
         return list.stream().anyMatch(this::isTargetValid);
     }
 
@@ -63,7 +63,7 @@ extends Behavior<E> {
     @Override
     protected void start(ServerLevel serverLevel, E livingEntity, long l) {
         Brain<?> brain = ((LivingEntity)livingEntity).getBrain();
-        brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity -> this.type.equals(livingEntity.getType())).map(livingEntity -> livingEntity).filter(livingEntity2 -> livingEntity2.distanceToSqr((Entity)livingEntity) <= (double)this.interactionRangeSqr).filter(this.targetFilter).findFirst().ifPresent(livingEntity -> {
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity -> this.type.equals(livingEntity.getType())).map(livingEntity -> livingEntity).filter(livingEntity2 -> livingEntity2.distanceToSqr((Entity)livingEntity) <= (double)this.interactionRangeSqr).filter(this.targetFilter).findFirst().ifPresent(livingEntity -> {
             brain.setMemory(this.memory, livingEntity);
             brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true));
             brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker((Entity)livingEntity, false), this.speedModifier, this.maxDist));

@@ -127,18 +127,18 @@ public final class NoiseGeneratorSettings {
     }
 
     private static NoiseGeneratorSettings endLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2, boolean bl3) {
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(bl3 ? -64 : 0, bl3 ? 384 : 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, Integer.MIN_VALUE, Integer.MIN_VALUE, bl3 ? -64 : 0, bl3 ? -64 : 0, bl, false, false, false);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(bl3 ? 0 : 0, bl3 ? 256 : 128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, Integer.MIN_VALUE, Integer.MIN_VALUE, bl3 ? 0 : 0, bl3 ? 0 : 0, bl, false, false, false);
     }
 
     private static NoiseGeneratorSettings netherLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl) {
         HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap(StructureSettings.DEFAULTS);
         map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), NoiseSettings.create(bl ? -64 : 0, bl ? 384 : 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, bl ? -64 : 0, false, false, false, false);
+        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), NoiseSettings.create(bl ? 0 : 0, bl ? 256 : 128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, bl ? 0 : 0, false, false, false, false);
     }
 
     private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl) {
         double d = 0.9999999814507745;
-        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(-64, 384, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlideSettings(-10, 3, 0), new NoiseSlideSettings(15, 3, 0), 1, 2, 1.0, -0.46875, true, true, false, bl), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), Integer.MIN_VALUE, 0, 63, 50, false, true, true, true);
+        return new NoiseGeneratorSettings(structureSettings, NoiseSettings.create(0, 256, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlideSettings(-10, 3, 0), new NoiseSlideSettings(15, 3, 0), 1, 2, 1.0, -0.46875, true, true, false, bl), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), Integer.MIN_VALUE, 0, 63, 0, false, false, false, false);
     }
 
     static {

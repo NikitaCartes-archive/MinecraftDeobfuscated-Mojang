@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,7 +20,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -36,7 +36,8 @@ extends BlockEntity {
     private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
     private final Component[] filteredMessages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
     private boolean isEditable = true;
-    private Player playerWhoMayEdit;
+    @Nullable
+    private UUID playerWhoMayEdit;
     @Nullable
     private FormattedCharSequence[] renderMessages;
     private boolean renderMessagedFiltered;
@@ -159,11 +160,12 @@ extends BlockEntity {
         }
     }
 
-    public void setAllowedPlayerEditor(Player player) {
-        this.playerWhoMayEdit = player;
+    public void setAllowedPlayerEditor(UUID uUID) {
+        this.playerWhoMayEdit = uUID;
     }
 
-    public Player getPlayerWhoMayEdit() {
+    @Nullable
+    public UUID getPlayerWhoMayEdit() {
         return this.playerWhoMayEdit;
     }
 

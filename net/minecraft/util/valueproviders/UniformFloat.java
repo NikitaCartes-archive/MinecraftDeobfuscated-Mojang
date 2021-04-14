@@ -8,7 +8,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.util.Mth;
@@ -56,21 +55,6 @@ extends FloatProvider {
     @Override
     public FloatProviderType<?> getType() {
         return FloatProviderType.UNIFORM;
-    }
-
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        UniformFloat uniformFloat = (UniformFloat)object;
-        return this.minInclusive == uniformFloat.minInclusive && this.maxExclusive == uniformFloat.maxExclusive;
-    }
-
-    public int hashCode() {
-        return Objects.hash(Float.valueOf(this.minInclusive), Float.valueOf(this.maxExclusive));
     }
 
     public String toString() {

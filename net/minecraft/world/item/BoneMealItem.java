@@ -44,7 +44,7 @@ extends Item {
         BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
         if (BoneMealItem.growCrop(useOnContext.getItemInHand(), level, blockPos)) {
             if (!level.isClientSide) {
-                level.levelEvent(2005, blockPos, 0);
+                level.levelEvent(1505, blockPos, 0);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -52,7 +52,7 @@ extends Item {
         boolean bl = blockState.isFaceSturdy(level, blockPos, useOnContext.getClickedFace());
         if (bl && BoneMealItem.growWaterPlant(useOnContext.getItemInHand(), level, blockPos2, useOnContext.getClickedFace())) {
             if (!level.isClientSide) {
-                level.levelEvent(2005, blockPos2, 0);
+                level.levelEvent(1505, blockPos2, 0);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }

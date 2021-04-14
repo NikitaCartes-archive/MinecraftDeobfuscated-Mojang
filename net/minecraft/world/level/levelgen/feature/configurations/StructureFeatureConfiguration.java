@@ -9,9 +9,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Function;
+import net.minecraft.util.ExtraCodecs;
 
 public class StructureFeatureConfiguration {
-    public static final Codec<StructureFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, 4096).fieldOf("spacing")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.spacing), ((MapCodec)Codec.intRange(0, 4096).fieldOf("separation")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.separation), ((MapCodec)Codec.intRange(0, Integer.MAX_VALUE).fieldOf("salt")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.salt)).apply((Applicative<StructureFeatureConfiguration, ?>)instance, StructureFeatureConfiguration::new)).comapFlatMap(structureFeatureConfiguration -> {
+    public static final Codec<StructureFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, 4096).fieldOf("spacing")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.spacing), ((MapCodec)Codec.intRange(0, 4096).fieldOf("separation")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.separation), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("salt")).forGetter(structureFeatureConfiguration -> structureFeatureConfiguration.salt)).apply((Applicative<StructureFeatureConfiguration, ?>)instance, StructureFeatureConfiguration::new)).comapFlatMap(structureFeatureConfiguration -> {
         if (structureFeatureConfiguration.spacing <= structureFeatureConfiguration.separation) {
             return DataResult.error("Spacing has to be smaller than separation");
         }

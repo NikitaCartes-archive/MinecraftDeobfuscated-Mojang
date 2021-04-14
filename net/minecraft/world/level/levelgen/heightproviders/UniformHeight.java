@@ -5,12 +5,9 @@ package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
@@ -21,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 public class UniformHeight
 extends HeightProvider {
-    public static final Codec<UniformHeight> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)VerticalAnchor.CODEC.fieldOf("min_inclusive")).forGetter(uniformHeight -> uniformHeight.minInclusive), ((MapCodec)VerticalAnchor.CODEC.fieldOf("max_inclusive")).forGetter(uniformHeight -> uniformHeight.maxInclusive)).apply((Applicative<UniformHeight, ?>)instance, UniformHeight::new)).comapFlatMap(DataResult::success, Function.identity());
+    public static final Codec<UniformHeight> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)VerticalAnchor.CODEC.fieldOf("min_inclusive")).forGetter(uniformHeight -> uniformHeight.minInclusive), ((MapCodec)VerticalAnchor.CODEC.fieldOf("max_inclusive")).forGetter(uniformHeight -> uniformHeight.maxInclusive)).apply((Applicative<UniformHeight, ?>)instance, UniformHeight::new));
     private static final Logger LOGGER = LogManager.getLogger();
     private final VerticalAnchor minInclusive;
     private final VerticalAnchor maxInclusive;
@@ -49,21 +46,6 @@ extends HeightProvider {
     @Override
     public HeightProviderType<?> getType() {
         return HeightProviderType.UNIFORM;
-    }
-
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        UniformHeight uniformHeight = (UniformHeight)object;
-        return this.minInclusive.equals(uniformHeight.minInclusive) && this.maxInclusive.equals(uniformHeight.maxInclusive);
-    }
-
-    public int hashCode() {
-        return Objects.hash(this.minInclusive, this.maxInclusive);
     }
 
     public String toString() {

@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 public class CountConfiguration
 implements DecoratorConfiguration,
 FeatureConfiguration {
-    public static final Codec<CountConfiguration> CODEC = ((MapCodec)IntProvider.codec(-10, 256).fieldOf("count")).xmap(CountConfiguration::new, CountConfiguration::count).codec();
+    public static final Codec<CountConfiguration> CODEC = ((MapCodec)IntProvider.codec(0, 256).fieldOf("count")).xmap(CountConfiguration::new, CountConfiguration::count).codec();
     private final IntProvider count;
 
     public CountConfiguration(int i) {

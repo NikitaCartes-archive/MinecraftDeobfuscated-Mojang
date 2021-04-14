@@ -1496,13 +1496,20 @@ implements ClientGamePacketListener {
                 if (serverData != null) {
                     ServerList.saveSingleServer(serverData);
                 }
-            }, bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line1") : new TranslatableComponent("multiplayer.texturePrompt.line1"), bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD) : new TranslatableComponent("multiplayer.texturePrompt.line2"), bl ? new TranslatableComponent("gui.proceed") : CommonComponents.GUI_YES, bl ? new TranslatableComponent("menu.disconnect") : CommonComponents.GUI_NO)));
+            }, bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line1") : new TranslatableComponent("multiplayer.texturePrompt.line1"), ClientPacketListener.preparePackPrompt(bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD) : new TranslatableComponent("multiplayer.texturePrompt.line2"), clientboundResourcePackPacket.getPrompt()), bl ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES, bl ? new TranslatableComponent("menu.disconnect") : CommonComponents.GUI_NO)));
         } else {
             this.send(ServerboundResourcePackPacket.Action.DECLINED);
             if (bl) {
                 this.connection.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
             }
         }
+    }
+
+    private static Component preparePackPrompt(Component component, @Nullable Component component2) {
+        if (component2 == null) {
+            return component;
+        }
+        return new TranslatableComponent("multiplayer.texturePrompt.serverPrompt", component, component2);
     }
 
     private boolean validateResourcePackUrl(String string) {

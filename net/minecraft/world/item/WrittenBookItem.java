@@ -20,6 +20,7 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -142,7 +143,7 @@ extends Item {
         MutableComponent component;
         try {
             component = Component.Serializer.fromJsonLenient(string);
-            component = ComponentUtils.updateForEntity(commandSourceStack, component, player, 0);
+            component = ComponentUtils.updateForEntity(commandSourceStack, component, (Entity)player, 0);
         } catch (Exception exception) {
             component = new TextComponent(string);
         }

@@ -39,7 +39,7 @@ public class BehaviorUtils {
     }
 
     public static boolean entityIsVisible(Brain<?> brain, LivingEntity livingEntity) {
-        return brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).filter(list -> list.contains(livingEntity)).isPresent();
+        return brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).filter(list -> list.contains(livingEntity)).isPresent();
     }
 
     public static boolean targetIsValid(Brain<?> brain, MemoryModuleType<? extends LivingEntity> memoryModuleType, EntityType<?> entityType) {
@@ -119,10 +119,10 @@ public class BehaviorUtils {
 
     public static boolean canSee(LivingEntity livingEntity, LivingEntity livingEntity2) {
         Brain<List<LivingEntity>> brain = livingEntity.getBrain();
-        if (!brain.hasMemoryValue(MemoryModuleType.VISIBLE_LIVING_ENTITIES)) {
+        if (!brain.hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)) {
             return false;
         }
-        return brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().contains(livingEntity2);
+        return brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(livingEntity2);
     }
 
     public static LivingEntity getNearestTarget(LivingEntity livingEntity, Optional<LivingEntity> optional, LivingEntity livingEntity2) {
@@ -144,7 +144,7 @@ public class BehaviorUtils {
     }
 
     public static Stream<Villager> getNearbyVillagersWithCondition(Villager villager, Predicate<Villager> predicate) {
-        return villager.getBrain().getMemory(MemoryModuleType.LIVING_ENTITIES).map(list -> list.stream().filter(livingEntity -> livingEntity instanceof Villager && livingEntity != villager).map(livingEntity -> (Villager)livingEntity).filter(LivingEntity::isAlive).filter(predicate)).orElseGet(Stream::empty);
+        return villager.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).map(list -> list.stream().filter(livingEntity -> livingEntity instanceof Villager && livingEntity != villager).map(livingEntity -> (Villager)livingEntity).filter(LivingEntity::isAlive).filter(predicate)).orElseGet(Stream::empty);
     }
 
     @Nullable

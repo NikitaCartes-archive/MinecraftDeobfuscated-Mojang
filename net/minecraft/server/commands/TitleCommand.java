@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 
 public class TitleCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -59,7 +60,7 @@ public class TitleCommand {
 
     private static int showTitle(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, Component component, String string, Function<Component, Packet<?>> function) throws CommandSyntaxException {
         for (ServerPlayer serverPlayer : collection) {
-            serverPlayer.connection.send(function.apply(ComponentUtils.updateForEntity(commandSourceStack, component, serverPlayer, 0)));
+            serverPlayer.connection.send(function.apply(ComponentUtils.updateForEntity(commandSourceStack, component, (Entity)serverPlayer, 0)));
         }
         if (collection.size() == 1) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.show." + string + ".single", collection.iterator().next().getDisplayName()), true);

@@ -26,7 +26,7 @@ extends Behavior<Animal> {
     private long spawnChildAtTime;
 
     public AnimalMakeLove(EntityType<? extends Animal> entityType, float f) {
-        super(ImmutableMap.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED), 110);
+        super(ImmutableMap.of(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED), 110);
         this.partnerType = entityType;
         this.speedModifier = f;
     }
@@ -87,7 +87,7 @@ extends Behavior<Animal> {
     }
 
     private Optional<? extends Animal> findValidBreedPartner(Animal animal) {
-        return animal.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().stream().filter(livingEntity -> livingEntity.getType() == this.partnerType).map(livingEntity -> (Animal)livingEntity).filter(animal::canMate).findFirst();
+        return animal.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().filter(livingEntity -> livingEntity.getType() == this.partnerType).map(livingEntity -> (Animal)livingEntity).filter(animal::canMate).findFirst();
     }
 
     @Override

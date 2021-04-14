@@ -16,6 +16,7 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
@@ -119,6 +120,10 @@ implements ItemSupplier {
                 if (!(d < 16.0) || !livingEntity.isSensitiveToWater()) continue;
                 livingEntity.hurt(DamageSource.indirectMagic(livingEntity, this.getOwner()), 1.0f);
             }
+        }
+        List<Axolotl> list2 = this.level.getEntitiesOfClass(Axolotl.class, aABB);
+        for (Axolotl axolotl : list2) {
+            axolotl.rehydrate();
         }
     }
 

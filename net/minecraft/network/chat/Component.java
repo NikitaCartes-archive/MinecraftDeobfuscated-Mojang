@@ -195,20 +195,22 @@ FormattedText {
                     if (!jsonObject2.has("name") || !jsonObject2.has("objective")) throw new JsonParseException("A score component needs a least a name and an objective");
                     ScoreComponent scoreComponent = new ScoreComponent(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
                 } else if (jsonObject.has("selector")) {
-                    SelectorComponent selectorComponent = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"));
+                    Optional<Component> optional = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
+                    SelectorComponent selectorComponent = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"), optional);
                 } else if (jsonObject.has("keybind")) {
                     KeybindComponent keybindComponent = new KeybindComponent(GsonHelper.getAsString(jsonObject, "keybind"));
                 } else {
                     if (!jsonObject.has("nbt")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
                     string = GsonHelper.getAsString(jsonObject, "nbt");
+                    Optional<Component> optional2 = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
                     boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
                     if (jsonObject.has("block")) {
-                        NbtComponent.BlockNbtComponent blockNbtComponent = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"));
+                        NbtComponent.BlockNbtComponent blockNbtComponent = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"), optional2);
                     } else if (jsonObject.has("entity")) {
-                        NbtComponent.EntityNbtComponent entityNbtComponent = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
+                        NbtComponent.EntityNbtComponent entityNbtComponent = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"), optional2);
                     } else {
                         if (!jsonObject.has("storage")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
-                        NbtComponent.StorageNbtComponent storageNbtComponent = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
+                        NbtComponent.StorageNbtComponent storageNbtComponent = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")), optional2);
                     }
                 }
                 if (jsonObject.has("extra")) {
@@ -233,6 +235,13 @@ FormattedText {
                 var5_19.append(mutableComponent2);
             }
             return var5_19;
+        }
+
+        private Optional<Component> parseSeparator(Type type, JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
+            if (jsonObject.has("separator")) {
+                return Optional.of(this.deserialize(jsonObject.get("separator"), type, jsonDeserializationContext));
+            }
+            return Optional.empty();
         }
 
         private void serializeStyle(Style style, JsonObject jsonObject, JsonSerializationContext jsonSerializationContext) {
@@ -289,6 +298,7 @@ FormattedText {
             } else if (component instanceof SelectorComponent) {
                 SelectorComponent selectorComponent = (SelectorComponent)component;
                 jsonObject.addProperty("selector", selectorComponent.getPattern());
+                this.serializeSeparator(jsonSerializationContext, jsonObject, selectorComponent.getSeparator());
                 return jsonObject;
             } else if (component instanceof KeybindComponent) {
                 KeybindComponent keybindComponent = (KeybindComponent)component;
@@ -299,6 +309,7 @@ FormattedText {
                 NbtComponent nbtComponent = (NbtComponent)component;
                 jsonObject.addProperty("nbt", nbtComponent.getNbtPath());
                 jsonObject.addProperty("interpret", nbtComponent.isInterpreting());
+                this.serializeSeparator(jsonSerializationContext, jsonObject, nbtComponent.separator);
                 if (component instanceof NbtComponent.BlockNbtComponent) {
                     NbtComponent.BlockNbtComponent blockNbtComponent = (NbtComponent.BlockNbtComponent)component;
                     jsonObject.addProperty("block", blockNbtComponent.getPos());
@@ -314,6 +325,10 @@ FormattedText {
                 }
             }
             return jsonObject;
+        }
+
+        private void serializeSeparator(JsonSerializationContext jsonSerializationContext, JsonObject jsonObject, Optional<Component> optional) {
+            optional.ifPresent(component -> jsonObject.add("separator", this.serialize((Component)component, (Type)component.getClass(), jsonSerializationContext)));
         }
 
         public static String toJson(Component component) {

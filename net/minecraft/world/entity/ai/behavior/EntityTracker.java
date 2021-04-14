@@ -35,7 +35,7 @@ implements PositionTracker {
     @Override
     public boolean isVisibleBy(LivingEntity livingEntity) {
         if (this.entity instanceof LivingEntity) {
-            Optional<List<LivingEntity>> optional = livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES);
+            Optional<List<LivingEntity>> optional = livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
             return this.entity.isAlive() && optional.isPresent() && optional.get().contains(this.entity);
         }
         return true;

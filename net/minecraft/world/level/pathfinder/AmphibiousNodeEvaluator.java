@@ -140,7 +140,7 @@ extends WalkNodeEvaluator {
             }
             return node;
         }
-        if (node == null && l > 0 && blockPathTypes != BlockPathTypes.FENCE && blockPathTypes != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes != BlockPathTypes.TRAPDOOR) {
+        if (node == null && l > 0 && blockPathTypes != BlockPathTypes.FENCE && blockPathTypes != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes != BlockPathTypes.TRAPDOOR && blockPathTypes != BlockPathTypes.POWDER_SNOW) {
             node = this.getAcceptedNode(i, j + 1, k, l - 1, d);
         }
         if (blockPathTypes == BlockPathTypes.OPEN) {

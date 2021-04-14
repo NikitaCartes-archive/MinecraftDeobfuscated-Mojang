@@ -12,6 +12,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.BaseStoneSource;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -103,22 +104,24 @@ extends Feature<BlockStateConfiguration> {
             }
         }
         if (blockStateConfiguration.state.getMaterial() == Material.LAVA) {
-            for (j = 0; j < 16; ++j) {
-                for (int s = 0; s < 16; ++s) {
-                    for (t = 0; t < 8; ++t) {
-                        boolean bl;
-                        boolean bl3 = bl = !bls[(j * 16 + s) * 8 + t] && (j < 15 && bls[((j + 1) * 16 + s) * 8 + t] || j > 0 && bls[((j - 1) * 16 + s) * 8 + t] || s < 15 && bls[(j * 16 + s + 1) * 8 + t] || s > 0 && bls[(j * 16 + (s - 1)) * 8 + t] || t < 7 && bls[(j * 16 + s) * 8 + t + 1] || t > 0 && bls[(j * 16 + s) * 8 + (t - 1)]);
-                        if (!bl || t >= 4 && random.nextInt(2) == 0 || !worldGenLevel.getBlockState(blockPos.offset(j, t, s)).getMaterial().isSolid()) continue;
-                        worldGenLevel.setBlock(blockPos.offset(j, t, s), Blocks.STONE.defaultBlockState(), 2);
+            BaseStoneSource baseStoneSource = featurePlaceContext.chunkGenerator().getBaseStoneSource();
+            for (int s = 0; s < 16; ++s) {
+                for (t = 0; t < 16; ++t) {
+                    for (int u = 0; u < 8; ++u) {
+                        boolean bl2;
+                        boolean bl = bl2 = !bls[(s * 16 + t) * 8 + u] && (s < 15 && bls[((s + 1) * 16 + t) * 8 + u] || s > 0 && bls[((s - 1) * 16 + t) * 8 + u] || t < 15 && bls[(s * 16 + t + 1) * 8 + u] || t > 0 && bls[(s * 16 + (t - 1)) * 8 + u] || u < 7 && bls[(s * 16 + t) * 8 + u + 1] || u > 0 && bls[(s * 16 + t) * 8 + (u - 1)]);
+                        if (!bl2 || u >= 4 && random.nextInt(2) == 0 || !worldGenLevel.getBlockState(blockPos.offset(s, u, t)).getMaterial().isSolid()) continue;
+                        BlockPos blockPos3 = blockPos.offset(s, u, t);
+                        worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseStone(blockPos3), 2);
                     }
                 }
             }
         }
         if (blockStateConfiguration.state.getMaterial() == Material.WATER) {
-            for (j = 0; j < 16; ++j) {
+            for (int j2 = 0; j2 < 16; ++j2) {
                 for (int s = 0; s < 16; ++s) {
                     t = 4;
-                    BlockPos blockPos2 = blockPos.offset(j, 4, s);
+                    BlockPos blockPos2 = blockPos.offset(j2, 4, s);
                     if (!worldGenLevel.getBiome(blockPos2).shouldFreeze(worldGenLevel, blockPos2, false)) continue;
                     worldGenLevel.setBlock(blockPos2, Blocks.ICE.defaultBlockState(), 2);
                 }

@@ -36,5 +36,9 @@ public interface CommandSource {
     public boolean acceptsFailure();
 
     public boolean shouldInformAdmins();
+
+    default public boolean alwaysAccepts() {
+        return false;
+    }
 }
 

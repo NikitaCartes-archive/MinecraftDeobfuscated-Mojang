@@ -20,7 +20,7 @@ extends Behavior<E> {
     private final float strafeSpeed;
 
     public BackUpIfTooClose(int i, float f) {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.tooCloseDistance = i;
         this.strafeSpeed = f;
     }
@@ -38,7 +38,7 @@ extends Behavior<E> {
     }
 
     private boolean isTargetVisible(E mob) {
-        return ((LivingEntity)mob).getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().contains(this.getTarget(mob));
+        return ((LivingEntity)mob).getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(this.getTarget(mob));
     }
 
     private boolean isTargetTooClose(E mob) {

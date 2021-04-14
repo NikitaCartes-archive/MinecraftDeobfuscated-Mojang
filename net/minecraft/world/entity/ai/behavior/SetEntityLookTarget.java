@@ -39,20 +39,20 @@ extends Behavior<LivingEntity> {
     }
 
     public SetEntityLookTarget(Predicate<LivingEntity> predicate, float f) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.predicate = predicate;
         this.maxDistSqr = f * f;
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        return livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(this.predicate);
+        return livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(this.predicate);
     }
 
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         Brain<?> brain = livingEntity.getBrain();
-        brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(this.predicate).filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr).findFirst().ifPresent(livingEntity -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true))));
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(this.predicate).filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr).findFirst().ifPresent(livingEntity -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true))));
     }
 }
 

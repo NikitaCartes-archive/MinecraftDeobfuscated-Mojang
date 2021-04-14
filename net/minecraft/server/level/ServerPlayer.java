@@ -871,7 +871,7 @@ extends Player {
 
     @Override
     public void openTextEdit(SignBlockEntity signBlockEntity) {
-        signBlockEntity.setAllowedPlayerEditor(this);
+        signBlockEntity.setAllowedPlayerEditor(this.getUUID());
         this.connection.send(new ClientboundBlockUpdatePacket(this.level, signBlockEntity.getBlockPos()));
         this.connection.send(new ClientboundOpenSignEditorPacket(signBlockEntity.getBlockPos()));
     }
@@ -1212,8 +1212,8 @@ extends Player {
         return true;
     }
 
-    public void sendTexturePack(String string, String string2, boolean bl) {
-        this.connection.send(new ClientboundResourcePackPacket(string, string2, bl));
+    public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {
+        this.connection.send(new ClientboundResourcePackPacket(string, string2, bl, component));
     }
 
     @Override

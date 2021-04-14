@@ -10,9 +10,10 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
+import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
-import net.minecraft.world.level.levelgen.placement.DepthAverageConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public interface Decoratable<R> {
@@ -34,8 +35,12 @@ public interface Decoratable<R> {
         return this.count(UniformInt.of(0, i));
     }
 
-    default public R range(VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
-        return this.range(new RangeDecoratorConfiguration(verticalAnchor, verticalAnchor2));
+    default public R rangeUniform(VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
+        return this.range(new RangeDecoratorConfiguration(UniformHeight.of(verticalAnchor, verticalAnchor2)));
+    }
+
+    default public R rangeTriangle(VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
+        return this.range(new RangeDecoratorConfiguration(TrapezoidHeight.of(verticalAnchor, verticalAnchor2)));
     }
 
     default public R range(RangeDecoratorConfiguration rangeDecoratorConfiguration) {
@@ -44,10 +49,6 @@ public interface Decoratable<R> {
 
     default public R squared() {
         return this.decorated(FeatureDecorator.SQUARE.configured(NoneDecoratorConfiguration.INSTANCE));
-    }
-
-    default public R depthAverage(VerticalAnchor verticalAnchor, int i) {
-        return this.decorated(FeatureDecorator.DEPTH_AVERAGE.configured(new DepthAverageConfiguration(verticalAnchor, i)));
     }
 }
 

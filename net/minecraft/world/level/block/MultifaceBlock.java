@@ -89,6 +89,9 @@ extends Block {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
+        if (!MultifaceBlock.hasAnyFace(blockState)) {
+            return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED) != false ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+        }
         if (!MultifaceBlock.hasFace(blockState, direction) || MultifaceBlock.canAttachTo(levelAccessor, direction, blockPos2, blockState2)) {
             return blockState;
         }
@@ -140,7 +143,7 @@ extends Block {
             }
             blockState2 = blockState;
         } else {
-            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)this.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true) : this.defaultBlockState();
+            blockState2 = this.isWaterloggable() && blockState.getFluidState().isSourceOfType(Fluids.WATER) ? (BlockState)MultifaceBlock.getEmptyState(this).setValue(BlockStateProperties.WATERLOGGED, true) : MultifaceBlock.getEmptyState(this);
         }
         BlockPos blockPos2 = blockPos.relative(direction);
         if (MultifaceBlock.canAttachTo(blockGetter, direction, blockPos2, blockGetter.getBlockState(blockPos2))) {
@@ -268,11 +271,18 @@ extends Block {
         return PROPERTY_BY_DIRECTION.get(direction);
     }
 
+    public static BlockState getEmptyState(Block block) {
+        return MultifaceBlock.getMultifaceStateWithAllFaces(block.defaultBlockState(), false);
+    }
+
     private static BlockState getDefaultMultifaceState(StateDefinition<Block, BlockState> stateDefinition) {
-        BlockState blockState = stateDefinition.any();
+        return MultifaceBlock.getMultifaceStateWithAllFaces(stateDefinition.any(), true);
+    }
+
+    private static BlockState getMultifaceStateWithAllFaces(BlockState blockState, boolean bl) {
         for (BooleanProperty booleanProperty : PROPERTY_BY_DIRECTION.values()) {
             if (!blockState.hasProperty(booleanProperty)) continue;
-            blockState = (BlockState)blockState.setValue(booleanProperty, false);
+            blockState = (BlockState)blockState.setValue(booleanProperty, bl);
         }
         return blockState;
     }

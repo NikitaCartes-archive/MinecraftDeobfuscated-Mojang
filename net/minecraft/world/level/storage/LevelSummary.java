@@ -122,7 +122,9 @@ implements Comparable<LevelSummary> {
     }
 
     public boolean isIncompatibleWorldHeight() {
-        return true != this.levelVersion.minecraftVersion() > 2692;
+        int i = this.levelVersion.minecraftVersion();
+        boolean bl = i > 2692 && i <= 2706;
+        return false != bl;
     }
 
     public boolean isDisabled() {

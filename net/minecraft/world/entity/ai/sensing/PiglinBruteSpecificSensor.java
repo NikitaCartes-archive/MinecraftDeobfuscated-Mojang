@@ -24,7 +24,7 @@ public class PiglinBruteSpecificSensor
 extends Sensor<LivingEntity> {
     @Override
     public Set<MemoryModuleType<?>> requires() {
-        return ImmutableSet.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEARBY_ADULT_PIGLINS);
+        return ImmutableSet.of(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEARBY_ADULT_PIGLINS);
     }
 
     @Override
@@ -32,13 +32,13 @@ extends Sensor<LivingEntity> {
         Brain<?> brain = livingEntity.getBrain();
         Optional<Object> optional = Optional.empty();
         ArrayList<AbstractPiglin> list = Lists.newArrayList();
-        List list2 = brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of());
+        List list2 = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of());
         for (LivingEntity livingEntity2 : list2) {
             if (!(livingEntity2 instanceof WitherSkeleton) && !(livingEntity2 instanceof WitherBoss)) continue;
             optional = Optional.of((Mob)livingEntity2);
             break;
         }
-        List list3 = brain.getMemory(MemoryModuleType.LIVING_ENTITIES).orElse(ImmutableList.of());
+        List list3 = brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of());
         for (LivingEntity livingEntity3 : list3) {
             if (!(livingEntity3 instanceof AbstractPiglin) || !((AbstractPiglin)livingEntity3).isAdult()) continue;
             list.add((AbstractPiglin)livingEntity3);

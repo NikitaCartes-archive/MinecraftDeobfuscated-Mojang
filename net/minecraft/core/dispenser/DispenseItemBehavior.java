@@ -428,7 +428,7 @@ public interface DispenseItemBehavior {
                 BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                 if (BoneMealItem.growCrop(itemStack, level, blockPos) || BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
                     if (!level.isClientSide) {
-                        level.levelEvent(2005, blockPos, 0);
+                        level.levelEvent(1505, blockPos, 0);
                     }
                 } else {
                     this.setSuccess(false);

@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.feature.configurations.BiasedRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HeightmapConfiguration;
@@ -30,8 +29,6 @@ import net.minecraft.world.level.levelgen.placement.DarkOakTreePlacementDecorato
 import net.minecraft.world.level.levelgen.placement.DecoratedDecorator;
 import net.minecraft.world.level.levelgen.placement.DecoratedDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DecorationContext;
-import net.minecraft.world.level.levelgen.placement.DepthAverageConfiguration;
-import net.minecraft.world.level.levelgen.placement.DepthAverageDecorator;
 import net.minecraft.world.level.levelgen.placement.EndGatewayPlacementDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyWithExtraChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.HeightmapDecorator;
@@ -41,15 +38,12 @@ import net.minecraft.world.level.levelgen.placement.LakeLavaPlacementDecorator;
 import net.minecraft.world.level.levelgen.placement.NoiseBasedDecorator;
 import net.minecraft.world.level.levelgen.placement.NoiseCountFactorDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.NopePlacementDecorator;
-import net.minecraft.world.level.levelgen.placement.RangeBiasedToBottomDecorator;
 import net.minecraft.world.level.levelgen.placement.RangeDecorator;
-import net.minecraft.world.level.levelgen.placement.RangeVeryBiasedToBottomDecorator;
 import net.minecraft.world.level.levelgen.placement.Spread32Decorator;
 import net.minecraft.world.level.levelgen.placement.SquareDecorator;
 import net.minecraft.world.level.levelgen.placement.WaterDepthThresholdConfiguration;
 import net.minecraft.world.level.levelgen.placement.WaterDepthThresholdDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.CountMultiLayerDecorator;
-import net.minecraft.world.level.levelgen.placement.nether.GlowstoneDecorator;
 
 public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<NoneDecoratorConfiguration> NOPE = FeatureDecorator.register("nope", new NopePlacementDecorator(NoneDecoratorConfiguration.CODEC));
@@ -65,15 +59,11 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<NoiseCountFactorDecoratorConfiguration> COUNT_NOISE_BIASED = FeatureDecorator.register("count_noise_biased", new NoiseBasedDecorator(NoiseCountFactorDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<FrequencyWithExtraChanceDecoratorConfiguration> COUNT_EXTRA = FeatureDecorator.register("count_extra", new CountWithExtraChanceDecorator(FrequencyWithExtraChanceDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<ChanceDecoratorConfiguration> LAVA_LAKE = FeatureDecorator.register("lava_lake", new LakeLavaPlacementDecorator(ChanceDecoratorConfiguration.CODEC));
-    public static final FeatureDecorator<CountConfiguration> GLOWSTONE = FeatureDecorator.register("glowstone", new GlowstoneDecorator(CountConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP = FeatureDecorator.register("heightmap", new HeightmapDecorator(HeightmapConfiguration.CODEC));
     public static final FeatureDecorator<HeightmapConfiguration> HEIGHTMAP_SPREAD_DOUBLE = FeatureDecorator.register("heightmap_spread_double", new HeightmapDoubleDecorator(HeightmapConfiguration.CODEC));
     public static final FeatureDecorator<WaterDepthThresholdConfiguration> WATER_DEPTH_THRESHOLD = FeatureDecorator.register("water_depth_threshold", new WaterDepthThresholdDecorator(WaterDepthThresholdConfiguration.CODEC));
     public static final FeatureDecorator<CaveDecoratorConfiguration> CAVE_SURFACE = FeatureDecorator.register("cave_surface", new CaveSurfaceDecorator(CaveDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<RangeDecoratorConfiguration> RANGE = FeatureDecorator.register("range", new RangeDecorator(RangeDecoratorConfiguration.CODEC));
-    public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_BIASED_TO_BOTTOM = FeatureDecorator.register("range_biased_to_bottom", new RangeBiasedToBottomDecorator(BiasedRangeDecoratorConfiguration.CODEC));
-    public static final FeatureDecorator<BiasedRangeDecoratorConfiguration> RANGE_VERY_BIASED_TO_BOTTOM = FeatureDecorator.register("range_very_biased_to_bottom", new RangeVeryBiasedToBottomDecorator(BiasedRangeDecoratorConfiguration.CODEC));
-    public static final FeatureDecorator<DepthAverageConfiguration> DEPTH_AVERAGE = FeatureDecorator.register("depth_average", new DepthAverageDecorator(DepthAverageConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> SPREAD_32_ABOVE = FeatureDecorator.register("spread_32_above", new Spread32Decorator(NoneDecoratorConfiguration.CODEC));
     public static final FeatureDecorator<NoneDecoratorConfiguration> END_GATEWAY = FeatureDecorator.register("end_gateway", new EndGatewayPlacementDecorator(NoneDecoratorConfiguration.CODEC));
     private final Codec<ConfiguredDecorator<DC>> configuredCodec;

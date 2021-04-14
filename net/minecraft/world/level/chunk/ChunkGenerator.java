@@ -38,14 +38,17 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.BaseStoneSource;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.SingleBaseStoneSource;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
@@ -65,6 +68,7 @@ public abstract class ChunkGenerator {
     private final StructureSettings settings;
     private final long strongholdSeed;
     private final List<ChunkPos> strongholdPositions = Lists.newArrayList();
+    private final BaseStoneSource defaultBaseStoneSource;
 
     public ChunkGenerator(BiomeSource biomeSource, StructureSettings structureSettings) {
         this(biomeSource, biomeSource, structureSettings, 0L);
@@ -75,6 +79,7 @@ public abstract class ChunkGenerator {
         this.runtimeBiomeSource = biomeSource2;
         this.settings = structureSettings;
         this.strongholdSeed = l;
+        this.defaultBaseStoneSource = new SingleBaseStoneSource(Blocks.STONE.defaultBlockState());
     }
 
     private void generateStrongholds() {
@@ -216,7 +221,7 @@ public abstract class ChunkGenerator {
     }
 
     public int getGenDepth() {
-        return 384;
+        return 256;
     }
 
     public WeightedRandomList<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
@@ -297,6 +302,10 @@ public abstract class ChunkGenerator {
     public boolean hasStronghold(ChunkPos chunkPos) {
         this.generateStrongholds();
         return this.strongholdPositions.contains(chunkPos);
+    }
+
+    public BaseStoneSource getBaseStoneSource() {
+        return this.defaultBaseStoneSource;
     }
 
     static {

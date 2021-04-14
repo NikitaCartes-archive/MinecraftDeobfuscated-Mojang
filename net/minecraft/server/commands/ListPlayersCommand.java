@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -33,7 +32,7 @@ public class ListPlayersCommand {
     private static int format(CommandSourceStack commandSourceStack, Function<ServerPlayer, Component> function) {
         PlayerList playerList = commandSourceStack.getServer().getPlayerList();
         List<ServerPlayer> list = playerList.getPlayers();
-        MutableComponent component = ComponentUtils.formatList(list, function);
+        Component component = ComponentUtils.formatList(list, function);
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.list.players", list.size(), playerList.getMaxPlayers(), component), false);
         return list.size();
     }

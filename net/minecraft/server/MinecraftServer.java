@@ -1532,6 +1532,11 @@ AutoCloseable {
         return this.resources.getResourceManager();
     }
 
+    @Nullable
+    public Component getResourcePackPrompt() {
+        return null;
+    }
+
     @Override
     public /* synthetic */ void doRunTask(Runnable runnable) {
         this.doRunTask((TickTask)runnable);

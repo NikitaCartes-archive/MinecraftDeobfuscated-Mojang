@@ -219,7 +219,7 @@ extends NodeEvaluator {
         if (blockPathTypes2 == BlockPathTypes.WALKABLE) {
             return node;
         }
-        if ((node == null || node.costMalus < 0.0f) && l > 0 && blockPathTypes2 != BlockPathTypes.FENCE && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && (node = this.getLandNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
+        if ((node == null || node.costMalus < 0.0f) && l > 0 && blockPathTypes2 != BlockPathTypes.FENCE && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.getLandNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
             node = null;
         }
         if (blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
@@ -415,8 +415,11 @@ extends NodeEvaluator {
         if (blockState.isAir()) {
             return BlockPathTypes.OPEN;
         }
-        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD) || blockState.is(Blocks.POWDER_SNOW)) {
+        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
             return BlockPathTypes.TRAPDOOR;
+        }
+        if (blockState.is(Blocks.POWDER_SNOW)) {
+            return BlockPathTypes.POWDER_SNOW;
         }
         if (blockState.is(Blocks.CACTUS)) {
             return BlockPathTypes.DAMAGE_CACTUS;

@@ -34,7 +34,7 @@ extends Sensor<LivingEntity> {
     }
 
     protected Optional<List<LivingEntity>> getVisibleEntities(LivingEntity livingEntity) {
-        return livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES);
+        return livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
     }
 }
 

@@ -2307,6 +2307,11 @@ AutoCloseable {
                 BoneMealItem.addGrowthParticles(this.level, blockPos, j);
                 break;
             }
+            case 1505: {
+                BoneMealItem.addGrowthParticles(this.level, blockPos, j);
+                this.level.playLocalSound(blockPos, SoundEvents.BONE_MEAL_USE, SoundSource.BLOCKS, 1.0f, 1.0f, false);
+                break;
+            }
             case 3002: {
                 if (j >= 0 && j < Direction.Axis.VALUES.length) {
                     ParticleUtils.spawnParticlesAlongAxis(Direction.Axis.VALUES[j], this.level, blockPos, 0.125, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(10, 19));

@@ -171,8 +171,8 @@ public class Camera {
             Vec3 vec39 = this.position.add(vec38);
             BlockPos blockPos = new BlockPos(vec39);
             FluidState fluidState2 = this.level.getFluidState(blockPos);
-            if (!fluidState2.isEmpty()) {
-                if (vec39.y >= (double)((float)this.blockPosition.getY() + fluidState2.getHeight(this.level, this.blockPosition)) || !fluidState2.is(FluidTags.LAVA)) continue;
+            if (fluidState2.is(FluidTags.LAVA)) {
+                if (!(vec39.y <= (double)(fluidState2.getHeight(this.level, blockPos) + (float)blockPos.getY()))) continue;
                 return FogType.LAVA;
             }
             BlockState blockState = this.level.getBlockState(blockPos);

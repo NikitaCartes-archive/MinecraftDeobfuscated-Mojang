@@ -8,12 +8,13 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class SimpleRandomFeatureConfiguration
 implements FeatureConfiguration {
-    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ConfiguredFeature.LIST_CODEC.fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
+    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ConfiguredFeature.LIST_CODEC.fieldOf("features")).flatXmap(ExtraCodecs.nonEmptyListCheck(), ExtraCodecs.nonEmptyListCheck()).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
     public final List<Supplier<ConfiguredFeature<?, ?>>> features;
 
     public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {

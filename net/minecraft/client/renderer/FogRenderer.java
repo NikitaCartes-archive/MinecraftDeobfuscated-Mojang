@@ -145,10 +145,12 @@ public class FogRenderer {
             fogBlue = fogBlue * (1.0f - g) + fogBlue * 0.6f * g;
         }
         float v = fogType == FogType.WATER ? (entity instanceof LocalPlayer ? ((LocalPlayer)entity).getWaterVision() : 1.0f) : (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION) ? GameRenderer.getNightVisionScale((LivingEntity)entity, f) : 0.0f);
-        float w = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
-        fogRed = fogRed * (1.0f - v) + fogRed * w * v;
-        fogGreen = fogGreen * (1.0f - v) + fogGreen * w * v;
-        fogBlue = fogBlue * (1.0f - v) + fogBlue * w * v;
+        if (fogRed != 0.0f && fogGreen != 0.0f && fogBlue != 0.0f) {
+            float w = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
+            fogRed = fogRed * (1.0f - v) + fogRed * w * v;
+            fogGreen = fogGreen * (1.0f - v) + fogGreen * w * v;
+            fogBlue = fogBlue * (1.0f - v) + fogBlue * w * v;
+        }
         RenderSystem.clearColor(fogRed, fogGreen, fogBlue, 0.0f);
     }
 

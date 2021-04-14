@@ -5,12 +5,9 @@ package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
@@ -20,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 public class BiasedToBottomHeight
 extends HeightProvider {
-    public static final Codec<BiasedToBottomHeight> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)VerticalAnchor.CODEC.fieldOf("min_inclusive")).forGetter(biasedToBottomHeight -> biasedToBottomHeight.minInclusive), ((MapCodec)VerticalAnchor.CODEC.fieldOf("max_inclusive")).forGetter(biasedToBottomHeight -> biasedToBottomHeight.maxInclusive), Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("inner", 1).forGetter(biasedToBottomHeight -> biasedToBottomHeight.inner)).apply((Applicative<BiasedToBottomHeight, ?>)instance, BiasedToBottomHeight::new)).comapFlatMap(DataResult::success, Function.identity());
+    public static final Codec<BiasedToBottomHeight> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)VerticalAnchor.CODEC.fieldOf("min_inclusive")).forGetter(biasedToBottomHeight -> biasedToBottomHeight.minInclusive), ((MapCodec)VerticalAnchor.CODEC.fieldOf("max_inclusive")).forGetter(biasedToBottomHeight -> biasedToBottomHeight.maxInclusive), Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("inner", 1).forGetter(biasedToBottomHeight -> biasedToBottomHeight.inner)).apply((Applicative<BiasedToBottomHeight, ?>)instance, BiasedToBottomHeight::new));
     private static final Logger LOGGER = LogManager.getLogger();
     private final VerticalAnchor minInclusive;
     private final VerticalAnchor maxInclusive;
@@ -51,21 +48,6 @@ extends HeightProvider {
     @Override
     public HeightProviderType<?> getType() {
         return HeightProviderType.BIASED_TO_BOTTOM;
-    }
-
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        BiasedToBottomHeight biasedToBottomHeight = (BiasedToBottomHeight)object;
-        return this.minInclusive.equals(biasedToBottomHeight.minInclusive) && this.maxInclusive.equals(this.maxInclusive) && this.inner == biasedToBottomHeight.inner;
-    }
-
-    public int hashCode() {
-        return Objects.hash(this.minInclusive, this.maxInclusive);
     }
 
     public String toString() {

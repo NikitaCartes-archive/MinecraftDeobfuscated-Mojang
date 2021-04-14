@@ -4,26 +4,31 @@
 package net.minecraft.server;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import com.mojang.brigadier.CommandDispatcher;
-import java.util.ArrayDeque;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionLibrary;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.GameRules;
+import org.jetbrains.annotations.Nullable;
 
 public class ServerFunctionManager {
+    private static final Component NO_RECURSIVE_TRACES = new TranslatableComponent("commands.debug.function.noRecursion");
     private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
     private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
     private final MinecraftServer server;
-    private boolean isInFunction;
-    private final ArrayDeque<QueuedCommand> commandQueue = new ArrayDeque();
-    private final List<QueuedCommand> nestedCalls = Lists.newArrayList();
+    @Nullable
+    private ExecutionContext context;
     private final List<CommandFunction> ticking = Lists.newArrayList();
     private boolean postReload;
     private ServerFunctionLibrary library;
@@ -59,46 +64,28 @@ public class ServerFunctionManager {
         this.server.getProfiler().pop();
     }
 
+    public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+        return this.execute(commandFunction, commandSourceStack, null);
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
-        int i = this.getCommandLimit();
-        if (this.isInFunction) {
-            if (this.commandQueue.size() + this.nestedCalls.size() < i) {
-                this.nestedCalls.add(new QueuedCommand(this, commandSourceStack, new CommandFunction.FunctionEntry(commandFunction)));
+    public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack, @Nullable TraceCallbacks traceCallbacks) {
+        if (this.context != null) {
+            if (traceCallbacks != null) {
+                this.context.reportError(NO_RECURSIVE_TRACES.getString());
+                return 0;
             }
+            this.context.delayFunctionCall(commandFunction, commandSourceStack);
             return 0;
         }
         try {
-            this.isInFunction = true;
-            int j = 0;
-            CommandFunction.Entry[] entrys = commandFunction.getEntries();
-            for (int k = entrys.length - 1; k >= 0; --k) {
-                this.commandQueue.push(new QueuedCommand(this, commandSourceStack, entrys[k]));
-            }
-            while (!this.commandQueue.isEmpty()) {
-                try {
-                    QueuedCommand queuedCommand = this.commandQueue.removeFirst();
-                    this.server.getProfiler().push(queuedCommand::toString);
-                    queuedCommand.execute(this.commandQueue, i);
-                    if (!this.nestedCalls.isEmpty()) {
-                        Lists.reverse(this.nestedCalls).forEach(this.commandQueue::addFirst);
-                        this.nestedCalls.clear();
-                    }
-                } finally {
-                    this.server.getProfiler().pop();
-                }
-                if (++j < i) continue;
-                int n = j;
-                return n;
-            }
-            int n = j;
+            this.context = new ExecutionContext(traceCallbacks);
+            int n = this.context.runTopCommand(commandFunction, commandSourceStack);
             return n;
         } finally {
-            this.commandQueue.clear();
-            this.nestedCalls.clear();
-            this.isInFunction = false;
+            this.context = null;
         }
     }
 
@@ -133,22 +120,93 @@ public class ServerFunctionManager {
         return this.library.getTags().getAvailableTags();
     }
 
+    public static interface TraceCallbacks {
+        public void onCommand(int var1, String var2);
+
+        public void onReturn(int var1, String var2, int var3);
+
+        public void onError(int var1, String var2);
+
+        public void onCall(int var1, ResourceLocation var2, int var3);
+    }
+
+    class ExecutionContext {
+        private int depth;
+        @Nullable
+        private final TraceCallbacks tracer;
+        private final Deque<QueuedCommand> commandQueue = Queues.newArrayDeque();
+        private final List<QueuedCommand> nestedCalls = Lists.newArrayList();
+
+        private ExecutionContext(TraceCallbacks traceCallbacks) {
+            this.tracer = traceCallbacks;
+        }
+
+        private void delayFunctionCall(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+            int i = ServerFunctionManager.this.getCommandLimit();
+            if (this.commandQueue.size() + this.nestedCalls.size() < i) {
+                this.nestedCalls.add(new QueuedCommand(commandSourceStack, this.depth, new CommandFunction.FunctionEntry(commandFunction)));
+            }
+        }
+
+        /*
+         * WARNING - Removed try catching itself - possible behaviour change.
+         */
+        private int runTopCommand(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+            int i = ServerFunctionManager.this.getCommandLimit();
+            int j = 0;
+            CommandFunction.Entry[] entrys = commandFunction.getEntries();
+            for (int k = entrys.length - 1; k >= 0; --k) {
+                this.commandQueue.push(new QueuedCommand(commandSourceStack, 0, entrys[k]));
+            }
+            while (!this.commandQueue.isEmpty()) {
+                try {
+                    QueuedCommand queuedCommand = this.commandQueue.removeFirst();
+                    ServerFunctionManager.this.server.getProfiler().push(queuedCommand::toString);
+                    this.depth = queuedCommand.depth;
+                    queuedCommand.execute(ServerFunctionManager.this, this.commandQueue, i, this.tracer);
+                    if (!this.nestedCalls.isEmpty()) {
+                        Lists.reverse(this.nestedCalls).forEach(this.commandQueue::addFirst);
+                        this.nestedCalls.clear();
+                    }
+                } finally {
+                    ServerFunctionManager.this.server.getProfiler().pop();
+                }
+                if (++j < i) continue;
+                return j;
+            }
+            return j;
+        }
+
+        public void reportError(String string) {
+            if (this.tracer != null) {
+                this.tracer.onError(this.depth, string);
+            }
+        }
+    }
+
     public static class QueuedCommand {
-        private final ServerFunctionManager manager;
         private final CommandSourceStack sender;
+        private final int depth;
         private final CommandFunction.Entry entry;
 
-        public QueuedCommand(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack, CommandFunction.Entry entry) {
-            this.manager = serverFunctionManager;
+        public QueuedCommand(CommandSourceStack commandSourceStack, int i, CommandFunction.Entry entry) {
             this.sender = commandSourceStack;
+            this.depth = i;
             this.entry = entry;
         }
 
-        public void execute(ArrayDeque<QueuedCommand> arrayDeque, int i) {
-            try {
-                this.entry.execute(this.manager, this.sender, arrayDeque, i);
-            } catch (Throwable throwable) {
-                // empty catch block
+        public void execute(ServerFunctionManager serverFunctionManager, Deque<QueuedCommand> deque, int i, @Nullable TraceCallbacks traceCallbacks) {
+            block4: {
+                try {
+                    this.entry.execute(serverFunctionManager, this.sender, deque, i, this.depth, traceCallbacks);
+                } catch (CommandSyntaxException commandSyntaxException) {
+                    if (traceCallbacks != null) {
+                        traceCallbacks.onError(this.depth, commandSyntaxException.getRawMessage().getString());
+                    }
+                } catch (Exception exception) {
+                    if (traceCallbacks == null) break block4;
+                    traceCallbacks.onError(this.depth, exception.getMessage());
+                }
             }
         }
 

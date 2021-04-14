@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -48,11 +49,11 @@ extends Feature<GeodeConfiguration> {
         int i = geodeConfiguration.minGenOffset;
         int j = geodeConfiguration.maxGenOffset;
         LinkedList<Pair<BlockPos, Integer>> list = Lists.newLinkedList();
-        int k = geodeConfiguration.minDistributionPoints + random.nextInt(geodeConfiguration.maxDistributionPoints - geodeConfiguration.minDistributionPoints);
+        int k = geodeConfiguration.distributionPoints.sample(random);
         WorldgenRandom worldgenRandom = new WorldgenRandom(worldGenLevel.getSeed());
         NormalNoise normalNoise = NormalNoise.create((RandomSource)worldgenRandom, -4, 1.0);
         LinkedList<BlockPos> list2 = Lists.newLinkedList();
-        double d = (double)k / (double)geodeConfiguration.maxOuterWallDistance;
+        double d = (double)k / (double)geodeConfiguration.outerWallDistance.getMaxValue();
         GeodeLayerSettings geodeLayerSettings = geodeConfiguration.geodeLayerSettings;
         GeodeBlockSettings geodeBlockSettings = geodeConfiguration.geodeBlockSettings;
         GeodeCrackSettings geodeCrackSettings = geodeConfiguration.geodeCrackSettings;
@@ -66,13 +67,13 @@ extends Feature<GeodeConfiguration> {
         for (n = 0; n < k; ++n) {
             int q;
             int p;
-            o = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance);
-            BlockPos blockPos2 = blockPos.offset(o, p = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance), q = geodeConfiguration.minOuterWallDistance + random.nextInt(geodeConfiguration.maxOuterWallDistance - geodeConfiguration.minOuterWallDistance));
+            o = geodeConfiguration.outerWallDistance.sample(random);
+            BlockPos blockPos2 = blockPos.offset(o, p = geodeConfiguration.outerWallDistance.sample(random), q = geodeConfiguration.outerWallDistance.sample(random));
             BlockState blockState = worldGenLevel.getBlockState(blockPos2);
             if ((blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA)) && ++m > geodeConfiguration.invalidBlocksThreshold) {
                 return false;
             }
-            list.add(Pair.of(blockPos2, geodeConfiguration.minPointOffset + random.nextInt(geodeConfiguration.maxPointOffset - geodeConfiguration.minPointOffset)));
+            list.add(Pair.of(blockPos2, geodeConfiguration.pointOffset.sample(random)));
         }
         if (bl) {
             n = random.nextInt(4);
@@ -137,7 +138,7 @@ extends Feature<GeodeConfiguration> {
         }
         List<BlockState> list4 = geodeBlockSettings.innerPlacements;
         block4: for (BlockPos blockPos5 : list3) {
-            BlockState blockState2 = list4.get(random.nextInt(list4.size()));
+            BlockState blockState2 = Util.getRandom(list4, random);
             for (Direction direction : DIRECTIONS) {
                 if (blockState2.hasProperty(BlockStateProperties.FACING)) {
                     blockState2 = (BlockState)blockState2.setValue(BlockStateProperties.FACING, direction);

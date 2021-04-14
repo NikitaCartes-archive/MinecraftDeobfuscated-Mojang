@@ -33,11 +33,11 @@ extends Sensor<LivingEntity> {
 
     @Override
     public Set<MemoryModuleType<?>> requires() {
-        return ImmutableSet.of(MemoryModuleType.LIVING_ENTITIES);
+        return ImmutableSet.of(MemoryModuleType.NEAREST_LIVING_ENTITIES);
     }
 
     public static void checkForNearbyGolem(LivingEntity livingEntity2) {
-        Optional<List<LivingEntity>> optional = livingEntity2.getBrain().getMemory(MemoryModuleType.LIVING_ENTITIES);
+        Optional<List<LivingEntity>> optional = livingEntity2.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES);
         if (!optional.isPresent()) {
             return;
         }

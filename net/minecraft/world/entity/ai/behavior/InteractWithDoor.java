@@ -112,10 +112,10 @@ extends Behavior<LivingEntity> {
 
     private static boolean areOtherMobsComingThroughDoor(ServerLevel serverLevel, LivingEntity livingEntity3, BlockPos blockPos) {
         Brain<List<LivingEntity>> brain = livingEntity3.getBrain();
-        if (!brain.hasMemoryValue(MemoryModuleType.LIVING_ENTITIES)) {
+        if (!brain.hasMemoryValue(MemoryModuleType.NEAREST_LIVING_ENTITIES)) {
             return false;
         }
-        return brain.getMemory(MemoryModuleType.LIVING_ENTITIES).get().stream().filter(livingEntity2 -> livingEntity2.getType() == livingEntity3.getType()).filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 2.0)).anyMatch(livingEntity -> InteractWithDoor.isMobComingThroughDoor(serverLevel, livingEntity, blockPos));
+        return brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).get().stream().filter(livingEntity2 -> livingEntity2.getType() == livingEntity3.getType()).filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 2.0)).anyMatch(livingEntity -> InteractWithDoor.isMobComingThroughDoor(serverLevel, livingEntity, blockPos));
     }
 
     private static boolean isMobComingThroughDoor(ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
