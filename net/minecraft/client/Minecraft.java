@@ -1672,7 +1672,7 @@ WindowEventHandler {
     }
 
     public void setLevel(ClientLevel clientLevel) {
-        ProgressScreen progressScreen = new ProgressScreen();
+        ProgressScreen progressScreen = new ProgressScreen(true);
         progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
         this.updateScreenAndTick(progressScreen);
         this.level = clientLevel;
@@ -1689,7 +1689,7 @@ WindowEventHandler {
     }
 
     public void clearLevel() {
-        this.clearLevel(new ProgressScreen());
+        this.clearLevel(new ProgressScreen(true));
     }
 
     public void clearLevel(Screen screen) {
@@ -2122,7 +2122,7 @@ WindowEventHandler {
     }
 
     public boolean shouldEntityAppearGlowing(Entity entity) {
-        return entity.isGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && entity.getType() == EntityType.PLAYER;
+        return entity.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && entity.getType() == EntityType.PLAYER;
     }
 
     @Override

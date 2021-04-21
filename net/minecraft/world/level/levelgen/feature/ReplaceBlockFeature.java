@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 
 public class ReplaceBlockFeature
@@ -21,8 +22,10 @@ extends Feature<ReplaceBlockConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
         ReplaceBlockConfiguration replaceBlockConfiguration = featurePlaceContext.config();
-        if (worldGenLevel.getBlockState(blockPos).is(replaceBlockConfiguration.target.getBlock())) {
-            worldGenLevel.setBlock(blockPos, replaceBlockConfiguration.state, 2);
+        for (OreConfiguration.TargetBlockState targetBlockState : replaceBlockConfiguration.targetStates) {
+            if (!targetBlockState.target.test(worldGenLevel.getBlockState(blockPos), featurePlaceContext.random())) continue;
+            worldGenLevel.setBlock(blockPos, targetBlockState.state, 2);
+            break;
         }
         return true;
     }

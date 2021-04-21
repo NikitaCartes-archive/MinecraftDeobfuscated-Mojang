@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class StringUtil {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)\\u00A7[0-9A-FK-OR]");
-    private static final Pattern LINE_PATTERN = Pattern.compile("\r\n|[\n\r\u2028\u2029\u0085]");
+    private static final Pattern LINE_PATTERN = Pattern.compile("\\r\\n|\\v");
+    private static final Pattern LINE_END_PATTERN = Pattern.compile("(?:\\r\\n|\\v)$");
 
     public static String formatTickDuration(int i) {
         int j = i / 20;
@@ -49,6 +50,10 @@ public class StringUtil {
             ++i;
         }
         return i;
+    }
+
+    public static boolean endsWithNewLine(String string) {
+        return LINE_END_PATTERN.matcher(string).find();
     }
 }
 

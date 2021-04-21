@@ -145,17 +145,11 @@ public class RealmsTextureManager {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     private static int getTextureId(String string, String string2) {
-        int i;
-        if (TEXTURES.containsKey(string)) {
-            RealmsTexture realmsTexture = TEXTURES.get(string);
-            if (realmsTexture.image.equals(string2)) {
-                return realmsTexture.textureId;
-            }
-            RenderSystem.deleteTexture(realmsTexture.textureId);
-            i = realmsTexture.textureId;
-        } else {
-            i = GlStateManager._genTexture();
+        RealmsTexture realmsTexture = TEXTURES.get(string);
+        if (realmsTexture != null && realmsTexture.image.equals(string2)) {
+            return realmsTexture.textureId;
         }
+        int i = realmsTexture != null ? realmsTexture.textureId : GlStateManager._genTexture();
         IntBuffer intBuffer = null;
         int j = 0;
         int k = 0;

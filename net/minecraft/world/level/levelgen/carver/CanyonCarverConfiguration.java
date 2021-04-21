@@ -20,14 +20,14 @@ extends CarverConfiguration {
     public final FloatProvider verticalRotation;
     public final CanyonShapeConfiguration shape;
 
-    public CanyonCarverConfiguration(float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, CarverDebugSettings carverDebugSettings, FloatProvider floatProvider2, CanyonShapeConfiguration canyonShapeConfiguration) {
-        super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
+    public CanyonCarverConfiguration(float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, boolean bl, CarverDebugSettings carverDebugSettings, FloatProvider floatProvider2, CanyonShapeConfiguration canyonShapeConfiguration) {
+        super(f, heightProvider, floatProvider, verticalAnchor, bl, carverDebugSettings);
         this.verticalRotation = floatProvider2;
         this.shape = canyonShapeConfiguration;
     }
 
     public CanyonCarverConfiguration(CarverConfiguration carverConfiguration, FloatProvider floatProvider, CanyonShapeConfiguration canyonShapeConfiguration) {
-        this(carverConfiguration.probability, carverConfiguration.y, carverConfiguration.yScale, carverConfiguration.lavaLevel, carverConfiguration.debugSettings, floatProvider, canyonShapeConfiguration);
+        this(carverConfiguration.probability, carverConfiguration.y, carverConfiguration.yScale, carverConfiguration.lavaLevel, carverConfiguration.aquifersEnabled, carverConfiguration.debugSettings, floatProvider, canyonShapeConfiguration);
     }
 
     public static class CanyonShapeConfiguration {

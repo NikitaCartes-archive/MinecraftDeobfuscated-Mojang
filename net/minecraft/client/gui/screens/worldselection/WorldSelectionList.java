@@ -307,7 +307,7 @@ extends ObjectSelectionList<WorldListEntry> {
         public void deleteWorld() {
             this.minecraft.setScreen(new ConfirmScreen(bl -> {
                 if (bl) {
-                    this.minecraft.setScreen(new ProgressScreen());
+                    this.minecraft.setScreen(new ProgressScreen(true));
                     this.doDeleteWorld();
                 }
                 this.minecraft.setScreen(this.screen);

@@ -15,7 +15,7 @@ implements BaseStoneSource {
     }
 
     @Override
-    public BlockState getBaseStone(int i, int j, int k) {
+    public BlockState getBaseBlock(int i, int j, int k) {
         return this.state;
     }
 }

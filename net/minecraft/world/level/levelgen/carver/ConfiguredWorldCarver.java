@@ -15,6 +15,7 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
@@ -39,8 +40,8 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
         return this.worldCarver.isStartChunk(this.config, random);
     }
 
-    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, ChunkPos chunkPos, BitSet bitSet) {
-        return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, i, chunkPos, bitSet);
+    public boolean carve(CarvingContext carvingContext, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, Aquifer aquifer, ChunkPos chunkPos, BitSet bitSet) {
+        return this.worldCarver.carve(carvingContext, this.config, chunkAccess, function, random, aquifer, chunkPos, bitSet);
     }
 }
 

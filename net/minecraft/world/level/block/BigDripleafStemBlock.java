@@ -130,10 +130,9 @@ SimpleWaterloggedBlock {
         }
         BlockPos blockPos2 = optional.get();
         BlockPos blockPos3 = blockPos2.above();
-        FluidState fluidState = serverLevel.getFluidState(blockPos3);
         Direction direction = blockState.getValue(FACING);
-        BigDripleafStemBlock.place(serverLevel, blockPos2, blockState.getFluidState(), direction);
-        BigDripleafBlock.place(serverLevel, blockPos3, fluidState, direction);
+        BigDripleafStemBlock.place(serverLevel, blockPos2, serverLevel.getFluidState(blockPos2), direction);
+        BigDripleafBlock.place(serverLevel, blockPos3, serverLevel.getFluidState(blockPos3), direction);
     }
 
     @Override

@@ -297,7 +297,7 @@ implements Bucketable {
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return 0.275f;
+        return entityDimensions.height * 0.655f;
     }
 
     @Override

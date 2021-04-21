@@ -22,7 +22,7 @@ extends Block {
     }
 
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.is(Blocks.MOSS_BLOCK) || blockState.is(Blocks.GRASS_BLOCK) || blockState.is(BlockTags.DIRT) || blockState.is(Blocks.FARMLAND);
+        return blockState.is(BlockTags.DIRT) || blockState.is(Blocks.FARMLAND);
     }
 
     @Override

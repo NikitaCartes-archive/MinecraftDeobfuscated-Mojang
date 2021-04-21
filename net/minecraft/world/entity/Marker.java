@@ -34,7 +34,7 @@ extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compoundTag) {
-        compoundTag.put(DATA_TAG, this.data);
+        compoundTag.put(DATA_TAG, this.data.copy());
     }
 
     @Override

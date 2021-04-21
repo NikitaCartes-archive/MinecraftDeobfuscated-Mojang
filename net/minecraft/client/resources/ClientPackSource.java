@@ -24,11 +24,13 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.client.resources.DefaultClientPackResources;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
@@ -62,6 +64,7 @@ implements RepositorySource {
     private static final String SERVER_ID = "server";
     private static final String PROGRAMMER_ART_ID = "programer_art";
     private static final String PROGRAMMER_ART_NAME = "Programmer Art";
+    private static final Component APPLYING_PACK_TEXT = new TranslatableComponent("multiplayer.applyingPack");
     private final VanillaPackResources vanillaPack;
     private final File serverPackDir;
     private final ReentrantLock downloadLock = new ReentrantLock();
@@ -110,7 +113,7 @@ implements RepositorySource {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2) {
+    public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2, boolean bl) {
         String string3 = DigestUtils.sha1Hex(string);
         String string4 = SHA1.matcher(string2).matches() ? string2 : "";
         this.downloadLock.lock();
@@ -122,7 +125,7 @@ implements RepositorySource {
             if (file.exists()) {
                 completableFuture = CompletableFuture.completedFuture("");
             } else {
-                ProgressScreen progressScreen = new ProgressScreen();
+                ProgressScreen progressScreen = new ProgressScreen(bl);
                 Map<String, String> map = ClientPackSource.getDownloadHeaders();
                 Minecraft minecraft = Minecraft.getInstance();
                 minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
@@ -132,6 +135,12 @@ implements RepositorySource {
                 if (!this.checkHash(string4, file)) {
                     return Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"));
                 }
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.execute(() -> {
+                    if (!bl) {
+                        minecraft.setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
+                    }
+                });
                 return this.setServerPack(file, PackSource.SERVER);
             })).whenComplete((void_, throwable) -> {
                 if (throwable != null) {

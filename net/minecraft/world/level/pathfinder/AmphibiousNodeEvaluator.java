@@ -5,14 +5,11 @@ package net.minecraft.world.level.pathfinder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Target;
@@ -210,10 +207,9 @@ extends WalkNodeEvaluator {
         }
         if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
             mutableBlockPos.set(i, j, k).move(Direction.DOWN);
-            BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
             BlockPathTypes blockPathTypes3 = AmphibiousNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos);
             blockPathTypes = blockPathTypes3 == BlockPathTypes.WALKABLE || blockPathTypes3 == BlockPathTypes.OPEN || blockPathTypes3 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
-            if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockState.is(BlockTags.CAMPFIRES)) {
+            if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
             }
             if (blockPathTypes3 == BlockPathTypes.DAMAGE_CACTUS) {

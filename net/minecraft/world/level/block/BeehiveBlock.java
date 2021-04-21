@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -118,6 +120,7 @@ extends BaseEntityBlock {
         int i = blockState.getValue(HONEY_LEVEL);
         boolean bl = false;
         if (i >= 5) {
+            Item item = itemStack.getItem();
             if (itemStack.is(Items.SHEARS)) {
                 level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0f, 1.0f);
                 BeehiveBlock.dropHoneycomb(level, blockPos);
@@ -134,6 +137,9 @@ extends BaseEntityBlock {
                 }
                 bl = true;
                 level.gameEvent((Entity)player2, GameEvent.FLUID_PICKUP, blockPos);
+            }
+            if (!level.isClientSide() && bl) {
+                player2.awardStat(Stats.ITEM_USED.get(item));
             }
         }
         if (bl) {

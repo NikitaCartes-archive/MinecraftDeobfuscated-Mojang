@@ -65,6 +65,7 @@ extends Block {
             level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0f, 1.0f);
             level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
             level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
+            player.awardStat(Stats.ITEM_USED.get(item));
             return InteractionResult.SUCCESS;
         }
         if (level.isClientSide) {

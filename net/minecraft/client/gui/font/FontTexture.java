@@ -29,9 +29,9 @@ extends AbstractTexture {
         this.name = resourceLocation;
         this.colored = bl;
         this.root = new Node(0, 0, 256, 256);
-        TextureUtil.prepareImage(bl ? NativeImage.InternalGlFormat.RGBA : NativeImage.InternalGlFormat.INTENSITY, this.getId(), 256, 256);
-        this.normalType = RenderType.text(resourceLocation);
-        this.seeThroughType = RenderType.textSeeThrough(resourceLocation);
+        TextureUtil.prepareImage(bl ? NativeImage.InternalGlFormat.RGBA : NativeImage.InternalGlFormat.RED, this.getId(), 256, 256);
+        this.normalType = bl ? RenderType.text(resourceLocation) : RenderType.textIntensity(resourceLocation);
+        this.seeThroughType = bl ? RenderType.textSeeThrough(resourceLocation) : RenderType.textIntensitySeeThrough(resourceLocation);
     }
 
     @Override

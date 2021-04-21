@@ -48,10 +48,15 @@ extends Feature<RootSystemConfiguration> {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (int i = 1; i <= rootSystemConfiguration.requiredVerticalSpaceForTree; ++i) {
             mutableBlockPos.move(Direction.UP);
-            if (worldGenLevel.isEmptyBlock(mutableBlockPos) || worldGenLevel.isWaterAt(mutableBlockPos)) continue;
+            BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
+            if (RootSystemFeature.isAllowedTreeSpace(blockState, i, rootSystemConfiguration.allowedVerticalWaterForTree)) continue;
             return false;
         }
         return true;
+    }
+
+    private static boolean isAllowedTreeSpace(BlockState blockState, int i, int j) {
+        return blockState.isAir() || i <= j && blockState.getFluidState().is(FluidTags.WATER);
     }
 
     private boolean placeDirtAndTree(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos blockPos) {

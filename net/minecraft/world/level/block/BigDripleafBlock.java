@@ -125,7 +125,7 @@ SimpleWaterloggedBlock {
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        return blockState2.is(Blocks.BIG_DRIPLEAF_STEM) || blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP);
+        return blockState2.is(Blocks.BIG_DRIPLEAF_STEM) || blockState2.is(this) || blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP);
     }
 
     @Override
@@ -135,6 +135,9 @@ SimpleWaterloggedBlock {
         }
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+        }
+        if (direction == Direction.UP && blockState2.is(this)) {
+            return Blocks.BIG_DRIPLEAF_STEM.withPropertiesOf(blockState);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -240,10 +243,10 @@ SimpleWaterloggedBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().below());
-        Direction direction = blockState.is(Blocks.BIG_DRIPLEAF_STEM) ? blockState.getValue(BigDripleafStemBlock.FACING) : blockPlaceContext.getHorizontalDirection().getOpposite();
-        return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, direction);
+        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
+        boolean bl = blockState.is(Blocks.BIG_DRIPLEAF) || blockState.is(Blocks.BIG_DRIPLEAF_STEM);
+        return (BlockState)((BlockState)this.defaultBlockState().setValue(WATERLOGGED, fluidState.isSourceOfType(Fluids.WATER))).setValue(FACING, bl ? blockState.getValue(FACING) : blockPlaceContext.getHorizontalDirection().getOpposite());
     }
 
     @Override

@@ -44,8 +44,8 @@ public interface Bucketable {
         if (mob.isNoGravity()) {
             compoundTag.putBoolean("NoGravity", mob.isNoGravity());
         }
-        if (mob.isGlowing()) {
-            compoundTag.putBoolean("Glowing", mob.isGlowing());
+        if (mob.hasGlowingTag()) {
+            compoundTag.putBoolean("Glowing", mob.hasGlowingTag());
         }
         if (mob.isInvulnerable()) {
             compoundTag.putBoolean("Invulnerable", mob.isInvulnerable());
@@ -64,7 +64,7 @@ public interface Bucketable {
             mob.setNoGravity(compoundTag.getBoolean("NoGravity"));
         }
         if (compoundTag.contains("Glowing")) {
-            mob.setGlowing(compoundTag.getBoolean("Glowing"));
+            mob.setGlowingTag(compoundTag.getBoolean("Glowing"));
         }
         if (compoundTag.contains("Invulnerable")) {
             mob.setInvulnerable(compoundTag.getBoolean("Invulnerable"));

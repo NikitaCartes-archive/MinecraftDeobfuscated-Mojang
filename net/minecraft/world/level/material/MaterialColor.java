@@ -66,6 +66,7 @@ public class MaterialColor {
     public static final MaterialColor WARPED_WART_BLOCK = new MaterialColor(58, 1356933);
     public static final MaterialColor DEEPSLATE = new MaterialColor(59, 0x646464);
     public static final MaterialColor RAW_IRON = new MaterialColor(60, 14200723);
+    public static final MaterialColor GLOW_LICHEN = new MaterialColor(61, 8365974);
     public final int col;
     public final int id;
 

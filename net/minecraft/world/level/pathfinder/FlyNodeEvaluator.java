@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
@@ -238,9 +237,8 @@ extends WalkNodeEvaluator {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPathTypes blockPathTypes = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
         if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
-            BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(i, j - 1, k));
             BlockPathTypes blockPathTypes2 = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
-            if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockPathTypes2 == BlockPathTypes.LAVA || blockState.is(BlockTags.CAMPFIRES)) {
+            if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || blockPathTypes2 == BlockPathTypes.LAVA) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
             } else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
                 blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;

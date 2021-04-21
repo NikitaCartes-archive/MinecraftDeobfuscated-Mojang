@@ -30,6 +30,7 @@ public class FishingHookRenderer
 extends EntityRenderer<FishingHook> {
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
     private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
+    private static final double VIEW_BOBBING_SCALE = 960.0;
 
     public FishingHookRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -78,10 +79,9 @@ extends EntityRenderer<FishingHook> {
             q = Mth.lerp((double)g, player.zo, player.getZ()) - d * m + e * 0.8;
             r = player.isCrouching() ? -0.1875f : 0.0f;
         } else {
-            s = this.entityRenderDispatcher.options.fov;
-            Vec3 vec3 = new Vec3((double)j * -0.36 * (s /= 100.0), -0.045 * s, 0.4);
-            vec3 = vec3.xRot(-Mth.lerp(g, player.xRotO, player.xRot) * ((float)Math.PI / 180));
-            vec3 = vec3.yRot(-Mth.lerp(g, player.yRotO, player.yRot) * ((float)Math.PI / 180));
+            s = 960.0 / this.entityRenderDispatcher.options.fov;
+            Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)j * 0.525f, -0.1f);
+            vec3 = vec3.scale(s);
             vec3 = vec3.yRot(k * 0.5f);
             vec3 = vec3.xRot(-k * 0.7f);
             o = Mth.lerp((double)g, player.xo, player.getX()) + vec3.x;

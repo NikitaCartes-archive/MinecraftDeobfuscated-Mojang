@@ -112,7 +112,7 @@ extends Feature<BlockStateConfiguration> {
                         boolean bl = bl2 = !bls[(s * 16 + t) * 8 + u] && (s < 15 && bls[((s + 1) * 16 + t) * 8 + u] || s > 0 && bls[((s - 1) * 16 + t) * 8 + u] || t < 15 && bls[(s * 16 + t + 1) * 8 + u] || t > 0 && bls[(s * 16 + (t - 1)) * 8 + u] || u < 7 && bls[(s * 16 + t) * 8 + u + 1] || u > 0 && bls[(s * 16 + t) * 8 + (u - 1)]);
                         if (!bl2 || u >= 4 && random.nextInt(2) == 0 || !worldGenLevel.getBlockState(blockPos.offset(s, u, t)).getMaterial().isSolid()) continue;
                         BlockPos blockPos3 = blockPos.offset(s, u, t);
-                        worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseStone(blockPos3), 2);
+                        worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
                     }
                 }
             }

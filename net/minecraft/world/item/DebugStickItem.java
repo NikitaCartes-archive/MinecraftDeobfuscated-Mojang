@@ -47,18 +47,18 @@ extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
+        BlockPos blockPos;
         Player player = useOnContext.getPlayer();
         Level level = useOnContext.getLevel();
-        if (!level.isClientSide && player != null) {
-            BlockPos blockPos = useOnContext.getClickedPos();
-            this.handleInteraction(player, level.getBlockState(blockPos), level, blockPos, true, useOnContext.getItemInHand());
+        if (!level.isClientSide && player != null && !this.handleInteraction(player, level.getBlockState(blockPos = useOnContext.getClickedPos()), level, blockPos, true, useOnContext.getItemInHand())) {
+            return InteractionResult.FAIL;
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    private void handleInteraction(Player player, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ItemStack itemStack) {
+    private boolean handleInteraction(Player player, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ItemStack itemStack) {
         if (!player.canUseGameMasterBlocks()) {
-            return;
+            return false;
         }
         Block block = blockState.getBlock();
         StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
@@ -66,7 +66,7 @@ extends Item {
         String string = Registry.BLOCK.getKey(block).toString();
         if (collection.isEmpty()) {
             DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".empty", string));
-            return;
+            return false;
         }
         CompoundTag compoundTag = itemStack.getOrCreateTagElement("DebugProperty");
         String string2 = compoundTag.getString(string);
@@ -84,6 +84,7 @@ extends Item {
             compoundTag.putString(string, string3);
             DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".select", string3, DebugStickItem.getNameHelper(blockState, property)));
         }
+        return true;
     }
 
     private static <T extends Comparable<T>> BlockState cycleState(BlockState blockState, Property<T> property, boolean bl) {

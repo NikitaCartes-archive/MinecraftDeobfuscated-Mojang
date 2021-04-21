@@ -479,14 +479,14 @@ public class MineShaftPieces {
             for (n = 0; n < this.numSections; ++n) {
                 o = 2 + n * 5;
                 this.placeSupport(worldGenLevel, boundingBox, 0, 0, o, 2, 2, random);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.1f, 0, 2, o - 1);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.1f, 2, 2, o - 1);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.1f, 0, 2, o + 1);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.1f, 2, 2, o + 1);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.05f, 0, 2, o - 2);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.05f, 2, 2, o - 2);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.05f, 0, 2, o + 2);
-                this.placeCobWeb(worldGenLevel, boundingBox, random, 0.05f, 2, 2, o + 2);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.1f, 0, 2, o - 1);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.1f, 2, 2, o - 1);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.1f, 0, 2, o + 1);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.1f, 2, 2, o + 1);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.05f, 0, 2, o - 2);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.05f, 2, 2, o - 2);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.05f, 0, 2, o + 2);
+                this.maybePlaceCobWeb(worldGenLevel, boundingBox, random, 0.05f, 2, 2, o + 2);
                 if (random.nextInt(100) == 0) {
                     this.createChest(worldGenLevel, boundingBox, random, 2, 0, o - 1, BuiltInLootTables.ABANDONED_MINESHAFT);
                 }
@@ -521,7 +521,7 @@ public class MineShaftPieces {
                     BlockState blockState3 = this.getBlock(worldGenLevel, 1, -1, p, boundingBox);
                     if (blockState3.isAir() || !blockState3.isSolidRender(worldGenLevel, this.getWorldPos(1, -1, p))) continue;
                     float f = this.isInterior(worldGenLevel, 1, 0, p, boundingBox) ? 0.7f : 0.9f;
-                    this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, 1, 0, p, blockState2, false);
+                    this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, 1, 0, p, blockState2);
                 }
             }
             return true;
@@ -621,15 +621,28 @@ public class MineShaftPieces {
                 this.generateBox(worldGenLevel, boundingBox, m, l, k, m, l, k, blockState, CAVE_AIR, false);
             } else {
                 this.generateBox(worldGenLevel, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
-                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k - 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH), false);
-                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k + 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH), false);
+                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k - 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH));
+                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k + 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
             }
         }
 
-        private void placeCobWeb(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
-            if (this.isInterior(worldGenLevel, i, j, k, boundingBox)) {
-                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, i, j, k, Blocks.COBWEB.defaultBlockState(), true);
+        private void maybePlaceCobWeb(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
+            if (this.isInterior(worldGenLevel, i, j, k, boundingBox) && random.nextFloat() < f && this.hasSturdyNeighbours(worldGenLevel, boundingBox, i, j, k, 2)) {
+                this.placeBlock(worldGenLevel, Blocks.COBWEB.defaultBlockState(), i, j, k, boundingBox);
             }
+        }
+
+        private boolean hasSturdyNeighbours(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l) {
+            BlockPos.MutableBlockPos mutableBlockPos = this.getWorldPos(i, j, k);
+            int m = 0;
+            for (Direction direction : Direction.values()) {
+                mutableBlockPos.move(direction);
+                if (boundingBox.isInside(mutableBlockPos) && worldGenLevel.getBlockState(mutableBlockPos).isFaceSturdy(worldGenLevel, mutableBlockPos, direction.getOpposite()) && ++m >= l) {
+                    return true;
+                }
+                mutableBlockPos.move(direction.getOpposite());
+            }
+            return false;
         }
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.CaveCarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
@@ -33,12 +34,12 @@ extends CaveWorldCarver {
     }
 
     @Override
-    protected boolean carveBlock(CarvingContext carvingContext, CaveCarverConfiguration caveCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, int i, MutableBoolean mutableBoolean) {
-        return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, random, mutableBlockPos, mutableBlockPos2, i);
+    protected boolean carveBlock(CarvingContext carvingContext, CaveCarverConfiguration caveCarverConfiguration, ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer, MutableBoolean mutableBoolean) {
+        return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, random, mutableBlockPos, mutableBlockPos2, aquifer);
     }
 
-    protected static boolean carveBlock(WorldCarver<?> worldCarver, ChunkAccess chunkAccess, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, int i) {
-        if (mutableBlockPos.getY() >= i) {
+    protected static boolean carveBlock(WorldCarver<?> worldCarver, ChunkAccess chunkAccess, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, Aquifer aquifer) {
+        if (aquifer.computeState(WorldCarver.STONE_SOURCE, mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), Double.NEGATIVE_INFINITY).isAir()) {
             return false;
         }
         BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);

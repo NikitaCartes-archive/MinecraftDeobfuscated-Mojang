@@ -91,10 +91,13 @@ extends Feature<VegetationPatchConfiguration> {
 
     protected boolean placeGround(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Predicate<BlockState> predicate, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i) {
         for (int j = 0; j < i; ++j) {
-            if (!predicate.test(worldGenLevel.getBlockState(mutableBlockPos))) {
+            BlockState blockState2;
+            BlockState blockState = vegetationPatchConfiguration.groundState.getState(random, mutableBlockPos);
+            if (blockState.is((blockState2 = worldGenLevel.getBlockState(mutableBlockPos)).getBlock())) continue;
+            if (!predicate.test(blockState2)) {
                 return j != 0;
             }
-            worldGenLevel.setBlock(mutableBlockPos, vegetationPatchConfiguration.groundState.getState(random, mutableBlockPos), 2);
+            worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
             mutableBlockPos.move(vegetationPatchConfiguration.surface.getDirection());
         }
         return true;

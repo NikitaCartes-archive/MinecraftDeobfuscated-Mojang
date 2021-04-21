@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
@@ -95,6 +97,7 @@ extends Block {
         if (itemStack.is(Items.FLINT_AND_STEEL) || itemStack.is(Items.FIRE_CHARGE)) {
             TntBlock.explode(level, blockPos, player2);
             level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
+            Item item = itemStack.getItem();
             if (!player2.isCreative()) {
                 if (itemStack.is(Items.FLINT_AND_STEEL)) {
                     itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
@@ -102,6 +105,7 @@ extends Block {
                     itemStack.shrink(1);
                 }
             }
+            player2.awardStat(Stats.ITEM_USED.get(item));
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);

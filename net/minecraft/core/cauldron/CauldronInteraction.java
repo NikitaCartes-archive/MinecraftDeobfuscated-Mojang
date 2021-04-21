@@ -108,8 +108,10 @@ public interface CauldronInteraction {
                 return InteractionResult.PASS;
             }
             if (!level.isClientSide) {
+                Item item = itemStack.getItem();
                 player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
                 player.awardStat(Stats.USE_CAULDRON);
+                player.awardStat(Stats.ITEM_USED.get(item));
                 level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                 level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
@@ -120,8 +122,10 @@ public interface CauldronInteraction {
         WATER.put(Items.BUCKET, (blockState2, level, blockPos, player, interactionHand, itemStack) -> CauldronInteraction.fillBucket(blockState2, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.WATER_BUCKET), blockState -> blockState.getValue(LayeredCauldronBlock.LEVEL) == 3, SoundEvents.BUCKET_FILL));
         WATER.put(Items.GLASS_BOTTLE, (blockState, level, blockPos, player, interactionHand, itemStack) -> {
             if (!level.isClientSide) {
+                Item item = itemStack.getItem();
                 player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)));
                 player.awardStat(Stats.USE_CAULDRON);
+                player.awardStat(Stats.ITEM_USED.get(item));
                 LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
@@ -195,8 +199,10 @@ public interface CauldronInteraction {
             return InteractionResult.PASS;
         }
         if (!level.isClientSide) {
+            Item item = itemStack.getItem();
             player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, itemStack2));
             player.awardStat(Stats.USE_CAULDRON);
+            player.awardStat(Stats.ITEM_USED.get(item));
             level.setBlockAndUpdate(blockPos, Blocks.CAULDRON.defaultBlockState());
             level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0f, 1.0f);
             level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
@@ -206,8 +212,10 @@ public interface CauldronInteraction {
 
     public static InteractionResult emptyBucket(Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack, BlockState blockState, SoundEvent soundEvent) {
         if (!level.isClientSide) {
+            Item item = itemStack.getItem();
             player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.BUCKET)));
             player.awardStat(Stats.FILL_CAULDRON);
+            player.awardStat(Stats.ITEM_USED.get(item));
             level.setBlockAndUpdate(blockPos, blockState);
             level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0f, 1.0f);
             level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);

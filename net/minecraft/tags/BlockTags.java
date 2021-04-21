@@ -116,7 +116,7 @@ public final class BlockTags {
     public static final Tag.Named<Block> OCCLUDES_VIBRATION_SIGNALS = BlockTags.bind("occludes_vibration_signals");
     public static final Tag.Named<Block> DRIPSTONE_REPLACEABLE = BlockTags.bind("dripstone_replaceable_blocks");
     public static final Tag.Named<Block> CAVE_VINES = BlockTags.bind("cave_vines");
-    public static final Tag.Named<Block> LUSH_PLANTS_REPLACEABLE = BlockTags.bind("lush_plants_replaceable");
+    public static final Tag.Named<Block> MOSS_REPLACEABLE = BlockTags.bind("moss_replaceable");
     public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = BlockTags.bind("lush_ground_replaceable");
     public static final Tag.Named<Block> SNOW = BlockTags.bind("snow");
 

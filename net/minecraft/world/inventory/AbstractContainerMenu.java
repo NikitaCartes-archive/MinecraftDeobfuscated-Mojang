@@ -719,6 +719,7 @@ public abstract class AbstractContainerMenu {
             slot = this.slots.get(i);
             Integer integer = (Integer)table.get(slot.container, slot.getContainerSlot());
             if (integer == null) continue;
+            this.lastSlots.set(i, abstractContainerMenu.lastSlots.get(integer));
             this.remoteSlots.set(i, abstractContainerMenu.remoteSlots.get(integer));
         }
     }

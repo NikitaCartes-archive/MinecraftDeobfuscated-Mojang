@@ -54,7 +54,8 @@ extends Item {
     public InteractionResult useOn(UseOnContext useOnContext) {
         InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
         if (!interactionResult.consumesAction() && this.isEdible()) {
-            return this.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
+            InteractionResult interactionResult2 = this.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
+            return interactionResult2 == InteractionResult.CONSUME ? InteractionResult.CONSUME_PARTIAL : interactionResult2;
         }
         return interactionResult;
     }

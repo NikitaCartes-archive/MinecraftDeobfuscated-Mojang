@@ -704,6 +704,7 @@ extends Entity {
         if (this.effectsDirty) {
             if (!this.level.isClientSide) {
                 this.updateInvisibilityStatus();
+                this.updateGlowingStatus();
             }
             this.effectsDirty = false;
         }
@@ -732,6 +733,13 @@ extends Entity {
             this.entityData.set(DATA_EFFECT_AMBIENCE_ID, LivingEntity.areAllEffectsAmbient(collection));
             this.entityData.set(DATA_EFFECT_COLOR_ID, PotionUtils.getColor(collection));
             this.setInvisible(this.hasEffect(MobEffects.INVISIBILITY));
+        }
+    }
+
+    private void updateGlowingStatus() {
+        boolean bl = this.isCurrentlyGlowing();
+        if (this.getSharedFlag(6) != bl) {
+            this.setSharedFlag(6, bl);
         }
     }
 
@@ -1947,13 +1955,6 @@ extends Entity {
             if (this.tickCount % 20 == 0) {
                 this.getCombatTracker().recheckStatus();
             }
-            if (!this.glowing) {
-                boolean bl = this.hasEffect(MobEffects.GLOWING);
-                if (this.getSharedFlag(6) != bl) {
-                    this.setSharedFlag(6, bl);
-                }
-                this.glowing = bl;
-            }
             if (this.isSleeping() && !this.checkBedExists()) {
                 this.stopSleeping();
             }
@@ -2204,7 +2205,7 @@ extends Entity {
         this.level.getProfiler().pop();
         this.level.getProfiler().push("freezing");
         boolean bl2 = this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES);
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide && !this.isDeadOrDying()) {
             m = this.getTicksFrozen();
             if (this.isInPowderSnow && this.canFreeze()) {
                 this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
@@ -2936,6 +2937,11 @@ extends Entity {
         }
         boolean bl = !this.getItemBySlot(EquipmentSlot.HEAD).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.CHEST).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.LEGS).is(ItemTags.FREEZE_IMMUNE_WEARABLES) && !this.getItemBySlot(EquipmentSlot.FEET).is(ItemTags.FREEZE_IMMUNE_WEARABLES);
         return bl && super.canFreeze();
+    }
+
+    @Override
+    public boolean isCurrentlyGlowing() {
+        return !this.level.isClientSide() && this.hasEffect(MobEffects.GLOWING) || super.isCurrentlyGlowing();
     }
 
     public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {

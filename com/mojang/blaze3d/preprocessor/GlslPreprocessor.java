@@ -18,9 +18,11 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class GlslPreprocessor {
-    private static final String C_COMMENT = "/\\*(?:[^*]|\\*+[^/])*\\*+/";
-    private static final Pattern REGEX_MOJ_IMPORT = Pattern.compile("(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*(#(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*moj_import(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*(?:\"(.*)\"|<(.*)>))");
-    private static final Pattern REGEX_VERSION = Pattern.compile("(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*(#(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*version(?:/\\*(?:[^*]|\\*+[^/])*\\*+/|\\h)*(\\d+))\\b");
+    private static final String C_COMMENT = "/\\*(?:[^*]|\\*+[^*/])*\\*+/";
+    private static final String LINE_COMMENT = "//[^\\v]*";
+    private static final Pattern REGEX_MOJ_IMPORT = Pattern.compile("(#(?:/\\*(?:[^*]|\\*+[^*/])*\\*+/|\\h)*moj_import(?:/\\*(?:[^*]|\\*+[^*/])*\\*+/|\\h)*(?:\"(.*)\"|<(.*)>))");
+    private static final Pattern REGEX_VERSION = Pattern.compile("(#(?:/\\*(?:[^*]|\\*+[^*/])*\\*+/|\\h)*version(?:/\\*(?:[^*]|\\*+[^*/])*\\*+/|\\h)*(\\d+))\\b");
+    private static final Pattern REGEX_ENDS_WITH_WHITESPACE = Pattern.compile("(?:^|\\v)(?:\\s|/\\*(?:[^*]|\\*+[^*/])*\\*+/|(//[^\\v]*))*\\z");
 
     public List<String> process(String string) {
         Context context = new Context();
@@ -39,6 +41,7 @@ public abstract class GlslPreprocessor {
         while (matcher.find()) {
             int k;
             boolean bl;
+            if (GlslPreprocessor.isDirectiveDisabled(string, matcher, j)) continue;
             string4 = matcher.group(2);
             boolean bl2 = bl = string4 != null;
             if (!bl) {
@@ -49,6 +52,9 @@ public abstract class GlslPreprocessor {
             String string6 = string2 + string4;
             String string7 = this.applyImport(bl, string6);
             if (!Strings.isEmpty(string7)) {
+                if (!StringUtil.endsWithNewLine(string7)) {
+                    string7 = string7 + System.lineSeparator();
+                }
                 context.sourceId = context.sourceId + 1;
                 k = context.sourceId;
                 List<String> list2 = this.processImports(string7, context, bl ? FileUtil.getFullResourcePath(string6) : "");
@@ -74,7 +80,7 @@ public abstract class GlslPreprocessor {
 
     private String processVersions(String string, Context context) {
         Matcher matcher = REGEX_VERSION.matcher(string);
-        if (matcher.find()) {
+        if (matcher.find() && GlslPreprocessor.isDirectiveEnabled(string, matcher)) {
             context.glslVersion = Math.max(context.glslVersion, Integer.parseInt(matcher.group(2)));
             return string.substring(0, matcher.start(1)) + "/*" + string.substring(matcher.start(1), matcher.end(1)) + "*/" + string.substring(matcher.end(1));
         }
@@ -83,10 +89,27 @@ public abstract class GlslPreprocessor {
 
     private String setVersion(String string, int i) {
         Matcher matcher = REGEX_VERSION.matcher(string);
-        if (matcher.find()) {
+        if (matcher.find() && GlslPreprocessor.isDirectiveEnabled(string, matcher)) {
             return string.substring(0, matcher.start(2)) + Math.max(i, Integer.parseInt(matcher.group(2))) + string.substring(matcher.end(2));
         }
         return string;
+    }
+
+    private static boolean isDirectiveEnabled(String string, Matcher matcher) {
+        return !GlslPreprocessor.isDirectiveDisabled(string, matcher, 0);
+    }
+
+    private static boolean isDirectiveDisabled(String string, Matcher matcher, int i) {
+        int j = matcher.start() - i;
+        if (j == 0) {
+            return false;
+        }
+        Matcher matcher2 = REGEX_ENDS_WITH_WHITESPACE.matcher(string.substring(i, matcher.start()));
+        if (!matcher2.find()) {
+            return true;
+        }
+        int k = matcher2.end(1);
+        return k == matcher.start();
     }
 
     @Nullable

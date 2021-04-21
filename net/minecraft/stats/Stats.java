@@ -22,7 +22,8 @@ public class Stats {
     public static final StatType<EntityType<?>> ENTITY_KILLED_BY = Stats.makeRegistryStatType("killed_by", Registry.ENTITY_TYPE);
     public static final StatType<ResourceLocation> CUSTOM = Stats.makeRegistryStatType("custom", Registry.CUSTOM_STAT);
     public static final ResourceLocation LEAVE_GAME = Stats.makeCustomStat("leave_game", StatFormatter.DEFAULT);
-    public static final ResourceLocation PLAY_ONE_MINUTE = Stats.makeCustomStat("play_one_minute", StatFormatter.TIME);
+    public static final ResourceLocation PLAY_TIME = Stats.makeCustomStat("play_time", StatFormatter.TIME);
+    public static final ResourceLocation TOTAL_WORLD_TIME = Stats.makeCustomStat("total_world_time", StatFormatter.TIME);
     public static final ResourceLocation TIME_SINCE_DEATH = Stats.makeCustomStat("time_since_death", StatFormatter.TIME);
     public static final ResourceLocation TIME_SINCE_REST = Stats.makeCustomStat("time_since_rest", StatFormatter.TIME);
     public static final ResourceLocation CROUCH_TIME = Stats.makeCustomStat("sneak_time", StatFormatter.TIME);

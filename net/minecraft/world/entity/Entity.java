@@ -223,7 +223,7 @@ CommandSource {
     private boolean invulnerable;
     protected UUID uuid = Mth.createInsecureUUID(this.random);
     protected String stringUUID = this.uuid.toString();
-    protected boolean glowing;
+    private boolean hasGlowingTag;
     private final Set<String> tags = Sets.newHashSet();
     private final double[] pistonDeltas = new double[]{0.0, 0.0, 0.0};
     private long pistonDeltasGameTime;
@@ -410,9 +410,6 @@ CommandSource {
     }
 
     public void tick() {
-        if (!this.level.isClientSide) {
-            this.setSharedFlag(6, this.isGlowing());
-        }
         this.baseTick();
     }
 
@@ -1403,8 +1400,8 @@ CommandSource {
             if (this.isNoGravity()) {
                 compoundTag.putBoolean("NoGravity", this.isNoGravity());
             }
-            if (this.glowing) {
-                compoundTag.putBoolean("Glowing", this.glowing);
+            if (this.hasGlowingTag) {
+                compoundTag.putBoolean("Glowing", true);
             }
             if ((i = this.getTicksFrozen()) > 0) {
                 compoundTag.putInt("TicksFrozen", this.getTicksFrozen());
@@ -1483,7 +1480,7 @@ CommandSource {
             this.setCustomNameVisible(compoundTag.getBoolean("CustomNameVisible"));
             this.setSilent(compoundTag.getBoolean("Silent"));
             this.setNoGravity(compoundTag.getBoolean("NoGravity"));
-            this.setGlowing(compoundTag.getBoolean("Glowing"));
+            this.setGlowingTag(compoundTag.getBoolean("Glowing"));
             this.setTicksFrozen(compoundTag.getInt("TicksFrozen"));
             if (compoundTag.contains("Tags", 9)) {
                 this.tags.clear();
@@ -1873,15 +1870,20 @@ CommandSource {
         this.setSharedFlag(4, bl);
     }
 
-    public boolean isGlowing() {
-        return this.glowing || this.level.isClientSide && this.getSharedFlag(6);
+    public final boolean hasGlowingTag() {
+        return this.hasGlowingTag;
     }
 
-    public void setGlowing(boolean bl) {
-        this.glowing = bl;
-        if (!this.level.isClientSide) {
-            this.setSharedFlag(6, this.glowing);
+    public final void setGlowingTag(boolean bl) {
+        this.hasGlowingTag = bl;
+        this.setSharedFlag(6, this.isCurrentlyGlowing());
+    }
+
+    public boolean isCurrentlyGlowing() {
+        if (this.level.isClientSide()) {
+            return this.getSharedFlag(6);
         }
+        return this.hasGlowingTag;
     }
 
     public boolean isInvisible() {

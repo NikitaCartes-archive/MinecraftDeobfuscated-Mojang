@@ -14,7 +14,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
@@ -126,7 +125,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<BlockPileConfiguration> BLOCK_PILE = Feature.register("block_pile", new BlockPileFeature(BlockPileConfiguration.CODEC));
     public static final Feature<SpringConfiguration> SPRING = Feature.register("spring_feature", new SpringFeature(SpringConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> CHORUS_PLANT = Feature.register("chorus_plant", new ChorusPlantFeature(NoneFeatureConfiguration.CODEC));
-    public static final Feature<ReplaceBlockConfiguration> EMERALD_ORE = Feature.register("emerald_ore", new ReplaceBlockFeature(ReplaceBlockConfiguration.CODEC));
+    public static final Feature<ReplaceBlockConfiguration> REPLACE_SINGLE_BLOCK = Feature.register("replace_single_block", new ReplaceBlockFeature(ReplaceBlockConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> VOID_START_PLATFORM = Feature.register("void_start_platform", new VoidStartPlatformFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> DESERT_WELL = Feature.register("desert_well", new DesertWellFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<FossilFeatureConfiguration> FOSSIL = Feature.register("fossil", new FossilFeature(FossilFeatureConfiguration.CODEC));
@@ -209,7 +208,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     }
 
     public static boolean isDirt(BlockState blockState) {
-        return blockState.is(Blocks.DIRT) || blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.PODZOL) || blockState.is(Blocks.COARSE_DIRT) || blockState.is(Blocks.MYCELIUM) || blockState.is(Blocks.ROOTED_DIRT);
+        return blockState.is(BlockTags.DIRT);
     }
 
     public static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

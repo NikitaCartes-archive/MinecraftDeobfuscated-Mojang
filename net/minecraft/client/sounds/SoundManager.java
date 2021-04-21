@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
@@ -95,11 +96,13 @@ extends SimplePreparableReloadListener<Preparations> {
     @Override
     protected void apply(Preparations preparations, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         preparations.apply(this.registry, this.soundEngine);
-        for (ResourceLocation resourceLocation : this.registry.keySet()) {
-            String string;
-            WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
-            if (!(weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) || I18n.exists(string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey())) continue;
-            LOGGER.debug("Missing subtitle {} for event: {}", (Object)string, (Object)resourceLocation);
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            for (ResourceLocation resourceLocation : this.registry.keySet()) {
+                String string;
+                WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
+                if (!(weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) || I18n.exists(string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey()) || !Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
+                throw new IllegalArgumentException(String.format("Missing translation %s for sound event: %s", string, resourceLocation));
+            }
         }
         if (LOGGER.isDebugEnabled()) {
             for (ResourceLocation resourceLocation : this.registry.keySet()) {

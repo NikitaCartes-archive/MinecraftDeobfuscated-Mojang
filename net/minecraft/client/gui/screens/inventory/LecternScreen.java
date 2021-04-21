@@ -67,7 +67,7 @@ implements MenuAccess<LecternMenu> {
     @Override
     protected void createMenuControls() {
         if (this.minecraft.player.mayBuild()) {
-            this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
+            this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
             this.addButton(new Button(this.width / 2 + 2, 196, 98, 20, new TranslatableComponent("lectern.take_book"), button -> this.sendButtonClick(3)));
         } else {
             super.createMenuControls();

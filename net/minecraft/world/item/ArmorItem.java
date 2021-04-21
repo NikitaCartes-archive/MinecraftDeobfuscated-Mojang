@@ -12,6 +12,7 @@ import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -111,6 +112,9 @@ implements Wearable {
         ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
         if (itemStack2.isEmpty()) {
             player.setItemSlot(equipmentSlot, itemStack.copy());
+            if (!level.isClientSide()) {
+                player.awardStat(Stats.ITEM_USED.get(this));
+            }
             itemStack.setCount(0);
             return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }

@@ -79,7 +79,7 @@ extends Block {
         if (blockState2.is(this)) {
             return true;
         }
-        if (blockState2.is(Blocks.GRASS_BLOCK) || blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
+        if (blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
             BlockPos blockPos2 = blockPos.below();
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockState blockState3 = levelReader.getBlockState(blockPos2.relative(direction));
