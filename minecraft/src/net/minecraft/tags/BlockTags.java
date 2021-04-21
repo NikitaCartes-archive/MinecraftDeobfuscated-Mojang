@@ -109,7 +109,7 @@ public final class BlockTags {
 	public static final Tag.Named<Block> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
 	public static final Tag.Named<Block> DRIPSTONE_REPLACEABLE = bind("dripstone_replaceable_blocks");
 	public static final Tag.Named<Block> CAVE_VINES = bind("cave_vines");
-	public static final Tag.Named<Block> LUSH_PLANTS_REPLACEABLE = bind("lush_plants_replaceable");
+	public static final Tag.Named<Block> MOSS_REPLACEABLE = bind("moss_replaceable");
 	public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
 	public static final Tag.Named<Block> SNOW = bind("snow");
 

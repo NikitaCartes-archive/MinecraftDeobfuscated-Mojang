@@ -360,7 +360,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 					new ConfirmScreen(
 						bl -> {
 							if (bl) {
-								this.minecraft.setScreen(new ProgressScreen());
+								this.minecraft.setScreen(new ProgressScreen(true));
 								this.doDeleteWorld();
 							}
 

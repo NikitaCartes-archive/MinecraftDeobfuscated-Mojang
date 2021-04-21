@@ -46,20 +46,25 @@ public class DebugStickItem extends Item {
 		Level level = useOnContext.getLevel();
 		if (!level.isClientSide && player != null) {
 			BlockPos blockPos = useOnContext.getClickedPos();
-			this.handleInteraction(player, level.getBlockState(blockPos), level, blockPos, true, useOnContext.getItemInHand());
+			if (!this.handleInteraction(player, level.getBlockState(blockPos), level, blockPos, true, useOnContext.getItemInHand())) {
+				return InteractionResult.FAIL;
+			}
 		}
 
 		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
-	private void handleInteraction(Player player, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ItemStack itemStack) {
-		if (player.canUseGameMasterBlocks()) {
+	private boolean handleInteraction(Player player, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ItemStack itemStack) {
+		if (!player.canUseGameMasterBlocks()) {
+			return false;
+		} else {
 			Block block = blockState.getBlock();
 			StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
 			Collection<Property<?>> collection = stateDefinition.getProperties();
 			String string = Registry.BLOCK.getKey(block).toString();
 			if (collection.isEmpty()) {
 				message(player, new TranslatableComponent(this.getDescriptionId() + ".empty", string));
+				return false;
 			} else {
 				CompoundTag compoundTag = itemStack.getOrCreateTagElement("DebugProperty");
 				String string2 = compoundTag.getString(string);
@@ -78,6 +83,8 @@ public class DebugStickItem extends Item {
 					compoundTag.putString(string, string3);
 					message(player, new TranslatableComponent(this.getDescriptionId() + ".select", string3, getNameHelper(blockState, property)));
 				}
+
+				return true;
 			}
 		}
 	}

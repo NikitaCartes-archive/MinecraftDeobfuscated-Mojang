@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -32,6 +33,35 @@ public class BeehiveBlockEntity extends BlockEntity {
 	public static final String TICKS_IN_HIVE = "TicksInHive";
 	public static final String HAS_NECTAR = "HasNectar";
 	public static final String BEES = "Bees";
+	private static final List<String> IGNORED_BEE_TAGS = Arrays.asList(
+		"Air",
+		"ArmorDropChances",
+		"ArmorItems",
+		"Brain",
+		"CanPickUpLoot",
+		"DeathTime",
+		"FallDistance",
+		"FallFlying",
+		"Fire",
+		"HandDropChances",
+		"HandItems",
+		"HurtByTimestamp",
+		"HurtTime",
+		"LeftHanded",
+		"Motion",
+		"NoGravity",
+		"OnGround",
+		"PortalCooldown",
+		"Pos",
+		"Rotation",
+		"CannotEnterHiveTicks",
+		"TicksSincePollination",
+		"CropsGrownSincePollination",
+		"HivePos",
+		"Passengers",
+		"Leash",
+		"UUID"
+	);
 	public static final int MAX_OCCUPANTS = 3;
 	private static final int MIN_TICKS_BEFORE_REENTERING_HIVE = 400;
 	private static final int MIN_OCCUPATION_TICKS_NECTAR = 2400;
@@ -158,9 +188,9 @@ public class BeehiveBlockEntity extends BlockEntity {
 			return false;
 		} else {
 			CompoundTag compoundTag = beeData.entityData;
-			compoundTag.remove("Passengers");
-			compoundTag.remove("Leash");
-			compoundTag.remove("UUID");
+			removeIgnoredBeeTags(compoundTag);
+			compoundTag.put("HivePos", NbtUtils.writeBlockPos(blockPos));
+			compoundTag.putBoolean("NoGravity", true);
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);
 			BlockPos blockPos3 = blockPos.relative(direction);
 			boolean bl = !level.getBlockState(blockPos3).getCollisionShape(level, blockPos3).isEmpty();
@@ -216,6 +246,12 @@ public class BeehiveBlockEntity extends BlockEntity {
 		}
 	}
 
+	private static void removeIgnoredBeeTags(CompoundTag compoundTag) {
+		for (String string : IGNORED_BEE_TAGS) {
+			compoundTag.remove(string);
+		}
+	}
+
 	private static void setBeeReleaseData(int i, Bee bee) {
 		int j = bee.getAge();
 		if (j < 0) {
@@ -225,7 +261,6 @@ public class BeehiveBlockEntity extends BlockEntity {
 		}
 
 		bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
-		bee.resetTicksWithoutNectarSinceExitingHive();
 	}
 
 	private boolean hasSavedFlowerPos() {
@@ -314,7 +349,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		private final int minOccupationTicks;
 
 		private BeeData(CompoundTag compoundTag, int i, int j) {
-			compoundTag.remove("UUID");
+			BeehiveBlockEntity.removeIgnoredBeeTags(compoundTag);
 			this.entityData = compoundTag;
 			this.ticksInHive = i;
 			this.minOccupationTicks = j;

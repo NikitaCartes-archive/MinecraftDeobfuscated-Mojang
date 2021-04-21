@@ -119,10 +119,9 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 		if (optional.isPresent()) {
 			BlockPos blockPos2 = (BlockPos)optional.get();
 			BlockPos blockPos3 = blockPos2.above();
-			FluidState fluidState = serverLevel.getFluidState(blockPos3);
 			Direction direction = blockState.getValue(FACING);
-			place(serverLevel, blockPos2, blockState.getFluidState(), direction);
-			BigDripleafBlock.place(serverLevel, blockPos3, fluidState, direction);
+			place(serverLevel, blockPos2, serverLevel.getFluidState(blockPos2), direction);
+			BigDripleafBlock.place(serverLevel, blockPos3, serverLevel.getFluidState(blockPos3), direction);
 		}
 	}
 

@@ -332,6 +332,10 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		return MobSpawnSettings.EMPTY_MOB_LIST;
 	}
 
+	public WeightedRandomList<MobSpawnSettings.SpawnerData> getSpecialUndergroundWaterAnimals() {
+		return MobSpawnSettings.EMPTY_MOB_LIST;
+	}
+
 	public interface StructureStartFactory<C extends FeatureConfiguration> {
 		StructureStart<C> create(StructureFeature<C> structureFeature, ChunkPos chunkPos, int i, long l);
 	}

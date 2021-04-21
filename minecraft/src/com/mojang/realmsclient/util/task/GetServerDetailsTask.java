@@ -140,7 +140,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 		try {
 			return Minecraft.getInstance()
 				.getClientPackSource()
-				.downloadAndSelectResourcePack(realmsServerAddress.resourcePackUrl, realmsServerAddress.resourcePackHash);
+				.downloadAndSelectResourcePack(realmsServerAddress.resourcePackUrl, realmsServerAddress.resourcePackHash, false);
 		} catch (Exception var4) {
 			CompletableFuture<Void> completableFuture = new CompletableFuture();
 			completableFuture.completeExceptionally(var4);

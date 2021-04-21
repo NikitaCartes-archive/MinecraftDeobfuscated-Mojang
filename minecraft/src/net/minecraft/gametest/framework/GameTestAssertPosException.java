@@ -34,7 +34,7 @@ public class GameTestAssertPosException extends GameTestAssertException {
 
 	@Nullable
 	public String getMessageToShowAtBlock() {
-		return super.getMessage() + " here";
+		return super.getMessage();
 	}
 
 	@Nullable

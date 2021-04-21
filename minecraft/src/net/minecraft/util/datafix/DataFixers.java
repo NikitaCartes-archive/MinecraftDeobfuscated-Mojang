@@ -134,9 +134,9 @@ import net.minecraft.util.datafix.fixes.SavedDataFeaturePoolElementFix;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
+import net.minecraft.util.datafix.fixes.StatsRenameFix;
 import net.minecraft.util.datafix.fixes.StriderGravityFix;
 import net.minecraft.util.datafix.fixes.StructureReferenceCountFix;
-import net.minecraft.util.datafix.fixes.SwimStatsRenameFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
@@ -469,7 +469,13 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema69, "Item renamening fix", createRenamer(EntityTheRenameningFix.RENAMED_ITEMS)));
 		dataFixerBuilder.addFixer(new RecipesRenameningFix(schema69, false));
 		dataFixerBuilder.addFixer(new EntityTheRenameningFix(schema69, true));
-		dataFixerBuilder.addFixer(new SwimStatsRenameFix(schema69, false));
+		dataFixerBuilder.addFixer(
+			new StatsRenameFix(
+				schema69,
+				"SwimStatsRenameFix",
+				ImmutableMap.of("minecraft:swim_one_cm", "minecraft:walk_on_water_one_cm", "minecraft:dive_one_cm", "minecraft:walk_under_water_one_cm")
+			)
+		);
 		Schema schema70 = dataFixerBuilder.addSchema(1514, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ObjectiveDisplayNameFix(schema70, false));
 		dataFixerBuilder.addFixer(new TeamDisplayNameFix(schema70, false));
@@ -756,6 +762,10 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema138, "Added Goat", References.ENTITY));
 		Schema schema139 = dataFixerBuilder.addSchema(2707, V2707::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema139, "Added Marker", References.ENTITY));
+		Schema schema140 = dataFixerBuilder.addSchema(2710, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			new StatsRenameFix(schema140, "Renamed play_one_minute stat to play_time", ImmutableMap.of("minecraft:play_one_minute", "minecraft:play_time"))
+		);
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

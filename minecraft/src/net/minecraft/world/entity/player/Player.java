@@ -249,7 +249,8 @@ public abstract class Player extends LivingEntity {
 		this.moveCloak();
 		if (!this.level.isClientSide) {
 			this.foodData.tick(this);
-			this.awardStat(Stats.PLAY_ONE_MINUTE);
+			this.awardStat(Stats.PLAY_TIME);
+			this.awardStat(Stats.TOTAL_WORLD_TIME);
 			if (this.isAlive()) {
 				this.awardStat(Stats.TIME_SINCE_DEATH);
 			}

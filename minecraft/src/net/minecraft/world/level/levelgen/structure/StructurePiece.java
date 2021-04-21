@@ -343,27 +343,9 @@ public abstract class StructurePiece {
 		}
 	}
 
-	protected void maybeGenerateBlock(
-		WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState, boolean bl
-	) {
+	protected void maybeGenerateBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState) {
 		if (random.nextFloat() < f) {
-			if (!bl) {
-				this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
-				return;
-			}
-
-			Direction[] directions = Direction.values();
-			BlockPos.MutableBlockPos mutableBlockPos = this.getWorldPos(i, j, k).mutable();
-
-			for (Direction direction : directions) {
-				mutableBlockPos.move(direction);
-				if (boundingBox.isInside(mutableBlockPos) && !worldGenLevel.isEmptyBlock(mutableBlockPos)) {
-					this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
-					return;
-				}
-
-				mutableBlockPos.move(direction.getOpposite());
-			}
+			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
 		}
 	}
 

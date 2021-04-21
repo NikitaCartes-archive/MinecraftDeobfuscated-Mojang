@@ -18,9 +18,11 @@ public class ProgressScreen extends Screen implements ProgressListener {
 	private Component stage;
 	private int progress;
 	private boolean stop;
+	private final boolean clearScreenAfterStop;
 
-	public ProgressScreen() {
+	public ProgressScreen(boolean bl) {
 		super(NarratorChatListener.NO_TITLE);
+		this.clearScreenAfterStop = bl;
 	}
 
 	@Override
@@ -58,7 +60,7 @@ public class ProgressScreen extends Screen implements ProgressListener {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.stop) {
-			if (!this.minecraft.isConnectedToRealms()) {
+			if (this.clearScreenAfterStop) {
 				this.minecraft.setScreen(null);
 			}
 		} else {

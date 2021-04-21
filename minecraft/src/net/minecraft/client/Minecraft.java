@@ -1904,7 +1904,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void setLevel(ClientLevel clientLevel) {
-		ProgressScreen progressScreen = new ProgressScreen();
+		ProgressScreen progressScreen = new ProgressScreen(true);
 		progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
 		this.updateScreenAndTick(progressScreen);
 		this.level = clientLevel;
@@ -1921,7 +1921,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void clearLevel() {
-		this.clearLevel(new ProgressScreen());
+		this.clearLevel(new ProgressScreen(true));
 	}
 
 	public void clearLevel(Screen screen) {
@@ -2372,7 +2372,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean shouldEntityAppearGlowing(Entity entity) {
-		return entity.isGlowing()
+		return entity.isCurrentlyGlowing()
 			|| this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && entity.getType() == EntityType.PLAYER;
 	}
 

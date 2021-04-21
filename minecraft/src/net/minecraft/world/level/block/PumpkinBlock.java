@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -45,6 +46,7 @@ public class PumpkinBlock extends StemGrownBlock {
 				level.addFreshEntity(itemEntity);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 				level.gameEvent(player, GameEvent.SHEAR, blockPos);
+				player.awardStat(Stats.ITEM_USED.get(Items.SHEARS));
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);

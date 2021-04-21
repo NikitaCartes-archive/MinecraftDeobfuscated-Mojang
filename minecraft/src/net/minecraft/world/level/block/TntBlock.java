@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
@@ -91,6 +93,7 @@ public class TntBlock extends Block {
 		} else {
 			explode(level, blockPos, player);
 			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
+			Item item = itemStack.getItem();
 			if (!player.isCreative()) {
 				if (itemStack.is(Items.FLINT_AND_STEEL)) {
 					itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
@@ -99,6 +102,7 @@ public class TntBlock extends Block {
 				}
 			}
 
+			player.awardStat(Stats.ITEM_USED.get(item));
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}

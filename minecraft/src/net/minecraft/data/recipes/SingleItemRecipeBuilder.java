@@ -15,11 +15,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 
-public class SingleItemRecipeBuilder {
+public class SingleItemRecipeBuilder implements RecipeBuilder {
 	private final Item result;
 	private final Ingredient ingredient;
 	private final int count;
 	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	@Nullable
 	private String group;
 	private final RecipeSerializer<?> type;
 
@@ -38,25 +39,22 @@ public class SingleItemRecipeBuilder {
 		return new SingleItemRecipeBuilder(RecipeSerializer.STONECUTTER, ingredient, itemLike, i);
 	}
 
-	public SingleItemRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+	public SingleItemRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
 		this.advancement.addCriterion(string, criterionTriggerInstance);
 		return this;
 	}
 
-	public SingleItemRecipeBuilder group(String string) {
+	public SingleItemRecipeBuilder group(@Nullable String string) {
 		this.group = string;
 		return this;
 	}
 
-	public void save(Consumer<FinishedRecipe> consumer, String string) {
-		ResourceLocation resourceLocation = Registry.ITEM.getKey(this.result);
-		if (new ResourceLocation(string).equals(resourceLocation)) {
-			throw new IllegalStateException("Single Item Recipe " + string + " should remove its 'save' argument");
-		} else {
-			this.save(consumer, new ResourceLocation(string));
-		}
+	@Override
+	public Item getResult() {
+		return this.result;
 	}
 
+	@Override
 	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
 		this.advancement

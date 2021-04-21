@@ -928,7 +928,11 @@ public class Blocks {
 	public static final Block GLOW_LICHEN = register(
 		"glow_lichen",
 		new GlowLichenBlock(
-			BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT).noCollission().strength(0.2F).sound(SoundType.GLOW_LICHEN).lightLevel(blockStatex -> 7)
+			BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.GLOW_LICHEN)
+				.noCollission()
+				.strength(0.2F)
+				.sound(SoundType.GLOW_LICHEN)
+				.lightLevel(blockStatex -> 7)
 		)
 	);
 	public static final Block OAK_FENCE_GATE = register(
@@ -3410,7 +3414,9 @@ public class Blocks {
 	public static final Block CRACKED_DEEPSLATE_TILES = register("cracked_deepslate_tiles", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
 	public static final Block INFESTED_DEEPSLATE = register(
 		"infested_deepslate",
-		new InfestedBlock(DEEPSLATE, BlockBehaviour.Properties.of(Material.CLAY, MaterialColor.DEEPSLATE).strength(0.0F, 0.75F).sound(SoundType.DEEPSLATE))
+		new InfestedRotatedPillarBlock(
+			DEEPSLATE, BlockBehaviour.Properties.of(Material.CLAY, MaterialColor.DEEPSLATE).strength(0.0F, 0.75F).sound(SoundType.DEEPSLATE)
+		)
 	);
 	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
 	public static final Block RAW_IRON_BLOCK = register(

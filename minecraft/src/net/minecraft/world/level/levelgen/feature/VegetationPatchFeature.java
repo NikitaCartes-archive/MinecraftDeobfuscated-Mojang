@@ -127,12 +127,16 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 		int i
 	) {
 		for (int j = 0; j < i; j++) {
-			if (!predicate.test(worldGenLevel.getBlockState(mutableBlockPos))) {
-				return j != 0;
-			}
+			BlockState blockState = vegetationPatchConfiguration.groundState.getState(random, mutableBlockPos);
+			BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos);
+			if (!blockState.is(blockState2.getBlock())) {
+				if (!predicate.test(blockState2)) {
+					return j != 0;
+				}
 
-			worldGenLevel.setBlock(mutableBlockPos, vegetationPatchConfiguration.groundState.getState(random, mutableBlockPos), 2);
-			mutableBlockPos.move(vegetationPatchConfiguration.surface.getDirection());
+				worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
+				mutableBlockPos.move(vegetationPatchConfiguration.surface.getDirection());
+			}
 		}
 
 		return true;

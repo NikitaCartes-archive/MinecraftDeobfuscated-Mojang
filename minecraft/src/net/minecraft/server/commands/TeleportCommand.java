@@ -42,6 +42,29 @@ public class TeleportCommand {
 			Commands.literal("teleport")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
+					Commands.argument("location", Vec3Argument.vec3())
+						.executes(
+							commandContext -> teleportToPos(
+									commandContext.getSource(),
+									Collections.singleton(commandContext.getSource().getEntityOrException()),
+									commandContext.getSource().getLevel(),
+									Vec3Argument.getCoordinates(commandContext, "location"),
+									WorldCoordinates.current(),
+									null
+								)
+						)
+				)
+				.then(
+					Commands.argument("destination", EntityArgument.entity())
+						.executes(
+							commandContext -> teleportToEntity(
+									commandContext.getSource(),
+									Collections.singleton(commandContext.getSource().getEntityOrException()),
+									EntityArgument.getEntity(commandContext, "destination")
+								)
+						)
+				)
+				.then(
 					Commands.argument("targets", EntityArgument.entities())
 						.then(
 							Commands.argument("location", Vec3Argument.vec3())
@@ -122,29 +145,6 @@ public class TeleportCommand {
 									commandContext -> teleportToEntity(
 											commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), EntityArgument.getEntity(commandContext, "destination")
 										)
-								)
-						)
-				)
-				.then(
-					Commands.argument("location", Vec3Argument.vec3())
-						.executes(
-							commandContext -> teleportToPos(
-									commandContext.getSource(),
-									Collections.singleton(commandContext.getSource().getEntityOrException()),
-									commandContext.getSource().getLevel(),
-									Vec3Argument.getCoordinates(commandContext, "location"),
-									WorldCoordinates.current(),
-									null
-								)
-						)
-				)
-				.then(
-					Commands.argument("destination", EntityArgument.entity())
-						.executes(
-							commandContext -> teleportToEntity(
-									commandContext.getSource(),
-									Collections.singleton(commandContext.getSource().getEntityOrException()),
-									EntityArgument.getEntity(commandContext, "destination")
 								)
 						)
 				)

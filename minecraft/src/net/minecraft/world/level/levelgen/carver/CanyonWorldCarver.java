@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,21 +30,21 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		Random random,
-		int i,
+		Aquifer aquifer,
 		ChunkPos chunkPos,
 		BitSet bitSet
 	) {
-		int j = (this.getRange() * 2 - 1) * 16;
+		int i = (this.getRange() * 2 - 1) * 16;
 		double d = (double)chunkPos.getBlockX(random.nextInt(16));
-		int k = canyonCarverConfiguration.y.sample(random, carvingContext);
+		int j = canyonCarverConfiguration.y.sample(random, carvingContext);
 		double e = (double)chunkPos.getBlockZ(random.nextInt(16));
 		float f = random.nextFloat() * (float) (Math.PI * 2);
 		float g = canyonCarverConfiguration.verticalRotation.sample(random);
 		double h = (double)canyonCarverConfiguration.yScale.sample(random);
-		float l = canyonCarverConfiguration.shape.thickness.sample(random);
-		int m = (int)((float)j * canyonCarverConfiguration.shape.distanceFactor.sample(random));
-		int n = 0;
-		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), i, d, (double)k, e, l, f, g, 0, m, h, bitSet);
+		float k = canyonCarverConfiguration.shape.thickness.sample(random);
+		int l = (int)((float)i * canyonCarverConfiguration.shape.distanceFactor.sample(random));
+		int m = 0;
+		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, bitSet);
 		return true;
 	}
 
@@ -53,42 +54,42 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		long l,
-		int i,
+		Aquifer aquifer,
 		double d,
 		double e,
 		double f,
 		float g,
 		float h,
-		float j,
+		float i,
+		int j,
 		int k,
-		int m,
-		double n,
+		double m,
 		BitSet bitSet
 	) {
 		Random random = new Random(l);
 		float[] fs = this.initWidthFactors(carvingContext, canyonCarverConfiguration, random);
+		float n = 0.0F;
 		float o = 0.0F;
-		float p = 0.0F;
 
-		for (int q = k; q < m; q++) {
-			double r = 1.5 + (double)(Mth.sin((float)q * (float) Math.PI / (float)m) * g);
-			double s = r * n;
-			r *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(random);
-			s = this.updateVerticalRadius(canyonCarverConfiguration, random, s, (float)m, (float)q);
-			float t = Mth.cos(j);
-			float u = Mth.sin(j);
-			d += (double)(Mth.cos(h) * t);
-			e += (double)u;
-			f += (double)(Mth.sin(h) * t);
-			j *= 0.7F;
-			j += p * 0.05F;
-			h += o * 0.05F;
-			p *= 0.8F;
-			o *= 0.5F;
-			p += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
-			o += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
+		for (int p = j; p < k; p++) {
+			double q = 1.5 + (double)(Mth.sin((float)p * (float) Math.PI / (float)k) * g);
+			double r = q * m;
+			q *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(random);
+			r = this.updateVerticalRadius(canyonCarverConfiguration, random, r, (float)k, (float)p);
+			float s = Mth.cos(i);
+			float t = Mth.sin(i);
+			d += (double)(Mth.cos(h) * s);
+			e += (double)t;
+			f += (double)(Mth.sin(h) * s);
+			i *= 0.7F;
+			i += o * 0.05F;
+			h += n * 0.05F;
+			o *= 0.8F;
+			n *= 0.5F;
+			o += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
+			n += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
 			if (random.nextInt(4) != 0) {
-				if (!canReach(chunkAccess.getPos(), d, f, q, m, g)) {
+				if (!canReach(chunkAccess.getPos(), d, f, p, k, g)) {
 					return;
 				}
 
@@ -98,12 +99,12 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 					chunkAccess,
 					function,
 					l,
-					i,
+					aquifer,
 					d,
 					e,
 					f,
+					q,
 					r,
-					s,
 					bitSet,
 					(carvingContextx, dx, ex, fx, ix) -> this.shouldSkip(carvingContextx, fs, dx, ex, fx, ix)
 				);

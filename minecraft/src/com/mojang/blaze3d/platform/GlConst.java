@@ -102,7 +102,6 @@ public class GlConst {
 	public static final int GL_ELEMENT_ARRAY_BUFFER = 34963;
 	public static final int GL_ALPHA_BIAS = 3357;
 	public static final int GL_RGB = 6407;
-	public static final int GL_LUMINANCE_ALPHA = 6410;
-	public static final int GL_LUMINANCE = 6409;
-	public static final int GL_INTENSITY = 32841;
+	public static final int GL_RG = 33319;
+	public static final int GL_RED = 6403;
 }

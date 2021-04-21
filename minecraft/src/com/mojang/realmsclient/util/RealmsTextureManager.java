@@ -129,49 +129,48 @@ public class RealmsTextureManager {
 	}
 
 	private static int getTextureId(String string, String string2) {
-		int i;
-		if (TEXTURES.containsKey(string)) {
-			RealmsTextureManager.RealmsTexture realmsTexture = (RealmsTextureManager.RealmsTexture)TEXTURES.get(string);
-			if (realmsTexture.image.equals(string2)) {
-				return realmsTexture.textureId;
-			}
-
-			RenderSystem.deleteTexture(realmsTexture.textureId);
-			i = realmsTexture.textureId;
+		RealmsTextureManager.RealmsTexture realmsTexture = (RealmsTextureManager.RealmsTexture)TEXTURES.get(string);
+		if (realmsTexture != null && realmsTexture.image.equals(string2)) {
+			return realmsTexture.textureId;
 		} else {
-			i = GlStateManager._genTexture();
-		}
-
-		IntBuffer intBuffer = null;
-		int j = 0;
-		int k = 0;
-
-		try {
-			InputStream inputStream = new ByteArrayInputStream(new Base64().decode(string2));
-
-			BufferedImage bufferedImage;
-			try {
-				bufferedImage = ImageIO.read(inputStream);
-			} finally {
-				IOUtils.closeQuietly(inputStream);
+			int i;
+			if (realmsTexture != null) {
+				i = realmsTexture.textureId;
+			} else {
+				i = GlStateManager._genTexture();
 			}
 
-			j = bufferedImage.getWidth();
-			k = bufferedImage.getHeight();
-			int[] is = new int[j * k];
-			bufferedImage.getRGB(0, 0, j, k, is, 0, j);
-			intBuffer = ByteBuffer.allocateDirect(4 * j * k).order(ByteOrder.nativeOrder()).asIntBuffer();
-			intBuffer.put(is);
-			intBuffer.flip();
-		} catch (IOException var12) {
-			var12.printStackTrace();
-		}
+			IntBuffer intBuffer = null;
+			int j = 0;
+			int k = 0;
 
-		RenderSystem.activeTexture(33984);
-		RenderSystem.bindTextureForSetup(i);
-		TextureUtil.initTexture(intBuffer, j, k);
-		TEXTURES.put(string, new RealmsTextureManager.RealmsTexture(string2, i));
-		return i;
+			try {
+				InputStream inputStream = new ByteArrayInputStream(new Base64().decode(string2));
+
+				BufferedImage bufferedImage;
+				try {
+					bufferedImage = ImageIO.read(inputStream);
+				} finally {
+					IOUtils.closeQuietly(inputStream);
+				}
+
+				j = bufferedImage.getWidth();
+				k = bufferedImage.getHeight();
+				int[] is = new int[j * k];
+				bufferedImage.getRGB(0, 0, j, k, is, 0, j);
+				intBuffer = ByteBuffer.allocateDirect(4 * j * k).order(ByteOrder.nativeOrder()).asIntBuffer();
+				intBuffer.put(is);
+				intBuffer.flip();
+			} catch (IOException var13) {
+				var13.printStackTrace();
+			}
+
+			RenderSystem.activeTexture(33984);
+			RenderSystem.bindTextureForSetup(i);
+			TextureUtil.initTexture(intBuffer, j, k);
+			TEXTURES.put(string, new RealmsTextureManager.RealmsTexture(string2, i));
+			return i;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class UnderwaterCanyonWorldCarver extends CanyonWorldCarver {
@@ -68,9 +69,9 @@ public class UnderwaterCanyonWorldCarver extends CanyonWorldCarver {
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
-		int i,
+		Aquifer aquifer,
 		MutableBoolean mutableBoolean
 	) {
-		return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, random, mutableBlockPos, mutableBlockPos2, i);
+		return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, random, mutableBlockPos, mutableBlockPos2, aquifer);
 	}
 }

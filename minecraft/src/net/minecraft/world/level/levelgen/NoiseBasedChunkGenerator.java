@@ -1,7 +1,8 @@
 package net.minecraft.world.level.levelgen;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -64,14 +67,15 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	private final SurfaceNoise surfaceNoise;
 	private final NormalNoise barrierNoise;
 	private final NormalNoise waterLevelNoise;
+	private final NormalNoise lavaNoise;
 	protected final BlockState defaultBlock;
 	protected final BlockState defaultFluid;
 	private final long seed;
 	protected final Supplier<NoiseGeneratorSettings> settings;
 	private final int height;
 	private final NoiseSampler sampler;
-	private final boolean aquifersEnabled;
 	private final BaseStoneSource baseStoneSource;
+	private final OreVeinifier oreVeinifier;
 
 	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
 		this(biomeSource, biomeSource, l, supplier);
@@ -109,12 +113,17 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 		this.barrierNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0);
 		this.waterLevelNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -3, 1.0, 0.0, 2.0);
+		this.lavaNoise = NormalNoise.create(new SimpleRandomSource(worldgenRandom.nextLong()), -1, 1.0, 0.0);
 		Cavifier cavifier = noiseGeneratorSettings.isNoiseCavesEnabled() ? new Cavifier(worldgenRandom, noiseSettings.minY() / this.cellHeight) : null;
 		this.sampler = new NoiseSampler(
 			biomeSource, this.cellWidth, this.cellHeight, this.cellCountY, noiseSettings, blendedNoise, simplexNoise, perlinNoise, cavifier
 		);
-		this.aquifersEnabled = noiseGeneratorSettings.isAquifersEnabled();
-		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState(), this.settings);
+		this.baseStoneSource = new DepthBasedReplacingBaseStoneSource(l, this.defaultBlock, Blocks.DEEPSLATE.defaultBlockState(), noiseGeneratorSettings);
+		this.oreVeinifier = new OreVeinifier(l, this.defaultBlock, this.cellWidth, this.cellHeight, noiseGeneratorSettings.noiseSettings().minY());
+	}
+
+	private boolean isAquifersEnabled() {
+		return ((NoiseGeneratorSettings)this.settings.get()).isAquifersEnabled();
 	}
 
 	@Override
@@ -194,11 +203,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			this.makeAndFillNoiseColumn(o + 1, p, k, l),
 			this.makeAndFillNoiseColumn(o + 1, p + 1, k, l)
 		};
-		Aquifer aquifer = this.aquifersEnabled
-			? new Aquifer(
-				m, n, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, k * this.cellHeight, l * this.cellHeight
-			)
-			: null;
+		Aquifer aquifer = this.getAquifer(k, l, new ChunkPos(m, n));
 
 		for (int s = l - 1; s >= 0; s--) {
 			double f = ds[0][s];
@@ -229,32 +234,26 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return OptionalInt.empty();
 	}
 
-	protected BlockState updateNoiseAndGenerateBaseState(
-		Beardifier beardifier, @Nullable Aquifer aquifer, BaseStoneSource baseStoneSource, int i, int j, int k, double d
-	) {
+	private Aquifer getAquifer(int i, int j, ChunkPos chunkPos) {
+		return !this.isAquifersEnabled()
+			? Aquifer.createDisabled(this.getSeaLevel(), this.defaultFluid)
+			: Aquifer.create(
+				chunkPos,
+				this.barrierNoise,
+				this.waterLevelNoise,
+				this.lavaNoise,
+				(NoiseGeneratorSettings)this.settings.get(),
+				this.sampler,
+				i * this.cellHeight,
+				j * this.cellHeight
+			);
+	}
+
+	protected BlockState updateNoiseAndGenerateBaseState(Beardifier beardifier, Aquifer aquifer, BaseStoneSource baseStoneSource, int i, int j, int k, double d) {
 		double e = Mth.clamp(d / 200.0, -1.0, 1.0);
 		e = e / 2.0 - e * e * e / 24.0;
 		e += beardifier.beardifyOrBury(i, j, k);
-		if (aquifer != null && e < 0.0) {
-			aquifer.computeAt(i, j, k);
-			e += aquifer.getLastBarrierDensity();
-		}
-
-		BlockState blockState;
-		if (e > 0.0) {
-			blockState = baseStoneSource.getBaseStone(i, j, k);
-		} else if (this.aquifersEnabled && Aquifer.isLavaLevel(j - this.getMinY())) {
-			blockState = Blocks.LAVA.defaultBlockState();
-		} else {
-			int l = aquifer == null ? this.getSeaLevel() : aquifer.getLastWaterLevel();
-			if (j < l) {
-				blockState = this.defaultFluid;
-			} else {
-				blockState = AIR;
-			}
-		}
-
-		return blockState;
+		return aquifer.computeState(baseStoneSource, i, j, k, e);
 	}
 
 	@Override
@@ -354,67 +353,65 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
 		Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
 		ChunkPos chunkPos = chunkAccess.getPos();
-		int k = chunkPos.x;
-		int l = chunkPos.z;
-		int m = chunkPos.getMinBlockX();
-		int n = chunkPos.getMinBlockZ();
+		int k = chunkPos.getMinBlockX();
+		int l = chunkPos.getMinBlockZ();
 		Beardifier beardifier = new Beardifier(structureFeatureManager, chunkAccess);
-		Aquifer aquifer = this.aquifersEnabled
-			? new Aquifer(
-				k, l, this.barrierNoise, this.waterLevelNoise, (NoiseGeneratorSettings)this.settings.get(), this.sampler, i * this.cellHeight, j * this.cellHeight
-			)
-			: null;
-		NoiseInterpolator noiseInterpolator = new NoiseInterpolator(this.cellCountX, j, this.cellCountZ, k, l, i, this::fillNoiseColumn);
-		List<NoiseInterpolator> list = ImmutableList.of(noiseInterpolator);
+		Aquifer aquifer = this.getAquifer(i, j, chunkPos);
+		NoiseInterpolator noiseInterpolator = new NoiseInterpolator(this.cellCountX, j, this.cellCountZ, chunkPos, i, this::fillNoiseColumn);
+		List<NoiseInterpolator> list = Lists.<NoiseInterpolator>newArrayList(noiseInterpolator);
+		Pair<BaseStoneSource, DoubleConsumer> pair = this.createBaseStoneSource(i, chunkPos, list::add);
+		BaseStoneSource baseStoneSource = pair.getFirst();
+		DoubleConsumer doubleConsumer = pair.getSecond();
 		list.forEach(NoiseInterpolator::initializeForFirstCellX);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int o = 0; o < this.cellCountX; o++) {
-			int p = o;
-			list.forEach(noiseInterpolatorx -> noiseInterpolatorx.advanceCellX(p));
+		for (int m = 0; m < this.cellCountX; m++) {
+			int n = m;
+			list.forEach(noiseInterpolatorx -> noiseInterpolatorx.advanceCellX(n));
 
-			for (int q = 0; q < this.cellCountZ; q++) {
+			for (int o = 0; o < this.cellCountZ; o++) {
 				LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(chunkAccess.getSectionsCount() - 1);
 
-				for (int r = j - 1; r >= 0; r--) {
-					int s = q;
-					int t = r;
-					list.forEach(noiseInterpolatorx -> noiseInterpolatorx.selectCellYZ(t, s));
+				for (int p = j - 1; p >= 0; p--) {
+					int q = o;
+					int r = p;
+					list.forEach(noiseInterpolatorx -> noiseInterpolatorx.selectCellYZ(r, q));
 
-					for (int u = this.cellHeight - 1; u >= 0; u--) {
-						int v = (i + r) * this.cellHeight + u;
-						int w = v & 15;
-						int x = chunkAccess.getSectionIndex(v);
-						if (chunkAccess.getSectionIndex(levelChunkSection.bottomBlockY()) != x) {
-							levelChunkSection = chunkAccess.getOrCreateSection(x);
+					for (int s = this.cellHeight - 1; s >= 0; s--) {
+						int t = (i + p) * this.cellHeight + s;
+						int u = t & 15;
+						int v = chunkAccess.getSectionIndex(t);
+						if (chunkAccess.getSectionIndex(levelChunkSection.bottomBlockY()) != v) {
+							levelChunkSection = chunkAccess.getOrCreateSection(v);
 						}
 
-						double d = (double)u / (double)this.cellHeight;
+						double d = (double)s / (double)this.cellHeight;
 						list.forEach(noiseInterpolatorx -> noiseInterpolatorx.updateForY(d));
 
-						for (int y = 0; y < this.cellWidth; y++) {
-							int z = m + o * this.cellWidth + y;
-							int aa = z & 15;
-							double e = (double)y / (double)this.cellWidth;
+						for (int w = 0; w < this.cellWidth; w++) {
+							int x = k + m * this.cellWidth + w;
+							int y = x & 15;
+							double e = (double)w / (double)this.cellWidth;
 							list.forEach(noiseInterpolatorx -> noiseInterpolatorx.updateForX(e));
 
-							for (int ab = 0; ab < this.cellWidth; ab++) {
-								int ac = n + q * this.cellWidth + ab;
-								int ad = ac & 15;
-								double f = (double)ab / (double)this.cellWidth;
+							for (int z = 0; z < this.cellWidth; z++) {
+								int aa = l + o * this.cellWidth + z;
+								int ab = aa & 15;
+								double f = (double)z / (double)this.cellWidth;
 								double g = noiseInterpolator.calculateValue(f);
-								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, this.baseStoneSource, z, v, ac, g);
+								doubleConsumer.accept(f);
+								BlockState blockState = this.updateNoiseAndGenerateBaseState(beardifier, aquifer, baseStoneSource, x, t, aa, g);
 								if (blockState != AIR) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
-										mutableBlockPos.set(z, v, ac);
+										mutableBlockPos.set(x, t, aa);
 										((ProtoChunk)chunkAccess).addLight(mutableBlockPos);
 									}
 
-									levelChunkSection.setBlockState(aa, w, ad, blockState, false);
-									heightmap.update(aa, v, ad, blockState);
-									heightmap2.update(aa, v, ad, blockState);
-									if (aquifer != null && aquifer.shouldScheduleWaterUpdate() && !blockState.getFluidState().isEmpty()) {
-										mutableBlockPos.set(z, v, ac);
+									levelChunkSection.setBlockState(y, u, ab, blockState, false);
+									heightmap.update(y, t, ab, blockState);
+									heightmap2.update(y, t, ab, blockState);
+									if (aquifer.shouldScheduleFluidUpdate() && !blockState.getFluidState().isEmpty()) {
+										mutableBlockPos.set(x, t, aa);
 										chunkAccess.getLiquidTicks().scheduleTick(mutableBlockPos, blockState.getFluidState().getType(), 0);
 									}
 								}
@@ -428,6 +425,29 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		}
 
 		return chunkAccess;
+	}
+
+	private Pair<BaseStoneSource, DoubleConsumer> createBaseStoneSource(int i, ChunkPos chunkPos, Consumer<NoiseInterpolator> consumer) {
+		if (!((NoiseGeneratorSettings)this.settings.get()).isOreVeinsEnabled()) {
+			return Pair.of(this.baseStoneSource, d -> {
+			});
+		} else {
+			NoiseBasedChunkGenerator.OreVeinNoiseSource oreVeinNoiseSource = new NoiseBasedChunkGenerator.OreVeinNoiseSource(chunkPos, i, this.seed + 1L);
+			oreVeinNoiseSource.listInterpolators(consumer);
+			BaseStoneSource baseStoneSource = (ix, j, k) -> {
+				BlockState blockState = oreVeinNoiseSource.getBaseBlock(ix, j, k);
+				return blockState != this.defaultBlock ? blockState : this.baseStoneSource.getBaseBlock(ix, j, k);
+			};
+			return Pair.of(baseStoneSource, oreVeinNoiseSource::prepare);
+		}
+	}
+
+	@Override
+	protected Aquifer createAquifer(ChunkAccess chunkAccess) {
+		ChunkPos chunkPos = chunkAccess.getPos();
+		int i = Math.max(((NoiseGeneratorSettings)this.settings.get()).noiseSettings().minY(), chunkAccess.getMinBuildHeight());
+		int j = Mth.intFloorDiv(i, this.cellHeight);
+		return this.getAquifer(j, this.cellCountY, chunkPos);
 	}
 
 	@Override
@@ -473,7 +493,10 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			}
 		}
 
-		return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
+		return mobCategory == MobCategory.UNDERGROUND_WATER_CREATURE
+				&& structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.OCEAN_MONUMENT).isValid()
+			? StructureFeature.OCEAN_MONUMENT.getSpecialUndergroundWaterAnimals()
+			: super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
 	}
 
 	@Override
@@ -484,6 +507,62 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			WorldgenRandom worldgenRandom = new WorldgenRandom();
 			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
 			NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, biome, chunkPos, worldgenRandom);
+		}
+	}
+
+	class OreVeinNoiseSource implements BaseStoneSource {
+		private final NoiseInterpolator veininess;
+		private final NoiseInterpolator veinA;
+		private final NoiseInterpolator veinB;
+		private double factorZ;
+		private final long seed;
+		private final WorldgenRandom random = new WorldgenRandom();
+
+		public OreVeinNoiseSource(ChunkPos chunkPos, int i, long l) {
+			this.veininess = new NoiseInterpolator(
+				NoiseBasedChunkGenerator.this.cellCountX,
+				NoiseBasedChunkGenerator.this.cellCountY,
+				NoiseBasedChunkGenerator.this.cellCountZ,
+				chunkPos,
+				i,
+				NoiseBasedChunkGenerator.this.oreVeinifier::fillVeininessNoiseColumn
+			);
+			this.veinA = new NoiseInterpolator(
+				NoiseBasedChunkGenerator.this.cellCountX,
+				NoiseBasedChunkGenerator.this.cellCountY,
+				NoiseBasedChunkGenerator.this.cellCountZ,
+				chunkPos,
+				i,
+				NoiseBasedChunkGenerator.this.oreVeinifier::fillNoiseColumnA
+			);
+			this.veinB = new NoiseInterpolator(
+				NoiseBasedChunkGenerator.this.cellCountX,
+				NoiseBasedChunkGenerator.this.cellCountY,
+				NoiseBasedChunkGenerator.this.cellCountZ,
+				chunkPos,
+				i,
+				NoiseBasedChunkGenerator.this.oreVeinifier::fillNoiseColumnB
+			);
+			this.seed = l;
+		}
+
+		public void listInterpolators(Consumer<NoiseInterpolator> consumer) {
+			consumer.accept(this.veininess);
+			consumer.accept(this.veinA);
+			consumer.accept(this.veinB);
+		}
+
+		public void prepare(double d) {
+			this.factorZ = d;
+		}
+
+		@Override
+		public BlockState getBaseBlock(int i, int j, int k) {
+			double d = this.veininess.calculateValue(this.factorZ);
+			double e = this.veinA.calculateValue(this.factorZ);
+			double f = this.veinB.calculateValue(this.factorZ);
+			this.random.setBaseStoneSeed(this.seed, i, j, k);
+			return NoiseBasedChunkGenerator.this.oreVeinifier.oreVeinify(this.random, j, d, e, f);
 		}
 	}
 }

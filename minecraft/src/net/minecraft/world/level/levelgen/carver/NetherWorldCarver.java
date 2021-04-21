@@ -10,6 +10,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
@@ -62,7 +63,7 @@ public class NetherWorldCarver extends CaveWorldCarver {
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
-		int i,
+		Aquifer aquifer,
 		MutableBoolean mutableBoolean
 	) {
 		if (this.canReplaceBlock(chunkAccess.getBlockState(mutableBlockPos))) {

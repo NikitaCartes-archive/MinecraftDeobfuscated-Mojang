@@ -159,12 +159,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.AZALEA_LEAVES_FLOWERS,
 				Blocks.FLOWERING_AZALEA
 			);
-		this.tag(BlockTags.DIRT).add(Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.PODZOL, Blocks.ROOTED_DIRT);
+		this.tag(BlockTags.DIRT).add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK);
 		this.tag(BlockTags.ENDERMAN_HOLDABLE)
 			.addTag(BlockTags.SMALL_FLOWERS)
 			.addTag(BlockTags.DIRT)
 			.add(
-				Blocks.GRASS_BLOCK,
 				Blocks.SAND,
 				Blocks.RED_SAND,
 				Blocks.GRAVEL,
@@ -441,10 +440,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			);
 		this.tag(BlockTags.TRAPDOORS).addTag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.IRON_TRAPDOOR);
 		this.tag(BlockTags.UNDERWATER_BONEMEALS).add(Blocks.SEAGRASS).addTag(BlockTags.CORALS).addTag(BlockTags.WALL_CORALS);
-		this.tag(BlockTags.BAMBOO_PLANTABLE_ON)
-			.addTag(BlockTags.SAND)
-			.addTag(BlockTags.DIRT)
-			.add(Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.GRAVEL, Blocks.GRASS_BLOCK, Blocks.MYCELIUM);
+		this.tag(BlockTags.BAMBOO_PLANTABLE_ON).addTag(BlockTags.SAND).addTag(BlockTags.DIRT).add(Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.GRAVEL);
 		this.tag(BlockTags.STANDING_SIGNS)
 			.add(
 				Blocks.OAK_SIGN,
@@ -697,13 +693,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add(Blocks.SNOW, Blocks.POWDER_SNOW);
 		this.tag(BlockTags.DRIPSTONE_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.DIRT);
 		this.tag(BlockTags.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT).add(Blocks.CAVE_VINES);
-		this.tag(BlockTags.LUSH_PLANTS_REPLACEABLE)
-			.addTag(BlockTags.BASE_STONE_OVERWORLD)
-			.addTag(BlockTags.CAVE_VINES)
-			.add(Blocks.DIRT)
-			.add(Blocks.GRAVEL)
-			.add(Blocks.SAND);
-		this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.LUSH_PLANTS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
+		this.tag(BlockTags.MOSS_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.CAVE_VINES).addTag(BlockTags.DIRT);
+		this.tag(BlockTags.LUSH_GROUND_REPLACEABLE).addTag(BlockTags.MOSS_REPLACEABLE).add(Blocks.CLAY).add(Blocks.GRAVEL).add(Blocks.MOSS_BLOCK).add(Blocks.SAND);
 		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
 		this.tag(BlockTags.SNOW).add(Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
 	}

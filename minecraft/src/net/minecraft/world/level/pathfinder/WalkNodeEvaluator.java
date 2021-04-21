@@ -547,7 +547,11 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		}
 	}
 
-	private static boolean isBurningBlock(BlockState blockState) {
-		return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
+	public static boolean isBurningBlock(BlockState blockState) {
+		return blockState.is(BlockTags.FIRE)
+			|| blockState.is(Blocks.LAVA)
+			|| blockState.is(Blocks.MAGMA_BLOCK)
+			|| CampfireBlock.isLitCampfire(blockState)
+			|| blockState.is(Blocks.LAVA_CAULDRON);
 	}
 }

@@ -135,7 +135,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 									);
 								if (bl2 && (u < 4 || random.nextInt(2) != 0) && worldGenLevel.getBlockState(blockPos.offset(s, u, txxx)).getMaterial().isSolid()) {
 									BlockPos blockPos3 = blockPos.offset(s, u, txxx);
-									worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseStone(blockPos3), 2);
+									worldGenLevel.setBlock(blockPos3, baseStoneSource.getBaseBlock(blockPos3), 2);
 								}
 							}
 						}

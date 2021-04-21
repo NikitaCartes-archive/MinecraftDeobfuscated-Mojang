@@ -157,6 +157,17 @@ public class Camera {
 		return this.detached;
 	}
 
+	public Camera.NearPlane getNearPlane() {
+		Minecraft minecraft = Minecraft.getInstance();
+		double d = (double)minecraft.getWindow().getWidth() / (double)minecraft.getWindow().getHeight();
+		double e = Math.tan(minecraft.options.fov * (float) (Math.PI / 180.0) / 2.0) * 0.05F;
+		double f = e * d;
+		Vec3 vec3 = new Vec3(this.forwards).scale(0.05F);
+		Vec3 vec32 = new Vec3(this.left).scale(f);
+		Vec3 vec33 = new Vec3(this.up).scale(e);
+		return new Camera.NearPlane(vec3, vec32, vec33);
+	}
+
 	public FogType getFluidInCamera() {
 		if (!this.initialized) {
 			return FogType.NONE;
@@ -165,24 +176,14 @@ public class Camera {
 			if (fluidState.is(FluidTags.WATER) && this.position.y < (double)((float)this.blockPosition.getY() + fluidState.getHeight(this.level, this.blockPosition))) {
 				return FogType.WATER;
 			} else {
-				Minecraft minecraft = Minecraft.getInstance();
-				double d = (double)minecraft.getWindow().getWidth() / (double)minecraft.getWindow().getHeight();
-				double e = Math.tan(minecraft.options.fov * (float) (Math.PI / 180.0) / 2.0) * 0.05F;
-				double f = e * d;
-				Vec3 vec3 = new Vec3(this.forwards).scale(0.05F);
-				Vec3 vec32 = new Vec3(this.left).scale(f);
-				Vec3 vec33 = new Vec3(this.up).scale(e);
-				Vec3 vec34 = vec3.add(vec33).add(vec32);
-				Vec3 vec35 = vec3.add(vec33).subtract(vec32);
-				Vec3 vec36 = vec3.subtract(vec33).add(vec32);
-				Vec3 vec37 = vec3.subtract(vec33).subtract(vec32);
+				Camera.NearPlane nearPlane = this.getNearPlane();
 
-				for (Vec3 vec38 : Arrays.asList(vec3, vec34, vec35, vec36, vec37)) {
-					Vec3 vec39 = this.position.add(vec38);
-					BlockPos blockPos = new BlockPos(vec39);
+				for (Vec3 vec3 : Arrays.asList(nearPlane.forward, nearPlane.getTopLeft(), nearPlane.getTopRight(), nearPlane.getBottomLeft(), nearPlane.getBottomRight())) {
+					Vec3 vec32 = this.position.add(vec3);
+					BlockPos blockPos = new BlockPos(vec32);
 					FluidState fluidState2 = this.level.getFluidState(blockPos);
 					if (fluidState2.is(FluidTags.LAVA)) {
-						if (vec39.y <= (double)(fluidState2.getHeight(this.level, blockPos) + (float)blockPos.getY())) {
+						if (vec32.y <= (double)(fluidState2.getHeight(this.level, blockPos) + (float)blockPos.getY())) {
 							return FogType.LAVA;
 						}
 					} else {
@@ -214,5 +215,38 @@ public class Camera {
 		this.level = null;
 		this.entity = null;
 		this.initialized = false;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class NearPlane {
+		private final Vec3 forward;
+		private final Vec3 left;
+		private final Vec3 up;
+
+		private NearPlane(Vec3 vec3, Vec3 vec32, Vec3 vec33) {
+			this.forward = vec3;
+			this.left = vec32;
+			this.up = vec33;
+		}
+
+		public Vec3 getTopLeft() {
+			return this.forward.add(this.up).add(this.left);
+		}
+
+		public Vec3 getTopRight() {
+			return this.forward.add(this.up).subtract(this.left);
+		}
+
+		public Vec3 getBottomLeft() {
+			return this.forward.subtract(this.up).add(this.left);
+		}
+
+		public Vec3 getBottomRight() {
+			return this.forward.subtract(this.up).subtract(this.left);
+		}
+
+		public Vec3 getPointOnPlane(float f, float g) {
+			return this.forward.add(this.up.scale((double)g)).subtract(this.left.scale((double)f));
+		}
 	}
 }

@@ -3,10 +3,11 @@ package net.minecraft.world.level.levelgen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
+@FunctionalInterface
 public interface BaseStoneSource {
-	default BlockState getBaseStone(BlockPos blockPos) {
-		return this.getBaseStone(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+	default BlockState getBaseBlock(BlockPos blockPos) {
+		return this.getBaseBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 
-	BlockState getBaseStone(int i, int j, int k);
+	BlockState getBaseBlock(int i, int j, int k);
 }

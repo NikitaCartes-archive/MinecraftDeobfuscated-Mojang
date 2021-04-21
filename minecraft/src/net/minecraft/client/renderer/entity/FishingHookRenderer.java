@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
+	private static final double VIEW_BOBBING_SCALE = 960.0;
 
 	public FishingHookRenderer(EntityRendererProvider.Context context) {
 		super(context);
@@ -65,11 +66,9 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			float r;
 			if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson())
 				&& player == Minecraft.getInstance().player) {
-				double s = this.entityRenderDispatcher.options.fov;
-				s /= 100.0;
-				Vec3 vec3 = new Vec3((double)j * -0.36 * s, -0.045 * s, 0.4);
-				vec3 = vec3.xRot(-Mth.lerp(g, player.xRotO, player.xRot) * (float) (Math.PI / 180.0));
-				vec3 = vec3.yRot(-Mth.lerp(g, player.yRotO, player.yRot) * (float) (Math.PI / 180.0));
+				double s = 960.0 / this.entityRenderDispatcher.options.fov;
+				Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)j * 0.525F, -0.1F);
+				vec3 = vec3.scale(s);
 				vec3 = vec3.yRot(k * 0.5F);
 				vec3 = vec3.xRot(-k * 0.7F);
 				o = Mth.lerp((double)g, player.xo, player.getX()) + vec3.x;

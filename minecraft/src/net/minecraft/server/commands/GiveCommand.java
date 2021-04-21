@@ -52,8 +52,7 @@ public class GiveCommand {
 		int j = itemInput.getItem().getMaxStackSize();
 		int k = j * 100;
 		if (i > k) {
-			String string = itemInput.getItem().getDescriptionId();
-			commandSourceStack.sendFailure(new TranslatableComponent("commands.give.failed.toomanyitems", k, string));
+			commandSourceStack.sendFailure(new TranslatableComponent("commands.give.failed.toomanyitems", k, itemInput.createItemStack(i, false).getDisplayName()));
 			return 0;
 		} else {
 			for (ServerPlayer serverPlayer : collection) {

@@ -15,6 +15,7 @@ public class CarverConfiguration extends ProbabilityFeatureConfiguration {
 					HeightProvider.CODEC.fieldOf("y").forGetter(carverConfiguration -> carverConfiguration.y),
 					FloatProvider.CODEC.fieldOf("yScale").forGetter(carverConfiguration -> carverConfiguration.yScale),
 					VerticalAnchor.CODEC.fieldOf("lava_level").forGetter(carverConfiguration -> carverConfiguration.lavaLevel),
+					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(carverConfiguration -> carverConfiguration.aquifersEnabled),
 					CarverDebugSettings.CODEC
 						.optionalFieldOf("debug_settings", CarverDebugSettings.DEFAULT)
 						.forGetter(carverConfiguration -> carverConfiguration.debugSettings)
@@ -24,15 +25,17 @@ public class CarverConfiguration extends ProbabilityFeatureConfiguration {
 	public final HeightProvider y;
 	public final FloatProvider yScale;
 	public final VerticalAnchor lavaLevel;
+	public final boolean aquifersEnabled;
 	public final CarverDebugSettings debugSettings;
 
 	public CarverConfiguration(
-		float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, CarverDebugSettings carverDebugSettings
+		float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, boolean bl, CarverDebugSettings carverDebugSettings
 	) {
 		super(f);
 		this.y = heightProvider;
 		this.yScale = floatProvider;
 		this.lavaLevel = verticalAnchor;
+		this.aquifersEnabled = bl;
 		this.debugSettings = carverDebugSettings;
 	}
 }

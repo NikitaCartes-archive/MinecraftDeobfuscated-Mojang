@@ -67,8 +67,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 					Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 					BlockPos blockPos2 = blockPos.relative(direction);
 					BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
-					if (serverLevel.getBlockState(blockPos2).isAir()
-						&& (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.GRASS_BLOCK))) {
+					if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT))) {
 						serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
 						serverLevel.setBlockAndUpdate(blockPos, this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
 					}

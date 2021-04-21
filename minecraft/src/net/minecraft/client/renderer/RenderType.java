@@ -65,7 +65,7 @@ public abstract class RenderType extends RenderStateShard {
 			.createCompositeState(true)
 	);
 	private static final RenderType TRANSLUCENT = create(
-		"translucent", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 262144, true, true, translucentState(RENDERTYPE_TRANSLUCENT_SHADER)
+		"translucent", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, translucentState(RENDERTYPE_TRANSLUCENT_SHADER)
 	);
 	private static final RenderType TRANSLUCENT_MOVING_BLOCK = create(
 		"translucent_moving_block", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 262144, false, true, translucentMovingBlockState()
@@ -445,6 +445,22 @@ public abstract class RenderType extends RenderStateShard {
 					.createCompositeState(false)
 			))
 	);
+	private static final Function<ResourceLocation, RenderType> TEXT_INTENSITY = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"text_intensity",
+				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+				VertexFormat.Mode.QUADS,
+				256,
+				false,
+				true,
+				RenderType.CompositeState.builder()
+					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SHADER)
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setLightmapState(LIGHTMAP)
+					.createCompositeState(false)
+			))
+	);
 	private static final Function<ResourceLocation, RenderType> TEXT_SEE_THROUGH = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
 				"text_see_through",
@@ -455,6 +471,24 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_SEE_THROUGH_SHADER)
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setLightmapState(LIGHTMAP)
+					.setDepthTestState(NO_DEPTH_TEST)
+					.setWriteMaskState(COLOR_WRITE)
+					.createCompositeState(false)
+			))
+	);
+	private static final Function<ResourceLocation, RenderType> TEXT_INTENSITY_SEE_THROUGH = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"text_intensity_see_through",
+				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+				VertexFormat.Mode.QUADS,
+				256,
+				false,
+				true,
+				RenderType.CompositeState.builder()
+					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
 					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
@@ -733,8 +767,16 @@ public abstract class RenderType extends RenderStateShard {
 		return (RenderType)TEXT.apply(resourceLocation);
 	}
 
+	public static RenderType textIntensity(ResourceLocation resourceLocation) {
+		return (RenderType)TEXT_INTENSITY.apply(resourceLocation);
+	}
+
 	public static RenderType textSeeThrough(ResourceLocation resourceLocation) {
 		return (RenderType)TEXT_SEE_THROUGH.apply(resourceLocation);
+	}
+
+	public static RenderType textIntensitySeeThrough(ResourceLocation resourceLocation) {
+		return (RenderType)TEXT_INTENSITY_SEE_THROUGH.apply(resourceLocation);
 	}
 
 	public static RenderType lightning() {

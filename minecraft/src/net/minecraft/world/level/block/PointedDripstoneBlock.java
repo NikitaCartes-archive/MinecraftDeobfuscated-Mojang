@@ -59,6 +59,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	private static final int MAX_STALACTITE_HEIGHT_FOR_DAMAGE_CALCULATION = 6;
 	private static final float STALAGMITE_FALL_DISTANCE_OFFSET = 2.0F;
 	private static final int STALAGMITE_FALL_DAMAGE_MODIFIER = 2;
+	private static final float AVERAGE_DAYS_PER_GROWTH = 5.0F;
+	private static final float GROWTH_PROBABILITY_PER_RANDOM_TICK = 0.011377778F;
+	private static final int MAX_GROWTH_LENGTH = 7;
+	private static final int MAX_STALAGMITE_SEARCH_RANGE_WHEN_GROWING = 10;
 	private static final float STALACTITE_DRIP_START_PIXEL = 0.6875F;
 	private static final VoxelShape TIP_MERGE_SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 16.0, 11.0);
 	private static final VoxelShape TIP_SHAPE_UP = Block.box(5.0, 0.0, 5.0, 11.0, 11.0, 11.0);
@@ -156,6 +160,9 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		maybeFillCauldron(blockState, serverLevel, blockPos, random.nextFloat());
+		if (random.nextFloat() < 0.011377778F && isStalactiteStartPos(blockState, serverLevel, blockPos)) {
+			growStalactiteOrStalagmiteIfPossible(blockState, serverLevel, blockPos, random);
+		}
 	}
 
 	@VisibleForTesting
@@ -175,7 +182,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 				}
 
 				if (!(f >= g)) {
-					BlockPos blockPos2 = findTip(blockState, serverLevel, blockPos, 10);
+					BlockPos blockPos2 = findTip(blockState, serverLevel, blockPos, 10, false);
 					if (blockPos2 != null) {
 						BlockPos blockPos3 = findFillableCauldronBelowStalactiteTip(serverLevel, blockPos2, fluid);
 						if (blockPos3 != null) {
@@ -279,7 +286,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	private void scheduleStalactiteFallTicks(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
-		BlockPos blockPos2 = findTip(blockState, levelAccessor, blockPos, Integer.MAX_VALUE);
+		BlockPos blockPos2 = findTip(blockState, levelAccessor, blockPos, Integer.MAX_VALUE, true);
 		if (blockPos2 != null) {
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
 
@@ -305,13 +312,91 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	private static void spawnFallingStalactite(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {
 		Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
 		FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(serverLevel, vec3.x, vec3.y, vec3.z, blockState);
-		if (isTip(blockState)) {
+		if (isTip(blockState, true)) {
 			int i = getStalactiteSizeFromTip(serverLevel, blockPos, 6);
 			float f = 1.0F * (float)i;
 			fallingBlockEntity.setHurtsEntities(f, 40);
 		}
 
 		serverLevel.addFreshEntity(fallingBlockEntity);
+	}
+
+	@VisibleForTesting
+	public static void growStalactiteOrStalagmiteIfPossible(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		Optional<BlockPos> optional = findRootBlock(serverLevel, blockPos, blockState, 7);
+		if (optional.isPresent()) {
+			BlockState blockState2 = serverLevel.getBlockState((BlockPos)optional.get());
+			BlockState blockState3 = serverLevel.getBlockState(((BlockPos)optional.get()).above());
+			if (canGrow(blockState2, blockState3)) {
+				BlockPos blockPos2 = findTip(blockState, serverLevel, blockPos, 7, false);
+				if (blockPos2 != null) {
+					BlockState blockState4 = serverLevel.getBlockState(blockPos2);
+					if (canDrip(blockState4) && canTipGrow(blockState4, serverLevel, blockPos2)) {
+						if (random.nextBoolean()) {
+							grow(serverLevel, blockPos2, Direction.DOWN);
+						} else {
+							growStalagmiteBelow(serverLevel, blockPos2);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void growStalagmiteBelow(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+
+		for (int i = 0; i < 10; i++) {
+			mutableBlockPos.move(Direction.DOWN);
+			BlockState blockState = serverLevel.getBlockState(mutableBlockPos);
+			if (!blockState.getFluidState().isEmpty()) {
+				return;
+			}
+
+			if (isUnmergedTipWithDirection(blockState, Direction.UP) && canTipGrow(blockState, serverLevel, mutableBlockPos)) {
+				grow(serverLevel, mutableBlockPos, Direction.UP);
+				return;
+			}
+
+			if (isValidPointedDripstonePlacement(serverLevel, mutableBlockPos, Direction.UP) && !serverLevel.isWaterAt(mutableBlockPos.below())) {
+				grow(serverLevel, mutableBlockPos.below(), Direction.UP);
+				return;
+			}
+		}
+	}
+
+	private static void grow(ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+		BlockPos blockPos2 = blockPos.relative(direction);
+		BlockState blockState = serverLevel.getBlockState(blockPos2);
+		if (isUnmergedTipWithDirection(blockState, direction.getOpposite())) {
+			createMergedTips(blockState, serverLevel, blockPos2);
+		} else if (blockState.isAir() || blockState.is(Blocks.WATER)) {
+			createDripstone(serverLevel, blockPos2, direction, DripstoneThickness.TIP);
+		}
+	}
+
+	private static void createDripstone(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, DripstoneThickness dripstoneThickness) {
+		BlockState blockState = Blocks.POINTED_DRIPSTONE
+			.defaultBlockState()
+			.setValue(TIP_DIRECTION, direction)
+			.setValue(THICKNESS, dripstoneThickness)
+			.setValue(WATERLOGGED, Boolean.valueOf(levelAccessor.getFluidState(blockPos).getType() == Fluids.WATER));
+		levelAccessor.setBlock(blockPos, blockState, 3);
+	}
+
+	private static void createMergedTips(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
+		BlockPos blockPos3;
+		BlockPos blockPos2;
+		if (blockState.getValue(TIP_DIRECTION) == Direction.UP) {
+			blockPos2 = blockPos;
+			blockPos3 = blockPos.above();
+		} else {
+			blockPos3 = blockPos;
+			blockPos2 = blockPos.below();
+		}
+
+		createDripstone(levelAccessor, blockPos3, Direction.DOWN, DripstoneThickness.TIP_MERGE);
+		createDripstone(levelAccessor, blockPos2, Direction.UP, DripstoneThickness.TIP_MERGE);
 	}
 
 	public static void spawnDripParticle(Level level, BlockPos blockPos, BlockState blockState) {
@@ -330,13 +415,13 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Nullable
-	private static BlockPos findTip(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		if (isTip(blockState)) {
+	private static BlockPos findTip(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i, boolean bl) {
+		if (isTip(blockState, bl)) {
 			return blockPos;
 		} else {
 			Direction direction = blockState.getValue(TIP_DIRECTION);
 			Predicate<BlockState> predicate = blockStatex -> blockStatex.is(Blocks.POINTED_DRIPSTONE) && blockStatex.getValue(TIP_DIRECTION) == direction;
-			return (BlockPos)findBlockVertical(levelAccessor, blockPos, direction.getAxisDirection(), predicate, PointedDripstoneBlock::isTip, i).orElse(null);
+			return (BlockPos)findBlockVertical(levelAccessor, blockPos, direction.getAxisDirection(), predicate, blockStatex -> isTip(blockStatex, bl), i).orElse(null);
 		}
 	}
 
@@ -378,6 +463,17 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return isStalactite(blockState) && blockState.getValue(THICKNESS) == DripstoneThickness.TIP && !(Boolean)blockState.getValue(WATERLOGGED);
 	}
 
+	private static boolean canTipGrow(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {
+		Direction direction = blockState.getValue(TIP_DIRECTION);
+		BlockPos blockPos2 = blockPos.relative(direction);
+		BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+		if (!blockState2.getFluidState().isEmpty()) {
+			return false;
+		} else {
+			return blockState2.isAir() ? true : isUnmergedTipWithDirection(blockState2, direction.getOpposite());
+		}
+	}
+
 	private static Optional<BlockPos> findRootBlock(Level level, BlockPos blockPos, BlockState blockState, int i) {
 		Direction direction = blockState.getValue(TIP_DIRECTION);
 		Predicate<BlockState> predicate = blockStatex -> blockStatex.is(Blocks.POINTED_DRIPSTONE) && blockStatex.getValue(TIP_DIRECTION) == direction;
@@ -390,13 +486,17 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 		return blockState.isFaceSturdy(levelReader, blockPos2, direction) || isPointedDripstoneWithDirection(blockState, direction);
 	}
 
-	private static boolean isTip(BlockState blockState) {
+	private static boolean isTip(BlockState blockState, boolean bl) {
 		if (!blockState.is(Blocks.POINTED_DRIPSTONE)) {
 			return false;
 		} else {
 			DripstoneThickness dripstoneThickness = blockState.getValue(THICKNESS);
-			return dripstoneThickness == DripstoneThickness.TIP || dripstoneThickness == DripstoneThickness.TIP_MERGE;
+			return dripstoneThickness == DripstoneThickness.TIP || bl && dripstoneThickness == DripstoneThickness.TIP_MERGE;
 		}
+	}
+
+	private static boolean isUnmergedTipWithDirection(BlockState blockState, Direction direction) {
+		return isTip(blockState, false) && blockState.getValue(TIP_DIRECTION) == direction;
 	}
 
 	private static boolean isStalactite(BlockState blockState) {
@@ -445,6 +545,10 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	private static boolean canFillCauldron(Fluid fluid) {
 		return fluid == Fluids.LAVA || fluid == Fluids.WATER;
+	}
+
+	private static boolean canGrow(BlockState blockState, BlockState blockState2) {
+		return blockState.is(Blocks.DRIPSTONE_BLOCK) && blockState2.is(Blocks.WATER) && blockState2.getFluidState().isSource();
 	}
 
 	private static Fluid getDripFluid(Level level, Fluid fluid) {

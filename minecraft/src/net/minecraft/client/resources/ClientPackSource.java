@@ -21,9 +21,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
@@ -57,6 +59,7 @@ public class ClientPackSource implements RepositorySource {
 	private static final String SERVER_ID = "server";
 	private static final String PROGRAMMER_ART_ID = "programer_art";
 	private static final String PROGRAMMER_ART_NAME = "Programmer Art";
+	private static final Component APPLYING_PACK_TEXT = new TranslatableComponent("multiplayer.applyingPack");
 	private final VanillaPackResources vanillaPack;
 	private final File serverPackDir;
 	private final ReentrantLock downloadLock = new ReentrantLock();
@@ -104,12 +107,12 @@ public class ClientPackSource implements RepositorySource {
 		return map;
 	}
 
-	public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2) {
+	public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2, boolean bl) {
 		String string3 = DigestUtils.sha1Hex(string);
 		String string4 = SHA1.matcher(string2).matches() ? string2 : "";
 		this.downloadLock.lock();
 
-		CompletableFuture var13;
+		CompletableFuture var14;
 		try {
 			this.clearServerPack();
 			this.clearOldDownloads();
@@ -118,18 +121,26 @@ public class ClientPackSource implements RepositorySource {
 			if (file.exists()) {
 				completableFuture = CompletableFuture.completedFuture("");
 			} else {
-				ProgressScreen progressScreen = new ProgressScreen();
+				ProgressScreen progressScreen = new ProgressScreen(bl);
 				Map<String, String> map = getDownloadHeaders();
 				Minecraft minecraft = Minecraft.getInstance();
 				minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
 				completableFuture = HttpUtil.downloadTo(file, string, map, 104857600, progressScreen, minecraft.getProxy());
 			}
 
-			this.currentDownload = completableFuture.thenCompose(
-					object -> !this.checkHash(string4, file)
-							? Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"))
-							: this.setServerPack(file, PackSource.SERVER)
-				)
+			this.currentDownload = completableFuture.thenCompose(object -> {
+					if (!this.checkHash(string4, file)) {
+						return Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"));
+					} else {
+						Minecraft minecraftx = Minecraft.getInstance();
+						minecraftx.execute(() -> {
+							if (!bl) {
+								minecraftx.setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
+							}
+						});
+						return this.setServerPack(file, PackSource.SERVER);
+					}
+				})
 				.whenComplete(
 					(void_, throwable) -> {
 						if (throwable != null) {
@@ -139,8 +150,8 @@ public class ClientPackSource implements RepositorySource {
 							minecraftx.execute(
 								() -> minecraftx.setScreen(
 										new ConfirmScreen(
-											bl -> {
-												if (bl) {
+											blx -> {
+												if (blx) {
 													minecraftx.setScreen(null);
 												} else {
 													ClientPacketListener clientPacketListener = minecraftx.getConnection();
@@ -159,12 +170,12 @@ public class ClientPackSource implements RepositorySource {
 						}
 					}
 				);
-			var13 = this.currentDownload;
+			var14 = this.currentDownload;
 		} finally {
 			this.downloadLock.unlock();
 		}
 
-		return var13;
+		return var14;
 	}
 
 	private static void deleteQuietly(File file) {

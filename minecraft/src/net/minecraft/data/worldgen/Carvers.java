@@ -24,7 +24,8 @@ public class Carvers {
 					0.14285715F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
 					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
@@ -40,7 +41,8 @@ public class Carvers {
 					0.33333334F,
 					UniformHeight.of(VerticalAnchor.aboveBottom(8), VerticalAnchor.absolute(126)),
 					UniformFloat.of(0.1F, 0.9F),
-					VerticalAnchor.aboveBottom(9),
+					VerticalAnchor.aboveBottom(8),
+					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					UniformFloat.of(0.3F, 1.8F),
 					UniformFloat.of(0.5F, 1.8F),
@@ -56,7 +58,8 @@ public class Carvers {
 					0.02F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(20), VerticalAnchor.absolute(67), 8),
 					ConstantFloat.of(3.0F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(
@@ -73,7 +76,8 @@ public class Carvers {
 					0.02F,
 					UniformHeight.of(VerticalAnchor.absolute(10), VerticalAnchor.absolute(67)),
 					ConstantFloat.of(3.0F),
-					VerticalAnchor.aboveBottom(9),
+					VerticalAnchor.aboveBottom(8),
+					false,
 					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(
@@ -90,7 +94,8 @@ public class Carvers {
 					0.06666667F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
 					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
@@ -106,7 +111,8 @@ public class Carvers {
 					0.14285715F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
 					UniformFloat.of(0.1F, 0.9F),
-					VerticalAnchor.aboveBottom(9),
+					VerticalAnchor.aboveBottom(8),
+					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
@@ -122,7 +128,8 @@ public class Carvers {
 					0.02F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(20), VerticalAnchor.absolute(67), 8),
 					ConstantFloat.of(3.0F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(
@@ -139,7 +146,8 @@ public class Carvers {
 					0.06666667F,
 					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
 					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
@@ -155,22 +163,24 @@ public class Carvers {
 					0.2F,
 					UniformHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.belowTop(1)),
 					ConstantFloat.of(0.5F),
-					VerticalAnchor.aboveBottom(11),
+					VerticalAnchor.aboveBottom(10),
+					false,
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(-0.7F)
 				)
 			)
 	);
-	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> PROTOTYPE_CRACK = register(
-		"prototype_crack",
+	public static final ConfiguredWorldCarver<CanyonCarverConfiguration> PROTOTYPE_CREVICE = register(
+		"prototype_crevice",
 		WorldCarver.CANYON
 			.configured(
 				new CanyonCarverConfiguration(
 					0.00125F,
 					UniformHeight.of(VerticalAnchor.absolute(40), VerticalAnchor.absolute(80)),
 					UniformFloat.of(6.0F, 8.0F),
-					VerticalAnchor.aboveBottom(9),
+					VerticalAnchor.aboveBottom(8),
+					false,
 					CarverDebugSettings.of(false, Blocks.OAK_BUTTON.defaultBlockState()),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(

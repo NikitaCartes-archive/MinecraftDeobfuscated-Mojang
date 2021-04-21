@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.level.GameType;
@@ -103,13 +104,21 @@ public class IntegratedServer extends MinecraftServer {
 			profilerFiller.pop();
 		}
 
-		if (!this.paused) {
+		if (this.paused) {
+			this.tickPaused();
+		} else {
 			super.tickServer(booleanSupplier);
 			int i = Math.max(2, this.minecraft.options.renderDistance + -1);
 			if (i != this.getPlayerList().getViewDistance()) {
 				LOGGER.info("Changing view distance to {}, from {}", i, this.getPlayerList().getViewDistance());
 				this.getPlayerList().setViewDistance(i);
 			}
+		}
+	}
+
+	private void tickPaused() {
+		for (ServerPlayer serverPlayer : this.getPlayerList().getPlayers()) {
+			serverPlayer.awardStat(Stats.TOTAL_WORLD_TIME);
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -16,7 +17,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.BaseStoneSource;
+import net.minecraft.world.level.levelgen.SingleBaseStoneSource;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -32,6 +37,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	public static final WorldCarver<CaveCarverConfiguration> UNDERWATER_CAVE = register(
 		"underwater_cave", new UnderwaterCaveWorldCarver(CaveCarverConfiguration.CODEC)
 	);
+	protected static final BaseStoneSource STONE_SOURCE = new SingleBaseStoneSource(Blocks.STONE.defaultBlockState());
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
@@ -67,7 +73,12 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Blocks.MYCELIUM,
 		Blocks.SNOW,
 		Blocks.PACKED_ICE,
-		Blocks.DEEPSLATE
+		Blocks.DEEPSLATE,
+		Blocks.TUFF,
+		Blocks.GRANITE,
+		Blocks.IRON_ORE,
+		Blocks.DEEPSLATE_IRON_ORE,
+		Blocks.COPPER_ORE
 	);
 	protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
 	private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
@@ -98,7 +109,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		long l,
-		int i,
+		Aquifer aquifer,
 		double d,
 		double e,
 		double f,
@@ -108,48 +119,48 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		WorldCarver.CarveSkipChecker carveSkipChecker
 	) {
 		ChunkPos chunkPos = chunkAccess.getPos();
-		int j = chunkPos.x;
-		int k = chunkPos.z;
-		Random random = new Random(l + (long)j + (long)k);
-		double m = (double)chunkPos.getMiddleBlockX();
-		double n = (double)chunkPos.getMiddleBlockZ();
-		double o = 16.0 + g * 2.0;
-		if (!(Math.abs(d - m) > o) && !(Math.abs(f - n) > o)) {
-			int p = chunkPos.getMinBlockX();
-			int q = chunkPos.getMinBlockZ();
-			int r = Math.max(Mth.floor(d - g) - p - 1, 0);
-			int s = Math.min(Mth.floor(d + g) - p, 15);
-			int t = Math.max(Mth.floor(e - h) - 1, carvingContext.getMinGenY() + 1);
-			int u = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
-			int v = Math.max(Mth.floor(f - g) - q - 1, 0);
-			int w = Math.min(Mth.floor(f + g) - q, 15);
-			if (this.hasDisallowedLiquid(chunkAccess, r, s, t, u, v, w)) {
+		int i = chunkPos.x;
+		int j = chunkPos.z;
+		Random random = new Random(l + (long)i + (long)j);
+		double k = (double)chunkPos.getMiddleBlockX();
+		double m = (double)chunkPos.getMiddleBlockZ();
+		double n = 16.0 + g * 2.0;
+		if (!(Math.abs(d - k) > n) && !(Math.abs(f - m) > n)) {
+			int o = chunkPos.getMinBlockX();
+			int p = chunkPos.getMinBlockZ();
+			int q = Math.max(Mth.floor(d - g) - o - 1, 0);
+			int r = Math.min(Mth.floor(d + g) - o, 15);
+			int s = Math.max(Mth.floor(e - h) - 1, carvingContext.getMinGenY() + 1);
+			int t = Math.min(Mth.floor(e + h) + 1, carvingContext.getMinGenY() + carvingContext.getGenDepth() - 8);
+			int u = Math.max(Mth.floor(f - g) - p - 1, 0);
+			int v = Math.min(Mth.floor(f + g) - p, 15);
+			if (!carverConfiguration.aquifersEnabled && this.hasDisallowedLiquid(chunkAccess, q, r, s, t, u, v)) {
 				return false;
 			} else {
 				boolean bl = false;
 				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 				BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
-				for (int x = r; x <= s; x++) {
-					int y = chunkPos.getBlockX(x);
-					double z = ((double)y + 0.5 - d) / g;
+				for (int w = q; w <= r; w++) {
+					int x = chunkPos.getBlockX(w);
+					double y = ((double)x + 0.5 - d) / g;
 
-					for (int aa = v; aa <= w; aa++) {
-						int ab = chunkPos.getBlockZ(aa);
-						double ac = ((double)ab + 0.5 - f) / g;
-						if (!(z * z + ac * ac >= 1.0)) {
+					for (int z = u; z <= v; z++) {
+						int aa = chunkPos.getBlockZ(z);
+						double ab = ((double)aa + 0.5 - f) / g;
+						if (!(y * y + ab * ab >= 1.0)) {
 							MutableBoolean mutableBoolean = new MutableBoolean(false);
 
-							for (int ad = u; ad > t; ad--) {
-								double ae = ((double)ad - 0.5 - e) / h;
-								if (!carveSkipChecker.shouldSkip(carvingContext, z, ae, ac, ad)) {
-									int af = ad - carvingContext.getMinGenY();
-									int ag = x | aa << 4 | af << 8;
-									if (!bitSet.get(ag) || isDebugEnabled(carverConfiguration)) {
-										bitSet.set(ag);
-										mutableBlockPos.set(y, ad, ab);
+							for (int ac = t; ac > s; ac--) {
+								double ad = ((double)ac - 0.5 - e) / h;
+								if (!carveSkipChecker.shouldSkip(carvingContext, y, ad, ab, ac)) {
+									int ae = ac - carvingContext.getMinGenY();
+									int af = w | z << 4 | ae << 8;
+									if (!bitSet.get(af) || isDebugEnabled(carverConfiguration)) {
+										bitSet.set(af);
+										mutableBlockPos.set(x, ac, aa);
 										bl |= this.carveBlock(
-											carvingContext, carverConfiguration, chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, i, mutableBoolean
+											carvingContext, carverConfiguration, chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, aquifer, mutableBoolean
 										);
 									}
 								}
@@ -174,7 +185,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos.MutableBlockPos mutableBlockPos2,
-		int i,
+		Aquifer aquifer,
 		MutableBoolean mutableBoolean
 	) {
 		BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
@@ -186,10 +197,11 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		if (!this.canReplaceBlock(blockState, blockState2) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
-			if (mutableBlockPos.getY() < carverConfiguration.lavaLevel.resolveY(carvingContext) && !isDebugEnabled(carverConfiguration)) {
-				chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
+			BlockState blockState3 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
+			if (blockState3 == null) {
+				return false;
 			} else {
-				chunkAccess.setBlockState(mutableBlockPos, getCaveAirState(carverConfiguration), false);
+				chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
 				if (mutableBoolean.isTrue()) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
 					if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
@@ -198,14 +210,39 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 						);
 					}
 				}
-			}
 
-			return true;
+				return true;
+			}
 		}
 	}
 
-	private static BlockState getCaveAirState(CarverConfiguration carverConfiguration) {
-		return isDebugEnabled(carverConfiguration) ? carverConfiguration.debugSettings.getAirState() : CAVE_AIR;
+	@Nullable
+	private BlockState getCarveState(CarvingContext carvingContext, C carverConfiguration, BlockPos blockPos, Aquifer aquifer) {
+		if (blockPos.getY() <= carverConfiguration.lavaLevel.resolveY(carvingContext)) {
+			return LAVA.createLegacyBlock();
+		} else if (!carverConfiguration.aquifersEnabled) {
+			return isDebugEnabled(carverConfiguration) ? getDebugState(carverConfiguration, AIR) : AIR;
+		} else {
+			BlockState blockState = aquifer.computeState(STONE_SOURCE, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0.0);
+			if (blockState == Blocks.STONE.defaultBlockState()) {
+				return isDebugEnabled(carverConfiguration) ? carverConfiguration.debugSettings.getBarrierState() : null;
+			} else {
+				return isDebugEnabled(carverConfiguration) ? getDebugState(carverConfiguration, blockState) : blockState;
+			}
+		}
+	}
+
+	private static BlockState getDebugState(CarverConfiguration carverConfiguration, BlockState blockState) {
+		if (blockState.is(Blocks.AIR)) {
+			return carverConfiguration.debugSettings.getAirState();
+		} else if (blockState.is(Blocks.WATER)) {
+			BlockState blockState2 = carverConfiguration.debugSettings.getWaterState();
+			return blockState2.hasProperty(BlockStateProperties.WATERLOGGED)
+				? blockState2.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true))
+				: blockState2;
+		} else {
+			return blockState.is(Blocks.LAVA) ? carverConfiguration.debugSettings.getLavaState() : blockState;
+		}
 	}
 
 	public abstract boolean carve(
@@ -214,7 +251,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Biome> function,
 		Random random,
-		int i,
+		Aquifer aquifer,
 		ChunkPos chunkPos,
 		BitSet bitSet
 	);

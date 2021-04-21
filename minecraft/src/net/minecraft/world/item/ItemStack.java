@@ -204,7 +204,7 @@ public final class ItemStack {
 		} else {
 			Item item = this.getItem();
 			InteractionResult interactionResult = item.useOn(useOnContext);
-			if (player != null && interactionResult.consumesAction()) {
+			if (player != null && interactionResult.shouldAwardStats()) {
 				player.awardStat(Stats.ITEM_USED.get(item));
 			}
 

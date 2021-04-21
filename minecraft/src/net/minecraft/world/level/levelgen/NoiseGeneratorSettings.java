@@ -31,7 +31,8 @@ public final class NoiseGeneratorSettings {
 					Codec.BOOL.fieldOf("disable_mob_generation").forGetter(NoiseGeneratorSettings::disableMobGeneration),
 					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(NoiseGeneratorSettings::isAquifersEnabled),
 					Codec.BOOL.fieldOf("noise_caves_enabled").forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled),
-					Codec.BOOL.fieldOf("deepslate_enabled").forGetter(NoiseGeneratorSettings::isDeepslateEnabled)
+					Codec.BOOL.fieldOf("deepslate_enabled").forGetter(NoiseGeneratorSettings::isDeepslateEnabled),
+					Codec.BOOL.fieldOf("ore_veins_enabled").forGetter(NoiseGeneratorSettings::isOreVeinsEnabled)
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
 	);
@@ -48,6 +49,7 @@ public final class NoiseGeneratorSettings {
 	private final boolean aquifersEnabled;
 	private final boolean noiseCavesEnabled;
 	private final boolean deepslateEnabled;
+	private final boolean oreVeinsEnabled;
 	public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld")
 	);
@@ -74,7 +76,8 @@ public final class NoiseGeneratorSettings {
 		boolean bl,
 		boolean bl2,
 		boolean bl3,
-		boolean bl4
+		boolean bl4,
+		boolean bl5
 	) {
 		this.structureSettings = structureSettings;
 		this.noiseSettings = noiseSettings;
@@ -88,6 +91,7 @@ public final class NoiseGeneratorSettings {
 		this.aquifersEnabled = bl2;
 		this.noiseCavesEnabled = bl3;
 		this.deepslateEnabled = bl4;
+		this.oreVeinsEnabled = bl5;
 	}
 
 	public StructureSettings structureSettings() {
@@ -139,6 +143,10 @@ public final class NoiseGeneratorSettings {
 		return this.deepslateEnabled;
 	}
 
+	protected boolean isOreVeinsEnabled() {
+		return this.oreVeinsEnabled;
+	}
+
 	public boolean stable(ResourceKey<NoiseGeneratorSettings> resourceKey) {
 		return Objects.equals(this, BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(resourceKey));
 	}
@@ -181,6 +189,7 @@ public final class NoiseGeneratorSettings {
 			bl,
 			false,
 			false,
+			false,
 			false
 		);
 	}
@@ -214,6 +223,7 @@ public final class NoiseGeneratorSettings {
 			false,
 			false,
 			false,
+			false,
 			false
 		);
 	}
@@ -243,6 +253,7 @@ public final class NoiseGeneratorSettings {
 			0,
 			63,
 			0,
+			false,
 			false,
 			false,
 			false,

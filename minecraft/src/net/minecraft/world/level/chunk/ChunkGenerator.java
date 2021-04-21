@@ -37,6 +37,7 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.BaseStoneSource;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
@@ -140,6 +141,7 @@ public abstract class ChunkGenerator {
 			.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos.getMinBlockZ()))
 			.getGenerationSettings();
 		CarvingContext carvingContext = new CarvingContext(this);
+		Aquifer aquifer = this.createAquifer(chunkAccess);
 		BitSet bitSet = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
 
 		for (int j = -8; j <= 8; j++) {
@@ -153,11 +155,15 @@ public abstract class ChunkGenerator {
 					ConfiguredWorldCarver<?> configuredWorldCarver = (ConfiguredWorldCarver<?>)((Supplier)listIterator.next()).get();
 					worldgenRandom.setLargeFeatureSeed(l + (long)m, chunkPos2.x, chunkPos2.z);
 					if (configuredWorldCarver.isStartChunk(worldgenRandom)) {
-						configuredWorldCarver.carve(carvingContext, chunkAccess, biomeManager2::getBiome, worldgenRandom, this.getSeaLevel(), chunkPos2, bitSet);
+						configuredWorldCarver.carve(carvingContext, chunkAccess, biomeManager2::getBiome, worldgenRandom, aquifer, chunkPos2, bitSet);
 					}
 				}
 			}
 		}
+	}
+
+	protected Aquifer createAquifer(ChunkAccess chunkAccess) {
+		return Aquifer.createDisabled(this.getSeaLevel(), Blocks.WATER.defaultBlockState());
 	}
 
 	@Nullable

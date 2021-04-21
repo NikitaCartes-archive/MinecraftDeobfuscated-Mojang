@@ -68,6 +68,7 @@ public class CakeBlock extends Block {
 				level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
 				level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
 				level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+				player.awardStat(Stats.ITEM_USED.get(item));
 				return InteractionResult.SUCCESS;
 			}
 		}

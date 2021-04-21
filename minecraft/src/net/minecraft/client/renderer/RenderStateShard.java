@@ -202,8 +202,14 @@ public abstract class RenderStateShard {
 		GameRenderer::getRendertypeCrumblingShader
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeTextShader);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeTextIntensityShader
+	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_SEE_THROUGH_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeTextSeeThroughShader
+	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeTextIntensitySeeThroughShader
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LIGHTNING_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeLightningShader

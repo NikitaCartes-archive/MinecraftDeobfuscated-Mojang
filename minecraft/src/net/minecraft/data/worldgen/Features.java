@@ -761,6 +761,18 @@ public class Features {
 		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.LAPIS_ORE),
 		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_LAPIS_ORE)
 	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_EMERALD_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.EMERALD_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_EMERALD_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_COPPER_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.COPPER_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_COPPER_ORE)
+	);
+	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_COAL_TARGET_LIST = ImmutableList.of(
+		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.COAL_ORE),
+		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.DEEPSLATE_COAL_ORE)
+	);
 	public static final ImmutableList<OreConfiguration.TargetBlockState> ORE_INFESTED_TARGET_LIST = ImmutableList.of(
 		OreConfiguration.target(OreConfiguration.Predicates.STONE_ORE_REPLACEABLES, Features.States.INFESTED_STONE),
 		OreConfiguration.target(OreConfiguration.Predicates.DEEPSLATE_ORE_REPLACEABLES, Features.States.INFESTED_DEEPSLATE)
@@ -1063,12 +1075,16 @@ public class Features {
 	);
 	public static final ConfiguredFeature<?, ?> ORE_EMERALD = register(
 		"ore_emerald",
-		Feature.EMERALD_ORE.configured(new ReplaceBlockConfiguration(Features.States.STONE, Features.States.EMERALD_ORE)).range(Features.Decorators.FULL_RANGE)
+		Feature.REPLACE_SINGLE_BLOCK
+			.configured(new ReplaceBlockConfiguration(ORE_EMERALD_TARGET_LIST))
+			.rangeUniform(VerticalAnchor.absolute(4), VerticalAnchor.absolute(31))
+			.squared()
+			.count(UniformInt.of(6, 24))
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_EMERALD = register(
 		"prototype_ore_emerald",
-		Feature.EMERALD_ORE
-			.configured(new ReplaceBlockConfiguration(Features.States.STONE, Features.States.EMERALD_ORE))
+		Feature.ORE
+			.configured(new OreConfiguration(ORE_EMERALD_TARGET_LIST, 3))
 			.rangeTriangle(VerticalAnchor.absolute(32), VerticalAnchor.absolute(480))
 			.squared()
 			.count(50)
@@ -1850,7 +1866,8 @@ public class Features {
 					3,
 					2,
 					new SimpleStateProvider(Blocks.HANGING_ROOTS.defaultBlockState()),
-					20
+					20,
+					2
 				)
 			)
 			.decorated(FeatureDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12)))
@@ -1926,7 +1943,7 @@ public class Features {
 		Feature.VEGETATION_PATCH
 			.configured(
 				new VegetationPatchConfiguration(
-					BlockTags.LUSH_PLANTS_REPLACEABLE.getName(),
+					BlockTags.MOSS_REPLACEABLE.getName(),
 					new SimpleStateProvider(Blocks.MOSS_BLOCK.defaultBlockState()),
 					() -> MOSS_VEGETATION,
 					CaveSurface.FLOOR,
@@ -1944,16 +1961,16 @@ public class Features {
 		Feature.VEGETATION_PATCH
 			.configured(
 				new VegetationPatchConfiguration(
-					BlockTags.LUSH_PLANTS_REPLACEABLE.getName(),
+					BlockTags.MOSS_REPLACEABLE.getName(),
 					new SimpleStateProvider(Blocks.MOSS_BLOCK.defaultBlockState()),
 					() -> MOSS_VEGETATION,
 					CaveSurface.FLOOR,
 					ConstantInt.of(1),
 					0.0F,
 					5,
-					0.8F,
-					UniformInt.of(1, 3),
-					0.0F
+					0.6F,
+					UniformInt.of(1, 2),
+					0.75F
 				)
 			)
 	);
@@ -2029,7 +2046,7 @@ public class Features {
 		Feature.VEGETATION_PATCH
 			.configured(
 				new VegetationPatchConfiguration(
-					BlockTags.LUSH_PLANTS_REPLACEABLE.getName(),
+					BlockTags.MOSS_REPLACEABLE.getName(),
 					new SimpleStateProvider(Blocks.MOSS_BLOCK.defaultBlockState()),
 					() -> CAVE_VINE_IN_MOSS,
 					CaveSurface.CEILING,
@@ -2319,7 +2336,9 @@ public class Features {
 		protected static final BlockState DIORITE = Blocks.DIORITE.defaultBlockState();
 		protected static final BlockState ANDESITE = Blocks.ANDESITE.defaultBlockState();
 		protected static final BlockState COAL_ORE = Blocks.COAL_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_COAL_ORE = Blocks.DEEPSLATE_COAL_ORE.defaultBlockState();
 		protected static final BlockState COPPER_ORE = Blocks.COPPER_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_COPPER_ORE = Blocks.DEEPSLATE_COPPER_ORE.defaultBlockState();
 		protected static final BlockState IRON_ORE = Blocks.IRON_ORE.defaultBlockState();
 		protected static final BlockState DEEPSLATE_IRON_ORE = Blocks.DEEPSLATE_IRON_ORE.defaultBlockState();
 		protected static final BlockState GOLD_ORE = Blocks.GOLD_ORE.defaultBlockState();
@@ -2332,6 +2351,7 @@ public class Features {
 		protected static final BlockState DEEPSLATE_LAPIS_ORE = Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState();
 		protected static final BlockState STONE = Blocks.STONE.defaultBlockState();
 		protected static final BlockState EMERALD_ORE = Blocks.EMERALD_ORE.defaultBlockState();
+		protected static final BlockState DEEPSLATE_EMERALD_ORE = Blocks.DEEPSLATE_EMERALD_ORE.defaultBlockState();
 		protected static final BlockState INFESTED_STONE = Blocks.INFESTED_STONE.defaultBlockState();
 		protected static final BlockState INFESTED_DEEPSLATE = Blocks.INFESTED_DEEPSLATE.defaultBlockState();
 		protected static final BlockState SAND = Blocks.SAND.defaultBlockState();
