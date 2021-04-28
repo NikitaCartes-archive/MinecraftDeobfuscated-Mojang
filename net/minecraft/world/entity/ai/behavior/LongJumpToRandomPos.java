@@ -96,7 +96,7 @@ extends Behavior<E> {
     protected void tick(ServerLevel serverLevel, E mob, long l) {
         if (this.chosenJump.isPresent()) {
             if (l - this.prepareJumpStart >= 40L) {
-                ((Mob)mob).yRot = ((Mob)mob).yBodyRot;
+                ((Entity)mob).setYRot(((Mob)mob).yBodyRot);
                 ((LivingEntity)mob).setDiscardFriction(true);
                 ((Entity)mob).setDeltaMovement(this.chosenJump.get().getJumpVector());
                 ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);

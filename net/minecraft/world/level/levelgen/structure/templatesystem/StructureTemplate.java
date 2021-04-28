@@ -345,7 +345,7 @@ public class StructureTemplate {
             compoundTag.remove("UUID");
             StructureTemplate.createEntityIgnoreException(serverLevelAccessor, compoundTag).ifPresent(entity -> {
                 float f = entity.mirror(mirror);
-                entity.moveTo(vec3.x, vec3.y, vec3.z, f += entity.yRot - entity.rotate(rotation), entity.xRot);
+                entity.moveTo(vec3.x, vec3.y, vec3.z, f += entity.getYRot() - entity.rotate(rotation), entity.getXRot());
                 if (bl && entity instanceof Mob) {
                     ((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
                 }

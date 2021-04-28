@@ -144,8 +144,8 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void stepOn(Level level, BlockPos blockPos, Entity entity) {
-        this.base.stepOn(level, blockPos, entity);
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+        this.base.stepOn(level, blockPos, blockState, entity);
     }
 
     @Override

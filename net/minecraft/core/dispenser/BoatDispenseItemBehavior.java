@@ -40,7 +40,7 @@ extends DefaultDispenseItemBehavior {
         }
         Boat boat = new Boat(level, d, e + g, f);
         boat.setType(this.type);
-        boat.yRot = direction.toYRot();
+        boat.setYRot(direction.toYRot());
         level.addFreshEntity(boat);
         itemStack.shrink(1);
         return itemStack;

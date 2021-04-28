@@ -294,7 +294,8 @@ implements RangedAttackMob {
                 double g = Mth.sqrt(d * d + e * e + f * f);
                 e /= g;
                 float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-                this.drowned.yBodyRot = this.drowned.yRot = this.rotlerp(this.drowned.yRot, h, 90.0f);
+                this.drowned.setYRot(this.rotlerp(this.drowned.getYRot(), h, 90.0f));
+                this.drowned.yBodyRot = this.drowned.getYRot();
                 float i = (float)(this.speedModifier * this.drowned.getAttributeValue(Attributes.MOVEMENT_SPEED));
                 float j = Mth.lerp(0.125f, this.drowned.getSpeed(), i);
                 this.drowned.setSpeed(j);

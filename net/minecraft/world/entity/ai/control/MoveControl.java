@@ -71,8 +71,8 @@ implements Control {
                 j = 1.0f;
             }
             j = g / j;
-            float k = Mth.sin(this.mob.yRot * ((float)Math.PI / 180));
-            float l = Mth.cos(this.mob.yRot * ((float)Math.PI / 180));
+            float k = Mth.sin(this.mob.getYRot() * ((float)Math.PI / 180));
+            float l = Mth.cos(this.mob.getYRot() * ((float)Math.PI / 180));
             float m = (h *= j) * l - (i *= j) * k;
             if (!this.isWalkable(m, n = i * l + h * k)) {
                 this.strafeForwards = 1.0f;
@@ -93,7 +93,7 @@ implements Control {
                 return;
             }
             float n = (float)(Mth.atan2(e, d) * 57.2957763671875) - 90.0f;
-            this.mob.yRot = this.rotlerp(this.mob.yRot, n, 90.0f);
+            this.mob.setYRot(this.rotlerp(this.mob.getYRot(), n, 90.0f));
             this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             BlockPos blockPos = this.mob.blockPosition();
             BlockState blockState = this.mob.level.getBlockState(blockPos);

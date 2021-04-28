@@ -222,14 +222,16 @@ implements Enemy {
         public void tick() {
             if (this.ghast.getTarget() == null) {
                 Vec3 vec3 = this.ghast.getDeltaMovement();
-                this.ghast.yBodyRot = this.ghast.yRot = -((float)Mth.atan2(vec3.x, vec3.z)) * 57.295776f;
+                this.ghast.setYRot(-((float)Mth.atan2(vec3.x, vec3.z)) * 57.295776f);
+                this.ghast.yBodyRot = this.ghast.getYRot();
             } else {
                 LivingEntity livingEntity = this.ghast.getTarget();
                 double d = 64.0;
                 if (livingEntity.distanceToSqr(this.ghast) < 4096.0) {
                     double e = livingEntity.getX() - this.ghast.getX();
                     double f = livingEntity.getZ() - this.ghast.getZ();
-                    this.ghast.yBodyRot = this.ghast.yRot = -((float)Mth.atan2(e, f)) * 57.295776f;
+                    this.ghast.setYRot(-((float)Mth.atan2(e, f)) * 57.295776f);
+                    this.ghast.yBodyRot = this.ghast.getYRot();
                 }
             }
         }

@@ -40,8 +40,8 @@ extends EntityRenderer<ShulkerBullet> {
     @Override
     public void render(ShulkerBullet shulkerBullet, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        float h = Mth.rotlerp(shulkerBullet.yRotO, shulkerBullet.yRot, g);
-        float j = Mth.lerp(g, shulkerBullet.xRotO, shulkerBullet.xRot);
+        float h = Mth.rotlerp(shulkerBullet.yRotO, shulkerBullet.getYRot(), g);
+        float j = Mth.lerp(g, shulkerBullet.xRotO, shulkerBullet.getXRot());
         float k = (float)shulkerBullet.tickCount + g;
         poseStack.translate(0.0, 0.15f, 0.0);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.sin(k * 0.1f) * 180.0f));

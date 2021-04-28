@@ -190,7 +190,7 @@ extends BlockEntity {
                 double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
                 double g = (double)blockPos.getY() + 0.5 - (double)(entity2.getBbHeight() / 2.0f);
                 double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
-                entity2.moveTo(e, g, h, entity2.yRot, entity2.xRot);
+                entity2.moveTo(e, g, h, entity2.getYRot(), entity2.getXRot());
             }
             level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0f, 1.0f);
             return level.addFreshEntity(entity2);

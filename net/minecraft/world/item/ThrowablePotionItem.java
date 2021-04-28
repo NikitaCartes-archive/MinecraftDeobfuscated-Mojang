@@ -25,7 +25,7 @@ extends PotionItem {
         if (!level.isClientSide) {
             ThrownPotion thrownPotion = new ThrownPotion(level, player);
             thrownPotion.setItem(itemStack);
-            thrownPotion.shootFromRotation(player, player.xRot, player.yRot, -20.0f, 0.5f, 1.0f);
+            thrownPotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0f, 0.5f, 1.0f);
             level.addFreshEntity(thrownPotion);
         }
         player.awardStat(Stats.ITEM_USED.get(this));

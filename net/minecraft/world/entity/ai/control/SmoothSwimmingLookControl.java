@@ -23,10 +23,10 @@ extends LookControl {
         if (this.hasWanted) {
             this.hasWanted = false;
             this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.getYRotD() + 20.0f, this.yMaxRotSpeed);
-            this.mob.xRot = this.rotateTowards(this.mob.xRot, this.getXRotD() + 10.0f, this.xMaxRotAngle);
+            this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), this.getXRotD() + 10.0f, this.xMaxRotAngle));
         } else {
             if (this.mob.getNavigation().isDone()) {
-                this.mob.xRot = this.rotateTowards(this.mob.xRot, 0.0f, 5.0f);
+                this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), 0.0f, 5.0f));
             }
             this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.mob.yBodyRot, this.yMaxRotSpeed);
         }

@@ -231,7 +231,7 @@ implements Shearable {
         if (this.eatAnimationTick > 0) {
             return 0.62831855f;
         }
-        return this.xRot * ((float)Math.PI / 180);
+        return this.getXRot() * ((float)Math.PI / 180);
     }
 
     @Override

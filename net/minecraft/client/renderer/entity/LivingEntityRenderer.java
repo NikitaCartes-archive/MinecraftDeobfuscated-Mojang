@@ -87,7 +87,7 @@ implements RenderLayerParent<T, M> {
             }
             k = j - h;
         }
-        float m = Mth.lerp(g, ((LivingEntity)livingEntity).xRotO, ((LivingEntity)livingEntity).xRot);
+        float m = Mth.lerp(g, ((LivingEntity)livingEntity).xRotO, ((Entity)livingEntity).getXRot());
         if (((Entity)livingEntity).getPose() == Pose.SLEEPING && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
             n = ((Entity)livingEntity).getEyeHeight(Pose.STANDING) - 0.1f;
             poseStack.translate((float)(-direction.getStepX()) * n, 0.0, (float)(-direction.getStepZ()) * n);
@@ -191,7 +191,7 @@ implements RenderLayerParent<T, M> {
             }
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
         } else if (((LivingEntity)livingEntity).isAutoSpinAttack()) {
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f - ((LivingEntity)livingEntity).xRot));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f - ((Entity)livingEntity).getXRot()));
             poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)((LivingEntity)livingEntity).tickCount + h) * -75.0f));
         } else if (pose == Pose.SLEEPING) {
             Direction direction = ((LivingEntity)livingEntity).getBedOrientation();

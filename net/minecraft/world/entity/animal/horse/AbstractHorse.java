@@ -479,8 +479,8 @@ Saddleable {
         this.setEating(false);
         this.setStanding(false);
         if (!this.level.isClientSide) {
-            player.yRot = this.yRot;
-            player.xRot = this.xRot;
+            player.setYRot(this.getYRot());
+            player.setXRot(this.getXRot());
             player.startRiding(this);
         }
     }
@@ -663,10 +663,11 @@ Saddleable {
             return;
         }
         LivingEntity livingEntity = (LivingEntity)this.getControllingPassenger();
-        this.yRotO = this.yRot = livingEntity.yRot;
-        this.xRot = livingEntity.xRot * 0.5f;
-        this.setRot(this.yRot, this.xRot);
-        this.yHeadRot = this.yBodyRot = this.yRot;
+        this.setYRot(livingEntity.getYRot());
+        this.yRotO = this.getYRot();
+        this.setXRot(livingEntity.getXRot() * 0.5f);
+        this.setRot(this.getYRot(), this.getXRot());
+        this.yHeadRot = this.yBodyRot = this.getYRot();
         float f = livingEntity.xxa * 0.5f;
         float g = livingEntity.zza;
         if (g <= 0.0f) {
@@ -685,8 +686,8 @@ Saddleable {
             this.setIsJumping(true);
             this.hasImpulse = true;
             if (g > 0.0f) {
-                float h = Mth.sin(this.yRot * ((float)Math.PI / 180));
-                float i = Mth.cos(this.yRot * ((float)Math.PI / 180));
+                float h = Mth.sin(this.getYRot() * ((float)Math.PI / 180));
+                float i = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
                 this.setDeltaMovement(this.getDeltaMovement().add(-0.4f * h * this.playerJumpPendingScale, 0.0, 0.4f * i * this.playerJumpPendingScale));
             }
             this.playerJumpPendingScale = 0.0f;
@@ -966,12 +967,12 @@ Saddleable {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-        Vec3 vec3 = AbstractHorse.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0f : -90.0f));
+        Vec3 vec3 = AbstractHorse.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), this.getYRot() + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0f : -90.0f));
         Vec3 vec32 = this.getDismountLocationInDirection(vec3, livingEntity);
         if (vec32 != null) {
             return vec32;
         }
-        Vec3 vec33 = AbstractHorse.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0f : -90.0f));
+        Vec3 vec33 = AbstractHorse.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), this.getYRot() + (livingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0f : -90.0f));
         Vec3 vec34 = this.getDismountLocationInDirection(vec33, livingEntity);
         if (vec34 != null) {
             return vec34;

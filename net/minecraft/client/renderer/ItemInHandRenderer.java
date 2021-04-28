@@ -282,7 +282,7 @@ public class ItemInHandRenderer {
         float l;
         float g = localPlayer.getAttackAnim(f);
         InteractionHand interactionHand = MoreObjects.firstNonNull(localPlayer.swingingArm, InteractionHand.MAIN_HAND);
-        float h = Mth.lerp(f, localPlayer.xRotO, localPlayer.xRot);
+        float h = Mth.lerp(f, localPlayer.xRotO, localPlayer.getXRot());
         HandRenderSelection handRenderSelection = ItemInHandRenderer.evaluateWhichHandsToRender(localPlayer);
         float j = Mth.lerp(f, localPlayer.xBobO, localPlayer.xBob);
         float k = Mth.lerp(f, localPlayer.yBobO, localPlayer.yBob);

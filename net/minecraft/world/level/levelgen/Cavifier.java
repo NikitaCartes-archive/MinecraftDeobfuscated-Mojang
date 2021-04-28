@@ -4,12 +4,14 @@
 package net.minecraft.world.level.levelgen;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.NoiseModifier;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.SimpleRandomSource;
 import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
-public class Cavifier {
+public class Cavifier
+implements NoiseModifier {
     private final int minCellY;
     private final NormalNoise layerNoiseSource;
     private final NormalNoise pillarNoiseSource;
@@ -50,22 +52,23 @@ public class Cavifier {
         this.cheeseNoiseSource = NormalNoise.create((RandomSource)new SimpleRandomSource(randomSource.nextLong()), -8, 0.5, 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 2.0, 0.0);
     }
 
-    public double cavify(int i, int j, int k, double d) {
+    @Override
+    public double modifyNoise(double d, int i, int j, int k) {
         boolean bl = d < 170.0;
-        double e = this.spaghettiRoughness(i, j, k);
-        double f = this.getSpaghetti3d(i, j, k);
+        double e = this.spaghettiRoughness(k, i, j);
+        double f = this.getSpaghetti3d(k, i, j);
         if (bl) {
             return Math.min(d, (f + e) * 128.0 * 5.0);
         }
-        double g = this.cheeseNoiseSource.getValue(i, (double)j / 1.5, k);
+        double g = this.cheeseNoiseSource.getValue(k, (double)i / 1.5, j);
         double h = Mth.clamp(g + 0.25, -1.0, 1.0);
-        double l = (float)(30 - j) / 8.0f;
+        double l = (float)(30 - i) / 8.0f;
         double m = h + Mth.clampedLerp(0.5, 0.0, l);
-        double n = this.getLayerizedCaverns(i, j, k);
-        double o = this.getSpaghetti2d(i, j, k);
+        double n = this.getLayerizedCaverns(k, i, j);
+        double o = this.getSpaghetti2d(k, i, j);
         double p = m + n;
         double q = Math.min(p, Math.min(f, o) + e);
-        double r = Math.max(q, this.getPillars(i, j, k));
+        double r = Math.max(q, this.getPillars(k, i, j));
         return 128.0 * Mth.clamp(r, -1.0, 1.0);
     }
 

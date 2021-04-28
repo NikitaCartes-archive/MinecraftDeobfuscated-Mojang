@@ -135,10 +135,10 @@ extends Projectile {
         Vec3 vec3 = this.getDeltaMovement();
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
             float f = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
-            this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-            this.xRot = (float)(Mth.atan2(vec3.y, f) * 57.2957763671875);
-            this.yRotO = this.yRot;
-            this.xRotO = this.xRot;
+            this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+            this.setXRot((float)(Mth.atan2(vec3.y, f) * 57.2957763671875));
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
         }
         if (!((blockState = this.level.getBlockState(blockPos = this.blockPosition())).isAir() || bl || (voxelShape = blockState.getCollisionShape(this.level, blockPos)).isEmpty())) {
             vec32 = this.position();
@@ -202,10 +202,14 @@ extends Projectile {
         double j = this.getY() + e;
         double k = this.getZ() + g;
         float l = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
-        this.yRot = bl ? (float)(Mth.atan2(-d, -g) * 57.2957763671875) : (float)(Mth.atan2(d, g) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(e, l) * 57.2957763671875);
-        this.xRot = AbstractArrow.lerpRotation(this.xRotO, this.xRot);
-        this.yRot = AbstractArrow.lerpRotation(this.yRotO, this.yRot);
+        if (bl) {
+            this.setYRot((float)(Mth.atan2(-d, -g) * 57.2957763671875));
+        } else {
+            this.setYRot((float)(Mth.atan2(d, g) * 57.2957763671875));
+        }
+        this.setXRot((float)(Mth.atan2(e, l) * 57.2957763671875));
+        this.setXRot(AbstractArrow.lerpRotation(this.xRotO, this.getXRot()));
+        this.setYRot(AbstractArrow.lerpRotation(this.yRotO, this.getYRot()));
         float m = 0.99f;
         float n = 0.05f;
         if (this.isInWater()) {
@@ -338,7 +342,7 @@ extends Projectile {
         } else {
             entity.setRemainingFireTicks(j);
             this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
-            this.yRot += 180.0f;
+            this.setYRot(this.getYRot() + 180.0f);
             this.yRotO += 180.0f;
             if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
                 if (this.pickup == Pickup.ALLOWED) {

@@ -78,14 +78,14 @@ extends HangingEntity {
         Validate.notNull(direction);
         this.direction = direction;
         if (direction.getAxis().isHorizontal()) {
-            this.xRot = 0.0f;
-            this.yRot = this.direction.get2DDataValue() * 90;
+            this.setXRot(0.0f);
+            this.setYRot(this.direction.get2DDataValue() * 90);
         } else {
-            this.xRot = -90 * direction.getAxisDirection().getStep();
-            this.yRot = 0.0f;
+            this.setXRot(-90 * direction.getAxisDirection().getStep());
+            this.setYRot(0.0f);
         }
-        this.xRotO = this.xRot;
-        this.yRotO = this.yRot;
+        this.xRotO = this.getXRot();
+        this.yRotO = this.getYRot();
         this.recalculateBoundingBox();
     }
 

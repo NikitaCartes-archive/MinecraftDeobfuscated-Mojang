@@ -23,8 +23,8 @@ implements Packet<ClientGamePacketListener> {
         this.x = entity.getX();
         this.y = entity.getY();
         this.z = entity.getZ();
-        this.yRot = (byte)(entity.yRot * 256.0f / 360.0f);
-        this.xRot = (byte)(entity.xRot * 256.0f / 360.0f);
+        this.yRot = (byte)(entity.getYRot() * 256.0f / 360.0f);
+        this.xRot = (byte)(entity.getXRot() * 256.0f / 360.0f);
         this.onGround = entity.isOnGround();
     }
 

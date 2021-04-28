@@ -150,7 +150,9 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             try {
                 Connection.genericsFtw(packet, this.packetListener);
             } catch (RunningOnDifferentThreadException runningOnDifferentThreadException) {
-                // empty catch block
+            } catch (ClassCastException classCastException) {
+                LOGGER.error("Received {} that couldn't be processed", (Object)packet.getClass(), (Object)classCastException);
+                this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_packet"));
             }
             ++this.receivedPackets;
         }
@@ -236,6 +238,9 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         }
         if (this.packetListener instanceof ServerGamePacketListenerImpl) {
             ((ServerGamePacketListenerImpl)this.packetListener).tick();
+        }
+        if (!this.isConnected() && !this.disconnectionHandled) {
+            this.handleDisconnection();
         }
         if (this.channel != null) {
             this.channel.flush();

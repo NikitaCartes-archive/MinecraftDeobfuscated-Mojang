@@ -84,6 +84,11 @@ public class BlockFamily {
             return this;
         }
 
+        public Builder cut(Block block) {
+            this.family.variants.put(Variant.CUT, block);
+            return this;
+        }
+
         public Builder door(Block block) {
             this.family.variants.put(Variant.DOOR, block);
             return this;
@@ -160,6 +165,7 @@ public class BlockFamily {
         BUTTON("button"),
         CHISELED("chiseled"),
         CRACKED("cracked"),
+        CUT("cut"),
         DOOR("door"),
         FENCE("fence"),
         FENCE_GATE("fence_gate"),

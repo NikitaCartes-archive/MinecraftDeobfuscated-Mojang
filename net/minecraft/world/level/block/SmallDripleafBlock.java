@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BigDripleafBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -56,7 +56,7 @@ SimpleWaterloggedBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.is(Blocks.CLAY) || super.mayPlaceOn(blockState, blockGetter, blockPos);
+        return blockState.is(BlockTags.SMALL_DRIPLEAF_PLACEABLE) || blockGetter.getFluidState(blockPos.above()).isSourceOfType(Fluids.WATER) && super.mayPlaceOn(blockState, blockGetter, blockPos);
     }
 
     @Override
@@ -91,7 +91,7 @@ SimpleWaterloggedBlock {
         }
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        return blockState2.is(Blocks.CLAY) || levelReader.getFluidState(blockPos).isSourceOfType(Fluids.WATER) && this.mayPlaceOn(blockState2, levelReader, blockPos2);
+        return this.mayPlaceOn(blockState2, levelReader, blockPos2);
     }
 
     @Override

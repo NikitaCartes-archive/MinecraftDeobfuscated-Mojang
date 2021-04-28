@@ -359,7 +359,7 @@ extends Animal {
             this.rollCounter = 0;
         }
         if (this.isSitting()) {
-            this.xRot = 0.0f;
+            this.setXRot(0.0f);
         }
         this.updateSitAmount();
         this.handleEating();
@@ -399,8 +399,8 @@ extends Animal {
             this.playSound(SoundEvents.PANDA_EAT, 0.5f + 0.5f * (float)this.random.nextInt(2), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
             for (int i = 0; i < 6; ++i) {
                 Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, ((double)this.random.nextFloat() - 0.5) * 0.1);
-                vec3 = vec3.xRot(-this.xRot * ((float)Math.PI / 180));
-                vec3 = vec3.yRot(-this.yRot * ((float)Math.PI / 180));
+                vec3 = vec3.xRot(-this.getXRot() * ((float)Math.PI / 180));
+                vec3 = vec3.yRot(-this.getYRot() * ((float)Math.PI / 180));
                 double d = (double)(-this.random.nextFloat()) * 0.6 - 0.3;
                 Vec3 vec32 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.8, d, 1.0 + ((double)this.random.nextFloat() - 0.5) * 0.4);
                 vec32 = vec32.yRot(-this.yBodyRot * ((float)Math.PI / 180));
@@ -446,7 +446,7 @@ extends Animal {
         if (!this.level.isClientSide) {
             Vec3 vec3 = this.getDeltaMovement();
             if (this.rollCounter == 1) {
-                float f = this.yRot * ((float)Math.PI / 180);
+                float f = this.getYRot() * ((float)Math.PI / 180);
                 float g = this.isBaby() ? 0.1f : 0.2f;
                 this.rollDelta = new Vec3(vec3.x + (double)(-Mth.sin(f) * g), 0.0, vec3.z + (double)(Mth.cos(f) * g));
                 this.setDeltaMovement(this.rollDelta.add(0.0, 0.27, 0.0));
@@ -897,7 +897,7 @@ extends Animal {
             if (!this.panda.canPerformAction()) {
                 return false;
             }
-            float f = this.panda.yRot * ((float)Math.PI / 180);
+            float f = this.panda.getYRot() * ((float)Math.PI / 180);
             int i = 0;
             int j = 0;
             float g = -Mth.sin(f);

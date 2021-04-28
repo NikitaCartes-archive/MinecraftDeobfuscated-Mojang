@@ -132,13 +132,13 @@ public class JigsawPlacement {
                 ResourceLocation resourceLocation = new ResourceLocation(structureBlockInfo2.nbt.getString("pool"));
                 Optional<StructureTemplatePool> optional = this.pools.getOptional(resourceLocation);
                 if (!optional.isPresent() || optional.get().size() == 0 && !Objects.equals(resourceLocation, Pools.EMPTY.location())) {
-                    LOGGER.warn("Empty or none existent pool: {}", (Object)resourceLocation);
+                    LOGGER.warn("Empty or non-existent pool: {}", (Object)resourceLocation);
                     continue;
                 }
                 ResourceLocation resourceLocation2 = optional.get().getFallback();
                 Optional<StructureTemplatePool> optional2 = this.pools.getOptional(resourceLocation2);
                 if (!optional2.isPresent() || optional2.get().size() == 0 && !Objects.equals(resourceLocation2, Pools.EMPTY.location())) {
-                    LOGGER.warn("Empty or none existent fallback pool: {}", (Object)resourceLocation2);
+                    LOGGER.warn("Empty or non-existent fallback pool: {}", (Object)resourceLocation2);
                     continue;
                 }
                 boolean bl3 = boundingBox.isInside(blockPos3);

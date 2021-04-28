@@ -161,9 +161,9 @@ extends AbstractClientPlayer {
             this.minecraft.getSoundManager().play(new RidingMinecartSoundInstance(this, (AbstractMinecart)entity, false));
         }
         if (entity instanceof Boat) {
-            this.yRotO = entity.yRot;
-            this.yRot = entity.yRot;
-            this.setYHeadRot(entity.yRot);
+            this.yRotO = entity.getYRot();
+            this.setYRot(entity.getYRot());
+            this.setYHeadRot(entity.getYRot());
         }
         return true;
     }
@@ -176,7 +176,7 @@ extends AbstractClientPlayer {
 
     @Override
     public float getViewXRot(float f) {
-        return this.xRot;
+        return this.getXRot();
     }
 
     @Override
@@ -184,7 +184,7 @@ extends AbstractClientPlayer {
         if (this.isPassenger()) {
             return super.getViewYRot(f);
         }
-        return this.yRot;
+        return this.getYRot();
     }
 
     @Override
@@ -194,7 +194,7 @@ extends AbstractClientPlayer {
         }
         super.tick();
         if (this.isPassenger()) {
-            this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
+            this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround));
             this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
             Entity entity = this.getRootVehicle();
             if (entity != this && entity.isControlledByLocalInstance()) {
@@ -234,21 +234,21 @@ extends AbstractClientPlayer {
             double d = this.getX() - this.xLast;
             double e = this.getY() - this.yLast1;
             double f = this.getZ() - this.zLast;
-            double g = this.yRot - this.yRotLast;
-            double h = this.xRot - this.xRotLast;
+            double g = this.getYRot() - this.yRotLast;
+            double h = this.getXRot() - this.xRotLast;
             ++this.positionReminder;
             boolean bl3 = d * d + e * e + f * f > 9.0E-4 || this.positionReminder >= 20;
             boolean bl5 = bl4 = g != 0.0 || h != 0.0;
             if (this.isPassenger()) {
                 Vec3 vec3 = this.getDeltaMovement();
-                this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0, vec3.z, this.yRot, this.xRot, this.onGround));
+                this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0, vec3.z, this.getYRot(), this.getXRot(), this.onGround));
                 bl3 = false;
             } else if (bl3 && bl4) {
-                this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot, this.onGround));
+                this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot(), this.onGround));
             } else if (bl3) {
                 this.connection.send(new ServerboundMovePlayerPacket.Pos(this.getX(), this.getY(), this.getZ(), this.onGround));
             } else if (bl4) {
-                this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
+                this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround));
             } else if (this.lastOnGround != this.onGround) {
                 this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(this.onGround));
             }
@@ -259,8 +259,8 @@ extends AbstractClientPlayer {
                 this.positionReminder = 0;
             }
             if (bl4) {
-                this.yRotLast = this.yRot;
-                this.xRotLast = this.xRot;
+                this.yRotLast = this.getYRot();
+                this.xRotLast = this.getXRot();
             }
             this.lastOnGround = this.onGround;
             this.autoJumpEnabled = this.minecraft.options.autoJump;
@@ -605,8 +605,8 @@ extends AbstractClientPlayer {
             this.jumping = this.input.jumping;
             this.yBobO = this.yBob;
             this.xBobO = this.xBob;
-            this.xBob = (float)((double)this.xBob + (double)(this.xRot - this.xBob) * 0.5);
-            this.yBob = (float)((double)this.yBob + (double)(this.yRot - this.yBob) * 0.5);
+            this.xBob = (float)((double)this.xBob + (double)(this.getXRot() - this.xBob) * 0.5);
+            this.yBob = (float)((double)this.yBob + (double)(this.getYRot() - this.yBob) * 0.5);
         }
     }
 
@@ -622,7 +622,7 @@ extends AbstractClientPlayer {
                 if (this.level.noCollision(this)) break;
             }
             this.setDeltaMovement(Vec3.ZERO);
-            this.xRot = 0.0f;
+            this.setXRot(0.0f);
         }
         this.setHealth(this.getMaxHealth());
         this.deathTime = 0;
@@ -846,8 +846,8 @@ extends AbstractClientPlayer {
             Vec2 vec2 = this.input.getMoveVector();
             float j = h * vec2.x;
             float k = h * vec2.y;
-            l = Mth.sin(this.yRot * ((float)Math.PI / 180));
-            float m = Mth.cos(this.yRot * ((float)Math.PI / 180));
+            l = Mth.sin(this.getYRot() * ((float)Math.PI / 180));
+            float m = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
             vec33 = new Vec3(j * m - k * l, vec33.y, k * m + j * l);
             i = (float)vec33.lengthSqr();
             if (i <= 0.001f) {
@@ -977,8 +977,8 @@ extends AbstractClientPlayer {
     @Override
     public Vec3 getRopeHoldPosition(float f) {
         if (this.minecraft.options.getCameraType().isFirstPerson()) {
-            float g = Mth.lerp(f * 0.5f, this.yRot, this.yRotO) * ((float)Math.PI / 180);
-            float h = Mth.lerp(f * 0.5f, this.xRot, this.xRotO) * ((float)Math.PI / 180);
+            float g = Mth.lerp(f * 0.5f, this.getYRot(), this.yRotO) * ((float)Math.PI / 180);
+            float h = Mth.lerp(f * 0.5f, this.getXRot(), this.xRotO) * ((float)Math.PI / 180);
             double d = this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0;
             Vec3 vec3 = new Vec3(0.39 * d, -0.6, 0.3);
             return vec3.xRot(-h).yRot(-g).add(this.getEyePosition(f));

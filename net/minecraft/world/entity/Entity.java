@@ -161,8 +161,8 @@ CommandSource {
     private Vec3 position;
     private BlockPos blockPosition;
     private Vec3 deltaMovement = Vec3.ZERO;
-    public float yRot;
-    public float xRot;
+    private float yRot;
+    private float xRot;
     public float yRotO;
     public float xRotO;
     private AABB bb = INITIAL_AABB;
@@ -374,8 +374,8 @@ CommandSource {
     }
 
     protected void setRot(float f, float g) {
-        this.yRot = f % 360.0f;
-        this.xRot = g % 360.0f;
+        this.setYRot(f % 360.0f);
+        this.setXRot(g % 360.0f);
     }
 
     public final void setPos(Vec3 vec3) {
@@ -396,13 +396,13 @@ CommandSource {
     }
 
     public void turn(double d, double e) {
-        double f = e * 0.15;
-        double g = d * 0.15;
-        this.xRot = (float)((double)this.xRot + f);
-        this.yRot = (float)((double)this.yRot + g);
-        this.xRot = Mth.clamp(this.xRot, -90.0f, 90.0f);
-        this.xRotO = (float)((double)this.xRotO + f);
-        this.yRotO = (float)((double)this.yRotO + g);
+        float f = (float)e * 0.15f;
+        float g = (float)d * 0.15f;
+        this.setXRot(this.getXRot() + f);
+        this.setYRot(this.getYRot() + g);
+        this.setXRot(Mth.clamp(this.getXRot(), -90.0f, 90.0f));
+        this.xRotO += f;
+        this.yRotO += g;
         this.xRotO = Mth.clamp(this.xRotO, -90.0f, 90.0f);
         if (this.vehicle != null) {
             this.vehicle.onPassengerTurned(this);
@@ -422,8 +422,8 @@ CommandSource {
             --this.boardingCooldown;
         }
         this.walkDistO = this.walkDist;
-        this.xRotO = this.xRot;
-        this.yRotO = this.yRot;
+        this.xRotO = this.getXRot();
+        this.yRotO = this.getYRot();
         this.handleNetherPortal();
         if (this.canSpawnSprintParticle()) {
             this.spawnSprintParticle();
@@ -572,6 +572,9 @@ CommandSource {
         BlockPos blockPos = this.getOnPos();
         BlockState blockState2 = this.level.getBlockState(blockPos);
         this.checkFallDamage(vec32.y, this.onGround, blockState2, blockPos);
+        if (this.isRemoved()) {
+            return;
+        }
         Vec3 vec33 = this.getDeltaMovement();
         if (vec3.x != vec32.x) {
             this.setDeltaMovement(0.0, vec33.y, vec33.z);
@@ -584,7 +587,7 @@ CommandSource {
             block.updateEntityAfterFallOn(this.level, this);
         }
         if (this.onGround && !this.isSteppingCarefully()) {
-            block.stepOn(this.level, blockPos, this);
+            block.stepOn(this.level, blockPos, blockState2, this);
         }
         if ((movementEmission = this.getMovementEmission()).emitsAnything() && !this.isPassenger()) {
             double d = vec32.x;
@@ -937,7 +940,7 @@ CommandSource {
     protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
         if (bl) {
             if (this.fallDistance > 0.0f) {
-                blockState.getBlock().fallOn(this.level, blockPos, this, this.fallDistance);
+                blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
                 if (!blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
                     this.gameEvent(GameEvent.HIT_GROUND);
                 }
@@ -1104,7 +1107,7 @@ CommandSource {
     }
 
     public void moveRelative(float f, Vec3 vec3) {
-        Vec3 vec32 = Entity.getInputVector(vec3, f, this.yRot);
+        Vec3 vec32 = Entity.getInputVector(vec3, f, this.getYRot());
         this.setDeltaMovement(this.getDeltaMovement().add(vec32));
     }
 
@@ -1128,10 +1131,10 @@ CommandSource {
 
     public void absMoveTo(double d, double e, double f, float g, float h) {
         this.absMoveTo(d, e, f);
-        this.yRot = g % 360.0f;
-        this.xRot = Mth.clamp(h, -90.0f, 90.0f) % 360.0f;
-        this.yRotO = this.yRot;
-        this.xRotO = this.xRot;
+        this.setYRot(g % 360.0f);
+        this.setXRot(Mth.clamp(h, -90.0f, 90.0f) % 360.0f);
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
     }
 
     public void absMoveTo(double d, double e, double f) {
@@ -1148,7 +1151,7 @@ CommandSource {
     }
 
     public void moveTo(double d, double e, double f) {
-        this.moveTo(d, e, f, this.yRot, this.xRot);
+        this.moveTo(d, e, f, this.getYRot(), this.getXRot());
     }
 
     public void moveTo(BlockPos blockPos, float f, float g) {
@@ -1157,8 +1160,8 @@ CommandSource {
 
     public void moveTo(double d, double e, double f, float g, float h) {
         this.setPosRaw(d, e, f);
-        this.yRot = g;
-        this.xRot = h;
+        this.setYRot(g);
+        this.setXRot(h);
         this.setOldPosAndRot();
         this.reapplyPosition();
     }
@@ -1173,8 +1176,8 @@ CommandSource {
         this.xOld = d;
         this.yOld = e;
         this.zOld = f;
-        this.yRotO = this.yRot;
-        this.xRotO = this.xRot;
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
     }
 
     public float distanceTo(Entity entity) {
@@ -1259,16 +1262,16 @@ CommandSource {
 
     public float getViewXRot(float f) {
         if (f == 1.0f) {
-            return this.xRot;
+            return this.getXRot();
         }
-        return Mth.lerp(f, this.xRotO, this.xRot);
+        return Mth.lerp(f, this.xRotO, this.getXRot());
     }
 
     public float getViewYRot(float f) {
         if (f == 1.0f) {
-            return this.yRot;
+            return this.getYRot();
         }
-        return Mth.lerp(f, this.yRotO, this.yRot);
+        return Mth.lerp(f, this.yRotO, this.getYRot());
     }
 
     protected final Vec3 calculateViewVector(float f, float g) {
@@ -1379,7 +1382,7 @@ CommandSource {
             }
             Vec3 vec3 = this.getDeltaMovement();
             compoundTag.put("Motion", this.newDoubleList(vec3.x, vec3.y, vec3.z));
-            compoundTag.put("Rotation", this.newFloatList(this.yRot, this.xRot));
+            compoundTag.put("Rotation", this.newFloatList(this.getYRot(), this.getXRot()));
             compoundTag.putFloat("FallDistance", this.fallDistance);
             compoundTag.putShort("Fire", (short)this.remainingFireTicks);
             compoundTag.putShort("Air", (short)this.getAirSupply());
@@ -1444,11 +1447,11 @@ CommandSource {
             double f = listTag2.getDouble(2);
             this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
             this.setPosRaw(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
-            this.yRot = listTag3.getFloat(0);
-            this.xRot = listTag3.getFloat(1);
+            this.setYRot(listTag3.getFloat(0));
+            this.setXRot(listTag3.getFloat(1));
             this.setOldPosAndRot();
-            this.setYHeadRot(this.yRot);
-            this.setYBodyRot(this.yRot);
+            this.setYHeadRot(this.getYRot());
+            this.setYBodyRot(this.getYRot());
             this.fallDistance = compoundTag.getFloat("FallDistance");
             this.remainingFireTicks = compoundTag.getShort("Fire");
             if (compoundTag.contains("Air")) {
@@ -1464,11 +1467,11 @@ CommandSource {
             if (!(Double.isFinite(this.getX()) && Double.isFinite(this.getY()) && Double.isFinite(this.getZ()))) {
                 throw new IllegalStateException("Entity has invalid position");
             }
-            if (!Double.isFinite(this.yRot) || !Double.isFinite(this.xRot)) {
+            if (!Double.isFinite(this.getYRot()) || !Double.isFinite(this.getXRot())) {
                 throw new IllegalStateException("Entity has invalid rotation");
             }
             this.reapplyPosition();
-            this.setRot(this.yRot, this.xRot);
+            this.setRot(this.getYRot(), this.getXRot());
             if (compoundTag.contains("CustomName", 8)) {
                 String string = compoundTag.getString("CustomName");
                 try {
@@ -1716,11 +1719,11 @@ CommandSource {
     }
 
     public Vec3 getLookAngle() {
-        return this.calculateViewVector(this.xRot, this.yRot);
+        return this.calculateViewVector(this.getXRot(), this.getYRot());
     }
 
     public Vec2 getRotationVector() {
-        return new Vec2(this.xRot, this.yRot);
+        return new Vec2(this.getXRot(), this.getYRot());
     }
 
     public Vec3 getForward() {
@@ -2089,7 +2092,7 @@ CommandSource {
     }
 
     public void copyPosition(Entity entity) {
-        this.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
+        this.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
     }
 
     public void restoreFrom(Entity entity) {
@@ -2116,7 +2119,7 @@ CommandSource {
         Object entity = this.getType().create(serverLevel);
         if (entity != null) {
             ((Entity)entity).restoreFrom(this);
-            ((Entity)entity).moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, ((Entity)entity).xRot);
+            ((Entity)entity).moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, ((Entity)entity).getXRot());
             ((Entity)entity).setDeltaMovement(portalInfo.speed);
             serverLevel.addDuringTeleport((Entity)entity);
             if (serverLevel.dimension() == Level.END) {
@@ -2143,7 +2146,7 @@ CommandSource {
         boolean bl4 = bl2 = serverLevel.dimension() == Level.END;
         if (bl || bl2) {
             BlockPos blockPos = bl2 ? ServerLevel.END_SPAWN_POINT : serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
-            return new PortalInfo(new Vec3((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.yRot, this.xRot);
+            return new PortalInfo(new Vec3((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot());
         }
         boolean bl5 = bl3 = serverLevel.dimension() == Level.NETHER;
         if (this.level.dimension() != Level.NETHER && !bl3) {
@@ -2168,7 +2171,7 @@ CommandSource {
                 axis = Direction.Axis.X;
                 vec3 = new Vec3(0.5, 0.0, 0.0);
             }
-            return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this.getDimensions(this.getPose()), this.getDeltaMovement(), this.yRot, this.xRot);
+            return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this.getDimensions(this.getPose()), this.getDeltaMovement(), this.getYRot(), this.getXRot());
         }).orElse(null);
     }
 
@@ -2209,7 +2212,7 @@ CommandSource {
         Vec3 vec3 = this.getDeltaMovement();
         crashReportCategory.setDetail("Entity's Momentum", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", vec3.x, vec3.y, vec3.z));
         crashReportCategory.setDetail("Entity's Passengers", () -> this.getPassengers().toString());
-        crashReportCategory.setDetail("Entity's Vehicle", () -> this.getVehicle().toString());
+        crashReportCategory.setDetail("Entity's Vehicle", () -> String.valueOf(this.getVehicle()));
     }
 
     public boolean displayFireAnimation() {
@@ -2292,7 +2295,7 @@ CommandSource {
         if (!(this.level instanceof ServerLevel)) {
             return;
         }
-        this.moveTo(d, e, f, this.yRot, this.xRot);
+        this.moveTo(d, e, f, this.getYRot(), this.getXRot());
         this.getSelfAndPassengers().forEach(entity -> {
             for (Entity entity2 : entity.passengers) {
                 entity.positionRider(entity2, Entity::moveTo);
@@ -2327,7 +2330,7 @@ CommandSource {
     }
 
     public Direction getDirection() {
-        return Direction.fromYRot(this.yRot);
+        return Direction.fromYRot(this.getYRot());
     }
 
     public Direction getMotionDirection() {
@@ -2418,7 +2421,7 @@ CommandSource {
     }
 
     public float rotate(Rotation rotation) {
-        float f = Mth.wrapDegrees(this.yRot);
+        float f = Mth.wrapDegrees(this.getYRot());
         switch (rotation) {
             case CLOCKWISE_180: {
                 return f + 180.0f;
@@ -2434,7 +2437,7 @@ CommandSource {
     }
 
     public float mirror(Mirror mirror) {
-        float f = Mth.wrapDegrees(this.yRot);
+        float f = Mth.wrapDegrees(this.getYRot());
         switch (mirror) {
             case LEFT_RIGHT: {
                 return -f;
@@ -2582,11 +2585,11 @@ CommandSource {
         double e = vec3.y - vec32.y;
         double f = vec3.z - vec32.z;
         double g = Mth.sqrt(d * d + f * f);
-        this.xRot = Mth.wrapDegrees((float)(-(Mth.atan2(e, g) * 57.2957763671875)));
-        this.yRot = Mth.wrapDegrees((float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f);
-        this.setYHeadRot(this.yRot);
-        this.xRotO = this.xRot;
-        this.yRotO = this.yRot;
+        this.setXRot(Mth.wrapDegrees((float)(-(Mth.atan2(e, g) * 57.2957763671875))));
+        this.setYRot(Mth.wrapDegrees((float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f));
+        this.setYHeadRot(this.getYRot());
+        this.xRotO = this.getXRot();
+        this.yRotO = this.getYRot();
     }
 
     public boolean updateFluidHeightAndDoFluidPushing(Tag<Fluid> tag, double d) {
@@ -2787,8 +2790,8 @@ CommandSource {
         double f = clientboundAddEntityPacket.getZ();
         this.setPacketCoordinates(d, e, f);
         this.moveTo(d, e, f);
-        this.xRot = (float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0f;
-        this.yRot = (float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0f;
+        this.setXRot((float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0f);
+        this.setYRot((float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0f);
         this.setId(i);
         this.setUUID(clientboundAddEntityPacket.getUUID());
     }
@@ -2806,6 +2809,28 @@ CommandSource {
         return !EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES.contains(this.getType());
     }
 
+    public float getYRot() {
+        return this.yRot;
+    }
+
+    public void setYRot(float f) {
+        if (!Float.isFinite(f)) {
+            throw new IllegalStateException("Invalid entity rotation");
+        }
+        this.yRot = f;
+    }
+
+    public float getXRot() {
+        return this.xRot;
+    }
+
+    public void setXRot(float f) {
+        if (!Float.isFinite(f)) {
+            throw new IllegalStateException("Invalid entity rotation");
+        }
+        this.xRot = f;
+    }
+
     public final boolean isRemoved() {
         return this.removalReason != null;
     }
@@ -2819,6 +2844,9 @@ CommandSource {
     public final void setRemoved(RemovalReason removalReason) {
         if (this.removalReason == null) {
             this.removalReason = removalReason;
+        }
+        if (this.removalReason.shouldDestroy()) {
+            this.stopRiding();
         }
         this.getPassengers().forEach(Entity::stopRiding);
         this.levelCallback.onRemove(removalReason);

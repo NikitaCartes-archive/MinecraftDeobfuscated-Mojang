@@ -34,12 +34,12 @@ extends MoveControl {
                 return;
             }
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-            this.mob.yRot = this.rotlerp(this.mob.yRot, h, 90.0f);
+            this.mob.setYRot(this.rotlerp(this.mob.getYRot(), h, 90.0f));
             float i = this.mob.isOnGround() ? (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)) : (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
             this.mob.setSpeed(i);
             double j = Mth.sqrt(d * d + f * f);
             float k = (float)(-(Mth.atan2(e, j) * 57.2957763671875));
-            this.mob.xRot = this.rotlerp(this.mob.xRot, k, this.maxTurn);
+            this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, this.maxTurn));
             this.mob.setYya(e > 0.0 ? i : -i);
         } else {
             if (!this.hoversInPlace) {

@@ -298,15 +298,15 @@ extends Entity {
                 double d = this.getX() + (this.lx - this.getX()) / (double)this.lSteps;
                 double e = this.getY() + (this.ly - this.getY()) / (double)this.lSteps;
                 double f = this.getZ() + (this.lz - this.getZ()) / (double)this.lSteps;
-                double g = Mth.wrapDegrees(this.lyr - (double)this.yRot);
-                this.yRot = (float)((double)this.yRot + g / (double)this.lSteps);
-                this.xRot = (float)((double)this.xRot + (this.lxr - (double)this.xRot) / (double)this.lSteps);
+                double g = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
+                this.setYRot(this.getYRot() + (float)g / (float)this.lSteps);
+                this.setXRot(this.getXRot() + (float)(this.lxr - (double)this.getXRot()) / (float)this.lSteps);
                 --this.lSteps;
                 this.setPos(d, e, f);
-                this.setRot(this.yRot, this.xRot);
+                this.setRot(this.getYRot(), this.getXRot());
             } else {
                 this.reapplyPosition();
-                this.setRot(this.yRot, this.xRot);
+                this.setRot(this.getYRot(), this.getXRot());
             }
             return;
         }
@@ -326,20 +326,20 @@ extends Entity {
             this.comeOffTrack();
         }
         this.checkInsideBlocks();
-        this.xRot = 0.0f;
+        this.setXRot(0.0f);
         double h = this.xo - this.getX();
         double l = this.zo - this.getZ();
         if (h * h + l * l > 0.001) {
-            this.yRot = (float)(Mth.atan2(l, h) * 180.0 / Math.PI);
+            this.setYRot((float)(Mth.atan2(l, h) * 180.0 / Math.PI));
             if (this.flipped) {
-                this.yRot += 180.0f;
+                this.setYRot(this.getYRot() + 180.0f);
             }
         }
-        if ((m = (double)Mth.wrapDegrees(this.yRot - this.yRotO)) < -170.0 || m >= 170.0) {
-            this.yRot += 180.0f;
+        if ((m = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO)) < -170.0 || m >= 170.0) {
+            this.setYRot(this.getYRot() + 180.0f);
             this.flipped = !this.flipped;
         }
-        this.setRot(this.yRot, this.xRot);
+        this.setRot(this.getYRot(), this.getXRot());
         if (this.getMinecartType() == Type.RIDEABLE && AbstractMinecart.getHorizontalDistanceSqr(this.getDeltaMovement()) > 0.01) {
             List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.2f, 0.0, 0.2f), EntitySelector.pushableBy(this));
             if (!list.isEmpty()) {
@@ -689,7 +689,7 @@ extends Entity {
                 double i;
                 double h = entity.getX() - this.getX();
                 Vec3 vec3 = new Vec3(h, 0.0, i = entity.getZ() - this.getZ()).normalize();
-                double j = Math.abs(vec3.dot(vec32 = new Vec3(Mth.cos(this.yRot * ((float)Math.PI / 180)), 0.0, Mth.sin(this.yRot * ((float)Math.PI / 180))).normalize()));
+                double j = Math.abs(vec3.dot(vec32 = new Vec3(Mth.cos(this.getYRot() * ((float)Math.PI / 180)), 0.0, Mth.sin(this.getYRot() * ((float)Math.PI / 180))).normalize()));
                 if (j < (double)0.8f) {
                     return;
                 }

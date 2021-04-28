@@ -30,8 +30,8 @@ extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
         poseStack.pushPose();
         float m = 1.0f;
         float n = -1.0f;
-        float o = Mth.abs(dolphin.xRot) / 60.0f;
-        if (dolphin.xRot < 0.0f) {
+        float o = Mth.abs(dolphin.getXRot()) / 60.0f;
+        if (dolphin.getXRot() < 0.0f) {
             poseStack.translate(0.0, 1.0f - o * 0.5f, -1.0f + o * 0.5f);
         } else {
             poseStack.translate(0.0, 1.0f + o * 0.8f, -1.0f + o * 0.2f);

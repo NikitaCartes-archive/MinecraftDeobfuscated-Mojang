@@ -58,7 +58,7 @@ extends Goal {
                 if (this.player.distanceToSqr(this.px, this.py, this.pz) > 0.010000000000000002) {
                     return false;
                 }
-                if (Math.abs((double)this.player.xRot - this.pRotX) > 5.0 || Math.abs((double)this.player.yRot - this.pRotY) > 5.0) {
+                if (Math.abs((double)this.player.getXRot() - this.pRotX) > 5.0 || Math.abs((double)this.player.getYRot() - this.pRotY) > 5.0) {
                     return false;
                 }
             } else {
@@ -66,8 +66,8 @@ extends Goal {
                 this.py = this.player.getY();
                 this.pz = this.player.getZ();
             }
-            this.pRotX = this.player.xRot;
-            this.pRotY = this.player.yRot;
+            this.pRotX = this.player.getXRot();
+            this.pRotY = this.player.getYRot();
         }
         return this.canUse();
     }

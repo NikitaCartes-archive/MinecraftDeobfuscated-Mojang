@@ -33,8 +33,8 @@ extends EntityRenderer<LlamaSpit> {
     public void render(LlamaSpit llamaSpit, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.translate(0.0, 0.15f, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, llamaSpit.yRotO, llamaSpit.yRot) - 90.0f));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, llamaSpit.xRotO, llamaSpit.xRot)));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, llamaSpit.yRotO, llamaSpit.getYRot()) - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, llamaSpit.xRotO, llamaSpit.getXRot())));
         this.model.setupAnim(llamaSpit, g, 0.0f, -0.1f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(LLAMA_SPIT_LOCATION));
         this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);

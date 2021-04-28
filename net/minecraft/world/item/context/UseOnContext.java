@@ -79,7 +79,7 @@ public class UseOnContext {
     }
 
     public float getRotation() {
-        return this.player == null ? 0.0f : this.player.yRot;
+        return this.player == null ? 0.0f : this.player.getYRot();
     }
 }
 

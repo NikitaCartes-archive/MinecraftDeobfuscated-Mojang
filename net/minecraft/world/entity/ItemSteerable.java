@@ -28,11 +28,12 @@ public interface ItemSteerable {
             this.travelWithInput(vec3);
             return false;
         }
-        mob.yRotO = mob.yRot = entity.yRot;
-        mob.xRot = entity.xRot * 0.5f;
-        mob.setRot(mob.yRot, mob.xRot);
-        mob.yBodyRot = mob.yRot;
-        mob.yHeadRot = mob.yRot;
+        mob.setYRot(entity.getYRot());
+        mob.yRotO = mob.getYRot();
+        mob.setXRot(entity.getXRot() * 0.5f);
+        mob.setRot(mob.getYRot(), mob.getXRot());
+        mob.yBodyRot = mob.getYRot();
+        mob.yHeadRot = mob.getYRot();
         mob.maxUpStep = 1.0f;
         mob.flyingSpeed = mob.getSpeed() * 0.1f;
         if (itemBasedSteering.boosting && itemBasedSteering.boostTime++ > itemBasedSteering.boostTimeTotal) {

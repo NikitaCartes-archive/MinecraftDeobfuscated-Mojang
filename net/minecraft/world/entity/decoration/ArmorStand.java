@@ -517,7 +517,7 @@ extends LivingEntity {
     @Override
     protected float tickHeadTurn(float f, float g) {
         this.yBodyRotO = this.yRotO;
-        this.yBodyRot = this.yRot;
+        this.yBodyRot = this.getYRot();
         return 0.0f;
     }
 

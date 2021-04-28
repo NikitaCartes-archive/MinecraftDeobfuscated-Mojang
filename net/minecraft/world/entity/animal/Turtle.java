@@ -405,11 +405,13 @@ extends Animal {
             double e = this.wantedY - this.turtle.getY();
             double f = this.wantedZ - this.turtle.getZ();
             double g = Mth.sqrt(d * d + e * e + f * f);
+            e /= g;
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-            this.turtle.yBodyRot = this.turtle.yRot = this.rotlerp(this.turtle.yRot, h, 90.0f);
+            this.turtle.setYRot(this.rotlerp(this.turtle.getYRot(), h, 90.0f));
+            this.turtle.yBodyRot = this.turtle.getYRot();
             float i = (float)(this.speedModifier * this.turtle.getAttributeValue(Attributes.MOVEMENT_SPEED));
             this.turtle.setSpeed(Mth.lerp(0.125f, this.turtle.getSpeed(), i));
-            this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * (e /= g) * 0.1, 0.0));
+            this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * e * 0.1, 0.0));
         }
     }
 

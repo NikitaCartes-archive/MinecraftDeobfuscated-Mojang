@@ -252,6 +252,10 @@ implements ResourceManagerReloadListener {
         this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k);
     }
 
+    public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k, int l) {
+        this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k, l);
+    }
+
     public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
         this.tryRenderGuiItem(null, itemStack, i, j, 0);
     }
@@ -261,12 +265,17 @@ implements ResourceManagerReloadListener {
     }
 
     private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
+        this.tryRenderGuiItem(livingEntity, itemStack, i, j, k, 0);
+    }
+
+    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k, int l) {
         if (itemStack.isEmpty()) {
             return;
         }
-        this.blitOffset += 50.0f;
+        BakedModel bakedModel = this.getModel(itemStack, null, livingEntity, k);
+        this.blitOffset = bakedModel.isGui3d() ? this.blitOffset + 50.0f + (float)l : this.blitOffset + 50.0f;
         try {
-            this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, livingEntity, k));
+            this.renderGuiItem(itemStack, i, j, bakedModel);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering item");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
@@ -276,7 +285,7 @@ implements ResourceManagerReloadListener {
             crashReportCategory.setDetail("Item Foil", () -> String.valueOf(itemStack.hasFoil()));
             throw new ReportedException(crashReport);
         }
-        this.blitOffset -= 50.0f;
+        this.blitOffset = bakedModel.isGui3d() ? this.blitOffset - 50.0f - (float)l : this.blitOffset - 50.0f;
     }
 
     public void renderGuiItemDecorations(Font font, ItemStack itemStack, int i, int j) {

@@ -99,7 +99,7 @@ extends EntityRenderer<FishingHook> {
         PoseStack.Pose pose2 = poseStack.last();
         int y = 16;
         for (int z = 0; z <= 16; ++z) {
-            FishingHookRenderer.stringVertex(v, w, x, vertexConsumer2, pose2, FishingHookRenderer.fraction(z, 16), FishingHookRenderer.fraction(z + 1, 17));
+            FishingHookRenderer.stringVertex(v, w, x, vertexConsumer2, pose2, FishingHookRenderer.fraction(z, 16), FishingHookRenderer.fraction(z + 1, 16));
         }
         poseStack.popPose();
         super.render(fishingHook, f, g, poseStack, multiBufferSource, i);

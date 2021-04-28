@@ -32,11 +32,11 @@ extends Block {
     }
 
     @Override
-    public void stepOn(Level level, BlockPos blockPos, Entity entity) {
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
         if (!entity.fireImmune() && entity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) {
             entity.hurt(DamageSource.HOT_FLOOR, 1.0f);
         }
-        super.stepOn(level, blockPos, entity);
+        super.stepOn(level, blockPos, blockState, entity);
     }
 
     @Override

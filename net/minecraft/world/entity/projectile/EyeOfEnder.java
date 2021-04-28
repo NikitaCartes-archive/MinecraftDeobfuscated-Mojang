@@ -98,10 +98,10 @@ implements ItemSupplier {
         this.setDeltaMovement(d, e, f);
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
             float g = Mth.sqrt(d * d + f * f);
-            this.yRot = (float)(Mth.atan2(d, f) * 57.2957763671875);
-            this.xRot = (float)(Mth.atan2(e, g) * 57.2957763671875);
-            this.yRotO = this.yRot;
-            this.xRotO = this.xRot;
+            this.setYRot((float)(Mth.atan2(d, f) * 57.2957763671875));
+            this.setXRot((float)(Mth.atan2(e, g) * 57.2957763671875));
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
         }
     }
 
@@ -113,8 +113,8 @@ implements ItemSupplier {
         double e = this.getY() + vec3.y;
         double f = this.getZ() + vec3.z;
         float g = Mth.sqrt(EyeOfEnder.getHorizontalDistanceSqr(vec3));
-        this.xRot = Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 57.2957763671875));
-        this.yRot = Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+        this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 57.2957763671875)));
+        this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875)));
         if (!this.level.isClientSide) {
             double h = this.tx - d;
             double i = this.tz - f;

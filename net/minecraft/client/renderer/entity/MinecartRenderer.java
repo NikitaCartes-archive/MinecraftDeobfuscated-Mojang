@@ -51,7 +51,7 @@ extends EntityRenderer<T> {
         double m = Mth.lerp((double)g, ((AbstractMinecart)abstractMinecart).zOld, ((Entity)abstractMinecart).getZ());
         double n = 0.3f;
         Vec3 vec3 = ((AbstractMinecart)abstractMinecart).getPos(d, e, m);
-        float o = Mth.lerp(g, ((AbstractMinecart)abstractMinecart).xRotO, ((AbstractMinecart)abstractMinecart).xRot);
+        float o = Mth.lerp(g, ((AbstractMinecart)abstractMinecart).xRotO, ((Entity)abstractMinecart).getXRot());
         if (vec3 != null) {
             Vec3 vec32 = ((AbstractMinecart)abstractMinecart).getPosOffs(d, e, m, 0.3f);
             Vec3 vec33 = ((AbstractMinecart)abstractMinecart).getPosOffs(d, e, m, -0.3f);

@@ -36,10 +36,10 @@ extends StuckInBodyLayer<T, M> {
     protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Entity entity, float f, float g, float h, float j) {
         float k = Mth.sqrt(f * f + h * h);
         Arrow arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
-        arrow.yRot = (float)(Math.atan2(f, h) * 57.2957763671875);
-        arrow.xRot = (float)(Math.atan2(g, k) * 57.2957763671875);
-        arrow.yRotO = arrow.yRot;
-        arrow.xRotO = arrow.xRot;
+        arrow.setYRot((float)(Math.atan2(f, h) * 57.2957763671875));
+        arrow.setXRot((float)(Math.atan2(g, k) * 57.2957763671875));
+        arrow.yRotO = arrow.getYRot();
+        arrow.xRotO = arrow.getXRot();
         this.dispatcher.render(arrow, 0.0, 0.0, 0.0, 0.0f, j, poseStack, multiBufferSource, i);
     }
 }

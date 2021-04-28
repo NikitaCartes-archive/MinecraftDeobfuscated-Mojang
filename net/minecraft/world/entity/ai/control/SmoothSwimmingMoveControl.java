@@ -46,16 +46,17 @@ extends MoveControl {
             return;
         }
         float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-        this.mob.yBodyRot = this.mob.yRot = this.rotlerp(this.mob.yRot, h, this.maxTurnY);
-        this.mob.yHeadRot = this.mob.yRot;
+        this.mob.setYRot(this.rotlerp(this.mob.getYRot(), h, this.maxTurnY));
+        this.mob.yBodyRot = this.mob.getYRot();
+        this.mob.yHeadRot = this.mob.getYRot();
         float i = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
         if (this.mob.isInWater()) {
             this.mob.setSpeed(i * this.inWaterSpeedModifier);
             float j = -((float)(Mth.atan2(e, Mth.sqrt(d * d + f * f)) * 57.2957763671875));
             j = Mth.clamp(Mth.wrapDegrees(j), (float)(-this.maxTurnX), (float)this.maxTurnX);
-            this.mob.xRot = this.rotlerp(this.mob.xRot, j, 5.0f);
-            float k = Mth.cos(this.mob.xRot * ((float)Math.PI / 180));
-            float l = Mth.sin(this.mob.xRot * ((float)Math.PI / 180));
+            this.mob.setXRot(this.rotlerp(this.mob.getXRot(), j, 5.0f));
+            float k = Mth.cos(this.mob.getXRot() * ((float)Math.PI / 180));
+            float l = Mth.sin(this.mob.getXRot() * ((float)Math.PI / 180));
             this.mob.zza = k * i;
             this.mob.yya = -l * i;
         } else {

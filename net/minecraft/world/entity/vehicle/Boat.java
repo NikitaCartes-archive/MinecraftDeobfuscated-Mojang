@@ -374,12 +374,12 @@ extends Entity {
         double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
         double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
         double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-        double g = Mth.wrapDegrees(this.lerpYRot - (double)this.yRot);
-        this.yRot = (float)((double)this.yRot + g / (double)this.lerpSteps);
-        this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+        double g = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
+        this.setYRot(this.getYRot() + (float)g / (float)this.lerpSteps);
+        this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
         --this.lerpSteps;
         this.setPos(d, e, f);
-        this.setRot(this.yRot, this.xRot);
+        this.setRot(this.getYRot(), this.getXRot());
     }
 
     public void setPaddleState(boolean bl, boolean bl2) {
@@ -576,14 +576,14 @@ extends Entity {
         if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown) {
             f += 0.005f;
         }
-        this.yRot += this.deltaRotation;
+        this.setYRot(this.getYRot() + this.deltaRotation);
         if (this.inputUp) {
             f += 0.04f;
         }
         if (this.inputDown) {
             f -= 0.005f;
         }
-        this.setDeltaMovement(this.getDeltaMovement().add(Mth.sin(-this.yRot * ((float)Math.PI / 180)) * f, 0.0, Mth.cos(this.yRot * ((float)Math.PI / 180)) * f));
+        this.setDeltaMovement(this.getDeltaMovement().add(Mth.sin(-this.getYRot() * ((float)Math.PI / 180)) * f, 0.0, Mth.cos(this.getYRot() * ((float)Math.PI / 180)) * f));
         this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
     }
 
@@ -601,9 +601,9 @@ extends Entity {
                 f = (float)((double)f + 0.2);
             }
         }
-        Vec3 vec3 = new Vec3(f, 0.0, 0.0).yRot(-this.yRot * ((float)Math.PI / 180) - 1.5707964f);
+        Vec3 vec3 = new Vec3(f, 0.0, 0.0).yRot(-this.getYRot() * ((float)Math.PI / 180) - 1.5707964f);
         entity.setPos(this.getX() + vec3.x, this.getY() + (double)g, this.getZ() + vec3.z);
-        entity.yRot += this.deltaRotation;
+        entity.setYRot(entity.getYRot() + this.deltaRotation);
         entity.setYHeadRot(entity.getYHeadRot() + this.deltaRotation);
         this.clampRotation(entity);
         if (entity instanceof Animal && this.getPassengers().size() > 1) {
@@ -616,7 +616,7 @@ extends Entity {
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
         double e;
-        Vec3 vec3 = Boat.getCollisionHorizontalEscapeVector(this.getBbWidth() * Mth.SQRT_OF_TWO, livingEntity.getBbWidth(), livingEntity.yRot);
+        Vec3 vec3 = Boat.getCollisionHorizontalEscapeVector(this.getBbWidth() * Mth.SQRT_OF_TWO, livingEntity.getBbWidth(), livingEntity.getYRot());
         double d = this.getX() + vec3.x;
         BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e = this.getZ() + vec3.z);
         BlockPos blockPos2 = blockPos.below();
@@ -642,12 +642,12 @@ extends Entity {
     }
 
     protected void clampRotation(Entity entity) {
-        entity.setYBodyRot(this.yRot);
-        float f = Mth.wrapDegrees(entity.yRot - this.yRot);
+        entity.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(entity.getYRot() - this.getYRot());
         float g = Mth.clamp(f, -105.0f, 105.0f);
         entity.yRotO += g - f;
-        entity.yRot += g - f;
-        entity.setYHeadRot(entity.yRot);
+        entity.setYRot(entity.getYRot() + g - f);
+        entity.setYHeadRot(entity.getYRot());
     }
 
     @Override

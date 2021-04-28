@@ -76,6 +76,7 @@ PlaceRecipe<Ingredient> {
     private final StackedContents stackedContents = new StackedContents();
     private int timesInventoryChanged;
     private boolean ignoreTextInput;
+    private boolean visible;
 
     public void init(int i, int j, Minecraft minecraft, boolean bl, RecipeBookMenu<?> recipeBookMenu) {
         this.minecraft = minecraft;
@@ -85,7 +86,8 @@ PlaceRecipe<Ingredient> {
         minecraft.player.containerMenu = recipeBookMenu;
         this.book = minecraft.player.getRecipeBook();
         this.timesInventoryChanged = minecraft.player.getInventory().getTimesChanged();
-        if (this.isVisible()) {
+        this.visible = this.isVisibleAccordingToBookData();
+        if (this.visible) {
             this.initVisuals(bl);
         }
         minecraft.keyboardHandler.setSendRepeatsToGui(true);
@@ -149,10 +151,15 @@ PlaceRecipe<Ingredient> {
     }
 
     public boolean isVisible() {
+        return this.visible;
+    }
+
+    private boolean isVisibleAccordingToBookData() {
         return this.book.isOpen(this.menu.getRecipeBookType());
     }
 
     protected void setVisible(boolean bl) {
+        this.visible = bl;
         this.book.setOpen(this.menu.getRecipeBookType(), bl);
         if (!bl) {
             this.recipeBookPage.setInvisible();
@@ -205,6 +212,10 @@ PlaceRecipe<Ingredient> {
     }
 
     public void tick() {
+        boolean bl = this.isVisibleAccordingToBookData();
+        if (this.isVisible() != bl) {
+            this.setVisible(bl);
+        }
         if (!this.isVisible()) {
             return;
         }

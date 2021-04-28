@@ -34,7 +34,7 @@ extends Feature<NoneFeatureConfiguration> {
         if (VoidStartPlatformFeature.checkerboardDistance(chunkPos.x, chunkPos.z, VoidStartPlatformFeature.PLATFORM_ORIGIN_CHUNK.x, VoidStartPlatformFeature.PLATFORM_ORIGIN_CHUNK.z) > 1) {
             return true;
         }
-        BlockPos blockPos = featurePlaceContext.origin().offset(PLATFORM_OFFSET);
+        BlockPos blockPos = PLATFORM_OFFSET.atY(featurePlaceContext.origin().getY() + PLATFORM_OFFSET.getY());
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int i = chunkPos.getMinBlockZ(); i <= chunkPos.getMaxBlockZ(); ++i) {
             for (int j = chunkPos.getMinBlockX(); j <= chunkPos.getMaxBlockX(); ++j) {

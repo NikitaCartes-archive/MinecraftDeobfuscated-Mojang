@@ -431,7 +431,7 @@ extends LivingEntity {
     protected void serverAiStep() {
         super.serverAiStep();
         this.updateSwingTime();
-        this.yHeadRot = this.yRot;
+        this.yHeadRot = this.getYRot();
     }
 
     @Override
@@ -517,7 +517,7 @@ extends LivingEntity {
             this.dropAllDeathLoot(damageSource);
         }
         if (damageSource != null) {
-            this.setDeltaMovement(-Mth.cos((this.hurtDir + this.yRot) * ((float)Math.PI / 180)) * 0.1f, 0.1f, -Mth.sin((this.hurtDir + this.yRot) * ((float)Math.PI / 180)) * 0.1f);
+            this.setDeltaMovement(-Mth.cos((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180)) * 0.1f, 0.1f, -Mth.sin((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180)) * 0.1f);
         } else {
             this.setDeltaMovement(0.0, 0.1, 0.0);
         }
@@ -596,10 +596,10 @@ extends LivingEntity {
             itemEntity.setDeltaMovement(-Mth.sin(g) * f, 0.2f, Mth.cos(g) * f);
         } else {
             float f = 0.3f;
-            float g = Mth.sin(this.xRot * ((float)Math.PI / 180));
-            float h = Mth.cos(this.xRot * ((float)Math.PI / 180));
-            float i = Mth.sin(this.yRot * ((float)Math.PI / 180));
-            float j = Mth.cos(this.yRot * ((float)Math.PI / 180));
+            float g = Mth.sin(this.getXRot() * ((float)Math.PI / 180));
+            float h = Mth.cos(this.getXRot() * ((float)Math.PI / 180));
+            float i = Mth.sin(this.getYRot() * ((float)Math.PI / 180));
+            float j = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
             float k = this.random.nextFloat() * ((float)Math.PI * 2);
             float l = 0.02f * this.random.nextFloat();
             itemEntity.setDeltaMovement((double)(-i * h * 0.3f) + Math.cos(k) * (double)l, -g * 0.3f + 0.1f + (this.random.nextFloat() - this.random.nextFloat()) * 0.1f, (double)(j * h * 0.3f) + Math.sin(k) * (double)l);
@@ -1018,9 +1018,9 @@ extends LivingEntity {
             if (bl6) {
                 if (i > 0) {
                     if (entity instanceof LivingEntity) {
-                        ((LivingEntity)entity).knockback((float)i * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                        ((LivingEntity)entity).knockback((float)i * 0.5f, Mth.sin(this.getYRot() * ((float)Math.PI / 180)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180)));
                     } else {
-                        entity.push(-Mth.sin(this.yRot * ((float)Math.PI / 180)) * (float)i * 0.5f, 0.1, Mth.cos(this.yRot * ((float)Math.PI / 180)) * (float)i * 0.5f);
+                        entity.push(-Mth.sin(this.getYRot() * ((float)Math.PI / 180)) * (float)i * 0.5f, 0.1, Mth.cos(this.getYRot() * ((float)Math.PI / 180)) * (float)i * 0.5f);
                     }
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
                     this.setSprinting(false);
@@ -1030,7 +1030,7 @@ extends LivingEntity {
                     List<LivingEntity> list = this.level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0));
                     for (LivingEntity livingEntity : list) {
                         if (livingEntity == this || livingEntity == entity || this.isAlliedTo(livingEntity) || livingEntity instanceof ArmorStand && ((ArmorStand)livingEntity).isMarker() || !(this.distanceToSqr(livingEntity) < 9.0)) continue;
-                        livingEntity.knockback(0.4f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                        livingEntity.knockback(0.4f, Mth.sin(this.getYRot() * ((float)Math.PI / 180)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180)));
                         livingEntity.hurt(DamageSource.playerAttack(this), l);
                     }
                     this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0f, 1.0f);
@@ -1116,8 +1116,8 @@ extends LivingEntity {
     }
 
     public void sweepAttack() {
-        double d = -Mth.sin(this.yRot * ((float)Math.PI / 180));
-        double e = Mth.cos(this.yRot * ((float)Math.PI / 180));
+        double d = -Mth.sin(this.getYRot() * ((float)Math.PI / 180));
+        double e = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
         if (this.level instanceof ServerLevel) {
             ((ServerLevel)this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + d, this.getY(0.5), this.getZ() + e, 0, d, 0.0, e, 0.0);
         }
@@ -1847,7 +1847,7 @@ extends LivingEntity {
     @Override
     public Vec3 getRopeHoldPosition(float f) {
         double d = 0.22 * (this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0);
-        float g = Mth.lerp(f * 0.5f, this.xRot, this.xRotO) * ((float)Math.PI / 180);
+        float g = Mth.lerp(f * 0.5f, this.getXRot(), this.xRotO) * ((float)Math.PI / 180);
         float h = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180);
         if (this.isFallFlying() || this.isAutoSpinAttack()) {
             float l;

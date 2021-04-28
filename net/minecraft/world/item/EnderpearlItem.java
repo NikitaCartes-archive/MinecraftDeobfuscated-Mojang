@@ -28,7 +28,7 @@ extends Item {
         if (!level.isClientSide) {
             ThrownEnderpearl thrownEnderpearl = new ThrownEnderpearl(level, player);
             thrownEnderpearl.setItem(itemStack);
-            thrownEnderpearl.shootFromRotation(player, player.xRot, player.yRot, 0.0f, 1.5f, 1.0f);
+            thrownEnderpearl.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 1.5f, 1.0f);
             level.addFreshEntity(thrownEnderpearl);
         }
         player.awardStat(Stats.ITEM_USED.get(this));

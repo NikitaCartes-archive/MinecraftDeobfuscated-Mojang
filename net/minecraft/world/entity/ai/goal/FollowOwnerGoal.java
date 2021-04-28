@@ -128,7 +128,7 @@ extends Goal {
         if (!this.canTeleportTo(new BlockPos(i, j, k))) {
             return false;
         }
-        this.tamable.moveTo((double)i + 0.5, j, (double)k + 0.5, this.tamable.yRot, this.tamable.xRot);
+        this.tamable.moveTo((double)i + 0.5, j, (double)k + 0.5, this.tamable.getYRot(), this.tamable.getXRot());
         this.navigation.stop();
         return true;
     }

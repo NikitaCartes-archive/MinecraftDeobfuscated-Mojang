@@ -20,7 +20,7 @@ extends RotatedPillarBlock {
     }
 
     @Override
-    public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
         entity.causeFallDamage(f, 0.2f, DamageSource.FALL);
     }
 }

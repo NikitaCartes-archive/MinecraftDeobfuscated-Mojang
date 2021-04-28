@@ -671,7 +671,7 @@ VillagerDataHolder {
         if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
             LOGGER.info("Villager {} was struck by lightning {}.", (Object)this, (Object)lightningBolt);
             Witch witch = EntityType.WITCH.create(serverLevel);
-            witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+            witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
             witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
             witch.setNoAi(this.isNoAi());
             if (this.hasCustomName()) {

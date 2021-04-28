@@ -51,11 +51,11 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundAddEntityPacket(Entity entity, int i) {
-        this(entity.getId(), entity.getUUID(), entity.getX(), entity.getY(), entity.getZ(), entity.xRot, entity.yRot, entity.getType(), i, entity.getDeltaMovement());
+        this(entity.getId(), entity.getUUID(), entity.getX(), entity.getY(), entity.getZ(), entity.getXRot(), entity.getYRot(), entity.getType(), i, entity.getDeltaMovement());
     }
 
     public ClientboundAddEntityPacket(Entity entity, EntityType<?> entityType, int i, BlockPos blockPos) {
-        this(entity.getId(), entity.getUUID(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), entity.xRot, entity.yRot, entityType, i, entity.getDeltaMovement());
+        this(entity.getId(), entity.getUUID(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), entity.getXRot(), entity.getYRot(), entityType, i, entity.getDeltaMovement());
     }
 
     public ClientboundAddEntityPacket(FriendlyByteBuf friendlyByteBuf) {

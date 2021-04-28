@@ -99,22 +99,22 @@ public final class ProjectileUtil {
             return;
         }
         float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
-        entity.yRot = (float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) + 90.0f;
-        entity.xRot = (float)(Mth.atan2(g, vec3.y) * 57.2957763671875) - 90.0f;
-        while (entity.xRot - entity.xRotO < -180.0f) {
+        entity.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) + 90.0f);
+        entity.setXRot((float)(Mth.atan2(g, vec3.y) * 57.2957763671875) - 90.0f);
+        while (entity.getXRot() - entity.xRotO < -180.0f) {
             entity.xRotO -= 360.0f;
         }
-        while (entity.xRot - entity.xRotO >= 180.0f) {
+        while (entity.getXRot() - entity.xRotO >= 180.0f) {
             entity.xRotO += 360.0f;
         }
-        while (entity.yRot - entity.yRotO < -180.0f) {
+        while (entity.getYRot() - entity.yRotO < -180.0f) {
             entity.yRotO -= 360.0f;
         }
-        while (entity.yRot - entity.yRotO >= 180.0f) {
+        while (entity.getYRot() - entity.yRotO >= 180.0f) {
             entity.yRotO += 360.0f;
         }
-        entity.xRot = Mth.lerp(f, entity.xRotO, entity.xRot);
-        entity.yRot = Mth.lerp(f, entity.yRotO, entity.yRot);
+        entity.setXRot(Mth.lerp(f, entity.xRotO, entity.getXRot()));
+        entity.setYRot(Mth.lerp(f, entity.yRotO, entity.getYRot()));
     }
 
     public static InteractionHand getWeaponHoldingHand(LivingEntity livingEntity, Item item) {

@@ -438,7 +438,7 @@ extends Monster {
                         }
                     } else if ((double)serverLevelAccessor.getRandom().nextFloat() < 0.05) {
                         Chicken chicken2 = EntityType.CHICKEN.create(this.level);
-                        chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
+                        chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
                         chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
                         chicken2.setChickenJockey(true);
                         this.startRiding(chicken2);

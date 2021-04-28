@@ -127,8 +127,8 @@ implements EntityBlock {
     }
 
     @Override
-    public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
-        super.fallOn(level, blockPos, entity, f * 0.5f);
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
+        super.fallOn(level, blockState, blockPos, entity, f * 0.5f);
     }
 
     @Override

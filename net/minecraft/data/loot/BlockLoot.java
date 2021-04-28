@@ -172,6 +172,10 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         return LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Lock", "BlockEntityTag.Lock").copy("LootTable", "BlockEntityTag.LootTable").copy("LootTableSeed", "BlockEntityTag.LootTableSeed"))).apply(SetContainerContents.setContents().withEntry(DynamicLoot.dynamicEntry(ShulkerBoxBlock.CONTENTS))))));
     }
 
+    private static LootTable.Builder createCopperOreDrops(Block block) {
+        return BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.RAW_COPPER).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0f, 3.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))));
+    }
+
     private static LootTable.Builder createLapisOreDrops(Block block) {
         return BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.LAPIS_LAZULI).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0f, 9.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))));
     }
@@ -955,8 +959,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.NETHER_QUARTZ_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.QUARTZ));
         this.add(Blocks.DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
         this.add(Blocks.DEEPSLATE_DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
-        this.add(Blocks.COPPER_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.RAW_COPPER));
-        this.add(Blocks.DEEPSLATE_COPPER_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.RAW_COPPER));
+        this.add(Blocks.COPPER_ORE, BlockLoot::createCopperOreDrops);
+        this.add(Blocks.DEEPSLATE_COPPER_ORE, BlockLoot::createCopperOreDrops);
         this.add(Blocks.IRON_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.RAW_IRON));
         this.add(Blocks.DEEPSLATE_IRON_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.RAW_IRON));
         this.add(Blocks.GOLD_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.RAW_GOLD));

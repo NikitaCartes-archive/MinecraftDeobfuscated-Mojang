@@ -85,7 +85,7 @@ extends MobRenderer<Panda, PandaModel<Panda>> {
         }
         if ((q = panda.getSitAmount(h)) > 0.0f) {
             poseStack.translate(0.0, 0.8f * q, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(q, panda.xRot, panda.xRot + 90.0f)));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(q, panda.getXRot(), panda.getXRot() + 90.0f)));
             poseStack.translate(0.0, -1.0f * q, 0.0);
             if (panda.isScared()) {
                 float r2 = (float)(Math.cos((double)panda.tickCount * 1.25) * Math.PI * (double)0.05f);
@@ -98,7 +98,7 @@ extends MobRenderer<Panda, PandaModel<Panda>> {
         if ((r = panda.getLieOnBackAmount(h)) > 0.0f) {
             k = panda.isBaby() ? 0.5f : 1.3f;
             poseStack.translate(0.0, k * r, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(r, panda.xRot, panda.xRot + 180.0f)));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(r, panda.getXRot(), panda.getXRot() + 180.0f)));
         }
     }
 

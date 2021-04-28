@@ -163,9 +163,9 @@ extends AmbientCreature {
             Vec3 vec32 = vec3.add((Math.signum(d) * 0.5 - vec3.x) * (double)0.1f, (Math.signum(e) * (double)0.7f - vec3.y) * (double)0.1f, (Math.signum(f) * 0.5 - vec3.z) * (double)0.1f);
             this.setDeltaMovement(vec32);
             float g = (float)(Mth.atan2(vec32.z, vec32.x) * 57.2957763671875) - 90.0f;
-            float h = Mth.wrapDegrees(g - this.yRot);
+            float h = Mth.wrapDegrees(g - this.getYRot());
             this.zza = 0.5f;
-            this.yRot += h;
+            this.setYRot(this.getYRot() + h);
             if (this.random.nextInt(100) == 0 && this.level.getBlockState(blockPos2).isRedstoneConductor(this.level, blockPos2)) {
                 this.setResting(true);
             }

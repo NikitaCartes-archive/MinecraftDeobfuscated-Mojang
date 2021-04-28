@@ -218,7 +218,7 @@ extends Animal {
     }
 
     private void facePoint(double d, double e) {
-        this.yRot = (float)(Mth.atan2(e - this.getZ(), d - this.getX()) * 57.2957763671875) - 90.0f;
+        this.setYRot((float)(Mth.atan2(e - this.getZ(), d - this.getX()) * 57.2957763671875) - 90.0f);
     }
 
     private void enableJumpControl() {

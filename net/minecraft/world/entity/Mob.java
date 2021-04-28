@@ -701,8 +701,8 @@ extends LivingEntity {
         double i = Mth.sqrt(d * d + e * e);
         float j = (float)(Mth.atan2(e, d) * 57.2957763671875) - 90.0f;
         float k = (float)(-(Mth.atan2(h, i) * 57.2957763671875));
-        this.xRot = this.rotlerp(this.xRot, k, g);
-        this.yRot = this.rotlerp(this.yRot, j, f);
+        this.setXRot(this.rotlerp(this.getXRot(), k, g));
+        this.setYRot(this.rotlerp(this.getYRot(), j, f));
     }
 
     private float rotlerp(float f, float g, float h) {
@@ -1273,7 +1273,7 @@ extends LivingEntity {
         }
         if (bl = entity.hurt(DamageSource.mobAttack(this), f)) {
             if (g > 0.0f && entity instanceof LivingEntity) {
-                ((LivingEntity)entity).knockback(g * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                ((LivingEntity)entity).knockback(g * 0.5f, Mth.sin(this.getYRot() * ((float)Math.PI / 180)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180)));
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
             }
             if (entity instanceof Player) {

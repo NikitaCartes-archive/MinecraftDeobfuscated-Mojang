@@ -153,7 +153,7 @@ public class ItemProperties {
                 boolean bl = livingEntity instanceof Player && ((Player)livingEntity).isLocalPlayer();
                 double e = 0.0;
                 if (bl) {
-                    e = livingEntity.yRot;
+                    e = livingEntity.getYRot();
                 } else if (entity instanceof ItemFrame) {
                     e = this.getFrameRotation((ItemFrame)entity);
                 } else if (entity instanceof ItemEntity) {

@@ -247,7 +247,8 @@ extends Entity {
         this.rotA = (float)((Math.random() + 1.0) * (double)0.01f);
         this.reapplyPosition();
         this.timeOffs = (float)Math.random() * 12398.0f;
-        this.yHeadRot = this.yRot = (float)(Math.random() * 6.2831854820251465);
+        this.setYRot((float)(Math.random() * 6.2831854820251465));
+        this.yHeadRot = this.getYRot();
         this.maxUpStep = 0.6f;
         NbtOps nbtOps = NbtOps.INSTANCE;
         this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
@@ -402,8 +403,8 @@ extends Entity {
         this.animStepO = this.animStep;
         this.yBodyRotO = this.yBodyRot;
         this.yHeadRotO = this.yHeadRot;
-        this.yRotO = this.yRot;
-        this.xRotO = this.xRot;
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
         this.level.getProfiler().pop();
     }
 
@@ -1001,7 +1002,7 @@ extends Entity {
                     d = (Math.random() - Math.random()) * 0.01;
                     e = (Math.random() - Math.random()) * 0.01;
                 }
-                this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.yRot);
+                this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.getYRot());
                 this.knockback(0.4f, d, e);
             } else {
                 this.hurtDir = (int)(Math.random() * 2.0) * 180;
@@ -1694,7 +1695,15 @@ extends Entity {
     }
 
     private void dismountVehicle(Entity entity) {
-        Vec3 vec3 = entity.isRemoved() || this.level.getBlockState(entity.blockPosition()).is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
+        Vec3 vec3;
+        if (this.isRemoved()) {
+            vec3 = this.position();
+        } else if (entity.isRemoved() || this.level.getBlockState(entity.blockPosition()).is(BlockTags.PORTALS)) {
+            double d = Math.max(this.getY(), entity.getY());
+            vec3 = new Vec3(this.getX(), d, this.getZ());
+        } else {
+            vec3 = entity.getDismountLocationForPassenger(this);
+        }
         this.dismountTo(vec3.x, vec3.y, vec3.z);
     }
 
@@ -1715,7 +1724,7 @@ extends Entity {
         Vec3 vec3 = this.getDeltaMovement();
         this.setDeltaMovement(vec3.x, f, vec3.z);
         if (this.isSprinting()) {
-            float g = this.yRot * ((float)Math.PI / 180);
+            float g = this.getYRot() * ((float)Math.PI / 180);
             this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(g) * 0.2f, 0.0, Mth.cos(g) * 0.2f));
         }
         this.hasImpulse = true;
@@ -1805,7 +1814,7 @@ extends Entity {
                     this.fallDistance = 1.0f;
                 }
                 Vec3 vec36 = this.getLookAngle();
-                float f = this.xRot * ((float)Math.PI / 180);
+                float f = this.getXRot() * ((float)Math.PI / 180);
                 double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
                 double j = Math.sqrt(LivingEntity.getHorizontalDistanceSqr(vec35));
                 double k = vec36.length();
@@ -1971,11 +1980,11 @@ extends Entity {
             k = 1.0f;
             h = (float)Math.sqrt(f) * 3.0f;
             float l = (float)Mth.atan2(e, d) * 57.295776f - 90.0f;
-            float m = Mth.abs(Mth.wrapDegrees(this.yRot) - l);
+            float m = Mth.abs(Mth.wrapDegrees(this.getYRot()) - l);
             g = 95.0f < m && m < 265.0f ? l - 180.0f : l;
         }
         if (this.attackAnim > 0.0f) {
-            g = this.yRot;
+            g = this.getYRot();
         }
         if (!this.onGround) {
             k = 0.0f;
@@ -1985,10 +1994,10 @@ extends Entity {
         h = this.tickHeadTurn(g, h);
         this.level.getProfiler().pop();
         this.level.getProfiler().push("rangeChecks");
-        while (this.yRot - this.yRotO < -180.0f) {
+        while (this.getYRot() - this.yRotO < -180.0f) {
             this.yRotO -= 360.0f;
         }
-        while (this.yRot - this.yRotO >= 180.0f) {
+        while (this.getYRot() - this.yRotO >= 180.0f) {
             this.yRotO += 360.0f;
         }
         while (this.yBodyRot - this.yBodyRotO < -180.0f) {
@@ -1997,10 +2006,10 @@ extends Entity {
         while (this.yBodyRot - this.yBodyRotO >= 180.0f) {
             this.yBodyRotO += 360.0f;
         }
-        while (this.xRot - this.xRotO < -180.0f) {
+        while (this.getXRot() - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }
-        while (this.xRot - this.xRotO >= 180.0f) {
+        while (this.getXRot() - this.xRotO >= 180.0f) {
             this.xRotO += 360.0f;
         }
         while (this.yHeadRot - this.yHeadRotO < -180.0f) {
@@ -2013,7 +2022,7 @@ extends Entity {
         this.animStep += h;
         this.fallFlyTicks = this.isFallFlying() ? ++this.fallFlyTicks : 0;
         if (this.isSleeping()) {
-            this.xRot = 0.0f;
+            this.setXRot(0.0f);
         }
     }
 
@@ -2110,7 +2119,7 @@ extends Entity {
         boolean bl;
         float h = Mth.wrapDegrees(f - this.yBodyRot);
         this.yBodyRot += h * 0.3f;
-        float i = Mth.wrapDegrees(this.yRot - this.yBodyRot);
+        float i = Mth.wrapDegrees(this.getYRot() - this.yBodyRot);
         boolean bl2 = bl = i < -90.0f || i >= 90.0f;
         if (i < -75.0f) {
             i = -75.0f;
@@ -2118,7 +2127,7 @@ extends Entity {
         if (i >= 75.0f) {
             i = 75.0f;
         }
-        this.yBodyRot = this.yRot - i;
+        this.yBodyRot = this.getYRot() - i;
         if (i * i > 2500.0f) {
             this.yBodyRot += i * 0.2f;
         }
@@ -2141,12 +2150,12 @@ extends Entity {
             double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
             double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
             double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-            double g = Mth.wrapDegrees(this.lerpYRot - (double)this.yRot);
-            this.yRot = (float)((double)this.yRot + g / (double)this.lerpSteps);
-            this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+            double g = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
+            this.setYRot(this.getYRot() + (float)g / (float)this.lerpSteps);
+            this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
             --this.lerpSteps;
             this.setPos(d, e, f);
-            this.setRot(this.yRot, this.xRot);
+            this.setRot(this.getYRot(), this.getXRot());
         } else if (!this.isEffectiveAi()) {
             this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
         }
@@ -2562,12 +2571,12 @@ extends Entity {
     private void spawnItemParticles(ItemStack itemStack, int i) {
         for (int j = 0; j < i; ++j) {
             Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0);
-            vec3 = vec3.xRot(-this.xRot * ((float)Math.PI / 180));
-            vec3 = vec3.yRot(-this.yRot * ((float)Math.PI / 180));
+            vec3 = vec3.xRot(-this.getXRot() * ((float)Math.PI / 180));
+            vec3 = vec3.yRot(-this.getYRot() * ((float)Math.PI / 180));
             double d = (double)(-this.random.nextFloat()) * 0.6 - 0.3;
             Vec3 vec32 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.3, d, 0.6);
-            vec32 = vec32.xRot(-this.xRot * ((float)Math.PI / 180));
-            vec32 = vec32.yRot(-this.yRot * ((float)Math.PI / 180));
+            vec32 = vec32.xRot(-this.getXRot() * ((float)Math.PI / 180));
+            vec32 = vec32.yRot(-this.getYRot() * ((float)Math.PI / 180));
             vec32 = vec32.add(this.getX(), this.getEyeY(), this.getZ());
             this.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, itemStack), vec32.x, vec32.y, vec32.z, vec3.x, vec3.y + 0.05, vec3.z);
         }
@@ -2768,15 +2777,15 @@ extends Entity {
             BlockState blockState = this.level.getBlockState((BlockPos)blockPos);
             if (blockState.getBlock() instanceof BedBlock) {
                 this.level.setBlock((BlockPos)blockPos, (BlockState)blockState.setValue(BedBlock.OCCUPIED, false), 3);
-                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.yRot).orElseGet(() -> {
+                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.getYRot()).orElseGet(() -> {
                     BlockPos blockPos2 = blockPos.above();
                     return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.1, (double)blockPos2.getZ() + 0.5);
                 });
                 Vec3 vec32 = Vec3.atBottomCenterOf(blockPos).subtract(vec3).normalize();
                 float f = (float)Mth.wrapDegrees(Mth.atan2(vec32.z, vec32.x) * 57.2957763671875 - 90.0);
                 this.setPos(vec3.x, vec3.y, vec3.z);
-                this.yRot = f;
-                this.xRot = 0.0f;
+                this.setYRot(f);
+                this.setXRot(0.0f);
             }
         });
         Vec3 vec3 = this.position();

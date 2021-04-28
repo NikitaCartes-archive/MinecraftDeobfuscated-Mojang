@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class SlimeBlock
@@ -20,9 +21,9 @@ extends HalfTransparentBlock {
     }
 
     @Override
-    public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
         if (entity.isSuppressingBounce()) {
-            super.fallOn(level, blockPos, entity, f);
+            super.fallOn(level, blockState, blockPos, entity, f);
         } else {
             entity.causeFallDamage(f, 0.0f, DamageSource.FALL);
         }
@@ -46,13 +47,13 @@ extends HalfTransparentBlock {
     }
 
     @Override
-    public void stepOn(Level level, BlockPos blockPos, Entity entity) {
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
         double d = Math.abs(entity.getDeltaMovement().y);
         if (d < 0.1 && !entity.isSteppingCarefully()) {
             double e = 0.4 + d * 0.2;
             entity.setDeltaMovement(entity.getDeltaMovement().multiply(e, 1.0, e));
         }
-        super.stepOn(level, blockPos, entity);
+        super.stepOn(level, blockPos, blockState, entity);
     }
 }
 

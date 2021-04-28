@@ -213,7 +213,7 @@ public interface DispenseItemBehavior {
                 ServerLevel level = blockSource.getLevel();
                 ArmorStand armorStand = new ArmorStand(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
                 EntityType.updateCustomEntityTag(level, null, armorStand, itemStack.getTag());
-                armorStand.yRot = direction.toYRot();
+                armorStand.setYRot(direction.toYRot());
                 level.addFreshEntity(armorStand);
                 itemStack.shrink(1);
                 return itemStack;

@@ -44,7 +44,7 @@ public class SummonCommand {
         compoundTag2.putString("id", resourceLocation.toString());
         ServerLevel serverLevel = commandSourceStack.getLevel();
         Entity entity2 = EntityType.loadEntityRecursive(compoundTag2, serverLevel, entity -> {
-            entity.moveTo(vec3.x, vec3.y, vec3.z, entity.yRot, entity.xRot);
+            entity.moveTo(vec3.x, vec3.y, vec3.z, entity.getYRot(), entity.getXRot());
             return entity;
         });
         if (entity2 == null) {

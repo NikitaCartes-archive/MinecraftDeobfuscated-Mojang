@@ -118,6 +118,7 @@ public final class BlockTags {
     public static final Tag.Named<Block> CAVE_VINES = BlockTags.bind("cave_vines");
     public static final Tag.Named<Block> MOSS_REPLACEABLE = BlockTags.bind("moss_replaceable");
     public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = BlockTags.bind("lush_ground_replaceable");
+    public static final Tag.Named<Block> SMALL_DRIPLEAF_PLACEABLE = BlockTags.bind("small_dripleaf_placeable");
     public static final Tag.Named<Block> SNOW = BlockTags.bind("snow");
 
     private BlockTags() {

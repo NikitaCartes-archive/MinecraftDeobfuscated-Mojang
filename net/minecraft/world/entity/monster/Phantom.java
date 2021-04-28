@@ -130,8 +130,8 @@ implements Enemy {
                 this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.PHANTOM_FLAP, this.getSoundSource(), 0.95f + this.random.nextFloat() * 0.05f, 0.95f + this.random.nextFloat() * 0.05f, false);
             }
             int i = this.getPhantomSize();
-            float h = Mth.cos(this.yRot * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
-            float j = Mth.sin(this.yRot * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
+            float h = Mth.cos(this.getYRot() * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
+            float j = Mth.sin(this.getYRot() * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
             float k = (0.3f + f * 0.45f) * ((float)i * 0.2f + 1.0f);
             this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
             this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
@@ -463,7 +463,7 @@ implements Enemy {
         @Override
         public void clientTick() {
             Phantom.this.yHeadRot = Phantom.this.yBodyRot;
-            Phantom.this.yBodyRot = Phantom.this.yRot;
+            Phantom.this.yBodyRot = Phantom.this.getYRot();
         }
     }
 
@@ -478,33 +478,36 @@ implements Enemy {
 
         @Override
         public void tick() {
-            float n;
             if (Phantom.this.horizontalCollision) {
-                Phantom.this.yRot += 180.0f;
+                Phantom.this.setYRot(Phantom.this.getYRot() + 180.0f);
                 this.speed = 0.1f;
             }
             float f = (float)(((Phantom)Phantom.this).moveTargetPoint.x - Phantom.this.getX());
             float g = (float)(((Phantom)Phantom.this).moveTargetPoint.y - Phantom.this.getY());
             float h = (float)(((Phantom)Phantom.this).moveTargetPoint.z - Phantom.this.getZ());
             double d = Mth.sqrt(f * f + h * h);
-            double e = 1.0 - (double)Mth.abs(g * 0.7f) / d;
-            f = (float)((double)f * e);
-            h = (float)((double)h * e);
-            d = Mth.sqrt(f * f + h * h);
-            double i = Mth.sqrt(f * f + h * h + g * g);
-            float j = Phantom.this.yRot;
-            float k = (float)Mth.atan2(h, f);
-            float l = Mth.wrapDegrees(Phantom.this.yRot + 90.0f);
-            float m = Mth.wrapDegrees(k * 57.295776f);
-            Phantom.this.yBodyRot = Phantom.this.yRot = Mth.approachDegrees(l, m, 4.0f) - 90.0f;
-            this.speed = Mth.degreesDifferenceAbs(j, Phantom.this.yRot) < 3.0f ? Mth.approach(this.speed, 1.8f, 0.005f * (1.8f / this.speed)) : Mth.approach(this.speed, 0.2f, 0.025f);
-            Phantom.this.xRot = n = (float)(-(Mth.atan2(-g, d) * 57.2957763671875));
-            float o = Phantom.this.yRot + 90.0f;
-            double p = (double)(this.speed * Mth.cos(o * ((float)Math.PI / 180))) * Math.abs((double)f / i);
-            double q = (double)(this.speed * Mth.sin(o * ((float)Math.PI / 180))) * Math.abs((double)h / i);
-            double r = (double)(this.speed * Mth.sin(n * ((float)Math.PI / 180))) * Math.abs((double)g / i);
-            Vec3 vec3 = Phantom.this.getDeltaMovement();
-            Phantom.this.setDeltaMovement(vec3.add(new Vec3(p, r, q).subtract(vec3).scale(0.2)));
+            if (Math.abs(d) > (double)1.0E-5f) {
+                double e = 1.0 - (double)Mth.abs(g * 0.7f) / d;
+                f = (float)((double)f * e);
+                h = (float)((double)h * e);
+                d = Mth.sqrt(f * f + h * h);
+                double i = Mth.sqrt(f * f + h * h + g * g);
+                float j = Phantom.this.getYRot();
+                float k = (float)Mth.atan2(h, f);
+                float l = Mth.wrapDegrees(Phantom.this.getYRot() + 90.0f);
+                float m = Mth.wrapDegrees(k * 57.295776f);
+                Phantom.this.setYRot(Mth.approachDegrees(l, m, 4.0f) - 90.0f);
+                Phantom.this.yBodyRot = Phantom.this.getYRot();
+                this.speed = Mth.degreesDifferenceAbs(j, Phantom.this.getYRot()) < 3.0f ? Mth.approach(this.speed, 1.8f, 0.005f * (1.8f / this.speed)) : Mth.approach(this.speed, 0.2f, 0.025f);
+                float n = (float)(-(Mth.atan2(-g, d) * 57.2957763671875));
+                Phantom.this.setXRot(n);
+                float o = Phantom.this.getYRot() + 90.0f;
+                double p = (double)(this.speed * Mth.cos(o * ((float)Math.PI / 180))) * Math.abs((double)f / i);
+                double q = (double)(this.speed * Mth.sin(o * ((float)Math.PI / 180))) * Math.abs((double)h / i);
+                double r = (double)(this.speed * Mth.sin(n * ((float)Math.PI / 180))) * Math.abs((double)g / i);
+                Vec3 vec3 = Phantom.this.getDeltaMovement();
+                Phantom.this.setDeltaMovement(vec3.add(new Vec3(p, r, q).subtract(vec3).scale(0.2)));
+            }
         }
     }
 

@@ -266,7 +266,8 @@ implements Enemy {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.yHeadRot = this.yRot = 0.0f;
+        this.setYRot(0.0f);
+        this.yHeadRot = this.getYRot();
         this.setOldPosAndRot();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

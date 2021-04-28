@@ -208,7 +208,8 @@ implements Bucketable {
             }
             if (d != 0.0 || g != 0.0) {
                 float i = (float)(Mth.atan2(g, d) * 57.2957763671875) - 90.0f;
-                this.fish.yBodyRot = this.fish.yRot = this.rotlerp(this.fish.yRot, i, 90.0f);
+                this.fish.setYRot(this.rotlerp(this.fish.getYRot(), i, 90.0f));
+                this.fish.yBodyRot = this.fish.getYRot();
             }
         }
     }

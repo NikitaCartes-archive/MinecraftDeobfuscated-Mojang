@@ -48,7 +48,7 @@ public class TeleportCommand {
 
     private static int teleportToEntity(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Entity entity) throws CommandSyntaxException {
         for (Entity entity2 : collection) {
-            TeleportCommand.performTeleport(commandSourceStack, entity2, (ServerLevel)entity.level, entity.getX(), entity.getY(), entity.getZ(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class), entity.yRot, entity.xRot, null);
+            TeleportCommand.performTeleport(commandSourceStack, entity2, (ServerLevel)entity.level, entity.getX(), entity.getY(), entity.getZ(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class), entity.getYRot(), entity.getXRot(), null);
         }
         if (collection.size() == 1) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.single", collection.iterator().next().getDisplayName(), entity.getDisplayName()), true);
@@ -84,7 +84,7 @@ public class TeleportCommand {
         }
         for (Entity entity : collection) {
             if (coordinates2 == null) {
-                TeleportCommand.performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.yRot, entity.xRot, lookAt);
+                TeleportCommand.performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), lookAt);
                 continue;
             }
             TeleportCommand.performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
@@ -130,8 +130,8 @@ public class TeleportCommand {
                     entity.restoreFrom(entity2);
                     entity.moveTo(d, e, f, i, k);
                     entity.setYHeadRot(i);
-                    serverLevel.addDuringTeleport(entity);
                     entity2.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+                    serverLevel.addDuringTeleport(entity);
                 } else {
                     return;
                 }

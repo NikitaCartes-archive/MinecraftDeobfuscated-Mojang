@@ -213,7 +213,7 @@ ServerGamePacketListener {
         this.player.yo = this.player.getY();
         this.player.zo = this.player.getZ();
         this.player.doTick();
-        this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.yRot, this.player.xRot);
+        this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.getYRot(), this.player.getXRot());
         ++this.tickCount;
         this.knownMovePacketCount = this.receivedMovePacketCount;
         if (this.clientIsFloating && !this.player.isSleeping()) {
@@ -405,7 +405,7 @@ ServerGamePacketListener {
     public void handleAcceptTeleportPacket(ServerboundAcceptTeleportationPacket serverboundAcceptTeleportationPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundAcceptTeleportationPacket, this, this.player.getLevel());
         if (serverboundAcceptTeleportationPacket.getId() == this.awaitingTeleport) {
-            this.player.absMoveTo(this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.yRot, this.player.xRot);
+            this.player.absMoveTo(this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.getYRot(), this.player.getXRot());
             this.lastGoodX = this.awaitingPositionFromClient.x;
             this.lastGoodY = this.awaitingPositionFromClient.y;
             this.lastGoodZ = this.awaitingPositionFromClient.z;
@@ -784,7 +784,7 @@ ServerGamePacketListener {
         if (this.awaitingPositionFromClient != null) {
             if (this.tickCount - this.awaitingTeleportTime > 20) {
                 this.awaitingTeleportTime = this.tickCount;
-                this.teleport(this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.yRot, this.player.xRot);
+                this.teleport(this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.getYRot(), this.player.getXRot());
             }
             return;
         }
@@ -792,8 +792,8 @@ ServerGamePacketListener {
         double d = ServerGamePacketListenerImpl.clampHorizontal(serverboundMovePlayerPacket.getX(this.player.getX()));
         double e = ServerGamePacketListenerImpl.clampVertical(serverboundMovePlayerPacket.getY(this.player.getY()));
         double f = ServerGamePacketListenerImpl.clampHorizontal(serverboundMovePlayerPacket.getZ(this.player.getZ()));
-        float g = Mth.wrapDegrees(serverboundMovePlayerPacket.getYRot(this.player.yRot));
-        float h = Mth.wrapDegrees(serverboundMovePlayerPacket.getXRot(this.player.xRot));
+        float g = Mth.wrapDegrees(serverboundMovePlayerPacket.getYRot(this.player.getYRot()));
+        float h = Mth.wrapDegrees(serverboundMovePlayerPacket.getXRot(this.player.getXRot()));
         if (this.player.isPassenger()) {
             this.player.absMoveTo(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
             this.player.getLevel().getChunkSource().move(this.player);
@@ -825,7 +825,7 @@ ServerGamePacketListener {
             float f2 = s = this.player.isFallFlying() ? 300.0f : 100.0f;
             if (q - p > (double)(s * (float)r) && !this.isSingleplayerOwner()) {
                 LOGGER.warn("{} moved too quickly! {},{},{}", (Object)this.player.getName().getString(), (Object)m, (Object)n, (Object)o);
-                this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.yRot, this.player.xRot);
+                this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
                 return;
             }
         }
@@ -891,8 +891,8 @@ ServerGamePacketListener {
         double i = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.X) ? this.player.getX() : 0.0;
         double j = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.Y) ? this.player.getY() : 0.0;
         double k = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.Z) ? this.player.getZ() : 0.0;
-        float l = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT) ? this.player.yRot : 0.0f;
-        float m = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.X_ROT) ? this.player.xRot : 0.0f;
+        float l = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT) ? this.player.getYRot() : 0.0f;
+        float m = set.contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.X_ROT) ? this.player.getXRot() : 0.0f;
         this.awaitingPositionFromClient = new Vec3(d, e, f);
         if (++this.awaitingTeleport == Integer.MAX_VALUE) {
             this.awaitingTeleport = 0;
@@ -1004,7 +1004,7 @@ ServerGamePacketListener {
             for (ServerLevel serverLevel : this.server.getAllLevels()) {
                 Entity entity = serverboundTeleportToEntityPacket.getEntity(serverLevel);
                 if (entity == null) continue;
-                this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
+                this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
                 return;
             }
         }

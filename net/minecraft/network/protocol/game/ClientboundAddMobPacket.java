@@ -34,8 +34,8 @@ implements Packet<ClientGamePacketListener> {
         this.x = livingEntity.getX();
         this.y = livingEntity.getY();
         this.z = livingEntity.getZ();
-        this.yRot = (byte)(livingEntity.yRot * 256.0f / 360.0f);
-        this.xRot = (byte)(livingEntity.xRot * 256.0f / 360.0f);
+        this.yRot = (byte)(livingEntity.getYRot() * 256.0f / 360.0f);
+        this.xRot = (byte)(livingEntity.getXRot() * 256.0f / 360.0f);
         this.yHeadRot = (byte)(livingEntity.yHeadRot * 256.0f / 360.0f);
         double d = 3.9;
         Vec3 vec3 = livingEntity.getDeltaMovement();

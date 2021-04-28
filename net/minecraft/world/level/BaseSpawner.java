@@ -112,7 +112,7 @@ public abstract class BaseSpawner {
             double d2 = f = j >= 3 ? listTag.getDouble(2) : (double)blockPos.getZ() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * (double)this.spawnRange + 0.5;
             if (!serverLevel.noCollision(optional.get().getAABB(d, e, f)) || !SpawnPlacements.checkSpawnRules(optional.get(), serverLevel, MobSpawnType.SPAWNER, new BlockPos(d, e, f), serverLevel.getRandom())) continue;
             Entity entity2 = EntityType.loadEntityRecursive(compoundTag, serverLevel, entity -> {
-                entity.moveTo(d, e, f, entity.yRot, entity.xRot);
+                entity.moveTo(d, e, f, entity.getYRot(), entity.getXRot());
                 return entity;
             });
             if (entity2 == null) {

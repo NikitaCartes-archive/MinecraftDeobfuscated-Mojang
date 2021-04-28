@@ -160,7 +160,7 @@ RangedAttackMob {
         }
         this.setDeltaMovement(vec3);
         if (WitherBoss.getHorizontalDistanceSqr(vec3) > 0.05) {
-            this.yRot = (float)Mth.atan2(vec3.z, vec3.x) * 57.295776f - 90.0f;
+            this.setYRot((float)Mth.atan2(vec3.z, vec3.x) * 57.295776f - 90.0f);
         }
         super.aiStep();
         for (i = 0; i < 2; ++i) {

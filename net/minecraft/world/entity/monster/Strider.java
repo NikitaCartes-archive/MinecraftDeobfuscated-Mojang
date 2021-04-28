@@ -212,7 +212,7 @@ Saddleable {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-        Vec3[] vec3s = new Vec3[]{Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 45.0f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 45.0f)};
+        Vec3[] vec3s = new Vec3[]{Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.getYRot()), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.getYRot() - 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.getYRot() + 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.getYRot() - 45.0f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.getYRot() + 45.0f)};
         LinkedHashSet<BlockPos> set = Sets.newLinkedHashSet();
         double d = this.getBoundingBox().maxY;
         double e = this.getBoundingBox().minY - 0.5;
@@ -441,7 +441,7 @@ Saddleable {
     }
 
     private SpawnGroupData spawnJockey(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData) {
-        mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
+        mob.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
         mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
         mob.startRiding(this, true);
         return new AgeableMob.AgeableMobGroupData(0.0f);

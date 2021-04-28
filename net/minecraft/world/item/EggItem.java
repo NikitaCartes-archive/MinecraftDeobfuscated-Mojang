@@ -27,7 +27,7 @@ extends Item {
         if (!level.isClientSide) {
             ThrownEgg thrownEgg = new ThrownEgg(level, player);
             thrownEgg.setItem(itemStack);
-            thrownEgg.shootFromRotation(player, player.xRot, player.yRot, 0.0f, 1.5f, 1.0f);
+            thrownEgg.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 1.5f, 1.0f);
             level.addFreshEntity(thrownEgg);
         }
         player.awardStat(Stats.ITEM_USED.get(this));

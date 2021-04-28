@@ -59,7 +59,7 @@ implements Vanishable {
             int k;
             ArrowItem arrowItem = (ArrowItem)(itemStack2.getItem() instanceof ArrowItem ? itemStack2.getItem() : Items.ARROW);
             AbstractArrow abstractArrow = arrowItem.createArrow(level, itemStack2, player);
-            abstractArrow.shootFromRotation(player, player.xRot, player.yRot, 0.0f, f * 3.0f, 1.0f);
+            abstractArrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, f * 3.0f, 1.0f);
             if (f == 1.0f) {
                 abstractArrow.setCritArrow(true);
             }

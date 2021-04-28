@@ -350,8 +350,8 @@ implements EntityTypeTest<Entity, T> {
         ((Entity)entity).moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(serverLevel.random.nextFloat() * 360.0f), 0.0f);
         if (entity instanceof Mob) {
             Mob mob = (Mob)entity;
-            mob.yHeadRot = mob.yRot;
-            mob.yBodyRot = mob.yRot;
+            mob.yHeadRot = mob.getYRot();
+            mob.yBodyRot = mob.getYRot();
             mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
             mob.playAmbientSound();
         }

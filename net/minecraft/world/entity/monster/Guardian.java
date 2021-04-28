@@ -251,12 +251,12 @@ extends Monster {
                 this.setAirSupply(300);
             } else if (this.onGround) {
                 this.setDeltaMovement(this.getDeltaMovement().add((this.random.nextFloat() * 2.0f - 1.0f) * 0.4f, 0.5, (this.random.nextFloat() * 2.0f - 1.0f) * 0.4f));
-                this.yRot = this.random.nextFloat() * 360.0f;
+                this.setYRot(this.random.nextFloat() * 360.0f);
                 this.onGround = false;
                 this.hasImpulse = true;
             }
             if (this.hasActiveAttackTarget()) {
-                this.yRot = this.yHeadRot;
+                this.setYRot(this.yHeadRot);
             }
         }
         super.aiStep();
@@ -342,13 +342,14 @@ extends Monster {
             double f = vec3.y / d;
             double g = vec3.z / d;
             float h = (float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) - 90.0f;
-            this.guardian.yBodyRot = this.guardian.yRot = this.rotlerp(this.guardian.yRot, h, 90.0f);
+            this.guardian.setYRot(this.rotlerp(this.guardian.getYRot(), h, 90.0f));
+            this.guardian.yBodyRot = this.guardian.getYRot();
             float i = (float)(this.speedModifier * this.guardian.getAttributeValue(Attributes.MOVEMENT_SPEED));
             float j = Mth.lerp(0.125f, this.guardian.getSpeed(), i);
             this.guardian.setSpeed(j);
             double k = Math.sin((double)(this.guardian.tickCount + this.guardian.getId()) * 0.5) * 0.05;
-            double l = Math.cos(this.guardian.yRot * ((float)Math.PI / 180));
-            double m = Math.sin(this.guardian.yRot * ((float)Math.PI / 180));
+            double l = Math.cos(this.guardian.getYRot() * ((float)Math.PI / 180));
+            double m = Math.sin(this.guardian.getYRot() * ((float)Math.PI / 180));
             double n = Math.sin((double)(this.guardian.tickCount + this.guardian.getId()) * 0.75) * 0.05;
             this.guardian.setDeltaMovement(this.guardian.getDeltaMovement().add(k * l, n * (m + l) * 0.25 + (double)j * f * 0.1, k * m));
             LookControl lookControl = this.guardian.getLookControl();

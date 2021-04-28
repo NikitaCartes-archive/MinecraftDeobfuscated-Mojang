@@ -155,7 +155,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -365,7 +365,7 @@ implements ClientGamePacketListener {
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook());
-            this.minecraft.player.yRot = -180.0f;
+            this.minecraft.player.setYRot(-180.0f);
             if (this.minecraft.getSingleplayerServer() != null) {
                 this.minecraft.getSingleplayerServer().setUUID(this.minecraft.player.getUUID());
             }
@@ -410,8 +410,8 @@ implements ClientGamePacketListener {
         double f = clientboundAddExperienceOrbPacket.getZ();
         ExperienceOrb entity = new ExperienceOrb(this.level, d, e, f, clientboundAddExperienceOrbPacket.getValue());
         entity.setPacketCoordinates(d, e, f);
-        entity.yRot = 0.0f;
-        entity.xRot = 0.0f;
+        entity.setYRot(0.0f);
+        entity.setXRot(0.0f);
         entity.setId(clientboundAddExperienceOrbPacket.getId());
         this.level.putNonPlayerEntity(clientboundAddExperienceOrbPacket.getId(), entity);
     }
@@ -507,8 +507,8 @@ implements ClientGamePacketListener {
             if (clientboundMoveEntityPacket.hasPosition()) {
                 Vec3 vec3 = clientboundMoveEntityPacket.updateEntityPosition(entity.getPacketCoordinates());
                 entity.setPacketCoordinates(vec3);
-                float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f : entity.yRot;
-                float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.xRot;
+                float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f : entity.getYRot();
+                float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.getXRot();
                 entity.lerpTo(vec3.x(), vec3.y(), vec3.z(), f, g, 3, false);
             } else if (clientboundMoveEntityPacket.hasRotation()) {
                 float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f;
@@ -531,9 +531,10 @@ implements ClientGamePacketListener {
     }
 
     @Override
-    public void handleRemoveEntity(ClientboundRemoveEntitiesPacket clientboundRemoveEntitiesPacket) {
-        PacketUtils.ensureRunningOnSameThread(clientboundRemoveEntitiesPacket, this, this.minecraft);
-        clientboundRemoveEntitiesPacket.getEntityIds().forEach(i -> this.level.removeEntity(i, Entity.RemovalReason.DISCARDED));
+    public void handleRemoveEntity(ClientboundRemoveEntityPacket clientboundRemoveEntityPacket) {
+        PacketUtils.ensureRunningOnSameThread(clientboundRemoveEntityPacket, this, this.minecraft);
+        int i = clientboundRemoveEntityPacket.getEntityId();
+        this.level.removeEntity(i, Entity.RemovalReason.DISCARDED);
     }
 
     @Override
@@ -585,14 +586,14 @@ implements ClientGamePacketListener {
         float j = clientboundPlayerPositionPacket.getYRot();
         float k = clientboundPlayerPositionPacket.getXRot();
         if (clientboundPlayerPositionPacket.getRelativeArguments().contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.X_ROT)) {
-            k += player.xRot;
+            k += player.getXRot();
         }
         if (clientboundPlayerPositionPacket.getRelativeArguments().contains((Object)ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT)) {
-            j += player.yRot;
+            j += player.getYRot();
         }
         player.absMoveTo(e, g, i, j, k);
         this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.getId()));
-        this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, false));
+        this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), false));
         if (!this.started) {
             this.started = true;
             this.minecraft.setScreen(null);
@@ -867,7 +868,7 @@ implements ClientGamePacketListener {
         localPlayer2.resetPos();
         localPlayer2.setServerBrand(string);
         this.level.addPlayer(i, localPlayer2);
-        localPlayer2.yRot = -180.0f;
+        localPlayer2.setYRot(-180.0f);
         localPlayer2.input = new KeyboardInput(this.minecraft.options);
         this.minecraft.gameMode.adjustPlayer(localPlayer2);
         localPlayer2.setReducedDebugInfo(localPlayer.isReducedDebugInfo());

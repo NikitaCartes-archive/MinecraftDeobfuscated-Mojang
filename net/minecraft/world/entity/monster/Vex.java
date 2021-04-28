@@ -328,11 +328,13 @@ extends Monster {
                 Vex.this.setDeltaMovement(Vex.this.getDeltaMovement().add(vec3.scale(this.speedModifier * 0.05 / d)));
                 if (Vex.this.getTarget() == null) {
                     Vec3 vec32 = Vex.this.getDeltaMovement();
-                    Vex.this.yBodyRot = Vex.this.yRot = -((float)Mth.atan2(vec32.x, vec32.z)) * 57.295776f;
+                    Vex.this.setYRot(-((float)Mth.atan2(vec32.x, vec32.z)) * 57.295776f);
+                    Vex.this.yBodyRot = Vex.this.getYRot();
                 } else {
                     double e = Vex.this.getTarget().getX() - Vex.this.getX();
                     double f = Vex.this.getTarget().getZ() - Vex.this.getZ();
-                    Vex.this.yBodyRot = Vex.this.yRot = -((float)Mth.atan2(e, f)) * 57.295776f;
+                    Vex.this.setYRot(-((float)Mth.atan2(e, f)) * 57.295776f);
+                    Vex.this.yBodyRot = Vex.this.getYRot();
                 }
             }
         }

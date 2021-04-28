@@ -103,10 +103,10 @@ extends Entity {
         Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h).scale(g);
         this.setDeltaMovement(vec3);
         float i = Mth.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
-        this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, i) * 57.2957763671875);
-        this.yRotO = this.yRot;
-        this.xRotO = this.xRot;
+        this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+        this.setXRot((float)(Mth.atan2(vec3.y, i) * 57.2957763671875));
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
     }
 
     public void shootFromRotation(Entity entity, float f, float g, float h, float i, float j) {
@@ -143,11 +143,11 @@ extends Entity {
         this.setDeltaMovement(d, e, f);
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
             float g = Mth.sqrt(d * d + f * f);
-            this.xRot = (float)(Mth.atan2(e, g) * 57.2957763671875);
-            this.yRot = (float)(Mth.atan2(d, f) * 57.2957763671875);
-            this.xRotO = this.xRot;
-            this.yRotO = this.yRot;
-            this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+            this.setXRot((float)(Mth.atan2(e, g) * 57.2957763671875));
+            this.setYRot((float)(Mth.atan2(d, f) * 57.2957763671875));
+            this.xRotO = this.getXRot();
+            this.yRotO = this.getYRot();
+            this.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
         }
     }
 
@@ -162,8 +162,8 @@ extends Entity {
     protected void updateRotation() {
         Vec3 vec3 = this.getDeltaMovement();
         float f = Mth.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
-        this.xRot = Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, f) * 57.2957763671875));
-        this.yRot = Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+        this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, f) * 57.2957763671875)));
+        this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875)));
     }
 
     protected static float lerpRotation(float f, float g) {

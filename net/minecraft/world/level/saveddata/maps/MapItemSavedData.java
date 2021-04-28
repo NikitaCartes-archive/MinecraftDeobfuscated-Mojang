@@ -164,7 +164,7 @@ extends SavedData {
                 continue;
             }
             if (itemStack.isFramed() || holdingPlayer2.player.level.dimension() != this.dimension || !this.trackingPosition) continue;
-            this.addDecoration(MapDecoration.Type.PLAYER, holdingPlayer2.player.level, string, holdingPlayer2.player.getX(), holdingPlayer2.player.getZ(), holdingPlayer2.player.yRot, null);
+            this.addDecoration(MapDecoration.Type.PLAYER, holdingPlayer2.player.level, string, holdingPlayer2.player.getX(), holdingPlayer2.player.getZ(), holdingPlayer2.player.getYRot(), null);
         }
         if (itemStack.isFramed() && this.trackingPosition) {
             ItemFrame itemFrame = itemStack.getFrame();

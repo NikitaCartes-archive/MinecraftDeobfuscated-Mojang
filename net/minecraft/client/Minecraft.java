@@ -17,6 +17,7 @@ import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.DisplayData;
+import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
@@ -1888,6 +1889,7 @@ WindowEventHandler {
         crashReportCategory.setDetail("Backend library", RenderSystem::getBackendDescription);
         crashReportCategory.setDetail("Backend API", RenderSystem::getApiDescription);
         crashReportCategory.setDetail("GL Caps", RenderSystem::getCapsString);
+        crashReportCategory.setDetail("GL debug messages", () -> GlDebug.isDebugEnabled() ? String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>");
         crashReportCategory.setDetail("Using VBOs", () -> "Yes");
         crashReportCategory.setDetail("Is Modded", () -> {
             String string = ClientBrandRetriever.getClientModName();
@@ -2240,8 +2242,8 @@ WindowEventHandler {
         int k = this.window.getWidth();
         int l = this.window.getHeight();
         RenderTarget renderTarget = new RenderTarget(i, j, true, ON_OSX);
-        float f = this.player.xRot;
-        float g = this.player.yRot;
+        float f = this.player.getXRot();
+        float g = this.player.getYRot();
         float h = this.player.xRotO;
         float m = this.player.yRotO;
         this.gameRenderer.setRenderBlockOutline(false);
@@ -2253,41 +2255,37 @@ WindowEventHandler {
             for (int n = 0; n < 6; ++n) {
                 switch (n) {
                     case 0: {
-                        this.player.yRotO = this.player.yRot = g;
-                        this.player.xRot = 0.0f;
-                        this.player.xRotO = 0.0f;
+                        this.player.setYRot(g);
+                        this.player.setXRot(0.0f);
                         break;
                     }
                     case 1: {
-                        this.player.yRotO = this.player.yRot = (g + 90.0f) % 360.0f;
-                        this.player.xRot = 0.0f;
-                        this.player.xRotO = 0.0f;
+                        this.player.setYRot((g + 90.0f) % 360.0f);
+                        this.player.setXRot(0.0f);
                         break;
                     }
                     case 2: {
-                        this.player.yRotO = this.player.yRot = (g + 180.0f) % 360.0f;
-                        this.player.xRot = 0.0f;
-                        this.player.xRotO = 0.0f;
+                        this.player.setYRot((g + 180.0f) % 360.0f);
+                        this.player.setXRot(0.0f);
                         break;
                     }
                     case 3: {
-                        this.player.yRotO = this.player.yRot = (g - 90.0f) % 360.0f;
-                        this.player.xRot = 0.0f;
-                        this.player.xRotO = 0.0f;
+                        this.player.setYRot((g - 90.0f) % 360.0f);
+                        this.player.setXRot(0.0f);
                         break;
                     }
                     case 4: {
-                        this.player.yRotO = this.player.yRot = g;
-                        this.player.xRot = -90.0f;
-                        this.player.xRotO = -90.0f;
+                        this.player.setYRot(g);
+                        this.player.setXRot(-90.0f);
                         break;
                     }
                     default: {
-                        this.player.yRotO = this.player.yRot = g;
-                        this.player.xRot = 90.0f;
-                        this.player.xRotO = 90.0f;
+                        this.player.setYRot(g);
+                        this.player.setXRot(90.0f);
                     }
                 }
+                this.player.yRotO = this.player.getYRot();
+                this.player.xRotO = this.player.getXRot();
                 renderTarget.bindWrite(true);
                 this.gameRenderer.renderLevel(1.0f, 0L, new PoseStack());
                 try {
@@ -2305,8 +2303,8 @@ WindowEventHandler {
             TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.failure", exception.getMessage());
             return translatableComponent;
         } finally {
-            this.player.xRot = f;
-            this.player.yRot = g;
+            this.player.setXRot(f);
+            this.player.setYRot(g);
             this.player.xRotO = h;
             this.player.yRotO = m;
             this.gameRenderer.setRenderBlockOutline(true);

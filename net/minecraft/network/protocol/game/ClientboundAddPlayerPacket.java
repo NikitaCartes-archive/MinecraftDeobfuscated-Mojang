@@ -25,8 +25,8 @@ implements Packet<ClientGamePacketListener> {
         this.x = player.getX();
         this.y = player.getY();
         this.z = player.getZ();
-        this.yRot = (byte)(player.yRot * 256.0f / 360.0f);
-        this.xRot = (byte)(player.xRot * 256.0f / 360.0f);
+        this.yRot = (byte)(player.getYRot() * 256.0f / 360.0f);
+        this.xRot = (byte)(player.getXRot() * 256.0f / 360.0f);
     }
 
     public ClientboundAddPlayerPacket(FriendlyByteBuf friendlyByteBuf) {

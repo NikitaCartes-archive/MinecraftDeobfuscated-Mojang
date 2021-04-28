@@ -100,7 +100,7 @@ extends AbstractWidget {
         ItemStack itemStack = list.get(this.currentIndex).getResultItem();
         int m = 4;
         if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
-            minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1);
+            minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1, 0, 10);
             --m;
         }
         minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);

@@ -98,11 +98,11 @@ extends Block {
     }
 
     @Override
-    public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
         if (!level.isClientSide && level.random.nextFloat() < f - 0.5f && entity instanceof LivingEntity && (entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && entity.getBbWidth() * entity.getBbWidth() * entity.getBbHeight() > 0.512f) {
-            FarmBlock.turnToDirt(level.getBlockState(blockPos), level, blockPos);
+            FarmBlock.turnToDirt(blockState, level, blockPos);
         }
-        super.fallOn(level, blockPos, entity, f);
+        super.fallOn(level, blockState, blockPos, entity, f);
     }
 
     public static void turnToDirt(BlockState blockState, Level level, BlockPos blockPos) {

@@ -51,7 +51,8 @@ extends Entity {
         Validate.notNull(direction);
         Validate.isTrue(direction.getAxis().isHorizontal());
         this.direction = direction;
-        this.yRotO = this.yRot = (float)(this.direction.get2DDataValue() * 90);
+        this.setYRot(this.direction.get2DDataValue() * 90);
+        this.yRotO = this.getYRot();
         this.recalculateBoundingBox();
     }
 
@@ -234,7 +235,7 @@ extends Entity {
                 }
             }
         }
-        float f = Mth.wrapDegrees(this.yRot);
+        float f = Mth.wrapDegrees(this.getYRot());
         switch (rotation) {
             case CLOCKWISE_180: {
                 return f + 180.0f;

@@ -54,7 +54,7 @@ extends JumpGoal {
     @Override
     public boolean canContinueToUse() {
         double d = this.dolphin.getDeltaMovement().y;
-        return !(d * d < (double)0.03f && this.dolphin.xRot != 0.0f && Math.abs(this.dolphin.xRot) < 10.0f && this.dolphin.isInWater() || this.dolphin.isOnGround());
+        return !(d * d < (double)0.03f && this.dolphin.getXRot() != 0.0f && Math.abs(this.dolphin.getXRot()) < 10.0f && this.dolphin.isInWater() || this.dolphin.isOnGround());
     }
 
     @Override
@@ -71,7 +71,7 @@ extends JumpGoal {
 
     @Override
     public void stop() {
-        this.dolphin.xRot = 0.0f;
+        this.dolphin.setXRot(0.0f);
     }
 
     @Override
@@ -85,12 +85,12 @@ extends JumpGoal {
             this.dolphin.playSound(SoundEvents.DOLPHIN_JUMP, 1.0f, 1.0f);
         }
         Vec3 vec3 = this.dolphin.getDeltaMovement();
-        if (vec3.y * vec3.y < (double)0.03f && this.dolphin.xRot != 0.0f) {
-            this.dolphin.xRot = Mth.rotlerp(this.dolphin.xRot, 0.0f, 0.2f);
+        if (vec3.y * vec3.y < (double)0.03f && this.dolphin.getXRot() != 0.0f) {
+            this.dolphin.setXRot(Mth.rotlerp(this.dolphin.getXRot(), 0.0f, 0.2f));
         } else {
             double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
             double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;
-            this.dolphin.xRot = (float)e;
+            this.dolphin.setXRot((float)e);
         }
     }
 }

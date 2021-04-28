@@ -211,7 +211,7 @@ implements RangedAttackMob {
         }
         ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
         thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
-        thrownPotion.xRot -= -20.0f;
+        thrownPotion.setXRot(thrownPotion.getXRot() - -20.0f);
         thrownPotion.shoot(d, e + (double)(h * 0.2f), g, 0.75f, 8.0f);
         if (!this.isSilent()) {
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);

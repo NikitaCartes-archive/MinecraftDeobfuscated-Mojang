@@ -240,7 +240,7 @@ extends Animal {
             ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
             if (!itemStack.isEmpty()) {
                 for (int i = 0; i < 8; ++i) {
-                    Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0).xRot(-this.xRot * ((float)Math.PI / 180)).yRot(-this.yRot * ((float)Math.PI / 180));
+                    Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0).xRot(-this.getXRot() * ((float)Math.PI / 180)).yRot(-this.getYRot() * ((float)Math.PI / 180));
                     this.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, itemStack), this.getX() + this.getLookAngle().x / 2.0, this.getY(), this.getZ() + this.getLookAngle().z / 2.0, vec3.x, vec3.y + 0.05, vec3.z);
                 }
             }
@@ -741,7 +741,7 @@ extends Animal {
                 return false;
             }
             double d = Fox.this.getDeltaMovement().y;
-            return !(d * d < (double)0.05f && Math.abs(Fox.this.xRot) < 15.0f && Fox.this.onGround || Fox.this.isFaceplanted());
+            return !(d * d < (double)0.05f && Math.abs(Fox.this.getXRot()) < 15.0f && Fox.this.onGround || Fox.this.isFaceplanted());
         }
 
         @Override
@@ -778,18 +778,18 @@ extends Animal {
             }
             if (!Fox.this.isFaceplanted()) {
                 Vec3 vec3 = Fox.this.getDeltaMovement();
-                if (vec3.y * vec3.y < (double)0.03f && Fox.this.xRot != 0.0f) {
-                    Fox.this.xRot = Mth.rotlerp(Fox.this.xRot, 0.0f, 0.2f);
+                if (vec3.y * vec3.y < (double)0.03f && Fox.this.getXRot() != 0.0f) {
+                    Fox.this.setXRot(Mth.rotlerp(Fox.this.getXRot(), 0.0f, 0.2f));
                 } else {
                     double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
                     double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;
-                    Fox.this.xRot = (float)e;
+                    Fox.this.setXRot((float)e);
                 }
             }
             if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0f) {
                 Fox.this.doHurtTarget(livingEntity);
-            } else if (Fox.this.xRot > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
-                Fox.this.xRot = 60.0f;
+            } else if (Fox.this.getXRot() > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
+                Fox.this.setXRot(60.0f);
                 Fox.this.setTarget(null);
                 Fox.this.setFaceplanted(true);
             }

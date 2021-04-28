@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Environment(value=EnvType.CLIENT)
@@ -28,8 +29,8 @@ extends EntityRenderer<T> {
     @Override
     public void render(T abstractArrow, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot)));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, ((AbstractArrow)abstractArrow).yRotO, ((Entity)abstractArrow).getYRot()) - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, ((AbstractArrow)abstractArrow).xRotO, ((Entity)abstractArrow).getXRot())));
         boolean j = false;
         float h = 0.0f;
         float k = 0.5f;

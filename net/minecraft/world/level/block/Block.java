@@ -321,7 +321,7 @@ implements ItemLike {
     public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
     }
 
-    public void stepOn(Level level, BlockPos blockPos, Entity entity) {
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
     }
 
     @Nullable
@@ -353,7 +353,7 @@ implements ItemLike {
         return this.descriptionId;
     }
 
-    public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+    public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
         entity.causeFallDamage(f, 1.0f, DamageSource.FALL);
     }
 

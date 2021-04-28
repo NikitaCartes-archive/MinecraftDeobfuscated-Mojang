@@ -61,7 +61,7 @@ extends ArmorStandArmorModel {
     @Override
     public void prepareMobModel(ArmorStand armorStand, float f, float g, float h) {
         this.basePlate.xRot = 0.0f;
-        this.basePlate.yRot = (float)Math.PI / 180 * -Mth.rotLerp(h, armorStand.yRotO, armorStand.yRot);
+        this.basePlate.yRot = (float)Math.PI / 180 * -Mth.rotLerp(h, armorStand.yRotO, armorStand.getYRot());
         this.basePlate.zRot = 0.0f;
     }
 

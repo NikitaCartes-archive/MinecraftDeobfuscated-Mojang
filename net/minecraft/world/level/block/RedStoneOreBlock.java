@@ -42,9 +42,9 @@ extends Block {
     }
 
     @Override
-    public void stepOn(Level level, BlockPos blockPos, Entity entity) {
-        RedStoneOreBlock.interact(level.getBlockState(blockPos), level, blockPos);
-        super.stepOn(level, blockPos, entity);
+    public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+        RedStoneOreBlock.interact(blockState, level, blockPos);
+        super.stepOn(level, blockPos, blockState, entity);
     }
 
     @Override
