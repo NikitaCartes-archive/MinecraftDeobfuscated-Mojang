@@ -402,12 +402,12 @@ public class Boat extends Entity {
 			double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
 			double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
 			double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-			double g = Mth.wrapDegrees(this.lerpYRot - (double)this.yRot);
-			this.yRot = (float)((double)this.yRot + g / (double)this.lerpSteps);
-			this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+			double g = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
+			this.setYRot(this.getYRot() + (float)g / (float)this.lerpSteps);
+			this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
 			this.lerpSteps--;
 			this.setPos(d, e, f);
-			this.setRot(this.yRot, this.xRot);
+			this.setRot(this.getYRot(), this.getXRot());
 		}
 	}
 
@@ -628,7 +628,7 @@ public class Boat extends Entity {
 				f += 0.005F;
 			}
 
-			this.yRot = this.yRot + this.deltaRotation;
+			this.setYRot(this.getYRot() + this.deltaRotation);
 			if (this.inputUp) {
 				f += 0.04F;
 			}
@@ -639,7 +639,7 @@ public class Boat extends Entity {
 
 			this.setDeltaMovement(
 				this.getDeltaMovement()
-					.add((double)(Mth.sin(-this.yRot * (float) (Math.PI / 180.0)) * f), 0.0, (double)(Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * f))
+					.add((double)(Mth.sin(-this.getYRot() * (float) (Math.PI / 180.0)) * f), 0.0, (double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * f))
 			);
 			this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
 		}
@@ -663,9 +663,9 @@ public class Boat extends Entity {
 				}
 			}
 
-			Vec3 vec3 = new Vec3((double)f, 0.0, 0.0).yRot(-this.yRot * (float) (Math.PI / 180.0) - (float) (Math.PI / 2));
+			Vec3 vec3 = new Vec3((double)f, 0.0, 0.0).yRot(-this.getYRot() * (float) (Math.PI / 180.0) - (float) (Math.PI / 2));
 			entity.setPos(this.getX() + vec3.x, this.getY() + (double)g, this.getZ() + vec3.z);
-			entity.yRot = entity.yRot + this.deltaRotation;
+			entity.setYRot(entity.getYRot() + this.deltaRotation);
 			entity.setYHeadRot(entity.getYHeadRot() + this.deltaRotation);
 			this.clampRotation(entity);
 			if (entity instanceof Animal && this.getPassengers().size() > 1) {
@@ -678,7 +678,7 @@ public class Boat extends Entity {
 
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-		Vec3 vec3 = getCollisionHorizontalEscapeVector((double)(this.getBbWidth() * Mth.SQRT_OF_TWO), (double)livingEntity.getBbWidth(), livingEntity.yRot);
+		Vec3 vec3 = getCollisionHorizontalEscapeVector((double)(this.getBbWidth() * Mth.SQRT_OF_TWO), (double)livingEntity.getBbWidth(), livingEntity.getYRot());
 		double d = this.getX() + vec3.x;
 		double e = this.getZ() + vec3.z;
 		BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e);
@@ -709,12 +709,12 @@ public class Boat extends Entity {
 	}
 
 	protected void clampRotation(Entity entity) {
-		entity.setYBodyRot(this.yRot);
-		float f = Mth.wrapDegrees(entity.yRot - this.yRot);
+		entity.setYBodyRot(this.getYRot());
+		float f = Mth.wrapDegrees(entity.getYRot() - this.getYRot());
 		float g = Mth.clamp(f, -105.0F, 105.0F);
 		entity.yRotO += g - f;
-		entity.yRot += g - f;
-		entity.setYHeadRot(entity.yRot);
+		entity.setYRot(entity.getYRot() + g - f);
+		entity.setYHeadRot(entity.getYRot());
 	}
 
 	@Override

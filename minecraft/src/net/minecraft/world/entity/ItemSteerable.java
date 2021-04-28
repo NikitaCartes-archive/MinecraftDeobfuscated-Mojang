@@ -17,12 +17,12 @@ public interface ItemSteerable {
 		} else {
 			Entity entity = mob.getFirstPassenger();
 			if (mob.isVehicle() && mob.canBeControlledByRider() && entity instanceof Player) {
-				mob.yRot = entity.yRot;
-				mob.yRotO = mob.yRot;
-				mob.xRot = entity.xRot * 0.5F;
-				mob.setRot(mob.yRot, mob.xRot);
-				mob.yBodyRot = mob.yRot;
-				mob.yHeadRot = mob.yRot;
+				mob.setYRot(entity.getYRot());
+				mob.yRotO = mob.getYRot();
+				mob.setXRot(entity.getXRot() * 0.5F);
+				mob.setRot(mob.getYRot(), mob.getXRot());
+				mob.yBodyRot = mob.getYRot();
+				mob.yHeadRot = mob.getYRot();
 				mob.maxUpStep = 1.0F;
 				mob.flyingSpeed = mob.getSpeed() * 0.1F;
 				if (itemBasedSteering.boosting && itemBasedSteering.boostTime++ > itemBasedSteering.boostTimeTotal) {

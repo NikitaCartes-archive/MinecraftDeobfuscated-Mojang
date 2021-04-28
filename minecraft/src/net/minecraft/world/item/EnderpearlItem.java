@@ -31,7 +31,7 @@ public class EnderpearlItem extends Item {
 		if (!level.isClientSide) {
 			ThrownEnderpearl thrownEnderpearl = new ThrownEnderpearl(level, player);
 			thrownEnderpearl.setItem(itemStack);
-			thrownEnderpearl.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 1.5F, 1.0F);
+			thrownEnderpearl.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
 			level.addFreshEntity(thrownEnderpearl);
 		}
 

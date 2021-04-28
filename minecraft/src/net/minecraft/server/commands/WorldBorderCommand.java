@@ -1,6 +1,7 @@
 package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -22,10 +23,10 @@ public class WorldBorderCommand {
 		new TranslatableComponent("commands.worldborder.set.failed.nochange")
 	);
 	private static final SimpleCommandExceptionType ERROR_TOO_SMALL = new SimpleCommandExceptionType(
-		new TranslatableComponent("commands.worldborder.set.failed.small.")
+		new TranslatableComponent("commands.worldborder.set.failed.small")
 	);
 	private static final SimpleCommandExceptionType ERROR_TOO_BIG = new SimpleCommandExceptionType(
-		new TranslatableComponent("commands.worldborder.set.failed.big.")
+		new TranslatableComponent("commands.worldborder.set.failed.big", 5.999997E7F)
 	);
 	private static final SimpleCommandExceptionType ERROR_SAME_WARNING_TIME = new SimpleCommandExceptionType(
 		new TranslatableComponent("commands.worldborder.warning.time.failed")
@@ -47,11 +48,11 @@ public class WorldBorderCommand {
 				.then(
 					Commands.literal("add")
 						.then(
-							Commands.argument("distance", FloatArgumentType.floatArg(-6.0E7F, 6.0E7F))
+							Commands.argument("distance", DoubleArgumentType.doubleArg(-5.999997E7F, 5.999997E7F))
 								.executes(
 									commandContext -> setSize(
 											commandContext.getSource(),
-											commandContext.getSource().getLevel().getWorldBorder().getSize() + (double)FloatArgumentType.getFloat(commandContext, "distance"),
+											commandContext.getSource().getLevel().getWorldBorder().getSize() + DoubleArgumentType.getDouble(commandContext, "distance"),
 											0L
 										)
 								)
@@ -60,7 +61,7 @@ public class WorldBorderCommand {
 										.executes(
 											commandContext -> setSize(
 													commandContext.getSource(),
-													commandContext.getSource().getLevel().getWorldBorder().getSize() + (double)FloatArgumentType.getFloat(commandContext, "distance"),
+													commandContext.getSource().getLevel().getWorldBorder().getSize() + DoubleArgumentType.getDouble(commandContext, "distance"),
 													commandContext.getSource().getLevel().getWorldBorder().getLerpRemainingTime()
 														+ (long)IntegerArgumentType.getInteger(commandContext, "time") * 1000L
 												)
@@ -71,14 +72,14 @@ public class WorldBorderCommand {
 				.then(
 					Commands.literal("set")
 						.then(
-							Commands.argument("distance", FloatArgumentType.floatArg(-6.0E7F, 6.0E7F))
-								.executes(commandContext -> setSize(commandContext.getSource(), (double)FloatArgumentType.getFloat(commandContext, "distance"), 0L))
+							Commands.argument("distance", DoubleArgumentType.doubleArg(-5.999997E7F, 5.999997E7F))
+								.executes(commandContext -> setSize(commandContext.getSource(), DoubleArgumentType.getDouble(commandContext, "distance"), 0L))
 								.then(
 									Commands.argument("time", IntegerArgumentType.integer(0))
 										.executes(
 											commandContext -> setSize(
 													commandContext.getSource(),
-													(double)FloatArgumentType.getFloat(commandContext, "distance"),
+													DoubleArgumentType.getDouble(commandContext, "distance"),
 													(long)IntegerArgumentType.getInteger(commandContext, "time") * 1000L
 												)
 										)
@@ -200,7 +201,7 @@ public class WorldBorderCommand {
 			throw ERROR_SAME_SIZE.create();
 		} else if (d < 1.0) {
 			throw ERROR_TOO_SMALL.create();
-		} else if (d > 6.0E7) {
+		} else if (d > 5.999997E7F) {
 			throw ERROR_TOO_BIG.create();
 		} else {
 			if (l > 0L) {

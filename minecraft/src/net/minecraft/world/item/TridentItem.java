@@ -66,7 +66,7 @@ public class TridentItem extends Item implements Vanishable {
 						itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(livingEntity.getUsedItemHand()));
 						if (k == 0) {
 							ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
-							thrownTrident.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 2.5F + (float)k * 0.5F, 1.0F);
+							thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F + (float)k * 0.5F, 1.0F);
 							if (player.getAbilities().instabuild) {
 								thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 							}
@@ -81,8 +81,8 @@ public class TridentItem extends Item implements Vanishable {
 
 					player.awardStat(Stats.ITEM_USED.get(this));
 					if (k > 0) {
-						float f = player.yRot;
-						float g = player.xRot;
+						float f = player.getYRot();
+						float g = player.getXRot();
 						float h = -Mth.sin(f * (float) (Math.PI / 180.0)) * Mth.cos(g * (float) (Math.PI / 180.0));
 						float l = -Mth.sin(g * (float) (Math.PI / 180.0));
 						float m = Mth.cos(f * (float) (Math.PI / 180.0)) * Mth.cos(g * (float) (Math.PI / 180.0));

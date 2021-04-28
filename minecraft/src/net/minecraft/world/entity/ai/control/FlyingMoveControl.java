@@ -30,7 +30,7 @@ public class FlyingMoveControl extends MoveControl {
 			}
 
 			float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-			this.mob.yRot = this.rotlerp(this.mob.yRot, h, 90.0F);
+			this.mob.setYRot(this.rotlerp(this.mob.getYRot(), h, 90.0F));
 			float i;
 			if (this.mob.isOnGround()) {
 				i = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
@@ -41,7 +41,7 @@ public class FlyingMoveControl extends MoveControl {
 			this.mob.setSpeed(i);
 			double j = (double)Mth.sqrt(d * d + f * f);
 			float k = (float)(-(Mth.atan2(e, j) * 180.0F / (float)Math.PI));
-			this.mob.xRot = this.rotlerp(this.mob.xRot, k, (float)this.maxTurn);
+			this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, (float)this.maxTurn));
 			this.mob.setYya(e > 0.0 ? i : -i);
 		} else {
 			if (!this.hoversInPlace) {

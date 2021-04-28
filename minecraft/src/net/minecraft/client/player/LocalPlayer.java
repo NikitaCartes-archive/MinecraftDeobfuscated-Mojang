@@ -164,9 +164,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			if (entity instanceof Boat) {
-				this.yRotO = entity.yRot;
-				this.yRot = entity.yRot;
-				this.setYHeadRot(entity.yRot);
+				this.yRotO = entity.getYRot();
+				this.setYRot(entity.getYRot());
+				this.setYHeadRot(entity.getYRot());
 			}
 
 			return true;
@@ -181,12 +181,12 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public float getViewXRot(float f) {
-		return this.xRot;
+		return this.getXRot();
 	}
 
 	@Override
 	public float getViewYRot(float f) {
-		return this.isPassenger() ? super.getViewYRot(f) : this.yRot;
+		return this.isPassenger() ? super.getViewYRot(f) : this.getYRot();
 	}
 
 	@Override
@@ -194,7 +194,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
 			super.tick();
 			if (this.isPassenger()) {
-				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
+				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround));
 				this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
 				Entity entity = this.getRootVehicle();
 				if (entity != this && entity.isControlledByLocalInstance()) {
@@ -243,21 +243,21 @@ public class LocalPlayer extends AbstractClientPlayer {
 			double d = this.getX() - this.xLast;
 			double e = this.getY() - this.yLast1;
 			double f = this.getZ() - this.zLast;
-			double g = (double)(this.yRot - this.yRotLast);
-			double h = (double)(this.xRot - this.xRotLast);
+			double g = (double)(this.getYRot() - this.yRotLast);
+			double h = (double)(this.getXRot() - this.xRotLast);
 			this.positionReminder++;
 			boolean bl3 = d * d + e * e + f * f > 9.0E-4 || this.positionReminder >= 20;
 			boolean bl4 = g != 0.0 || h != 0.0;
 			if (this.isPassenger()) {
 				Vec3 vec3 = this.getDeltaMovement();
-				this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0, vec3.z, this.yRot, this.xRot, this.onGround));
+				this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0, vec3.z, this.getYRot(), this.getXRot(), this.onGround));
 				bl3 = false;
 			} else if (bl3 && bl4) {
-				this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot, this.onGround));
+				this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot(), this.onGround));
 			} else if (bl3) {
 				this.connection.send(new ServerboundMovePlayerPacket.Pos(this.getX(), this.getY(), this.getZ(), this.onGround));
 			} else if (bl4) {
-				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
+				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround));
 			} else if (this.lastOnGround != this.onGround) {
 				this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(this.onGround));
 			}
@@ -270,8 +270,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			if (bl4) {
-				this.yRotLast = this.yRot;
-				this.xRotLast = this.xRot;
+				this.yRotLast = this.getYRot();
+				this.xRotLast = this.getXRot();
 			}
 
 			this.lastOnGround = this.onGround;
@@ -621,8 +621,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.jumping = this.input.jumping;
 			this.yBobO = this.yBob;
 			this.xBobO = this.xBob;
-			this.xBob = (float)((double)this.xBob + (double)(this.xRot - this.xBob) * 0.5);
-			this.yBob = (float)((double)this.yBob + (double)(this.yRot - this.yBob) * 0.5);
+			this.xBob = (float)((double)this.xBob + (double)(this.getXRot() - this.xBob) * 0.5);
+			this.yBob = (float)((double)this.yBob + (double)(this.getYRot() - this.yBob) * 0.5);
 		}
 	}
 
@@ -641,7 +641,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			this.setDeltaMovement(Vec3.ZERO);
-			this.xRot = 0.0F;
+			this.setXRot(0.0F);
 		}
 
 		this.setHealth(this.getMaxHealth());
@@ -905,8 +905,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 				Vec2 vec2 = this.input.getMoveVector();
 				float j = h * vec2.x;
 				float k = h * vec2.y;
-				float l = Mth.sin(this.yRot * (float) (Math.PI / 180.0));
-				float m = Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+				float l = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+				float m = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
 				vec33 = new Vec3((double)(j * m - k * l), vec33.y, (double)(k * m + j * l));
 				i = (float)vec33.lengthSqr();
 				if (i <= 0.001F) {
@@ -1054,8 +1054,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		if (this.minecraft.options.getCameraType().isFirstPerson()) {
-			float g = Mth.lerp(f * 0.5F, this.yRot, this.yRotO) * (float) (Math.PI / 180.0);
-			float h = Mth.lerp(f * 0.5F, this.xRot, this.xRotO) * (float) (Math.PI / 180.0);
+			float g = Mth.lerp(f * 0.5F, this.getYRot(), this.yRotO) * (float) (Math.PI / 180.0);
+			float h = Mth.lerp(f * 0.5F, this.getXRot(), this.xRotO) * (float) (Math.PI / 180.0);
 			double d = this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0;
 			Vec3 vec3 = new Vec3(0.39 * d, -0.6, 0.3);
 			return vec3.xRot(-h).yRot(-g).add(this.getEyePosition(f));

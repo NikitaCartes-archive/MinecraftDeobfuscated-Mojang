@@ -28,7 +28,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		EntityType<? extends AbstractHurtingProjectile> entityType, double d, double e, double f, double g, double h, double i, Level level
 	) {
 		this(entityType, level);
-		this.moveTo(d, e, f, this.yRot, this.xRot);
+		this.moveTo(d, e, f, this.getYRot(), this.getXRot());
 		this.reapplyPosition();
 		double j = (double)Mth.sqrt(g * g + h * h + i * i);
 		if (j != 0.0) {
@@ -43,7 +43,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	) {
 		this(entityType, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), d, e, f, level);
 		this.setOwner(livingEntity);
-		this.setRot(livingEntity.yRot, livingEntity.xRot);
+		this.setRot(livingEntity.getYRot(), livingEntity.getXRot());
 	}
 
 	@Override
@@ -181,8 +181,8 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			this.getX(),
 			this.getY(),
 			this.getZ(),
-			this.xRot,
-			this.yRot,
+			this.getXRot(),
+			this.getYRot(),
 			this.getType(),
 			i,
 			new Vec3(this.xPower, this.yPower, this.zPower)

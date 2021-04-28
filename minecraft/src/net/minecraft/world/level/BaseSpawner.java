@@ -122,7 +122,7 @@ public abstract class BaseSpawner {
 					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))
 						&& SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.SPAWNER, new BlockPos(d, e, f), serverLevel.getRandom())) {
 						Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, entityx -> {
-							entityx.moveTo(d, e, f, entityx.yRot, entityx.xRot);
+							entityx.moveTo(d, e, f, entityx.getYRot(), entityx.getXRot());
 							return entityx;
 						});
 						if (entity == null) {

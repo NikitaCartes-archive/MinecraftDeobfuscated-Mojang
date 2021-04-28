@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -64,8 +65,8 @@ public class ServerEntity {
 		this.updateInterval = i;
 		this.trackDelta = bl;
 		this.updateSentPos();
-		this.yRotp = Mth.floor(entity.yRot * 256.0F / 360.0F);
-		this.xRotp = Mth.floor(entity.xRot * 256.0F / 360.0F);
+		this.yRotp = Mth.floor(entity.getYRot() * 256.0F / 360.0F);
+		this.xRotp = Mth.floor(entity.getXRot() * 256.0F / 360.0F);
 		this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0F / 360.0F);
 		this.wasOnGround = entity.isOnGround();
 	}
@@ -99,8 +100,8 @@ public class ServerEntity {
 
 		if (this.tickCount % this.updateInterval == 0 || this.entity.hasImpulse || this.entity.getEntityData().isDirty()) {
 			if (this.entity.isPassenger()) {
-				int i = Mth.floor(this.entity.yRot * 256.0F / 360.0F);
-				int j = Mth.floor(this.entity.xRot * 256.0F / 360.0F);
+				int i = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
+				int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
 				boolean bl = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
 				if (bl) {
 					this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround()));
@@ -113,8 +114,8 @@ public class ServerEntity {
 				this.wasRiding = true;
 			} else {
 				this.teleportDelay++;
-				int i = Mth.floor(this.entity.yRot * 256.0F / 360.0F);
-				int j = Mth.floor(this.entity.xRot * 256.0F / 360.0F);
+				int i = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
+				int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
 				Vec3 vec3 = this.entity.position().subtract(ClientboundMoveEntityPacket.packetToEntity(this.xp, this.yp, this.zp));
 				boolean bl2 = vec3.lengthSqr() >= 7.6293945E-6F;
 				Packet<?> packet2 = null;
@@ -186,13 +187,12 @@ public class ServerEntity {
 
 	public void removePairing(ServerPlayer serverPlayer) {
 		this.entity.stopSeenByPlayer(serverPlayer);
-		serverPlayer.sendRemoveEntity(this.entity);
+		serverPlayer.connection.send(new ClientboundRemoveEntityPacket(this.entity.getId()));
 	}
 
 	public void addPairing(ServerPlayer serverPlayer) {
 		this.sendPairingData(serverPlayer.connection::send);
 		this.entity.startSeenByPlayer(serverPlayer);
-		serverPlayer.cancelRemoveEntity(this.entity);
 	}
 
 	public void sendPairingData(Consumer<Packet<?>> consumer) {

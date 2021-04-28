@@ -362,7 +362,7 @@ public class Panda extends Animal {
 		}
 
 		if (this.isSitting()) {
-			this.xRot = 0.0F;
+			this.setXRot(0.0F);
 		}
 
 		this.updateSitAmount();
@@ -408,8 +408,8 @@ public class Panda extends Animal {
 
 			for (int i = 0; i < 6; i++) {
 				Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, ((double)this.random.nextFloat() - 0.5) * 0.1);
-				vec3 = vec3.xRot(-this.xRot * (float) (Math.PI / 180.0));
-				vec3 = vec3.yRot(-this.yRot * (float) (Math.PI / 180.0));
+				vec3 = vec3.xRot(-this.getXRot() * (float) (Math.PI / 180.0));
+				vec3 = vec3.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
 				double d = (double)(-this.random.nextFloat()) * 0.6 - 0.3;
 				Vec3 vec32 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.8, d, 1.0 + ((double)this.random.nextFloat() - 0.5) * 0.4);
 				vec32 = vec32.yRot(-this.yBodyRot * (float) (Math.PI / 180.0));
@@ -469,7 +469,7 @@ public class Panda extends Animal {
 			if (!this.level.isClientSide) {
 				Vec3 vec3 = this.getDeltaMovement();
 				if (this.rollCounter == 1) {
-					float f = this.yRot * (float) (Math.PI / 180.0);
+					float f = this.getYRot() * (float) (Math.PI / 180.0);
 					float g = this.isBaby() ? 0.1F : 0.2F;
 					this.rollDelta = new Vec3(vec3.x + (double)(-Mth.sin(f) * g), 0.0, vec3.z + (double)(Mth.cos(f) * g));
 					this.setDeltaMovement(this.rollDelta.add(0.0, 0.27, 0.0));
@@ -1008,7 +1008,7 @@ public class Panda extends Animal {
 				if (!this.panda.canPerformAction()) {
 					return false;
 				} else {
-					float f = this.panda.yRot * (float) (Math.PI / 180.0);
+					float f = this.panda.getYRot() * (float) (Math.PI / 180.0);
 					int i = 0;
 					int j = 0;
 					float g = -Mth.sin(f);

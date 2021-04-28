@@ -32,7 +32,8 @@ public final class NoiseGeneratorSettings {
 					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(NoiseGeneratorSettings::isAquifersEnabled),
 					Codec.BOOL.fieldOf("noise_caves_enabled").forGetter(NoiseGeneratorSettings::isNoiseCavesEnabled),
 					Codec.BOOL.fieldOf("deepslate_enabled").forGetter(NoiseGeneratorSettings::isDeepslateEnabled),
-					Codec.BOOL.fieldOf("ore_veins_enabled").forGetter(NoiseGeneratorSettings::isOreVeinsEnabled)
+					Codec.BOOL.fieldOf("ore_veins_enabled").forGetter(NoiseGeneratorSettings::isOreVeinsEnabled),
+					Codec.BOOL.fieldOf("noodle_caves_enabled").forGetter(NoiseGeneratorSettings::isOreVeinsEnabled)
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
 	);
@@ -50,6 +51,7 @@ public final class NoiseGeneratorSettings {
 	private final boolean noiseCavesEnabled;
 	private final boolean deepslateEnabled;
 	private final boolean oreVeinsEnabled;
+	private final boolean noodleCavesEnabled;
 	public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(
 		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld")
 	);
@@ -77,7 +79,8 @@ public final class NoiseGeneratorSettings {
 		boolean bl2,
 		boolean bl3,
 		boolean bl4,
-		boolean bl5
+		boolean bl5,
+		boolean bl6
 	) {
 		this.structureSettings = structureSettings;
 		this.noiseSettings = noiseSettings;
@@ -92,6 +95,7 @@ public final class NoiseGeneratorSettings {
 		this.noiseCavesEnabled = bl3;
 		this.deepslateEnabled = bl4;
 		this.oreVeinsEnabled = bl5;
+		this.noodleCavesEnabled = bl6;
 	}
 
 	public StructureSettings structureSettings() {
@@ -147,6 +151,10 @@ public final class NoiseGeneratorSettings {
 		return this.oreVeinsEnabled;
 	}
 
+	protected boolean isNoodleCavesEnabled() {
+		return this.noodleCavesEnabled;
+	}
+
 	public boolean stable(ResourceKey<NoiseGeneratorSettings> resourceKey) {
 		return Objects.equals(this, BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(resourceKey));
 	}
@@ -161,13 +169,13 @@ public final class NoiseGeneratorSettings {
 	}
 
 	private static NoiseGeneratorSettings endLikePreset(
-		StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2, boolean bl3
+		StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2
 	) {
 		return new NoiseGeneratorSettings(
 			structureSettings,
 			NoiseSettings.create(
-				bl3 ? 0 : 0,
-				bl3 ? 256 : 128,
+				0,
+				128,
 				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
 				new NoiseSlideSettings(-3000, 64, -46),
 				new NoiseSlideSettings(-30, 7, 1),
@@ -184,9 +192,10 @@ public final class NoiseGeneratorSettings {
 			blockState2,
 			Integer.MIN_VALUE,
 			Integer.MIN_VALUE,
-			bl3 ? 0 : 0,
-			bl3 ? 0 : 0,
+			0,
+			0,
 			bl,
+			false,
 			false,
 			false,
 			false,
@@ -194,14 +203,14 @@ public final class NoiseGeneratorSettings {
 		);
 	}
 
-	private static NoiseGeneratorSettings netherLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, boolean bl) {
+	private static NoiseGeneratorSettings netherLikePreset(StructureSettings structureSettings, BlockState blockState, BlockState blockState2) {
 		Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(StructureSettings.DEFAULTS);
 		map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
 		return new NoiseGeneratorSettings(
 			new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map),
 			NoiseSettings.create(
-				bl ? 0 : 0,
-				bl ? 256 : 128,
+				0,
+				128,
 				new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0),
 				new NoiseSlideSettings(120, 3, 0),
 				new NoiseSlideSettings(320, 4, -1),
@@ -219,7 +228,8 @@ public final class NoiseGeneratorSettings {
 			0,
 			0,
 			32,
-			bl ? 0 : 0,
+			0,
+			false,
 			false,
 			false,
 			false,
@@ -257,15 +267,16 @@ public final class NoiseGeneratorSettings {
 			false,
 			false,
 			false,
+			false,
 			false
 		);
 	}
 
 	static {
 		register(AMPLIFIED, overworld(new StructureSettings(true), true));
-		register(NETHER, netherLikePreset(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false));
-		register(END, endLikePreset(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), true, true, false));
-		register(CAVES, netherLikePreset(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), true));
-		register(FLOATING_ISLANDS, endLikePreset(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), false, false, true));
+		register(NETHER, netherLikePreset(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState()));
+		register(END, endLikePreset(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), true, true));
+		register(CAVES, netherLikePreset(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState()));
+		register(FLOATING_ISLANDS, endLikePreset(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), false, false));
 	}
 }

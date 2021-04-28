@@ -30,7 +30,7 @@ public class SnowballItem extends Item {
 		if (!level.isClientSide) {
 			Snowball snowball = new Snowball(level, player);
 			snowball.setItem(itemStack);
-			snowball.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 1.5F, 1.0F);
+			snowball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
 			level.addFreshEntity(snowball);
 		}
 

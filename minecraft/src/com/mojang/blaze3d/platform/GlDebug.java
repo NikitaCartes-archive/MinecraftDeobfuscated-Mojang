@@ -1,8 +1,12 @@
 package com.mojang.blaze3d.platform;
 
+import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
+import java.util.Queue;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
@@ -18,8 +22,13 @@ import org.lwjgl.opengl.KHRDebug;
 @Environment(EnvType.CLIENT)
 public class GlDebug {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int CIRCULAR_LOG_SIZE = 10;
+	private static final Queue<GlDebug.LogEntry> MESSAGE_BUFFER = EvictingQueue.create(10);
+	@Nullable
+	private static volatile GlDebug.LogEntry lastEntry;
 	private static final List<Integer> DEBUG_LEVELS = ImmutableList.of(37190, 37191, 37192, 33387);
 	private static final List<Integer> DEBUG_LEVELS_ARB = ImmutableList.of(37190, 37191, 37192);
+	private static boolean debugEnabled;
 
 	private static String printUnknownToken(int i) {
 		return "Unknown (0x" + Integer.toHexString(i).toUpperCase() + ")";
@@ -81,14 +90,36 @@ public class GlDebug {
 	}
 
 	private static void printDebugLog(int i, int j, int k, int l, int m, long n, long o) {
-		LOGGER.info(
-			"OpenGL debug message, id={}, source={}, type={}, severity={}, message={}",
-			k,
-			sourceToString(i),
-			typeToString(j),
-			severityToString(l),
-			GLDebugMessageCallback.getMessage(m, n)
-		);
+		String string = GLDebugMessageCallback.getMessage(m, n);
+		GlDebug.LogEntry logEntry;
+		synchronized (MESSAGE_BUFFER) {
+			logEntry = lastEntry;
+			if (logEntry != null && logEntry.isSame(i, j, k, l, string)) {
+				logEntry.count = logEntry.count + 1;
+			} else {
+				logEntry = new GlDebug.LogEntry(i, j, k, l, string);
+				MESSAGE_BUFFER.add(logEntry);
+				lastEntry = logEntry;
+			}
+		}
+
+		LOGGER.info("OpenGL debug message: {}", logEntry);
+	}
+
+	public static List<String> getLastOpenGlDebugMessages() {
+		synchronized (MESSAGE_BUFFER) {
+			List<String> list = Lists.<String>newArrayListWithCapacity(MESSAGE_BUFFER.size());
+
+			for (GlDebug.LogEntry logEntry : MESSAGE_BUFFER) {
+				list.add(logEntry + " x " + logEntry.count);
+			}
+
+			return list;
+		}
+	}
+
+	public static boolean isDebugEnabled() {
+		return debugEnabled;
 	}
 
 	public static void enableDebugCallback(int i, boolean bl) {
@@ -96,6 +127,7 @@ public class GlDebug {
 		if (i > 0) {
 			GLCapabilities gLCapabilities = GL.getCapabilities();
 			if (gLCapabilities.GL_KHR_debug) {
+				debugEnabled = true;
 				GL11.glEnable(37600);
 				if (bl) {
 					GL11.glEnable(33346);
@@ -108,6 +140,7 @@ public class GlDebug {
 
 				KHRDebug.glDebugMessageCallback(GLX.make(GLDebugMessageCallback.create(GlDebug::printDebugLog), DebugMemoryUntracker::untrack), 0L);
 			} else if (gLCapabilities.GL_ARB_debug_output) {
+				debugEnabled = true;
 				if (bl) {
 					GL11.glEnable(33346);
 				}
@@ -119,6 +152,42 @@ public class GlDebug {
 
 				ARBDebugOutput.glDebugMessageCallbackARB(GLX.make(GLDebugMessageARBCallback.create(GlDebug::printDebugLog), DebugMemoryUntracker::untrack), 0L);
 			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class LogEntry {
+		private final int id;
+		private final int source;
+		private final int type;
+		private final int severity;
+		private final String message;
+		private int count = 1;
+
+		private LogEntry(int i, int j, int k, int l, String string) {
+			this.id = k;
+			this.source = i;
+			this.type = j;
+			this.severity = l;
+			this.message = string;
+		}
+
+		private boolean isSame(int i, int j, int k, int l, String string) {
+			return j == this.type && i == this.source && k == this.id && l == this.severity && string.equals(this.message);
+		}
+
+		public String toString() {
+			return "id="
+				+ this.id
+				+ ", source="
+				+ GlDebug.sourceToString(this.source)
+				+ ", type="
+				+ GlDebug.typeToString(this.type)
+				+ ", severity="
+				+ GlDebug.severityToString(this.severity)
+				+ ", message='"
+				+ this.message
+				+ "'";
 		}
 	}
 }

@@ -36,8 +36,9 @@ public class Deadmau5EarsLayer extends RenderLayer<AbstractClientPlayer, PlayerM
 			int m = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0F);
 
 			for (int n = 0; n < 2; n++) {
-				float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
-				float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
+				float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.getYRot())
+					- Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
+				float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.getXRot());
 				poseStack.pushPose();
 				poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
 				poseStack.mulPose(Vector3f.XP.rotationDegrees(p));

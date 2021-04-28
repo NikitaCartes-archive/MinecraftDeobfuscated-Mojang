@@ -233,7 +233,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 							double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
 							double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
 							double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
-							entity.moveTo(e, g, h, entity.yRot, entity.xRot);
+							entity.moveTo(e, g, h, entity.getYRot(), entity.getXRot());
 						}
 
 						level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);

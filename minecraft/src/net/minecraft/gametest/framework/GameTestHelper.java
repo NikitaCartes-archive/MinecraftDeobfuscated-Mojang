@@ -87,7 +87,7 @@ public class GameTestHelper {
 		}
 
 		Vec3 vec32 = this.absoluteVec(vec3);
-		entity.moveTo(vec32.x, vec32.y, vec32.z, entity.yRot, entity.xRot);
+		entity.moveTo(vec32.x, vec32.y, vec32.z, entity.getYRot(), entity.getXRot());
 		serverLevel.addFreshEntity(entity);
 		return entity;
 	}

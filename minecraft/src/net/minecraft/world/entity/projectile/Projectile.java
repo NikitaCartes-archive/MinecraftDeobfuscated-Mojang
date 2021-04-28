@@ -110,10 +110,10 @@ public abstract class Projectile extends Entity {
 			.scale((double)g);
 		this.setDeltaMovement(vec3);
 		float i = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)i) * 180.0F / (float)Math.PI);
-		this.yRotO = this.yRot;
-		this.xRotO = this.xRot;
+		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+		this.setXRot((float)(Mth.atan2(vec3.y, (double)i) * 180.0F / (float)Math.PI));
+		this.yRotO = this.getYRot();
+		this.xRotO = this.getXRot();
 	}
 
 	public void shootFromRotation(Entity entity, float f, float g, float h, float i, float j) {
@@ -151,11 +151,11 @@ public abstract class Projectile extends Entity {
 		this.setDeltaMovement(d, e, f);
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
 			float g = Mth.sqrt(d * d + f * f);
-			this.xRot = (float)(Mth.atan2(e, (double)g) * 180.0F / (float)Math.PI);
-			this.yRot = (float)(Mth.atan2(d, f) * 180.0F / (float)Math.PI);
-			this.xRotO = this.xRot;
-			this.yRotO = this.yRot;
-			this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			this.setXRot((float)(Mth.atan2(e, (double)g) * 180.0F / (float)Math.PI));
+			this.setYRot((float)(Mth.atan2(d, f) * 180.0F / (float)Math.PI));
+			this.xRotO = this.getXRot();
+			this.yRotO = this.getYRot();
+			this.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
 		}
 	}
 
@@ -171,8 +171,8 @@ public abstract class Projectile extends Entity {
 	protected void updateRotation() {
 		Vec3 vec3 = this.getDeltaMovement();
 		float f = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.xRot = lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI));
-		this.yRot = lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+		this.setXRot(lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI)));
+		this.setYRot(lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
 	}
 
 	protected static float lerpRotation(float f, float g) {

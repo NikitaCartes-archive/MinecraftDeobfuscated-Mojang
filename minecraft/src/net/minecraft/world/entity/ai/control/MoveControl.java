@@ -68,8 +68,8 @@ public class MoveControl implements Control {
 			j = g / j;
 			h *= j;
 			i *= j;
-			float k = Mth.sin(this.mob.yRot * (float) (Math.PI / 180.0));
-			float l = Mth.cos(this.mob.yRot * (float) (Math.PI / 180.0));
+			float k = Mth.sin(this.mob.getYRot() * (float) (Math.PI / 180.0));
+			float l = Mth.cos(this.mob.getYRot() * (float) (Math.PI / 180.0));
 			float m = h * l - i * k;
 			float n = i * l + h * k;
 			if (!this.isWalkable(m, n)) {
@@ -93,7 +93,7 @@ public class MoveControl implements Control {
 			}
 
 			float n = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
-			this.mob.yRot = this.rotlerp(this.mob.yRot, n, 90.0F);
+			this.mob.setYRot(this.rotlerp(this.mob.getYRot(), n, 90.0F));
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 			BlockPos blockPos = this.mob.blockPosition();
 			BlockState blockState = this.mob.level.getBlockState(blockPos);

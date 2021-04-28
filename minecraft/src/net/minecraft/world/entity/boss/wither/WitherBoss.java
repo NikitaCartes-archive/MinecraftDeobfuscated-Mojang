@@ -159,7 +159,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 
 		this.setDeltaMovement(vec3);
 		if (getHorizontalDistanceSqr(vec3) > 0.05) {
-			this.yRot = (float)Mth.atan2(vec3.z, vec3.x) * (180.0F / (float)Math.PI) - 90.0F;
+			this.setYRot((float)Mth.atan2(vec3.z, vec3.x) * (180.0F / (float)Math.PI) - 90.0F);
 		}
 
 		super.aiStep();

@@ -287,8 +287,8 @@ public class Item implements ItemLike {
 	}
 
 	protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
-		float f = player.xRot;
-		float g = player.yRot;
+		float f = player.getXRot();
+		float g = player.getYRot();
 		Vec3 vec3 = player.getEyePosition();
 		float h = Mth.cos(-g * (float) (Math.PI / 180.0) - (float) Math.PI);
 		float i = Mth.sin(-g * (float) (Math.PI / 180.0) - (float) Math.PI);

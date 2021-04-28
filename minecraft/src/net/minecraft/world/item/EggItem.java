@@ -23,7 +23,7 @@ public class EggItem extends Item {
 		if (!level.isClientSide) {
 			ThrownEgg thrownEgg = new ThrownEgg(level, player);
 			thrownEgg.setItem(itemStack);
-			thrownEgg.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 1.5F, 1.0F);
+			thrownEgg.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
 			level.addFreshEntity(thrownEgg);
 		}
 

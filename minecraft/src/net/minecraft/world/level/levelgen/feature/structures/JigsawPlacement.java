@@ -317,10 +317,10 @@ public class JigsawPlacement {
 							}
 						}
 					} else {
-						JigsawPlacement.LOGGER.warn("Empty or none existent fallback pool: {}", resourceLocation2);
+						JigsawPlacement.LOGGER.warn("Empty or non-existent fallback pool: {}", resourceLocation2);
 					}
 				} else {
-					JigsawPlacement.LOGGER.warn("Empty or none existent pool: {}", resourceLocation);
+					JigsawPlacement.LOGGER.warn("Empty or non-existent pool: {}", resourceLocation);
 				}
 			}
 		}

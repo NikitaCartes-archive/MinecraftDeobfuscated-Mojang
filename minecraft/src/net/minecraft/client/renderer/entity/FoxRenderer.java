@@ -26,7 +26,7 @@ public class FoxRenderer extends MobRenderer<Fox, FoxModel<Fox>> {
 	protected void setupRotations(Fox fox, PoseStack poseStack, float f, float g, float h) {
 		super.setupRotations(fox, poseStack, f, g, h);
 		if (fox.isPouncing() || fox.isFaceplanted()) {
-			float i = -Mth.lerp(h, fox.xRotO, fox.xRot);
+			float i = -Mth.lerp(h, fox.xRotO, fox.getXRot());
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
 		}
 	}

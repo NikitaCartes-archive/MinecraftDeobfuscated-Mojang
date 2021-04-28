@@ -64,7 +64,7 @@ public class ItemPickupParticle extends Particle {
 				i - vec3.x(),
 				j - vec3.y(),
 				k - vec3.z(),
-				this.itemEntity.yRot,
+				this.itemEntity.getYRot(),
 				f,
 				new PoseStack(),
 				bufferSource,

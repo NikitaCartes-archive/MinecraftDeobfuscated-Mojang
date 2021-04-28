@@ -37,7 +37,7 @@ public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
 	protected void start(ServerLevel serverLevel, E mob, long l) {
 		mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(this.getTarget(mob), true));
 		mob.getMoveControl().strafe(-this.strafeSpeed, 0.0F);
-		mob.yRot = Mth.rotateIfNecessary(mob.yRot, mob.yHeadRot, 0.0F);
+		mob.setYRot(Mth.rotateIfNecessary(mob.getYRot(), mob.yHeadRot, 0.0F));
 	}
 
 	private boolean isTargetVisible(E mob) {

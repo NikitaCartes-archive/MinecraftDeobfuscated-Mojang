@@ -950,23 +950,19 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> ORE_COAL = register(
 		"ore_coal",
 		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
+			.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17))
 			.rangeUniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(127))
 			.squared()
 			.count(20)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COAL_UPPER = register(
 		"prototype_ore_coal_upper",
-		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17))
-			.rangeUniform(VerticalAnchor.absolute(136), VerticalAnchor.top())
-			.squared()
-			.count(30)
+		Feature.ORE.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17)).rangeUniform(VerticalAnchor.absolute(136), VerticalAnchor.top()).squared().count(30)
 	);
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COAL_LOWER = register(
 		"prototype_ore_coal_lower",
 		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COAL_ORE, 17, 0.5F))
+			.configured(new OreConfiguration(ORE_COAL_TARGET_LIST, 17, 0.5F))
 			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192))
 			.squared()
 			.count(20)
@@ -1106,7 +1102,7 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> ORE_COPPER = register(
 		"ore_copper",
 		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10))
+			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 10))
 			.rangeTriangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(96))
 			.squared()
 			.count(6)
@@ -1114,7 +1110,7 @@ public class Features {
 	public static final ConfiguredFeature<?, ?> PROTOTYPE_ORE_COPPER = register(
 		"prototype_ore_copper",
 		Feature.ORE
-			.configured(new OreConfiguration(OreConfiguration.Predicates.NATURAL_STONE, Features.States.COPPER_ORE, 10))
+			.configured(new OreConfiguration(ORE_COPPER_TARGET_LIST, 10))
 			.rangeUniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(63))
 			.squared()
 			.count(10)

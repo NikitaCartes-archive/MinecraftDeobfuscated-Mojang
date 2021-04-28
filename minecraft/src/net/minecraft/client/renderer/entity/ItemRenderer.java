@@ -311,6 +311,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k);
 	}
 
+	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k, int l) {
+		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k, l);
+	}
+
 	public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
 		this.tryRenderGuiItem(null, itemStack, i, j, 0);
 	}
@@ -320,13 +324,18 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(livingEntity, itemStack, i, j, k, 0);
+	}
+
+	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k, int l) {
 		if (!itemStack.isEmpty()) {
-			this.blitOffset += 50.0F;
+			BakedModel bakedModel = this.getModel(itemStack, null, livingEntity, k);
+			this.blitOffset = bakedModel.isGui3d() ? this.blitOffset + 50.0F + (float)l : this.blitOffset + 50.0F;
 
 			try {
-				this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, livingEntity, k));
-			} catch (Throwable var9) {
-				CrashReport crashReport = CrashReport.forThrowable(var9, "Rendering item");
+				this.renderGuiItem(itemStack, i, j, bakedModel);
+			} catch (Throwable var11) {
+				CrashReport crashReport = CrashReport.forThrowable(var11, "Rendering item");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
 				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
 				crashReportCategory.setDetail("Item Damage", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getDamageValue())));
@@ -335,7 +344,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				throw new ReportedException(crashReport);
 			}
 
-			this.blitOffset -= 50.0F;
+			this.blitOffset = bakedModel.isGui3d() ? this.blitOffset - 50.0F - (float)l : this.blitOffset - 50.0F;
 		}
 	}
 

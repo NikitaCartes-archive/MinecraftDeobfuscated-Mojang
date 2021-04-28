@@ -75,7 +75,7 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 		float q = panda.getSitAmount(h);
 		if (q > 0.0F) {
 			poseStack.translate(0.0, (double)(0.8F * q), 0.0);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(q, panda.xRot, panda.xRot + 90.0F)));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(q, panda.getXRot(), panda.getXRot() + 90.0F)));
 			poseStack.translate(0.0, (double)(-1.0F * q), 0.0);
 			if (panda.isScared()) {
 				float r = (float)(Math.cos((double)panda.tickCount * 1.25) * Math.PI * 0.05F);
@@ -90,7 +90,7 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 		if (r > 0.0F) {
 			float k = panda.isBaby() ? 0.5F : 1.3F;
 			poseStack.translate(0.0, (double)(k * r), 0.0);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(r, panda.xRot, panda.xRot + 180.0F)));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(r, panda.getXRot(), panda.getXRot() + 180.0F)));
 		}
 	}
 

@@ -66,6 +66,7 @@ public class RecipeProvider implements DataProvider {
 	private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> shapeBuilders = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder()
 		.put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> buttonBuilder(itemLike, Ingredient.of(itemLike2)))
 		.put(BlockFamily.Variant.CHISELED, (itemLike, itemLike2) -> chiseledBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.CUT, (itemLike, itemLike2) -> cutBuilder(itemLike, Ingredient.of(itemLike2)))
 		.put(BlockFamily.Variant.DOOR, (itemLike, itemLike2) -> doorBuilder(itemLike, Ingredient.of(itemLike2)))
 		.put(BlockFamily.Variant.FENCE, (itemLike, itemLike2) -> fenceBuilder(itemLike, Ingredient.of(itemLike2)))
 		.put(BlockFamily.Variant.FENCE_GATE, (itemLike, itemLike2) -> fenceGateBuilder(itemLike, Ingredient.of(itemLike2)))
@@ -690,31 +691,13 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_cut_red_sandstone", has(Blocks.CUT_RED_SANDSTONE))
 			.save(consumer);
 		chiseled(consumer, Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE_SLAB);
-		ShapedRecipeBuilder.shaped(Blocks.COPPER_BLOCK)
-			.define('#', Items.COPPER_INGOT)
-			.pattern("##")
-			.pattern("##")
-			.unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4)
-			.requires(Blocks.COPPER_BLOCK)
-			.group(getItemName(Items.COPPER_INGOT))
-			.unlockedBy(getHasName(Blocks.COPPER_BLOCK), has(Blocks.COPPER_BLOCK))
-			.save(consumer, getConversionRecipeName(Items.COPPER_INGOT, Blocks.COPPER_BLOCK));
-		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 4)
+		nineBlockStorageRecipes(consumer, Items.COPPER_INGOT, Items.COPPER_BLOCK);
+		ShapelessRecipeBuilder.shapeless(Items.COPPER_INGOT, 9)
 			.requires(Blocks.WAXED_COPPER_BLOCK)
 			.group(getItemName(Items.COPPER_INGOT))
 			.unlockedBy(getHasName(Blocks.WAXED_COPPER_BLOCK), has(Blocks.WAXED_COPPER_BLOCK))
 			.save(consumer, getConversionRecipeName(Items.COPPER_INGOT, Blocks.WAXED_COPPER_BLOCK));
-		cut(consumer, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
-		cut(consumer, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
-		cut(consumer, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
-		cut(consumer, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
 		waxRecipes(consumer);
-		cut(consumer, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
-		cut(consumer, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
-		cut(consumer, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
-		cut(consumer, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_OXIDIZED_COPPER);
 		ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.GREEN_DYE)
@@ -1388,22 +1371,26 @@ public class RecipeProvider implements DataProvider {
 		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE)
 			.requires(Blocks.COBBLESTONE)
 			.requires(Blocks.VINE)
+			.group("mossy_cobblestone")
 			.unlockedBy("has_vine", has(Blocks.VINE))
 			.save(consumer, getConversionRecipeName(Blocks.MOSSY_COBBLESTONE, Blocks.VINE));
 		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS)
 			.requires(Blocks.STONE_BRICKS)
 			.requires(Blocks.VINE)
-			.unlockedBy("has_mossy_cobblestone", has(Blocks.MOSSY_COBBLESTONE))
+			.group("mossy_stone_bricks")
+			.unlockedBy("has_vine", has(Blocks.VINE))
 			.save(consumer, getConversionRecipeName(Blocks.MOSSY_STONE_BRICKS, Blocks.VINE));
 		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_COBBLESTONE)
 			.requires(Blocks.COBBLESTONE)
 			.requires(Blocks.MOSS_BLOCK)
+			.group("mossy_cobblestone")
 			.unlockedBy("has_moss_block", has(Blocks.MOSS_BLOCK))
 			.save(consumer, getConversionRecipeName(Blocks.MOSSY_COBBLESTONE, Blocks.MOSS_BLOCK));
 		ShapelessRecipeBuilder.shapeless(Blocks.MOSSY_STONE_BRICKS)
 			.requires(Blocks.STONE_BRICKS)
 			.requires(Blocks.MOSS_BLOCK)
-			.unlockedBy("has_mossy_cobblestone", has(Blocks.MOSSY_COBBLESTONE))
+			.group("mossy_stone_bricks")
+			.unlockedBy("has_moss_block", has(Blocks.MOSS_BLOCK))
 			.save(consumer, getConversionRecipeName(Blocks.MOSSY_STONE_BRICKS, Blocks.MOSS_BLOCK));
 		ShapelessRecipeBuilder.shapeless(Items.MUSHROOM_STEW)
 			.requires(Blocks.BROWN_MUSHROOM)
@@ -2131,14 +2118,14 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_porkchop", has(Items.PORKCHOP))
 			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.RABBIT), Items.COOKED_RABBIT, 0.35F, 200).unlockedBy("has_rabbit", has(Items.RABBIT)).save(consumer);
-		oreSmelting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 200);
-		oreSmelting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 200);
-		oreSmelting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 200);
-		oreSmelting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 200);
-		oreSmelting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 200);
-		oreSmelting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 200);
-		oreSmelting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 200);
-		oreSmelting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 200);
+		oreSmelting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 200, "coal");
+		oreSmelting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 200, "iron_ingot");
+		oreSmelting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 200, "copper_ingot");
+		oreSmelting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 200, "gold_ingot");
+		oreSmelting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 200, "diamond");
+		oreSmelting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 200, "lapus_lazuli");
+		oreSmelting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 200, "redstone");
+		oreSmelting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 200, "emerald");
 		nineBlockStorageRecipes(consumer, Items.RAW_IRON, Items.RAW_IRON_BLOCK);
 		nineBlockStorageRecipes(consumer, Items.RAW_COPPER, Items.RAW_COPPER_BLOCK);
 		nineBlockStorageRecipes(consumer, Items.RAW_GOLD, Items.RAW_GOLD_BLOCK);
@@ -2300,14 +2287,14 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.COBBLED_DEEPSLATE), Blocks.DEEPSLATE, 0.1F, 200)
 			.unlockedBy("has_cobbled_deepslate", has(Blocks.COBBLED_DEEPSLATE))
 			.save(consumer);
-		oreBlasting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 100);
-		oreBlasting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 100);
-		oreBlasting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 100);
-		oreBlasting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 100);
-		oreBlasting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 100);
-		oreBlasting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 100);
-		oreBlasting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 100);
-		oreBlasting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 100);
+		oreBlasting(consumer, COAL_SMELTABLES, Items.COAL, 0.1F, 100, "coal");
+		oreBlasting(consumer, IRON_SMELTABLES, Items.IRON_INGOT, 0.7F, 100, "iron_ingot");
+		oreBlasting(consumer, COPPER_SMELTABLES, Items.COPPER_INGOT, 0.7F, 100, "copper_ingot");
+		oreBlasting(consumer, GOLD_SMELTABLES, Items.GOLD_INGOT, 1.0F, 100, "gold_ingot");
+		oreBlasting(consumer, DIAMOND_SMELTABLES, Items.DIAMOND, 1.0F, 100, "diamond");
+		oreBlasting(consumer, LAPIS_SMELTABLES, Items.LAPIS_LAZULI, 0.2F, 100, "lapus_lazuli");
+		oreBlasting(consumer, REDSTONE_SMELTABLES, Items.REDSTONE, 0.7F, 100, "redstone");
+		oreBlasting(consumer, EMERALD_SMELTABLES, Items.EMERALD, 1.0F, 100, "emerald");
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.NETHER_QUARTZ_ORE), Items.QUARTZ, 0.2F, 100)
 			.unlockedBy("has_nether_quartz_ore", has(Blocks.NETHER_QUARTZ_ORE))
 			.save(consumer, getBlastingRecipeName(Items.QUARTZ));
@@ -2625,21 +2612,29 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer, getConversionRecipeName(itemLike, itemLike2));
 	}
 
-	private static void oreSmelting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i) {
-		oreCooking(consumer, RecipeSerializer.SMELTING_RECIPE, list, itemLike, f, i, "_from_smelting");
+	private static void oreSmelting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i, String string) {
+		oreCooking(consumer, RecipeSerializer.SMELTING_RECIPE, list, itemLike, f, i, string, "_from_smelting");
 	}
 
-	private static void oreBlasting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i) {
-		oreCooking(consumer, RecipeSerializer.BLASTING_RECIPE, list, itemLike, f, i, "_from_blasting");
+	private static void oreBlasting(Consumer<FinishedRecipe> consumer, List<ItemLike> list, ItemLike itemLike, float f, int i, String string) {
+		oreCooking(consumer, RecipeSerializer.BLASTING_RECIPE, list, itemLike, f, i, string, "_from_blasting");
 	}
 
 	private static void oreCooking(
-		Consumer<FinishedRecipe> consumer, SimpleCookingSerializer<?> simpleCookingSerializer, List<ItemLike> list, ItemLike itemLike, float f, int i, String string
+		Consumer<FinishedRecipe> consumer,
+		SimpleCookingSerializer<?> simpleCookingSerializer,
+		List<ItemLike> list,
+		ItemLike itemLike,
+		float f,
+		int i,
+		String string,
+		String string2
 	) {
 		for (ItemLike itemLike2 : list) {
 			SimpleCookingRecipeBuilder.cooking(Ingredient.of(itemLike2), itemLike, f, i, simpleCookingSerializer)
+				.group(string)
 				.unlockedBy(getHasName(itemLike2), has(itemLike2))
-				.save(consumer, getItemName(itemLike) + string + "_" + getItemName(itemLike2));
+				.save(consumer, getItemName(itemLike) + string2 + "_" + getItemName(itemLike2));
 		}
 	}
 
@@ -2834,7 +2829,12 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	public static void candle(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(itemLike).requires(Blocks.CANDLE).requires(itemLike2).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(consumer);
+		ShapelessRecipeBuilder.shapeless(itemLike)
+			.requires(Blocks.CANDLE)
+			.requires(itemLike2)
+			.group("dyed_candle")
+			.unlockedBy(getHasName(itemLike2), has(itemLike2))
+			.save(consumer);
 	}
 
 	public static void wall(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -2854,7 +2854,11 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	public static void cut(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(itemLike, 4).define('#', itemLike2).pattern("##").pattern("##").unlockedBy(getHasName(itemLike2), has(itemLike2)).save(consumer);
+		cutBuilder(itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(consumer);
+	}
+
+	public static ShapedRecipeBuilder cutBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return ShapedRecipeBuilder.shaped(itemLike, 4).define('#', ingredient).pattern("##").pattern("##");
 	}
 
 	public static void chiseled(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -2939,6 +2943,7 @@ public class RecipeProvider implements DataProvider {
 				(block, block2) -> ShapelessRecipeBuilder.shapeless(block2)
 						.requires(block)
 						.requires(Items.HONEYCOMB)
+						.group(getItemName(block2))
 						.unlockedBy(getHasName(block), has(block))
 						.save(consumer, getConversionRecipeName(block2, Items.HONEYCOMB))
 			);
@@ -2950,7 +2955,7 @@ public class RecipeProvider implements DataProvider {
 			ItemLike itemLike = getBaseBlock(blockFamily, variant);
 			if (biFunction != null) {
 				RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
-				blockFamily.getRecipeGroupPrefix().ifPresent(string -> recipeBuilder.group(string + "_" + variant.getName()));
+				blockFamily.getRecipeGroupPrefix().ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getName())));
 				recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
 				recipeBuilder.save(consumer);
 			}

@@ -169,7 +169,7 @@ public class MushroomCow extends Cow implements Shearable {
 			((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			this.discard();
 			Cow cow = EntityType.COW.create(this.level);
-			cow.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
 			cow.setHealth(this.getHealth());
 			cow.yBodyRot = this.yBodyRot;
 			if (this.hasCustomName()) {

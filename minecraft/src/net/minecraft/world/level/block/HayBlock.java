@@ -6,6 +6,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class HayBlock extends RotatedPillarBlock {
 	public HayBlock(BlockBehaviour.Properties properties) {
@@ -14,7 +15,7 @@ public class HayBlock extends RotatedPillarBlock {
 	}
 
 	@Override
-	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
 		entity.causeFallDamage(f, 0.2F, DamageSource.FALL);
 	}
 }

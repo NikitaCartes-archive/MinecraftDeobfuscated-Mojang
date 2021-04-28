@@ -73,15 +73,15 @@ public class ItemFrame extends HangingEntity {
 		Validate.notNull(direction);
 		this.direction = direction;
 		if (direction.getAxis().isHorizontal()) {
-			this.xRot = 0.0F;
-			this.yRot = (float)(this.direction.get2DDataValue() * 90);
+			this.setXRot(0.0F);
+			this.setYRot((float)(this.direction.get2DDataValue() * 90));
 		} else {
-			this.xRot = (float)(-90 * direction.getAxisDirection().getStep());
-			this.yRot = 0.0F;
+			this.setXRot((float)(-90 * direction.getAxisDirection().getStep()));
+			this.setYRot(0.0F);
 		}
 
-		this.xRotO = this.xRot;
-		this.yRotO = this.yRot;
+		this.xRotO = this.getXRot();
+		this.yRotO = this.getYRot();
 		this.recalculateBoundingBox();
 	}
 

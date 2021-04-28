@@ -21,8 +21,8 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 
 	public void render(T abstractArrow, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, abstractArrow.yRotO, abstractArrow.yRot) - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, abstractArrow.xRotO, abstractArrow.xRot)));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, abstractArrow.yRotO, abstractArrow.getYRot()) - 90.0F));
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, abstractArrow.xRotO, abstractArrow.getXRot())));
 		int j = 0;
 		float h = 0.0F;
 		float k = 0.5F;

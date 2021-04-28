@@ -104,8 +104,8 @@ public class ScreenEffectRenderer {
 		float j = -1.0F;
 		float k = 1.0F;
 		float l = -0.5F;
-		float m = -minecraft.player.yRot / 64.0F;
-		float n = minecraft.player.xRot / 64.0F;
+		float m = -minecraft.player.getYRot() / 64.0F;
+		float n = minecraft.player.getXRot() / 64.0F;
 		Matrix4f matrix4f = poseStack.last().pose();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).uv(4.0F + m, 4.0F + n).endVertex();

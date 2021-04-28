@@ -43,27 +43,24 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public void stepOn(Level level, BlockPos blockPos, Entity entity) {
-		this.destroyEgg(level, blockPos, entity, 100);
-		super.stepOn(level, blockPos, entity);
+	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+		this.destroyEgg(level, blockState, blockPos, entity, 100);
+		super.stepOn(level, blockPos, blockState, entity);
 	}
 
 	@Override
-	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
 		if (!(entity instanceof Zombie)) {
-			this.destroyEgg(level, blockPos, entity, 3);
+			this.destroyEgg(level, blockState, blockPos, entity, 3);
 		}
 
-		super.fallOn(level, blockPos, entity, f);
+		super.fallOn(level, blockState, blockPos, entity, f);
 	}
 
-	private void destroyEgg(Level level, BlockPos blockPos, Entity entity, int i) {
+	private void destroyEgg(Level level, BlockState blockState, BlockPos blockPos, Entity entity, int i) {
 		if (this.canDestroyEgg(level, entity)) {
-			if (!level.isClientSide && level.random.nextInt(i) == 0) {
-				BlockState blockState = level.getBlockState(blockPos);
-				if (blockState.is(Blocks.TURTLE_EGG)) {
-					this.decreaseEggs(level, blockPos, blockState);
-				}
+			if (!level.isClientSide && level.random.nextInt(i) == 0 && blockState.is(Blocks.TURTLE_EGG)) {
+				this.decreaseEggs(level, blockPos, blockState);
 			}
 		}
 	}

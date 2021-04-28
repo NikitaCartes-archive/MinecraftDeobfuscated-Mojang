@@ -28,7 +28,7 @@ public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> 
 		if (checkerboardDistance(chunkPos.x, chunkPos.z, PLATFORM_ORIGIN_CHUNK.x, PLATFORM_ORIGIN_CHUNK.z) > 1) {
 			return true;
 		} else {
-			BlockPos blockPos = featurePlaceContext.origin().offset(PLATFORM_OFFSET);
+			BlockPos blockPos = PLATFORM_OFFSET.atY(featurePlaceContext.origin().getY() + PLATFORM_OFFSET.getY());
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 			for (int i = chunkPos.getMinBlockZ(); i <= chunkPos.getMaxBlockZ(); i++) {

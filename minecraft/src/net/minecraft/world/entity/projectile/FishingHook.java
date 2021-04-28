@@ -75,8 +75,8 @@ public class FishingHook extends Projectile {
 	public FishingHook(Player player, Level level, int i, int j) {
 		this(EntityType.FISHING_BOBBER, level, i, j);
 		this.setOwner(player);
-		float f = player.xRot;
-		float g = player.yRot;
+		float f = player.getXRot();
+		float g = player.getYRot();
 		float h = Mth.cos(-g * (float) (Math.PI / 180.0) - (float) Math.PI);
 		float k = Mth.sin(-g * (float) (Math.PI / 180.0) - (float) Math.PI);
 		float l = -Mth.cos(-f * (float) (Math.PI / 180.0));
@@ -93,10 +93,10 @@ public class FishingHook extends Projectile {
 			0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045
 		);
 		this.setDeltaMovement(vec3);
-		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)Mth.sqrt(getHorizontalDistanceSqr(vec3))) * 180.0F / (float)Math.PI);
-		this.yRotO = this.yRot;
-		this.xRotO = this.xRot;
+		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+		this.setXRot((float)(Mth.atan2(vec3.y, (double)Mth.sqrt(getHorizontalDistanceSqr(vec3))) * 180.0F / (float)Math.PI));
+		this.yRotO = this.getYRot();
+		this.xRotO = this.getXRot();
 	}
 
 	@Override

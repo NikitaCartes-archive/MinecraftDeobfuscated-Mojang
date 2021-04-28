@@ -41,7 +41,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 	}
 
 	@Override
-	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
+	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
 		entity.playSound(SoundEvents.HONEY_BLOCK_SLIDE, 1.0F, 1.0F);
 		if (!level.isClientSide) {
 			level.broadcastEntityEvent(entity, (byte)54);

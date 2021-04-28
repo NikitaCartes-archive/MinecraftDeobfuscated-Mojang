@@ -99,7 +99,7 @@ public class RecipeButton extends AbstractWidget {
 		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem();
 		int m = 4;
 		if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
-			minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1);
+			minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1, 0, 10);
 			m--;
 		}
 

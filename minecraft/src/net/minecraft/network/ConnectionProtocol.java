@@ -67,7 +67,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -238,7 +238,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundPlayerLookAtPacket.class, ClientboundPlayerLookAtPacket::new)
 					.addPacket(ClientboundPlayerPositionPacket.class, ClientboundPlayerPositionPacket::new)
 					.addPacket(ClientboundRecipePacket.class, ClientboundRecipePacket::new)
-					.addPacket(ClientboundRemoveEntitiesPacket.class, ClientboundRemoveEntitiesPacket::new)
+					.addPacket(ClientboundRemoveEntityPacket.class, ClientboundRemoveEntityPacket::new)
 					.addPacket(ClientboundRemoveMobEffectPacket.class, ClientboundRemoveMobEffectPacket::new)
 					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
 					.addPacket(ClientboundRespawnPacket.class, ClientboundRespawnPacket::new)

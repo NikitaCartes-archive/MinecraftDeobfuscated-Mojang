@@ -1321,7 +1321,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		double h = Mth.lerp((double)g, entity.xOld, entity.getX());
 		double i = Mth.lerp((double)g, entity.yOld, entity.getY());
 		double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
-		float k = Mth.lerp(g, entity.yRotO, entity.yRot);
+		float k = Mth.lerp(g, entity.yRotO, entity.getYRot());
 		this.entityRenderDispatcher
 			.render(entity, h - d, i - e, j - f, k, g, poseStack, multiBufferSource, this.entityRenderDispatcher.getPackedLightCoords(entity, g));
 	}

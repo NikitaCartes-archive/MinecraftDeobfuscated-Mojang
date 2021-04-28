@@ -186,13 +186,13 @@ public class EnderDragon extends Mob implements Enemy {
 				this.flapTime += g;
 			}
 
-			this.yRot = Mth.wrapDegrees(this.yRot);
+			this.setYRot(Mth.wrapDegrees(this.getYRot()));
 			if (this.isNoAi()) {
 				this.flapTime = 0.5F;
 			} else {
 				if (this.posPointer < 0) {
 					for (int i = 0; i < this.positions.length; i++) {
-						this.positions[i][0] = (double)this.yRot;
+						this.positions[i][0] = (double)this.getYRot();
 						this.positions[i][1] = this.getY();
 					}
 				}
@@ -201,19 +201,19 @@ public class EnderDragon extends Mob implements Enemy {
 					this.posPointer = 0;
 				}
 
-				this.positions[this.posPointer][0] = (double)this.yRot;
+				this.positions[this.posPointer][0] = (double)this.getYRot();
 				this.positions[this.posPointer][1] = this.getY();
 				if (this.level.isClientSide) {
 					if (this.lerpSteps > 0) {
 						double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
 						double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
 						double j = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-						double k = Mth.wrapDegrees(this.lerpYRot - (double)this.yRot);
-						this.yRot = (float)((double)this.yRot + k / (double)this.lerpSteps);
-						this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+						double k = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
+						this.setYRot(this.getYRot() + (float)k / (float)this.lerpSteps);
+						this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
 						this.lerpSteps--;
 						this.setPos(d, e, j);
-						this.setRot(this.yRot, this.xRot);
+						this.setRot(this.getYRot(), this.getXRot());
 					}
 
 					this.phaseManager.getCurrentPhase().doClientTick();
@@ -238,17 +238,17 @@ public class EnderDragon extends Mob implements Enemy {
 						}
 
 						this.setDeltaMovement(this.getDeltaMovement().add(0.0, j * 0.01, 0.0));
-						this.yRot = Mth.wrapDegrees(this.yRot);
-						double o = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 180.0F / (float)Math.PI - (double)this.yRot), -50.0, 50.0);
+						this.setYRot(Mth.wrapDegrees(this.getYRot()));
+						double o = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(e, k) * 180.0F / (float)Math.PI - (double)this.getYRot()), -50.0, 50.0);
 						Vec3 vec33 = vec32.subtract(this.getX(), this.getY(), this.getZ()).normalize();
 						Vec3 vec34 = new Vec3(
-								(double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), this.getDeltaMovement().y, (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0)))
+								(double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), this.getDeltaMovement().y, (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 							)
 							.normalize();
 						float p = Math.max(((float)vec34.dot(vec33) + 0.5F) / 1.5F, 0.0F);
 						this.yRotA *= 0.8F;
 						this.yRotA = (float)((double)this.yRotA + o * (double)dragonPhaseInstance.getTurnSpeed());
-						this.yRot = this.yRot + this.yRotA * 0.1F;
+						this.setYRot(this.getYRot() + this.yRotA * 0.1F);
 						float q = (float)(2.0 / (l + 1.0));
 						float r = 0.06F;
 						this.moveRelative(0.06F * (p * q + (1.0F - q)), new Vec3(0.0, 0.0, -1.0));
@@ -264,7 +264,7 @@ public class EnderDragon extends Mob implements Enemy {
 					}
 				}
 
-				this.yBodyRot = this.yRot;
+				this.yBodyRot = this.getYRot();
 				Vec3[] vec3s = new Vec3[this.subEntities.length];
 
 				for (int t = 0; t < this.subEntities.length; t++) {
@@ -274,7 +274,7 @@ public class EnderDragon extends Mob implements Enemy {
 				float u = (float)(this.getLatencyPos(5, 1.0F)[1] - this.getLatencyPos(10, 1.0F)[1]) * 10.0F * (float) (Math.PI / 180.0);
 				float v = Mth.cos(u);
 				float w = Mth.sin(u);
-				float x = this.yRot * (float) (Math.PI / 180.0);
+				float x = this.getYRot() * (float) (Math.PI / 180.0);
 				float y = Mth.sin(x);
 				float z = Mth.cos(x);
 				this.tickPart(this.body, (double)(y * 0.5F), 0.0, (double)(-z * 0.5F));
@@ -291,8 +291,8 @@ public class EnderDragon extends Mob implements Enemy {
 					this.hurt(this.level.getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
 				}
 
-				float aa = Mth.sin(this.yRot * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
-				float ab = Mth.cos(this.yRot * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
+				float aa = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
+				float ab = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
 				float ac = this.getHeadYOffset();
 				this.tickPart(this.head, (double)(aa * 6.5F * v), (double)(ac + w * 6.5F), (double)(-ab * 6.5F * v));
 				this.tickPart(this.neck, (double)(aa * 5.5F * v), (double)(ac + w * 5.5F), (double)(-ab * 5.5F * v));
@@ -313,7 +313,7 @@ public class EnderDragon extends Mob implements Enemy {
 					}
 
 					double[] es = this.getLatencyPos(12 + ad * 2, 1.0F);
-					float ae = this.yRot * (float) (Math.PI / 180.0) + this.rotWrap(es[0] - ds[0]) * (float) (Math.PI / 180.0);
+					float ae = this.getYRot() * (float) (Math.PI / 180.0) + this.rotWrap(es[0] - ds[0]) * (float) (Math.PI / 180.0);
 					float af = Mth.sin(ae);
 					float ag = Mth.cos(ae);
 					float p = 1.5F;
@@ -532,8 +532,8 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 
 		this.move(MoverType.SELF, new Vec3(0.0, 0.1F, 0.0));
-		this.yRot += 20.0F;
-		this.yBodyRot = this.yRot;
+		this.setYRot(this.getYRot() + 20.0F);
+		this.yBodyRot = this.getYRot();
 		if (this.dragonDeathTime == 200 && this.level instanceof ServerLevel) {
 			if (bl) {
 				ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.2F));
@@ -793,17 +793,17 @@ public class EnderDragon extends Mob implements Enemy {
 			BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
 			float g = Math.max(Mth.sqrt(blockPos.distSqr(this.position(), true)) / 4.0F, 1.0F);
 			float h = 6.0F / g;
-			float i = this.xRot;
+			float i = this.getXRot();
 			float j = 1.5F;
-			this.xRot = -h * 1.5F * 5.0F;
+			this.setXRot(-h * 1.5F * 5.0F);
 			vec3 = this.getViewVector(f);
-			this.xRot = i;
+			this.setXRot(i);
 		} else if (dragonPhaseInstance.isSitting()) {
-			float k = this.xRot;
+			float k = this.getXRot();
 			float g = 1.5F;
-			this.xRot = -45.0F;
+			this.setXRot(-45.0F);
 			vec3 = this.getViewVector(f);
-			this.xRot = k;
+			this.setXRot(k);
 		} else {
 			vec3 = this.getViewVector(f);
 		}

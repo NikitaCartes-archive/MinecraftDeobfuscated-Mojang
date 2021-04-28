@@ -502,8 +502,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.setEating(false);
 		this.setStanding(false);
 		if (!this.level.isClientSide) {
-			player.yRot = this.yRot;
-			player.xRot = this.xRot;
+			player.setYRot(this.getYRot());
+			player.setXRot(this.getXRot());
 			player.startRiding(this);
 		}
 	}
@@ -697,11 +697,11 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		if (this.isAlive()) {
 			if (this.isVehicle() && this.canBeControlledByRider() && this.isSaddled()) {
 				LivingEntity livingEntity = (LivingEntity)this.getControllingPassenger();
-				this.yRot = livingEntity.yRot;
-				this.yRotO = this.yRot;
-				this.xRot = livingEntity.xRot * 0.5F;
-				this.setRot(this.yRot, this.xRot);
-				this.yBodyRot = this.yRot;
+				this.setYRot(livingEntity.getYRot());
+				this.yRotO = this.getYRot();
+				this.setXRot(livingEntity.getXRot() * 0.5F);
+				this.setRot(this.getYRot(), this.getXRot());
+				this.yBodyRot = this.getYRot();
 				this.yHeadRot = this.yBodyRot;
 				float f = livingEntity.xxa * 0.5F;
 				float g = livingEntity.zza;
@@ -729,8 +729,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 					this.setIsJumping(true);
 					this.hasImpulse = true;
 					if (g > 0.0F) {
-						float h = Mth.sin(this.yRot * (float) (Math.PI / 180.0));
-						float i = Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+						float h = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+						float i = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
 						this.setDeltaMovement(
 							this.getDeltaMovement().add((double)(-0.4F * h * this.playerJumpPendingScale), 0.0, (double)(0.4F * i * this.playerJumpPendingScale))
 						);
@@ -1049,14 +1049,14 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
 		Vec3 vec3 = getCollisionHorizontalEscapeVector(
-			(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0F : -90.0F)
+			(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.getYRot() + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0F : -90.0F)
 		);
 		Vec3 vec32 = this.getDismountLocationInDirection(vec3, livingEntity);
 		if (vec32 != null) {
 			return vec32;
 		} else {
 			Vec3 vec33 = getCollisionHorizontalEscapeVector(
-				(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0F : -90.0F)
+				(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.getYRot() + (livingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0F : -90.0F)
 			);
 			Vec3 vec34 = this.getDismountLocationInDirection(vec33, livingEntity);
 			return vec34 != null ? vec34 : this.position();

@@ -18,7 +18,7 @@ public class ThrowablePotionItem extends PotionItem {
 		if (!level.isClientSide) {
 			ThrownPotion thrownPotion = new ThrownPotion(level, player);
 			thrownPotion.setItem(itemStack);
-			thrownPotion.shootFromRotation(player, player.xRot, player.yRot, -20.0F, 0.5F, 1.0F);
+			thrownPotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
 			level.addFreshEntity(thrownPotion);
 		}
 

@@ -182,7 +182,7 @@ public class MapItemSavedData extends SavedData {
 						string,
 						holdingPlayer2.player.getX(),
 						holdingPlayer2.player.getZ(),
-						(double)holdingPlayer2.player.yRot,
+						(double)holdingPlayer2.player.getYRot(),
 						null
 					);
 				}

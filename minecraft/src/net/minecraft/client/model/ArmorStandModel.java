@@ -66,7 +66,7 @@ public class ArmorStandModel extends ArmorStandArmorModel {
 
 	public void prepareMobModel(ArmorStand armorStand, float f, float g, float h) {
 		this.basePlate.xRot = 0.0F;
-		this.basePlate.yRot = (float) (Math.PI / 180.0) * -Mth.rotLerp(h, armorStand.yRotO, armorStand.yRot);
+		this.basePlate.yRot = (float) (Math.PI / 180.0) * -Mth.rotLerp(h, armorStand.yRotO, armorStand.getYRot());
 		this.basePlate.zRot = 0.0F;
 	}
 

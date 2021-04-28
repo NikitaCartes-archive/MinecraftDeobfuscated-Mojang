@@ -46,13 +46,13 @@ public class LookControl implements Control {
 
 	public void tick() {
 		if (this.resetXRotOnTick()) {
-			this.mob.xRot = 0.0F;
+			this.mob.setXRot(0.0F);
 		}
 
 		if (this.hasWanted) {
 			this.hasWanted = false;
 			this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.getYRotD(), this.yMaxRotSpeed);
-			this.mob.xRot = this.rotateTowards(this.mob.xRot, this.getXRotD(), this.xMaxRotAngle);
+			this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), this.getXRotD(), this.xMaxRotAngle));
 		} else {
 			this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.mob.yBodyRot, 10.0F);
 		}

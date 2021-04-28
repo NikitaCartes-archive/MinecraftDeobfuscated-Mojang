@@ -208,11 +208,11 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
 		Vec3[] vec3s = new Vec3[]{
-			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.yRot),
-			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.yRot - 22.5F),
-			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.yRot + 22.5F),
-			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.yRot - 45.0F),
-			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.yRot + 45.0F)
+			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.getYRot()),
+			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.getYRot() - 22.5F),
+			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.getYRot() + 22.5F),
+			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.getYRot() - 45.0F),
+			getCollisionHorizontalEscapeVector((double)this.getBbWidth(), (double)livingEntity.getBbWidth(), livingEntity.getYRot() + 45.0F)
 		};
 		Set<BlockPos> set = Sets.<BlockPos>newLinkedHashSet();
 		double d = this.getBoundingBox().maxY;
@@ -472,7 +472,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	private SpawnGroupData spawnJockey(
 		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData
 	) {
-		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
+		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
 		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
 		mob.startRiding(this, true);
 		return new AgeableMob.AgeableMobGroupData(0.0F);

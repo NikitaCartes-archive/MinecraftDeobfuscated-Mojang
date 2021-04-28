@@ -20,8 +20,8 @@ public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListen
 		this.x = player.getX();
 		this.y = player.getY();
 		this.z = player.getZ();
-		this.yRot = (byte)((int)(player.yRot * 256.0F / 360.0F));
-		this.xRot = (byte)((int)(player.xRot * 256.0F / 360.0F));
+		this.yRot = (byte)((int)(player.getYRot() * 256.0F / 360.0F));
+		this.xRot = (byte)((int)(player.getXRot() * 256.0F / 360.0F));
 	}
 
 	public ClientboundAddPlayerPacket(FriendlyByteBuf friendlyByteBuf) {

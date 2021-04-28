@@ -276,13 +276,13 @@ public class Guardian extends Monster {
 				this.setDeltaMovement(
 					this.getDeltaMovement().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F), 0.5, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F))
 				);
-				this.yRot = this.random.nextFloat() * 360.0F;
+				this.setYRot(this.random.nextFloat() * 360.0F);
 				this.onGround = false;
 				this.hasImpulse = true;
 			}
 
 			if (this.hasActiveAttackTarget()) {
-				this.yRot = this.yHeadRot;
+				this.setYRot(this.yHeadRot);
 			}
 		}
 
@@ -454,14 +454,14 @@ public class Guardian extends Monster {
 				double f = vec3.y / d;
 				double g = vec3.z / d;
 				float h = (float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) - 90.0F;
-				this.guardian.yRot = this.rotlerp(this.guardian.yRot, h, 90.0F);
-				this.guardian.yBodyRot = this.guardian.yRot;
+				this.guardian.setYRot(this.rotlerp(this.guardian.getYRot(), h, 90.0F));
+				this.guardian.yBodyRot = this.guardian.getYRot();
 				float i = (float)(this.speedModifier * this.guardian.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				float j = Mth.lerp(0.125F, this.guardian.getSpeed(), i);
 				this.guardian.setSpeed(j);
 				double k = Math.sin((double)(this.guardian.tickCount + this.guardian.getId()) * 0.5) * 0.05;
-				double l = Math.cos((double)(this.guardian.yRot * (float) (Math.PI / 180.0)));
-				double m = Math.sin((double)(this.guardian.yRot * (float) (Math.PI / 180.0)));
+				double l = Math.cos((double)(this.guardian.getYRot() * (float) (Math.PI / 180.0)));
+				double m = Math.sin((double)(this.guardian.getYRot() * (float) (Math.PI / 180.0)));
 				double n = Math.sin((double)(this.guardian.tickCount + this.guardian.getId()) * 0.75) * 0.05;
 				this.guardian.setDeltaMovement(this.guardian.getDeltaMovement().add(k * l, n * (m + l) * 0.25 + (double)j * f * 0.1, k * m));
 				LookControl lookControl = this.guardian.getLookControl();

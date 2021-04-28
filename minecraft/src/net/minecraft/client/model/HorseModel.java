@@ -210,7 +210,7 @@ public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 		super.prepareMobModel(abstractHorse, f, g, h);
 		float i = Mth.rotlerp(abstractHorse.yBodyRotO, abstractHorse.yBodyRot, h);
 		float j = Mth.rotlerp(abstractHorse.yHeadRotO, abstractHorse.yHeadRot, h);
-		float k = Mth.lerp(h, abstractHorse.xRotO, abstractHorse.xRot);
+		float k = Mth.lerp(h, abstractHorse.xRotO, abstractHorse.getXRot());
 		float l = j - i;
 		float m = k * (float) (Math.PI / 180.0);
 		if (l > 20.0F) {

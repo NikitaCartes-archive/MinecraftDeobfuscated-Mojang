@@ -35,7 +35,7 @@ public class ExperienceBottleItem extends Item {
 		if (!level.isClientSide) {
 			ThrownExperienceBottle thrownExperienceBottle = new ThrownExperienceBottle(level, player);
 			thrownExperienceBottle.setItem(itemStack);
-			thrownExperienceBottle.shootFromRotation(player, player.xRot, player.yRot, -20.0F, 0.7F, 1.0F);
+			thrownExperienceBottle.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.7F, 1.0F);
 			level.addFreshEntity(thrownExperienceBottle);
 		}
 

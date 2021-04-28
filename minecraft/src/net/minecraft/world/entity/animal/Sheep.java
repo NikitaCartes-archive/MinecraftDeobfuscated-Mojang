@@ -211,7 +211,7 @@ public class Sheep extends Animal implements Shearable {
 			float g = ((float)(this.eatAnimationTick - 4) - f) / 32.0F;
 			return (float) (Math.PI / 5) + 0.21991149F * Mth.sin(g * 28.7F);
 		} else {
-			return this.eatAnimationTick > 0 ? (float) (Math.PI / 5) : this.xRot * (float) (Math.PI / 180.0);
+			return this.eatAnimationTick > 0 ? (float) (Math.PI / 5) : this.getXRot() * (float) (Math.PI / 180.0);
 		}
 	}
 

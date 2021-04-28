@@ -127,10 +127,10 @@ public abstract class AbstractArrow extends Projectile {
 		Vec3 vec3 = this.getDeltaMovement();
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
 			float f = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-			this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-			this.xRot = (float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI);
-			this.yRotO = this.yRot;
-			this.xRotO = this.xRot;
+			this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+			this.setXRot((float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI));
+			this.yRotO = this.getYRot();
+			this.xRotO = this.getXRot();
 		}
 
 		BlockPos blockPos = this.blockPosition();
@@ -219,14 +219,14 @@ public abstract class AbstractArrow extends Projectile {
 			double k = this.getZ() + g;
 			float l = Mth.sqrt(getHorizontalDistanceSqr(vec3));
 			if (bl) {
-				this.yRot = (float)(Mth.atan2(-d, -g) * 180.0F / (float)Math.PI);
+				this.setYRot((float)(Mth.atan2(-d, -g) * 180.0F / (float)Math.PI));
 			} else {
-				this.yRot = (float)(Mth.atan2(d, g) * 180.0F / (float)Math.PI);
+				this.setYRot((float)(Mth.atan2(d, g) * 180.0F / (float)Math.PI));
 			}
 
-			this.xRot = (float)(Mth.atan2(e, (double)l) * 180.0F / (float)Math.PI);
-			this.xRot = lerpRotation(this.xRotO, this.xRot);
-			this.yRot = lerpRotation(this.yRotO, this.yRot);
+			this.setXRot((float)(Mth.atan2(e, (double)l) * 180.0F / (float)Math.PI));
+			this.setXRot(lerpRotation(this.xRotO, this.getXRot()));
+			this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
 			float m = 0.99F;
 			float n = 0.05F;
 			if (this.isInWater()) {
@@ -381,7 +381,7 @@ public abstract class AbstractArrow extends Projectile {
 		} else {
 			entity.setRemainingFireTicks(j);
 			this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
-			this.yRot += 180.0F;
+			this.setYRot(this.getYRot() + 180.0F);
 			this.yRotO += 180.0F;
 			if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
 				if (this.pickup == AbstractArrow.Pickup.ALLOWED) {

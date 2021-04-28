@@ -604,8 +604,8 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 			);
 			if (entity instanceof Mob) {
 				Mob mob = (Mob)entity;
-				mob.yHeadRot = mob.yRot;
-				mob.yBodyRot = mob.yRot;
+				mob.yHeadRot = mob.getYRot();
+				mob.yBodyRot = mob.getYRot();
 				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
 				mob.playAmbientSound();
 			}

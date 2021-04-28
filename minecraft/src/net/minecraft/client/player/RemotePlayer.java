@@ -46,11 +46,11 @@ public class RemotePlayer extends AbstractClientPlayer {
 			double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
 			double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
 			double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-			this.yRot = (float)((double)this.yRot + Mth.wrapDegrees(this.lerpYRot - (double)this.yRot) / (double)this.lerpSteps);
-			this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+			this.setYRot(this.getYRot() + (float)Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot()) / (float)this.lerpSteps);
+			this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
 			this.lerpSteps--;
 			this.setPos(d, e, f);
-			this.setRot(this.yRot, this.xRot);
+			this.setRot(this.getYRot(), this.getXRot());
 		}
 
 		if (this.lerpHeadSteps > 0) {

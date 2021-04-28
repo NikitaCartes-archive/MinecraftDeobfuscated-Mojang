@@ -98,7 +98,7 @@ public class Dolphin extends WaterAnimal {
 		@Nullable CompoundTag compoundTag
 	) {
 		this.setAirSupply(this.getMaxAirSupply());
-		this.xRot = 0.0F;
+		this.setXRot(0.0F);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
@@ -269,7 +269,7 @@ public class Dolphin extends WaterAnimal {
 					this.setDeltaMovement(
 						this.getDeltaMovement().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.2F), 0.5, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.2F))
 					);
-					this.yRot = this.random.nextFloat() * 360.0F;
+					this.setYRot(this.random.nextFloat() * 360.0F);
 					this.onGround = false;
 					this.hasImpulse = true;
 				}
@@ -277,8 +277,8 @@ public class Dolphin extends WaterAnimal {
 
 			if (this.level.isClientSide && this.isInWater() && this.getDeltaMovement().lengthSqr() > 0.03) {
 				Vec3 vec3 = this.getViewVector(0.0F);
-				float f = Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * 0.3F;
-				float g = Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * 0.3F;
+				float f = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * 0.3F;
+				float g = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * 0.3F;
 				float h = 1.2F - this.random.nextFloat() * 0.7F;
 
 				for (int i = 0; i < 2; i++) {
@@ -595,9 +595,11 @@ public class Dolphin extends WaterAnimal {
 				float g = Dolphin.this.random.nextFloat() * (float) (Math.PI * 2);
 				float h = 0.02F * Dolphin.this.random.nextFloat();
 				itemEntity.setDeltaMovement(
-					(double)(0.3F * -Mth.sin(Dolphin.this.yRot * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.xRot * (float) (Math.PI / 180.0)) + Mth.cos(g) * h),
-					(double)(0.3F * Mth.sin(Dolphin.this.xRot * (float) (Math.PI / 180.0)) * 1.5F),
-					(double)(0.3F * Mth.cos(Dolphin.this.yRot * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.xRot * (float) (Math.PI / 180.0)) + Mth.sin(g) * h)
+					(double)(
+						0.3F * -Mth.sin(Dolphin.this.getYRot() * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) + Mth.cos(g) * h
+					),
+					(double)(0.3F * Mth.sin(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) * 1.5F),
+					(double)(0.3F * Mth.cos(Dolphin.this.getYRot() * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) + Mth.sin(g) * h)
 				);
 				Dolphin.this.level.addFreshEntity(itemEntity);
 			}

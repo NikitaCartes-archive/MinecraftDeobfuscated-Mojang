@@ -404,8 +404,8 @@ public class Drowned extends Zombie implements RangedAttackMob {
 				double g = (double)Mth.sqrt(d * d + e * e + f * f);
 				e /= g;
 				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-				this.drowned.yRot = this.rotlerp(this.drowned.yRot, h, 90.0F);
-				this.drowned.yBodyRot = this.drowned.yRot;
+				this.drowned.setYRot(this.rotlerp(this.drowned.getYRot(), h, 90.0F));
+				this.drowned.yBodyRot = this.drowned.getYRot();
 				float i = (float)(this.speedModifier * this.drowned.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				float j = Mth.lerp(0.125F, this.drowned.getSpeed(), i);
 				this.drowned.setSpeed(j);

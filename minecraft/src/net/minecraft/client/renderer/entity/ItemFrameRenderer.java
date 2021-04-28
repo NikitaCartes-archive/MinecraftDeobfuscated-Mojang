@@ -55,8 +55,8 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
 		double d = 0.46875;
 		poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - itemFrame.yRot));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.getXRot()));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - itemFrame.getYRot()));
 		boolean bl = itemFrame.isInvisible();
 		ItemStack itemStack = itemFrame.getItem();
 		if (!bl) {

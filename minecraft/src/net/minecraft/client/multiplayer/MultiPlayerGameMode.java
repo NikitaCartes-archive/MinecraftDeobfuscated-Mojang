@@ -305,7 +305,8 @@ public class MultiPlayerGameMode {
 			return InteractionResult.PASS;
 		} else {
 			this.ensureHasSentCarriedItem();
-			this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, player.isOnGround()));
+			this.connection
+				.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), player.isOnGround()));
 			this.connection.send(new ServerboundUseItemPacket(interactionHand));
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {

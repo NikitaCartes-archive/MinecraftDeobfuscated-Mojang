@@ -51,7 +51,9 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 				if (this.dragon.canSee(this.attackTarget)) {
 					this.fireballCharge++;
 					Vec3 vec3 = new Vec3(this.attackTarget.getX() - this.dragon.getX(), 0.0, this.attackTarget.getZ() - this.dragon.getZ()).normalize();
-					Vec3 vec32 = new Vec3((double)Mth.sin(this.dragon.yRot * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.yRot * (float) (Math.PI / 180.0))))
+					Vec3 vec32 = new Vec3(
+							(double)Mth.sin(this.dragon.getYRot() * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.getYRot() * (float) (Math.PI / 180.0)))
+						)
 						.normalize();
 					float j = (float)vec32.dot(vec3);
 					float k = (float)(Math.acos((double)j) * 180.0F / (float)Math.PI);

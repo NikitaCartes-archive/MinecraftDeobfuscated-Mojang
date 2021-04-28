@@ -100,27 +100,27 @@ public final class ProjectileUtil {
 		Vec3 vec3 = entity.getDeltaMovement();
 		if (vec3.lengthSqr() != 0.0) {
 			float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
-			entity.yRot = (float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F;
-			entity.xRot = (float)(Mth.atan2((double)g, vec3.y) * 180.0F / (float)Math.PI) - 90.0F;
+			entity.setYRot((float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F);
+			entity.setXRot((float)(Mth.atan2((double)g, vec3.y) * 180.0F / (float)Math.PI) - 90.0F);
 
-			while (entity.xRot - entity.xRotO < -180.0F) {
+			while (entity.getXRot() - entity.xRotO < -180.0F) {
 				entity.xRotO -= 360.0F;
 			}
 
-			while (entity.xRot - entity.xRotO >= 180.0F) {
+			while (entity.getXRot() - entity.xRotO >= 180.0F) {
 				entity.xRotO += 360.0F;
 			}
 
-			while (entity.yRot - entity.yRotO < -180.0F) {
+			while (entity.getYRot() - entity.yRotO < -180.0F) {
 				entity.yRotO -= 360.0F;
 			}
 
-			while (entity.yRot - entity.yRotO >= 180.0F) {
+			while (entity.getYRot() - entity.yRotO >= 180.0F) {
 				entity.yRotO += 360.0F;
 			}
 
-			entity.xRot = Mth.lerp(f, entity.xRotO, entity.xRot);
-			entity.yRot = Mth.lerp(f, entity.yRotO, entity.yRot);
+			entity.setXRot(Mth.lerp(f, entity.xRotO, entity.getXRot()));
+			entity.setYRot(Mth.lerp(f, entity.yRotO, entity.getYRot()));
 		}
 	}
 

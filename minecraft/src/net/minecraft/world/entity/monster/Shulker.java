@@ -283,8 +283,8 @@ public class Shulker extends AbstractGolem implements Enemy {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.yRot = 0.0F;
-		this.yHeadRot = this.yRot;
+		this.setYRot(0.0F);
+		this.yHeadRot = this.getYRot();
 		this.setOldPosAndRot();
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}

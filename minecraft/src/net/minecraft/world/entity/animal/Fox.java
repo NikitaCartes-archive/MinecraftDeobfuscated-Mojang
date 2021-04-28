@@ -263,8 +263,8 @@ public class Fox extends Animal {
 			if (!itemStack.isEmpty()) {
 				for (int i = 0; i < 8; i++) {
 					Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0)
-						.xRot(-this.xRot * (float) (Math.PI / 180.0))
-						.yRot(-this.yRot * (float) (Math.PI / 180.0));
+						.xRot(-this.getXRot() * (float) (Math.PI / 180.0))
+						.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
 					this.level
 						.addParticle(
 							new ItemParticleOption(ParticleTypes.ITEM, itemStack),
@@ -1127,7 +1127,7 @@ public class Fox extends Animal {
 			LivingEntity livingEntity = Fox.this.getTarget();
 			if (livingEntity != null && livingEntity.isAlive()) {
 				double d = Fox.this.getDeltaMovement().y;
-				return (!(d * d < 0.05F) || !(Math.abs(Fox.this.xRot) < 15.0F) || !Fox.this.onGround) && !Fox.this.isFaceplanted();
+				return (!(d * d < 0.05F) || !(Math.abs(Fox.this.getXRot()) < 15.0F) || !Fox.this.onGround) && !Fox.this.isFaceplanted();
 			} else {
 				return false;
 			}
@@ -1168,22 +1168,22 @@ public class Fox extends Animal {
 
 			if (!Fox.this.isFaceplanted()) {
 				Vec3 vec3 = Fox.this.getDeltaMovement();
-				if (vec3.y * vec3.y < 0.03F && Fox.this.xRot != 0.0F) {
-					Fox.this.xRot = Mth.rotlerp(Fox.this.xRot, 0.0F, 0.2F);
+				if (vec3.y * vec3.y < 0.03F && Fox.this.getXRot() != 0.0F) {
+					Fox.this.setXRot(Mth.rotlerp(Fox.this.getXRot(), 0.0F, 0.2F));
 				} else {
 					double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
 					double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 180.0F / (float)Math.PI;
-					Fox.this.xRot = (float)e;
+					Fox.this.setXRot((float)e);
 				}
 			}
 
 			if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0F) {
 				Fox.this.doHurtTarget(livingEntity);
-			} else if (Fox.this.xRot > 0.0F
+			} else if (Fox.this.getXRot() > 0.0F
 				&& Fox.this.onGround
 				&& (float)Fox.this.getDeltaMovement().y != 0.0F
 				&& Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
-				Fox.this.xRot = 60.0F;
+				Fox.this.setXRot(60.0F);
 				Fox.this.setTarget(null);
 				Fox.this.setFaceplanted(true);
 			}

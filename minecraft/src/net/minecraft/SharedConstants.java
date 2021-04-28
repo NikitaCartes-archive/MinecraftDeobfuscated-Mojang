@@ -12,15 +12,15 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 2711;
+	public static final int WORLD_VERSION = 2712;
 	@Deprecated
-	public static final String VERSION_STRING = "21w16a";
+	public static final String VERSION_STRING = "21w17a";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.17";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 755;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 23;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 25;
 	public static final int SNBT_NAG_VERSION = 2678;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	@Deprecated
@@ -83,6 +83,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_DISABLE_STRUCTURES = false;
 	public static final boolean DEBUG_DISABLE_FEATURES = false;
 	public static final boolean DEBUG_DISABLE_ORE_VEINS = false;
+	public static final boolean DEBUG_DISABLE_NOODLE_CAVES = false;
 	public static final int DEFAULT_MINECRAFT_PORT = 25565;
 	public static final boolean INGAME_DEBUG_OUTPUT = false;
 	public static final boolean DEBUG_SUBTITLES = false;
@@ -149,7 +150,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741847;
+		return 1073741849;
 	}
 
 	static {

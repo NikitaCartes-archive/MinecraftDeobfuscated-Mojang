@@ -201,7 +201,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
 			float k = Mth.clamp(j * j / 100.0F, 0.0F, 1.0F);
 			if (!abstractClientPlayer.isAutoSpinAttack()) {
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(k * (-90.0F - abstractClientPlayer.xRot)));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(k * (-90.0F - abstractClientPlayer.getXRot())));
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
@@ -215,7 +215,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			}
 		} else if (i > 0.0F) {
 			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
-			float jx = abstractClientPlayer.isInWater() ? -90.0F - abstractClientPlayer.xRot : -90.0F;
+			float jx = abstractClientPlayer.isInWater() ? -90.0F - abstractClientPlayer.getXRot() : -90.0F;
 			float kx = Mth.lerp(i, 0.0F, jx);
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(kx));
 			if (abstractClientPlayer.isVisuallySwimming()) {

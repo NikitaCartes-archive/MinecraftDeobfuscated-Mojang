@@ -127,12 +127,11 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
-		BlockState blockState = level.getBlockState(blockPos);
+	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
 		if (blockState.getValue(TIP_DIRECTION) == Direction.UP && blockState.getValue(THICKNESS) == DripstoneThickness.TIP) {
 			entity.causeFallDamage(f + 2.0F, 2.0F, DamageSource.STALAGMITE);
 		} else {
-			super.fallOn(level, blockPos, entity, f);
+			super.fallOn(level, blockState, blockPos, entity, f);
 		}
 	}
 

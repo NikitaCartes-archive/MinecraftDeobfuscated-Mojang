@@ -93,7 +93,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			int y = 16;
 
 			for (int z = 0; z <= 16; z++) {
-				stringVertex(v, w, x, vertexConsumer2, pose2, fraction(z, 16), fraction(z + 1, 17));
+				stringVertex(v, w, x, vertexConsumer2, pose2, fraction(z, 16), fraction(z + 1, 16));
 			}
 
 			poseStack.popPose();

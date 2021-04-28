@@ -60,7 +60,7 @@ public class TemptGoal extends Goal {
 					return false;
 				}
 
-				if (Math.abs((double)this.player.xRot - this.pRotX) > 5.0 || Math.abs((double)this.player.yRot - this.pRotY) > 5.0) {
+				if (Math.abs((double)this.player.getXRot() - this.pRotX) > 5.0 || Math.abs((double)this.player.getYRot() - this.pRotY) > 5.0) {
 					return false;
 				}
 			} else {
@@ -69,8 +69,8 @@ public class TemptGoal extends Goal {
 				this.pz = this.player.getZ();
 			}
 
-			this.pRotX = (double)this.player.xRot;
-			this.pRotY = (double)this.player.yRot;
+			this.pRotX = (double)this.player.getXRot();
+			this.pRotY = (double)this.player.getYRot();
 		}
 
 		return this.canUse();

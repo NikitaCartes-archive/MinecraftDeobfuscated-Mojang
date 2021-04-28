@@ -162,8 +162,8 @@ public class TeleportCommand {
 				entity.getY(),
 				entity.getZ(),
 				EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class),
-				entity.yRot,
-				entity.xRot,
+				entity.getYRot(),
+				entity.getXRot(),
 				null
 			);
 		}
@@ -218,7 +218,7 @@ public class TeleportCommand {
 
 		for (Entity entity : collection) {
 			if (coordinates2 == null) {
-				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.yRot, entity.xRot, lookAt);
+				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), lookAt);
 			} else {
 				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
 			}
@@ -285,8 +285,8 @@ public class TeleportCommand {
 					entity.restoreFrom(entity2);
 					entity.moveTo(d, e, f, i, k);
 					entity.setYHeadRot(i);
-					serverLevel.addDuringTeleport(entity);
 					entity2.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+					serverLevel.addDuringTeleport(entity);
 				}
 			}
 

@@ -20,7 +20,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterloggedBlock {
-	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.FACING;
 	protected final VoxelShape northAabb;
@@ -32,9 +31,7 @@ public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterlo
 
 	public AmethystClusterBlock(int i, int j, BlockBehaviour.Properties properties) {
 		super(properties);
-		this.registerDefaultState(
-			this.defaultBlockState().setValue(LIT, Boolean.valueOf(true)).setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, Direction.UP)
-		);
+		this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, Direction.UP));
 		this.upAabb = Block.box((double)j, 0.0, (double)j, (double)(16 - j), (double)i, (double)(16 - j));
 		this.downAabb = Block.box((double)j, (double)(16 - i), (double)j, (double)(16 - j), 16.0, (double)(16 - j));
 		this.northAabb = Block.box((double)j, (double)j, (double)(16 - i), (double)(16 - j), (double)(16 - j), 16.0);
@@ -110,7 +107,7 @@ public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterlo
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(WATERLOGGED, LIT, FACING);
+		builder.add(WATERLOGGED, FACING);
 	}
 
 	@Override

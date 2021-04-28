@@ -29,14 +29,16 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_ATTACKING);
 			} else {
 				Vec3 vec3 = new Vec3(livingEntity.getX() - this.dragon.getX(), 0.0, livingEntity.getZ() - this.dragon.getZ()).normalize();
-				Vec3 vec32 = new Vec3((double)Mth.sin(this.dragon.yRot * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.yRot * (float) (Math.PI / 180.0))))
+				Vec3 vec32 = new Vec3(
+						(double)Mth.sin(this.dragon.getYRot() * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.getYRot() * (float) (Math.PI / 180.0)))
+					)
 					.normalize();
 				float f = (float)vec32.dot(vec3);
 				float g = (float)(Math.acos((double)f) * 180.0F / (float)Math.PI) + 0.5F;
 				if (g < 0.0F || g > 10.0F) {
 					double d = livingEntity.getX() - this.dragon.head.getX();
 					double e = livingEntity.getZ() - this.dragon.head.getZ();
-					double h = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(d, e) * 180.0F / (float)Math.PI - (double)this.dragon.yRot), -100.0, 100.0);
+					double h = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(d, e) * 180.0F / (float)Math.PI - (double)this.dragon.getYRot()), -100.0, 100.0);
 					this.dragon.yRotA *= 0.8F;
 					float i = Mth.sqrt(d * d + e * e) + 1.0F;
 					float j = i;
@@ -45,7 +47,7 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 					}
 
 					this.dragon.yRotA = (float)((double)this.dragon.yRotA + h * (double)(0.7F / i / j));
-					this.dragon.yRot = this.dragon.yRot + this.dragon.yRotA;
+					this.dragon.setYRot(this.dragon.getYRot() + this.dragon.yRotA);
 				}
 			}
 		} else if (this.scanningTime >= 100) {

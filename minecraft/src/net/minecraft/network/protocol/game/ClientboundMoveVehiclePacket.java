@@ -15,8 +15,8 @@ public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketList
 		this.x = entity.getX();
 		this.y = entity.getY();
 		this.z = entity.getZ();
-		this.yRot = entity.yRot;
-		this.xRot = entity.xRot;
+		this.yRot = entity.getYRot();
+		this.xRot = entity.getXRot();
 	}
 
 	public ClientboundMoveVehiclePacket(FriendlyByteBuf friendlyByteBuf) {

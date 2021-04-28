@@ -159,8 +159,8 @@ public class KeyboardHandler {
 								this.minecraft.player.getX(),
 								this.minecraft.player.getY(),
 								this.minecraft.player.getZ(),
-								this.minecraft.player.yRot,
-								this.minecraft.player.xRot
+								this.minecraft.player.getYRot(),
+								this.minecraft.player.getXRot()
 							)
 						);
 						return true;

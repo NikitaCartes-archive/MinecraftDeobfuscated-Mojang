@@ -103,13 +103,13 @@ public class Silverfish extends Monster {
 
 	@Override
 	public void tick() {
-		this.yBodyRot = this.yRot;
+		this.yBodyRot = this.getYRot();
 		super.tick();
 	}
 
 	@Override
 	public void setYBodyRot(float f) {
-		this.yRot = f;
+		this.setYRot(f);
 		super.setYBodyRot(f);
 	}
 

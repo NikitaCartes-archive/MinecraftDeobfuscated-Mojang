@@ -478,7 +478,7 @@ public abstract class Player extends LivingEntity {
 	protected void serverAiStep() {
 		super.serverAiStep();
 		this.updateSwingTime();
-		this.yHeadRot = this.yRot;
+		this.yHeadRot = this.getYRot();
 	}
 
 	@Override
@@ -598,9 +598,9 @@ public abstract class Player extends LivingEntity {
 
 		if (damageSource != null) {
 			this.setDeltaMovement(
-				(double)(-Mth.cos((this.hurtDir + this.yRot) * (float) (Math.PI / 180.0)) * 0.1F),
+				(double)(-Mth.cos((this.hurtDir + this.getYRot()) * (float) (Math.PI / 180.0)) * 0.1F),
 				0.1F,
-				(double)(-Mth.sin((this.hurtDir + this.yRot) * (float) (Math.PI / 180.0)) * 0.1F)
+				(double)(-Mth.sin((this.hurtDir + this.getYRot()) * (float) (Math.PI / 180.0)) * 0.1F)
 			);
 		} else {
 			this.setDeltaMovement(0.0, 0.1, 0.0);
@@ -685,10 +685,10 @@ public abstract class Player extends LivingEntity {
 				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
 			} else {
 				float f = 0.3F;
-				float g = Mth.sin(this.xRot * (float) (Math.PI / 180.0));
-				float h = Mth.cos(this.xRot * (float) (Math.PI / 180.0));
-				float i = Mth.sin(this.yRot * (float) (Math.PI / 180.0));
-				float j = Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+				float g = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
+				float h = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
+				float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+				float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
 				float k = this.random.nextFloat() * (float) (Math.PI * 2);
 				float l = 0.02F * this.random.nextFloat();
 				itemEntity.setDeltaMovement(
@@ -1145,12 +1145,14 @@ public abstract class Player extends LivingEntity {
 						if (i > 0) {
 							if (entity instanceof LivingEntity) {
 								((LivingEntity)entity)
-									.knockback((float)i * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+									.knockback(
+										(float)i * 0.5F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+									);
 							} else {
 								entity.push(
-									(double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * (float)i * 0.5F),
+									(double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * (float)i * 0.5F),
 									0.1,
-									(double)(Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * (float)i * 0.5F)
+									(double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * (float)i * 0.5F)
 								);
 							}
 
@@ -1167,7 +1169,9 @@ public abstract class Player extends LivingEntity {
 									&& !this.isAlliedTo(livingEntity)
 									&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
 									&& this.distanceToSqr(livingEntity) < 9.0) {
-									livingEntity.knockback(0.4F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+									livingEntity.knockback(
+										0.4F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+									);
 									livingEntity.hurt(DamageSource.playerAttack(this), l);
 								}
 							}
@@ -1268,8 +1272,8 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public void sweepAttack() {
-		double d = (double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)));
-		double e = (double)Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+		double d = (double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)));
+		double e = (double)Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
 		if (this.level instanceof ServerLevel) {
 			((ServerLevel)this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + d, this.getY(0.5), this.getZ() + e, 0, d, 0.0, e, 0.0);
 		}
@@ -2008,7 +2012,7 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public Vec3 getRopeHoldPosition(float f) {
 		double d = 0.22 * (this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0);
-		float g = Mth.lerp(f * 0.5F, this.xRot, this.xRotO) * (float) (Math.PI / 180.0);
+		float g = Mth.lerp(f * 0.5F, this.getXRot(), this.xRotO) * (float) (Math.PI / 180.0);
 		float h = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * (float) (Math.PI / 180.0);
 		if (this.isFallFlying() || this.isAutoSpinAttack()) {
 			Vec3 vec3 = this.getViewVector(f);

@@ -35,7 +35,7 @@ public class ExperienceOrb extends Entity {
 	public ExperienceOrb(Level level, double d, double e, double f, int i) {
 		this(EntityType.EXPERIENCE_ORB, level);
 		this.setPos(d, e, f);
-		this.yRot = (float)(this.random.nextDouble() * 360.0);
+		this.setYRot((float)(this.random.nextDouble() * 360.0));
 		this.setDeltaMovement((this.random.nextDouble() * 0.2F - 0.1F) * 2.0, this.random.nextDouble() * 0.2 * 2.0, (this.random.nextDouble() * 0.2F - 0.1F) * 2.0);
 		this.value = i;
 	}

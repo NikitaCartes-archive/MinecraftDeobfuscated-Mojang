@@ -296,13 +296,13 @@ public class Vex extends Monster {
 					Vex.this.setDeltaMovement(Vex.this.getDeltaMovement().add(vec3.scale(this.speedModifier * 0.05 / d)));
 					if (Vex.this.getTarget() == null) {
 						Vec3 vec32 = Vex.this.getDeltaMovement();
-						Vex.this.yRot = -((float)Mth.atan2(vec32.x, vec32.z)) * (180.0F / (float)Math.PI);
-						Vex.this.yBodyRot = Vex.this.yRot;
+						Vex.this.setYRot(-((float)Mth.atan2(vec32.x, vec32.z)) * (180.0F / (float)Math.PI));
+						Vex.this.yBodyRot = Vex.this.getYRot();
 					} else {
 						double e = Vex.this.getTarget().getX() - Vex.this.getX();
 						double f = Vex.this.getTarget().getZ() - Vex.this.getZ();
-						Vex.this.yRot = -((float)Mth.atan2(e, f)) * (180.0F / (float)Math.PI);
-						Vex.this.yBodyRot = Vex.this.yRot;
+						Vex.this.setYRot(-((float)Mth.atan2(e, f)) * (180.0F / (float)Math.PI));
+						Vex.this.yBodyRot = Vex.this.getYRot();
 					}
 				}
 			}
