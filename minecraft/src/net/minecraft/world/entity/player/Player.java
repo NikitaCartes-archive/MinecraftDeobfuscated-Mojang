@@ -1146,7 +1146,9 @@ public abstract class Player extends LivingEntity {
 							if (entity instanceof LivingEntity) {
 								((LivingEntity)entity)
 									.knockback(
-										(float)i * 0.5F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+										(double)((float)i * 0.5F),
+										(double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)),
+										(double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 									);
 							} else {
 								entity.push(

@@ -2421,7 +2421,7 @@ public class BlockModelGenerators {
 	}
 
 	private void createAmethystCluster(Block block) {
-		this.createSimpleFlatItemModel(block);
+		this.skipAutoItemBlock(block);
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(

@@ -13,7 +13,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -133,14 +132,8 @@ public class ItemEntity extends Entity {
 
 			boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
 			int i = bl ? 2 : 40;
-			if (this.tickCount % i == 0) {
-				if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA) && !this.fireImmune()) {
-					this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
-				}
-
-				if (!this.level.isClientSide && this.isMergable()) {
-					this.mergeWithNeighbours();
-				}
+			if (this.tickCount % i == 0 && !this.level.isClientSide && this.isMergable()) {
+				this.mergeWithNeighbours();
 			}
 
 			if (this.age != -32768) {
@@ -256,7 +249,7 @@ public class ItemEntity extends Entity {
 				this.discard();
 			}
 
-			return false;
+			return true;
 		}
 	}
 

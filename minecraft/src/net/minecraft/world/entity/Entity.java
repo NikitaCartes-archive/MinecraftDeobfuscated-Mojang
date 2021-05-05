@@ -484,7 +484,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.setSecondsOnFire(15);
 			}
 
-			this.hurt(DamageSource.LAVA, 4.0F);
+			if (this.hurt(DamageSource.LAVA, 4.0F)) {
+				this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
+			}
 		}
 	}
 
@@ -1315,7 +1317,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			return false;
 		} else {
 			this.markHurt();
-			return false;
+			return true;
 		}
 	}
 

@@ -24,7 +24,7 @@ public class InfestedBlock extends Block {
 	private static final Map<BlockState, BlockState> INFESTED_TO_HOST_STATES = Maps.<BlockState, BlockState>newIdentityHashMap();
 
 	public InfestedBlock(Block block, BlockBehaviour.Properties properties) {
-		super(properties);
+		super(properties.destroyTime(block.defaultDestroyTime() / 2.0F).explosionResistance(0.75F));
 		this.hostBlock = block;
 		BLOCK_BY_HOST_BLOCK.put(block, this);
 	}

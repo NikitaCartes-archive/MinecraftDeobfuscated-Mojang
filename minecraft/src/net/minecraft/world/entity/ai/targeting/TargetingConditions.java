@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 
 public class TargetingConditions {
 	public static final TargetingConditions DEFAULT = new TargetingConditions();
@@ -75,6 +76,13 @@ public class TargetingConditions {
 		} else if (this.selector != null && !this.selector.test(livingEntity2)) {
 			return false;
 		} else {
+			if (livingEntity2 instanceof ArmorStand) {
+				ArmorStand armorStand = (ArmorStand)livingEntity2;
+				if (armorStand.isInvisible() || armorStand.isMarker()) {
+					return false;
+				}
+			}
+
 			if (livingEntity != null) {
 				if (!this.allowNonAttackable) {
 					if (!livingEntity.canAttack(livingEntity2)) {

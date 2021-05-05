@@ -137,9 +137,6 @@ public abstract class ChunkGenerator {
 		WorldgenRandom worldgenRandom = new WorldgenRandom();
 		int i = 8;
 		ChunkPos chunkPos = chunkAccess.getPos();
-		BiomeGenerationSettings biomeGenerationSettings = this.biomeSource
-			.getNoiseBiome(QuartPos.fromBlock(chunkPos.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos.getMinBlockZ()))
-			.getGenerationSettings();
 		CarvingContext carvingContext = new CarvingContext(this);
 		Aquifer aquifer = this.createAquifer(chunkAccess);
 		BitSet bitSet = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
@@ -147,6 +144,9 @@ public abstract class ChunkGenerator {
 		for (int j = -8; j <= 8; j++) {
 			for (int k = -8; k <= 8; k++) {
 				ChunkPos chunkPos2 = new ChunkPos(chunkPos.x + j, chunkPos.z + k);
+				BiomeGenerationSettings biomeGenerationSettings = this.biomeSource
+					.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()))
+					.getGenerationSettings();
 				List<Supplier<ConfiguredWorldCarver<?>>> list = biomeGenerationSettings.getCarvers(carving);
 				ListIterator<Supplier<ConfiguredWorldCarver<?>>> listIterator = list.listIterator();
 

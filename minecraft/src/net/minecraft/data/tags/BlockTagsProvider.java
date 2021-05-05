@@ -618,7 +618,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.STRIDER_WARM_BLOCKS).add(Blocks.LAVA);
 		this.tag(BlockTags.CAMPFIRES).add(Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
 		this.tag(BlockTags.GUARDED_BY_PIGLINS)
-			.add(Blocks.GOLD_BLOCK, Blocks.BARREL, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.GILDED_BLACKSTONE, Blocks.TRAPPED_CHEST)
+			.add(Blocks.GOLD_BLOCK, Blocks.BARREL, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.GILDED_BLACKSTONE, Blocks.TRAPPED_CHEST, Blocks.RAW_GOLD_BLOCK)
 			.addTag(BlockTags.SHULKER_BOXES)
 			.addTag(BlockTags.GOLD_ORES);
 		this.tag(BlockTags.PREVENT_MOB_SPAWNING_INSIDE).addTag(BlockTags.RAILS);

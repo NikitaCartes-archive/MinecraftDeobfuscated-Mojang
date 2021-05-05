@@ -550,15 +550,9 @@ public abstract class LivingEntity extends Entity {
 
 	protected void tickDeath() {
 		this.deathTime++;
-		if (this.deathTime == 20) {
+		if (this.deathTime == 20 && !this.level.isClientSide()) {
+			this.level.broadcastEntityEvent(this, (byte)60);
 			this.remove(Entity.RemovalReason.KILLED);
-
-			for (int i = 0; i < 20; i++) {
-				double d = this.random.nextGaussian() * 0.02;
-				double e = this.random.nextGaussian() * 0.02;
-				double f = this.random.nextGaussian() * 0.02;
-				this.level.addParticle(ParticleTypes.POOF, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d, e, f);
-			}
 		}
 	}
 
@@ -1157,7 +1151,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected void blockedByShield(LivingEntity livingEntity) {
-		livingEntity.knockback(0.5F, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
+		livingEntity.knockback(0.5, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
 	}
 
 	private boolean checkTotemDeathProtection(DamageSource damageSource) {
@@ -1358,13 +1352,13 @@ public abstract class LivingEntity extends Entity {
 		return builder;
 	}
 
-	public void knockback(float f, double d, double e) {
-		f = (float)((double)f * (1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)));
-		if (!(f <= 0.0F)) {
+	public void knockback(double d, double e, double f) {
+		d *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+		if (!(d <= 0.0)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
-			Vec3 vec32 = new Vec3(d, 0.0, e).normalize().scale((double)f);
-			this.setDeltaMovement(vec3.x / 2.0 - vec32.x, this.onGround ? Math.min(0.4, vec3.y / 2.0 + (double)f) : vec3.y, vec3.z / 2.0 - vec32.z);
+			Vec3 vec32 = new Vec3(e, 0.0, f).normalize().scale(d);
+			this.setDeltaMovement(vec3.x / 2.0 - vec32.x, this.onGround ? Math.min(0.4, vec3.y / 2.0 + d) : vec3.y, vec3.z / 2.0 - vec32.z);
 		}
 	}
 
@@ -1706,6 +1700,8 @@ public abstract class LivingEntity extends Entity {
 			case 45:
 			case 53:
 			case 56:
+			case 58:
+			case 59:
 			default:
 				super.handleEntityEvent(b);
 				break;
@@ -1752,6 +1748,18 @@ public abstract class LivingEntity extends Entity {
 				break;
 			case 55:
 				this.swapHandItems();
+				break;
+			case 60:
+				this.makePoofParticles();
+		}
+	}
+
+	private void makePoofParticles() {
+		for (int i = 0; i < 20; i++) {
+			double d = this.random.nextGaussian() * 0.02;
+			double e = this.random.nextGaussian() * 0.02;
+			double f = this.random.nextGaussian() * 0.02;
+			this.level.addParticle(ParticleTypes.POOF, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d, e, f);
 		}
 	}
 
@@ -1885,7 +1893,7 @@ public abstract class LivingEntity extends Entity {
 		return 1.0F;
 	}
 
-	protected float getVoicePitch() {
+	public float getVoicePitch() {
 		return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F;
 	}
 

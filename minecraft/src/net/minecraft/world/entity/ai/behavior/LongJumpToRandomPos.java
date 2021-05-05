@@ -60,7 +60,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		return mob.isOnGround() && !serverLevel.getBlockState(mob.blockPosition().below()).is(Blocks.HONEY_BLOCK);
+		return mob.isOnGround() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {

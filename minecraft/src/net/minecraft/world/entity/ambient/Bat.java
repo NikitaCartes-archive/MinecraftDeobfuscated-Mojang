@@ -57,7 +57,7 @@ public class Bat extends AmbientCreature {
 	}
 
 	@Override
-	protected float getVoicePitch() {
+	public float getVoicePitch() {
 		return super.getVoicePitch() * 0.95F;
 	}
 

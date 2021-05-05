@@ -37,6 +37,10 @@ public interface SimpleWaterloggedBlock extends BucketPickup, LiquidBlockContain
 	default ItemStack pickupBlock(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
 		if ((Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
 			levelAccessor.setBlock(blockPos, blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false)), 3);
+			if (!blockState.canSurvive(levelAccessor, blockPos)) {
+				levelAccessor.destroyBlock(blockPos, true);
+			}
+
 			return new ItemStack(Items.WATER_BUCKET);
 		} else {
 			return ItemStack.EMPTY;

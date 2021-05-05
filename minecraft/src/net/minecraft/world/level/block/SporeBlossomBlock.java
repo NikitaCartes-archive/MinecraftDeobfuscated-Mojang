@@ -26,7 +26,7 @@ public class SporeBlossomBlock extends Block {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return Block.canSupportCenter(levelReader, blockPos.above(), Direction.DOWN);
+		return Block.canSupportCenter(levelReader, blockPos.above(), Direction.DOWN) && !levelReader.isWaterAt(blockPos);
 	}
 
 	@Override

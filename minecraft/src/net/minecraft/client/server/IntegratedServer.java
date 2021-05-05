@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
@@ -158,16 +159,14 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public CrashReport fillReport(CrashReport crashReport) {
-		crashReport = super.fillReport(crashReport);
-		crashReport.getSystemDetails().setDetail("Type", "Integrated Server (map_client.txt)");
-		crashReport.getSystemDetails()
-			.setDetail(
-				"Is Modded",
-				(CrashReportDetail<String>)(() -> (String)this.getModdedStatus()
-						.orElse("Probably not. Jar signature remains and both client + server brands are untouched."))
-			);
-		return crashReport;
+	public void fillReport(CrashReportCategory crashReportCategory) {
+		super.fillReport(crashReportCategory);
+		crashReportCategory.setDetail("Type", "Integrated Server (map_client.txt)");
+		crashReportCategory.setDetail(
+			"Is Modded",
+			(CrashReportDetail<String>)(() -> (String)this.getModdedStatus()
+					.orElse("Probably not. Jar signature remains and both client + server brands are untouched."))
+		);
 	}
 
 	@Override

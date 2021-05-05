@@ -368,6 +368,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	private ProfileResults fpsPieResults;
 	private ClientMetricsLogger clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
+	private final ResourceLoadStateTracker reloadStateTracker = new ResourceLoadStateTracker();
 	private String debugPath = "root";
 
 	public Minecraft(GameConfig gameConfig) {
@@ -524,6 +525,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack());
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
+		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
 		this.setOverlay(
 			new LoadingOverlay(
 				this,
@@ -532,6 +534,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 						if (SharedConstants.IS_RUNNING_IN_IDE) {
 							this.selfTest();
 						}
+
+						this.reloadStateTracker.finishReload();
 					}),
 				false
 			)
@@ -597,11 +601,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void clearResourcePacksOnError(Throwable throwable, @Nullable Component component) {
 		LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
+		this.reloadStateTracker.startRecovery(throwable);
 		this.resourcePackRepository.setSelected(Collections.emptyList());
 		this.options.resourcePacks.clear();
 		this.options.incompatibleResourcePacks.clear();
 		this.options.save();
-		this.reloadResourcePacks().thenRun(() -> {
+		this.reloadResourcePacks(true).thenRun(() -> {
 			ToastComponent toastComponent = this.getToasts();
 			SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
 		});
@@ -747,22 +752,31 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public CompletableFuture<Void> reloadResourcePacks() {
+		return this.reloadResourcePacks(false);
+	}
+
+	private CompletableFuture<Void> reloadResourcePacks(boolean bl) {
 		if (this.pendingReload != null) {
 			return this.pendingReload;
 		} else {
 			CompletableFuture<Void> completableFuture = new CompletableFuture();
-			if (this.overlay instanceof LoadingOverlay) {
+			if (!bl && this.overlay instanceof LoadingOverlay) {
 				this.pendingReload = completableFuture;
 				return completableFuture;
 			} else {
 				this.resourcePackRepository.reload();
 				List<PackResources> list = this.resourcePackRepository.openAllSelected();
+				if (!bl) {
+					this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.MANUAL, list);
+				}
+
 				this.setOverlay(
 					new LoadingOverlay(
 						this,
 						this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
 						optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
 								this.levelRenderer.allChanged();
+								this.reloadStateTracker.finishReload();
 								completableFuture.complete(null);
 							}),
 						true
@@ -1670,7 +1684,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		ResourceManager resourceManager,
 		DataPackConfig dataPackConfig
 	) {
-		RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, resourceManager, registryHolder);
+		RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, resourceManager, registryHolder);
 		WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig);
 		if (worldData == null) {
 			throw new IllegalStateException("Failed to load world");
@@ -1690,7 +1704,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			levelStorageAccess -> levelSettings.getDataPackConfig(),
 			(levelStorageAccess, registryHolder2, resourceManager, dataPackConfig) -> {
 				RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder);
-				RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, resourceManager, registryHolder);
+				RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, resourceManager, registryHolder);
 				DataResult<WorldGenSettings> dataResult = WorldGenSettings.CODEC
 					.encodeStart(registryWriteOps, worldGenSettings)
 					.setLifecycle(Lifecycle.stable())
@@ -2116,19 +2130,29 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public CrashReport fillReport(CrashReport crashReport) {
-		fillReport(this.languageManager, this.launchedVersion, this.options, crashReport);
+		fillReport(this, this.languageManager, this.launchedVersion, this.options, crashReport);
 		if (this.level != null) {
 			this.level.fillReportDetails(crashReport);
 		}
 
+		if (this.singleplayerServer != null) {
+			this.singleplayerServer.fillReport(crashReport.addCategory("Integrated server"));
+		}
+
+		this.reloadStateTracker.fillCrashReport(crashReport);
 		return crashReport;
 	}
 
-	public static void fillReport(@Nullable LanguageManager languageManager, String string, @Nullable Options options, CrashReport crashReport) {
+	public static void fillReport(
+		@Nullable Minecraft minecraft, @Nullable LanguageManager languageManager, String string, @Nullable Options options, CrashReport crashReport
+	) {
 		CrashReportCategory crashReportCategory = crashReport.getSystemDetails();
 		crashReportCategory.setDetail("Launched Version", (CrashReportDetail<String>)(() -> string));
 		crashReportCategory.setDetail("Backend library", RenderSystem::getBackendDescription);
 		crashReportCategory.setDetail("Backend API", RenderSystem::getApiDescription);
+		crashReportCategory.setDetail(
+			"Window size", (CrashReportDetail<String>)(() -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>")
+		);
 		crashReportCategory.setDetail("GL Caps", RenderSystem::getCapsString);
 		crashReportCategory.setDetail(
 			"GL debug messages", (CrashReportDetail<String>)(() -> GlDebug.isDebugEnabled() ? String.join("\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>")

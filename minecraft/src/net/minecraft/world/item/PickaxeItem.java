@@ -235,7 +235,8 @@ public class PickaxeItem extends DiggerItem {
 				Blocks.WAXED_OXIDIZED_COPPER,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS,
-				Blocks.WAXED_OXIDIZED_CUT_COPPER
+				Blocks.WAXED_OXIDIZED_CUT_COPPER,
+				Blocks.LIGHTNING_ROD
 			)) {
 				object2IntOpenHashMap.put(block, 1);
 			}

@@ -526,8 +526,8 @@ public class RenderSystem {
 	}
 
 	public static int maxSupportedTextureSize() {
-		assertThread(RenderSystem::isInInitPhase);
 		if (MAX_SUPPORTED_TEXTURE_SIZE == -1) {
+			assertThread(RenderSystem::isOnRenderThreadOrInit);
 			int i = GlStateManager._getInteger(3379);
 
 			for (int j = Math.max(32768, i); j >= 1024; j >>= 1) {

@@ -23,9 +23,10 @@ public class GoatModel<T extends Goat> extends QuadrupedModel<T> {
 			"head",
 			CubeListBuilder.create()
 				.texOffs(2, 61)
-				.addBox("left ear", 2.0F, -11.0F, -10.0F, 3.0F, 2.0F, 1.0F)
-				.texOffs(2, 61)
 				.addBox("right ear", -6.0F, -11.0F, -10.0F, 3.0F, 2.0F, 1.0F)
+				.texOffs(2, 61)
+				.mirror()
+				.addBox("left ear", 2.0F, -11.0F, -10.0F, 3.0F, 2.0F, 1.0F)
 				.texOffs(23, 52)
 				.addBox("goatee", -0.5F, -3.0F, -14.0F, 0.0F, 7.0F, 5.0F),
 			PartPose.offset(1.0F, 14.0F, 0.0F)
@@ -53,10 +54,10 @@ public class GoatModel<T extends Goat> extends QuadrupedModel<T> {
 			"right_hind_leg", CubeListBuilder.create().texOffs(49, 29).addBox(0.0F, 4.0F, 0.0F, 3.0F, 6.0F, 3.0F), PartPose.offset(-3.0F, 14.0F, 4.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"left_front_leg", CubeListBuilder.create().texOffs(49, 2).addBox(0.0F, 0.0F, 0.0F, 3.0F, 10.0F, 3.0F), PartPose.offset(-3.0F, 14.0F, -6.0F)
+			"left_front_leg", CubeListBuilder.create().texOffs(49, 2).addBox(0.0F, 0.0F, 0.0F, 3.0F, 10.0F, 3.0F), PartPose.offset(1.0F, 14.0F, -6.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"right_front_leg", CubeListBuilder.create().texOffs(35, 2).addBox(0.0F, 0.0F, 0.0F, 3.0F, 10.0F, 3.0F), PartPose.offset(1.0F, 14.0F, -6.0F)
+			"right_front_leg", CubeListBuilder.create().texOffs(35, 2).addBox(0.0F, 0.0F, 0.0F, 3.0F, 10.0F, 3.0F), PartPose.offset(-3.0F, 14.0F, -6.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}

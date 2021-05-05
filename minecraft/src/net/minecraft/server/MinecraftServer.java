@@ -53,6 +53,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -695,11 +696,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			LOGGER.error("Encountered an unexpected exception", var44);
 			CrashReport crashReport;
 			if (var44 instanceof ReportedException) {
-				crashReport = this.fillReport(((ReportedException)var44).getReport());
+				crashReport = ((ReportedException)var44).getReport();
 			} else {
-				crashReport = this.fillReport(new CrashReport("Exception in server tick loop", var44));
+				crashReport = new CrashReport("Exception in server tick loop", var44);
 			}
 
+			this.fillReport(crashReport.getSystemDetails());
 			File file = new File(
 				new File(this.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt"
 			);
@@ -961,16 +963,15 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return "vanilla";
 	}
 
-	public CrashReport fillReport(CrashReport crashReport) {
+	public void fillReport(CrashReportCategory crashReportCategory) {
 		if (this.playerList != null) {
-			crashReport.getSystemDetails()
-				.setDetail(
-					"Player Count",
-					(CrashReportDetail<String>)(() -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers())
-				);
+			crashReportCategory.setDetail(
+				"Player Count",
+				(CrashReportDetail<String>)(() -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers())
+			);
 		}
 
-		crashReport.getSystemDetails().setDetail("Data Packs", (CrashReportDetail<String>)(() -> {
+		crashReportCategory.setDetail("Data Packs", (CrashReportDetail<String>)(() -> {
 			StringBuilder stringBuilder = new StringBuilder();
 
 			for (Pack pack : this.packRepository.getSelectedPacks()) {
@@ -987,10 +988,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			return stringBuilder.toString();
 		}));
 		if (this.serverId != null) {
-			crashReport.getSystemDetails().setDetail("Server Id", (CrashReportDetail<String>)(() -> this.serverId));
+			crashReportCategory.setDetail("Server Id", (CrashReportDetail<String>)(() -> this.serverId));
 		}
-
-		return crashReport;
 	}
 
 	public abstract Optional<String> getModdedStatus();
@@ -1567,7 +1566,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	private void dumpCrashCategory(Path path) throws IOException {
 		CrashReport crashReport = new CrashReport("Server dump", new Exception("dummy"));
-		this.fillReport(crashReport);
+		this.fillReport(crashReport.getSystemDetails());
 		Writer writer = Files.newBufferedWriter(path);
 		Throwable var4 = null;
 

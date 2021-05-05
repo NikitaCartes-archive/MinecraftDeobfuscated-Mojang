@@ -50,7 +50,12 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 public class Goat extends Animal {
 	public static final EntityDimensions LONG_JUMPING_DIMENSIONS = EntityDimensions.scalable(0.9F, 1.3F).scale(0.7F);
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Goat>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.GOAT_TEMPTATIONS
+		SensorType.NEAREST_LIVING_ENTITIES,
+		SensorType.NEAREST_PLAYERS,
+		SensorType.NEAREST_ITEMS,
+		SensorType.NEAREST_ADULT,
+		SensorType.HURT_BY,
+		SensorType.GOAT_TEMPTATIONS
 	);
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
@@ -63,6 +68,7 @@ public class Goat extends Animal {
 		MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS,
 		MemoryModuleType.LONG_JUMP_MID_JUMP,
 		MemoryModuleType.TEMPTING_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_ADULT,
 		MemoryModuleType.TEMPTATION_COOLDOWN_TICKS,
 		MemoryModuleType.IS_TEMPTED,
 		MemoryModuleType.RAM_COOLDOWN_TICKS,
@@ -133,11 +139,6 @@ public class Goat extends Animal {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? entityDimensions.height * 0.95F : 1.3F;
-	}
-
-	@Override
 	public Brain<Goat> getBrain() {
 		return (Brain<Goat>)super.getBrain();
 	}
@@ -156,6 +157,14 @@ public class Goat extends Animal {
 	@Override
 	public int getMaxHeadYRot() {
 		return 15;
+	}
+
+	@Override
+	public void setYHeadRot(float f) {
+		int i = this.getMaxHeadYRot();
+		float g = Mth.degreesDifference(this.yBodyRot, f);
+		float h = Mth.clamp(g, (float)(-i), (float)i);
+		super.setYHeadRot(this.yBodyRot + h);
 	}
 
 	@Override

@@ -44,9 +44,9 @@ public class Carvers {
 					VerticalAnchor.aboveBottom(8),
 					false,
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
-					UniformFloat.of(0.3F, 1.8F),
-					UniformFloat.of(0.5F, 1.8F),
-					UniformFloat.of(-1.0F, 0.0F)
+					UniformFloat.of(0.7F, 1.4F),
+					UniformFloat.of(0.8F, 1.3F),
+					UniformFloat.of(-1.0F, -0.4F)
 				)
 			)
 	);
@@ -100,23 +100,6 @@ public class Carvers {
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(-0.7F)
-				)
-			)
-	);
-	public static final ConfiguredWorldCarver<CaveCarverConfiguration> PROTOTYPE_OCEAN_CAVE = register(
-		"prototype_ocean_cave",
-		WorldCarver.CAVE
-			.configured(
-				new CaveCarverConfiguration(
-					0.14285715F,
-					BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(127), 8),
-					UniformFloat.of(0.1F, 0.9F),
-					VerticalAnchor.aboveBottom(8),
-					false,
-					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
-					ConstantFloat.of(1.0F),
-					ConstantFloat.of(1.0F),
-					UniformFloat.of(-1.0F, 0.0F)
 				)
 			)
 	);

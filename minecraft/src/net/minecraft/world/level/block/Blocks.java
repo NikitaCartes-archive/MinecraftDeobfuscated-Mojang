@@ -140,19 +140,20 @@ public class Blocks {
 		"gold_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
 	);
 	public static final Block DEEPSLATE_GOLD_ORE = register(
-		"deepslate_gold_ore", new OreBlock(BlockBehaviour.Properties.copy(GOLD_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+		"deepslate_gold_ore", new OreBlock(BlockBehaviour.Properties.copy(GOLD_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block IRON_ORE = register(
 		"iron_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
 	);
 	public static final Block DEEPSLATE_IRON_ORE = register(
-		"deepslate_iron_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+		"deepslate_iron_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block COAL_ORE = register(
 		"coal_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(0, 2))
 	);
 	public static final Block DEEPSLATE_COAL_ORE = register(
-		"deepslate_coal_ore", new OreBlock(BlockBehaviour.Properties.copy(COAL_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(0, 2))
+		"deepslate_coal_ore",
+		new OreBlock(BlockBehaviour.Properties.copy(COAL_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(0, 2))
 	);
 	public static final Block NETHER_GOLD_ORE = register(
 		"nether_gold_ore",
@@ -238,7 +239,8 @@ public class Blocks {
 		"lapis_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(2, 5))
 	);
 	public static final Block DEEPSLATE_LAPIS_ORE = register(
-		"deepslate_lapis_ore", new OreBlock(BlockBehaviour.Properties.copy(LAPIS_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(2, 5))
+		"deepslate_lapis_ore",
+		new OreBlock(BlockBehaviour.Properties.copy(LAPIS_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(2, 5))
 	);
 	public static final Block LAPIS_BLOCK = register(
 		"lapis_block", new Block(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.LAPIS).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
@@ -481,7 +483,8 @@ public class Blocks {
 		"diamond_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7))
 	);
 	public static final Block DEEPSLATE_DIAMOND_ORE = register(
-		"deepslate_diamond_ore", new OreBlock(BlockBehaviour.Properties.copy(DIAMOND_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(3, 7))
+		"deepslate_diamond_ore",
+		new OreBlock(BlockBehaviour.Properties.copy(DIAMOND_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(3, 7))
 	);
 	public static final Block DIAMOND_BLOCK = register(
 		"diamond_block",
@@ -656,7 +659,8 @@ public class Blocks {
 		)
 	);
 	public static final Block DEEPSLATE_REDSTONE_ORE = register(
-		"deepslate_redstone_ore", new RedStoneOreBlock(BlockBehaviour.Properties.copy(REDSTONE_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+		"deepslate_redstone_ore",
+		new RedStoneOreBlock(BlockBehaviour.Properties.copy(REDSTONE_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block REDSTONE_TORCH = register(
 		"redstone_torch",
@@ -849,23 +853,19 @@ public class Blocks {
 	public static final Block CHISELED_STONE_BRICKS = register(
 		"chiseled_stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
-	public static final Block INFESTED_STONE = register(
-		"infested_stone", new InfestedBlock(STONE, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
-	);
-	public static final Block INFESTED_COBBLESTONE = register(
-		"infested_cobblestone", new InfestedBlock(COBBLESTONE, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
-	);
+	public static final Block INFESTED_STONE = register("infested_stone", new InfestedBlock(STONE, BlockBehaviour.Properties.of(Material.CLAY)));
+	public static final Block INFESTED_COBBLESTONE = register("infested_cobblestone", new InfestedBlock(COBBLESTONE, BlockBehaviour.Properties.of(Material.CLAY)));
 	public static final Block INFESTED_STONE_BRICKS = register(
-		"infested_stone_bricks", new InfestedBlock(STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
+		"infested_stone_bricks", new InfestedBlock(STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY))
 	);
 	public static final Block INFESTED_MOSSY_STONE_BRICKS = register(
-		"infested_mossy_stone_bricks", new InfestedBlock(MOSSY_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
+		"infested_mossy_stone_bricks", new InfestedBlock(MOSSY_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY))
 	);
 	public static final Block INFESTED_CRACKED_STONE_BRICKS = register(
-		"infested_cracked_stone_bricks", new InfestedBlock(CRACKED_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
+		"infested_cracked_stone_bricks", new InfestedBlock(CRACKED_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY))
 	);
 	public static final Block INFESTED_CHISELED_STONE_BRICKS = register(
-		"infested_chiseled_stone_bricks", new InfestedBlock(CHISELED_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY).strength(0.0F, 0.75F))
+		"infested_chiseled_stone_bricks", new InfestedBlock(CHISELED_STONE_BRICKS, BlockBehaviour.Properties.of(Material.CLAY))
 	);
 	public static final Block BROWN_MUSHROOM_BLOCK = register(
 		"brown_mushroom_block", new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(0.2F).sound(SoundType.WOOD))
@@ -1027,7 +1027,8 @@ public class Blocks {
 		"emerald_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7))
 	);
 	public static final Block DEEPSLATE_EMERALD_ORE = register(
-		"deepslate_emerald_ore", new OreBlock(BlockBehaviour.Properties.copy(EMERALD_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(3, 7))
+		"deepslate_emerald_ore",
+		new OreBlock(BlockBehaviour.Properties.copy(EMERALD_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE), UniformInt.of(3, 7))
 	);
 	public static final Block ENDER_CHEST = register(
 		"ender_chest",
@@ -3217,7 +3218,8 @@ public class Blocks {
 	);
 	public static final Block COPPER_ORE = register("copper_ore", new OreBlock(BlockBehaviour.Properties.copy(IRON_ORE)));
 	public static final Block DEEPSLATE_COPPER_ORE = register(
-		"deepslate_copper_ore", new OreBlock(BlockBehaviour.Properties.copy(COPPER_ORE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+		"deepslate_copper_ore",
+		new OreBlock(BlockBehaviour.Properties.copy(COPPER_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block OXIDIZED_CUT_COPPER = register(
 		"oxidized_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_COPPER))
@@ -3414,9 +3416,7 @@ public class Blocks {
 	public static final Block CRACKED_DEEPSLATE_TILES = register("cracked_deepslate_tiles", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
 	public static final Block INFESTED_DEEPSLATE = register(
 		"infested_deepslate",
-		new InfestedRotatedPillarBlock(
-			DEEPSLATE, BlockBehaviour.Properties.of(Material.CLAY, MaterialColor.DEEPSLATE).strength(0.0F, 0.75F).sound(SoundType.DEEPSLATE)
-		)
+		new InfestedRotatedPillarBlock(DEEPSLATE, BlockBehaviour.Properties.of(Material.CLAY, MaterialColor.DEEPSLATE).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
 	public static final Block RAW_IRON_BLOCK = register(

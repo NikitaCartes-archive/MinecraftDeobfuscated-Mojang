@@ -95,37 +95,42 @@ public class RenderTarget {
 
 	public void createBuffers(int i, int j, boolean bl) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		this.viewWidth = i;
-		this.viewHeight = j;
-		this.width = i;
-		this.height = j;
-		this.frameBufferId = GlStateManager.glGenFramebuffers();
-		this.colorTextureId = TextureUtil.generateTextureId();
-		if (this.useDepth) {
-			this.depthBufferId = TextureUtil.generateTextureId();
-			GlStateManager._bindTexture(this.depthBufferId);
-			GlStateManager._texParameter(3553, 10241, 9728);
-			GlStateManager._texParameter(3553, 10240, 9728);
-			GlStateManager._texParameter(3553, 34892, 0);
+		int k = RenderSystem.maxSupportedTextureSize();
+		if (i > 0 && i <= k && j > 0 && j <= k) {
+			this.viewWidth = i;
+			this.viewHeight = j;
+			this.width = i;
+			this.height = j;
+			this.frameBufferId = GlStateManager.glGenFramebuffers();
+			this.colorTextureId = TextureUtil.generateTextureId();
+			if (this.useDepth) {
+				this.depthBufferId = TextureUtil.generateTextureId();
+				GlStateManager._bindTexture(this.depthBufferId);
+				GlStateManager._texParameter(3553, 10241, 9728);
+				GlStateManager._texParameter(3553, 10240, 9728);
+				GlStateManager._texParameter(3553, 34892, 0);
+				GlStateManager._texParameter(3553, 10242, 33071);
+				GlStateManager._texParameter(3553, 10243, 33071);
+				GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
+			}
+
+			this.setFilterMode(9728);
+			GlStateManager._bindTexture(this.colorTextureId);
 			GlStateManager._texParameter(3553, 10242, 33071);
 			GlStateManager._texParameter(3553, 10243, 33071);
-			GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
-		}
+			GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
+			GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
+			GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
+			if (this.useDepth) {
+				GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
+			}
 
-		this.setFilterMode(9728);
-		GlStateManager._bindTexture(this.colorTextureId);
-		GlStateManager._texParameter(3553, 10242, 33071);
-		GlStateManager._texParameter(3553, 10243, 33071);
-		GlStateManager._texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
-		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
-		GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
-		if (this.useDepth) {
-			GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
+			this.checkStatus();
+			this.clear(bl);
+			this.unbindRead();
+		} else {
+			throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
 		}
-
-		this.checkStatus();
-		this.clear(bl);
-		this.unbindRead();
 	}
 
 	public void setFilterMode(int i) {

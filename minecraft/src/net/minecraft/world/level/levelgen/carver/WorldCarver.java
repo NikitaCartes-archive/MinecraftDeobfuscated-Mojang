@@ -78,7 +78,10 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Blocks.GRANITE,
 		Blocks.IRON_ORE,
 		Blocks.DEEPSLATE_IRON_ORE,
-		Blocks.COPPER_ORE
+		Blocks.RAW_IRON_BLOCK,
+		Blocks.COPPER_ORE,
+		Blocks.DEEPSLATE_COPPER_ORE,
+		Blocks.RAW_COPPER_BLOCK
 	);
 	protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
 	private final Codec<ConfiguredWorldCarver<C>> configuredCodec;

@@ -11,7 +11,8 @@ public class FoliageColor {
 		e *= d;
 		int i = (int)((1.0 - d) * 255.0);
 		int j = (int)((1.0 - e) * 255.0);
-		return pixels[j << 8 | i];
+		int k = j << 8 | i;
+		return k >= pixels.length ? getDefaultColor() : pixels[k];
 	}
 
 	public static int getEvergreenColor() {

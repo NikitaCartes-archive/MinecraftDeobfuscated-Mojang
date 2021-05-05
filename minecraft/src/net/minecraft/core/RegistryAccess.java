@@ -95,7 +95,7 @@ public abstract class RegistryAccess {
 			addBuiltinElements(registryHolder, memoryMap, registryData);
 		}
 
-		RegistryReadOps.create(JsonOps.INSTANCE, memoryMap, registryHolder);
+		RegistryReadOps.createAndLoad(JsonOps.INSTANCE, memoryMap, registryHolder);
 		return registryHolder;
 	}
 

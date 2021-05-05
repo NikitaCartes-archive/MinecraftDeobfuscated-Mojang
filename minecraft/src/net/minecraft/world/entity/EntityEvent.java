@@ -60,4 +60,5 @@ public class EntityEvent {
 	public static final byte FROZEN = 57;
 	public static final byte START_RAM = 58;
 	public static final byte END_RAM = 59;
+	public static final byte POOF = 60;
 }

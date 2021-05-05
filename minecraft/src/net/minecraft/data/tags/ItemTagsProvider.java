@@ -136,7 +136,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.GOLDEN_SHOVEL,
 				Items.GOLDEN_AXE,
 				Items.GOLDEN_HOE,
-				Items.RAW_GOLD
+				Items.RAW_GOLD,
+				Items.RAW_GOLD_BLOCK
 			);
 		this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
 		this.tag(ItemTags.PIGLIN_FOOD).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);
