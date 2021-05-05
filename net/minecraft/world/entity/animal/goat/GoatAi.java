@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -52,7 +53,8 @@ public class GoatAi {
     public static final int MAX_LONG_JUMP_WIDTH = 5;
     public static final float MAX_JUMP_VELOCITY = 1.5f;
     private static final UniformInt TIME_BETWEEN_RAMS = UniformInt.of(600, 6000);
-    private static final TargetingConditions RAM_TARGET_CONDITIONS = new TargetingConditions().selector(livingEntity -> !livingEntity.getType().equals(EntityType.GOAT));
+    private static final UniformInt TIME_BETWEEN_RAMS_SCREAMER = UniformInt.of(100, 300);
+    private static final TargetingConditions RAM_TARGET_CONDITIONS = new TargetingConditions().selector(livingEntity -> !livingEntity.getType().equals(EntityType.GOAT) && (livingEntity.level.getDifficulty() != Difficulty.PEACEFUL || !livingEntity.getType().equals(EntityType.PLAYER)));
     private static final float SPEED_MULTIPLIER_WHEN_RAMMING = 3.0f;
     public static final int RAM_MIN_DISTANCE = 4;
     private static final int ADULT_RAM_DAMAGE = 2;
@@ -89,7 +91,7 @@ public class GoatAi {
     }
 
     private static void initRamActivity(Brain<Goat> brain) {
-        brain.addActivityWithConditions(Activity.RAM, ImmutableList.of(Pair.of(0, new RamTarget<Goat>(TIME_BETWEEN_RAMS, RAM_TARGET_CONDITIONS, goat -> goat.isBaby() ? 1 : 2, 3.0f, goat -> Float.valueOf(goat.isBaby() ? 1.0f : 2.5f), goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_RAM_IMPACT : SoundEvents.GOAT_RAM_IMPACT)), Pair.of(1, new PrepareRamNearestTarget<Goat>(TIME_BETWEEN_RAMS.getMinValue(), 4, 7, 1.25f, RAM_TARGET_CONDITIONS, 20, goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_PREPARE_RAM : SoundEvents.GOAT_PREPARE_RAM))), ImmutableSet.of(Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT)));
+        brain.addActivityWithConditions(Activity.RAM, ImmutableList.of(Pair.of(0, new RamTarget<Goat>(goat -> goat.isScreamingGoat() ? TIME_BETWEEN_RAMS_SCREAMER : TIME_BETWEEN_RAMS, RAM_TARGET_CONDITIONS, goat -> goat.isBaby() ? 1 : 2, 3.0f, goat -> goat.isBaby() ? 1.0 : 2.5, goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_RAM_IMPACT : SoundEvents.GOAT_RAM_IMPACT)), Pair.of(1, new PrepareRamNearestTarget<Goat>(goat -> goat.isScreamingGoat() ? TIME_BETWEEN_RAMS_SCREAMER.getMinValue() : TIME_BETWEEN_RAMS.getMinValue(), 4, 7, 1.25f, RAM_TARGET_CONDITIONS, 20, goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_PREPARE_RAM : SoundEvents.GOAT_PREPARE_RAM))), ImmutableSet.of(Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT)));
     }
 
     public static void updateActivity(Goat goat) {

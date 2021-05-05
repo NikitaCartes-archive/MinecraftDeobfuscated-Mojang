@@ -29,7 +29,7 @@ extends Block {
     private static final Map<BlockState, BlockState> INFESTED_TO_HOST_STATES = Maps.newIdentityHashMap();
 
     public InfestedBlock(Block block, BlockBehaviour.Properties properties) {
-        super(properties);
+        super(properties.destroyTime(block.defaultDestroyTime() / 2.0f).explosionResistance(0.75f));
         this.hostBlock = block;
         BLOCK_BY_HOST_BLOCK.put(block, this);
     }

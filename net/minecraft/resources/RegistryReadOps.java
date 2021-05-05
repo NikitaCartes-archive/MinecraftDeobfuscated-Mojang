@@ -45,14 +45,22 @@ extends DelegatingOps<T> {
     private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache;
     private final RegistryReadOps<JsonElement> jsonOps;
 
+    public static <T> RegistryReadOps<T> createAndLoad(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess registryAccess) {
+        return RegistryReadOps.createAndLoad(dynamicOps, ResourceAccess.forResourceManager(resourceManager), registryAccess);
+    }
+
+    public static <T> RegistryReadOps<T> createAndLoad(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess registryAccess) {
+        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceAccess, registryAccess, Maps.newIdentityHashMap());
+        RegistryAccess.load(registryAccess, registryReadOps);
+        return registryReadOps;
+    }
+
     public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess registryAccess) {
         return RegistryReadOps.create(dynamicOps, ResourceAccess.forResourceManager(resourceManager), registryAccess);
     }
 
     public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess registryAccess) {
-        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceAccess, registryAccess, Maps.newIdentityHashMap());
-        RegistryAccess.load(registryAccess, registryReadOps);
-        return registryReadOps;
+        return new RegistryReadOps<T>(dynamicOps, resourceAccess, registryAccess, Maps.newIdentityHashMap());
     }
 
     private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess registryAccess, IdentityHashMap<ResourceKey<? extends Registry<?>>, ReadCache<?>> identityHashMap) {

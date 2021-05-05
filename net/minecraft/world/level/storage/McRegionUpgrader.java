@@ -59,7 +59,7 @@ public class McRegionUpgrader {
         int i = list.size() + list2.size() + list3.size();
         LOGGER.info("Total conversion count is {}", (Object)i);
         RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, ResourceManager.Empty.INSTANCE, (RegistryAccess)registryHolder);
+        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, ResourceManager.Empty.INSTANCE, (RegistryAccess)registryHolder);
         WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, DataPackConfig.DEFAULT);
         long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
         Registry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);

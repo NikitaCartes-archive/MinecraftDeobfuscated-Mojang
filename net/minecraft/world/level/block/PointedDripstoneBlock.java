@@ -56,12 +56,12 @@ SimpleWaterloggedBlock {
     public static final DirectionProperty TIP_DIRECTION = BlockStateProperties.VERTICAL_DIRECTION;
     public static final EnumProperty<DripstoneThickness> THICKNESS = BlockStateProperties.DRIPSTONE_THICKNESS;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-    private static final int MAX_SEARCH_LENGTH_WHEN_CHECKING_DRIP_TYPE = 10;
+    private static final int MAX_SEARCH_LENGTH_WHEN_CHECKING_DRIP_TYPE = 11;
     private static final int MAX_SEARCH_LENGTH_WHEN_LOOKING_FOR_TIP_OF_FALLING_STALACTITE = Integer.MAX_VALUE;
     private static final int DELAY_BEFORE_FALLING = 2;
     private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK = 0.02f;
     private static final float DRIP_PROBABILITY_PER_ANIMATE_TICK_IF_UNDER_LIQUID_SOURCE = 0.12f;
-    private static final int MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON = 10;
+    private static final int MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON = 11;
     private static final float WATER_CAULDRON_FILL_PROBABILITY_PER_RANDOM_TICK = 0.17578125f;
     private static final float LAVA_CAULDRON_FILL_PROBABILITY_PER_RANDOM_TICK = 0.05859375f;
     private static final double MIN_TRIDENT_VELOCITY_TO_BREAK_DRIPSTONE = 0.6;
@@ -188,7 +188,7 @@ SimpleWaterloggedBlock {
         if (f >= g) {
             return;
         }
-        BlockPos blockPos2 = PointedDripstoneBlock.findTip(blockState, serverLevel, blockPos, 10, false);
+        BlockPos blockPos2 = PointedDripstoneBlock.findTip(blockState, serverLevel, blockPos, 11, false);
         if (blockPos2 == null) {
             return;
         }
@@ -309,12 +309,8 @@ SimpleWaterloggedBlock {
     @VisibleForTesting
     public static void growStalactiteOrStalagmiteIfPossible(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BlockState blockState3;
-        Optional<BlockPos> optional = PointedDripstoneBlock.findRootBlock(serverLevel, blockPos, blockState, 7);
-        if (!optional.isPresent()) {
-            return;
-        }
-        BlockState blockState2 = serverLevel.getBlockState(optional.get());
-        if (!PointedDripstoneBlock.canGrow(blockState2, blockState3 = serverLevel.getBlockState(optional.get().above()))) {
+        BlockState blockState2 = serverLevel.getBlockState(blockPos.above(1));
+        if (!PointedDripstoneBlock.canGrow(blockState2, blockState3 = serverLevel.getBlockState(blockPos.above(2)))) {
             return;
         }
         BlockPos blockPos2 = PointedDripstoneBlock.findTip(blockState, serverLevel, blockPos, 7, false);
@@ -505,12 +501,12 @@ SimpleWaterloggedBlock {
     @Nullable
     private static BlockPos findFillableCauldronBelowStalactiteTip(Level level, BlockPos blockPos, Fluid fluid) {
         Predicate<BlockState> predicate = blockState -> blockState.getBlock() instanceof AbstractCauldronBlock && ((AbstractCauldronBlock)blockState.getBlock()).canReceiveStalactiteDrip(fluid);
-        return PointedDripstoneBlock.findBlockVertical(level, blockPos, Direction.DOWN.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, predicate, 10).orElse(null);
+        return PointedDripstoneBlock.findBlockVertical(level, blockPos, Direction.DOWN.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, predicate, 11).orElse(null);
     }
 
     @Nullable
     public static BlockPos findStalactiteTipAboveCauldron(Level level, BlockPos blockPos) {
-        return PointedDripstoneBlock.findBlockVertical(level, blockPos, Direction.UP.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, PointedDripstoneBlock::canDrip, 10).orElse(null);
+        return PointedDripstoneBlock.findBlockVertical(level, blockPos, Direction.UP.getAxisDirection(), BlockBehaviour.BlockStateBase::isAir, PointedDripstoneBlock::canDrip, 11).orElse(null);
     }
 
     public static Fluid getCauldronFillFluidType(Level level, BlockPos blockPos) {
@@ -521,7 +517,7 @@ SimpleWaterloggedBlock {
         if (!PointedDripstoneBlock.isStalactite(blockState)) {
             return Optional.empty();
         }
-        return PointedDripstoneBlock.findRootBlock(level, blockPos2, blockState, 10).map(blockPos -> level.getFluidState(blockPos.above()).getType());
+        return PointedDripstoneBlock.findRootBlock(level, blockPos2, blockState, 11).map(blockPos -> level.getFluidState(blockPos.above()).getType());
     }
 
     private static boolean canFillCauldron(Fluid fluid) {
@@ -542,11 +538,11 @@ SimpleWaterloggedBlock {
     private static Optional<BlockPos> findBlockVertical(LevelAccessor levelAccessor, BlockPos blockPos, Direction.AxisDirection axisDirection, Predicate<BlockState> predicate, Predicate<BlockState> predicate2, int i) {
         Direction direction = Direction.get(axisDirection, Direction.Axis.Y);
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        for (int j = 0; j < i; ++j) {
+        for (int j = 1; j < i; ++j) {
             mutableBlockPos.move(direction);
             BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
             if (predicate2.test(blockState)) {
-                return Optional.of(mutableBlockPos);
+                return Optional.of(mutableBlockPos.immutable());
             }
             if (!levelAccessor.isOutsideBuildHeight(mutableBlockPos.getY()) && predicate.test(blockState)) continue;
             return Optional.empty();

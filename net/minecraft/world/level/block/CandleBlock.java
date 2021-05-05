@@ -67,7 +67,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (player.getItemInHand(interactionHand).isEmpty() && blockState.getValue(LIT).booleanValue()) {
+        if (player.getAbilities().mayBuild && player.getItemInHand(interactionHand).isEmpty() && blockState.getValue(LIT).booleanValue()) {
             CandleBlock.extinguish(player, blockState, level, blockPos);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }

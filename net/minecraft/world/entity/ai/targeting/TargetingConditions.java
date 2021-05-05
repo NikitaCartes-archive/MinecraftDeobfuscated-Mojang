@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.targeting;
 import java.util.function.Predicate;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jetbrains.annotations.Nullable;
 
 public class TargetingConditions {
@@ -67,6 +68,7 @@ public class TargetingConditions {
     }
 
     public boolean test(@Nullable LivingEntity livingEntity, LivingEntity livingEntity2) {
+        ArmorStand armorStand;
         if (livingEntity == livingEntity2) {
             return false;
         }
@@ -80,6 +82,9 @@ public class TargetingConditions {
             return false;
         }
         if (this.selector != null && !this.selector.test(livingEntity2)) {
+            return false;
+        }
+        if (livingEntity2 instanceof ArmorStand && ((armorStand = (ArmorStand)livingEntity2).isInvisible() || armorStand.isMarker())) {
             return false;
         }
         if (livingEntity != null) {

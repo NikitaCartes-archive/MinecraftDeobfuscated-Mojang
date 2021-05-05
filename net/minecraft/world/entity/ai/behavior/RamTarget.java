@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -29,22 +31,22 @@ public class RamTarget<E extends PathfinderMob>
 extends Behavior<E> {
     public static final int TIME_OUT_DURATION = 200;
     public static final float RAM_SPEED_FORCE_FACTOR = 1.65f;
-    private final UniformInt timeBetweenRams;
-    private final TargetingConditions targeting;
-    private final Function<E, Integer> getDamage;
+    private final Function<E, UniformInt> getTimeBetweenRams;
+    private final TargetingConditions ramTargeting;
+    private final ToIntFunction<E> getDamage;
     private final float speed;
-    private final Function<E, Float> getKnockbackForce;
+    private final ToDoubleFunction<E> getKnockbackForce;
     private Vec3 ramDirection;
     private final Function<E, SoundEvent> getImpactSound;
 
-    public RamTarget(UniformInt uniformInt, TargetingConditions targetingConditions, Function<E, Integer> function, float f, Function<E, Float> function2, Function<E, SoundEvent> function3) {
+    public RamTarget(Function<E, UniformInt> function, TargetingConditions targetingConditions, ToIntFunction<E> toIntFunction, float f, ToDoubleFunction<E> toDoubleFunction, Function<E, SoundEvent> function2) {
         super(ImmutableMap.of(MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.RAM_TARGET, MemoryStatus.VALUE_PRESENT), 200);
-        this.timeBetweenRams = uniformInt;
-        this.targeting = targetingConditions;
-        this.getDamage = function;
+        this.getTimeBetweenRams = function;
+        this.ramTargeting = targetingConditions;
+        this.getDamage = toIntFunction;
         this.speed = f;
-        this.getKnockbackForce = function2;
-        this.getImpactSound = function3;
+        this.getKnockbackForce = toDoubleFunction;
+        this.getImpactSound = function2;
         this.ramDirection = Vec3.ZERO;
     }
 
@@ -69,15 +71,15 @@ extends Behavior<E> {
 
     @Override
     protected void tick(ServerLevel serverLevel, E pathfinderMob, long l) {
-        List<LivingEntity> list = serverLevel.getNearbyEntities(LivingEntity.class, this.targeting, (LivingEntity)pathfinderMob, ((Entity)pathfinderMob).getBoundingBox());
+        List<LivingEntity> list = serverLevel.getNearbyEntities(LivingEntity.class, this.ramTargeting, (LivingEntity)pathfinderMob, ((Entity)pathfinderMob).getBoundingBox());
         Brain<?> brain = ((LivingEntity)pathfinderMob).getBrain();
         if (!list.isEmpty()) {
             LivingEntity livingEntity = list.get(0);
-            livingEntity.hurt(DamageSource.mobAttack(pathfinderMob), this.getDamage.apply(pathfinderMob).intValue());
+            livingEntity.hurt(DamageSource.mobAttack(pathfinderMob), this.getDamage.applyAsInt(pathfinderMob));
             float f = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(pathfinderMob)) ? 0.5f : 1.0f;
             float g = Mth.clamp(((LivingEntity)pathfinderMob).getSpeed() * 1.65f, 0.2f, 3.0f);
-            livingEntity.knockback(f * g * this.getKnockbackForce.apply(pathfinderMob).floatValue(), this.ramDirection.x(), this.ramDirection.z());
-            this.finishRam(serverLevel, (PathfinderMob)pathfinderMob);
+            livingEntity.knockback((double)(f * g) * this.getKnockbackForce.applyAsDouble(pathfinderMob), this.ramDirection.x(), this.ramDirection.z());
+            this.finishRam(serverLevel, pathfinderMob);
             serverLevel.playSound(null, (Entity)pathfinderMob, this.getImpactSound.apply(pathfinderMob), SoundSource.HOSTILE, 1.0f, 1.0f);
         } else {
             boolean bl;
@@ -85,15 +87,15 @@ extends Behavior<E> {
             Optional<Vec3> optional2 = brain.getMemory(MemoryModuleType.RAM_TARGET);
             boolean bl2 = bl = !optional.isPresent() || !optional2.isPresent() || optional.get().getTarget().currentPosition().distanceTo(optional2.get()) < 0.25;
             if (bl) {
-                this.finishRam(serverLevel, (PathfinderMob)pathfinderMob);
+                this.finishRam(serverLevel, pathfinderMob);
             }
         }
     }
 
-    protected void finishRam(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-        serverLevel.broadcastEntityEvent(pathfinderMob, (byte)59);
-        pathfinderMob.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, this.timeBetweenRams.sample(serverLevel.random));
-        pathfinderMob.getBrain().eraseMemory(MemoryModuleType.RAM_TARGET);
+    protected void finishRam(ServerLevel serverLevel, E pathfinderMob) {
+        serverLevel.broadcastEntityEvent((Entity)pathfinderMob, (byte)59);
+        ((LivingEntity)pathfinderMob).getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, this.getTimeBetweenRams.apply(pathfinderMob).sample(serverLevel.random));
+        ((LivingEntity)pathfinderMob).getBrain().eraseMemory(MemoryModuleType.RAM_TARGET);
     }
 
     @Override

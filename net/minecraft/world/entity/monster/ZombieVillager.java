@@ -234,7 +234,7 @@ implements VillagerDataHolder {
     }
 
     @Override
-    protected float getVoicePitch() {
+    public float getVoicePitch() {
         if (this.isBaby()) {
             return (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 2.0f;
         }

@@ -59,6 +59,9 @@ implements AutoCloseable {
     }
 
     public NativeImage(Format format, int i, int j, boolean bl) {
+        if (i <= 0 || j <= 0) {
+            throw new IllegalArgumentException("Invalid texture size: " + i + "x" + j);
+        }
         this.format = format;
         this.width = i;
         this.height = j;
@@ -68,16 +71,23 @@ implements AutoCloseable {
     }
 
     private NativeImage(Format format, int i, int j, boolean bl, long l) {
+        if (i <= 0 || j <= 0) {
+            throw new IllegalArgumentException("Invalid texture size: " + i + "x" + j);
+        }
         this.format = format;
         this.width = i;
         this.height = j;
         this.useStbFree = bl;
         this.pixels = l;
-        this.size = i * j * format.components();
+        this.size = (long)i * (long)j * (long)format.components();
     }
 
     public String toString() {
         return "NativeImage[" + (Object)((Object)this.format) + " " + this.width + "x" + this.height + "@" + this.pixels + (this.useStbFree ? "S" : "N") + "]";
+    }
+
+    private boolean isOutsideBounds(int i, int j) {
+        return i < 0 || i >= this.width || j < 0 || j >= this.height;
     }
 
     public static NativeImage read(InputStream inputStream) throws IOException {
@@ -169,11 +179,11 @@ implements AutoCloseable {
         if (this.format != Format.RGBA) {
             throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
-        long l = (i + j * this.width) * 4;
+        long l = ((long)i + (long)j * (long)this.width) * 4L;
         return MemoryUtil.memGetInt(this.pixels + l);
     }
 
@@ -181,11 +191,11 @@ implements AutoCloseable {
         if (this.format != Format.RGBA) {
             throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
-        long l = (i + j * this.width) * 4;
+        long l = ((long)i + (long)j * (long)this.width) * 4L;
         MemoryUtil.memPutInt(this.pixels + l, k);
     }
 
@@ -194,11 +204,11 @@ implements AutoCloseable {
         if (!this.format.hasLuminance()) {
             throw new IllegalArgumentException(String.format("setPixelLuminance only works on image with luminance; have %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
-        long l = (i + j * this.width) * this.format.components() + this.format.luminanceOffset() / 8;
+        long l = ((long)i + (long)j * (long)this.width) * (long)this.format.components() + (long)(this.format.luminanceOffset() / 8);
         MemoryUtil.memPutByte(this.pixels + l, b);
     }
 
@@ -207,7 +217,7 @@ implements AutoCloseable {
         if (!this.format.hasLuminanceOrRed()) {
             throw new IllegalArgumentException(String.format("no red or luminance in %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrRedOffset() / 8;
@@ -219,7 +229,7 @@ implements AutoCloseable {
         if (!this.format.hasLuminanceOrGreen()) {
             throw new IllegalArgumentException(String.format("no green or luminance in %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrGreenOffset() / 8;
@@ -231,7 +241,7 @@ implements AutoCloseable {
         if (!this.format.hasLuminanceOrBlue()) {
             throw new IllegalArgumentException(String.format("no blue or luminance in %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrBlueOffset() / 8;
@@ -242,7 +252,7 @@ implements AutoCloseable {
         if (!this.format.hasLuminanceOrAlpha()) {
             throw new IllegalArgumentException(String.format("no luminance or alpha in %s", new Object[]{this.format}));
         }
-        if (i > this.width || j > this.height) {
+        if (this.isOutsideBounds(i, j)) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8;

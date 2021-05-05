@@ -303,7 +303,7 @@ public class ChunkHolder {
         FullChunkStatus fullChunkStatus2 = ChunkHolder.getFullChunkStatus(this.ticketLevel);
         if (bl) {
             int i;
-            Either either3 = Either.right(new ChunkLoadingFailure(){
+            Either either2 = Either.right(new ChunkLoadingFailure(){
 
                 public String toString() {
                     return "Unloaded ticket level " + ChunkHolder.this.pos;
@@ -312,10 +312,8 @@ public class ChunkHolder {
             int n = i = bl2 ? chunkStatus2.getIndex() + 1 : 0;
             while (i <= chunkStatus.getIndex()) {
                 completableFuture = this.futures.get(i);
-                if (completableFuture != null) {
-                    this.futures.set(i, (CompletableFuture<Either<ChunkAccess, ChunkLoadingFailure>>)completableFuture.thenApply(either2 -> either3));
-                } else {
-                    this.futures.set(i, CompletableFuture.completedFuture(either3));
+                if (completableFuture == null) {
+                    this.futures.set(i, CompletableFuture.completedFuture(either2));
                 }
                 ++i;
             }

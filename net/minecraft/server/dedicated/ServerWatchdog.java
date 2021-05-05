@@ -57,7 +57,7 @@ implements Runnable {
                     stringBuilder.append("\n");
                 }
                 CrashReport crashReport = new CrashReport("Watching Server", error);
-                this.server.fillReport(crashReport);
+                this.server.fillReport(crashReport.getSystemDetails());
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Thread Dump");
                 crashReportCategory.setDetail("Threads", stringBuilder);
                 CrashReportCategory crashReportCategory2 = crashReport.addCategory("Performance stats");

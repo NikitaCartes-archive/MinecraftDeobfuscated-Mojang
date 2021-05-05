@@ -60,6 +60,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -636,7 +637,8 @@ AutoCloseable {
             }
         } catch (Throwable throwable) {
             LOGGER.error("Encountered an unexpected exception", throwable);
-            CrashReport crashReport = throwable instanceof ReportedException ? this.fillReport(((ReportedException)throwable).getReport()) : this.fillReport(new CrashReport("Exception in server tick loop", throwable));
+            CrashReport crashReport = throwable instanceof ReportedException ? ((ReportedException)throwable).getReport() : new CrashReport("Exception in server tick loop", throwable);
+            this.fillReport(crashReport.getSystemDetails());
             File file = new File(new File(this.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt");
             if (crashReport.saveToFile(file)) {
                 LOGGER.error("This crash report has been saved to: {}", (Object)file.getAbsolutePath());
@@ -880,11 +882,11 @@ AutoCloseable {
         return "vanilla";
     }
 
-    public CrashReport fillReport(CrashReport crashReport) {
+    public void fillReport(CrashReportCategory crashReportCategory) {
         if (this.playerList != null) {
-            crashReport.getSystemDetails().setDetail("Player Count", () -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers());
+            crashReportCategory.setDetail("Player Count", () -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers());
         }
-        crashReport.getSystemDetails().setDetail("Data Packs", () -> {
+        crashReportCategory.setDetail("Data Packs", () -> {
             StringBuilder stringBuilder = new StringBuilder();
             for (Pack pack : this.packRepository.getSelectedPacks()) {
                 if (stringBuilder.length() > 0) {
@@ -897,9 +899,8 @@ AutoCloseable {
             return stringBuilder.toString();
         });
         if (this.serverId != null) {
-            crashReport.getSystemDetails().setDetail("Server Id", () -> this.serverId);
+            crashReportCategory.setDetail("Server Id", () -> this.serverId);
         }
-        return crashReport;
     }
 
     public abstract Optional<String> getModdedStatus();
@@ -1416,7 +1417,7 @@ AutoCloseable {
 
     private void dumpCrashCategory(Path path) throws IOException {
         CrashReport crashReport = new CrashReport("Server dump", new Exception("dummy"));
-        this.fillReport(crashReport);
+        this.fillReport(crashReport.getSystemDetails());
         try (BufferedWriter writer = Files.newBufferedWriter(path, new OpenOption[0]);){
             writer.write(crashReport.getFriendlyReport());
         }

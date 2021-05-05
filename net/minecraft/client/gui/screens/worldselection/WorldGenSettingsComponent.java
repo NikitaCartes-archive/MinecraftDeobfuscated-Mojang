@@ -152,7 +152,7 @@ Widget {
                 packRepository.close();
                 return;
             }
-            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
+            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
             JsonParser jsonParser = new JsonParser();
             try (BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string, new String[0]));){
                 JsonElement jsonElement = jsonParser.parse(bufferedReader);
@@ -282,7 +282,7 @@ Widget {
     void updateDataPacks(ServerResources serverResources) {
         RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
         RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, this.registryHolder);
-        RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
+        RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
         DataResult dataResult = WorldGenSettings.CODEC.encodeStart(registryWriteOps, this.settings).flatMap(jsonElement -> WorldGenSettings.CODEC.parse(registryReadOps, jsonElement));
         dataResult.resultOrPartial(Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error)).ifPresent(worldGenSettings -> {
             this.settings = worldGenSettings;

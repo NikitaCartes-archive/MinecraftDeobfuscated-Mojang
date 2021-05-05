@@ -499,7 +499,9 @@ CommandSource {
         if (!this.isInWaterRainOrBubble() && !this.isInPowderSnow) {
             this.setSecondsOnFire(15);
         }
-        this.hurt(DamageSource.LAVA, 4.0f);
+        if (this.hurt(DamageSource.LAVA, 4.0f)) {
+            this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
+        }
     }
 
     public void setSecondsOnFire(int i) {
@@ -1253,7 +1255,7 @@ CommandSource {
             return false;
         }
         this.markHurt();
-        return false;
+        return true;
     }
 
     public final Vec3 getViewVector(float f) {

@@ -14,7 +14,7 @@ public class GrassColor {
         int j = (int)((1.0 - (e *= d)) * 255.0);
         int i = (int)((1.0 - d) * 255.0);
         int k = j << 8 | i;
-        if (k > pixels.length) {
+        if (k >= pixels.length) {
             return -65281;
         }
         return pixels[k];

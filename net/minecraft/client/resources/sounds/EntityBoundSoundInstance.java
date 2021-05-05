@@ -15,10 +15,6 @@ public class EntityBoundSoundInstance
 extends AbstractTickableSoundInstance {
     private final Entity entity;
 
-    public EntityBoundSoundInstance(SoundEvent soundEvent, SoundSource soundSource, Entity entity) {
-        this(soundEvent, soundSource, 1.0f, 1.0f, entity);
-    }
-
     public EntityBoundSoundInstance(SoundEvent soundEvent, SoundSource soundSource, float f, float g, Entity entity) {
         super(soundEvent, soundSource);
         this.volume = f;

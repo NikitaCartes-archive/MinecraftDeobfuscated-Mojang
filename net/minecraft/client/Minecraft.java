@@ -78,6 +78,7 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
+import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.Timer;
 import net.minecraft.client.User;
@@ -388,6 +389,7 @@ WindowEventHandler {
     @Nullable
     private ProfileResults fpsPieResults;
     private ClientMetricsLogger clientMetricsLogger = InactiveClientMetricsLogger.INSTANCE;
+    private final ResourceLoadStateTracker reloadStateTracker = new ResourceLoadStateTracker();
     private String debugPath = "root";
 
     public Minecraft(GameConfig gameConfig) {
@@ -525,10 +527,12 @@ WindowEventHandler {
         this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack());
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
+        this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
         this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 this.selfTest();
             }
+            this.reloadStateTracker.finishReload();
         }), false));
     }
 
@@ -583,11 +587,12 @@ WindowEventHandler {
 
     public void clearResourcePacksOnError(Throwable throwable, @Nullable Component component) {
         LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
+        this.reloadStateTracker.startRecovery(throwable);
         this.resourcePackRepository.setSelected(Collections.emptyList());
         this.options.resourcePacks.clear();
         this.options.incompatibleResourcePacks.clear();
         this.options.save();
-        this.reloadResourcePacks().thenRun(() -> {
+        this.reloadResourcePacks(true).thenRun(() -> {
             ToastComponent toastComponent = this.getToasts();
             SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
         });
@@ -709,18 +714,26 @@ WindowEventHandler {
     }
 
     public CompletableFuture<Void> reloadResourcePacks() {
+        return this.reloadResourcePacks(false);
+    }
+
+    private CompletableFuture<Void> reloadResourcePacks(boolean bl) {
         if (this.pendingReload != null) {
             return this.pendingReload;
         }
         CompletableFuture<Void> completableFuture = new CompletableFuture<Void>();
-        if (this.overlay instanceof LoadingOverlay) {
+        if (!bl && this.overlay instanceof LoadingOverlay) {
             this.pendingReload = completableFuture;
             return completableFuture;
         }
         this.resourcePackRepository.reload();
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
+        if (!bl) {
+            this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.MANUAL, list);
+        }
         this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
             this.levelRenderer.allChanged();
+            this.reloadStateTracker.finishReload();
             completableFuture.complete(null);
         }), true));
         return completableFuture;
@@ -1511,7 +1524,7 @@ WindowEventHandler {
     }
 
     public static WorldData loadWorldData(LevelStorageSource.LevelStorageAccess levelStorageAccess, RegistryAccess.RegistryHolder registryHolder, ResourceManager resourceManager, DataPackConfig dataPackConfig) {
-        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
+        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
         WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig);
         if (worldData == null) {
             throw new IllegalStateException("Failed to load world");
@@ -1526,7 +1539,7 @@ WindowEventHandler {
     public void createLevel(String string, LevelSettings levelSettings, RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
         this.doLoadLevel(string, registryHolder, levelStorageAccess -> levelSettings.getDataPackConfig(), (levelStorageAccess, registryHolder2, resourceManager, dataPackConfig) -> {
             RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder);
-            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
+            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.createAndLoad(JsonOps.INSTANCE, resourceManager, (RegistryAccess)registryHolder);
             DataResult dataResult = WorldGenSettings.CODEC.encodeStart(registryWriteOps, worldGenSettings).setLifecycle(Lifecycle.stable()).flatMap(jsonElement -> WorldGenSettings.CODEC.parse(registryReadOps, jsonElement));
             WorldGenSettings worldGenSettings2 = dataResult.resultOrPartial(Util.prefix("Error reading worldgen settings after loading data packs: ", LOGGER::error)).orElse(worldGenSettings);
             return new PrimaryLevelData(levelSettings, worldGenSettings2, dataResult.lifecycle());
@@ -1876,18 +1889,23 @@ WindowEventHandler {
     }
 
     public CrashReport fillReport(CrashReport crashReport) {
-        Minecraft.fillReport(this.languageManager, this.launchedVersion, this.options, crashReport);
+        Minecraft.fillReport(this, this.languageManager, this.launchedVersion, this.options, crashReport);
         if (this.level != null) {
             this.level.fillReportDetails(crashReport);
         }
+        if (this.singleplayerServer != null) {
+            this.singleplayerServer.fillReport(crashReport.addCategory("Integrated server"));
+        }
+        this.reloadStateTracker.fillCrashReport(crashReport);
         return crashReport;
     }
 
-    public static void fillReport(@Nullable LanguageManager languageManager, String string, @Nullable Options options, CrashReport crashReport) {
+    public static void fillReport(@Nullable Minecraft minecraft, @Nullable LanguageManager languageManager, String string, @Nullable Options options, CrashReport crashReport) {
         CrashReportCategory crashReportCategory = crashReport.getSystemDetails();
         crashReportCategory.setDetail("Launched Version", () -> string);
         crashReportCategory.setDetail("Backend library", RenderSystem::getBackendDescription);
         crashReportCategory.setDetail("Backend API", RenderSystem::getApiDescription);
+        crashReportCategory.setDetail("Window size", () -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>");
         crashReportCategory.setDetail("GL Caps", RenderSystem::getCapsString);
         crashReportCategory.setDetail("GL debug messages", () -> GlDebug.isDebugEnabled() ? String.join((CharSequence)"\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>");
         crashReportCategory.setDetail("Using VBOs", () -> "Yes");

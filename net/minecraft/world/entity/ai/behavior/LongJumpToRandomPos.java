@@ -59,7 +59,7 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        return mob.isOnGround() && !serverLevel.getBlockState(mob.blockPosition().below()).is(Blocks.HONEY_BLOCK);
+        return mob.isOnGround() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
     }
 
     @Override

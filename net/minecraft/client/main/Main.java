@@ -164,7 +164,7 @@ public class Main {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Initializing game");
             crashReport.addCategory("Initialization");
-            Minecraft.fillReport(null, gameConfig.game.launchVersion, null, crashReport);
+            Minecraft.fillReport(null, null, gameConfig.game.launchVersion, null, crashReport);
             Minecraft.crash(crashReport);
             return;
         }

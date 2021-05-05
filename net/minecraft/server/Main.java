@@ -141,7 +141,7 @@ public class Main {
                 return;
             }
             serverResources.updateGlobals();
-            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
+            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.createAndLoad(NbtOps.INSTANCE, serverResources.getResourceManager(), (RegistryAccess)registryHolder);
             WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
             if (worldData == null) {
                 WorldGenSettings worldGenSettings;

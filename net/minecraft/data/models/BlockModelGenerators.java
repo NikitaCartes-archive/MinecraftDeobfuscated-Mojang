@@ -715,7 +715,7 @@ public class BlockModelGenerators {
     }
 
     private void createAmethystCluster(Block block) {
-        this.createSimpleFlatItemModel(block);
+        this.skipAutoItemBlock(block);
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CROSS.create(block, TextureMapping.cross(block), this.modelOutput))).with(this.createColumnWithFacing()));
     }
 

@@ -81,7 +81,7 @@ SimpleWaterloggedBlock {
 
     public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos, Direction direction) {
         int j;
-        int i = 1 + random.nextInt(5);
+        int i = Mth.nextInt(random, 2, 5);
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (j = 0; j < i && BigDripleafBlock.canPlaceAt(levelAccessor, mutableBlockPos, levelAccessor.getBlockState(mutableBlockPos)); ++j) {
             mutableBlockPos.move(Direction.UP);

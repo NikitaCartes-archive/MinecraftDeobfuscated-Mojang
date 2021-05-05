@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.chunk;
 
+import java.util.Arrays;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
@@ -36,15 +37,21 @@ implements BiomeManager.NoiseBiomeSource {
 
     public ChunkBiomeContainer(IdMap<Biome> idMap, LevelHeightAccessor levelHeightAccessor, int[] is) {
         this(idMap, levelHeightAccessor, new Biome[is.length]);
-        for (int i = 0; i < this.biomes.length; ++i) {
-            int j = is[i];
-            Biome biome = idMap.byId(j);
+        int i = -1;
+        for (int j = 0; j < this.biomes.length; ++j) {
+            int k = is[j];
+            Biome biome = idMap.byId(k);
             if (biome == null) {
-                LOGGER.warn("Received invalid biome id: {}", (Object)j);
-                this.biomes[i] = idMap.byId(0);
+                if (i == -1) {
+                    i = j;
+                }
+                this.biomes[j] = idMap.byId(0);
                 continue;
             }
-            this.biomes[i] = biome;
+            this.biomes[j] = biome;
+        }
+        if (i != -1) {
+            LOGGER.warn("Invalid biome data received, starting from {}: {}", (Object)i, (Object)Arrays.toString(is));
         }
     }
 

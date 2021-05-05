@@ -42,6 +42,9 @@ LiquidBlockContainer {
     default public ItemStack pickupBlock(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
         if (blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
             levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, false), 3);
+            if (!blockState.canSurvive(levelAccessor, blockPos)) {
+                levelAccessor.destroyBlock(blockPos, true);
+            }
             return new ItemStack(Items.WATER_BUCKET);
         }
         return ItemStack.EMPTY;

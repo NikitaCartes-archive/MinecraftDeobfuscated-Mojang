@@ -95,6 +95,10 @@ public class RenderTarget {
 
     public void createBuffers(int i, int j, boolean bl) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        int k = RenderSystem.maxSupportedTextureSize();
+        if (i <= 0 || i > k || j <= 0 || j > k) {
+            throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
+        }
         this.viewWidth = i;
         this.viewHeight = j;
         this.width = i;

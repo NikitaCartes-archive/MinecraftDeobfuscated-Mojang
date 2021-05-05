@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
-import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
 import net.minecraft.SharedConstants;
@@ -255,11 +255,10 @@ implements ServerInterface {
     }
 
     @Override
-    public CrashReport fillReport(CrashReport crashReport) {
-        crashReport = super.fillReport(crashReport);
-        crashReport.getSystemDetails().setDetail("Is Modded", () -> this.getModdedStatus().orElse("Unknown (can't tell)"));
-        crashReport.getSystemDetails().setDetail("Type", () -> "Dedicated Server (map_server.txt)");
-        return crashReport;
+    public void fillReport(CrashReportCategory crashReportCategory) {
+        super.fillReport(crashReportCategory);
+        crashReportCategory.setDetail("Is Modded", () -> this.getModdedStatus().orElse("Unknown (can't tell)"));
+        crashReportCategory.setDetail("Type", () -> "Dedicated Server (map_server.txt)");
     }
 
     @Override

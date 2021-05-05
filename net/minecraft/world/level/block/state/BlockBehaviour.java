@@ -350,6 +350,10 @@ public abstract class BlockBehaviour {
         return (MaterialColor)this.properties.materialColor.apply(this.asBlock().defaultBlockState());
     }
 
+    public float defaultDestroyTime() {
+        return this.properties.destroyTime;
+    }
+
     public static interface StateArgumentPredicate<A> {
         public boolean test(BlockState var1, BlockGetter var2, BlockPos var3, A var4);
     }
@@ -913,9 +917,7 @@ public abstract class BlockBehaviour {
         }
 
         public Properties strength(float f, float g) {
-            this.destroyTime = f;
-            this.explosionResistance = Math.max(0.0f, g);
-            return this;
+            return this.destroyTime(f).explosionResistance(g);
         }
 
         public Properties instabreak() {
@@ -989,6 +991,16 @@ public abstract class BlockBehaviour {
 
         public Properties color(MaterialColor materialColor) {
             this.materialColor = blockState -> materialColor;
+            return this;
+        }
+
+        public Properties destroyTime(float f) {
+            this.destroyTime = f;
+            return this;
+        }
+
+        public Properties explosionResistance(float f) {
+            this.explosionResistance = Math.max(0.0f, f);
             return this;
         }
     }

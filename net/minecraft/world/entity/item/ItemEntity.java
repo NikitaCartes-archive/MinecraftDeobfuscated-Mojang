@@ -16,7 +16,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -136,13 +135,8 @@ extends Entity {
         }
         boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
         int n = i = bl ? 2 : 40;
-        if (this.tickCount % i == 0) {
-            if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA) && !this.fireImmune()) {
-                this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
-            }
-            if (!this.level.isClientSide && this.isMergable()) {
-                this.mergeWithNeighbours();
-            }
+        if (this.tickCount % i == 0 && !this.level.isClientSide && this.isMergable()) {
+            this.mergeWithNeighbours();
         }
         if (this.age != Short.MIN_VALUE) {
             ++this.age;
@@ -255,7 +249,7 @@ extends Entity {
             this.getItem().onDestroyed(this);
             this.discard();
         }
-        return false;
+        return true;
     }
 
     @Override

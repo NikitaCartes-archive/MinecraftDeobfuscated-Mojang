@@ -23,6 +23,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,15 +35,13 @@ extends AbstractFish {
     private static final EntityDataAccessor<Integer> PUFF_STATE = SynchedEntityData.defineId(Pufferfish.class, EntityDataSerializers.INT);
     private int inflateCounter;
     private int deflateTimer;
-    private static final Predicate<LivingEntity> NO_SPECTATORS_AND_NO_WATER_MOB = livingEntity -> {
-        if (livingEntity == null) {
-            return false;
-        }
-        if (livingEntity instanceof Player && (livingEntity.isSpectator() || ((Player)livingEntity).isCreative())) {
+    private static final Predicate<LivingEntity> NO_CREATIVE_OR_WATER_MOB = livingEntity -> {
+        if (livingEntity instanceof Player && ((Player)livingEntity).isCreative()) {
             return false;
         }
         return livingEntity.getMobType() != MobType.WATER;
     };
+    private static final TargetingConditions targetingConditions = new TargetingConditions().allowInvulnerable().ignoreInvisibilityTesting().allowNonAttackable().allowSameTeam().allowUnseeable().selector(NO_CREATIVE_OR_WATER_MOB);
     public static final int STATE_SMALL = 0;
     public static final int STATE_MID = 1;
     public static final int STATE_FULL = 2;
@@ -127,10 +126,10 @@ extends AbstractFish {
     public void aiStep() {
         super.aiStep();
         if (this.isAlive() && this.getPuffState() > 0) {
-            List<LivingEntity> list = this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(0.3), NO_SPECTATORS_AND_NO_WATER_MOB);
-            for (Mob mob : list) {
-                if (!mob.isAlive()) continue;
-                this.touch(mob);
+            List<Mob> list = this.level.getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(0.3), mob -> targetingConditions.test(this, (LivingEntity)mob));
+            for (Mob mob2 : list) {
+                if (!mob2.isAlive()) continue;
+                this.touch(mob2);
             }
         }
     }
@@ -201,7 +200,7 @@ extends AbstractFish {
 
         @Override
         public boolean canUse() {
-            List<LivingEntity> list = this.fish.level.getEntitiesOfClass(LivingEntity.class, this.fish.getBoundingBox().inflate(2.0), NO_SPECTATORS_AND_NO_WATER_MOB);
+            List<LivingEntity> list = this.fish.level.getEntitiesOfClass(LivingEntity.class, this.fish.getBoundingBox().inflate(2.0), livingEntity -> targetingConditions.test(this.fish, (LivingEntity)livingEntity));
             return !list.isEmpty();
         }
 
@@ -214,12 +213,6 @@ extends AbstractFish {
         @Override
         public void stop() {
             this.fish.inflateCounter = 0;
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            List<LivingEntity> list = this.fish.level.getEntitiesOfClass(LivingEntity.class, this.fish.getBoundingBox().inflate(2.0), NO_SPECTATORS_AND_NO_WATER_MOB);
-            return !list.isEmpty();
         }
     }
 }
